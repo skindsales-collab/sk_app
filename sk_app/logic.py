@@ -88,7 +88,11 @@ class WorkItem:
 
 
 # lower number wins when two items have the same priority
-KIND_ORDER = {"reminder": 0, "lead_new": 0, "send_file": 1, "lead_followup": 3, "crm_task": 4, "deal": 5, "quote": 6, "task": 7, "dsi": 8, "day_report": 99}
+KIND_ORDER = {"reminder": 0, "lead_new": 0, "send_file": 1, "lead_followup": 3, "crm_task": 4, "deal": 5, "quote": 6, "task": 7, "dsi": 98, "day_report": 99}
+
+
+# kinds that have their own tile / bar on Home and never take the "What to do now" card (SK)
+OFF_CARD = ("dsi", "day_report")
 
 
 def rank_items(items: list[WorkItem], now: datetime) -> list[WorkItem]:

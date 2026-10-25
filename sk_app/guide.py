@@ -4,7 +4,7 @@ import frappe
 from frappe.utils import now_datetime
 
 from sk_app import claude, kpi, work
-from sk_app.logic import guide_prompt, is_work_slot, parse_lines, rule_card
+from sk_app.logic import OFF_CARD, guide_prompt, is_work_slot, parse_lines, rule_card
 
 
 def app_user(user: str):
@@ -18,7 +18,8 @@ def make_card(user: str, use_claude: bool = True) -> dict:
 	if not profile:
 		frappe.throw(frappe._("{0} is not set up as an SK App user").format(user))
 	now = now_datetime()
-	items = work.collect(user, profile.home)
+	# DSI and the Day Report have their own tiles / bar at the bottom of Home (SK): never on the "What to do now" card
+	items = [i for i in work.collect(user, profile.home) if i.kind not in OFF_CARD]
 	text, top = rule_card(items, now, profile.language or "English")
 	source = "Rules"
 	if use_claude and items:

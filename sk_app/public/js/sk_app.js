@@ -275,15 +275,21 @@
 		</section>`;
 	}
 
+	// Home is only small icons (SK). Alerts become a red count on their icon: new drawings on Follow-up, reminders
+	// due now on Reminders, the evening Day Report on its icon. The "What to do now" card lives in My Day.
+	function fileBanners() {
+		return ((state.home && state.home.new_files) || []).map((f) => `<button class="sk-banner new" data-open="${esc(f.doctype)}" data-name="${esc(f.attached_to_name)}">📐 ${t("new_drawing")}: ${esc(f.title)}<br><small>${esc(f.file_name)}</small></button>`).join("");
+	}
 	function renderHome() {
 		const h = state.home;
 		const fn = h.home;
-		const tiles = fn.tiles.map((k) => `<button class="sk-tile" data-go="${k}"><span class="sk-tile-icon">${ICON[k] || "•"}</span><span>${t(k)}</span></button>`).join("");
-		const files = (h.new_files || []).map((f) => `<button class="sk-banner new" data-open="${esc(f.doctype)}" data-name="${esc(f.attached_to_name)}">📐 ${t("new_drawing")}: ${esc(f.title)}<br><small>${esc(f.file_name)}</small></button>`).join("");
-		const report = !h.day_report_sent && new Date().getHours() >= 17 ? `<button class="sk-banner bad" data-go="day_report">📝 ${t("report_due")}</button>` : "";
-		root.innerHTML = header("SK App") +
-			`<main>${reminderBanners()}${files}${cardHtml(state.card)}<button class="sk-btn wide sk-addrem" data-act="reminder-new">⏰ + ${t("reminder")}</button>
-			<div class="sk-tiles">${tiles}</div>${report}</main>`;
+		const badge = {
+			follow_up: (h.new_files || []).length,
+			reminders: dueNow().length,
+			day_report: !h.day_report_sent && new Date().getHours() >= 17 ? "!" : 0,
+		};
+		const tiles = fn.tiles.map((k) => `<button class="sk-tile" data-go="${k}"><span class="sk-tile-icon">${ICON[k] || "•"}</span><span>${t(k)}</span>${badge[k] ? `<b class="sk-dot">${esc(badge[k])}</b>` : ""}</button>`).join("");
+		root.innerHTML = header("SK App") + `<main><div class="sk-tiles small">${tiles}</div></main>`;
 	}
 
 	function itemRow(i) {
@@ -298,7 +304,10 @@
 
 	async function renderMyDay() {
 		const d = await call("my_day");
-		root.innerHTML = header(t("my_day")) + `<main>${cardHtml(d.card)}<ul class="sk-list">${d.items.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+		if (!state.card || Date.now() - new Date(String(state.card.slot_start).replace(" ", "T")).getTime() > 10 * 60 * 1000) {
+			state.card = await call("next_card", {}, true).catch(() => state.card);
+		}
+		root.innerHTML = header(t("my_day")) + `<main>${cardHtml(state.card || d.card)}<ul class="sk-list">${d.items.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
 	}
 
 	async function renderLeads(which) {
@@ -391,7 +400,7 @@
 				${r.next || r.due ? `<div class="sk-item-meta">${t("next")}: ${esc(r.next || "")} ${r.due ? "· " + when(r.due) : ""}</div>` : ""}
 				${r.last ? `<div class="sk-item-meta">${t("last")}: ${esc(r.last.text)} · ${when(r.last.on)}</div>` : ""}
 			</button>${contactButtons(r)}</li>`).join("");
-		root.innerHTML = header(t("follow_up")) + `<main><button class="sk-btn go wide" data-go="new_lead">➕ ${t("new_lead")}</button><ul class="sk-list sk-gap">${li || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+		root.innerHTML = header(t("follow_up")) + `<main>${fileBanners()}<button class="sk-btn go wide" data-go="new_lead">➕ ${t("new_lead")}</button><ul class="sk-list sk-gap">${li || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
 	}
 
 	function erpDocRow(doctype, d, mobile) {
@@ -756,7 +765,7 @@
 	}
 	async function renderReminders() {
 		const rows = await call("my_reminders", { days: 7 });
-		root.innerHTML = header(t("reminders")) + `<main><button class="sk-btn go wide" data-act="reminder-new">⏰ + ${t("reminder")}</button>
+		root.innerHTML = header(t("reminders")) + `<main>${reminderBanners()}<button class="sk-btn go wide" data-act="reminder-new">⏰ + ${t("reminder")}</button>
 			<h3 class="sk-h">${t("upcoming")}</h3><ul class="sk-list">${rows.map((r) => `<li class="sk-item"><div class="sk-grow"><div class="sk-item-title">${esc(r.title)}</div>
 			<div class="sk-item-meta">${esc(r.at.slice(8, 10))}/${esc(r.at.slice(5, 7))} ${esc(hm(r.at))}${r.repeat ? " · ↻ " + esc(r.repeat) : ""}</div></div>
 			${r.ref_doctype ? `<button class="sk-open" data-open="${esc(r.ref_doctype)}" data-name="${esc(r.ref_name)}">›</button>` : ""}

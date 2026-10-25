@@ -92,7 +92,17 @@ class TestCrmAndDayReport(IntegrationTestCase):
 		late = add_to_date(day_report.due_at(), hours=2)
 		report = day_report.reminder(STRANGER, late)[0]
 		other = WorkItem("task", "Pack drawings", due=add_to_date(late, hours=5), priority=5)
-		self.assertEqual([i.kind for i in rank_items([report, other], late)], ["task", "day_report"])
+		dsi = WorkItem("dsi", "Daily Small Improvement", priority=9)
+		self.assertEqual([i.kind for i in rank_items([report, dsi, other], late)], ["task", "dsi", "day_report"])
+
+	def test_my_day_first_dsi_and_day_report_tiles_last(self):
+		from sk_app.functions import home_for
+
+		for function, team in (("Sales", True), ("", False), ("Management", True)):
+			tiles = home_for(function, has_team=team)["tiles"]
+			self.assertEqual(tiles[0], "my_day")
+			self.assertEqual(tiles[-2:], ["dsi", "day_report"])
+			self.assertEqual(len(tiles), len(set(tiles)))
 
 	def test_crm_new_lead_follow_up_and_call_log(self):
 		if not self.crm:
