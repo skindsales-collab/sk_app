@@ -95,3 +95,45 @@ main { padding: 12px 16px 40px; max-width: 640px; margin: 0 auto; }
 .sk-pre { white-space: pre-wrap; font-family: inherit; font-size: 14px; background: var(--card); border-radius: 10px; padding: 10px; color: var(--muted); }
 .sk-prob { color: var(--red); font-weight: 600; margin: 4px 0; }
 .sk-date { font-size: 16px; padding: 6px; border-radius: 8px; border: 0; }
+.sk-banner.new { background: var(--navy); color: #fff; }
+.sk-banner small { font-weight: 400; opacity: .85; }
+.sk-open.sk-send { font-size: 15px; font-weight: 700; background: var(--green); color: #fff; border: 0; border-radius: 10px; padding: 10px 12px; }
+button.sk-open { background: none; border: 0; }
+.sk-open.sk-fix { font-size: 20px; padding: 8px; }
+.sk-contact.sk-two { grid-template-columns: 1fr 1fr; margin-bottom: 12px; }
+.sk-contact.sk-two .sk-chip { padding: 12px; font-size: 16px; font-weight: 600; }
+.sk-item > div:first-child { min-width: 0; flex: 1; }
+.sk-item a.sk-item-title { word-break: break-all; }
+/* calendars */
+.cal-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+.cal-tabs button { border: 0; border-radius: 10px; padding: 10px; font-weight: 700; background: var(--light); color: var(--ink); font-size: 15px; }
+.cal-tabs .on { background: var(--navy); color: #fff; }
+.slot { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 8px; margin-bottom: 6px; }
+.slot .t { font-size: 13px; color: var(--muted); padding-top: 10px; }
+.ev { display: block; width: 100%; overflow-wrap: anywhere; text-align: left; background: var(--card); color: var(--ink); border: 0; border-radius: 10px; padding: 9px 10px; border-left: 4px solid var(--navy); font-size: 15px; }
+.ev small { display: block; color: var(--muted); font-size: 12px; }
+.ev.red { border-left-color: var(--red); } .ev.green { border-left-color: var(--green); } .ev.yel { border-left-color: var(--yellow); }
+.ev.grey { border-left-color: #b8c4d2; color: var(--muted); }
+.now { border-top: 2px solid var(--red); margin: 4px 0 8px; font-size: 11px; color: var(--red); }
+.day { background: var(--card); border-radius: 12px; padding: 10px; margin-bottom: 8px; }
+.day.off { opacity: .6; }
+.day h4 { margin: 0 0 6px; font-size: 15px; display: flex; justify-content: space-between; }
+.day.today { outline: 2px solid var(--navy); }
+.chip2 { display: inline-block; overflow-wrap: anywhere; text-align: left; border: 0; font-size: 12px; border-radius: 8px; padding: 3px 7px; margin: 2px 3px 2px 0; background: var(--light); color: var(--ink); }
+.chip2.red { background: #fde2e6; color: #9b0c22; } .chip2.green { background: #dff3e5; color: #16692d; }
+.chip2.navy { background: #dfe8f3; color: var(--navy); } .chip2.yel { background: #fff3cd; color: #7a5a00; }
+.sk-cal-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px; }
+.sk-cal-head small { display: block; font-size: 13px; margin-top: 4px; }
+.sk-nav { border: 0; background: rgba(255,255,255,.15); color: #fff; font-size: 24px; border-radius: 8px; padding: 2px 12px; }
+.grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.grid .h { font-size: 11px; color: var(--muted); text-align: center; }
+.cell { background: var(--card); color: var(--ink); border: 0; border-radius: 6px; min-height: 56px; padding: 3px; font-size: 11px; text-align: left; display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; overflow: hidden; min-width: 0; }
+.cell b { font-size: 12px; } .cell.off { background: transparent; } .cell.today { outline: 2px solid var(--navy); }
+.dot { display: block; border-radius: 4px; padding: 1px 3px; margin-top: 2px; font-size: 9.5px; line-height: 1.2; }
+.dot.m { background: #dfe8f3; color: var(--navy); } .dot.r { background: #fde2e6; color: #9b0c22; }
+.dot.g { background: #dff3e5; color: #16692d; } .dot.y { background: #fff3cd; color: #7a5a00; }
+.legend { font-size: 12px; color: var(--muted); margin-top: 8px; }
+/* mic with its own language switch */
+.sk-micbox { display: flex; flex-direction: column; gap: 4px; }
+.sk-micbox .sk-mic { flex: 1; min-height: 44px; }
+.sk-miclang { border: 1px solid var(--navy); background: var(--card); color: var(--navy); border-radius: 8px; font-size: 12px; font-weight: 700; padding: 3px 0; }

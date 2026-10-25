@@ -5,7 +5,7 @@
  "custom": 0,
  "engine": "InnoDB",
  "creation": "2026-10-25 08:30:00.000000",
- "modified": "2026-10-25 08:30:00.000000",
+ "modified": "2026-10-25 21:00:00.000000",
  "owner": "Administrator",
  "modified_by": "Administrator",
  "naming_rule": "",
@@ -24,6 +24,7 @@
   "lunch_start",
   "lunch_end",
   "working_days",
+  "company_dates",
   "kpi_section",
   "digital_lead_sources",
   "cabin_item_groups",
@@ -99,6 +100,13 @@
    "fieldtype": "Data",
    "label": "Working Days",
    "default": "Mon,Tue,Wed,Thu,Fri,Sat"
+  },
+  {
+   "fieldname": "company_dates",
+   "fieldtype": "Small Text",
+   "label": "Company Dates (calendar)",
+   "default": "1: Stock closing\n2: Stock closing\n5: Scorecard\n7: P&L\n10: MAR review\nlast-Sat: Town hall",
+   "description": "One per line, shown on everyone's My Month and My Week. Day of month or last-Mon ... last-Sun, then a colon and the label, e.g. 5: Scorecard"
   },
   {
    "fieldname": "kpi_section",

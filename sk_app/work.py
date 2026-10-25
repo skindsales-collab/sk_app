@@ -32,10 +32,11 @@ def open_tasks(user: str) -> list[WorkItem]:
 
 
 def open_todos(user: str) -> list[WorkItem]:
-	"""Open ToDos allocated to the user that are not already covered by a Task."""
+	"""Open ToDos allocated to the user that are not already covered by a Task or a CRM lead / deal / task.
+	(Frappe CRM makes an 'Assignment for CRM Lead ...' ToDo for every owner, which would show the lead twice.)"""
 	rows = frappe.get_all(
 		"ToDo",
-		filters={"allocated_to": user, "status": "Open", "reference_type": ["!=", "Task"]},
+		filters={"allocated_to": user, "status": "Open", "reference_type": ["not in", ["Task", "CRM Lead", "CRM Deal", "CRM Task"]]},
 		fields=["name", "description", "date", "priority", "reference_type", "reference_name"],
 		limit=30,
 	)
@@ -119,6 +120,17 @@ def open_crm_tasks(user: str) -> list[WorkItem]:
 	]
 
 
+def files_to_send(user: str) -> list[WorkItem]:
+	"""Customer drawings / PDFs the AI or design attached to the user's leads and deals: send them to the customer."""
+	from sk_app.crm import files_to_send as pending_files
+
+	return [
+		WorkItem("send_file", f"{f.file_name} → {f.title}", "File", f.name, due=get_datetime(f.creation),
+			minutes=5, priority=1, extra={"ref_doctype": f.doctype, "ref_name": f.attached_to_name})
+		for f in pending_files(user)
+	]
+
+
 def stale_quotes(user: str, days: int = 7) -> list[WorkItem]:
 	"""Submitted quotations by the user, still open and older than `days` (follow-up due)."""
 	cutoff = add_to_date(getdate(), days=-days)
@@ -142,7 +154,7 @@ def collect(user: str, function: str) -> list[WorkItem]:
 	"""Everything open for the person. Sales and Marketing add CRM work; every function gets tasks, ToDos and DSI."""
 	items = open_tasks(user) + open_todos(user)
 	if function in ("Sales", "Marketing", "Machine Shifting", "Design"):
-		items += open_leads(user) + open_deals(user) + open_crm_tasks(user)
+		items += open_leads(user) + open_deals(user) + open_crm_tasks(user) + files_to_send(user)
 	if function == "Sales":
 		items += stale_quotes(user)
 	items += dsi_due(user)

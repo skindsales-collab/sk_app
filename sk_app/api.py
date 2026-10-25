@@ -4,7 +4,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime
 
-from sk_app import claude, crm, day_report, guide, kpi, training, work
+from sk_app import calendar_view, claude, crm, day_report, guide, kpi, training, work
 from sk_app.functions import home_for
 from sk_app.logic import rank_items
 
@@ -34,9 +34,11 @@ def _latest_card(user):
 @frappe.whitelist()
 def home():
 	profile = _me()
+	me = frappe.db.get_value("User", profile.user, ["mobile_no", "phone"], as_dict=True) or {}
 	return {"user": profile.user, "full_name": profile.full_name, "language": profile.language,
+		"mobile": me.get("mobile_no") or me.get("phone"),
 		"home": home_for(profile.home, has_team=_has_team(profile.user)), "card": _latest_card(profile.user),
-		"new_files": crm.new_files(profile.user), "day_report_sent": bool(day_report._find(profile.user, getdate()))}
+		"new_files": crm.files_to_send(profile.user), "day_report_sent": bool(day_report._find(profile.user, getdate()))}
 
 
 def _has_team(user):
@@ -72,6 +74,8 @@ def respond_card(card, response):
 	if doc.user != profile.user:
 		frappe.throw(_("Not your card"), frappe.PermissionError)
 	doc.db_set({"response": response, "responded_on": now_datetime()})
+	if response == "Done" and doc.reference_doctype == "File" and doc.reference_name:
+		crm.mark_file_sent(profile.user, doc.reference_name)
 	if response in ("Done", "Problem"):
 		return guide.make_card(profile.user)
 	return doc.as_dict()
@@ -206,6 +210,16 @@ def new_files():
 
 
 @frappe.whitelist(methods=["POST"])
+def request_correction(doctype, name, text=None, file=None, photo=None):
+	return crm.request_correction(_me().user, doctype, name, text, file, photo)
+
+
+@frappe.whitelist(methods=["POST"])
+def mark_file_sent(file, channel="WhatsApp"):
+	return crm.mark_file_sent(_me().user, file, channel)
+
+
+@frappe.whitelist(methods=["POST"])
 def share_link(doctype, name):
 	_me()
 	return crm.share_link(doctype, name)
@@ -249,3 +263,20 @@ def team_day_reports(day=None):
 @frappe.whitelist(methods=["POST"])
 def review_day_report(report, rating=None, comment=None):
 	return day_report.review(_me().user, report, rating, comment)
+
+
+# ---- Calendars ----
+
+@frappe.whitelist()
+def cal_today():
+	return calendar_view.today(_me().user)
+
+
+@frappe.whitelist()
+def cal_week(day=None):
+	return calendar_view.week(_me().user, day)
+
+
+@frappe.whitelist()
+def cal_month(year=None, month=None):
+	return calendar_view.month(_me().user, year, month)

@@ -121,8 +121,11 @@ def follow_up(user: str) -> list[dict]:
 
 
 def _files(doctype: str, name: str) -> list[dict]:
-	return frappe.get_all("File", filters={"attached_to_doctype": doctype, "attached_to_name": name, "is_folder": 0},
+	rows = frappe.get_all("File", filters={"attached_to_doctype": doctype, "attached_to_name": name, "is_folder": 0},
 		fields=["name", "file_name", "file_url", "owner", "creation"], order_by="creation desc")
+	for r in rows:
+		r["for_customer"] = _for_customer(r.file_name)
+	return rows
 
 
 def _pdf(doctype: str, name: str) -> str:
@@ -171,8 +174,17 @@ def detail(doctype: str, name: str) -> dict:
 		deal = frappe.db.get_value("CRM Deal", {"lead": name}, ["name", "erpnext_customer"], as_dict=True)
 	notes = frappe.get_all("FCRM Note", filters=ref, fields=["title", "content", "owner", "creation"],
 		order_by="creation desc", limit=30)
+	# CRM comments (design questions, drawing corrections) shown with the notes, newest first
+	for c in frappe.get_all("Comment", filters={"reference_doctype": doctype, "reference_name": name, "comment_type": "Comment"},
+			fields=["content", "owner", "creation"], order_by="creation desc", limit=30):
+		text = strip_html(c.content or "")
+		notes.append(frappe._dict(title="💬 " + text[:80], content=text, owner=c.owner, creation=c.creation))
+	notes.sort(key=lambda n: n.creation, reverse=True)
 	for n in notes:
 		n["content"] = strip_html(n.content or "")[:1000]
+	field = _design_status_field(doctype)
+	if field:
+		doc["design_status"] = frappe.db.get_value(doctype, name, field)
 	return {
 		"doctype": doctype,
 		"doc": doc,
@@ -300,9 +312,110 @@ def new_files(user: str, hours: int = 48) -> list[dict]:
 			continue
 		for f in frappe.get_all("File", filters={"attached_to_doctype": dt, "attached_to_name": ["in", docnames],
 				"owner": ["!=", user], "creation": [">=", cutoff], "is_folder": 0},
-				fields=["file_name", "file_url", "attached_to_name", "creation"], order_by="creation desc", limit=20):
-			out.append({**f, "doctype": dt, "title": titles[(dt, f.attached_to_name)]})
+				fields=["name", "file_name", "file_url", "attached_to_name", "creation", "owner"], order_by="creation desc", limit=20):
+			out.append(frappe._dict({**f, "doctype": dt, "title": titles[(dt, f.attached_to_name)]}))
 	return out
+
+
+# Files the AI or design team attach that are for the customer: PDFs, but not internal costing / BOM / shop drawings
+INTERNAL_FILE_WORDS = ("bom", "costing", "cost_sheet", "manufacturing", "internal", "job_card")
+
+
+def _for_customer(file_name: str) -> bool:
+	name = (file_name or "").lower()
+	return name.endswith(".pdf") and not any(w in name for w in INTERNAL_FILE_WORDS)
+
+
+def _sent_files(user: str) -> set:
+	return set(frappe.get_all("SK Work Log", filters={"user": user, "reference_doctype": "File"}, pluck="reference_name"))
+
+
+def files_to_send(user: str, hours: int = 48) -> list[dict]:
+	"""Customer PDFs (e.g. the AI's customer drawing) newly attached to the user's leads / deals and not yet sent."""
+	sent = _sent_files(user)
+	return [f for f in new_files(user, hours) if _for_customer(f.file_name) and f.name not in sent]
+
+
+def mark_file_sent(user: str, file: str, channel: str = "WhatsApp") -> bool:
+	"""Record that the user sent a CRM file to the customer: Work Book entry (clears the reminder) + CRM note."""
+	row = frappe.db.get_value("File", file, ["file_name", "attached_to_doctype", "attached_to_name"], as_dict=True)
+	if not row or row.attached_to_doctype not in CRM_DOCTYPES:
+		frappe.throw(_("File not found"))
+	_check(row.attached_to_doctype, row.attached_to_name, "write")
+	if file in _sent_files(user):
+		return True
+	text = _("Sent {0} to customer on {1}").format(row.file_name, channel)
+	frappe.get_doc({"doctype": "SK Work Log", "user": user, "date": frappe.utils.getdate(), "entry_type": "Task Update",
+		"description": text, "reference_doctype": "File", "reference_name": file, "status": "Done"}).insert(ignore_permissions=True)
+	add_note(user, row.attached_to_doctype, row.attached_to_name, text)
+	return True
+
+
+REVISION_STATUS = "Revision Requested"
+
+
+def _design_status_field(doctype: str) -> str | None:
+	"""The Design Status select on CRM Deal / Lead used by the AI design flow (found by its 'Revision Requested' option)."""
+	for df in frappe.get_meta(doctype).fields:
+		if df.fieldtype == "Select" and REVISION_STATUS in (df.options or "").split("\n"):
+			return df.fieldname
+	return None
+
+
+def _design_target(doctype: str, name: str) -> tuple[str, str]:
+	"""Corrections go to the deal when the lead is converted, because design works on the deal."""
+	if doctype == "CRM Lead":
+		deal = frappe.db.get_value("CRM Deal", {"lead": name})
+		if deal:
+			return "CRM Deal", deal
+	return doctype, name
+
+
+def request_correction(user: str, doctype: str, name: str, text: str | None = None, file: str | None = None,
+		photo: str | None = None) -> dict:
+	"""Salesperson's drawing correction from the phone: CRM comment (+ marked-up photo) and Design Status
+	'Revision Requested', so the design AI sends the next revision, which then alerts the salesperson at once."""
+	doctype, name = _design_target(doctype, name)
+	_check(doctype, name, "write")
+	text = (text or "").strip()
+	if not text and not photo:
+		frappe.throw(_("Please type, speak or photo the correction"))
+	drawing = frappe.db.get_value("File", file, "file_name") if file else None
+	_attach(photo, doctype, name, user)
+	body = _("Drawing correction") + (f" ({drawing})" if drawing else "") + ":\n" + (text or _("see attached photo"))
+	doc = frappe.get_doc(doctype, name)
+	doc.add_comment("Comment", body)
+	field = _design_status_field(doctype)
+	status_set = False
+	if field:
+		doc.set(field, REVISION_STATUS)
+		doc.save()
+		status_set = True
+	frappe.get_doc({"doctype": "SK Work Log", "user": user, "date": frappe.utils.getdate(), "entry_type": "Task Update",
+		"description": body[:500], "reference_doctype": doctype, "reference_name": name, "status": "Done"}).insert(ignore_permissions=True)
+	return {"doctype": doctype, "name": name, "status_set": status_set}
+
+
+def on_file_attached(doc, method=None):
+	"""A customer PDF (e.g. the AI's drawing) was attached to a lead / deal: alert its owner at once, not at the next hourly card."""
+	if doc.attached_to_doctype not in CRM_DOCTYPES or not doc.attached_to_name or not _for_customer(doc.file_name):
+		return
+	field = "lead_owner" if doc.attached_to_doctype == "CRM Lead" else "deal_owner"
+	owner = frappe.db.get_value(doc.attached_to_doctype, doc.attached_to_name, field)
+	if owner and owner != doc.owner and frappe.db.exists("SK App User", {"user": owner, "enabled": 1}):
+		frappe.enqueue("sk_app.crm.alert_owner", user=owner, enqueue_after_commit=True, queue="short")
+
+
+def alert_owner(user: str):
+	"""Background job: a fresh 'what to do now' card for the owner, built with their own permissions."""
+	from sk_app import guide
+
+	current = frappe.session.user
+	frappe.set_user(user)
+	try:
+		guide.make_card(user, use_claude=False)
+	finally:
+		frappe.set_user(current)
 
 
 def own_file_content(user: str, file_url: str) -> tuple[bytes, str]:
