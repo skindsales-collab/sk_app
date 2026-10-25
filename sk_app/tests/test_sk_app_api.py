@@ -113,3 +113,9 @@ class TestSKAppAPI(IntegrationTestCase):
 	def test_load_sales_pilot_reports_missing_people(self):
 		result = setup.load_sales_pilot()
 		self.assertEqual(len(result["set_up"]) + len(result["user_not_found"]), 4)
+
+	def test_load_sales_button_is_for_system_manager_only(self):
+		with set_user(SALES), self.assertRaises(frappe.PermissionError):
+			setup.load_sales_pilot_now()
+		result = setup.load_sales_pilot_now()
+		self.assertEqual(len(result["set_up"]) + len(result["user_not_found"]), 4)

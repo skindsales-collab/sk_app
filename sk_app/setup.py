@@ -84,3 +84,10 @@ def load_sales_pilot(replace_targets: int = 0):
 		done.append(person["full_name"])
 	frappe.db.commit()
 	return {"set_up": done, "user_not_found": missing}
+
+
+@frappe.whitelist(methods=["POST"])
+def load_sales_pilot_now():
+	"""Button on SK App Settings: same as the bench command, for sites without a bench shell (Frappe Cloud)."""
+	frappe.only_for("System Manager")
+	return load_sales_pilot()
