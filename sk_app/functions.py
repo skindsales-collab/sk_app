@@ -4,19 +4,19 @@ Sales is the pilot and is fully live. Every other function already gets the comm
 DSI, Report Problem, My KPI) driven by their ERPNext tasks, and its own tiles are switched on in later phases.
 """
 
-COMMON_TILES = ["my_day", "work_book", "dsi", "problem", "my_kpi"]
+COMMON_TILES = ["my_day", "day_report", "work_book", "dsi", "problem", "my_kpi", "training"]
 
 FUNCTIONS = {
 	"Sales": {
 		"label": {"English": "Sales", "Marathi": "विक्री"},
-		"tiles": ["my_day", "my_leads", "my_deals", "my_kpi", "work_book", "dsi", "problem"],
+		"tiles": ["my_day", "follow_up", "new_lead", "my_leads", "my_deals", "day_report", "my_kpi", "work_book", "dsi", "problem", "training"],
 		"live": True,
 		"erpnext_roles": ["Sales User", "Sales Manager"],
 		"desk": "/crm",
 	},
 	"Marketing": {
 		"label": {"English": "Marketing", "Marathi": "मार्केटिंग"},
-		"tiles": ["my_day", "my_leads", "my_kpi", "work_book", "dsi", "problem"],
+		"tiles": ["my_day", "follow_up", "new_lead", "my_leads", "day_report", "my_kpi", "work_book", "dsi", "problem", "training"],
 		"live": True,  # uses the same CRM lead screens as Sales
 		"erpnext_roles": ["Sales User"],
 		"desk": "/crm",
@@ -86,7 +86,7 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": ["ceo_view", "my_day", "my_kpi", "dsi", "problem"],
+		"tiles": ["ceo_view", "team_reports", "my_day", "day_report", "my_kpi", "dsi", "problem", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager"],
 		"desk": "/app",
@@ -94,10 +94,15 @@ FUNCTIONS = {
 }
 
 
-def home_for(function: str | None) -> dict:
-	"""Home definition for a function; unknown or blank falls back to the common screens."""
+def home_for(function: str | None, has_team: bool = False) -> dict:
+	"""Home definition for a function; unknown or blank falls back to the common screens.
+	Anyone who manages a team also gets the Team Reports tile (daily Day Reports of their people)."""
 	spec = FUNCTIONS.get(function or "")
 	if spec:
-		return {"function": function, **spec}
-	return {"function": function or "", "label": {"English": function or "My Work"}, "tiles": COMMON_TILES,
-		"live": False, "erpnext_roles": [], "desk": "/app"}
+		home = {"function": function, **spec}
+	else:
+		home = {"function": function or "", "label": {"English": function or "My Work"}, "tiles": COMMON_TILES,
+			"live": False, "erpnext_roles": [], "desk": "/app"}
+	if has_team and "team_reports" not in home["tiles"]:
+		home["tiles"] = home["tiles"][:1] + ["team_reports"] + home["tiles"][1:]
+	return home

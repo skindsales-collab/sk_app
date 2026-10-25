@@ -1,0 +1,286 @@
+{
+ "doctype": "DocType",
+ "name": "SK Day Report",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-10-25 19:30:00.000000",
+ "modified": "2026-10-25 19:30:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "naming_rule": "Expression",
+ "autoname": "format:DR-{YYYY}-{#####}",
+ "track_changes": 1,
+ "sort_field": "date",
+ "sort_order": "DESC",
+ "title_field": "person_name",
+ "field_order": [
+  "user",
+  "person_name",
+  "date",
+  "function",
+  "column_1",
+  "manager",
+  "submitted_on",
+  "on_time",
+  "section_report",
+  "work_done",
+  "problems",
+  "plan_tomorrow",
+  "photo",
+  "section_auto",
+  "cards_done",
+  "calls_made",
+  "notes_added",
+  "leads_created",
+  "column_2",
+  "work_entries",
+  "dsi_done",
+  "kpi_score",
+  "auto_summary",
+  "section_review",
+  "manager_rating",
+  "manager_comment",
+  "column_3",
+  "reviewed_by",
+  "reviewed_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "User",
+   "options": "User",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "person_name",
+   "fieldtype": "Data",
+   "label": "Person",
+   "fetch_from": "user.full_name",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "reqd": 1,
+   "default": "Today",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "function",
+   "fieldtype": "Data",
+   "label": "Function",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "column_1",
+   "fieldtype": "Column Break",
+   "label": "Column 1"
+  },
+  {
+   "fieldname": "manager",
+   "fieldtype": "Link",
+   "label": "Manager",
+   "options": "User",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "submitted_on",
+   "fieldtype": "Datetime",
+   "label": "Submitted On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "on_time",
+   "fieldtype": "Check",
+   "label": "On Time",
+   "read_only": 1,
+   "description": "Sent before the report time in SK App Settings"
+  },
+  {
+   "fieldname": "section_report",
+   "fieldtype": "Section Break",
+   "label": "Day Report"
+  },
+  {
+   "fieldname": "work_done",
+   "fieldtype": "Text",
+   "label": "Work Done Today",
+   "reqd": 1
+  },
+  {
+   "fieldname": "problems",
+   "fieldtype": "Small Text",
+   "label": "Problems / Help Needed"
+  },
+  {
+   "fieldname": "plan_tomorrow",
+   "fieldtype": "Small Text",
+   "label": "Plan for Tomorrow"
+  },
+  {
+   "fieldname": "photo",
+   "fieldtype": "Attach Image",
+   "label": "Photo"
+  },
+  {
+   "fieldname": "section_auto",
+   "fieldtype": "Section Break",
+   "label": "Captured by the App",
+   "collapsible": 0
+  },
+  {
+   "fieldname": "cards_done",
+   "fieldtype": "Int",
+   "label": "Guide Cards Done",
+   "read_only": 1
+  },
+  {
+   "fieldname": "calls_made",
+   "fieldtype": "Int",
+   "label": "Calls Logged",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notes_added",
+   "fieldtype": "Int",
+   "label": "CRM Notes",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leads_created",
+   "fieldtype": "Int",
+   "label": "New Leads",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_2",
+   "fieldtype": "Column Break",
+   "label": "Column 2"
+  },
+  {
+   "fieldname": "work_entries",
+   "fieldtype": "Int",
+   "label": "Work Book Entries",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dsi_done",
+   "fieldtype": "Check",
+   "label": "DSI Done",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kpi_score",
+   "fieldtype": "Float",
+   "label": "Month KPI Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "auto_summary",
+   "fieldtype": "Small Text",
+   "label": "Activity Captured",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_review",
+   "fieldtype": "Section Break",
+   "label": "Manager Review"
+  },
+  {
+   "fieldname": "manager_rating",
+   "fieldtype": "Select",
+   "label": "Rating",
+   "options": "\nGood\nOK\nNeeds improvement",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "manager_comment",
+   "fieldtype": "Small Text",
+   "label": "Manager Comment"
+  },
+  {
+   "fieldname": "column_3",
+   "fieldtype": "Column Break",
+   "label": "Column 3"
+  },
+  {
+   "fieldname": "reviewed_by",
+   "fieldtype": "Link",
+   "label": "Reviewed By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reviewed_on",
+   "fieldtype": "Datetime",
+   "label": "Reviewed On",
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "Employee",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "if_owner": 1,
+   "print": 1,
+   "report": 1
+  },
+  {
+   "role": "Sales User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "if_owner": 1,
+   "print": 1,
+   "report": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "report": 1,
+   "export": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "Sales Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "report": 1,
+   "export": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "HR Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "report": 1,
+   "export": 1,
+   "email": 1,
+   "share": 1
+  }
+ ],
+ "states": [],
+ "links": [],
+ "actions": [],
+ "index_web_pages_for_search": 0
+}

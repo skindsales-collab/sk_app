@@ -268,11 +268,13 @@ def log_contact(user: str, doctype: str, name: str, channel: str, outcome: str |
 	summary = " · ".join(p for p in (channel, outcome, text) if p)
 	note = add_note(user, doctype, name, summary, photo)
 	if channel == "Call":
-		to = frappe.db.get_value(doctype, name, "mobile_no") or frappe.db.get_value(doctype, name, "phone") or "-"
+		# both are Phone fields; "0" when a number is not known (the user's own mobile may be blank in ERPNext)
+		to = frappe.db.get_value(doctype, name, "mobile_no") or frappe.db.get_value(doctype, name, "phone") or "0"
+		mine = frappe.db.get_value("User", user, ["mobile_no", "phone"], as_dict=True) or {}
 		log = frappe.get_doc({
 			"doctype": "CRM Call Log", "id": frappe.generate_hash(length=16), "type": "Outgoing",
 			"status": CALL_LOG_STATUS.get(outcome, "Completed"),
-			"from": frappe.db.get_value("User", user, "mobile_no") or user, "to": to, "caller": user,
+			"from": mine.get("mobile_no") or mine.get("phone") or "0", "to": to, "caller": user,
 			"telephony_medium": "Manual", "start_time": now_datetime(), "note": note,
 			"reference_doctype": doctype, "reference_docname": name,
 		})
@@ -316,3 +318,20 @@ def own_file_content(user: str, file_url: str) -> tuple[bytes, str]:
 	if len(content) > 5 * 1024 * 1024:
 		frappe.throw(_("Photo is too large (max 5 MB)"))
 	return content, media
+
+
+SHARE_DAYS = 30
+
+
+def share_link(doctype: str, name: str) -> dict:
+	"""Absolute PDF link a customer can open without login (Frappe Document Share Key, valid 30 days)."""
+	if doctype not in PDF_DOCTYPES:
+		frappe.throw(_("Only Quotation and Sales Order PDFs can be sent"))
+	if not frappe.has_permission(doctype, "read", name):
+		frappe.throw(_("No access to {0}").format(name), frappe.PermissionError)
+	doc = frappe.get_doc(doctype, name)
+	key = doc.get_document_share_key(expires_on=frappe.utils.add_days(frappe.utils.today(), SHARE_DAYS))
+	url = frappe.utils.get_url(f"{_pdf(doctype, name)}&key={key}")
+	party = doc.get("customer_name") or doc.get("party_name") or doc.get("customer") or ""
+	return {"url": url, "file_name": f"{name}.pdf", "pdf": _pdf(doctype, name),
+		"message": _("Dear {0}, please find {1} {2} from SK Ind Tech Solutions: {3}").format(party, _(doctype), name, url)}
