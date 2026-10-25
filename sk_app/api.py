@@ -4,7 +4,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime
 
-from sk_app import claude, crm, day_report, guide, kpi, training, work
+from sk_app import calendar_view, claude, crm, day_report, guide, kpi, training, work
 from sk_app.functions import home_for
 from sk_app.logic import rank_items
 
@@ -263,3 +263,20 @@ def team_day_reports(day=None):
 @frappe.whitelist(methods=["POST"])
 def review_day_report(report, rating=None, comment=None):
 	return day_report.review(_me().user, report, rating, comment)
+
+
+# ---- Calendars ----
+
+@frappe.whitelist()
+def cal_today():
+	return calendar_view.today(_me().user)
+
+
+@frappe.whitelist()
+def cal_week(day=None):
+	return calendar_view.week(_me().user, day)
+
+
+@frappe.whitelist()
+def cal_month(year=None, month=None):
+	return calendar_view.month(_me().user, year, month)

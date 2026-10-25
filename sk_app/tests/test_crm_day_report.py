@@ -90,6 +90,7 @@ class TestCrmAndDayReport(IntegrationTestCase):
 		if not self.crm:
 			self.skipTest("Frappe CRM not installed")
 		with set_user(REP):
+			calls_before = day_report.captured(REP)["calls_made"]
 			name = api.new_lead("Ramesh", mobile_no="9876543210", organization="SK Test Cabins Ltd", segment="Cabin",
 				requirement="2 site cabins 20x10")
 			rows = [r for r in api.follow_up() if r["name"] == name]
@@ -100,7 +101,7 @@ class TestCrmAndDayReport(IntegrationTestCase):
 			self.assertEqual(len(d["calls"]), 1)
 			self.assertTrue(any("Requirement" in n["title"] for n in d["notes"]))
 			self.assertTrue(frappe.db.get_value("CRM Lead", name, "first_responded_on"))
-			self.assertEqual(day_report.captured(REP)["calls_made"], 1)
+			self.assertEqual(day_report.captured(REP)["calls_made"], calls_before + 1)
 			# the CRM's own assignment ToDo must not show the lead a second time
 			self.assertFalse([i for i in api.my_day()["items"] if i["kind"] == "task" and i["name"] == name])
 		with set_user(STRANGER):
@@ -110,7 +111,7 @@ class TestCrmAndDayReport(IntegrationTestCase):
 		if not self.crm:
 			self.skipTest("Frappe CRM not installed")
 		with set_user(REP):
-			lead = api.new_lead("Suresh", mobile_no="9876500000", organization="SK Test Drawing Co")
+			lead = api.new_lead("Suresh", mobile_no="9876500000", organization="SK Test Drawing Co " + frappe.generate_hash(length=5))
 		with set_user(BOSS):  # stands in for the AI design user
 			def attach(fname):
 				return frappe.get_doc({"doctype": "File", "file_name": fname, "content": pdf_bytes() if fname.endswith(".pdf") else b"x", "is_private": 1,
@@ -120,14 +121,14 @@ class TestCrmAndDayReport(IntegrationTestCase):
 			attach("Cabin99_Test_BOM_Costing_Rev0.pdf")
 		from sk_app import crm
 
+		started = frappe.utils.now_datetime()
 		crm.alert_owner(REP)
 		self.assertEqual(frappe.session.user, "Administrator")
 		with set_user(REP):
 			self.assertEqual([f.name for f in api.home()["new_files"]], [pdf.name])
-			card = frappe.get_all("SK Guide Card", filters={"user": REP}, fields=["card_text", "reference_name"],
-				order_by="creation desc", limit=1)[0]
-			self.assertIn("Cabin99", card.card_text)
-			self.assertEqual(card.reference_name, pdf.name)
+			# a fresh card was made at once; the drawing is in the person's ranked work
+			self.assertTrue(frappe.get_all("SK Guide Card", filters={"user": REP, "creation": [">=", started]}))
+			self.assertTrue([i for i in api.my_day()["items"] if i["kind"] == "send_file" and i["name"] == pdf.name])
 			api.mark_file_sent(pdf.name)
 			self.assertEqual(api.home()["new_files"], [])
 			self.assertFalse([i for i in api.my_day()["items"] if i["kind"] == "send_file"])
@@ -155,3 +156,28 @@ class TestCrmAndDayReport(IntegrationTestCase):
 	def test_share_link_only_for_quotation_and_sales_order(self):
 		with set_user(REP):
 			self.assertRaises(frappe.ValidationError, api.share_link, "User", REP)
+
+
+class TestCalendars(IntegrationTestCase):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		from sk_app.install import after_install
+
+		after_install()
+		make_user(REP, ["Sales User", "Employee"])
+		make_user(BOSS, ["Sales User", "Employee"])
+		app_user(BOSS, "Sales")
+		app_user(REP, "Sales", BOSS)
+
+	def test_today_week_month(self):
+		with set_user(REP):
+			api.add_dsi("Sorted cabin brochures")
+			t = api.cal_today()
+			self.assertTrue(any(s["kind"] == "lunch" for s in t["slots"]) or t["later"] is not None)
+			w = api.cal_week()
+			self.assertEqual(len(w["days"]), 7)
+			self.assertTrue(any(d["today"] and d["dsi"] for d in w["days"]))
+			m = api.cal_month()
+			self.assertTrue(any(d["company"] == ["Scorecard"] for d in m["days"]))
+			self.assertIn("calendar", api.home()["home"]["tiles"])

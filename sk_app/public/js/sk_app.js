@@ -40,6 +40,10 @@
 			correction_photo: "Photo / screenshot with marks (optional)", send_correction: "Send correction to design",
 			correction_sent: "Sent to design. You will get the new drawing here.", design_status: "Design",
 			self: "Self", customer: "Customer", no_number: "No number saved. Please type it.",
+			calendar: "My Calendar", cal_today: "Today", cal_week: "My Week", cal_month: "My Month", done_today: "Done today",
+			plan: "Plan", now_word: "NOW", later: "Does not fit today", tomorrow: "Work day is over: for tomorrow", week: "Week", orders: "Orders", order: "Order",
+			open_items: "items", company_dates: "Company dates", done_word: "Done", due_overdue: "Due / overdue",
+			tap_day: "Tap a day to see it.", d_Mon: "Mon", d_Tue: "Tue", d_Wed: "Wed", d_Thu: "Thu", d_Fri: "Fri", d_Sat: "Sat", d_Sun: "Sun",
 		},
 		Marathi: {
 			my_day: "माझा दिवस", my_leads: "माझे लीड", my_deals: "माझे डील", my_kpi: "माझा स्कोअर",
@@ -76,13 +80,17 @@
 			correction_photo: "खुणा केलेला फोटो / स्क्रीनशॉट (ऐच्छिक)", send_correction: "दुरुस्ती डिझाईनला पाठवा",
 			correction_sent: "डिझाईनला पाठवले. नवीन ड्रॉइंग इथेच मिळेल.", design_status: "डिझाईन",
 			self: "स्वतः", customer: "ग्राहक", no_number: "नंबर नाही. कृपया टाईप करा.",
+			calendar: "माझे कॅलेंडर", cal_today: "आज", cal_week: "माझा आठवडा", cal_month: "माझा महिना", done_today: "आज झालेले",
+			plan: "नियोजन", now_word: "आता", later: "आज बसत नाही", tomorrow: "आजचा दिवस संपला: उद्यासाठी", week: "आठवडा", orders: "ऑर्डर", order: "ऑर्डर",
+			open_items: "कामे", company_dates: "कंपनी तारखा", done_word: "झाले", due_overdue: "मुदत / उशीर",
+			tap_day: "दिवस पाहण्यासाठी दाबा.", d_Mon: "सोम", d_Tue: "मंगळ", d_Wed: "बुध", d_Thu: "गुरु", d_Fri: "शुक्र", d_Sat: "शनि", d_Sun: "रवि",
 		},
 	};
 	const ICON = {
 		my_day: "☀️", my_leads: "📞", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
 		job_cards: "🛠️", inspections: "✅", stock_alerts: "📦", material_requests: "🧾", invoice_photo: "📷",
 		collections: "💰", team_scorecards: "👥", site_checklist: "📋", ceo_view: "📊",
-		follow_up: "🔔", new_lead: "➕", training: "🎓", day_report: "📝", team_reports: "🗂️",
+		calendar: "📅", follow_up: "🔔", new_lead: "➕", training: "🎓", day_report: "📝", team_reports: "🗂️",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
 	const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -125,11 +133,13 @@
 		setTimeout(() => el.remove(), 2600);
 	}
 
+	const micLang = {}; // per text box: "en" or "mr"; default follows the app language
 	function speakInto(input) {
 		const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 		if (!SR) { toast("Voice not supported on this phone. Use the keyboard mic.", true); return; }
 		const rec = new SR();
-		rec.lang = state.lang === "Marathi" ? "mr-IN" : "en-IN";
+		const ml = micLang[input.id] || (state.lang === "Marathi" ? "mr" : "en");
+		rec.lang = ml === "mr" ? "mr-IN" : "en-IN";
 		rec.interimResults = false;
 		rec.onresult = (e) => { input.value = (input.value ? input.value + " " : "") + e.results[0][0].transcript; };
 		rec.onerror = () => toast("Could not hear. Try again.", true);
@@ -217,7 +227,8 @@
 	function formField(id, label, big) {
 		return `<label class="sk-field"><span>${esc(label)}</span><div class="sk-input-row">
 			${big ? `<textarea id="${id}" rows="3"></textarea>` : `<input id="${id}">`}
-			<button class="sk-mic" data-mic="${id}" title="${t("speak")}">🎤</button></div></label>`;
+			<div class="sk-micbox"><button class="sk-mic" data-mic="${id}" title="${t("speak")}">🎤</button>
+			<button class="sk-miclang" data-miclang="${id}">${(micLang[id] || (state.lang === "Marathi" ? "mr" : "en")) === "en" ? "EN" : "मर"}</button></div></div></label>`;
 	}
 
 	function photoField(id, label, anyFile) {
@@ -464,10 +475,76 @@
 		document.getElementById("f-day").addEventListener("change", (e) => { teamDay = e.target.value; go("team_reports"); });
 	}
 
+	// ---------- Calendars: Today / My Week / My Month ----------
+	let calTab = "today", calDay = null, calMonth = null;
+	const hm = (s) => (s ? String(s).slice(11, 16) : "");
+	const lakh = (v) => "₹" + (Number(v || 0) / 100000).toFixed(1) + " L";
+	const KIND_CLS = { lead_new: "red", send_file: "red", day_report: "red", dsi: "green", lunch: "grey", event: "yel" };
+
+	function calTabs() {
+		return `<div class="cal-tabs">${["today", "week", "month"].map((k) => `<button class="${calTab === k ? "on" : ""}" data-cal="${k}">${t("cal_" + k)}</button>`).join("")}</div>`;
+	}
+
+	function evRow(x) {
+		const it = x.item || x;
+		let open = "";
+		if (it.kind === "send_file") open = `data-open="${esc(it.ref_doctype)}" data-name="${esc(it.ref_name)}"`;
+		else if (it.doctype && it.doctype.startsWith("CRM ") && it.name) open = `data-open="${esc(it.doctype)}" data-name="${esc(it.name)}"`;
+		else if (it.kind === "day_report") open = `data-go="day_report"`;
+		else if (it.kind === "dsi") open = `data-go="dsi"`;
+		return `<button class="ev ${KIND_CLS[x.kind || it.kind] || ""}" ${open}>${esc(x.title || it.title)}<small>${esc((it.kind || x.kind || "").replace("_", " "))}${it.minutes ? " · " + esc(it.minutes) + " " + t("min") : ""}</small></button>`;
+	}
+
+	async function renderCalToday() {
+		const d = await call("cal_today");
+		const now = hm(d.now);
+		let html = d.all_day.map((x) => `<span class="chip2 navy">${esc(x)}</span>`).join("");
+		if (d.done.length) html += `<h3 class="sk-h">✓ ${t("done_today")}</h3>` + d.done.map((x) => `<div class="slot"><div class="t">${hm(x.time)}</div><div class="ev green">${esc(x.title)}</div></div>`).join("");
+		html += `<h3 class="sk-h">${t("plan")}</h3><div class="now">${t("now_word")} ${now}</div>`;
+		html += d.slots.map((x) => `<div class="slot"><div class="t">${hm(x.start)}</div>${evRow(x)}</div>`).join("") || `<div class="sk-empty">${t("nothing")}</div>`;
+		if (d.later.length) html += `<h3 class="sk-h">${d.now.slice(11, 16) >= String(d.work_end).slice(0, 5) ? t("tomorrow") : t("later")}</h3>` + d.later.map((x) => `<div class="slot"><div class="t"></div>${evRow(x)}</div>`).join("");
+		return html;
+	}
+
+	async function renderCalWeek() {
+		const d = await call("cal_week", calDay ? { day: calDay } : {});
+		let html = `<div class="sk-score sk-cal-head"><button class="sk-nav" data-week="${esc(d.start)}" data-step="-7">‹</button>
+			<div><div>${t("week")} ${d.week_no} · ${esc(d.start.slice(8))}/${esc(d.start.slice(5, 7))} – ${esc(d.end.slice(8))}/${esc(d.end.slice(5, 7))}</div>
+			<small>${d.orders_target ? `${t("orders")} ${lakh(d.orders)} / ${lakh(d.orders_target)} · ` : ""}${d.open_items} ${t("open_items")}</small></div>
+			<button class="sk-nav" data-week="${esc(d.start)}" data-step="7">›</button></div>`;
+		html += d.days.map((x) => {
+			const chips = x.company.map((c) => `<span class="chip2 navy">${esc(c)}</span>`).join("") +
+				x.events.map((e) => `<span class="chip2 yel">${e.time ? esc(e.time) + " " : ""}${esc(e.title)}</span>`).join("") +
+				(x.orders ? `<span class="chip2 green">${t("order")} ${lakh(x.orders)}</span>` : "") + (x.dsi ? `<span class="chip2 green">DSI ✓</span>` : "") +
+				x.due.map((i) => `<button class="chip2 ${i.overdue ? "red" : ""}" ${i.doctype && i.doctype.startsWith("CRM ") ? `data-open="${esc(i.doctype)}" data-name="${esc(i.name)}"` : ""}>${i.overdue ? "⚠ " : ""}${esc(i.title)}</button>`).join("");
+			return `<div class="day ${x.today ? "today" : ""} ${x.working ? "" : "off"}"><h4><span>${t("d_" + x.day)} ${esc(x.date.slice(8))}</span><span class="sk-item-meta">${x.due.length} ${t("open_items")}</span></h4>${chips || `<span class="sk-item-meta">—</span>`}</div>`;
+		}).join("");
+		return html;
+	}
+
+	async function renderCalMonth() {
+		const d = await call("cal_month", calMonth || {});
+		let html = `<div class="sk-score sk-cal-head"><button class="sk-nav" data-month="${d.year}-${d.month}" data-step="-1">‹</button>
+			<div><div>${esc(d.label)}</div><small>${t("score")} ${d.score}%${d.orders_target ? ` · ${t("orders")} ${lakh(d.orders)} / ${lakh(d.orders_target)}` : ""} · ${d.dsi} DSI</small></div>
+			<button class="sk-nav" data-month="${d.year}-${d.month}" data-step="1">›</button></div><div class="grid">`;
+		html += ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((w) => `<div class="h">${t("d_" + w)}</div>`).join("");
+		html += '<div class="cell off"></div>'.repeat(d.days[0].weekday);
+		html += d.days.map((x) => `<button class="cell ${x.today ? "today" : ""}" data-calday="${esc(x.date)}"><b>${x.day}</b>
+			${x.company.map((c) => `<span class="dot m">${esc(c)}</span>`).join("")}${x.events.map((e) => `<span class="dot y">${esc(e)}</span>`).join("")}
+			${x.orders ? `<span class="dot g">${lakh(x.orders)}</span>` : ""}${x.due ? `<span class="dot ${x.overdue ? "r" : "m"}">${x.due} ${t("due")}</span>` : ""}${x.dsi ? `<span class="dot g">DSI</span>` : ""}</button>`).join("");
+		html += `</div><div class="legend"><span class="chip2 navy">${t("company_dates")}</span><span class="chip2 green">${t("done_word")}</span><span class="chip2 red">${t("due_overdue")}</span> · ${t("tap_day")}</div>`;
+		return html;
+	}
+
+	async function renderCalendar() {
+		const body = calTab === "week" ? await renderCalWeek() : calTab === "month" ? await renderCalMonth() : await renderCalToday();
+		root.innerHTML = header(t("calendar")) + `<main>${calTabs()}${body}</main>`;
+	}
+
 	const LIVE_VIEWS = { my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"),
 		my_kpi: renderKpi, dsi: renderDsi, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
-		team_reports: renderTeamReports, detail: () => renderDetail(current.doctype, current.name) };
+		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name) };
 
 	async function go(view) {
 		state.view = view;
@@ -499,6 +576,22 @@
 				el.classList.add("on");
 				document.getElementById("f-wa").value = el.dataset.waPick;
 				if (!el.dataset.waPick) toast(t("no_number"), true);
+				return;
+			}
+			if (el.dataset.cal) { calTab = el.dataset.cal; if (calTab === "today") calDay = null; return go("calendar"); }
+			if (el.dataset.week) { const d = new Date(el.dataset.week); d.setDate(d.getDate() + Number(el.dataset.step)); calDay = d.toISOString().slice(0, 10); return go("calendar"); }
+			if (el.dataset.month) {
+				let [y, m] = el.dataset.month.split("-").map(Number);
+				m += Number(el.dataset.step);
+				if (m < 1) { m = 12; y -= 1; } else if (m > 12) { m = 1; y += 1; }
+				calMonth = { year: y, month: m };
+				return go("calendar");
+			}
+			if (el.dataset.calday) { calDay = el.dataset.calday; calTab = "week"; return go("calendar"); }
+			if (el.dataset.miclang) {
+				const cur = micLang[el.dataset.miclang] || (state.lang === "Marathi" ? "mr" : "en");
+				micLang[el.dataset.miclang] = cur === "en" ? "mr" : "en";
+				el.textContent = micLang[el.dataset.miclang] === "en" ? "EN" : "मर";
 				return;
 			}
 			if (el.dataset.rate) {
