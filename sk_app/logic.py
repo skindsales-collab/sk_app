@@ -88,7 +88,7 @@ class WorkItem:
 
 
 # lower number wins when two items have the same priority
-KIND_ORDER = {"reminder": 0, "lead_new": 0, "send_file": 1, "day_report": 2, "lead_followup": 3, "crm_task": 4, "deal": 5, "quote": 6, "task": 7, "dsi": 8}
+KIND_ORDER = {"reminder": 0, "lead_new": 0, "send_file": 1, "lead_followup": 3, "crm_task": 4, "deal": 5, "quote": 6, "task": 7, "dsi": 8, "day_report": 99}
 
 
 def rank_items(items: list[WorkItem], now: datetime) -> list[WorkItem]:

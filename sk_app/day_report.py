@@ -97,7 +97,8 @@ def reminder(user: str, now=None) -> list[WorkItem]:
 	due = due_at(now)
 	if now < add_to_date(due, minutes=-REMIND_BEFORE_END_MINUTES) or _find(user, now):
 		return []
-	return [WorkItem("day_report", "Send today's Day Report", "SK Day Report", "", due=due, minutes=5, priority=1)]
+	# always the last job of the day: other work comes first, so no due time (never "overdue") and lowest priority
+	return [WorkItem("day_report", "Send today's Day Report", "SK Day Report", "", minutes=5, priority=9, extra={"due_at": str(due)})]
 
 
 def _team(manager: str) -> list[dict]:
