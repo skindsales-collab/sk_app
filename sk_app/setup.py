@@ -45,10 +45,10 @@ SALES_PILOT = [
 		],
 	},
 	{
-		"full_name": "Aditya",  # cabin, machine shifting and job work segments (added by SK 25-Oct-2026)
+		"full_name": "Aditya",  # cabin, machine shifting and job work segments; Rs 16.7 L confirmed by SK 25-Oct-2026
 		"home": "Sales",
 		"targets": [
-			("Revenue", "Orders booked (Rs, before GST)", "orders_value", 16.7 * L, "Rs", 30, "Proposed"),
+			("Revenue", "Orders booked (Rs, before GST)", "orders_value", 16.7 * L, "Rs", 30, "Confirmed by CEO"),
 			("Pipeline", "Leads worked (first call made)", "leads_worked", 60, "Count", 15, "Proposed"),
 			("Conversion", "Quotations sent", "quotes_sent", 15, "Count", 20, "Proposed"),
 			("Delivery", "Shifting / job work jobs closed on promised date", "manual", 100, "%", 15, "Proposed"),

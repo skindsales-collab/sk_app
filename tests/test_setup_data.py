@@ -20,7 +20,7 @@ def test_weights_add_to_100():
 def test_confirmed_revenue_targets():
 	revenue = {p["full_name"]: p["targets"][0][3] for p in SALES_PILOT if p["targets"][0][6] == "Confirmed by CEO"}
 	assert revenue == {"Rishikesh Mhase": 4500000, "Rahul Raju Jalnil": 1250000,
-		"Swati  Mashakhetri": 1500000, "Pranali Mane": 1000000}
+		"Swati  Mashakhetri": 1500000, "Pranali Mane": 1000000, "Aditya": 1670000}
 
 
 def test_kpi_codes_known_and_dsi_for_everyone():
