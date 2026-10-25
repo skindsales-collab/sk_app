@@ -1,0 +1,164 @@
+{
+ "doctype": "DocType",
+ "name": "SK App Settings",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-10-25 08:30:00.000000",
+ "modified": "2026-10-25 08:30:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "naming_rule": "",
+ "track_changes": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "field_order": [
+  "guide_section",
+  "guide_enabled",
+  "claude_model",
+  "claude_effort",
+  "monthly_call_cap",
+  "column_hours",
+  "work_start",
+  "work_end",
+  "lunch_start",
+  "lunch_end",
+  "working_days",
+  "kpi_section",
+  "digital_lead_sources",
+  "cabin_item_groups",
+  "first_response_minutes",
+  "column_kpi",
+  "claude_calls_this_month",
+  "claude_calls_month"
+ ],
+ "fields": [
+  {
+   "fieldname": "guide_section",
+   "fieldtype": "Section Break",
+   "label": "Hourly Claude guide"
+  },
+  {
+   "fieldname": "guide_enabled",
+   "fieldtype": "Check",
+   "label": "Guide Enabled",
+   "default": "1"
+  },
+  {
+   "fieldname": "claude_model",
+   "fieldtype": "Data",
+   "label": "Claude Model",
+   "default": "claude-opus-5-5",
+   "description": "Model id for the hourly guide and drafts. API key is read from site_config key anthropic_api_key, never stored here."
+  },
+  {
+   "fieldname": "claude_effort",
+   "fieldtype": "Select",
+   "label": "Claude Effort",
+   "options": "low\nmedium\nhigh",
+   "default": "low"
+  },
+  {
+   "fieldname": "monthly_call_cap",
+   "fieldtype": "Int",
+   "label": "Monthly Claude Call Cap",
+   "default": "3000",
+   "description": "Hard cap on Claude calls per month; after it the rule-based guide is used."
+  },
+  {
+   "fieldname": "column_hours",
+   "fieldtype": "Column Break",
+   "label": "Column Hours"
+  },
+  {
+   "fieldname": "work_start",
+   "fieldtype": "Time",
+   "label": "Work Start",
+   "default": "09:00:00"
+  },
+  {
+   "fieldname": "work_end",
+   "fieldtype": "Time",
+   "label": "Work End",
+   "default": "18:00:00"
+  },
+  {
+   "fieldname": "lunch_start",
+   "fieldtype": "Time",
+   "label": "Lunch Start",
+   "default": "13:00:00"
+  },
+  {
+   "fieldname": "lunch_end",
+   "fieldtype": "Time",
+   "label": "Lunch End",
+   "default": "13:40:00"
+  },
+  {
+   "fieldname": "working_days",
+   "fieldtype": "Data",
+   "label": "Working Days",
+   "default": "Mon,Tue,Wed,Thu,Fri,Sat"
+  },
+  {
+   "fieldname": "kpi_section",
+   "fieldtype": "Section Break",
+   "label": "KPI sources"
+  },
+  {
+   "fieldname": "digital_lead_sources",
+   "fieldtype": "Small Text",
+   "label": "Digital Lead Sources",
+   "default": "Indiamart\nWebsite\nWeb Form\nFacebook\nLinkedIn\nWhat's App Marketing\nMail Marketing\nAdvertisement",
+   "description": "One CRM Lead Source per line. Used for Pranali's digital leads and digital revenue KPIs."
+  },
+  {
+   "fieldname": "cabin_item_groups",
+   "fieldtype": "Small Text",
+   "label": "Cabin Item Groups",
+   "default": "Portable Office Cabin\nSecurity Cabin\nPortable Cabin\nFRP Toilet / Portable Toilet\nFarmhouse Cabin\nStorage Cabin\nOffice Cabin\nMS Container\nAerocon Panel / Cabin\nElectric Room Cabin\nBunk Bed Cabin\nBunk Bed Office Cabin\nLabour Camp\nKiosk Cabin\nLabour Accommodation Cabin\nOffice Container"
+  },
+  {
+   "fieldname": "first_response_minutes",
+   "fieldtype": "Int",
+   "label": "First Response SLA (minutes)",
+   "default": "5"
+  },
+  {
+   "fieldname": "column_kpi",
+   "fieldtype": "Column Break",
+   "label": "Column Kpi"
+  },
+  {
+   "fieldname": "claude_calls_this_month",
+   "fieldtype": "Int",
+   "label": "Claude Calls This Month",
+   "read_only": 1
+  },
+  {
+   "fieldname": "claude_calls_month",
+   "fieldtype": "Data",
+   "label": "Counter Month",
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "report": 1,
+   "export": 1,
+   "email": 1,
+   "share": 1
+  }
+ ],
+ "states": [],
+ "links": [],
+ "actions": [],
+ "index_web_pages_for_search": 0,
+ "issingle": 1
+}

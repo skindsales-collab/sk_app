@@ -1,0 +1,7 @@
+{% extends "templates/sk_shell.html" %}
+{% block content %}
+<div id="sk-app" data-csrf="{{ csrf_token }}" data-user="{{ user }}">
+	<div class="sk-loading">SK App…</div>
+</div>
+<script src="/assets/sk_app/js/sk_app.js"></script>
+{% endblock %}
