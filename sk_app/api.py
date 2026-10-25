@@ -16,6 +16,10 @@ def _me():
 	if user in ("Guest", None):
 		frappe.throw(_("Please log in"), frappe.PermissionError)
 	profile = guide.app_user(user)
+	if not profile and "System Manager" in frappe.get_roles(user) and not frappe.db.exists("SK App User", {"user": user}):
+		# admins can try the app at once: Administrator cannot be picked in the SK App User form (ERPNext hides it)
+		frappe.get_doc({"doctype": "SK App User", "user": user, "home": "Sales", "enabled": 1}).insert(ignore_permissions=True)
+		profile = guide.app_user(user)
 	if not profile:
 		frappe.throw(_("Your login is not set up for the SK App yet. Please ask the ERPNext admin."), frappe.PermissionError)
 	return profile
