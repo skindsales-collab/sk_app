@@ -146,8 +146,9 @@ def stale_quotes(user: str, days: int = 7) -> list[WorkItem]:
 def dsi_due(user: str) -> list[WorkItem]:
 	if frappe.db.exists("SK DSI Entry", {"user": user, "date": getdate()}):
 		return []
-	due = get_datetime(f"{getdate()} 17:30:00")
-	return [WorkItem("dsi", "Daily Small Improvement", "SK DSI Entry", "", due=due, minutes=5, priority=3)]
+	# after all real work (SK): no due time, so it is never "overdue" ahead of jobs; only the Day Report comes later
+	return [WorkItem("dsi", "Daily Small Improvement", "SK DSI Entry", "", minutes=5, priority=9,
+		extra={"due_at": f"{getdate()} 17:30:00"})]
 
 
 def collect(user: str, function: str) -> list[WorkItem]:

@@ -110,4 +110,8 @@ def home_for(function: str | None, has_team: bool = False) -> dict:
 			"live": False, "erpnext_roles": [], "desk": "/app"}
 	if has_team and "team_reports" not in home["tiles"]:
 		home["tiles"] = home["tiles"][:1] + ["team_reports"] + home["tiles"][1:]
+	# SK: My Day is always the first tile; DSI and the Day Report are the day's last jobs, so their tiles come last
+	last = [t for t in ("dsi", "day_report") if t in home["tiles"]]
+	middle = [t for t in home["tiles"] if t not in last and t != "my_day"]
+	home = {**home, "tiles": ["my_day"] + middle + last}
 	return home
