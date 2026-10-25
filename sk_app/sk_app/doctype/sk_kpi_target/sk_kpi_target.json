@@ -1,0 +1,150 @@
+{
+ "doctype": "DocType",
+ "name": "SK KPI Target",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-10-25 08:30:00.000000",
+ "modified": "2026-10-25 08:30:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "naming_rule": "Random",
+ "track_changes": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "field_order": [
+  "user",
+  "person_name",
+  "kra",
+  "kpi_label",
+  "column_1",
+  "kpi_code",
+  "monthly_target",
+  "unit",
+  "weight",
+  "manual_actual",
+  "active",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "User",
+   "options": "User",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "person_name",
+   "fieldtype": "Data",
+   "label": "Person",
+   "fetch_from": "user.full_name"
+  },
+  {
+   "fieldname": "kra",
+   "fieldtype": "Data",
+   "label": "KRA",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "kpi_label",
+   "fieldtype": "Data",
+   "label": "KPI",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "column_1",
+   "fieldtype": "Column Break",
+   "label": "Column 1"
+  },
+  {
+   "fieldname": "kpi_code",
+   "fieldtype": "Select",
+   "label": "Counted As",
+   "reqd": 1,
+   "options": "orders_value\ndigital_orders_value\ncabins_qty\nleads_worked\nfirst_response_pct\nquotes_sent\ndigital_leads\nlead_data_quality_pct\ndsi_count\nmanual",
+   "description": "How ERPNext counts the actual every month. 'manual' uses Manual Actual."
+  },
+  {
+   "fieldname": "monthly_target",
+   "fieldtype": "Float",
+   "label": "Monthly Target",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Select",
+   "label": "Unit",
+   "options": "Rs\nCount\n%",
+   "default": "Count"
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Percent",
+   "label": "Weight",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "manual_actual",
+   "fieldtype": "Float",
+   "label": "Manual Actual (this month)",
+   "depends_on": "eval:doc.kpi_code=='manual'"
+  },
+  {
+   "fieldname": "active",
+   "fieldtype": "Check",
+   "label": "Active",
+   "default": "1"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Proposed\nConfirmed by CEO",
+   "default": "Proposed"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "report": 1,
+   "export": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "HR Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "report": 1,
+   "export": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "Sales Manager",
+   "read": 1,
+   "report": 1
+  }
+ ],
+ "states": [],
+ "links": [],
+ "actions": [],
+ "index_web_pages_for_search": 0,
+ "autoname": "hash",
+ "title_field": "kpi_label"
+}

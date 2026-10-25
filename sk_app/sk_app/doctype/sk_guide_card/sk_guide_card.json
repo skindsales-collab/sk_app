@@ -1,0 +1,118 @@
+{
+ "doctype": "DocType",
+ "name": "SK Guide Card",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-10-25 08:30:00.000000",
+ "modified": "2026-10-25 08:30:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "naming_rule": "Random",
+ "track_changes": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "field_order": [
+  "user",
+  "slot_start",
+  "minutes",
+  "card_text",
+  "column_1",
+  "source",
+  "reference_doctype",
+  "reference_name",
+  "response",
+  "responded_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "User",
+   "options": "User",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "slot_start",
+   "fieldtype": "Datetime",
+   "label": "Slot Start",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "minutes",
+   "fieldtype": "Int",
+   "label": "Minutes",
+   "default": "60"
+  },
+  {
+   "fieldname": "card_text",
+   "fieldtype": "Small Text",
+   "label": "What To Do Now",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_1",
+   "fieldtype": "Column Break",
+   "label": "Column 1"
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Select",
+   "label": "Made By",
+   "options": "Claude\nRules",
+   "default": "Rules"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Reference Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference",
+   "options": "reference_doctype"
+  },
+  {
+   "fieldname": "response",
+   "fieldtype": "Select",
+   "label": "Response",
+   "options": "\nStarted\nDone\nNeed more time\nProblem",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "responded_on",
+   "fieldtype": "Datetime",
+   "label": "Responded On"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "report": 1,
+   "export": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "Sales Manager",
+   "read": 1,
+   "report": 1
+  }
+ ],
+ "states": [],
+ "links": [],
+ "actions": [],
+ "index_web_pages_for_search": 0,
+ "autoname": "hash",
+ "title_field": "card_text"
+}
