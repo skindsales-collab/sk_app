@@ -102,3 +102,5 @@ button.sk-open { background: none; border: 0; }
 .sk-open.sk-fix { font-size: 20px; padding: 8px; }
 .sk-contact.sk-two { grid-template-columns: 1fr 1fr; margin-bottom: 12px; }
 .sk-contact.sk-two .sk-chip { padding: 12px; font-size: 16px; font-weight: 600; }
+.sk-item > div:first-child { min-width: 0; flex: 1; }
+.sk-item a.sk-item-title { word-break: break-all; }
