@@ -89,6 +89,8 @@ class TestCrmAndDayReport(IntegrationTestCase):
 			self.assertTrue(any("Requirement" in n["title"] for n in d["notes"]))
 			self.assertTrue(frappe.db.get_value("CRM Lead", name, "first_responded_on"))
 			self.assertEqual(day_report.captured(REP)["calls_made"], 1)
+			# the CRM's own assignment ToDo must not show the lead a second time
+			self.assertFalse([i for i in api.my_day()["items"] if i["kind"] == "task" and i["name"] == name])
 		with set_user(STRANGER):
 			self.assertRaises(frappe.PermissionError, api.crm_detail, "CRM Lead", name)
 

@@ -32,10 +32,11 @@ def open_tasks(user: str) -> list[WorkItem]:
 
 
 def open_todos(user: str) -> list[WorkItem]:
-	"""Open ToDos allocated to the user that are not already covered by a Task."""
+	"""Open ToDos allocated to the user that are not already covered by a Task or a CRM lead / deal / task.
+	(Frappe CRM makes an 'Assignment for CRM Lead ...' ToDo for every owner, which would show the lead twice.)"""
 	rows = frappe.get_all(
 		"ToDo",
-		filters={"allocated_to": user, "status": "Open", "reference_type": ["!=", "Task"]},
+		filters={"allocated_to": user, "status": "Open", "reference_type": ["not in", ["Task", "CRM Lead", "CRM Deal", "CRM Task"]]},
 		fields=["name", "description", "date", "priority", "reference_type", "reference_name"],
 		limit=30,
 	)
