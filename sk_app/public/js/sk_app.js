@@ -19,6 +19,23 @@
 			work_q: "What did you do?", extra: "Extra work", problem_q: "What is the problem?",
 			score: "Score this month", target: "Target", actual: "Actual", not_live: "not live yet",
 			lang: "मराठी", leads: "Leads", deals: "Deals", due: "due", min: "min",
+			follow_up: "Follow-up", new_lead: "New Lead", training: "Training", day_report: "Day Report",
+			team_reports: "Team Reports", overdue: "Overdue", new_badge: "New", next: "Next", last: "Last",
+			call: "Call", whatsapp: "WhatsApp", email: "Email", status: "Status", notes: "Notes", add_note: "Add note",
+			note_q: "Note (type, speak or photo)", files: "Files & drawings", attach: "Attach photo / file",
+			tasks: "CRM tasks", calls: "Calls", quotations: "Quotations", sales_orders: "Sales Orders",
+			pdf: "PDF", send_customer: "Send on WhatsApp", share_pdf: "Share PDF", send_to: "Send to WhatsApp number",
+			send: "Send", what_happened: "What happened?", skip: "Skip", open_crm: "Open in CRM",
+			card_photo: "Photo of visiting card / enquiry", reading: "Reading photo…", read_ok: "Filled from photo. Please check.",
+			read_none: "Could not read. Please type.", cust_name: "Customer name", company: "Company", mobile: "Mobile",
+			source: "Source", segment: "Segment", requirement: "Requirement", lesson_done: "I have done this lesson",
+			done_tick: "Done", new_files: "New files on your leads", report_q: "What work did you do today?",
+			problems_q: "Problems / help needed", plan_q: "Plan for tomorrow", captured: "Captured by the app today",
+			cards_done: "Cards done", calls_made: "Calls", notes_added: "Notes", leads_created: "New leads",
+			work_entries: "Work Book", dsi_done: "DSI", kpi_score: "Month score", send_report: "Send Day Report",
+			report_sent: "Day Report sent", report_due: "Send today's Day Report", history: "Last 14 days",
+			sent_of: "sent", not_sent: "Not sent", on_time: "on time", late: "late", rating: "Rating",
+			comment: "Comment", save_review: "Save review", none: "None",
 		},
 		Marathi: {
 			my_day: "माझा दिवस", my_leads: "माझे लीड", my_deals: "माझे डील", my_kpi: "माझा स्कोअर",
@@ -34,12 +51,30 @@
 			work_q: "तुम्ही काय काम केले?", extra: "जादा काम", problem_q: "समस्या काय आहे?",
 			score: "या महिन्याचा स्कोअर", target: "लक्ष्य", actual: "प्रत्यक्ष", not_live: "अजून सुरू नाही",
 			lang: "English", leads: "लीड", deals: "डील", due: "मुदत", min: "मिनिटे",
+			follow_up: "फॉलो-अप", new_lead: "नवीन लीड", training: "प्रशिक्षण", day_report: "दिवसाचा अहवाल",
+			team_reports: "टीम अहवाल", overdue: "उशीर", new_badge: "नवीन", next: "पुढे", last: "शेवटचे",
+			call: "कॉल", whatsapp: "WhatsApp", email: "ईमेल", status: "स्थिती", notes: "नोंदी", add_note: "नोंद जोडा",
+			note_q: "नोंद (टाईप, बोला किंवा फोटो)", files: "फाईल्स आणि ड्रॉइंग", attach: "फोटो / फाईल जोडा",
+			tasks: "CRM कामे", calls: "कॉल", quotations: "कोटेशन", sales_orders: "सेल्स ऑर्डर",
+			pdf: "PDF", send_customer: "WhatsApp वर पाठवा", share_pdf: "PDF शेअर करा", send_to: "WhatsApp नंबरवर पाठवा",
+			send: "पाठवा", what_happened: "काय झाले?", skip: "वगळा", open_crm: "CRM मध्ये उघडा",
+			card_photo: "व्हिजिटिंग कार्ड / चौकशीचा फोटो", reading: "फोटो वाचत आहे…", read_ok: "फोटोवरून भरले. कृपया तपासा.",
+			read_none: "वाचता आले नाही. कृपया टाईप करा.", cust_name: "ग्राहकाचे नाव", company: "कंपनी", mobile: "मोबाईल",
+			source: "स्रोत", segment: "विभाग", requirement: "गरज", lesson_done: "मी हा धडा पूर्ण केला",
+			done_tick: "पूर्ण", new_files: "तुमच्या लीडवर नवीन फाईल्स", report_q: "आज तुम्ही कोणते काम केले?",
+			problems_q: "अडचणी / मदत हवी", plan_q: "उद्याचे नियोजन", captured: "आज ॲपने नोंदवलेले",
+			cards_done: "कार्ड पूर्ण", calls_made: "कॉल", notes_added: "नोंदी", leads_created: "नवीन लीड",
+			work_entries: "कामाची वही", dsi_done: "DSI", kpi_score: "महिन्याचा स्कोअर", send_report: "अहवाल पाठवा",
+			report_sent: "दिवसाचा अहवाल पाठवला", report_due: "आजचा दिवसाचा अहवाल पाठवा", history: "मागील 14 दिवस",
+			sent_of: "पाठवले", not_sent: "पाठवला नाही", on_time: "वेळेवर", late: "उशिरा", rating: "रेटिंग",
+			comment: "टिप्पणी", save_review: "रिव्ह्यू जतन करा", none: "काही नाही",
 		},
 	};
 	const ICON = {
 		my_day: "☀️", my_leads: "📞", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
 		job_cards: "🛠️", inspections: "✅", stock_alerts: "📦", material_requests: "🧾", invoice_photo: "📷",
 		collections: "💰", team_scorecards: "👥", site_checklist: "📋", ceo_view: "📊",
+		follow_up: "🔔", new_lead: "➕", training: "🎓", day_report: "📝", team_reports: "🗂️",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
 	const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -131,14 +166,18 @@
 		const h = state.home;
 		const fn = h.home;
 		const tiles = fn.tiles.map((k) => `<button class="sk-tile" data-go="${k}"><span class="sk-tile-icon">${ICON[k] || "•"}</span><span>${t(k)}</span></button>`).join("");
+		const files = (h.new_files || []).length ? `<button class="sk-banner" data-open="${esc(h.new_files[0].doctype)}" data-name="${esc(h.new_files[0].attached_to_name)}">📎 ${t("new_files")}: ${h.new_files.length} · ${esc(h.new_files[0].title)}</button>` : "";
+		const report = !h.day_report_sent && new Date().getHours() >= 17 ? `<button class="sk-banner bad" data-go="day_report">📝 ${t("report_due")}</button>` : "";
 		root.innerHTML = header((fn.label && (fn.label[state.lang] || fn.label.English)) || "SK App") +
-			`<main><div class="sk-hello">${esc(h.full_name || h.user)}</div>${cardHtml(state.card)}<div class="sk-tiles">${tiles}</div></main>`;
+			`<main><div class="sk-hello">${esc(h.full_name || h.user)}</div>${report}${files}${cardHtml(state.card)}<div class="sk-tiles">${tiles}</div></main>`;
 	}
 
 	function itemRow(i) {
 		const due = i.due ? `<span class="sk-due">${t("due")} ${esc(i.due.slice(5, 16))}</span>` : "";
 		const link = i.doctype && i.name ? (i.doctype.startsWith("CRM ") ? `/crm/${i.doctype === "CRM Lead" ? "leads" : "deals"}/${encodeURIComponent(i.name)}` : `/app/${i.doctype.toLowerCase().replace(/ /g, "-")}/${encodeURIComponent(i.name)}`) : "";
-		const open = link ? `<a class="sk-open" href="${link}">›</a>` : "";
+		let open = link ? `<a class="sk-open" href="${link}">›</a>` : "";
+		if (i.doctype && i.doctype.startsWith("CRM ") && i.name) open = `<button class="sk-open" data-open="${esc(i.doctype)}" data-name="${esc(i.name)}">›</button>`;
+		if (i.kind === "day_report") open = `<button class="sk-open" data-go="day_report">›</button>`;
 		return `<li class="sk-item k-${esc(i.kind)}"><div><div class="sk-item-title">${esc(i.title)}</div><div class="sk-item-meta">${esc(i.kind.replace("_", " "))} · ${esc(i.minutes)} ${t("min")} ${due}</div></div>${open}</li>`;
 	}
 
@@ -172,12 +211,12 @@
 			<button class="sk-mic" data-mic="${id}" title="${t("speak")}">🎤</button></div></label>`;
 	}
 
-	function photoField() {
-		return `<label class="sk-field"><span>${t("photo")}</span><input id="f-photo" type="file" accept="image/*" capture="environment"></label>`;
+	function photoField(id, label, anyFile) {
+		return `<label class="sk-field"><span>${esc(label || t("photo"))}</span><input id="${id || "f-photo"}" type="file" ${anyFile ? 'accept="image/*,application/pdf,.dwg,.dxf,.xlsx,.docx"' : 'accept="image/*" capture="environment"'}></label>`;
 	}
 
-	async function photoUrl() {
-		const f = document.getElementById("f-photo");
+	async function photoUrl(id) {
+		const f = document.getElementById(id || "f-photo");
 		return f && f.files[0] ? upload(f.files[0]) : null;
 	}
 
@@ -204,8 +243,215 @@
 		root.innerHTML = header(t(k)) + `<main><p class="sk-soon">${t("soon")}</p><a class="sk-btn wide" href="${desk}">${t("open_erp")}</a></main>`;
 	}
 
+	// ---------- CRM on the phone ----------
+	let crmOpts = null;
+	let pending = null; // contact the person just started (call / WhatsApp / email), to log on return
+	let current = null; // lead or deal open on the detail screen
+
+	async function options() {
+		if (!crmOpts) crmOpts = await call("crm_options");
+		return crmOpts;
+	}
+
+	function waNumber(m) {
+		let d = String(m || "").replace(/\D/g, "");
+		if (d.length === 11 && d[0] === "0") d = d.slice(1);
+		return d.length === 10 ? "91" + d : d;
+	}
+
+	function contactButtons(r) {
+		const b = (ch, icon, ok) => `<button class="sk-cbtn" ${ok ? "" : "disabled"} data-contact="${ch}" data-doctype="${esc(r.doctype)}" data-name="${esc(r.name)}" data-mobile="${esc(r.mobile || "")}" data-email="${esc(r.email || "")}">${icon}</button>`;
+		return `<div class="sk-contact">${b("Call", "📞", r.mobile)}${b("WhatsApp", "💬", r.mobile)}${b("Email", "✉️", r.email)}</div>`;
+	}
+
+	function when(s) { return s ? esc(String(s).slice(5, 16)) : ""; }
+
+	async function renderFollowUp() {
+		const rows = await call("follow_up");
+		const li = rows.map((r) => `<li class="sk-fu ${r.overdue ? "late" : r.new ? "new" : ""}">
+			<button class="sk-fu-main" data-open="${esc(r.doctype)}" data-name="${esc(r.name)}">
+				<div class="sk-item-title">${esc(r.title)} ${r.new ? `<span class="sk-badge">${t("new_badge")}</span>` : ""}${r.overdue ? `<span class="sk-badge bad">${t("overdue")}</span>` : ""}</div>
+				<div class="sk-item-meta">${esc(r.person || "")} · ${esc(r.status || "")} · ${r.doctype === "CRM Deal" ? t("deals") : t("leads")}</div>
+				${r.next || r.due ? `<div class="sk-item-meta">${t("next")}: ${esc(r.next || "")} ${r.due ? "· " + when(r.due) : ""}</div>` : ""}
+				${r.last ? `<div class="sk-item-meta">${t("last")}: ${esc(r.last.text)} · ${when(r.last.on)}</div>` : ""}
+			</button>${contactButtons(r)}</li>`).join("");
+		root.innerHTML = header(t("follow_up")) + `<main><button class="sk-btn go wide" data-go="new_lead">➕ ${t("new_lead")}</button><ul class="sk-list sk-gap">${li || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+	}
+
+	function erpDocRow(doctype, d, mobile) {
+		const amt = d.grand_total ? "₹" + Number(d.grand_total).toLocaleString("en-IN") : "";
+		return `<li class="sk-item"><div><div class="sk-item-title">${esc(d.name)}</div><div class="sk-item-meta">${esc(d.status || "")} · ${esc(d.transaction_date || "")} · ${amt}</div>
+			<div class="sk-row">
+				<a class="sk-chip" href="${esc(d.pdf)}" target="_blank">📄 ${t("pdf")}</a>
+				<button class="sk-chip" data-act="wa-send" data-doctype="${doctype}" data-name="${esc(d.name)}" data-mobile="${esc(mobile || "")}">💬 ${t("send_customer")}</button>
+				<button class="sk-chip" data-act="share-pdf" data-pdf="${esc(d.pdf)}" data-file="${esc(d.name)}.pdf">↗ ${t("share_pdf")}</button>
+			</div></div></li>`;
+	}
+
+	async function renderDetail(doctype, name) {
+		const [d, o] = await Promise.all([call("crm_detail", { doctype, name }), options()]);
+		const doc = d.doc;
+		current = { doctype, name, mobile: doc.mobile_no || doc.phone, email: doc.email };
+		const statuses = (doctype === "CRM Lead" ? o.lead_statuses : o.deal_statuses) || [];
+		const chips = statuses.map((s) => `<button class="sk-chip ${s.name === doc.status ? "on" : ""}" data-act="status" data-status="${esc(s.name)}">${esc(s.name)}</button>`).join("");
+		const files = d.files.map((f) => `<li class="sk-item"><div><a class="sk-item-title" href="${esc(f.file_url)}" target="_blank">📎 ${esc(f.file_name)}</a><div class="sk-item-meta">${esc(f.owner)} · ${when(f.creation)}</div></div>
+			<button class="sk-open" data-act="share-pdf" data-pdf="${esc(f.file_url)}" data-file="${esc(f.file_name)}">↗</button></li>`).join("");
+		const tasks = d.tasks.map((x) => `<li class="sk-item"><div><div class="sk-item-title">${esc(x.title)}</div><div class="sk-item-meta">${esc(x.status)} · ${when(x.due_date)}</div></div></li>`).join("");
+		const calls = d.calls.map((x) => `<li class="sk-item"><div><div class="sk-item-title">📞 ${esc(x.type)} · ${esc(x.status)}</div><div class="sk-item-meta">${when(x.creation)}</div></div></li>`).join("");
+		const notes = d.notes.map((n) => `<li class="sk-item"><div><div class="sk-item-title">${esc(n.title)}</div>${n.content && n.content !== n.title ? `<div>${esc(n.content)}</div>` : ""}<div class="sk-item-meta">${esc(n.owner)} · ${when(n.creation)}</div></div></li>`).join("");
+		const sec = (title, body) => body ? `<h3 class="sk-h">${title}</h3><ul class="sk-list">${body}</ul>` : "";
+		const mobile = current.mobile;
+		root.innerHTML = header(doc.organization || doc.lead_name || name) + `<main>
+			<div class="sk-info"><div class="sk-item-title">${esc(doc.lead_name || "")}</div>
+				<div class="sk-item-meta">${esc(mobile || "")} ${doc.email ? "· " + esc(doc.email) : ""}</div>
+				<div class="sk-item-meta">${[doc.status, doc.source, doc.sk_segment, doc.deal_value ? "₹" + Number(doc.deal_value).toLocaleString("en-IN") : ""].filter(Boolean).map(esc).join(" · ")}</div>
+				${doc.next_step ? `<div class="sk-item-meta">${t("next")}: ${esc(doc.next_step)}</div>` : ""}
+				${contactButtons({ doctype, name, mobile, email: doc.email })}</div>
+			<h3 class="sk-h">${t("status")}</h3><div class="sk-chips">${chips}</div>
+			<div class="sk-form">${formField("f-note", t("note_q"), true)}${photoField("f-photo", t("attach"), true)}
+				<button class="sk-btn ok wide" data-act="save-note">${t("add_note")}</button></div>
+			${sec(t("quotations"), d.quotations.map((q) => erpDocRow("Quotation", q, mobile)).join(""))}
+			${sec(t("sales_orders"), d.sales_orders.map((q) => erpDocRow("Sales Order", q, mobile)).join(""))}
+			${sec(t("files"), files)}${sec(t("tasks"), tasks)}${sec(t("notes"), notes)}${sec(t("calls"), calls)}
+			<a class="sk-btn wide" href="${esc(d.crm_url)}">${t("open_crm")}</a></main>`;
+	}
+
+	function sheet(html) {
+		closeSheet();
+		const el = document.createElement("div");
+		el.className = "sk-sheet-wrap";
+		el.innerHTML = `<div class="sk-sheet sk-form">${html}</div>`;
+		root.appendChild(el);
+		return el;
+	}
+	function closeSheet() { const s = root.querySelector(".sk-sheet-wrap"); if (s) s.remove(); }
+
+	function outcomeSheet(p) {
+		const outs = p.channel === "Call" ? ((crmOpts && crmOpts.call_outcomes) || ["Talked", "No answer", "Busy", "Call back later", "Wrong number"]) : [];
+		sheet(`<h3 class="sk-h">${t("what_happened")} (${t(p.channel.toLowerCase())})</h3>
+			<div class="sk-chips">${outs.map((x) => `<button class="sk-chip" data-ptype="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+			${formField("f-out", t("note_q"), true)}${photoField("f-outphoto")}
+			<button class="sk-btn ok wide" data-act="save-contact">${t("save")}</button>
+			<button class="sk-btn wide" data-act="close-sheet">${t("skip")}</button>`);
+	}
+
+	function waSheet(doctype, name, mobile) {
+		sheet(`<h3 class="sk-h">${t("send_to")}</h3>
+			<label class="sk-field"><span>${t("mobile")}</span><div class="sk-input-row"><input id="f-wa" type="tel" value="${esc(mobile || "")}"></div></label>
+			<button class="sk-btn ok wide" data-act="wa-go" data-doctype="${esc(doctype)}" data-name="${esc(name)}">💬 ${t("send")}</button>
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+
+	async function sharePdf(url, fileName) {
+		const res = await fetch(url, { credentials: "same-origin" });
+		if (!res.ok) throw new Error("Could not get the file");
+		const blob = await res.blob();
+		const file = new File([blob], fileName, { type: blob.type || "application/pdf" });
+		if (navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file], title: fileName });
+		const a = document.createElement("a");
+		a.href = URL.createObjectURL(blob);
+		a.download = fileName;
+		a.click();
+	}
+
+	async function renderNewLead() {
+		const o = await options();
+		const sel = (id, label, items) => `<label class="sk-field"><span>${esc(label)}</span><select id="${id}" class="sk-select"><option value=""></option>${(items || []).map((x) => `<option>${esc(x)}</option>`).join("")}</select></label>`;
+		root.innerHTML = header(t("new_lead")) + `<main class="sk-form">
+			${photoField("f-card", "📷 " + t("card_photo"))}
+			${formField("f-first", t("cust_name"))}${formField("f-org", t("company"))}
+			<label class="sk-field"><span>${t("mobile")}</span><div class="sk-input-row"><input id="f-mobile" type="tel"></div></label>
+			<label class="sk-field"><span>${t("email")}</span><div class="sk-input-row"><input id="f-email" type="email"></div></label>
+			${sel("f-source", t("source"), o.sources)}${sel("f-segment", t("segment"), o.segments)}
+			${formField("f-req", t("requirement"), true)}
+			<button class="sk-btn ok wide" data-act="save-lead">${t("save")}</button></main>`;
+		document.getElementById("f-card").addEventListener("change", readCard);
+	}
+
+	let cardUrl = null;
+	async function readCard(ev) {
+		const f = ev.target.files[0];
+		if (!f) return;
+		try {
+			toast(t("reading"));
+			cardUrl = await upload(f);
+			const d = await call("read_photo", { file_url: cardUrl }, true);
+			const set = (id, v) => { const el = document.getElementById(id); if (el && v && !el.value) el.value = v; };
+			set("f-first", d.first_name); set("f-org", d.organization); set("f-mobile", d.mobile_no); set("f-email", d.email); set("f-req", d.requirement);
+			toast(d.first_name || d.organization || d.mobile_no ? t("read_ok") : t("read_none"), !(d.first_name || d.organization || d.mobile_no));
+		} catch (e) { toast(e.message, true); }
+	}
+
+	// ---------- Training ----------
+	let lessons = [];
+	async function renderTraining() {
+		lessons = await call("training_lessons");
+		const mr = state.lang === "Marathi";
+		root.innerHTML = header(t("training")) + `<main><ul class="sk-list">${lessons.map((l, i) => `<li class="sk-item"><button class="sk-fu-main" data-lesson="${i}">
+			<div class="sk-item-title">${l.done ? "✅" : "🎓"} ${esc((mr && l.title_marathi) || l.title)}</div><div class="sk-item-meta">${esc(l.topic || "")} · ${esc(l.minutes || 2)} ${t("min")}</div></button></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+	}
+
+	function renderLesson(i) {
+		const l = lessons[i];
+		const mr = state.lang === "Marathi";
+		state.view = "lesson";
+		const video = l.video_url ? `<a class="sk-btn wide" href="${esc(l.video_url)}" target="_blank">▶ Video</a>` : "";
+		// lesson HTML is written by HR / managers in ERPNext (SK Training Lesson)
+		root.innerHTML = header((mr && l.title_marathi) || l.title) + `<main><div class="sk-lesson">${(mr && l.content_marathi) || l.content || ""}</div>${video}
+			${l.done ? `<div class="sk-answered">✅ ${t("done_tick")}</div>` : `<button class="sk-btn ok wide" data-act="lesson-done" data-lesson="${esc(l.name)}">✓ ${t("lesson_done")}</button>`}
+			<button class="sk-btn wide" data-go="training">‹ ${t("training")}</button></main>`;
+	}
+
+	// ---------- Day Report ----------
+	function factChips(c) {
+		const keys = ["cards_done", "calls_made", "notes_added", "leads_created", "work_entries"];
+		return `<div class="sk-facts">${keys.map((k) => `<div><b>${esc(c[k] || 0)}</b><span>${t(k)}</span></div>`).join("")}
+			<div><b>${c.dsi_done ? "✓" : "✗"}</b><span>${t("dsi_done")}</span></div><div><b>${esc(c.kpi_score || 0)}%</b><span>${t("kpi_score")}</span></div></div>`;
+	}
+
+	async function renderDayReport() {
+		const [d, hist] = await Promise.all([call("my_day_report"), call("my_day_reports", { days: 14 })]);
+		const r = d.report || {};
+		const c = d.captured;
+		root.innerHTML = header(t("day_report")) + `<main class="sk-form">
+			${r.submitted_on ? `<div class="sk-answered">✓ ${t("report_sent")} · ${when(r.submitted_on)}</div>` : ""}
+			<h3 class="sk-h">${t("captured")}</h3>${factChips(c)}
+			${c.auto_summary ? `<pre class="sk-pre">${esc(c.auto_summary)}</pre>` : ""}
+			${formField("f-done", t("report_q"), true)}${formField("f-prob", t("problems_q"), true)}${formField("f-plan", t("plan_q"), true)}${photoField()}
+			<button class="sk-btn ok wide" data-act="save-report">${t("send_report")}</button>
+			<h3 class="sk-h">${t("history")}</h3><ul class="sk-list">${hist.map((h) => `<li class="sk-item"><div><div class="sk-item-title">${esc(h.date)} ${h.on_time ? "· " + t("on_time") : "· " + t("late")}</div>
+				<div>${esc(h.work_done)}</div>${h.manager_rating || h.manager_comment ? `<div class="sk-item-meta">⭐ ${esc(h.manager_rating || "")} ${esc(h.manager_comment || "")}</div>` : ""}</div></li>`).join("")}</ul></main>`;
+		document.getElementById("f-done").value = r.work_done || "";
+		document.getElementById("f-prob").value = r.problems || "";
+		document.getElementById("f-plan").value = r.plan_tomorrow || "";
+	}
+
+	let teamDay = null;
+	async function renderTeamReports() {
+		const d = await call("team_day_reports", teamDay ? { day: teamDay } : {});
+		const ratings = ["Good", "OK", "Needs improvement"];
+		const people = d.people.map((p) => {
+			const r = p.report;
+			if (!r) return `<li class="sk-item k-lead_new"><div><div class="sk-item-title">${esc(p.full_name)}</div><div class="sk-item-meta">${esc(p.function || "")} · ❌ ${t("not_sent")}</div></div></li>`;
+			return `<li class="sk-item"><div class="sk-grow"><div class="sk-item-title">${esc(p.full_name)} · ${r.on_time ? "✅ " + t("on_time") : "⏰ " + t("late")}</div>
+				<div class="sk-item-meta">${esc(p.function || "")} · ${when(r.submitted_on)}</div>
+				${factChips(r)}<div>${esc(r.work_done)}</div>
+				${r.problems ? `<div class="sk-prob">⚠ ${esc(r.problems)}</div>` : ""}
+				${r.plan_tomorrow ? `<div class="sk-item-meta">${t("plan_q")}: ${esc(r.plan_tomorrow)}</div>` : ""}
+				${r.photo ? `<a href="${esc(r.photo)}" target="_blank">📷 ${t("photo")}</a>` : ""}
+				<div class="sk-chips sk-gap">${ratings.map((x) => `<button class="sk-chip ${r.manager_rating === x ? "on" : ""}" data-rate="${esc(r.name)}" data-rating="${x}">${x}</button>`).join("")}</div>
+				<div class="sk-input-row"><input id="c-${esc(r.name)}" placeholder="${t("comment")}" value="${esc(r.manager_comment || "")}"><button class="sk-mic" data-mic="c-${esc(r.name)}">🎤</button></div>
+				<button class="sk-btn wide" data-act="save-review" data-report="${esc(r.name)}">${t("save_review")}</button></div></li>`;
+		}).join("");
+		root.innerHTML = header(t("team_reports")) + `<main><div class="sk-score"><input type="date" id="f-day" class="sk-date" value="${esc(d.date)}"><div class="sk-score-num">${d.sent} / ${d.total}</div><div>${t("sent_of")}</div></div>
+			<ul class="sk-list">${people || `<li class="sk-empty">${t("none")}</li>`}</ul></main>`;
+		document.getElementById("f-day").addEventListener("change", (e) => { teamDay = e.target.value; go("team_reports"); });
+	}
+
 	const LIVE_VIEWS = { my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"),
-		my_kpi: renderKpi, dsi: renderDsi, work_book: () => renderWork("work_book"), problem: () => renderWork("problem") };
+		my_kpi: renderKpi, dsi: renderDsi, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
+		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
+		team_reports: renderTeamReports, detail: () => renderDetail(current.doctype, current.name) };
 
 	async function go(view) {
 		state.view = view;
@@ -221,9 +467,25 @@
 		if (!el) return;
 		try {
 			if (el.dataset.go) return go(el.dataset.go);
+			if (el.dataset.open) { current = { doctype: el.dataset.open, name: el.dataset.name }; return go("detail"); }
+			if (el.dataset.lesson && !el.dataset.act) return renderLesson(Number(el.dataset.lesson));
+			if (el.dataset.contact) {
+				const ch = el.dataset.contact;
+				pending = { channel: ch, doctype: el.dataset.doctype, name: el.dataset.name, at: Date.now() };
+				options().catch(() => null);
+				if (ch === "Call") window.location.href = "tel:" + el.dataset.mobile;
+				else if (ch === "WhatsApp") window.open("https://wa.me/" + waNumber(el.dataset.mobile), "_blank");
+				else window.location.href = "mailto:" + el.dataset.email;
+				return;
+			}
+			if (el.dataset.rate) {
+				root.querySelectorAll(`[data-rate="${el.dataset.rate}"]`).forEach((c) => c.classList.remove("on"));
+				el.classList.add("on");
+				return;
+			}
 			if (el.dataset.mic) return speakInto(document.getElementById(el.dataset.mic));
 			if (el.dataset.ptype) {
-				root.querySelectorAll(".sk-chip").forEach((c) => c.classList.remove("on"));
+				(el.parentElement || root).querySelectorAll(".sk-chip").forEach((c) => c.classList.remove("on"));
 				el.classList.add("on");
 				return;
 			}
@@ -254,6 +516,66 @@
 				toast(t("saved"));
 				return go(el.dataset.kind === "Problem" ? "home" : "work_book");
 			}
+			if (act === "close-sheet") { pending = null; return closeSheet(); }
+			if (act === "status") {
+				await call("set_crm_status", { doctype: current.doctype, name: current.name, status: el.dataset.status }, true);
+				toast(t("saved"));
+				return go("detail");
+			}
+			if (act === "save-note") {
+				el.disabled = true;
+				await call("add_crm_note", { doctype: current.doctype, name: current.name, text: val("f-note"), photo: await photoUrl("f-photo") }, true);
+				toast(t("saved"));
+				return go("detail");
+			}
+			if (act === "save-contact" && pending) {
+				el.disabled = true;
+				const chip = root.querySelector(".sk-sheet .sk-chip.on");
+				await call("log_contact", { doctype: pending.doctype, name: pending.name, channel: pending.channel,
+					outcome: chip ? chip.dataset.ptype : null, text: val("f-out"), photo: await photoUrl("f-outphoto") }, true);
+				pending = null;
+				closeSheet();
+				toast(t("saved"));
+				return go(state.view);
+			}
+			if (act === "wa-send") return waSheet(el.dataset.doctype, el.dataset.name, el.dataset.mobile);
+			if (act === "wa-go") {
+				const num = waNumber(val("f-wa"));
+				const w = window.open("about:blank", "_blank"); // open now, while the tap still counts, so the phone allows it
+				const d = await call("share_link", { doctype: el.dataset.doctype, name: el.dataset.name }, true);
+				const url = "https://wa.me/" + num + "?text=" + encodeURIComponent(d.message);
+				if (w) w.location.href = url; else window.location.href = url;
+				return closeSheet();
+			}
+			if (act === "share-pdf") return sharePdf(el.dataset.pdf, el.dataset.file);
+			if (act === "save-lead") {
+				el.disabled = true;
+				const name = await call("new_lead", { first_name: val("f-first"), organization: val("f-org"), mobile_no: val("f-mobile"),
+					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl }, true);
+				cardUrl = null;
+				toast(t("saved"));
+				current = { doctype: "CRM Lead", name };
+				return go("detail");
+			}
+			if (act === "lesson-done") {
+				await call("training_done", { lesson: el.dataset.lesson }, true);
+				toast(t("saved"));
+				return go("training");
+			}
+			if (act === "save-report") {
+				el.disabled = true;
+				await call("send_day_report", { work_done: val("f-done"), problems: val("f-prob"), plan_tomorrow: val("f-plan"), photo: await photoUrl() }, true);
+				if (state.home) state.home.day_report_sent = true;
+				toast(t("report_sent"));
+				return go("day_report");
+			}
+			if (act === "save-review") {
+				const rep = el.dataset.report;
+				const chip = root.querySelector(`[data-rate="${rep}"].on`);
+				await call("review_day_report", { report: rep, rating: chip ? chip.dataset.rating : null, comment: val("c-" + rep) }, true);
+				toast(t("saved"));
+				return;
+			}
 		} catch (e) {
 			el.disabled = false;
 			toast(e.message, true);
@@ -276,6 +598,11 @@
 			root.innerHTML = `<div class="sk-loading">${esc(e.message)}</div>`;
 		}
 	}
+
+	// back from the phone's call / WhatsApp / email app: ask what happened and log it in CRM
+	document.addEventListener("visibilitychange", () => {
+		if (!document.hidden && pending && !root.querySelector(".sk-sheet-wrap") && Date.now() - pending.at > 1500) outcomeSheet(pending);
+	});
 
 	// refresh the card every 5 minutes while the app is open
 	setInterval(async () => {

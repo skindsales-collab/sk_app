@@ -104,6 +104,21 @@ def open_deals(user: str) -> list[WorkItem]:
 	]
 
 
+def open_crm_tasks(user: str) -> list[WorkItem]:
+	"""Frappe CRM tasks assigned to the user that are not done or cancelled."""
+	if not frappe.db.exists("DocType", "CRM Task"):
+		return []
+	rows = frappe.get_all("CRM Task", filters={"assigned_to": user, "status": ["in", ["Backlog", "Todo", "In Progress"]]},
+		fields=["name", "title", "due_date", "priority", "reference_doctype", "reference_docname"], order_by="due_date asc", limit=30)
+	prio = {"High": 1, "Medium": 2, "Low": 3}
+	return [
+		WorkItem("crm_task", r.title, r.reference_doctype or "CRM Task", r.reference_docname or r.name,
+			due=get_datetime(r.due_date) if r.due_date else None, minutes=15, priority=prio.get(r.priority, 2),
+			extra={"task": r.name})
+		for r in rows
+	]
+
+
 def stale_quotes(user: str, days: int = 7) -> list[WorkItem]:
 	"""Submitted quotations by the user, still open and older than `days` (follow-up due)."""
 	cutoff = add_to_date(getdate(), days=-days)
@@ -127,8 +142,11 @@ def collect(user: str, function: str) -> list[WorkItem]:
 	"""Everything open for the person. Sales and Marketing add CRM work; every function gets tasks, ToDos and DSI."""
 	items = open_tasks(user) + open_todos(user)
 	if function in ("Sales", "Marketing", "Machine Shifting", "Design"):
-		items += open_leads(user) + open_deals(user)
+		items += open_leads(user) + open_deals(user) + open_crm_tasks(user)
 	if function == "Sales":
 		items += stale_quotes(user)
 	items += dsi_due(user)
+	from sk_app.day_report import reminder
+
+	items += reminder(user)
 	return items

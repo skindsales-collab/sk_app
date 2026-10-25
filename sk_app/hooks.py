@@ -18,11 +18,14 @@ scheduler_events = {
 doc_events = {
 	"SK DSI Entry": {"before_insert": "sk_app.permissions.stamp_user"},
 	"SK Work Log": {"before_insert": "sk_app.permissions.stamp_user"},
+	"SK Day Report": {"before_insert": "sk_app.permissions.stamp_user"},
 }
 
 has_permission = {
 	"SK DSI Entry": "sk_app.permissions.own_or_manager",
 	"SK Work Log": "sk_app.permissions.own_or_manager",
+	"SK Day Report": "sk_app.permissions.own_or_manager",
 }
 
 after_install = "sk_app.install.after_install"
+after_migrate = "sk_app.install.after_migrate"

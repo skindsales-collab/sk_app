@@ -77,7 +77,7 @@ def is_work_slot(now: datetime, work_start, work_end, lunch_start, lunch_end, wo
 class WorkItem:
 	"""One thing a person could do now, collected from ERPNext."""
 
-	kind: str  # lead_new, lead_followup, deal, task, quote, dsi
+	kind: str  # lead_new, lead_followup, deal, crm_task, task, quote, dsi, day_report
 	title: str
 	doctype: str = ""
 	name: str = ""
@@ -88,7 +88,7 @@ class WorkItem:
 
 
 # lower number wins when two items have the same priority
-KIND_ORDER = {"lead_new": 0, "lead_followup": 1, "deal": 2, "quote": 3, "task": 4, "dsi": 5}
+KIND_ORDER = {"lead_new": 0, "day_report": 1, "lead_followup": 2, "crm_task": 3, "deal": 4, "quote": 5, "task": 6, "dsi": 7}
 
 
 def rank_items(items: list[WorkItem], now: datetime) -> list[WorkItem]:
@@ -109,7 +109,9 @@ CARD_TEXT = {
 		"deal": "Now: move deal {title} to its next step",
 		"quote": "Now: follow up quotation {title}",
 		"task": "Now: work on task {title}",
+		"crm_task": "Now: do CRM task {title}",
 		"dsi": "Now: post today's Daily Small Improvement (DSI)",
+		"day_report": "Now: send today's Day Report (what you did, problems, plan for tomorrow)",
 		"none": "No open items. Add extra work or post your DSI.",
 	},
 	"Marathi": {
@@ -118,7 +120,9 @@ CARD_TEXT = {
 		"deal": "आता: डील {title} पुढच्या टप्प्यावर न्या",
 		"quote": "आता: कोटेशन {title} चा फॉलो-अप करा",
 		"task": "आता: काम {title} करा",
+		"crm_task": "आता: CRM काम {title} करा",
 		"dsi": "आता: आजची DSI (रोजची छोटी सुधारणा) टाका",
+		"day_report": "आता: आजचा दिवसाचा अहवाल पाठवा (काय केले, अडचणी, उद्याचे नियोजन)",
 		"none": "उघडे काम नाही. जादा काम जोडा किंवा DSI टाका.",
 	},
 }

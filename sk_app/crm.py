@@ -1,0 +1,337 @@
+"""Frappe CRM on the phone: follow-up list, lead / deal detail, new lead, status, notes, call log, files, ERP PDFs.
+
+Every read goes through frappe.get_list / has_permission and every write through doc.insert / doc.save with the
+user's own CRM permissions (Sales User / Sales Manager), so the app can never see or change more than CRM allows.
+"""
+
+import frappe
+from frappe import _
+from frappe.utils import add_to_date, get_datetime, now_datetime, strip_html, time_diff_in_seconds
+
+SEGMENTS = ["Cabin", "Machine Shifting", "Job Work", "Modular / Labour Camp", "LGSF", "Other"]
+CALL_OUTCOMES = ["Talked", "No answer", "Busy", "Call back later", "Wrong number"]
+CALL_LOG_STATUS = {"Talked": "Completed", "Call back later": "Completed", "No answer": "No Answer", "Busy": "Busy",
+	"Wrong number": "Failed"}
+CRM_DOCTYPES = ("CRM Lead", "CRM Deal")
+CLOSED_LEAD_TYPES = ("Won", "Lost", "Junk")
+OPEN_TASK_STATUSES = ("Backlog", "Todo", "In Progress")
+PDF_DOCTYPES = ("Quotation", "Sales Order")
+
+
+def installed() -> bool:
+	return bool(frappe.db.exists("DocType", "CRM Lead"))
+
+
+def _check(doctype: str, name: str, ptype: str = "read"):
+	if doctype not in CRM_DOCTYPES:
+		frappe.throw(_("Not a CRM record"))
+	if not frappe.has_permission(doctype, ptype, name):
+		frappe.throw(_("No access to {0}").format(name), frappe.PermissionError)
+
+
+def options() -> dict:
+	if not installed():
+		return {"crm": False}
+	return {
+		"crm": True,
+		"lead_statuses": frappe.get_all("CRM Lead Status", fields=["name", "type"], order_by="position asc"),
+		"deal_statuses": frappe.get_all("CRM Deal Status", fields=["name", "type"], order_by="position asc"),
+		"sources": frappe.get_all("CRM Lead Source", pluck="name", order_by="name asc"),
+		"segments": SEGMENTS,
+		"call_outcomes": CALL_OUTCOMES,
+	}
+
+
+def _closed(status_doctype: str) -> list[str]:
+	return frappe.get_all(status_doctype, filters={"type": ["in", CLOSED_LEAD_TYPES]}, pluck="name")
+
+
+def _open_tasks_by_doc(user: str) -> dict:
+	rows = frappe.get_all("CRM Task", filters={"assigned_to": user, "status": ["in", OPEN_TASK_STATUSES]},
+		fields=["reference_doctype", "reference_docname", "title", "due_date"], order_by="due_date asc")
+	out = {}
+	for r in rows:
+		out.setdefault((r.reference_doctype, r.reference_docname), r)
+	return out
+
+
+def _last_activity(doctype: str, names: list[str]) -> dict:
+	"""Latest note or call per record, as {name: {"on": datetime, "text": str}}."""
+	if not names:
+		return {}
+	out = {}
+	notes = frappe.get_all("FCRM Note", filters={"reference_doctype": doctype, "reference_docname": ["in", names]},
+		fields=["reference_docname", "title", "creation"], order_by="creation desc")
+	calls = frappe.get_all("CRM Call Log", filters={"reference_doctype": doctype, "reference_docname": ["in", names]},
+		fields=["reference_docname", "status", "type", "creation"], order_by="creation desc")
+	for r in notes:
+		out.setdefault(r.reference_docname, {"on": r.creation, "text": r.title})
+	for r in calls:
+		cur = out.get(r.reference_docname)
+		if not cur or r.creation > cur["on"]:
+			out[r.reference_docname] = {"on": r.creation, "text": f"{r.type} call: {r.status}"}
+	return out
+
+
+def follow_up(user: str) -> list[dict]:
+	"""All open leads and deals of the user with their next due action, overdue first."""
+	if not installed():
+		return []
+	now = now_datetime()
+	tasks = _open_tasks_by_doc(user)
+	rows = []
+	closed_leads = _closed("CRM Lead Status")
+	lead_filters = {"lead_owner": user, "converted": 0}
+	if closed_leads:
+		lead_filters["status"] = ["not in", closed_leads]
+	for r in frappe.get_list("CRM Lead", filters=lead_filters, limit_page_length=200, order_by="modified desc",
+			fields=["name", "lead_name", "organization", "status", "mobile_no", "phone", "email", "source",
+				"response_by", "first_responded_on", "creation"]):
+		task = tasks.get(("CRM Lead", r.name))
+		due, why = None, None
+		if task and task.due_date:
+			due, why = task.due_date, task.title
+		elif not r.first_responded_on:
+			due, why = r.response_by or add_to_date(r.creation, minutes=5), _("First call")
+		rows.append({"doctype": "CRM Lead", "name": r.name, "title": r.organization or r.lead_name or r.name,
+			"person": r.lead_name, "status": r.status, "mobile": r.mobile_no or r.phone, "email": r.email,
+			"source": r.source, "due": due, "next": why, "new": not r.first_responded_on})
+	closed_deals = _closed("CRM Deal Status")
+	deal_filters = {"deal_owner": user}
+	if closed_deals:
+		deal_filters["status"] = ["not in", closed_deals]
+	for r in frappe.get_list("CRM Deal", filters=deal_filters, limit_page_length=200, order_by="modified desc",
+			fields=["name", "organization", "lead_name", "status", "mobile_no", "phone", "email", "next_step",
+				"expected_closure_date", "deal_value"]):
+		task = tasks.get(("CRM Deal", r.name))
+		due, why = (task.due_date, task.title) if task and task.due_date else (r.expected_closure_date, r.next_step)
+		rows.append({"doctype": "CRM Deal", "name": r.name, "title": r.organization or r.lead_name or r.name,
+			"person": r.lead_name, "status": r.status, "mobile": r.mobile_no or r.phone, "email": r.email,
+			"due": due, "next": why or r.next_step, "value": r.deal_value, "new": False})
+	for dt in CRM_DOCTYPES:
+		last = _last_activity(dt, [r["name"] for r in rows if r["doctype"] == dt])
+		for r in rows:
+			if r["doctype"] == dt and r["name"] in last:
+				r["last"] = last[r["name"]]
+	for r in rows:
+		r["overdue"] = bool(r["due"] and get_datetime(r["due"]) < now)
+	far = get_datetime("2999-12-31")
+	rows.sort(key=lambda r: (not r["overdue"], not r["new"], get_datetime(r["due"]) if r["due"] else far))
+	return rows
+
+
+def _files(doctype: str, name: str) -> list[dict]:
+	return frappe.get_all("File", filters={"attached_to_doctype": doctype, "attached_to_name": name, "is_folder": 0},
+		fields=["name", "file_name", "file_url", "owner", "creation"], order_by="creation desc")
+
+
+def _pdf(doctype: str, name: str) -> str:
+	return f"/api/method/frappe.utils.print_format.download_pdf?doctype={doctype.replace(' ', '%20')}&name={name}"
+
+
+def _erp_docs(deal: dict | None) -> dict:
+	"""Quotations and Sales Orders linked to a deal (ERPNext CRM integration on the same site)."""
+	out = {"quotations": [], "sales_orders": []}
+	if not deal:
+		return out
+	quotes = []
+	if frappe.has_permission("Quotation", "read") and frappe.get_meta("Quotation").has_field("crm_deal"):
+		quotes = frappe.get_list("Quotation", filters={"crm_deal": deal["name"], "docstatus": ["<", 2]},
+			fields=["name", "status", "grand_total", "transaction_date", "docstatus"], order_by="creation desc")
+	out["quotations"] = [{**q, "pdf": _pdf("Quotation", q.name)} for q in quotes]
+	customer = deal.get("erpnext_customer")
+	if not customer and frappe.get_meta("Customer").has_field("crm_deal"):
+		customer = frappe.db.get_value("Customer", {"crm_deal": deal["name"]})
+	if customer and frappe.has_permission("Sales Order", "read"):
+		orders = frappe.get_list("Sales Order", filters={"customer": customer, "docstatus": ["<", 2]},
+			fields=["name", "status", "grand_total", "transaction_date", "delivery_date", "docstatus"],
+			order_by="creation desc", limit_page_length=20)
+		out["sales_orders"] = [{**o, "pdf": _pdf("Sales Order", o.name)} for o in orders]
+	return out
+
+
+DETAIL_FIELDS = {
+	"CRM Lead": ["name", "lead_name", "first_name", "organization", "status", "mobile_no", "phone", "email", "source",
+		"industry", "job_title", "lead_owner", "converted", "first_responded_on", "response_by", "creation", "website"],
+	"CRM Deal": ["name", "lead_name", "organization", "status", "mobile_no", "phone", "email", "source", "deal_owner",
+		"next_step", "expected_closure_date", "deal_value", "probability", "lead", "creation", "erpnext_customer"],
+}
+
+
+def detail(doctype: str, name: str) -> dict:
+	_check(doctype, name)
+	meta = frappe.get_meta(doctype)
+	fields = [f for f in DETAIL_FIELDS[doctype] + ["sk_segment"] if f == "name" or meta.has_field(f)]
+	doc = frappe.db.get_value(doctype, name, fields, as_dict=True)
+	ref = {"reference_doctype": doctype, "reference_docname": name}
+	deal = None
+	if doctype == "CRM Deal":
+		deal = doc
+	elif doc.get("converted"):
+		deal = frappe.db.get_value("CRM Deal", {"lead": name}, ["name", "erpnext_customer"], as_dict=True)
+	notes = frappe.get_all("FCRM Note", filters=ref, fields=["title", "content", "owner", "creation"],
+		order_by="creation desc", limit=30)
+	for n in notes:
+		n["content"] = strip_html(n.content or "")[:1000]
+	return {
+		"doctype": doctype,
+		"doc": doc,
+		"notes": notes,
+		"tasks": frappe.get_all("CRM Task", filters=ref, fields=["name", "title", "status", "due_date", "assigned_to"],
+			order_by="due_date asc", limit=30),
+		"calls": frappe.get_all("CRM Call Log", filters=ref, fields=["type", "status", "duration", "caller", "creation"],
+			order_by="creation desc", limit=30),
+		"files": _files(doctype, name) + (_files("CRM Deal", deal["name"]) if deal and doctype == "CRM Lead" else []),
+		"deal": deal and deal["name"],
+		**_erp_docs(deal),
+		"crm_url": f"/crm/{'leads' if doctype == 'CRM Lead' else 'deals'}/{name}",
+	}
+
+
+def _attach(file_url: str | None, doctype: str, name: str, user: str):
+	"""Attach a file the user uploaded from the phone (upload_file without a parent) to the CRM record."""
+	if not file_url:
+		return
+	file_name = frappe.db.get_value("File", {"file_url": file_url, "owner": user, "attached_to_name": ["is", "not set"]})
+	if file_name:
+		frappe.db.set_value("File", file_name, {"attached_to_doctype": doctype, "attached_to_name": name})
+
+
+def new_lead(user: str, first_name: str, mobile_no: str | None = None, organization: str | None = None,
+		email: str | None = None, source: str | None = None, segment: str | None = None,
+		requirement: str | None = None, photo: str | None = None) -> str:
+	if not installed():
+		frappe.throw(_("Frappe CRM is not installed"))
+	if not (first_name or "").strip():
+		frappe.throw(_("Please give the customer's name"))
+	status = frappe.get_all("CRM Lead Status", order_by="position asc", pluck="name", limit=1)
+	doc = frappe.get_doc({
+		"doctype": "CRM Lead", "first_name": first_name.strip(), "mobile_no": (mobile_no or "").strip() or None,
+		"organization": (organization or "").strip() or None, "email": (email or "").strip() or None,
+		"source": source or None, "lead_owner": user, "status": status[0] if status else "New",
+	})
+	if segment and doc.meta.has_field("sk_segment"):
+		doc.sk_segment = segment
+	doc.insert()
+	if (requirement or "").strip():
+		frappe.get_doc({"doctype": "FCRM Note", "title": _("Requirement"), "content": requirement.strip(),
+			"reference_doctype": "CRM Lead", "reference_docname": doc.name}).insert()
+	_attach(photo, "CRM Lead", doc.name, user)
+	return doc.name
+
+
+def set_status(doctype: str, name: str, status: str) -> str:
+	_check(doctype, name, "write")
+	status_dt = "CRM Lead Status" if doctype == "CRM Lead" else "CRM Deal Status"
+	if not frappe.db.exists(status_dt, status):
+		frappe.throw(_("Unknown status {0}").format(status))
+	doc = frappe.get_doc(doctype, name)
+	doc.status = status
+	doc.save()
+	return doc.status
+
+
+def add_note(user: str, doctype: str, name: str, text: str | None = None, photo: str | None = None) -> str | None:
+	_check(doctype, name, "write")
+	text = (text or "").strip()
+	if not text and not photo:
+		frappe.throw(_("Please type, speak or attach something"))
+	_attach(photo, doctype, name, user)
+	if not text:
+		return None
+	note = frappe.get_doc({"doctype": "FCRM Note", "title": text[:80], "content": text,
+		"reference_doctype": doctype, "reference_docname": name}).insert()
+	return note.name
+
+
+def _mark_first_response(doctype: str, name: str):
+	"""A call or message from the app counts as the first response (the 5-minute rule and the 'leads worked' KPI)."""
+	meta = frappe.get_meta(doctype)
+	if not meta.has_field("first_responded_on") or frappe.db.get_value(doctype, name, "first_responded_on"):
+		return
+	now = now_datetime()
+	values = {"first_responded_on": now}
+	if meta.has_field("first_response_time"):
+		values["first_response_time"] = max(0, time_diff_in_seconds(now, frappe.db.get_value(doctype, name, "creation")))
+	frappe.db.set_value(doctype, name, values)
+
+
+def log_contact(user: str, doctype: str, name: str, channel: str, outcome: str | None = None,
+		text: str | None = None, photo: str | None = None) -> dict:
+	"""Record what happened after the person tapped Call / WhatsApp / Email in the app."""
+	_check(doctype, name, "write")
+	if channel not in ("Call", "WhatsApp", "Email"):
+		frappe.throw(_("Unknown channel"))
+	if outcome and outcome not in CALL_OUTCOMES:
+		frappe.throw(_("Unknown outcome"))
+	text = (text or "").strip()
+	summary = " · ".join(p for p in (channel, outcome, text) if p)
+	note = add_note(user, doctype, name, summary, photo)
+	if channel == "Call":
+		# both are Phone fields; "0" when a number is not known (the user's own mobile may be blank in ERPNext)
+		to = frappe.db.get_value(doctype, name, "mobile_no") or frappe.db.get_value(doctype, name, "phone") or "0"
+		mine = frappe.db.get_value("User", user, ["mobile_no", "phone"], as_dict=True) or {}
+		log = frappe.get_doc({
+			"doctype": "CRM Call Log", "id": frappe.generate_hash(length=16), "type": "Outgoing",
+			"status": CALL_LOG_STATUS.get(outcome, "Completed"),
+			"from": mine.get("mobile_no") or mine.get("phone") or "0", "to": to, "caller": user,
+			"telephony_medium": "Manual", "start_time": now_datetime(), "note": note,
+			"reference_doctype": doctype, "reference_docname": name,
+		})
+		log.insert()
+	if outcome != "Wrong number":
+		_mark_first_response(doctype, name)
+	return {"note": note}
+
+
+def new_files(user: str, hours: int = 48) -> list[dict]:
+	"""Files (drawings, photos, PDFs) others attached to the user's open leads and deals recently."""
+	if not installed():
+		return []
+	names = [(r["doctype"], r["name"], r["title"]) for r in follow_up(user)]
+	if not names:
+		return []
+	titles = {(dt, n): t for dt, n, t in names}
+	cutoff = add_to_date(now_datetime(), hours=-hours)
+	out = []
+	for dt in CRM_DOCTYPES:
+		docnames = [n for d, n, _t in names if d == dt]
+		if not docnames:
+			continue
+		for f in frappe.get_all("File", filters={"attached_to_doctype": dt, "attached_to_name": ["in", docnames],
+				"owner": ["!=", user], "creation": [">=", cutoff], "is_folder": 0},
+				fields=["file_name", "file_url", "attached_to_name", "creation"], order_by="creation desc", limit=20):
+			out.append({**f, "doctype": dt, "title": titles[(dt, f.attached_to_name)]})
+	return out
+
+
+def own_file_content(user: str, file_url: str) -> tuple[bytes, str]:
+	"""Bytes and media type of an image the user just uploaded (for Claude to read a visiting card)."""
+	name = frappe.db.get_value("File", {"file_url": file_url, "owner": user})
+	if not name:
+		frappe.throw(_("File not found"), frappe.PermissionError)
+	ext = file_url.rsplit(".", 1)[-1].lower()
+	media = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "webp": "image/webp", "gif": "image/gif"}.get(ext)
+	if not media:
+		frappe.throw(_("Please send a photo (JPG or PNG)"))
+	content = frappe.get_doc("File", name).get_content()
+	if len(content) > 5 * 1024 * 1024:
+		frappe.throw(_("Photo is too large (max 5 MB)"))
+	return content, media
+
+
+SHARE_DAYS = 30
+
+
+def share_link(doctype: str, name: str) -> dict:
+	"""Absolute PDF link a customer can open without login (Frappe Document Share Key, valid 30 days)."""
+	if doctype not in PDF_DOCTYPES:
+		frappe.throw(_("Only Quotation and Sales Order PDFs can be sent"))
+	if not frappe.has_permission(doctype, "read", name):
+		frappe.throw(_("No access to {0}").format(name), frappe.PermissionError)
+	doc = frappe.get_doc(doctype, name)
+	key = doc.get_document_share_key(expires_on=frappe.utils.add_days(frappe.utils.today(), SHARE_DAYS))
+	url = frappe.utils.get_url(f"{_pdf(doctype, name)}&key={key}")
+	party = doc.get("customer_name") or doc.get("party_name") or doc.get("customer") or ""
+	return {"url": url, "file_name": f"{name}.pdf", "pdf": _pdf(doctype, name),
+		"message": _("Dear {0}, please find {1} {2} from SK Ind Tech Solutions: {3}").format(party, _(doctype), name, url)}

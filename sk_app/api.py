@@ -4,7 +4,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime
 
-from sk_app import guide, kpi, work
+from sk_app import claude, crm, day_report, guide, kpi, training, work
 from sk_app.functions import home_for
 from sk_app.logic import rank_items
 
@@ -35,7 +35,13 @@ def _latest_card(user):
 def home():
 	profile = _me()
 	return {"user": profile.user, "full_name": profile.full_name, "language": profile.language,
-		"home": home_for(profile.home), "card": _latest_card(profile.user)}
+		"home": home_for(profile.home, has_team=_has_team(profile.user)), "card": _latest_card(profile.user),
+		"new_files": crm.new_files(profile.user), "day_report_sent": bool(day_report._find(profile.user, getdate()))}
+
+
+def _has_team(user):
+	return bool(frappe.db.exists("SK App User", {"manager": user, "enabled": 1})) or bool(
+		{"System Manager", "HR Manager"} & set(frappe.get_roles(user)))
 
 
 @frappe.whitelist()
@@ -143,3 +149,103 @@ def set_language(language):
 		frappe.throw(_("Unknown language"))
 	frappe.db.set_value("SK App User", profile.name, "language", language)
 	return language
+
+
+# ---- CRM on the phone ----
+
+@frappe.whitelist()
+def crm_options():
+	_me()
+	return crm.options()
+
+
+@frappe.whitelist()
+def follow_up():
+	return crm.follow_up(_me().user)
+
+
+@frappe.whitelist()
+def crm_detail(doctype, name):
+	_me()
+	return crm.detail(doctype, name)
+
+
+@frappe.whitelist(methods=["POST"])
+def new_lead(first_name, mobile_no=None, organization=None, email=None, source=None, segment=None,
+		requirement=None, photo=None):
+	return crm.new_lead(_me().user, first_name, mobile_no, organization, email, source, segment, requirement, photo)
+
+
+@frappe.whitelist(methods=["POST"])
+def set_crm_status(doctype, name, status):
+	_me()
+	return crm.set_status(doctype, name, status)
+
+
+@frappe.whitelist(methods=["POST"])
+def add_crm_note(doctype, name, text=None, photo=None):
+	return crm.add_note(_me().user, doctype, name, text, photo)
+
+
+@frappe.whitelist(methods=["POST"])
+def log_contact(doctype, name, channel, outcome=None, text=None, photo=None):
+	return crm.log_contact(_me().user, doctype, name, channel, outcome, text, photo)
+
+
+@frappe.whitelist(methods=["POST"])
+def read_photo(file_url):
+	"""Claude reads a visiting card / enquiry photo into the new-lead form. Empty result when Claude is off."""
+	profile = _me()
+	content, media = crm.own_file_content(profile.user, file_url)
+	return claude.read_lead_photo(content, media) or {}
+
+
+@frappe.whitelist()
+def new_files():
+	return crm.new_files(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def share_link(doctype, name):
+	_me()
+	return crm.share_link(doctype, name)
+
+
+# ---- Training ----
+
+@frappe.whitelist()
+def training_lessons():
+	profile = _me()
+	return training.lessons(profile.user, profile.home)
+
+
+@frappe.whitelist(methods=["POST"])
+def training_done(lesson):
+	return training.mark_done(_me().user, lesson)
+
+
+# ---- Day Report ----
+
+@frappe.whitelist()
+def my_day_report(day=None):
+	return day_report.get(_me().user, day)
+
+
+@frappe.whitelist(methods=["POST"])
+def send_day_report(work_done, problems=None, plan_tomorrow=None, photo=None):
+	return day_report.submit(_me().user, work_done, problems, plan_tomorrow, photo)
+
+
+@frappe.whitelist()
+def my_day_reports(days=14):
+	return day_report.my_history(_me().user, days)
+
+
+@frappe.whitelist()
+def team_day_reports(day=None):
+	return day_report.team(_me().user, day)
+
+
+@frappe.whitelist(methods=["POST"])
+def review_day_report(report, rating=None, comment=None):
+	return day_report.review(_me().user, report, rating, comment)
