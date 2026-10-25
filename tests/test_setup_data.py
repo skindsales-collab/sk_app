@@ -1,7 +1,9 @@
 import sys
 import types
 
-sys.modules.setdefault("frappe", types.ModuleType("frappe"))
+_frappe = sys.modules.setdefault("frappe", types.ModuleType("frappe"))
+if not hasattr(_frappe, "whitelist"):
+	_frappe.whitelist = lambda *args, **kwargs: (lambda fn: fn)
 
 from sk_app.functions import FUNCTIONS, home_for  # noqa: E402
 from sk_app.setup import SALES_PILOT  # noqa: E402
@@ -16,7 +18,7 @@ def test_weights_add_to_100():
 
 
 def test_confirmed_revenue_targets():
-	revenue = {p["full_name"]: p["targets"][0][3] for p in SALES_PILOT}
+	revenue = {p["full_name"]: p["targets"][0][3] for p in SALES_PILOT if p["targets"][0][6] == "Confirmed by CEO"}
 	assert revenue == {"Rishikesh Mhase": 4500000, "Rahul Raju Jalnil": 1250000,
 		"Swati  Mashakhetri": 1500000, "Pranali Mane": 1000000}
 
