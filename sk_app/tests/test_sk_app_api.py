@@ -114,6 +114,16 @@ class TestSKAppAPI(IntegrationTestCase):
 		result = setup.load_sales_pilot()
 		self.assertEqual(len(result["set_up"]) + len(result["user_not_found"]), len(setup.SALES_PILOT))
 
+	def test_system_manager_is_set_up_automatically(self):
+		admin = make_user("sk_test_admin@example.com", ["System Manager"])
+		frappe.db.delete("SK App User", {"user": admin})
+		with set_user(admin):
+			self.assertEqual(api.home()["home"]["function"], "Sales")
+		self.assertTrue(frappe.db.exists("SK App User", {"user": admin}))
+		frappe.db.set_value("SK App User", {"user": admin}, "enabled", 0)
+		with set_user(admin):
+			self.assertRaises(frappe.PermissionError, api.home)  # a record switched off stays off
+
 	def test_load_sales_button_is_for_system_manager_only(self):
 		with set_user(SALES), self.assertRaises(frappe.PermissionError):
 			setup.load_sales_pilot_now()
