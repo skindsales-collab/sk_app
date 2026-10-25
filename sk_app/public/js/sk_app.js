@@ -35,7 +35,11 @@
 			work_entries: "Work Book", dsi_done: "DSI", kpi_score: "Month score", send_report: "Send Day Report",
 			report_sent: "Day Report sent", report_due: "Send today's Day Report", history: "Last 14 days",
 			sent_of: "sent", not_sent: "Not sent", on_time: "on time", late: "late", rating: "Rating",
-			comment: "Comment", save_review: "Save review", none: "None",
+			comment: "Comment", save_review: "Save review", none: "None", new_drawing: "New drawing to send",
+			correction: "Drawing correction", correction_q: "What should change? (type or speak)",
+			correction_photo: "Photo / screenshot with marks (optional)", send_correction: "Send correction to design",
+			correction_sent: "Sent to design. You will get the new drawing here.", design_status: "Design",
+			self: "Self", customer: "Customer", no_number: "No number saved. Please type it.",
 		},
 		Marathi: {
 			my_day: "माझा दिवस", my_leads: "माझे लीड", my_deals: "माझे डील", my_kpi: "माझा स्कोअर",
@@ -67,7 +71,11 @@
 			work_entries: "कामाची वही", dsi_done: "DSI", kpi_score: "महिन्याचा स्कोअर", send_report: "अहवाल पाठवा",
 			report_sent: "दिवसाचा अहवाल पाठवला", report_due: "आजचा दिवसाचा अहवाल पाठवा", history: "मागील 14 दिवस",
 			sent_of: "पाठवले", not_sent: "पाठवला नाही", on_time: "वेळेवर", late: "उशिरा", rating: "रेटिंग",
-			comment: "टिप्पणी", save_review: "रिव्ह्यू जतन करा", none: "काही नाही",
+			comment: "टिप्पणी", save_review: "रिव्ह्यू जतन करा", none: "काही नाही", new_drawing: "पाठवायचे नवीन ड्रॉइंग",
+			correction: "ड्रॉइंग दुरुस्ती", correction_q: "काय बदलायचे? (टाईप करा किंवा बोला)",
+			correction_photo: "खुणा केलेला फोटो / स्क्रीनशॉट (ऐच्छिक)", send_correction: "दुरुस्ती डिझाईनला पाठवा",
+			correction_sent: "डिझाईनला पाठवले. नवीन ड्रॉइंग इथेच मिळेल.", design_status: "डिझाईन",
+			self: "स्वतः", customer: "ग्राहक", no_number: "नंबर नाही. कृपया टाईप करा.",
 		},
 	};
 	const ICON = {
@@ -166,7 +174,7 @@
 		const h = state.home;
 		const fn = h.home;
 		const tiles = fn.tiles.map((k) => `<button class="sk-tile" data-go="${k}"><span class="sk-tile-icon">${ICON[k] || "•"}</span><span>${t(k)}</span></button>`).join("");
-		const files = (h.new_files || []).length ? `<button class="sk-banner" data-open="${esc(h.new_files[0].doctype)}" data-name="${esc(h.new_files[0].attached_to_name)}">📎 ${t("new_files")}: ${h.new_files.length} · ${esc(h.new_files[0].title)}</button>` : "";
+		const files = (h.new_files || []).map((f) => `<button class="sk-banner new" data-open="${esc(f.doctype)}" data-name="${esc(f.attached_to_name)}">📐 ${t("new_drawing")}: ${esc(f.title)}<br><small>${esc(f.file_name)}</small></button>`).join("");
 		const report = !h.day_report_sent && new Date().getHours() >= 17 ? `<button class="sk-banner bad" data-go="day_report">📝 ${t("report_due")}</button>` : "";
 		root.innerHTML = header((fn.label && (fn.label[state.lang] || fn.label.English)) || "SK App") +
 			`<main><div class="sk-hello">${esc(h.full_name || h.user)}</div>${report}${files}${cardHtml(state.card)}<div class="sk-tiles">${tiles}</div></main>`;
@@ -178,6 +186,7 @@
 		let open = link ? `<a class="sk-open" href="${link}">›</a>` : "";
 		if (i.doctype && i.doctype.startsWith("CRM ") && i.name) open = `<button class="sk-open" data-open="${esc(i.doctype)}" data-name="${esc(i.name)}">›</button>`;
 		if (i.kind === "day_report") open = `<button class="sk-open" data-go="day_report">›</button>`;
+		if (i.kind === "send_file") open = `<button class="sk-open" data-open="${esc(i.ref_doctype)}" data-name="${esc(i.ref_name)}">›</button>`;
 		return `<li class="sk-item k-${esc(i.kind)}"><div><div class="sk-item-title">${esc(i.title)}</div><div class="sk-item-meta">${esc(i.kind.replace("_", " "))} · ${esc(i.minutes)} ${t("min")} ${due}</div></div>${open}</li>`;
 	}
 
@@ -295,7 +304,8 @@
 		const statuses = (doctype === "CRM Lead" ? o.lead_statuses : o.deal_statuses) || [];
 		const chips = statuses.map((s) => `<button class="sk-chip ${s.name === doc.status ? "on" : ""}" data-act="status" data-status="${esc(s.name)}">${esc(s.name)}</button>`).join("");
 		const files = d.files.map((f) => `<li class="sk-item"><div><a class="sk-item-title" href="${esc(f.file_url)}" target="_blank">📎 ${esc(f.file_name)}</a><div class="sk-item-meta">${esc(f.owner)} · ${when(f.creation)}</div></div>
-			<button class="sk-open" data-act="share-pdf" data-pdf="${esc(f.file_url)}" data-file="${esc(f.file_name)}">↗</button></li>`).join("");
+			<button class="sk-open ${f.for_customer ? "sk-send" : ""}" data-act="share-pdf" data-pdf="${esc(f.file_url)}" data-file="${esc(f.file_name)}" ${f.for_customer ? `data-fileid="${esc(f.name)}"` : ""}>${f.for_customer ? "💬 " + t("send") : "↗"}</button>
+			${f.for_customer ? `<button class="sk-open sk-fix" data-act="correction" data-fileid="${esc(f.name)}" data-file="${esc(f.file_name)}">✏️</button>` : ""}</li>`).join("");
 		const tasks = d.tasks.map((x) => `<li class="sk-item"><div><div class="sk-item-title">${esc(x.title)}</div><div class="sk-item-meta">${esc(x.status)} · ${when(x.due_date)}</div></div></li>`).join("");
 		const calls = d.calls.map((x) => `<li class="sk-item"><div><div class="sk-item-title">📞 ${esc(x.type)} · ${esc(x.status)}</div><div class="sk-item-meta">${when(x.creation)}</div></div></li>`).join("");
 		const notes = d.notes.map((n) => `<li class="sk-item"><div><div class="sk-item-title">${esc(n.title)}</div>${n.content && n.content !== n.title ? `<div>${esc(n.content)}</div>` : ""}<div class="sk-item-meta">${esc(n.owner)} · ${when(n.creation)}</div></div></li>`).join("");
@@ -306,6 +316,7 @@
 				<div class="sk-item-meta">${esc(mobile || "")} ${doc.email ? "· " + esc(doc.email) : ""}</div>
 				<div class="sk-item-meta">${[doc.status, doc.source, doc.sk_segment, doc.deal_value ? "₹" + Number(doc.deal_value).toLocaleString("en-IN") : ""].filter(Boolean).map(esc).join(" · ")}</div>
 				${doc.next_step ? `<div class="sk-item-meta">${t("next")}: ${esc(doc.next_step)}</div>` : ""}
+				${doc.design_status ? `<div class="sk-item-meta">📐 ${t("design_status")}: <b>${esc(doc.design_status)}</b></div>` : ""}
 				${contactButtons({ doctype, name, mobile, email: doc.email })}</div>
 			<h3 class="sk-h">${t("status")}</h3><div class="sk-chips">${chips}</div>
 			<div class="sk-form">${formField("f-note", t("note_q"), true)}${photoField("f-photo", t("attach"), true)}
@@ -336,7 +347,12 @@
 	}
 
 	function waSheet(doctype, name, mobile) {
+		const self = (state.home && state.home.mobile) || "";
 		sheet(`<h3 class="sk-h">${t("send_to")}</h3>
+			<div class="sk-contact sk-two">
+				<button class="sk-chip" data-wa-pick="${esc(self)}">👤 1) ${t("self")}</button>
+				<button class="sk-chip on" data-wa-pick="${esc(mobile || "")}">🧑‍💼 2) ${t("customer")}</button>
+			</div>
 			<label class="sk-field"><span>${t("mobile")}</span><div class="sk-input-row"><input id="f-wa" type="tel" value="${esc(mobile || "")}"></div></label>
 			<button class="sk-btn ok wide" data-act="wa-go" data-doctype="${esc(doctype)}" data-name="${esc(name)}">💬 ${t("send")}</button>
 			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
@@ -478,6 +494,13 @@
 				else window.location.href = "mailto:" + el.dataset.email;
 				return;
 			}
+			if (el.dataset.waPick !== undefined) {
+				el.parentElement.querySelectorAll(".sk-chip").forEach((c) => c.classList.remove("on"));
+				el.classList.add("on");
+				document.getElementById("f-wa").value = el.dataset.waPick;
+				if (!el.dataset.waPick) toast(t("no_number"), true);
+				return;
+			}
 			if (el.dataset.rate) {
 				root.querySelectorAll(`[data-rate="${el.dataset.rate}"]`).forEach((c) => c.classList.remove("on"));
 				el.classList.add("on");
@@ -538,16 +561,40 @@
 				toast(t("saved"));
 				return go(state.view);
 			}
+			if (act === "correction") {
+				sheet(`<h3 class="sk-h">✏️ ${t("correction")}</h3><div class="sk-item-meta">${esc(el.dataset.file)}</div>
+					${formField("f-fix", t("correction_q"), true)}${photoField("f-fixphoto", t("correction_photo"))}
+					<button class="sk-btn bad wide" data-act="send-correction" data-fileid="${esc(el.dataset.fileid)}">${t("send_correction")}</button>
+					<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+				return;
+			}
+			if (act === "send-correction") {
+				el.disabled = true;
+				const r = await call("request_correction", { doctype: current.doctype, name: current.name, text: val("f-fix"),
+					file: el.dataset.fileid, photo: await photoUrl("f-fixphoto") }, true);
+				closeSheet();
+				toast(r.status_set ? t("correction_sent") : t("saved"));
+				return go("detail");
+			}
 			if (act === "wa-send") return waSheet(el.dataset.doctype, el.dataset.name, el.dataset.mobile);
 			if (act === "wa-go") {
 				const num = waNumber(val("f-wa"));
+				if (num.length < 10) throw new Error(t("no_number"));
 				const w = window.open("about:blank", "_blank"); // open now, while the tap still counts, so the phone allows it
 				const d = await call("share_link", { doctype: el.dataset.doctype, name: el.dataset.name }, true);
 				const url = "https://wa.me/" + num + "?text=" + encodeURIComponent(d.message);
 				if (w) w.location.href = url; else window.location.href = url;
 				return closeSheet();
 			}
-			if (act === "share-pdf") return sharePdf(el.dataset.pdf, el.dataset.file);
+			if (act === "share-pdf") {
+				await sharePdf(el.dataset.pdf, el.dataset.file);
+				if (el.dataset.fileid) {
+					await call("mark_file_sent", { file: el.dataset.fileid }, true);
+					if (state.home) state.home.new_files = (state.home.new_files || []).filter((f) => f.name !== el.dataset.fileid);
+					toast(t("saved"));
+				}
+				return;
+			}
 			if (act === "save-lead") {
 				el.disabled = true;
 				const name = await call("new_lead", { first_name: val("f-first"), organization: val("f-org"), mobile_no: val("f-mobile"),
@@ -604,18 +651,38 @@
 		if (!document.hidden && pending && !root.querySelector(".sk-sheet-wrap") && Date.now() - pending.at > 1500) outcomeSheet(pending);
 	});
 
-	// refresh the card every 5 minutes while the app is open
-	setInterval(async () => {
+	function beep() {
+		try {
+			const ctx = new (window.AudioContext || window.webkitAudioContext)();
+			const o = ctx.createOscillator();
+			o.frequency.value = 880;
+			o.connect(ctx.destination);
+			o.start();
+			o.stop(ctx.currentTime + 0.4);
+		} catch (e) { /* no sound on this phone */ }
+	}
+
+	// check every minute while the app is open (and at once when it comes back to the screen):
+	// a new drawing from the AI / design alerts straight away, not at the next hourly card
+	async function poll() {
 		if (document.hidden || !state.home) return;
 		try {
 			const h = await call("home");
-			if (h.card && (!state.card || h.card.name !== state.card.name)) {
-				state.card = h.card;
-				if (state.view === "home") renderHome();
-				if (navigator.vibrate) navigator.vibrate(200);
-			}
+			const known = new Set((state.home.new_files || []).map((f) => f.name));
+			const fresh = (h.new_files || []).filter((f) => !known.has(f.name));
+			const newCard = h.card && (!state.card || h.card.name !== state.card.name);
+			state.home = h;
+			if (newCard) state.card = h.card;
+			if (fresh.length) {
+				if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+				beep();
+				toast(`📐 ${t("new_drawing")}: ${fresh[0].title}`);
+			} else if (newCard && navigator.vibrate) navigator.vibrate(200);
+			if ((fresh.length || newCard) && state.view === "home") renderHome();
 		} catch (e) { /* offline: try again later */ }
-	}, 5 * 60 * 1000);
+	}
+	setInterval(poll, 60 * 1000);
+	document.addEventListener("visibilitychange", () => { if (!document.hidden && !pending) poll(); });
 
 	start();
 })();

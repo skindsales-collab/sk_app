@@ -77,7 +77,7 @@ def is_work_slot(now: datetime, work_start, work_end, lunch_start, lunch_end, wo
 class WorkItem:
 	"""One thing a person could do now, collected from ERPNext."""
 
-	kind: str  # lead_new, lead_followup, deal, crm_task, task, quote, dsi, day_report
+	kind: str  # lead_new, send_file, lead_followup, deal, crm_task, task, quote, dsi, day_report
 	title: str
 	doctype: str = ""
 	name: str = ""
@@ -88,7 +88,7 @@ class WorkItem:
 
 
 # lower number wins when two items have the same priority
-KIND_ORDER = {"lead_new": 0, "day_report": 1, "lead_followup": 2, "crm_task": 3, "deal": 4, "quote": 5, "task": 6, "dsi": 7}
+KIND_ORDER = {"lead_new": 0, "send_file": 1, "day_report": 2, "lead_followup": 3, "crm_task": 4, "deal": 5, "quote": 6, "task": 7, "dsi": 8}
 
 
 def rank_items(items: list[WorkItem], now: datetime) -> list[WorkItem]:
@@ -110,6 +110,7 @@ CARD_TEXT = {
 		"quote": "Now: follow up quotation {title}",
 		"task": "Now: work on task {title}",
 		"crm_task": "Now: do CRM task {title}",
+		"send_file": "Now: send drawing {title} to the customer on WhatsApp",
 		"dsi": "Now: post today's Daily Small Improvement (DSI)",
 		"day_report": "Now: send today's Day Report (what you did, problems, plan for tomorrow)",
 		"none": "No open items. Add extra work or post your DSI.",
@@ -121,6 +122,7 @@ CARD_TEXT = {
 		"quote": "आता: कोटेशन {title} चा फॉलो-अप करा",
 		"task": "आता: काम {title} करा",
 		"crm_task": "आता: CRM काम {title} करा",
+		"send_file": "आता: ड्रॉइंग {title} ग्राहकाला WhatsApp वर पाठवा",
 		"dsi": "आता: आजची DSI (रोजची छोटी सुधारणा) टाका",
 		"day_report": "आता: आजचा दिवसाचा अहवाल पाठवा (काय केले, अडचणी, उद्याचे नियोजन)",
 		"none": "उघडे काम नाही. जादा काम जोडा किंवा DSI टाका.",

@@ -10,6 +10,18 @@ BOSS = "sk_test_boss@example.com"
 STRANGER = "sk_test_stranger@example.com"
 
 
+def pdf_bytes():
+	import io
+
+	from pypdf import PdfWriter
+
+	w = PdfWriter()
+	w.add_blank_page(width=200, height=200)
+	buf = io.BytesIO()
+	w.write(buf)
+	return buf.getvalue()
+
+
 def make_user(email, roles):
 	if not frappe.db.exists("User", email):
 		frappe.get_doc({"doctype": "User", "email": email, "first_name": email.split("@")[0], "send_welcome_email": 0,
@@ -93,6 +105,52 @@ class TestCrmAndDayReport(IntegrationTestCase):
 			self.assertFalse([i for i in api.my_day()["items"] if i["kind"] == "task" and i["name"] == name])
 		with set_user(STRANGER):
 			self.assertRaises(frappe.PermissionError, api.crm_detail, "CRM Lead", name)
+
+	def test_ai_drawing_alerts_owner_until_sent(self):
+		if not self.crm:
+			self.skipTest("Frappe CRM not installed")
+		with set_user(REP):
+			lead = api.new_lead("Suresh", mobile_no="9876500000", organization="SK Test Drawing Co")
+		with set_user(BOSS):  # stands in for the AI design user
+			def attach(fname):
+				return frappe.get_doc({"doctype": "File", "file_name": fname, "content": pdf_bytes() if fname.endswith(".pdf") else b"x", "is_private": 1,
+					"attached_to_doctype": "CRM Lead", "attached_to_name": lead}).insert(ignore_permissions=True)
+			pdf = attach("Cabin99_Test_Customer_Drawing_GA-01C_Rev0.pdf")
+			attach("Cabin99_Test_BOM_Costing_Quote_Rev0.xlsx")
+			attach("Cabin99_Test_BOM_Costing_Rev0.pdf")
+		from sk_app import crm
+
+		crm.alert_owner(REP)
+		self.assertEqual(frappe.session.user, "Administrator")
+		with set_user(REP):
+			self.assertEqual([f.name for f in api.home()["new_files"]], [pdf.name])
+			card = frappe.get_all("SK Guide Card", filters={"user": REP}, fields=["card_text", "reference_name"],
+				order_by="creation desc", limit=1)[0]
+			self.assertIn("Cabin99", card.card_text)
+			self.assertEqual(card.reference_name, pdf.name)
+			api.mark_file_sent(pdf.name)
+			self.assertEqual(api.home()["new_files"], [])
+			self.assertFalse([i for i in api.my_day()["items"] if i["kind"] == "send_file"])
+			self.assertTrue(any("Sent Cabin99" in n["title"] for n in api.crm_detail("CRM Lead", lead)["notes"]))
+
+	def test_drawing_correction_goes_back_to_design(self):
+		if not self.crm:
+			self.skipTest("Frappe CRM not installed")
+		from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
+		# sk-dev has a Design Status select used by the AI design flow; make a stand-in here
+		create_custom_fields({"CRM Lead": [{"fieldname": "sk_test_design_status", "label": "Design Status", "fieldtype": "Select",
+			"options": "\nSent to Design\nDrawing Sent\nRevision Requested\nDrawing Approved", "insert_after": "status"}]})
+		with set_user(REP):
+			lead = api.new_lead("Mahesh", mobile_no="9876511111", organization="SK Test Correction Co")
+			self.assertRaises(frappe.ValidationError, api.request_correction, "CRM Lead", lead, "  ")
+			r = api.request_correction("CRM Lead", lead, "Door on the 10 ft side, add one window")
+			self.assertTrue(r["status_set"])
+			d = api.crm_detail("CRM Lead", lead)
+			self.assertEqual(d["doc"]["design_status"], "Revision Requested")
+			self.assertTrue(any("add one window" in n["content"] for n in d["notes"]))
+		with set_user(STRANGER):
+			self.assertRaises(frappe.PermissionError, api.request_correction, "CRM Lead", lead, "change")
 
 	def test_share_link_only_for_quotation_and_sales_order(self):
 		with set_user(REP):

@@ -95,3 +95,10 @@ main { padding: 12px 16px 40px; max-width: 640px; margin: 0 auto; }
 .sk-pre { white-space: pre-wrap; font-family: inherit; font-size: 14px; background: var(--card); border-radius: 10px; padding: 10px; color: var(--muted); }
 .sk-prob { color: var(--red); font-weight: 600; margin: 4px 0; }
 .sk-date { font-size: 16px; padding: 6px; border-radius: 8px; border: 0; }
+.sk-banner.new { background: var(--navy); color: #fff; }
+.sk-banner small { font-weight: 400; opacity: .85; }
+.sk-open.sk-send { font-size: 15px; font-weight: 700; background: var(--green); color: #fff; border: 0; border-radius: 10px; padding: 10px 12px; }
+button.sk-open { background: none; border: 0; }
+.sk-open.sk-fix { font-size: 20px; padding: 8px; }
+.sk-contact.sk-two { grid-template-columns: 1fr 1fr; margin-bottom: 12px; }
+.sk-contact.sk-two .sk-chip { padding: 12px; font-size: 16px; font-weight: 600; }
