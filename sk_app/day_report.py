@@ -31,9 +31,14 @@ def captured(user: str, day=None) -> dict:
 	"""What the app recorded for the user on the day."""
 	day = getdate(day)
 	period = ["between", [f"{day} 00:00:00", f"{day} 23:59:59"]]
+	from sk_app.comms import call_totals
+
+	calls = call_totals(user, day)
 	facts = {
 		"cards_done": _count("SK Guide Card", {"user": user, "response": "Done", "slot_start": period}),
-		"calls_made": _count("CRM Call Log", {"caller": user, "creation": period}),
+		"calls_made": calls["calls"],
+		"talk_minutes": round(calls["talk_seconds"] / 60),
+		"missed_calls": calls["missed"],
 		"notes_added": _count("FCRM Note", {"owner": user, "creation": period}),
 		"leads_created": _count("CRM Lead", {"owner": user, "creation": period}),
 		"work_entries": _count("SK Work Log", {"user": user, "date": day}),
@@ -96,13 +101,21 @@ def reminder(user: str, now=None) -> list[WorkItem]:
 
 
 def _team(manager: str) -> list[dict]:
-	"""People whose SK App manager is `manager`; managers with Sales/HR/System Manager role and no team see everyone."""
-	team = frappe.get_all("SK App User", filters={"manager": manager, "enabled": 1}, fields=["user", "full_name", "home"],
+	"""Everyone under `manager`, down the whole chain (a CEO sees the managers and their people too). The CEO /
+	Management function and System / HR Managers see everyone in the app."""
+	people = frappe.get_all("SK App User", filters={"enabled": 1}, fields=["user", "full_name", "home", "manager"],
 		order_by="full_name asc")
-	if not team and {"System Manager", "HR Manager"} & set(frappe.get_roles(manager)):
-		team = frappe.get_all("SK App User", filters={"enabled": 1, "user": ["!=", manager]},
-			fields=["user", "full_name", "home"], order_by="full_name asc")
-	return team
+	me = next((p for p in people if p.user == manager), None)
+	if (me and me.home == "Management") or {"System Manager", "HR Manager"} & set(frappe.get_roles(manager)):
+		return [p for p in people if p.user != manager]
+	under, todo = set(), [manager]
+	while todo:
+		boss = todo.pop()
+		for p in people:
+			if p.manager == boss and p.user not in under and p.user != manager:
+				under.add(p.user)
+				todo.append(p.user)
+	return [p for p in people if p.user in under]
 
 
 def team(manager: str, day=None) -> dict:
@@ -111,7 +124,7 @@ def team(manager: str, day=None) -> dict:
 	people = _team(manager)
 	rows = {r.user: r for r in frappe.get_all("SK Day Report", filters={"date": day, "user": ["in", [p.user for p in people] or [""]]},
 		fields=["name", "user", "work_done", "problems", "plan_tomorrow", "photo", "submitted_on", "on_time", "cards_done",
-			"calls_made", "notes_added", "leads_created", "work_entries", "dsi_done", "kpi_score", "manager_rating",
+			"calls_made", "talk_minutes", "missed_calls", "notes_added", "leads_created", "work_entries", "dsi_done", "kpi_score", "manager_rating",
 			"manager_comment"])}
 	out = []
 	for p in people:

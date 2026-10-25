@@ -158,7 +158,8 @@ def collect(user: str, function: str) -> list[WorkItem]:
 	if function == "Sales":
 		items += stale_quotes(user)
 	items += dsi_due(user)
+	from sk_app.comms import reminder_items
 	from sk_app.day_report import reminder
 
-	items += reminder(user)
+	items += reminder(user) + reminder_items(user)
 	return items

@@ -9,8 +9,8 @@ from frappe import _
 from frappe.utils import add_to_date, get_datetime, now_datetime, strip_html, time_diff_in_seconds
 
 SEGMENTS = ["Cabin", "Machine Shifting", "Job Work", "Modular / Labour Camp", "LGSF", "Other"]
-CALL_OUTCOMES = ["Talked", "No answer", "Busy", "Call back later", "Wrong number"]
-CALL_LOG_STATUS = {"Talked": "Completed", "Call back later": "Completed", "No answer": "No Answer", "Busy": "Busy",
+CALL_OUTCOMES = ["Talked", "No answer", "Busy", "Missed", "Call back later", "Wrong number"]
+CALL_LOG_STATUS = {"Talked": "Completed", "Call back later": "Completed", "No answer": "No Answer", "Busy": "Busy", "Missed": "No Answer",
 	"Wrong number": "Failed"}
 CRM_DOCTYPES = ("CRM Lead", "CRM Deal")
 CLOSED_LEAD_TYPES = ("Won", "Lost", "Junk")
@@ -269,27 +269,34 @@ def _mark_first_response(doctype: str, name: str):
 
 
 def log_contact(user: str, doctype: str, name: str, channel: str, outcome: str | None = None,
-		text: str | None = None, photo: str | None = None) -> dict:
-	"""Record what happened after the person tapped Call / WhatsApp / Email in the app."""
+		text: str | None = None, photo: str | None = None, duration: int | None = None, direction: str = "Outgoing") -> dict:
+	"""Record what happened after the person tapped Call / WhatsApp / Email in the app.
+	`duration` is the talk time in seconds the person confirmed (the app measures the time away on the call)."""
 	_check(doctype, name, "write")
 	if channel not in ("Call", "WhatsApp", "Email"):
 		frappe.throw(_("Unknown channel"))
 	if outcome and outcome not in CALL_OUTCOMES:
 		frappe.throw(_("Unknown outcome"))
 	text = (text or "").strip()
-	summary = " · ".join(p for p in (channel, outcome, text) if p)
+	seconds = max(0, int(duration or 0)) if outcome in (None, "Talked", "Call back later") else 0
+	talk = f"{seconds // 60}:{seconds % 60:02d} min" if channel == "Call" and seconds else None
+	summary = " · ".join(p for p in (channel if direction == "Outgoing" else _("Incoming call"), outcome, talk, text) if p)
 	note = add_note(user, doctype, name, summary, photo)
 	if channel == "Call":
 		# both are Phone fields; "0" when a number is not known (the user's own mobile may be blank in ERPNext)
 		to = frappe.db.get_value(doctype, name, "mobile_no") or frappe.db.get_value(doctype, name, "phone") or "0"
 		mine = frappe.db.get_value("User", user, ["mobile_no", "phone"], as_dict=True) or {}
+		me = mine.get("mobile_no") or mine.get("phone") or "0"
+		end = now_datetime()
 		log = frappe.get_doc({
-			"doctype": "CRM Call Log", "id": frappe.generate_hash(length=16), "type": "Outgoing",
+			"doctype": "CRM Call Log", "id": frappe.generate_hash(length=16), "type": direction,
 			"status": CALL_LOG_STATUS.get(outcome, "Completed"),
-			"from": mine.get("mobile_no") or mine.get("phone") or "0", "to": to, "caller": user,
-			"telephony_medium": "Manual", "start_time": now_datetime(), "note": note,
-			"reference_doctype": doctype, "reference_docname": name,
+			"from": me if direction == "Outgoing" else to, "to": to if direction == "Outgoing" else me,
+			"telephony_medium": "Manual", "start_time": add_to_date(end, seconds=-seconds), "end_time": end,
+			"duration": seconds, "note": note, "reference_doctype": doctype, "reference_docname": name,
 		})
+		# the person who handled the call: caller when we called, receiver when the customer called
+		log.set("caller" if direction == "Outgoing" else "receiver", user)
 		log.insert()
 	if outcome != "Wrong number":
 		_mark_first_response(doctype, name)

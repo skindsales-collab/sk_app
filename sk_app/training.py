@@ -16,9 +16,9 @@ APP_LESSONS = [
 		"<ol><li>दर तासाला लाल कार्ड आत्ताचे सर्वात महत्त्वाचे एक काम सांगते.</li><li>काम सुरू करताना <b>सुरू</b> आणि संपल्यावर <b>झाले</b> दाबा: लगेच पुढचे काम मिळेल.</li>"
 		"<li><b>अजून वेळ हवा</b> तेच काम ठेवते. <b>अडचण</b> समस्या कळवा उघडते.</li><li>🔊 कार्ड वाचून दाखवते.</li></ol>"),
 	("Enter a new lead in 1 minute", "1 मिनिटात नवीन लीड टाका", "Sales", 3,
-		"<ol><li>Home → <b>New Lead</b>.</li><li>Fastest: tap <b>📷 Photo</b> of the visiting card or enquiry note; the form fills itself.</li>"
+		"<ol><li>Home → <b>New Lead</b>.</li><li>Fastest: tap <b>📷 Photo</b> of a visiting card, enquiry letter or email, drawing, spec sheet, invoice or WhatsApp screenshot. The phone reads it free and fills name, company, mobile, email, source, segment and the requirement (sizes, material, quantity, place). Check and correct.</li>"
 		"<li>Or type, or tap 🎤 and speak.</li><li>Pick <b>Source</b> and <b>Segment</b> (Cabin, Machine Shifting, Job Work...).</li><li>Tap <b>Save</b>. The lead is now in ERPNext CRM under your name.</li></ol>",
-		"<ol><li>होम → <b>नवीन लीड</b>.</li><li>सर्वात जलद: व्हिजिटिंग कार्ड किंवा चौकशीचा <b>📷 फोटो</b> काढा; फॉर्म आपोआप भरतो.</li>"
+		"<ol><li>होम → <b>नवीन लीड</b>.</li><li>सर्वात जलद: व्हिजिटिंग कार्ड, चौकशीचे पत्र किंवा ईमेल, ड्रॉइंग, स्पेसिफिकेशन, बिल किंवा WhatsApp स्क्रीनशॉटचा <b>📷 फोटो</b> काढा. फोन तो मोफत वाचतो आणि नाव, कंपनी, मोबाईल, ईमेल, सोर्स, सेगमेंट आणि गरज (साईज, मटेरियल, संख्या, ठिकाण) भरतो. तपासा आणि दुरुस्त करा.</li>"
 		"<li>किंवा टाईप करा, किंवा 🎤 दाबून बोला.</li><li><b>Source</b> आणि <b>Segment</b> निवडा (Cabin, Machine Shifting, Job Work...).</li><li><b>जतन करा</b> दाबा. लीड तुमच्या नावाने ERPNext CRM मध्ये जाते.</li></ol>"),
 	("Follow-up: call, WhatsApp, email", "फॉलो-अप: कॉल, WhatsApp, ईमेल", "Sales", 4,
 		"<ol><li>Home → <b>Follow-up</b> shows all your open leads and deals. Red = overdue, do these first.</li>"
@@ -46,32 +46,109 @@ APP_LESSONS = [
 		"<li>Green = target met, yellow = 80-99%, red = below 80%.</li><li>Score = done ÷ target × weight, up to 120% for each KPI.</li></ol>",
 		"<ol><li><b>माझा स्कोअर</b> मध्ये तुमचे महिन्याचे लक्ष्य आणि किती पूर्ण झाले ते ERPNext मधून मोजून दिसते.</li>"
 		"<li>हिरवा = लक्ष्य पूर्ण, पिवळा = 80-99%, लाल = 80% पेक्षा कमी.</li><li>स्कोअर = पूर्ण ÷ लक्ष्य × वजन, प्रत्येक KPI साठी 120% पर्यंत.</li></ol>"),
+	("Reminders with date and time", "तारीख आणि वेळेसह आठवण", "All", 8,
+		"<ol><li>Home → <b>⏰ + Reminder</b>, or ⏰ on a lead page.</li><li>Write or speak what to do, pick date and time, and repeat (daily, weekly, monthly) if needed.</li>"
+		"<li>At the time, the open app rings and shows the reminder on Home: tap <b>Done</b> or <b>In 10 min</b>.</li><li>Managers can give a reminder to a team member.</li></ol>",
+		"<ol><li>होम → <b>⏰ + आठवण</b>, किंवा लीड पानावर ⏰.</li><li>काय करायचे ते लिहा किंवा बोला, तारीख व वेळ निवडा, गरज असल्यास पुनरावृत्ती (रोज, आठवड्याला, महिन्याला).</li>"
+		"<li>वेळ झाल्यावर उघडे ॲप वाजते आणि होमवर आठवण दाखवते: <b>झाले</b> किंवा <b>10 मिनिटांनी</b> दाबा.</li><li>मॅनेजर टीममधील व्यक्तीला आठवण देऊ शकतात.</li></ol>"),
+	("Calls: talk time and missed calls", "कॉल: बोलण्याचा वेळ आणि मिस कॉल", "Sales", 9,
+		"<ol><li>Call from the app (📞 on Follow-up or a lead). When you come back, pick what happened; the talk time is filled for you, correct it if needed.</li>"
+		"<li>Customer called you, or you called from the phone's dialer? Home → <b>Calls</b> → <b>Add a call</b>. A missed call: pick <b>Missed</b>.</li>"
+		"<li><b>Calls</b> shows today's and this week's calls, talk time and missed calls. Managers and the CEO see the whole team.</li></ol>",
+		"<ol><li>ॲपमधून कॉल करा (फॉलो-अप किंवा लीडवर 📞). परत आल्यावर काय झाले ते निवडा; बोलण्याचा वेळ आपोआप भरतो, गरज असल्यास दुरुस्त करा.</li>"
+		"<li>ग्राहकाने कॉल केला, किंवा फोनच्या डायलरवरून कॉल केला? होम → <b>कॉल</b> → <b>कॉल नोंदवा</b>. मिस कॉल: <b>Missed</b> निवडा.</li>"
+		"<li><b>कॉल</b> मध्ये आजचे व या आठवड्याचे कॉल, बोलण्याचा वेळ आणि मिस कॉल दिसतात. मॅनेजर आणि CEO यांना पूर्ण टीम दिसते.</li></ol>"),
+	("WhatsApp and email from the app", "ॲपमधून WhatsApp आणि ईमेल", "Sales", 10,
+		"<ol><li><b>WhatsApp</b>: pick a lead or type any number, choose a ready message, tap <b>Open chat</b>. WhatsApp opens with the text; attach the drawing or PDF there.</li>"
+		"<li><b>Mail</b>: on a lead page tap ✉️, write, attach the quotation or drawing, send. The mail is saved on the lead.</li>"
+		"<li>Items with 🔒 are paid services, not active now.</li></ol>",
+		"<ol><li><b>WhatsApp</b>: लीड निवडा किंवा कोणताही नंबर टाका, तयार मेसेज निवडा, <b>चॅट उघडा</b> दाबा. मजकुरासह WhatsApp उघडते; तिथे ड्रॉइंग किंवा PDF जोडा.</li>"
+		"<li><b>मेल</b>: लीड पानावर ✉️ दाबा, लिहा, कोटेशन किंवा ड्रॉइंग जोडा, पाठवा. मेल लीडवर जतन होतो.</li>"
+		"<li>🔒 असलेल्या सेवा पेड आहेत, सध्या चालू नाहीत.</li></ol>"),
+	("Company & Products: send to customer", "कंपनी व उत्पादने: ग्राहकाला पाठवा", "All", 11,
+		"<ol><li>Home → <b>Company & Products</b>: website, presentation, product details, videos, customer FAQ, ready messages and Sales Manual pages.</li>"
+		"<li><b>Open</b> to read, <b>Send</b> to share on WhatsApp, <b>Copy</b> to paste anywhere.</li><li>Sales Manual pages open only the pages you need, so the phone stays fast.</li></ol>",
+		"<ol><li>होम → <b>कंपनी व उत्पादने</b>: वेबसाईट, प्रेझेंटेशन, उत्पादन माहिती, व्हिडिओ, ग्राहकांचे प्रश्न, तयार मेसेज आणि सेल्स मॅन्युअलची पाने.</li>"
+		"<li>वाचण्यासाठी <b>उघडा</b>, WhatsApp वर देण्यासाठी <b>पाठवा</b>, कुठेही चिकटवण्यासाठी <b>कॉपी</b>.</li><li>सेल्स मॅन्युअलची फक्त हवी ती पाने उघडतात, त्यामुळे फोन जलद राहतो.</li></ol>"),
+	("Voice typing: tap the mic", "आवाजाने लिहा: माईक दाबा", "All", 12,
+		"<ol><li>Tap 🎤 next to a box. It turns red and says <b>Listening… speak now</b>.</li><li>Speak; the words appear as you talk. Tap the red mic to stop.</li>"
+		"<li>EN / मर under the mic picks English or Marathi. If it says no permission, allow the microphone for Chrome.</li></ol>",
+		"<ol><li>बॉक्सजवळील 🎤 दाबा. तो लाल होतो आणि <b>ऐकत आहे… आता बोला</b> दाखवतो.</li><li>बोला; शब्द लगेच दिसतात. थांबवण्यासाठी लाल माईक दाबा.</li>"
+		"<li>माईकखालील EN / मर ने इंग्रजी किंवा मराठी निवडा. परवानगी नाही असे आले तर Chrome ला माईकची परवानगी द्या.</li></ol>"),
 ]
 
 
 def seed_lessons():
+	frappe.db.sql("""update `tabSK Training Lesson` set lesson_type='App usage' where ifnull(lesson_type, '')=''""")
 	for title, title_mr, function, seq, content, content_mr in APP_LESSONS:
-		if frappe.db.exists("SK Training Lesson", {"title": title}):
+		name = frappe.db.get_value("SK Training Lesson", {"title": title})
+		if name:  # app lessons follow the app: keep their text up to date
+			frappe.db.set_value("SK Training Lesson", name, {"content": content, "content_marathi": content_mr}, update_modified=False)
 			continue
 		frappe.get_doc({"doctype": "SK Training Lesson", "title": title, "title_marathi": title_mr, "function": function,
-			"topic": "Using the app", "sequence": seq, "minutes": 2, "published": 1,
+			"topic": "Using the app", "lesson_type": "App usage", "sequence": seq, "minutes": 2, "published": 1,
 			"content": content, "content_marathi": content_mr}).insert(ignore_permissions=True)
 
 
 def lessons(user: str, function: str) -> list[dict]:
+	"""Lessons for the person's function, without content (opened one at a time), with done / score."""
 	rows = frappe.get_all("SK Training Lesson", filters={"published": 1, "function": ["in", ["All", function]]},
-		fields=["name", "title", "title_marathi", "topic", "minutes", "video_url", "content", "content_marathi"],
+		fields=["name", "title", "title_marathi", "topic", "lesson_type", "minutes"],
 		order_by="sequence asc, creation asc")
-	done = set(frappe.get_all("SK Training Done", filters={"user": user}, pluck="lesson"))
+	done = {d.lesson: d for d in frappe.get_all("SK Training Done", filters={"user": user}, fields=["lesson", "score", "questions"])}
 	for r in rows:
-		r["done"] = r.name in done
+		d = done.get(r.name)
+		r["done"] = bool(d)
+		r["score"] = f"{d.score}/{d.questions}" if d and d.questions else None
+		r["lesson_type"] = r.lesson_type or "App usage"
 	return rows
 
 
-def mark_done(user: str, lesson: str) -> bool:
+def lesson(user: str, name: str) -> dict:
+	"""One lesson with its content and check questions (the correct answers stay on the server)."""
+	doc = frappe.get_doc("SK Training Lesson", name)
+	if not doc.published:
+		frappe.throw(frappe._("Lesson not found"))
+	out = {k: doc.get(k) for k in ("name", "title", "title_marathi", "topic", "lesson_type", "minutes", "video_url",
+		"content", "content_marathi")}
+	out["questions"] = [{"question": q.question, "choices": [c for c in (q.choice_1, q.choice_2, q.choice_3) if c]}
+		for q in doc.questions]
+	out["pages_url"] = f"/api/method/sk_app.api.library_pdf?item={doc.library_item}" if doc.library_item else None
+	out["done"] = bool(frappe.db.exists("SK Training Done", {"user": user, "lesson": name}))
+	return out
+
+
+def pass_mark(total: int) -> int:
+	"""2 of 3, or two thirds of the questions rounded up."""
+	return -(-2 * total // 3)
+
+
+def mark_done(user: str, lesson: str, answers: list | None = None) -> dict:
+	"""Finish a lesson. With check questions, `answers` (choice numbers 1-3, in order) must reach the pass mark."""
 	if not frappe.db.exists("SK Training Lesson", {"name": lesson, "published": 1}):
 		frappe.throw(frappe._("Lesson not found"))
-	if not frappe.db.exists("SK Training Done", {"user": user, "lesson": lesson}):
-		frappe.get_doc({"doctype": "SK Training Done", "user": user, "lesson": lesson,
+	questions = frappe.get_doc("SK Training Lesson", lesson).questions
+	answers = [str(a) for a in (answers or [])]
+	score = sum(1 for i, q in enumerate(questions) if i < len(answers) and answers[i] == str(q.correct))
+	total = len(questions)
+	if total and score < pass_mark(total):
+		return {"passed": False, "score": score, "questions": total}
+	name = frappe.db.get_value("SK Training Done", {"user": user, "lesson": lesson})
+	if name:
+		frappe.db.set_value("SK Training Done", name, {"score": score, "questions": total})
+	else:
+		frappe.get_doc({"doctype": "SK Training Done", "user": user, "lesson": lesson, "score": score, "questions": total,
 			"completed_on": now_datetime()}).insert(ignore_permissions=True)
-	return True
+	return {"passed": True, "score": score, "questions": total}
+
+
+def team_progress(manager: str) -> dict:
+	"""For managers: how many lessons each team member finished, of those for their function."""
+	from sk_app.day_report import _team
+
+	out = []
+	for p in _team(manager):
+		total = frappe.db.count("SK Training Lesson", {"published": 1, "function": ["in", ["All", p.home]]})
+		done = frappe.db.count("SK Training Done", {"user": p.user})
+		out.append({"user": p.user, "full_name": p.full_name, "function": p.home, "done": done, "total": total})
+	return {"people": out}

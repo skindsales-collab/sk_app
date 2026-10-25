@@ -16,9 +16,11 @@
 body { margin: 0; font-family: system-ui, -apple-system, "Noto Sans Devanagari", sans-serif; background: var(--bg); color: var(--ink); font-size: 17px; }
 main { padding: 12px 16px 40px; max-width: 640px; margin: 0 auto; }
 .sk-loading { padding: 40px 16px; text-align: center; color: var(--muted); }
-.sk-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 10px; padding: 10px 16px; padding-top: max(10px, env(safe-area-inset-top)); background: var(--navy); color: #fff; }
+.sk-head { position: fixed; top: 0; left: 0; right: 0; z-index: 4; display: flex; align-items: center; gap: 10px; padding: 10px 16px; padding-top: max(10px, env(safe-area-inset-top)); background: var(--navy); color: #fff; }
 .sk-logo { width: 34px; height: 34px; border-radius: 8px; background: #fff; }
-.sk-title { flex: 1; font-weight: 700; font-size: 18px; }
+.sk-title { flex: 1; min-width: 0; font-weight: 700; font-size: 18px; line-height: 1.2; }
+.sk-title small { display: block; font-weight: 400; font-size: 13px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body { padding-top: 64px; }
 .sk-head button { background: rgba(255,255,255,.15); color: #fff; border: 0; border-radius: 8px; padding: 8px 10px; font-size: 15px; }
 .sk-hello { color: var(--muted); margin: 4px 0 10px; }
 .sk-card { background: var(--card); border-left: 5px solid var(--red); border-radius: 12px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 16px; }
@@ -105,7 +107,9 @@ button.sk-open { background: none; border: 0; }
 .sk-item > div:first-child { min-width: 0; flex: 1; }
 .sk-item a.sk-item-title { word-break: break-all; }
 /* calendars */
-.cal-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+.cal-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; margin-bottom: 12px; }
+.cal-tabs.sk-wrap { display: flex; flex-wrap: wrap; }
+.cal-tabs.sk-wrap button { flex: 1 1 30%; padding: 8px 4px; font-size: 14px; }
 .cal-tabs button { border: 0; border-radius: 10px; padding: 10px; font-weight: 700; background: var(--light); color: var(--ink); font-size: 15px; }
 .cal-tabs .on { background: var(--navy); color: #fff; }
 .slot { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 8px; margin-bottom: 6px; }
@@ -137,3 +141,18 @@ button.sk-open { background: none; border: 0; }
 .sk-micbox { display: flex; flex-direction: column; gap: 4px; }
 .sk-micbox .sk-mic { flex: 1; min-height: 44px; }
 .sk-miclang { border: 1px solid var(--navy); background: var(--card); color: var(--navy); border-radius: 8px; font-size: 12px; font-weight: 700; padding: 3px 0; }
+
+/* trial fixes 25-Oct: mic, reminders, calls, WhatsApp, mail, library, training */
+.sk-mic.on { background: var(--red); animation: sk-pulse 1s infinite; }
+@keyframes sk-pulse { 50% { opacity: .55; } }
+.sk-listening { color: var(--red); font-size: 14px; font-weight: 600; margin-top: 4px; }
+.sk-banner.rem { background: #fff4d6; border-left: 5px solid var(--yellow); }
+.sk-banner .sk-row { margin-top: 6px; }
+.sk-addrem { margin-bottom: 14px; }
+.sk-locked { background: var(--light); color: var(--muted); border: 1px dashed var(--muted); border-radius: 10px; padding: 10px 12px; margin: 14px 0; font-size: 14px; }
+.sk-locked b { color: var(--ink); }
+.sk-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sk-two-col input, .sk-field input[type=number], .sk-field > input { width: 100%; font-size: 17px; padding: 10px; border: 1px solid #c5cfdb; border-radius: 10px; background: var(--card); color: var(--ink); }
+.sk-libtext { white-space: pre-wrap; font-size: 15px; margin: 4px 0; }
+.sk-q { background: var(--card); border-radius: 10px; padding: 10px; margin-bottom: 8px; }
+.sk-facts.three { grid-template-columns: repeat(3, 1fr); }

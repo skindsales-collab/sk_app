@@ -88,7 +88,7 @@ class WorkItem:
 
 
 # lower number wins when two items have the same priority
-KIND_ORDER = {"lead_new": 0, "send_file": 1, "day_report": 2, "lead_followup": 3, "crm_task": 4, "deal": 5, "quote": 6, "task": 7, "dsi": 8}
+KIND_ORDER = {"reminder": 0, "lead_new": 0, "send_file": 1, "day_report": 2, "lead_followup": 3, "crm_task": 4, "deal": 5, "quote": 6, "task": 7, "dsi": 8}
 
 
 def rank_items(items: list[WorkItem], now: datetime) -> list[WorkItem]:
@@ -113,6 +113,7 @@ CARD_TEXT = {
 		"send_file": "Now: send drawing {title} to the customer on WhatsApp",
 		"dsi": "Now: post today's Daily Small Improvement (DSI)",
 		"day_report": "Now: send today's Day Report (what you did, problems, plan for tomorrow)",
+		"reminder": "Reminder: {title}",
 		"none": "No open items. Add extra work or post your DSI.",
 	},
 	"Marathi": {
@@ -125,6 +126,7 @@ CARD_TEXT = {
 		"send_file": "आता: ड्रॉइंग {title} ग्राहकाला WhatsApp वर पाठवा",
 		"dsi": "आता: आजची DSI (रोजची छोटी सुधारणा) टाका",
 		"day_report": "आता: आजचा दिवसाचा अहवाल पाठवा (काय केले, अडचणी, उद्याचे नियोजन)",
+		"reminder": "आठवण: {title}",
 		"none": "उघडे काम नाही. जादा काम जोडा किंवा DSI टाका.",
 	},
 }

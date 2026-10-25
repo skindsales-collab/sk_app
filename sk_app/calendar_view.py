@@ -13,10 +13,13 @@ def _settings():
 
 
 def _events(start, end) -> list[dict]:
-	"""ERPNext calendar Events the user can see (own, shared or public) between two dates."""
-	return frappe.get_list("Event", filters={"starts_on": ["between", [f"{start} 00:00:00", f"{end} 23:59:59"]],
-		"status": ["!=", "Cancelled"]}, fields=["name", "subject", "starts_on", "ends_on", "all_day"],
-		order_by="starts_on asc", limit_page_length=200)
+	"""ERPNext calendar Events the user can see (own, shared or public) between two dates, with repeating ones
+	(e.g. a daily reminder) placed on each day."""
+	from frappe.desk.doctype.event.event import get_events
+
+	rows = [e for e in get_events(getdate(start), getdate(end)) if e.get("status") not in ("Cancelled",)]
+	rows.sort(key=lambda e: get_datetime(e.starts_on))
+	return rows[:200]
 
 
 def _orders_by_day(user: str, start, end) -> dict:
@@ -43,7 +46,8 @@ def today(user: str, now=None) -> dict:
 	day = now.date()
 	s = _settings()
 	profile = guide.app_user(user)
-	items = work.collect(user, profile.home if profile else None)
+	# own reminders are calendar Events, so they come in once, as fixed times
+	items = [i for i in work.collect(user, profile.home if profile else None) if i.kind != "reminder"]
 	events = _events(day, day)
 	fixed = [(get_datetime(e.starts_on), get_datetime(e.ends_on or e.starts_on), e.subject) for e in events
 		if not e.all_day and get_datetime(e.starts_on) >= now]
@@ -88,7 +92,7 @@ def week(user: str, day=None) -> dict:
 	now = now_datetime()
 	s = _settings()
 	profile = guide.app_user(user)
-	due = _due_by_day(work.collect(user, profile.home if profile else None), start, end, now)
+	due = _due_by_day([i for i in work.collect(user, profile.home if profile else None) if i.kind != "reminder"], start, end, now)
 	orders = _orders_by_day(user, start, end)
 	events = _events(start, end)
 	working = parse_lines((s.working_days or "").replace(",", "\n"))
@@ -118,7 +122,7 @@ def month(user: str, year=None, month_no=None) -> dict:
 	now = now_datetime()
 	s = _settings()
 	profile = guide.app_user(user)
-	due = _due_by_day(work.collect(user, profile.home if profile else None), start, end, now)
+	due = _due_by_day([i for i in work.collect(user, profile.home if profile else None) if i.kind != "reminder"], start, end, now)
 	orders = _orders_by_day(user, start, end)
 	labels = company_dates(s.company_dates, year, month_no)
 	dsi = set(str(d) for d in frappe.get_all("SK DSI Entry", filters={"user": user, "date": ["between", [start, end]]}, pluck="date"))

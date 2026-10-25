@@ -20,6 +20,7 @@ doc_events = {
 	"SK Work Log": {"before_insert": "sk_app.permissions.stamp_user"},
 	"SK Day Report": {"before_insert": "sk_app.permissions.stamp_user"},
 	"File": {"after_insert": "sk_app.crm.on_file_attached"},
+	"SK Library Item": {"validate": "sk_app.library.make_public"},
 }
 
 has_permission = {

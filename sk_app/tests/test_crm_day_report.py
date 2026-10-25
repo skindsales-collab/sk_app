@@ -1,7 +1,7 @@
 import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.tests.classes.context_managers import set_user
-from frappe.utils import add_to_date, now_datetime
+from frappe.utils import add_to_date
 
 from sk_app import api, day_report
 

@@ -5,7 +5,7 @@
  "custom": 0,
  "engine": "InnoDB",
  "creation": "2026-10-25 14:30:00.000000",
- "modified": "2026-10-25 14:30:00.000000",
+ "modified": "2026-10-25 17:20:00.000000",
  "owner": "Administrator",
  "modified_by": "Administrator",
  "naming_rule": "Random",
@@ -17,14 +17,18 @@
   "title_marathi",
   "function",
   "topic",
+  "lesson_type",
   "column_1",
   "sequence",
   "minutes",
   "published",
   "video_url",
+  "library_item",
   "content_section",
   "content",
-  "content_marathi"
+  "content_marathi",
+  "check_section",
+  "questions"
  ],
  "fields": [
   {
@@ -54,6 +58,16 @@
    "label": "Topic",
    "in_standard_filter": 1,
    "description": "e.g. Using the app, Safety, Product, ERPNext"
+  },
+  {
+   "fieldname": "lesson_type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "App usage\nMy function",
+   "default": "App usage",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "My function: understanding the work (e.g. Sales Manual). App usage: how to use the SK App."
   },
   {
    "fieldname": "column_1",
@@ -88,6 +102,13 @@
    "description": "YouTube or any video link (optional)"
   },
   {
+   "fieldname": "library_item",
+   "fieldtype": "Link",
+   "options": "SK Library Item",
+   "label": "Manual pages to read",
+   "description": "Opens only these pages of the manual from the lesson."
+  },
+  {
    "fieldname": "content_section",
    "fieldtype": "Section Break",
    "label": "Lesson"
@@ -101,6 +122,18 @@
    "fieldname": "content_marathi",
    "fieldtype": "Text Editor",
    "label": "Steps (Marathi)"
+  },
+  {
+   "fieldname": "check_section",
+   "fieldtype": "Section Break",
+   "label": "Lesson check"
+  },
+  {
+   "fieldname": "questions",
+   "fieldtype": "Table",
+   "options": "SK Training Question",
+   "label": "Questions",
+   "description": "2 of 3 correct (or 2/3 of the questions) to finish the lesson."
   }
  ],
  "permissions": [

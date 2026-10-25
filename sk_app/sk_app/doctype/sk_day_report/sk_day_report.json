@@ -5,7 +5,7 @@
  "custom": 0,
  "engine": "InnoDB",
  "creation": "2026-10-25 19:30:00.000000",
- "modified": "2026-10-25 19:30:00.000000",
+ "modified": "2026-10-25 17:10:00.000000",
  "owner": "Administrator",
  "modified_by": "Administrator",
  "naming_rule": "Expression",
@@ -31,6 +31,8 @@
   "section_auto",
   "cards_done",
   "calls_made",
+  "talk_minutes",
+  "missed_calls",
   "notes_added",
   "leads_created",
   "column_2",
@@ -145,6 +147,20 @@
    "fieldtype": "Int",
    "label": "Calls Logged",
    "read_only": 1
+  },
+  {
+   "fieldname": "talk_minutes",
+   "fieldtype": "Int",
+   "label": "Talk Time (min)",
+   "read_only": 1,
+   "description": "Total talk time of the calls logged in the app today"
+  },
+  {
+   "fieldname": "missed_calls",
+   "fieldtype": "Int",
+   "label": "Missed / Not Answered Calls",
+   "read_only": 1,
+   "description": "Missed incoming calls and calls the customer did not pick up, logged in the app today"
   },
   {
    "fieldname": "notes_added",

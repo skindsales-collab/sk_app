@@ -1,0 +1,191 @@
+{
+ "doctype": "DocType",
+ "name": "SK Library Item",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-10-25 17:20:00.000000",
+ "modified": "2026-10-25 17:20:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "field_order": [
+  "title",
+  "title_marathi",
+  "category",
+  "product",
+  "column_1",
+  "audience",
+  "function",
+  "sequence",
+  "enabled",
+  "content_section",
+  "file",
+  "link",
+  "page_from",
+  "page_to",
+  "column_2",
+  "text",
+  "text_marathi"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title / Question",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "title_marathi",
+   "fieldtype": "Data",
+   "label": "Title / Question (Marathi)"
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "options": "Company\nProduct\nCustomer FAQ\nMessage Template\nSales Manual",
+   "default": "Company"
+  },
+  {
+   "fieldname": "product",
+   "fieldtype": "Select",
+   "label": "Product",
+   "options": "All\nCabin\nMachine Shifting\nJob Work\nModular / Labour Camp\nLGSF\nOther",
+   "default": "All",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "column_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "audience",
+   "fieldtype": "Select",
+   "label": "Who can it be sent to",
+   "options": "Customer\nInternal",
+   "default": "Customer",
+   "description": "Customer: Send on WhatsApp / Share buttons in the app (files become public links). Internal: staff only, no Send button."
+  },
+  {
+   "fieldname": "function",
+   "fieldtype": "Select",
+   "label": "Shown to",
+   "options": "All\nSales\nMarketing\nMachine Shifting\nDesign\nManagement",
+   "default": "All"
+  },
+  {
+   "fieldname": "sequence",
+   "fieldtype": "Int",
+   "label": "Order"
+  },
+  {
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Show in app",
+   "default": "1"
+  },
+  {
+   "fieldname": "content_section",
+   "fieldtype": "Section Break",
+   "label": "Content"
+  },
+  {
+   "fieldname": "file",
+   "fieldtype": "Attach",
+   "label": "File (PDF, photo, small video)"
+  },
+  {
+   "fieldname": "link",
+   "fieldtype": "Data",
+   "options": "URL",
+   "label": "Link (website, YouTube video)"
+  },
+  {
+   "fieldname": "page_from",
+   "fieldtype": "Int",
+   "label": "From page",
+   "description": "Only part of a big PDF: the app opens these pages only (keeps the phone fast)."
+  },
+  {
+   "fieldname": "page_to",
+   "fieldtype": "Int",
+   "label": "To page"
+  },
+  {
+   "fieldname": "column_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "text",
+   "fieldtype": "Small Text",
+   "label": "Answer / message (English)"
+  },
+  {
+   "fieldname": "text_marathi",
+   "fieldtype": "Small Text",
+   "label": "Answer / message (Marathi)"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "report": 1,
+   "export": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "HR Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "report": 1,
+   "export": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "Sales Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "report": 1,
+   "export": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "Employee",
+   "read": 1,
+   "report": 1
+  },
+  {
+   "role": "Sales User",
+   "read": 1,
+   "report": 1
+  }
+ ],
+ "states": [],
+ "links": [],
+ "actions": [],
+ "index_web_pages_for_search": 0,
+ "autoname": "hash",
+ "naming_rule": "Random",
+ "title_field": "title",
+ "track_changes": 1
+}
