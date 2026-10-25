@@ -15,5 +15,13 @@ frappe.ui.form.on("SK App Settings", {
 				});
 			});
 		});
+		frm.add_custom_button(__("Load training & library pack"), () => {
+			if (frm.is_dirty()) return frappe.msgprint(__("Please save first."));
+			frappe.call({ method: "sk_app.library.load_pack_now", freeze: true }).then((r) => {
+				const res = r.message || {};
+				frappe.msgprint({ title: __("Training & library"), indicator: "green",
+					message: __("Lessons: {0}, library items: {1}", [res.lessons || 0, res.library || 0]) });
+			});
+		});
 	},
 });

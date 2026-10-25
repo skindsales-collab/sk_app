@@ -4,19 +4,23 @@ Sales is the pilot and is fully live. Every other function already gets the comm
 DSI, Report Problem, My KPI) driven by their ERPNext tasks, and its own tiles are switched on in later phases.
 """
 
-COMMON_TILES = ["my_day", "calendar", "day_report", "work_book", "dsi", "problem", "my_kpi", "training"]
+COMMON_TILES = ["my_day", "calendar", "reminders", "day_report", "work_book", "dsi", "problem", "my_kpi", "training"]
+# free contact tiles: the phone's own dialer / WhatsApp / mail, logged in CRM; paid parts show locked inside them
+CONTACT_TILES = ["calls", "whatsapp", "mail"]
 
 FUNCTIONS = {
 	"Sales": {
 		"label": {"English": "Sales", "Marathi": "विक्री"},
-		"tiles": ["my_day", "calendar", "follow_up", "new_lead", "my_leads", "my_deals", "day_report", "my_kpi", "work_book", "dsi", "problem", "training"],
+		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "my_deals", "reminders", "library",
+			"day_report", "my_kpi", "work_book", "dsi", "problem", "training"],
 		"live": True,
 		"erpnext_roles": ["Sales User", "Sales Manager"],
 		"desk": "/crm",
 	},
 	"Marketing": {
 		"label": {"English": "Marketing", "Marathi": "मार्केटिंग"},
-		"tiles": ["my_day", "calendar", "follow_up", "new_lead", "my_leads", "day_report", "my_kpi", "work_book", "dsi", "problem", "training"],
+		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "reminders", "library", "day_report",
+			"my_kpi", "work_book", "dsi", "problem", "training"],
 		"live": True,  # uses the same CRM lead screens as Sales
 		"erpnext_roles": ["Sales User"],
 		"desk": "/crm",
@@ -86,7 +90,8 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": ["ceo_view", "team_reports", "my_day", "calendar", "day_report", "my_kpi", "dsi", "problem", "training"],
+		"tiles": ["ceo_view", "team_reports", "calls", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
+			"library", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager"],
 		"desk": "/app",

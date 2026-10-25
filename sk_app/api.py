@@ -4,7 +4,8 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime
 
-from sk_app import calendar_view, claude, crm, day_report, guide, kpi, training, work
+from sk_app import calendar_view, claude, comms, crm, day_report, guide, kpi, training, work
+from sk_app import library as lib
 from sk_app.functions import home_for
 from sk_app.logic import rank_items
 
@@ -42,7 +43,8 @@ def home():
 	return {"user": profile.user, "full_name": profile.full_name, "language": profile.language,
 		"mobile": me.get("mobile_no") or me.get("phone"),
 		"home": home_for(profile.home, has_team=_has_team(profile.user)), "card": _latest_card(profile.user),
-		"new_files": crm.files_to_send(profile.user), "day_report_sent": bool(day_report._find(profile.user, getdate()))}
+		"new_files": crm.files_to_send(profile.user), "day_report_sent": bool(day_report._find(profile.user, getdate())),
+		"due_reminders": comms.due_reminders(profile.user)}
 
 
 def _has_team(user):
@@ -196,8 +198,8 @@ def add_crm_note(doctype, name, text=None, photo=None):
 
 
 @frappe.whitelist(methods=["POST"])
-def log_contact(doctype, name, channel, outcome=None, text=None, photo=None):
-	return crm.log_contact(_me().user, doctype, name, channel, outcome, text, photo)
+def log_contact(doctype, name, channel, outcome=None, text=None, photo=None, duration=None):
+	return crm.log_contact(_me().user, doctype, name, channel, outcome, text, photo, cint(duration))
 
 
 @frappe.whitelist(methods=["POST"])
@@ -237,9 +239,19 @@ def training_lessons():
 	return training.lessons(profile.user, profile.home)
 
 
+@frappe.whitelist()
+def training_lesson(name):
+	return training.lesson(_me().user, name)
+
+
 @frappe.whitelist(methods=["POST"])
-def training_done(lesson):
-	return training.mark_done(_me().user, lesson)
+def training_done(lesson, answers=None):
+	return training.mark_done(_me().user, lesson, frappe.parse_json(answers) if isinstance(answers, str) else answers)
+
+
+@frappe.whitelist()
+def team_training():
+	return training.team_progress(_me().user)
 
 
 # ---- Day Report ----
@@ -284,3 +296,77 @@ def cal_week(day=None):
 @frappe.whitelist()
 def cal_month(year=None, month=None):
 	return calendar_view.month(_me().user, year, month)
+
+
+# ---- Calls (talk time), reminders, mail: free ----
+
+@frappe.whitelist()
+def my_calls(days=7):
+	return comms.my_calls(_me().user, cint(days) or 7)
+
+
+@frappe.whitelist()
+def team_calls(day=None):
+	return comms.team_calls(_me().user, day)
+
+
+@frappe.whitelist(methods=["POST"])
+def add_call(doctype, name, direction="Outgoing", outcome=None, minutes=None, text=None):
+	return comms.add_call(_me().user, doctype, name, direction, outcome, minutes, text)
+
+
+@frappe.whitelist()
+def my_team():
+	"""Team members a manager can give a reminder to."""
+	profile = _me()
+	return [{"user": p.user, "full_name": p.full_name} for p in day_report._team(profile.user)]
+
+
+@frappe.whitelist(methods=["POST"])
+def add_reminder(title, when, repeat=None, doctype=None, name=None, for_user=None):
+	return comms.add_reminder(_me().user, title, when, repeat, doctype, name, for_user)
+
+
+@frappe.whitelist()
+def my_reminders(days=7):
+	today = getdate()
+	return comms.reminders_between(_me().user, today, add_to_date(today, days=cint(days) or 7))
+
+
+@frappe.whitelist(methods=["POST"])
+def done_reminder(doctype, name):
+	return comms.done_reminder(_me().user, doctype, name)
+
+
+@frappe.whitelist()
+def my_mail():
+	return comms.my_mail(_me().user)
+
+
+@frappe.whitelist()
+def mail_thread(doctype, name):
+	_me()
+	return comms.mail_thread(doctype, name)
+
+
+@frappe.whitelist(methods=["POST"])
+def send_mail(doctype, name, to, subject, message, files=None):
+	files = frappe.parse_json(files) if isinstance(files, str) else files
+	return comms.send_mail(_me().user, doctype, name, to, subject, message, files)
+
+
+# ---- Company & Products library, customer FAQ, message templates, Sales Manual ----
+
+@frappe.whitelist()
+def library(category=None):
+	return lib.items(_me().home, category)
+
+
+@frappe.whitelist()
+def library_pdf(item):
+	"""Only the pages of one manual section, so the phone never downloads the whole manual."""
+	_me()
+	data, title = lib.section_pdf(item)
+	frappe.local.response.filename = f"{title}.pdf"
+	frappe.local.response.filecontent = data
+	frappe.local.response.type = "pdf"

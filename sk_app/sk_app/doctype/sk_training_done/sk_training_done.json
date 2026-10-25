@@ -5,7 +5,7 @@
  "custom": 0,
  "engine": "InnoDB",
  "creation": "2026-10-25 14:30:00.000000",
- "modified": "2026-10-25 14:30:00.000000",
+ "modified": "2026-10-25 17:20:00.000000",
  "owner": "Administrator",
  "modified_by": "Administrator",
  "naming_rule": "Random",
@@ -17,7 +17,9 @@
   "person_name",
   "lesson",
   "lesson_title",
-  "completed_on"
+  "completed_on",
+  "score",
+  "questions"
  ],
  "fields": [
   {
@@ -55,6 +57,16 @@
    "fieldtype": "Datetime",
    "label": "Completed On",
    "in_list_view": 1
+  },
+  {
+   "fieldname": "score",
+   "fieldtype": "Int",
+   "label": "Correct answers"
+  },
+  {
+   "fieldname": "questions",
+   "fieldtype": "Int",
+   "label": "Questions"
   }
  ],
  "permissions": [
