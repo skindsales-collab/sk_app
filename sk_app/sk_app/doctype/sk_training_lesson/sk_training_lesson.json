@@ -1,0 +1,160 @@
+{
+ "doctype": "DocType",
+ "name": "SK Training Lesson",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-10-25 14:30:00.000000",
+ "modified": "2026-10-25 14:30:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "naming_rule": "Random",
+ "track_changes": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "field_order": [
+  "title",
+  "title_marathi",
+  "function",
+  "topic",
+  "column_1",
+  "sequence",
+  "minutes",
+  "published",
+  "video_url",
+  "content_section",
+  "content",
+  "content_marathi"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "title_marathi",
+   "fieldtype": "Data",
+   "label": "Title (Marathi)"
+  },
+  {
+   "fieldname": "function",
+   "fieldtype": "Select",
+   "label": "For Function",
+   "options": "All\nSales\nMarketing\nProduction\nQuality\nStores\nPurchase\nAccounts\nHR\nMachine Shifting\nDesign\nIT / ERP\nManagement",
+   "default": "All",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "topic",
+   "fieldtype": "Data",
+   "label": "Topic",
+   "in_standard_filter": 1,
+   "description": "e.g. Using the app, Safety, Product, ERPNext"
+  },
+  {
+   "fieldname": "column_1",
+   "fieldtype": "Column Break",
+   "label": "Column 1"
+  },
+  {
+   "fieldname": "sequence",
+   "fieldtype": "Int",
+   "label": "Order",
+   "default": "10",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "minutes",
+   "fieldtype": "Int",
+   "label": "Minutes",
+   "default": "3"
+  },
+  {
+   "fieldname": "published",
+   "fieldtype": "Check",
+   "label": "Published",
+   "default": "1",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "video_url",
+   "fieldtype": "Data",
+   "label": "Video Link",
+   "options": "URL",
+   "description": "YouTube or any video link (optional)"
+  },
+  {
+   "fieldname": "content_section",
+   "fieldtype": "Section Break",
+   "label": "Lesson"
+  },
+  {
+   "fieldname": "content",
+   "fieldtype": "Text Editor",
+   "label": "Steps (English)"
+  },
+  {
+   "fieldname": "content_marathi",
+   "fieldtype": "Text Editor",
+   "label": "Steps (Marathi)"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "report": 1,
+   "export": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "HR Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "report": 1,
+   "export": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "Sales Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "report": 1,
+   "export": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "Employee",
+   "read": 1,
+   "report": 1
+  },
+  {
+   "role": "Sales User",
+   "read": 1,
+   "report": 1
+  }
+ ],
+ "states": [],
+ "links": [],
+ "actions": [],
+ "index_web_pages_for_search": 0,
+ "autoname": "hash",
+ "title_field": "title"
+}

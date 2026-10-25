@@ -26,3 +26,4 @@ has_permission = {
 }
 
 after_install = "sk_app.install.after_install"
+after_migrate = "sk_app.install.after_migrate"
