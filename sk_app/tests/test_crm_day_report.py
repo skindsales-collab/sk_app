@@ -86,6 +86,14 @@ class TestCrmAndDayReport(IntegrationTestCase):
 		self.assertEqual(day_report.reminder(STRANGER, add_to_date(due, hours=-3)), [])
 		self.assertEqual(len(day_report.reminder(STRANGER, add_to_date(due, minutes=-30))), 1)
 
+	def test_day_report_is_the_last_job_even_after_work_end(self):
+		from sk_app.logic import WorkItem, rank_items
+
+		late = add_to_date(day_report.due_at(), hours=2)
+		report = day_report.reminder(STRANGER, late)[0]
+		other = WorkItem("task", "Pack drawings", due=add_to_date(late, hours=5), priority=5)
+		self.assertEqual([i.kind for i in rank_items([report, other], late)], ["task", "day_report"])
+
 	def test_crm_new_lead_follow_up_and_call_log(self):
 		if not self.crm:
 			self.skipTest("Frappe CRM not installed")
