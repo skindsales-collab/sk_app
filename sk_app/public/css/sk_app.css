@@ -185,3 +185,4 @@ button.sk-open { background: none; border: 0; }
 .sk-check input { width: 22px; height: 22px; }
 .sk-mini { margin: 4px 0 12px; padding-left: 18px; font-size: 14px; color: var(--muted); }
 .sk-countbox { flex: 0 0 auto; }
+.sk-login-or { color: var(--muted); margin: 10px 0 0; font-size: 14px; }

@@ -54,6 +54,10 @@ The person sets their own PIN at the first login. HR can reset a PIN or close a 
 Subcontractors (`Subcontractor` function) get the small `SK Subcontractor` role, no ERPNext desk, and a workstation.
 `after_migrate` turns on *System Settings → Allow Login using Mobile Number* (`sk_app/logins.py`).
 
+**OTP by SMS (optional):** when *SMS Settings* in ERPNext has a gateway (for example MSG91 with the DLT-approved
+OTP text; site config `sk_otp_message` must match that text), the login page also shows **Send OTP**
+(`sk_app/otp.py`: 6 digits, 5 minutes, 5 tries, 5 SMS per number per hour). Without a gateway only the PIN login shows.
+
 A person in several functions (SK App User: Main Function + Other Functions) sees one Home with a labelled row of
 icons per function and one "For everyone" row; no switching.
 

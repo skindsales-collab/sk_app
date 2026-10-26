@@ -8,29 +8,76 @@
 	<form id="sk-login">
 		<label class="sk-field"><span>Mobile number · मोबाईल नंबर</span>
 			<input id="l-mobile" type="tel" inputmode="numeric" autocomplete="username" placeholder="98XXXXXXXX" required></label>
+		{% if otp %}
+		<div id="otp-box">
+			<button class="sk-btn go wide" type="button" id="otp-send">Send OTP · OTP पाठवा</button>
+			<label class="sk-field" id="otp-row" hidden><span>OTP (SMS)</span>
+				<input id="l-otp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6"></label>
+			<button class="sk-btn ok wide" type="button" id="otp-verify" hidden>Login with OTP · OTP ने लॉगिन</button>
+			<p class="sk-login-or">or · किंवा</p>
+		</div>
+		{% endif %}
 		<label class="sk-field"><span>PIN · पिन</span>
-			<input id="l-pin" type="password" inputmode="numeric" autocomplete="current-password" required></label>
-		<button class="sk-btn go wide" type="submit">Login · लॉगिन</button>
+			<input id="l-pin" type="password" inputmode="numeric" autocomplete="current-password"></label>
+		<button class="sk-btn {{ 'wide' if otp else 'go wide' }}" type="submit">Login with PIN · पिनने लॉगिन</button>
 		<p id="l-msg" class="sk-login-msg"></p>
 	</form>
 	<p class="sk-login-help">Forgot PIN? Ask HR to reset it. · पिन विसरलात? HR ला सांगा.</p>
 	<a class="sk-link" href="/login?redirect-to=/sk">Login with email (optional) · ईमेलने लॉगिन</a>
 </main>
 <script>
-document.getElementById("sk-login").addEventListener("submit", async (e) => {
-	e.preventDefault();
+(() => {
 	const msg = document.getElementById("l-msg");
-	let m = document.getElementById("l-mobile").value.replace(/\D/g, "");
-	if (m.length === 12 && m.startsWith("91")) m = m.slice(2);
-	if (m.length === 11 && m.startsWith("0")) m = m.slice(1);
-	if (m.length !== 10) { msg.textContent = "Please type your 10-digit mobile number · 10 अंकी मोबाईल नंबर टाका"; return; }
-	msg.textContent = "…";
-	const body = new URLSearchParams({ usr: m, pwd: document.getElementById("l-pin").value });
-	const res = await fetch("/api/method/login", { method: "POST", body, headers: { Accept: "application/json" }, credentials: "same-origin" });
-	if (res.ok) { window.location.reload(); return; }
-	msg.textContent = res.status === 429 ? "Too many tries. Wait a few minutes · खूप प्रयत्न झाले, थोडा वेळ थांबा"
-		: "Mobile number or PIN is wrong · मोबाईल नंबर किंवा पिन चुकीचा";
-});
+	const say = (t) => { msg.textContent = t; };
+	function mobile() {
+		let m = document.getElementById("l-mobile").value.replace(/\D/g, "");
+		if (m.length === 12 && m.startsWith("91")) m = m.slice(2);
+		if (m.length === 11 && m.startsWith("0")) m = m.slice(1);
+		if (m.length !== 10) { say("Please type your 10-digit mobile number · 10 अंकी मोबाईल नंबर टाका"); return null; }
+		return m;
+	}
+	async function post(url, data) {
+		const res = await fetch(url, { method: "POST", body: new URLSearchParams(data), headers: { Accept: "application/json" }, credentials: "same-origin" });
+		let body = {};
+		try { body = await res.json(); } catch (e) { /* empty */ }
+		let text = "";
+		try { text = JSON.parse(JSON.parse(body._server_messages)[0]).message; } catch (e) { /* none */ }
+		return { ok: res.ok, status: res.status, text };
+	}
+	document.getElementById("sk-login").addEventListener("submit", async (e) => {
+		e.preventDefault();
+		const m = mobile();
+		if (!m) return;
+		if (!document.getElementById("l-pin").value) { say("Please type your PIN · पिन टाका"); return; }
+		say("…");
+		const r = await post("/api/method/login", { usr: m, pwd: document.getElementById("l-pin").value });
+		if (r.ok) { window.location.reload(); return; }
+		say(r.status === 429 ? "Too many tries. Wait a few minutes · खूप प्रयत्न झाले, थोडा वेळ थांबा" : "Mobile number or PIN is wrong · मोबाईल नंबर किंवा पिन चुकीचा");
+	});
+	const send = document.getElementById("otp-send");
+	if (!send) return;
+	send.addEventListener("click", async () => {
+		const m = mobile();
+		if (!m) return;
+		send.disabled = true;
+		say("…");
+		const r = await post("/api/method/sk_app.otp.send", { mobile: m });
+		send.disabled = false;
+		if (!r.ok) { say(r.text || "SMS could not be sent. Please use your PIN · पिन वापरा"); return; }
+		send.textContent = "Send OTP again · पुन्हा पाठवा";
+		document.getElementById("otp-row").hidden = false;
+		document.getElementById("otp-verify").hidden = false;
+		document.getElementById("l-otp").focus();
+		say("OTP sent by SMS. Valid 5 minutes · SMS ने OTP पाठवला, 5 मिनिटे चालेल");
+	});
+	document.getElementById("otp-verify").addEventListener("click", async () => {
+		const m = mobile();
+		if (!m) return;
+		const r = await post("/api/method/sk_app.otp.verify", { mobile: m, otp: document.getElementById("l-otp").value });
+		if (r.ok) { window.location.reload(); return; }
+		say(r.text || "OTP is wrong · OTP चुकीचा");
+	});
+})();
 </script>
 {% else %}
 <div id="sk-app" data-csrf="{{ csrf_token }}" data-user="{{ user }}">
