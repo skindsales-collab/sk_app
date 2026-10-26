@@ -141,19 +141,76 @@ def _sales_card(start, end, prev_start, prev_end, segment=None):
 		+ [_row(r.customer_name, f"{r.posting_date} · Tally {r.voucher}", r.amount, "Journal Entry", r.name) for r in tally[:80]])
 
 
+def _party_dues(party_type: str, segment=None) -> list:
+	"""Dues per customer / supplier from the General Ledger (SK 26-Oct trial: the year's bills came from Tally as Journal
+	Entries, so the invoices' outstanding showed Rs 23.6 L of the Rs 71.7 L really owed). Payments are set against the
+	oldest bills first; "late" is the age of the oldest bill still unpaid. Advances (minus balances) are left out."""
+	from sk_app.store import _company
+
+	company = _company()
+	accts = frappe.get_all("Account", filters={"company": company, "is_group": 0,
+		"account_type": "Receivable" if party_type == "Customer" else "Payable"}, pluck="name")
+	if not accts:
+		return []
+	sign = 1 if party_type == "Customer" else -1
+	lines = frappe.db.sql("""select party, posting_date, sum(debit - credit) as amount from `tabGL Entry`
+		where company = %s and is_cancelled = 0 and party_type = %s and ifnull(party, '') != '' and account in %s
+		group by party, posting_date, voucher_no order by posting_date""", (company, party_type, tuple(accts)), as_dict=True)
+	by = {}
+	for line in lines:
+		by.setdefault(line.party, []).append((line.posting_date, sign * flt(line.amount)))
+	name_field = "customer_name" if party_type == "Customer" else "supplier_name"
+	group_field = "customer_group" if party_type == "Customer" else "supplier_group"
+	allowed = None
+	if party_type == "Customer" and segment:
+		allowed = set(frappe.get_all("Customer", filters=_seg_filter(segment), pluck="name"))
+	today = getdate()
+	out = []
+	for party, items in by.items():
+		if allowed is not None and party not in allowed:
+			continue
+		paid = sum(-a for _d, a in items if a < 0)
+		open_bills = []
+		for d, a in items:
+			if a <= 0:
+				continue
+			use = min(a, paid)
+			paid -= use
+			if a - use > 0.5:
+				open_bills.append((getdate(d), a - use))
+		due = sum(a for _d, a in open_bills)
+		if due <= 0.5:
+			continue
+		late = date_diff(today, open_bills[0][0])
+		ages = {"0-30 days": 0.0, "31-60 days": 0.0, "Over 60 days": 0.0}
+		for d, a in open_bills:
+			days = date_diff(today, d)
+			ages["0-30 days" if days <= 30 else "31-60 days" if days <= 60 else "Over 60 days"] += a
+		out.append(frappe._dict(name=party, party=party, outstanding_amount=due, late=late, ages=ages))
+	names = {r.name: r[name_field] for r in frappe.get_all(party_type, filters={"name": ["in", [o.name for o in out] or [""]]},
+		fields=["name", name_field, group_field])}
+	for o in out:
+		o[name_field] = o["customer_name"] = names.get(o.name) or o.name
+	out.sort(key=lambda r: -r.late)
+	return out
+
+
 def _receivables(segment=None):
-	rows = frappe.get_all("Sales Invoice", filters={"docstatus": 1, "outstanding_amount": [">", 0], **_seg_filter(segment)},
-		fields=["name", "customer_name", "outstanding_amount", "due_date", "posting_date"], order_by="due_date asc", limit=1000)
-	for r in rows:
-		r["late"] = date_diff(nowdate(), r.due_date or r.posting_date)
-	return rows
+	return _party_dues("Customer", segment)
 
 
 def _receivables_card(segment=None):
 	rows = _receivables(segment)
 	return _card("receivables", "Receivables", sum(flt(r.outstanding_amount) for r in rows), "money", None,
-		[_row(r.customer_name, f"{r.late} days late" if r.late > 0 else "not due", r.outstanding_amount, "Sales Invoice", r.name,
-			"red" if r.late > 60 else "amber" if r.late > 0 else None) for r in rows[:60]])
+		[_row(r.customer_name, f"oldest bill {r.late} days", r.outstanding_amount, "Customer", r.name,
+			"red" if r.late > 60 else "amber" if r.late > 30 else None) for r in sorted(rows, key=lambda r: -r.outstanding_amount)[:60]])
+
+
+def _payables_card(key="payables", label="Payables (supplier dues)"):
+	rows = _party_dues("Supplier")
+	return _card(key, label, sum(flt(r.outstanding_amount) for r in rows), "money", None,
+		[_row(r.supplier_name, f"oldest bill {r.late} days", r.outstanding_amount, "Supplier", r.name,
+			"red" if r.late > 60 else "amber" if r.late > 30 else None) for r in sorted(rows, key=lambda r: -r.outstanding_amount)[:60]])
 
 
 def _cash_card():
@@ -264,7 +321,7 @@ def _attention() -> list[dict]:
 	out = []
 	old = [r for r in (_safe(_receivables, []) or []) if r.late > 60]
 	if old:
-		out.append({"label": "Dues over 60 days", "rows": [_row(r.customer_name, f"{r.late} days late", r.outstanding_amount, "Sales Invoice", r.name, "red") for r in old[:20]]})
+		out.append({"label": "Dues over 60 days", "rows": [_row(r.customer_name, f"oldest bill {r.late} days", r.outstanding_amount, "Customer", r.name, "red") for r in old[:20]]})
 	from sk_app.purchase import po_limit
 
 	pos = _safe(lambda: frappe.get_all("Purchase Order", filters={"docstatus": 0, "grand_total": [">", po_limit()]},
@@ -370,16 +427,13 @@ def _cr100(start, end, ps, pe, segment):
 
 def _finance(start, end, ps, pe, segment, user=None):
 	rec = _receivables(segment)
-	buckets = {"Not due": 0.0, "0-30 days": 0.0, "31-60 days": 0.0, "Over 60 days": 0.0}
+	buckets = {"0-30 days": 0.0, "31-60 days": 0.0, "Over 60 days": 0.0}
 	for r in rec:
-		k = "Not due" if r.late <= 0 else "0-30 days" if r.late <= 30 else "31-60 days" if r.late <= 60 else "Over 60 days"
-		buckets[k] += flt(r.outstanding_amount)
-	pay = frappe.get_all("Purchase Invoice", filters={"docstatus": 1, "outstanding_amount": [">", 0]},
-		fields=["name", "supplier_name", "outstanding_amount", "due_date"], order_by="due_date asc", limit=500)
+		for k, v in r.ages.items():
+			buckets[k] += v
 	cards = [_safe(_cash_card), _receivables_card(segment),
 		_card("ageing", "Receivables ageing", sum(buckets.values()), "money", None, [_row(k, "", v, c="red" if k == "Over 60 days" and v else None) for k, v in buckets.items()]),
-		_card("payables", "Payables (supplier dues)", sum(flt(p.outstanding_amount) for p in pay), "money", None,
-			[_row(p.supplier_name, f"due {p.due_date or ''}", p.outstanding_amount, "Purchase Invoice", p.name) for p in pay[:60]])]
+		_safe(_payables_card)]
 
 	def pnl():
 		from sk_app import ledger
@@ -424,8 +478,6 @@ def _purchase(start, end, ps, pe, segment):
 	waiting = frappe.get_all("Purchase Order", filters={"docstatus": 0}, fields=["name", "supplier_name", "grand_total", "creation"],
 		order_by="creation asc", limit=200)
 	late = [p for p in open_po if p.schedule_date and getdate(p.schedule_date) < getdate() and flt(p.per_received) < 100]
-	pay = frappe.get_all("Purchase Invoice", filters={"docstatus": 1, "outstanding_amount": [">", 0]},
-		fields=["name", "supplier_name", "outstanding_amount", "due_date"], order_by="due_date asc", limit=300)
 	reqs = frappe.get_all("Material Request", filters={"docstatus": 1, "material_request_type": "Purchase", "status": ["in", ["Pending", "Partially Ordered"]]},
 		fields=["name", "schedule_date", "status"], limit=200)
 	limit = po_limit()
@@ -437,8 +489,7 @@ def _purchase(start, end, ps, pe, segment):
 				"amber" if flt(p.grand_total) > limit else None) for p in waiting]),
 		_card("late_po", "Late supplier deliveries", len(late), "count", None,
 			[_row(p.supplier_name, f"was due {p.schedule_date}", p.grand_total, "Purchase Order", p.name, "red") for p in late], "red" if late else None),
-		_card("dues", "Supplier dues", sum(flt(p.outstanding_amount) for p in pay), "money", None,
-			[_row(p.supplier_name, f"due {p.due_date or ''}", p.outstanding_amount, "Purchase Invoice", p.name) for p in pay[:60]]),
+		_safe(lambda: _payables_card("dues", "Supplier dues")),
 		_card("requests", "Buy requests not ordered yet", len(reqs), "count", None,
 			[_row(r.name, f"{r.status} · need by {r.schedule_date}", None, "Material Request", r.name) for r in reqs]),
 	]

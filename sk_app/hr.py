@@ -665,6 +665,53 @@ def _close_todos(doctype: str, name: str):
 		frappe.db.set_value("ToDo", t, "status", "Closed")
 
 
+SK_HOLIDAYS = "SK Holidays {0}-{1}"
+
+
+def ensure_holiday_setup():
+	"""Trial 26-Oct: leave could not be applied on sk-dev: HRMS needs a Holiday List assigned to the company, and the
+	holidays were made as one small list per festival with nothing assigned. Once, after deploy: one list for the
+	financial year with every festival from those lists plus Sunday weekly off (Optick shows Sunday as Week_off),
+	assigned to the company. Nothing is made when the company already has a holiday list."""
+	if not frappe.db.exists("DocType", "Holiday List"):
+		return
+	try:
+		company = _company()
+		if not company:
+			return
+		if frappe.db.exists("DocType", "Holiday List Assignment"):
+			if frappe.db.exists("Holiday List Assignment", {"assigned_to": company, "docstatus": 1}):
+				return
+		elif frappe.db.get_value("Company", company, "default_holiday_list"):
+			return
+		today = getdate()
+		fy = today.year if today.month >= 4 else today.year - 1
+		start, end = getdate(f"{fy}-04-01"), getdate(f"{fy + 1}-03-31")
+		name = SK_HOLIDAYS.format(fy, str(fy + 1)[2:])
+		if not frappe.db.exists("Holiday List", name):
+			festivals = frappe.get_all("Holiday", filters={"parenttype": "Holiday List", "holiday_date": ["between", [start, end]], "weekly_off": 0},
+				fields=["holiday_date", "description"], order_by="holiday_date")
+			seen, rows = set(), []
+			for h in festivals:
+				if h.holiday_date not in seen:
+					seen.add(h.holiday_date)
+					rows.append({"holiday_date": h.holiday_date, "description": h.description})
+			day = start + timedelta(days=(6 - start.weekday()) % 7)
+			while day <= end:
+				if day not in seen:
+					rows.append({"holiday_date": day, "description": "Sunday", "weekly_off": 1})
+				day += timedelta(days=7)
+			frappe.get_doc({"doctype": "Holiday List", "holiday_list_name": name, "from_date": start, "to_date": end,
+				"holidays": sorted(rows, key=lambda r: r["holiday_date"])}).insert(ignore_permissions=True)
+		if frappe.db.exists("DocType", "Holiday List Assignment"):
+			frappe.get_doc({"doctype": "Holiday List Assignment", "applicable_for": "Company", "assigned_to": company,
+				"holiday_list": name, "from_date": start}).insert(ignore_permissions=True).submit()
+		if not frappe.db.get_value("Company", company, "default_holiday_list"):
+			frappe.db.set_value("Company", company, "default_holiday_list", name)
+	except Exception:
+		frappe.log_error("SK App holiday list setup")
+
+
 def badges(user: str, functions: list[str]) -> dict:
 	out = {}
 	try:

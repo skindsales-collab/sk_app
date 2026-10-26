@@ -720,13 +720,13 @@
 	});
 	// change list point 2: Cabin / Non-Cabin customers
 	Object.assign(T.English, {
-		customers: "Customers", seg_not_set: "Segment not set", seg_all: "All", seg_cabin: "Cabin", seg_noncabin: "Non-Cabin",
+		customers: "Customers", tag_tally: "Tag from Tally (Cabin / Non-Cabin sales)", seg_not_set: "Segment not set", seg_all: "All", seg_cabin: "Cabin", seg_noncabin: "Non-Cabin",
 		pick_segment: "Please pick the segment (Cabin or Non-Cabin)", orders_word: "orders", tag_hint: "Tap the segment: the right team then sees this customer.",
 		seen_by_mgmt: "Customers without a segment are seen by Management only until tagged.",
 		"Cabin": "Cabin", "Non-Cabin": "Non-Cabin",
 	});
 	Object.assign(T.Marathi, {
-		customers: "ग्राहक", seg_not_set: "विभाग ठरवलेला नाही", seg_all: "सर्व", seg_cabin: "केबिन", seg_noncabin: "नॉन-केबिन",
+		customers: "ग्राहक", tag_tally: "Tally प्रमाणे विभाग लावा", seg_not_set: "विभाग ठरवलेला नाही", seg_all: "सर्व", seg_cabin: "केबिन", seg_noncabin: "नॉन-केबिन",
 		pick_segment: "कृपया विभाग निवडा (केबिन की नॉन-केबिन)", orders_word: "ऑर्डर", tag_hint: "विभागावर टॅप करा: योग्य टीमला हा ग्राहक दिसेल.",
 		seen_by_mgmt: "विभाग नसलेले ग्राहक टॅग होईपर्यंत फक्त व्यवस्थापनाला दिसतात.",
 		"Cabin": "केबिन", "Non-Cabin": "नॉन-केबिन",
@@ -820,6 +820,22 @@
 	T.Marathi.mic_blocked = "माईक / कॅमेरा बंद आहे. Chrome → ⋮ → Settings → Site settings → Microphone (किंवा Camera) → ही साईट → Allow. मग परत येऊन 🎤 दाबा.";
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
 	T.Marathi.mic_network = "आवाजासाठी इंटरनेट हवे. मोबाईल डेटा तपासा, किंवा कीबोर्डवरील 🎤 वापरा.";
+	Object.assign(T.English, { fl_workflow: "work flow", fl_loading: "live figures loading", fl_days: "days", fl_oldest: "oldest",
+		fl_on_time: "all on time", fl_work: "Work on it", fl_first: "Showing the first" });
+	Object.assign(T.Marathi, { fl_workflow: "कामाचा क्रम", fl_loading: "आकडे येत आहेत", fl_days: "दिवस", fl_oldest: "सर्वात जुने",
+		fl_on_time: "सर्व वेळेवर", fl_work: "काम करा", fl_first: "पहिले दाखवले" });
+	Object.assign(T.English, { lk_locked: "Locked", lk_touch: "Touch finger or look at the phone", lk_open_face: "Open with face / finger",
+		lk_ask_ceo: "Not working or new phone? Ask the CEO to reset it.", lk_pin: "Your PIN", lk_open: "Open",
+		lk_cancelled: "Not checked. Tap the button and touch the finger sensor or look at the phone.",
+		lk_setup: "Set up face / finger", lk_setup_why: "From now on the app opens only with your phone's fingerprint or face lock, no PIN. Your finger and face stay on the phone; nothing is sent.",
+		lk_setup_now: "Set up now", lk_setup_done: "Face / finger set up. The PIN is not needed any more.",
+		lk_reset: "Reset face / finger", lk_reset_q: "Reset face / finger? The person opens with the PIN once and sets it up again.", lk_reset_done: "Face / finger reset" });
+	Object.assign(T.Marathi, { lk_locked: "लॉक आहे", lk_touch: "बोट लावा किंवा फोनकडे पहा", lk_open_face: "चेहरा / बोटाने उघडा",
+		lk_ask_ceo: "चालत नाही किंवा नवीन फोन? CEO ला रीसेट करायला सांगा.", lk_pin: "तुमचा पिन", lk_open: "उघडा",
+		lk_cancelled: "तपासले नाही. बटण दाबा आणि बोट लावा किंवा फोनकडे पहा.",
+		lk_setup: "चेहरा / बोट लॉक सुरू करा", lk_setup_why: "आता पासून ॲप फक्त फोनच्या बोट / चेहरा लॉकने उघडेल, पिन नाही. बोट आणि चेहरा फोनवरच राहतात; काहीही पाठवले जात नाही.",
+		lk_setup_now: "आत्ता सुरू करा", lk_setup_done: "चेहरा / बोट लॉक तयार. आता पिन लागणार नाही.",
+		lk_reset: "चेहरा / बोट रीसेट", lk_reset_q: "चेहरा / बोट रीसेट करायचे? ती व्यक्ती एकदा पिनने उघडून परत सुरू करेल.", lk_reset_done: "चेहरा / बोट रीसेट झाले" });
 	const ICON = {
 		my_day: "☀️", my_leads: "🎯", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
 		job_cards: "🛠️", inspections: "✅", stock_alerts: "📦", material_requests: "🧾", invoice_photo: "📷",
@@ -840,13 +856,14 @@
 
 	// while the CEO views a member's app every reading screen runs as the member (their own permissions); saving is blocked
 	const VIEW_OWN = new Set(["view_members", "view_suggest", "report_screen_error"]);
-	async function call(method, args, post) {
+	async function call(method, args, post, background) {
 		if (state.viewAs && !VIEW_OWN.has(method)) {
 			if (post) throw new Error(t("view_only"));
 			args = { member: state.viewAs.user, method, args: JSON.stringify(args || {}), view: state.view };
 			method = "view_as";
 		}
 		const opts = { headers: { Accept: "application/json", "X-Frappe-CSRF-Token": CSRF }, credentials: "same-origin" };
+		if (background) opts.headers["X-SK-Background"] = "1"; // the minute check does not keep the app unlocked
 		let url = "/api/method/sk_app.api." + method;
 		if (post) {
 			opts.method = "POST";
@@ -860,6 +877,7 @@
 		if (!res.ok) {
 			let msg = "Error";
 			try { msg = JSON.parse(JSON.parse(data._server_messages)[0]).message; } catch (e) { msg = data.exception || msg; }
+			if (String(msg).includes("SK_LOCKED")) { if (!post && !background) lockHit = true; showLock(); throw new Error(t("lk_locked")); }
 			throw new Error(String(msg).replace(/<[^>]*>/g, "")); // ERPNext messages carry <strong> tags
 		}
 		return data.message;
@@ -1086,9 +1104,65 @@
 		if (!h.sections) { root.innerHTML = header("SK App") + `<main>${tiles(fn.tiles)}</main>`; return; }
 		// a person in several functions: one labelled row per function, then the tiles everyone has (SK, 26-Oct)
 		const label = (l) => (l && (l[state.lang] || l.English)) || "";
-		const rows = h.sections.sections.filter((x) => x.tiles.length).map((x) => `<h3 class="sk-h sk-fn-row">${esc(label(x.label))}</h3>${tiles(x.tiles)}`).join("");
+		// point 17: each function's live process flow on top of its icons; the icons in work order with arrows
+		const rows = h.sections.sections.filter((x) => x.tiles.length).map((x) => `<h3 class="sk-h sk-fn-row">${esc(label(x.label))} · ${t("fl_workflow")}</h3>
+			<div class="sk-flowbox" data-fn="${esc(x.function)}">${flowHtml(x.function)}</div>${seqTiles(x.tiles, tiles)}`).join("");
 		root.innerHTML = header("SK App") + `<main>${rows}<h3 class="sk-h sk-fn-row">${t("for_everyone")}</h3>${tiles(h.sections.shared)}</main>`;
+		loadFlows();
 	}
+	// the function's own icons joined by arrows, in the order the work goes (SK's mock-ups 26-Oct)
+	function seqTiles(keys, tiles) {
+		const html = tiles(keys);
+		return html.replace(/<div class="sk-tiles small">/g, '<div class="sk-tiles small sk-seq">');
+	}
+	// ---------- Point 17: live process flow ----------
+	let flowData = null, flowAt = 0, flowLoading = false;
+	const shortMoneyF = (v) => (Math.abs(v) >= 1e7 ? `₹${(v / 1e7).toFixed(2)} Cr` : Math.abs(v) >= 1e5 ? `₹${(v / 1e5).toFixed(1)} L` : `₹${Math.round(v).toLocaleString("en-IN")}`);
+	function flowHtml(fn) {
+		if (!flowData) return `<p class="sk-note">… ${t("fl_loading")}</p>`;
+		const flows = flowData.flows.map((f, i) => [f, i]).filter(([f]) => f.function === fn);
+		if (!flows.length) return "";
+		return flows.map(([f, fi]) => `${f.label ? `<div class="sk-flow-name">${esc(f.label)}</div>` : ""}<div class="sk-flow">${f.stages.map((st, si) =>
+			`${si ? `<span class="sk-flow-arrow">➜</span>` : ""}<button class="sk-flow-box ${st.c ? "c-" + st.c : ""}" data-flow="${fi}:${si}">
+				<span class="sk-flow-icon">${st.icon}</span><span class="sk-flow-label">${esc(st.label)}</span>
+				<b class="sk-flow-n">${st.count}</b>${st.value ? `<small>${shortMoneyF(st.value)}</small>` : ""}
+				${st.late ? `<small class="sk-flow-late">${st.late} ${t("late")} · ${st.oldest} ${t("fl_days")}</small>` : ""}</button>`).join("")}</div>`).join("");
+	}
+	async function loadFlows(force) {
+		if (flowLoading || (!force && flowData && Date.now() - flowAt < 60 * 1000)) return paintFlows();
+		flowLoading = true;
+		try { flowData = await call("my_flow"); flowAt = Date.now(); } catch (e) { flowData = flowData || { flows: [] }; }
+		flowLoading = false;
+		paintFlows();
+	}
+	function paintFlows() {
+		if (state.view !== "home") return;
+		root.querySelectorAll(".sk-flowbox").forEach((el) => { el.innerHTML = flowHtml(el.dataset.fn); });
+	}
+	function renderFlowStage(fi, si) {
+		const f = flowData.flows[fi], st = f.stages[si];
+		state.view = "flow";
+		root._flowRows = st.rows;
+		root.innerHTML = header(`${st.icon} ${st.label}`) + `<main>
+			<p class="sk-note">${st.count} · ${st.value ? shortMoneyF(st.value) + " · " : ""}${st.late ? `<span class="sk-due">${st.late} ${t("late")}, ${t("fl_oldest")} ${st.oldest} ${t("fl_days")}</span>` : t("fl_on_time")}</p>
+			${st.go && ICON[st.go] ? `<button class="sk-btn go wide" data-go="${esc(st.go)}">${ICON[st.go]} ${t("fl_work")}: ${t(st.go)}</button>` : ""}
+			<ul class="sk-list">${st.rows.map((r, j) => `<li class="sk-item ${r.c ? "k-" + r.c : ""}"><button class="sk-fu-main" data-flowrow="${j}">
+				<div class="sk-item-title">${r.c === "red" ? "🔴 " : r.c === "amber" ? "🟠 " : ""}${esc(r.title)}</div>
+				<div class="sk-item-meta">${esc(r.meta || "")}</div></button>
+				${r.value != null ? `<b>${typeof r.value === "number" ? shortMoneyF(r.value) : esc(r.value)}</b>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
+			${st.count > st.rows.length ? `<p class="sk-note">${t("fl_first")} ${st.rows.length}</p>` : ""}
+			<button class="sk-btn wide" data-go="home">‹ ${t("back")}</button></main>`;
+	}
+	document.addEventListener("click", (ev) => {
+		const b = ev.target.closest("[data-flow],[data-flowrow]");
+		if (!b || !root.contains(b)) return;
+		ev.stopPropagation();
+		if (b.dataset.flow) { const [fi, si] = b.dataset.flow.split(":").map(Number); return renderFlowStage(fi, si); }
+		const r = root._flowRows[Number(b.dataset.flowrow)];
+		if (!r || !r.doctype || !r.name || r.doctype === "User") return;
+		if (r.doctype === "CRM Lead" || r.doctype === "CRM Deal") { current = { doctype: r.doctype, name: r.name }; return go("detail"); }
+		window.open(`/app/${r.doctype.toLowerCase().replace(/ /g, "-")}/${encodeURIComponent(r.name)}`, "_blank");
+	}, true);
 
 	function renderSetPin() {
 		state.view = "home";
@@ -1100,7 +1174,7 @@
 			<button class="sk-btn ok wide" data-act="pin-save">${t("save")}</button></main>`;
 	}
 
-	// HR: every login is made from the person's mobile number; the app gives a first PIN (SK, 26-Oct)
+	// The CEO (point 20; HR until then): every login is made from the person's mobile number; the app gives a first PIN
 	let loginOpts = null;
 	async function renderLogins() {
 		const people = await call("hr_people");
@@ -1115,6 +1189,7 @@
 				: p.state === "closed" ? `<button class="sk-chip" data-act="login-new" data-i="${i}">↺ ${t("make_login")}</button>`
 				: `<button class="sk-chip" data-act="login-new" data-i="${i}">✏️ ${t("edit_login")}</button>
 					<button class="sk-chip" data-act="login-reset" data-i="${i}">🔑 ${t("reset_pin")}</button>
+					<button class="sk-chip" data-act="login-face" data-i="${i}">🙂 ${t("lk_reset")}</button>
 					<button class="sk-chip bad" data-act="login-close" data-i="${i}">✕ ${t("close_login")}</button>`;
 			return `<li class="sk-item sk-person"><div><b>${esc(p.name)}</b>${warn}<div class="sk-item-meta">${esc(sub)}</div></div><div class="sk-row sk-wrap">${btn}</div></li>`;
 		};
@@ -2299,6 +2374,7 @@
 			${segChips}
 			<div class="sk-input-row sk-gap"><input id="cust-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(custQuery)}">${micBox("cust-q")}</div>
 			${custTab === "not_set" ? `<p class="sk-note">${t("tag_hint")} ${t("seen_by_mgmt")}</p>` : ""}
+			${custTab === "not_set" && d.from_tally ? `<button class="sk-btn go wide" data-act="cust-tally">📒 ${t("tag_tally")} (${d.from_tally})</button>` : ""}
 			<ul class="sk-list">${d.rows.map((r, i) => `<li class="sk-item"><div style="flex:1">
 				<div class="sk-item-title">${esc(r.customer_name || r.name)}</div>
 				<div class="sk-item-meta">${[r.segment ? `<span class="chip2 ${r.main === "Cabin" ? "navy" : "yel"}">${esc(r.segment)}</span>` : esc(r.customer_group || ""),
@@ -3555,6 +3631,21 @@
 				document.getElementById("q-note-wrap-" + k).hidden = el.dataset.v === "1";
 				return;
 			}
+			if (act === "face-setup") {
+				try {
+					lockInfo = await faceSetup();
+					closeSheet();
+					toast("✓ " + t("lk_setup_done"));
+				} catch (e) { toast(e.name === "NotAllowedError" ? t("lk_cancelled") : e.message, true); }
+				return;
+			}
+			if (act === "login-face") {
+				const p = root._people && root._people[Number(el.dataset.i)];
+				if (!p || !confirm(`${p.name}: ${t("lk_reset_q")}`)) return;
+				const r = await call("reset_face", { user: p.user }, true);
+				toast(`✓ ${t("lk_reset_done")} (${r.reset})`);
+				return;
+			}
 			if (act === "pin-save") {
 				if (val("p-new") !== val("p-new2")) return toast(t("pin_mismatch"), true);
 				el.disabled = true;
@@ -3761,6 +3852,11 @@
 				toast(t("idea_sent"));
 				return;
 			}
+			if (act === "cust-tally") {
+				const r = await call("tag_customers_from_tally", {}, true);
+				toast(`✓ ${t("seg_cabin")} ${r.cabin} · ${t("seg_noncabin")} ${r.non_cabin}`);
+				return go("customers");
+			}
 			if (act === "cust-tag") {
 				const r = S.cust[Number(el.dataset.i)];
 				await call("tag_customer", { customer: r.name, segment: el.dataset.seg }, true);
@@ -3961,6 +4057,104 @@
 
 	function val(id) { const el = document.getElementById(id); return el ? el.value.trim() : ""; }
 
+
+	// ---------- App lock (point 20, SK 26-Oct): face / finger only after set-up, locks after 30 min without use ----------
+	const b64u = {
+		dec: (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)), (c) => c.charCodeAt(0)),
+		enc: (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""),
+	};
+	const canFace = async () => {
+		try { return !!(window.PublicKeyCredential && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()); } catch (e) { return false; }
+	};
+	let lockInfo = null, lastTouch = Date.now(), lockHit = false;
+	["touchstart", "click", "keydown", "scroll"].forEach((ev) => document.addEventListener(ev, () => { lastTouch = Date.now(); }, { passive: true, capture: true }));
+	async function faceUnlock() {
+		const o = await call("face_options", { purpose: "unlock" }, true);
+		const cred = await navigator.credentials.get({ publicKey: { challenge: b64u.dec(o.challenge), rpId: o.rpId, timeout: o.timeout,
+			userVerification: "required", allowCredentials: o.allowCredentials.map((c) => ({ type: "public-key", id: b64u.dec(c.id) })) } });
+		return call("face_unlock", { credential: { id: cred.id, rawId: b64u.enc(cred.rawId), type: cred.type, response: {
+			clientDataJSON: b64u.enc(cred.response.clientDataJSON), authenticatorData: b64u.enc(cred.response.authenticatorData),
+			signature: b64u.enc(cred.response.signature) } } }, true);
+	}
+	async function faceSetup() {
+		const o = await call("face_options", { purpose: "setup" }, true);
+		const cred = await navigator.credentials.create({ publicKey: { ...o, challenge: b64u.dec(o.challenge),
+			user: { ...o.user, id: b64u.dec(o.user.id) }, excludeCredentials: (o.excludeCredentials || []).map((c) => ({ type: "public-key", id: b64u.dec(c.id) })) } });
+		return call("face_setup", { credential: { id: cred.id, rawId: b64u.enc(cred.rawId), type: cred.type, response: {
+			clientDataJSON: b64u.enc(cred.response.clientDataJSON), attestationObject: b64u.enc(cred.response.attestationObject) } } }, true);
+	}
+	function hideLock() {
+		const el = document.getElementById("sk-lock");
+		if (el) el.remove();
+		lastTouch = Date.now();
+	}
+	// the lock covers the screen; what was typed or photographed under it stays (point 20: work kept as a draft)
+	async function showLock(info) {
+		if (state.viewAs) return;
+		lockInfo = info || await fetch("/api/method/sk_app.api.lock_status", { headers: { Accept: "application/json" }, credentials: "same-origin" })
+			.then((r) => r.json()).then((d) => d.message).catch(() => lockInfo);
+		if (!lockInfo) return;
+		let el = document.getElementById("sk-lock");
+		if (!el) { el = document.createElement("div"); el.id = "sk-lock"; el.className = "sk-lock"; document.body.appendChild(el); }
+		const face = lockInfo.has_key;
+		el.innerHTML = `<div class="sk-lock-box"><div class="sk-lock-icon">🔒</div><h2>${t("lk_locked")}</h2>
+			<p class="sk-note">${esc(lockInfo.name || "")}</p>
+			${face ? `<p class="sk-big">👆 ${t("lk_touch")}</p><button class="sk-btn go wide" data-lock="face">🙂 ${t("lk_open_face")}</button>
+				<p class="sk-note">${t("lk_ask_ceo")}</p>`
+			: `<label class="sk-field"><span>${t("lk_pin")}</span><input id="lk-pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8"></label>
+				<button class="sk-btn go wide" data-lock="pin">${t("lk_open")}</button>`}
+			<p class="sk-lock-msg" id="lk-msg"></p></div>`;
+		if (face) setTimeout(() => el.querySelector("[data-lock=face]") && el.querySelector("[data-lock=face]").click(), 300);
+	}
+	async function afterUnlock(st) {
+		lockInfo = st;
+		hideLock();
+		if (!state.home) await start();
+		else if (lockHit) go(state.view); // a screen that could not load while locked opens now (typed forms are left as they are)
+		lockHit = false;
+		if (!st.has_key && await canFace()) faceSetupSheet();
+	}
+	function faceSetupSheet() {
+		sheet(`<h3 class="sk-h">🙂 ${t("lk_setup")}</h3><p class="sk-note">${t("lk_setup_why")}</p>
+			<button class="sk-btn go wide" data-act="face-setup">👆 ${t("lk_setup_now")}</button>`);
+	}
+	document.addEventListener("click", async (ev) => {
+		const b = ev.target.closest("[data-lock]");
+		if (!b) return;
+		const msg = document.getElementById("lk-msg");
+		b.disabled = true;
+		try {
+			if (b.dataset.lock === "face") await afterUnlock(await faceUnlock());
+			else await afterUnlock(await call("unlock_pin", { pin: (document.getElementById("lk-pin") || {}).value || "" }, true));
+		} catch (e) {
+			if (msg) msg.textContent = e.name === "NotAllowedError" ? t("lk_cancelled") : e.message;
+			if (/log in again/i.test(e.message)) setTimeout(() => location.reload(), 1500);
+		}
+		b.disabled = false;
+	});
+	document.addEventListener("keydown", (ev) => { if (ev.key === "Enter" && ev.target.id === "lk-pin") document.querySelector("[data-lock=pin]").click(); });
+	// no touch for the lock time: lock (the server also locks by itself after that time)
+	setInterval(() => {
+		if (!lockInfo || !lockInfo.minutes || document.getElementById("sk-lock") || state.viewAs) return;
+		if (Date.now() - lastTouch > lockInfo.minutes * 60 * 1000) call("lock_now", {}, true).catch(() => {}).finally(() => showLock());
+	}, 20 * 1000);
+	// every time the app is opened (not a reload of the open app): locked, unless the person has just logged in
+	async function lockAtOpen() {
+		const st = await fetch("/api/method/sk_app.api.lock_status", { headers: { Accept: "application/json" }, credentials: "same-origin" })
+			.then((r) => r.json()).then((d) => d.message).catch(() => null);
+		if (!st || !st.minutes) return false;
+		lockInfo = st;
+		let opened = false;
+		try { opened = !!sessionStorage.getItem("sk_open"); sessionStorage.setItem("sk_open", "1"); } catch (e) { /* private mode */ }
+		if (!opened && !st.locked && !st.just_unlocked) {
+			await call("lock_now", {}, true).catch(() => {});
+			st.locked = true;
+		}
+		if (st.locked) { showLock(st); return true; }
+		if (!st.has_key && await canFace()) setTimeout(faceSetupSheet, 1500);
+		return false;
+	}
+
 	async function start() {
 		try {
 			state.home = await call("home");
@@ -3999,7 +4193,7 @@
 	async function poll() {
 		if (document.hidden || !state.home) return;
 		try {
-			const h = await call("home");
+			const h = await call("home", null, false, true);
 			if (reloadIfNew(h)) return;
 			const known = new Set((state.home.new_files || []).map((f) => f.name));
 			const fresh = (h.new_files || []).filter((f) => !known.has(f.name));
@@ -4027,5 +4221,5 @@
 	setInterval(poll, 60 * 1000);
 	document.addEventListener("visibilitychange", () => { if (!document.hidden && !pending) poll(); });
 
-	start().then(() => setTimeout(poll, 3000));
+	lockAtOpen().then((locked) => (locked ? null : start())).then(() => setTimeout(poll, 3000));
 })();

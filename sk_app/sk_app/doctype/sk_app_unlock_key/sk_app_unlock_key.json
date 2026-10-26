@@ -1,0 +1,99 @@
+{
+ "doctype": "DocType",
+ "name": "SK App Unlock Key",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-10-26 15:00:00.000000",
+ "modified": "2026-10-26 15:00:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "naming_rule": "Random",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "description": "Change list point 20: the phone's own face / finger lock linked to a person's SK App login (one row per phone). Only the public key is kept; no photo or fingerprint ever leaves the phone. Only the CEO resets it.",
+ "field_order": [
+  "user",
+  "device",
+  "enabled",
+  "last_used",
+  "credential_id",
+  "public_key",
+  "alg",
+  "sign_count"
+ ],
+ "fields": [
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "User",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "device",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled",
+   "default": "1",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "last_used",
+   "fieldtype": "Datetime",
+   "label": "Last used",
+   "read_only": 1
+  },
+  {
+   "fieldname": "credential_id",
+   "fieldtype": "Small Text",
+   "label": "Credential ID",
+   "reqd": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "public_key",
+   "fieldtype": "Small Text",
+   "label": "Public key (COSE)",
+   "reqd": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "alg",
+   "fieldtype": "Int",
+   "label": "Algorithm",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sign_count",
+   "fieldtype": "Int",
+   "label": "Sign count",
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1
+  }
+ ],
+ "states": [],
+ "actions": [],
+ "index_web_pages_for_search": 0,
+ "autoname": "hash",
+ "title_field": "device",
+ "links": []
+}

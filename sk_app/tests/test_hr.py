@@ -128,3 +128,12 @@ class TestHr(IntegrationTestCase):
 		d = run(BOSS, hr.decide_expense, c["name"], 1)
 		self.assertEqual(d["status"], "Approved")
 		self.assertEqual(frappe.db.get_value("Expense Claim", c["name"], "approval_status"), "Approved")
+
+	def test_company_holiday_list_made_once(self):
+		hr.ensure_holiday_setup()
+		company = frappe.db.get_value("Employee", self.staff, "company")
+		if frappe.db.exists("DocType", "Holiday List Assignment"):
+			self.assertTrue(frappe.db.exists("Holiday List Assignment", {"assigned_to": company, "docstatus": 1}))
+		n = frappe.db.count("Holiday List")
+		hr.ensure_holiday_setup()
+		self.assertEqual(frappe.db.count("Holiday List"), n)

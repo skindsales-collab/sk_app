@@ -144,3 +144,46 @@ class TestCeoDashboards(IntegrationTestCase):
 		self.assertEqual(dashboards._invoiced(start, end) - before, 11800)
 		self.assertTrue(any(r.name == je.name for r in dashboards._tally_sales(start, end, "Non-Cabin")))
 		self.assertFalse(any(r.name == je.name for r in dashboards._tally_sales(start, end, "Cabin")))
+
+	def test_dues_from_ledger_and_tag_from_tally(self):
+		"""Trial on live sk-dev data (26-Oct): Tally bills are Journal Entries against the party, so the CEO's receivables
+		come from the ledger; customers get their Cabin / Non-Cabin from their Tally sales vouchers."""
+		from frappe.utils import add_days, nowdate
+
+		from sk_app import dashboards
+
+		company = frappe.db.get_value("Company", {}, "name")
+		if not company:
+			self.skipTest("needs an ERPNext company")
+		debtors = frappe.db.get_value("Account", {"company": company, "account_type": "Receivable", "is_group": 0}, "name")
+		income = frappe.db.get_value("Account", {"company": company, "root_type": "Income", "is_group": 0}, "name")
+		cash = frappe.db.get_value("Account", {"company": company, "account_type": "Cash", "is_group": 0}, "name")
+		if not (debtors and income and cash):
+			self.skipTest("needs debtors, income and cash accounts")
+		old_group = frappe.db.get_value("Customer Group", {"is_group": 0, "name": ["not in", segments.all_groups()]}) or "All Customer Groups"
+		party = _customer("SK Test Tally Party", old_group)
+		frappe.db.set_value("Customer", party, "customer_group", old_group)
+
+		def je(remark, days_ago, dr, cr, amount, party_side):
+			rows = [{"account": dr, "debit_in_account_currency": amount}, {"account": cr, "credit_in_account_currency": amount}]
+			rows[0 if party_side == "dr" else 1].update({"party_type": "Customer", "party": party})
+			d = frappe.get_doc({"doctype": "Journal Entry", "company": company, "posting_date": add_days(nowdate(), -days_ago),
+				"user_remark": remark, "accounts": rows}).insert(ignore_permissions=True)
+			d.submit()
+
+		je("Tally Non Cabin Sales 9101 | SK Test Tally Party", 90, debtors, income, 50000, "dr")
+		je("Tally Non Cabin Sales 9102 | SK Test Tally Party", 10, debtors, income, 20000, "dr")
+		je("Tally Receipt 9103 | SK Test Tally Party", 5, cash, debtors, 30000, "cr")
+		due = next(r for r in dashboards._receivables() if r.name == party)
+		self.assertEqual(due.outstanding_amount, 40000)  # 70,000 billed - 30,000 paid
+		self.assertEqual(due.ages["Over 60 days"], 20000)  # the payment went to the oldest bill first
+		self.assertEqual(due.ages["0-30 days"], 20000)
+		self.assertGreaterEqual(due.late, 89)
+
+		self.assertEqual(segments.tally_suggestions().get(party), "Non-Cabin")
+		with self.assertRaises(frappe.PermissionError):
+			segments.tag_from_tally(CABIN_REP)
+		r = segments.tag_from_tally(CEO)
+		self.assertGreaterEqual(r["non_cabin"], 1)
+		self.assertEqual(frappe.db.get_value("Customer", party, "customer_group"), "Other Non-Cabin")
+		self.assertNotIn(party, segments.tally_suggestions())

@@ -15,7 +15,8 @@ DASH_TILES = ["dash_overview", "dash_daily_review", "dash_sales", "dash_marketin
 FUNCTIONS = {
 	"Sales": {
 		"label": {"English": "Sales", "Marathi": "विक्री"},
-		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "my_deals", "customers", "complaints", "reminders", "library",
+		# point 17 (SK's mock-up 26-Oct): own icons in work order New Lead → My Leads → My Deals → Customers → Follow-up → Complaints
+		"tiles": ["my_day", "calendar", "new_lead", "my_leads", "my_deals", "customers", "follow_up", "complaints", *CONTACT_TILES, "reminders", "library",
 			"day_report", "my_kpi", "dsi", "problem", "training"],
 		"live": True,
 		# not Sales Manager: in Frappe CRM that role shows every lead of the company (SK 26-Oct: each salesperson sees
@@ -25,7 +26,7 @@ FUNCTIONS = {
 	},
 	"Marketing": {
 		"label": {"English": "Marketing", "Marathi": "मार्केटिंग"},
-		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "complaints", "reminders", "library", "day_report",
+		"tiles": ["my_day", "calendar", "new_lead", "my_leads", "follow_up", "complaints", *CONTACT_TILES, "reminders", "library", "day_report",
 			"my_kpi", "dsi", "problem", "training"],
 		"live": True,  # uses the same CRM lead screens as Sales
 		"erpnext_roles": ["Sales User"],
@@ -33,7 +34,8 @@ FUNCTIONS = {
 	},
 	"Production": {
 		"label": {"English": "Production", "Marathi": "उत्पादन"},
-		"tiles": ["my_day", "order_board", "job_cards", "need_material", "progress_photos", "ready_dispatch", "non_conformance", "complaints", *COMMON_TILES[1:]],
+		# point 17 (SK's mock-up): Need Material → Job Cards → Order Board → Progress Photos → Ready to Dispatch → Non-Conformance
+		"tiles": ["my_day", "need_material", "job_cards", "order_board", "progress_photos", "ready_dispatch", "non_conformance", "complaints", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Manufacturing User", "Manufacturing Manager"],
 		"desk": "/app/manufacturing",
@@ -48,7 +50,8 @@ FUNCTIONS = {
 	"Stores": {
 		"label": {"English": "Stores", "Marathi": "स्टोअर"},
 		# SK draft F01: My Day first, then the Store icons, then the common ones
-		"tiles": ["my_day", "stock_check", "receive", "issue", "store_requests", "dispatch", "low_stock", "stock_count", "new_item", "complaints", *COMMON_TILES[1:]],
+		# point 17 (SK's mock-up): Requests → Stock Check → Receive → Issue → Stock Count → New Item → Low Stock → Dispatch
+		"tiles": ["my_day", "store_requests", "stock_check", "receive", "issue", "stock_count", "new_item", "low_stock", "dispatch", "complaints", *COMMON_TILES[1:]],
 		"live": True,
 		# Stock Manager: needed to make stock count drafts and to pick accounts on receipts / delivery notes
 		"erpnext_roles": ["Stock User", "Stock Manager"],
@@ -75,7 +78,8 @@ FUNCTIONS = {
 	"HR": {
 		"label": {"English": "HR", "Marathi": "एचआर"},
 		# point 16 + HR draft Rev 2: Attendance (Optick file upload, today, month, fixes); leave and expense approvals
-		"tiles": COMMON_TILES[:1] + ["attendance", "logins"] + COMMON_TILES[1:] + ["team_scorecards", "mail"],
+		# point 20 (SK 26-Oct): Logins / Reset PIN are the CEO's only, so HR has no Logins icon any more
+		"tiles": COMMON_TILES[:1] + ["attendance"] + COMMON_TILES[1:] + ["team_scorecards", "mail"],
 		"live": True,
 		"erpnext_roles": ["HR User", "HR Manager"],
 		"desk": "/app/hr",

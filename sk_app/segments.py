@@ -163,7 +163,10 @@ def customers(user: str, tab: str = "mine", q: str | None = None, segment: str |
 		r["main"] = main_of(r.customer_group)
 		r["orders"] = totals.get(r.name) or 0
 	not_set = frappe.db.count("Customer", {"disabled": 0, "customer_group": ["not in", all_groups()]}) if tagger else 0
-	return {"main": main, "tree": TREE, "rows": rows, "not_set": not_set, "can_tag": tagger}
+	from sk_app.logins import profile_functions
+
+	tally = len(tally_suggestions()) if tab == "not_set" and (user == "Administrator" or "Management" in profile_functions(user)) else 0
+	return {"main": main, "tree": TREE, "rows": rows, "not_set": not_set, "can_tag": tagger, "from_tally": tally}
 
 
 def tag(user: str, customer: str, segment: str) -> dict:
@@ -186,6 +189,38 @@ def tag(user: str, customer: str, segment: str) -> dict:
 		"content": f"Segment set to {sub} in SK App by {frappe.utils.get_fullname(user)}"
 		+ (f" (old group: {old.customer_group})" if old.customer_group else "")}).insert(ignore_permissions=True)
 	return {"customer": customer, "group": GROUP_OF[sub], "main": main_of(sub)}
+
+
+TALLY_DEFAULT = {CABIN: "Standard Cabin (GI / ACP)", NON_CABIN: "Other"}
+
+
+def tally_suggestions() -> dict:
+	"""SK 26-Oct: "in Tally all data was with segment". Customers not tagged yet get the segment of their Tally sales
+	vouchers ("Tally Sales" = Cabin, "Tally Non Cabin Sales" = Non-Cabin). A customer found in both stays untagged
+	for a person to decide. {customer: main segment}"""
+	rows = frappe.db.sql("""select jea.party, max(je.user_remark like 'Tally Non Cabin Sales%%') as non_cabin,
+			max(je.user_remark like 'Tally Sales%%') as cabin
+		from `tabJournal Entry Account` jea join `tabJournal Entry` je on je.name = jea.parent
+		where je.docstatus = 1 and jea.party_type = 'Customer' and ifnull(jea.party, '') != ''
+			and (je.user_remark like 'Tally Sales%%' or je.user_remark like 'Tally Non Cabin Sales%%')
+		group by jea.party""", as_dict=True)
+	untagged = set(frappe.get_all("Customer", filters={"customer_group": ["not in", all_groups()],
+		"name": ["in", [r.party for r in rows] or [""]]}, pluck="name"))
+	return {r.party: (NON_CABIN if r.non_cabin else CABIN) for r in rows if r.party in untagged and bool(r.cabin) != bool(r.non_cabin)}
+
+
+def tag_from_tally(user: str) -> dict:
+	"""One tap for Management: tag every untagged customer with its Tally segment (Cabin → Standard Cabin, Non-Cabin →
+	Other; Rushi / Aditya can change the sub-segment later). Each customer gets a note, so it can be checked."""
+	from sk_app.logins import profile_functions
+
+	if user != "Administrator" and "Management" not in profile_functions(user):
+		frappe.throw(_("Only the CEO can tag customers from Tally"), frappe.PermissionError)
+	done = {CABIN: 0, NON_CABIN: 0}
+	for customer, main in tally_suggestions().items():
+		tag(user, customer, TALLY_DEFAULT[main])
+		done[main] += 1
+	return {"cabin": done[CABIN], "non_cabin": done[NON_CABIN]}
 
 
 def sync_user_permissions():
