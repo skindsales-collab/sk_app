@@ -147,6 +147,22 @@ class TestStorePurchase(IntegrationTestCase):
 		self.assertEqual(dn.docstatus, 0)
 		self.assertEqual(dn.vehicle_no, "MH 46 AB 1234")
 
+	def test_erp_flow_order_to_work_order(self):
+		"""SK 26-Oct: Production makes the Work Order of a confirmed order in the app (BOM needed, Design makes it)."""
+		from sk_app import erp_flow
+
+		so = frappe.get_doc({"doctype": "Sales Order", "customer": CUSTOMER, "company": self.company, "delivery_date": add_days(nowdate(), 5),
+			"items": [{"item_code": FG, "qty": 2, "rate": 500000, "warehouse": self.fgw, "delivery_date": add_days(nowdate(), 5)}]})
+		so.insert()
+		so.submit()
+		rows = [r for r in run(BOSS, erp_flow.orders_to_plan) if r["sales_order"] == so.name]
+		self.assertEqual(len(rows), 1)
+		self.assertTrue(rows[0]["bom"])
+		wo = run(BOSS, erp_flow.make_work_order, so.name, rows[0]["so_item"])
+		self.assertEqual(frappe.db.get_value("Work Order", wo["name"], "sales_order"), so.name)
+		self.assertFalse([r for r in run(BOSS, erp_flow.orders_to_plan) if r["sales_order"] == so.name])
+		self.assertRaises(frappe.PermissionError, run, STORE_U, erp_flow.orders_to_plan)
+
 	def test_stock_count_sends_only_differences(self):
 		rows = run(STORE_U, store.count_list, self.stores)
 		book = next(r["qty"] for r in rows if r["item_code"] == RAW)

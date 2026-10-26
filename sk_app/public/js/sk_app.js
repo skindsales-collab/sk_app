@@ -744,6 +744,12 @@
 	});
 	// SK 26-Oct: short main screen with levels, SAS, Leadership & Strategy, Target Action Plan, receipt bill check
 	Object.assign(T.English, {
+		co_flow: "Company flow", all_dash: "All dashboards", to_plan: "Orders to plan", fl_order_received: "Order received → Sales Order", fl_confirm: "Confirm order (factory can plan)",
+		fl_new_quote: "Make quotation", fl_quote_why: "Saved in ERPNext as a Quotation for this customer (the customer is made by itself). The PDF opens to send.",
+		fl_add_item: "Add item", fl_rate_blank: "blank = price list", fl_valid: "Valid for days", fl_terms: "Terms / note", fl_quote_saved: "Quotation saved",
+		fl_order_why: "The quotation is submitted and a Sales Order is made from it.", fl_delivery: "Promised delivery date", fl_po_no: "Customer PO no (optional)",
+		fl_so_saved: "Sales Order saved", fl_plan_why: "Confirmed orders without a Work Order. Make one per cabin; its stages become job cards.",
+		fl_no_bom: "No BOM yet: Design makes it first", fl_make_wo: "Make Work Order", fl_wo_saved: "Work Order saved",
 		more: "More", grp_work: "My work", grp_me: "Me", grp_help: "Help", leadership: "Leadership & Strategy",
 		sas_self: "self score", sas_assessor: "assessor score", sas_no_assessor: "no assessor score yet", sas_raise: "Raise your SAS score: do these first",
 		sas_weak: "Weakest points", sas_actions: "Actions in the app", sas_evidence: "Proof recorded this month",
@@ -751,6 +757,12 @@
 		plan_behind: "Behind this month's target by", bill_no_q: "Supplier bill / challan no",
 	});
 	Object.assign(T.Marathi, {
+		co_flow: "कंपनी फ्लो", all_dash: "सर्व डॅशबोर्ड", to_plan: "प्लॅन करायच्या ऑर्डर", fl_order_received: "ऑर्डर मिळाली → सेल्स ऑर्डर", fl_confirm: "ऑर्डर निश्चित करा (फॅक्टरी प्लॅन करू शकते)",
+		fl_new_quote: "कोटेशन बनवा", fl_quote_why: "या ग्राहकासाठी ERPNext मध्ये कोटेशन म्हणून जतन होते (ग्राहक आपोआप बनतो). पाठवण्यासाठी PDF उघडते.",
+		fl_add_item: "आयटम जोडा", fl_rate_blank: "रिकामे = किंमत यादी", fl_valid: "किती दिवस वैध", fl_terms: "अटी / नोंद", fl_quote_saved: "कोटेशन जतन झाले",
+		fl_order_why: "कोटेशन सबमिट होते आणि त्यावरून सेल्स ऑर्डर बनते.", fl_delivery: "दिलेली डिलिव्हरी तारीख", fl_po_no: "ग्राहकाचा PO नंबर (ऐच्छिक)",
+		fl_so_saved: "सेल्स ऑर्डर जतन झाली", fl_plan_why: "वर्क ऑर्डर नसलेल्या निश्चित ऑर्डर. प्रत्येक केबिनसाठी एक बनवा; त्याचे टप्पे जॉब कार्ड होतात.",
+		fl_no_bom: "BOM अजून नाही: आधी डिझाईन बनवेल", fl_make_wo: "वर्क ऑर्डर बनवा", fl_wo_saved: "वर्क ऑर्डर जतन झाली",
 		more: "अधिक", grp_work: "माझे काम", grp_me: "मी", grp_help: "मदत", leadership: "नेतृत्व व रणनीती",
 		sas_self: "स्वतःचा स्कोअर", sas_assessor: "परीक्षकाचा स्कोअर", sas_no_assessor: "परीक्षकाचा स्कोअर अजून नाही", sas_raise: "SAS स्कोअर वाढवा: हे आधी करा",
 		sas_weak: "सर्वात कमी गुण", sas_actions: "ॲपमधील कृती", sas_evidence: "या महिन्यात नोंदलेला पुरावा",
@@ -852,7 +864,7 @@
 		lk_setup_now: "आत्ता सुरू करा", lk_setup_done: "चेहरा / बोट लॉक तयार. आता पिन लागणार नाही.",
 		lk_reset: "चेहरा / बोट रीसेट", lk_reset_q: "चेहरा / बोट रीसेट करायचे? ती व्यक्ती एकदा पिनने उघडून परत सुरू करेल.", lk_reset_done: "चेहरा / बोट रीसेट झाले" });
 	const ICON = {
-		more: "⋯", leadership: "🧭",
+		more: "⋯", leadership: "🧭", to_plan: "🗓️",
 		my_day: "☀️", my_leads: "🎯", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
 		job_cards: "🛠️", inspections: "✅", stock_alerts: "📦", material_requests: "🧾", invoice_photo: "📷",
 		collections: "💰", team_scorecards: "👥", site_checklist: "📋", ceo_view: "📊",
@@ -1122,8 +1134,11 @@
 		const bottom = `<div class="sk-tiles small sk-bottom">${shared.map(tile).join("")}${moreTile}</div>`;
 		if (sects.length === 1) {
 			const x = sects[0];
-			root.innerHTML = header("SK App") + `<main class="sk-l1"><div class="sk-flowbox" data-fn="${esc(x.function)}">${flowHtml(x.function)}</div>
-				${seqTiles(x.main || x.tiles, plain)}${bottom}</main>`;
+			// the CEO's company flow has a row per function: too long for the first screen, so it opens from its own icon
+			const big = x.function === "Management";
+			const flowTile = `<div class="sk-tiles small"><button class="sk-tile" data-fnpage="${esc(x.function)}"><span class="sk-tile-icon">🔀</span><span>${t("co_flow")}</span></button></div>`;
+			root.innerHTML = header("SK App") + `<main class="sk-l1">${big ? "" : `<div class="sk-flowbox" data-fn="${esc(x.function)}">${flowHtml(x.function)}</div>`}
+				${seqTiles(x.main || x.tiles, plain)}${big ? flowTile : ""}${bottom}</main>`;
 		} else {
 			root.innerHTML = header("SK App") + `<main class="sk-l1"><div class="sk-tiles small sk-fns">${sects.map((x) => {
 				const red = (x.tiles || []).reduce((n, k) => n + redCount(badge[k]), 0);
@@ -1175,9 +1190,18 @@
 		const h = state.home, badge = homeBadges();
 		const sects = h.sections ? h.sections.sections.filter((x) => x.tiles.length) : [];
 		const groups = [];
-		if (sects.length === 1 && (sects[0].more || []).length) groups.push([fnLabel(sects[0].label), sects[0].more, true]);
+		let big = "";
+		if (sects.length === 1 && (sects[0].more || []).length) {
+			const x = sects[0];
+			// a long list (CEO: all dashboards) goes one level deeper so this page needs no scrolling (SK 26-Oct)
+			if (x.more.length > 8) {
+				const red = x.more.filter((k) => badge[k] && (typeof badge[k] !== "object" || badge[k].c === "red")).length;
+				big = `<h3 class="sk-h sk-fn-row">${esc(fnLabel(x.label))}</h3><div class="sk-tiles small"><button class="sk-tile ${red ? "c-red" : ""}" data-fnpage="${esc(x.function)}">
+					<span class="sk-tile-icon">📊</span><span>${t("all_dash")} (${x.more.length})</span>${red ? `<b class="sk-dot red">${red}</b>` : ""}</button></div>`;
+			} else groups.push([fnLabel(x.label), x.more, true]);
+		}
 		(h.sections ? h.sections.more_groups || [] : []).forEach((g) => groups.push([t(g.group), g.tiles, false]));
-		root.innerHTML = header(`${ICON.more} ${t("more")}`) + `<main class="sk-l1">${groups.map(([title, keys, seq]) => `<h3 class="sk-h sk-fn-row">${esc(title)}</h3>
+		root.innerHTML = header(`${ICON.more} ${t("more")}`) + `<main class="sk-l1">${big}${groups.map(([title, keys, seq]) => `<h3 class="sk-h sk-fn-row">${esc(title)}</h3>
 			<div class="sk-tiles small ${seq ? "sk-seq" : ""}">${keys.map((k) => tileBtn(k, badge)).join("")}</div>`).join("")}</main>`;
 	}
 	// the function's own icons joined by arrows, in the order the work goes (SK's mock-ups 26-Oct)
@@ -1605,7 +1629,36 @@
 				<a class="sk-chip" href="${esc(d.pdf)}" target="_blank">📄 ${t("pdf")}</a>
 				<button class="sk-chip" data-act="wa-send" data-doctype="${doctype}" data-name="${esc(d.name)}" data-mobile="${esc(mobile || "")}">💬 ${t("send_customer")}</button>
 				<button class="sk-chip" data-act="share-pdf" data-pdf="${esc(d.pdf)}" data-file="${esc(d.name)}.pdf">↗ ${t("share_pdf")}</button>
-			</div></div></li>`;
+			</div>${flowButtons(doctype, d)}</div></li>`;
+	}
+	// ERP flow in the app (SK 26-Oct): the next ERPNext step of each document, done by its owner here
+	function flowButtons(doctype, d) {
+		if (doctype === "Quotation" && d.docstatus < 2 && !["Ordered", "Lost", "Expired"].includes(d.status))
+			return `<button class="sk-btn ok wide" data-act="fl-order" data-name="${esc(d.name)}">✅ ${t("fl_order_received")}</button>`;
+		if (doctype === "Sales Order" && d.docstatus === 0)
+			return `<button class="sk-btn go wide" data-act="fl-confirm" data-name="${esc(d.name)}">✔ ${t("fl_confirm")}</button>`;
+		return "";
+	}
+	function quoteLine(k) {
+		return `<div class="sk-qline" data-k="${k}">${finder("ql-item" + k, t("item"), "item")}
+			<div class="sk-row"><label class="sk-field"><span>${t("qty")}</span>${qtyBox("ql-qty" + k, 1)}</label>
+			<label class="sk-field"><span>${t("rate")} (${t("fl_rate_blank")})</span>${qtyBox("ql-rate" + k)}</label></div></div>`;
+	}
+	function quotationSheet(deal) {
+		S.qLines = 1;
+		S.qDeal = deal;
+		sheet(`<h3 class="sk-h">📝 ${t("fl_new_quote")}</h3><p class="sk-note">${t("fl_quote_why")}</p><div id="ql-box">${quoteLine(0)}</div>
+			<button class="sk-btn wide" data-act="fl-addline">＋ ${t("fl_add_item")}</button>
+			<label class="sk-field"><span>${t("fl_valid")}</span>${qtyBox("ql-valid", 15)}</label>${formField("ql-note", t("fl_terms"), true)}
+			<button class="sk-btn ok wide" data-act="fl-quote-save">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+	async function renderToPlan() {
+		const rows = await call("flow_orders_to_plan");
+		S.toPlan = rows;
+		root.innerHTML = header(t("to_plan")) + `<main><p class="sk-note">${t("fl_plan_why")}</p><ul class="sk-list">${rows.map((r, i) => `<li class="sk-item ${r.late ? "k-red" : ""}"><div>
+			<div class="sk-item-title">${r.late ? "🔴 " : ""}${esc(r.customer)} · ${esc(r.item_name)}</div>
+			<div class="sk-item-meta">${t("qty")} ${r.qty} · ${t("due")} ${esc(r.delivery_date)} · ${r.bom ? "BOM " + esc(r.bom) : `<span class="sk-due">${t("fl_no_bom")}</span>`}</div>
+			${r.bom ? `<button class="sk-btn go wide" data-act="fl-wo" data-i="${i}">🏭 ${t("fl_make_wo")}</button>` : ""}</div></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
 	}
 
 	async function renderDetail(doctype, name) {
@@ -1634,6 +1687,7 @@
 				<button class="sk-btn ok wide" data-act="save-note">${t("add_note")}</button>
 				<button class="sk-btn wide sk-gap" data-act="reminder-new" data-doctype="${esc(doctype)}" data-name="${esc(name)}">⏰ + ${t("reminder")}</button></div>
 			${(d.products || []).length ? `<h3 class="sk-h">${t("products_for")}</h3>${productStrip(d.products)}` : ""}
+			${doctype === "CRM Deal" ? `<button class="sk-btn go wide" data-act="fl-quote" data-name="${esc(name)}">📝 ${t("fl_new_quote")}</button>` : ""}
 			${sec(t("quotations"), d.quotations.map((q) => erpDocRow("Quotation", q, mobile)).join(""))}
 			${sec(t("sales_orders"), d.sales_orders.map((q) => erpDocRow("Sales Order", q, mobile)).join(""))}
 			${sec(t("files"), files)}${sec(t("tasks"), tasks)}${sec(t("emails"), mails.map((m) => `<li class="sk-item"><div><div class="sk-item-title">${m.sent_or_received === "Received" ? "📥" : "📤"} ${esc(m.subject || "")}</div>
@@ -2225,7 +2279,7 @@
 		const mx = Math.max(1, ...all) * 1.15, mn = Math.min(0, ...all);
 		const n = c.labels.length, X = (i) => L + i * (W - L - 8) / (n - 1), Y = (v) => H - B - (v - mn) / (mx - mn) * (H - B - T);
 		let g = "";
-		for (let k = 0; k <= 3; k++) { const v = mn + (mx - mn) * k / 3; g += `<line x1="${L}" x2="${W - 4}" y1="${Y(v)}" y2="${Y(v)}" stroke="#e3e7ee"/><text x="2" y="${Y(v) + 3}" font-size="8" fill="#889">${Math.round(v)}</text>`; }
+		for (let k = 0; k <= 3; k++) { const v = mn + (mx - mn) * k / 3; g += `<line x1="${L}" x2="${W - 4}" y1="${Y(v)}" y2="${Y(v)}" stroke="#e3e7ee"/><text x="2" y="${Y(v) + 3}" font-size="8" fill="#889">${mx < 6 ? Math.round(v * 10) / 10 : Math.round(v)}</text>`; }
 		if (mn < 0) g += `<line x1="${L}" x2="${W - 4}" y1="${Y(0)}" y2="${Y(0)}" stroke="#99a"/>`;
 		c.labels.forEach((l, i) => { g += `<text x="${X(i)}" y="${H - 4}" font-size="8" text-anchor="middle" fill="#667">${esc(l)}</text>`; });
 		if (c.target) g += `<line x1="${L}" x2="${W - 4}" y1="${Y(c.target)}" y2="${Y(c.target)}" stroke="#4a90d9" stroke-width="1.5" stroke-dasharray="5 3"/><text x="${W - 6}" y="${Y(c.target) - 3}" font-size="8" text-anchor="end" fill="#4a90d9">${t("target")} ${c.target}</text>`;
@@ -2925,6 +2979,38 @@
 			case "st-item": return itemSheet(S.items[i].item_code);
 			case "st-po": return receiveForm(i);
 			case "st-nopo": return receiveNoPo();
+			case "fl-quote": return quotationSheet(el.dataset.name);
+			case "fl-addline": { document.getElementById("ql-box").insertAdjacentHTML("beforeend", quoteLine(S.qLines)); S.qLines += 1; return; }
+			case "fl-quote-save": {
+				el.disabled = true;
+				const items = [...Array(S.qLines).keys()].map((k) => ({ item_code: val("ql-item" + k), qty: val("ql-qty" + k), rate: val("ql-rate" + k) })).filter((x) => x.item_code);
+				try {
+					const r = await call("flow_make_quotation", { deal: S.qDeal, items: JSON.stringify(items), valid_days: val("ql-valid"), note: val("ql-note") }, true);
+					closeSheet(); saved(`${t("fl_quote_saved")}: ${r.name}`); window.open(r.pdf, "_blank");
+				} finally { el.disabled = false; }
+				return go("detail");
+			}
+			case "fl-order":
+				S.flQuote = el.dataset.name;
+				return sheet(`<h3 class="sk-h">✅ ${t("fl_order_received")}</h3><p class="sk-note">${esc(el.dataset.name)} · ${t("fl_order_why")}</p>
+					<label class="sk-field"><span>${t("fl_delivery")}</span><input id="fo-date" type="date" value="${new Date(Date.now() + 21 * 864e5).toISOString().slice(0, 10)}"></label>
+					${formField("fo-po", t("fl_po_no"))}<button class="sk-btn ok wide" data-act="fl-order-save">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+			case "fl-order-save": {
+				el.disabled = true;
+				try {
+					const r = await call("flow_order_received", { quotation: S.flQuote, delivery_date: val("fo-date"), po_no: val("fo-po") }, true);
+					closeSheet(); saved(`${t("fl_so_saved")}: ${r.name}`);
+				} finally { el.disabled = false; }
+				return go("detail");
+			}
+			case "fl-confirm": { el.disabled = true; const r = await call("flow_confirm_order", { sales_order: el.dataset.name }, true); saved(`✔ ${r.name} · ${r.status}`); return go("detail"); }
+			case "fl-wo": {
+				el.disabled = true;
+				const x = S.toPlan[i];
+				const r = await call("flow_make_work_order", { sales_order: x.sales_order, so_item: x.so_item }, true);
+				saved(`${t("fl_wo_saved")}: ${r.name}`);
+				return go("to_plan");
+			}
 			case "st-receive": {
 				el.disabled = true;
 				const args = { challan_photo: await photoUrl("r-challan"), goods_photo: await photoUrl("r-goods"), note: val("r-note"), bill_no: val("r-billno") };
@@ -3558,7 +3644,7 @@
 		document.body.prepend(a);
 	}
 
-	const LIVE_VIEWS = { fnpage: () => renderFnPage(), more: renderMore, leadership: renderLeadership, my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"),
+	const LIVE_VIEWS = { fnpage: () => renderFnPage(), more: renderMore, leadership: renderLeadership, to_plan: renderToPlan, my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"),
 		my_kpi: renderKpi, dsi: renderDsi, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
 		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name),
@@ -3768,7 +3854,7 @@
 			if (el.dataset.teamp !== undefined) { teamPerson = el.dataset.teamp; return go("team_leads"); }
 			if (el.dataset.fnpick) { el.classList.toggle("on"); return showWorkstation(); }
 			const act = el.dataset.act;
-			if (act && (act.startsWith("st-") || act.startsWith("pu-"))) return await storeAct(act, el);
+			if (act && (act.startsWith("st-") || act.startsWith("pu-") || act.startsWith("fl-"))) return await storeAct(act, el);
 			if (act && (act.startsWith("pr-") || act.startsWith("qc-"))) return await prodAct(act, el);
 			if (act && act.startsWith("fin-")) return await finAct(act, el);
 			if (el.dataset.qok !== undefined) {

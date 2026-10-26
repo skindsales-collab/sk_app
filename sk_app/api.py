@@ -1310,3 +1310,47 @@ def expense_claim(expense_type, amount, expense_date=None, note=None, photo=None
 @frappe.whitelist(methods=["POST"])
 def expense_decide(name, ok, note=None):
 	return hr.decide_expense(_me().user, name, ok, note)
+
+
+# ---- ERP flow in the app (SK 26-Oct): Customer → Quotation → Sales Order → Work Order ----
+
+@frappe.whitelist(methods=["POST"])
+def flow_make_customer(deal):
+	from sk_app import erp_flow
+
+	return erp_flow.make_customer(_me().user, deal)
+
+
+@frappe.whitelist(methods=["POST"])
+def flow_make_quotation(deal, items, valid_days=15, note=None):
+	from sk_app import erp_flow
+
+	return erp_flow.make_quotation(_me().user, deal, _list(items), int(valid_days or 15), note)
+
+
+@frappe.whitelist(methods=["POST"])
+def flow_order_received(quotation, delivery_date=None, po_no=None):
+	from sk_app import erp_flow
+
+	return erp_flow.order_received(_me().user, quotation, delivery_date, po_no)
+
+
+@frappe.whitelist(methods=["POST"])
+def flow_confirm_order(sales_order):
+	from sk_app import erp_flow
+
+	return erp_flow.confirm_order(_me().user, sales_order)
+
+
+@frappe.whitelist()
+def flow_orders_to_plan():
+	from sk_app import erp_flow
+
+	return erp_flow.orders_to_plan(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def flow_make_work_order(sales_order, so_item):
+	from sk_app import erp_flow
+
+	return erp_flow.make_work_order(_me().user, sales_order, so_item)

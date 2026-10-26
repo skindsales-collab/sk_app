@@ -36,7 +36,7 @@ FUNCTIONS = {
 	"Production": {
 		"label": {"English": "Production", "Marathi": "उत्पादन"},
 		# point 17 (SK's mock-up): Need Material → Job Cards → Order Board → Progress Photos → Ready to Dispatch → Non-Conformance
-		"tiles": ["my_day", "need_material", "job_cards", "order_board", "progress_photos", "ready_dispatch", "non_conformance", "complaints", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "to_plan", "need_material", "job_cards", "order_board", "progress_photos", "ready_dispatch", "non_conformance", "complaints", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Manufacturing User", "Manufacturing Manager"],
 		"desk": "/app/manufacturing",
@@ -180,7 +180,7 @@ def function_list(profile) -> list[str]:
 MAIN_TILES = {
 	"Sales": ["new_lead", "my_leads", "follow_up", "my_deals", "team_leads"],
 	"Marketing": ["new_lead", "my_leads", "follow_up"],
-	"Production": ["job_cards", "need_material", "order_board", "ready_dispatch"],
+	"Production": ["to_plan", "job_cards", "need_material", "order_board", "ready_dispatch"],
 	"Quality": ["inspect", "final_check", "non_conformance"],
 	"Stores": ["store_requests", "receive", "issue", "dispatch"],
 	"Purchase": ["buy_requests", "get_rates", "po_follow_up", "bills"],
