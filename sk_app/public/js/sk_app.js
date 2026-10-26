@@ -680,7 +680,7 @@
 		if (!res.ok) {
 			let msg = "Error";
 			try { msg = JSON.parse(JSON.parse(data._server_messages)[0]).message; } catch (e) { msg = data.exception || msg; }
-			throw new Error(msg);
+			throw new Error(String(msg).replace(/<[^>]*>/g, "")); // ERPNext messages carry <strong> tags
 		}
 		return data.message;
 	}
