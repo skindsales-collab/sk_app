@@ -93,14 +93,16 @@ def open_deals(user: str) -> list[WorkItem]:
 	rows = frappe.get_all(
 		"CRM Deal",
 		filters=filters,
-		fields=["name", "organization", "lead_name", "status", "next_step", "expected_closure_date", "deal_value"],
+		fields=["name", "organization", "lead_name", "status", "next_step", "expected_closure_date", "deal_value"]
+			+ (["sk_customer_name"] if frappe.get_meta("CRM Deal").has_field("sk_customer_name") else []),
 		order_by="modified desc",
 		limit=30,
 	)
 	return [
 		WorkItem("deal", r.organization or r.lead_name or r.name, "CRM Deal", r.name,
 			due=get_datetime(r.expected_closure_date) if r.expected_closure_date else None,
-			minutes=30, priority=2, extra={"status": r.status, "next_step": r.next_step, "value": r.deal_value})
+			minutes=30, priority=2, extra={"status": r.status, "next_step": r.next_step, "value": r.deal_value,
+				"customer": r.get("sk_customer_name") or r.lead_name})
 		for r in rows
 	]
 

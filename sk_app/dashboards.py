@@ -85,12 +85,41 @@ def _card(key, label, value, kind="count", prev=None, rows=None, c=None) -> dict
 
 def _invoiced(start, end, segment=None) -> float:
 	return _sum("Sales Invoice", "base_net_total", {"docstatus": 1, "is_return": 0, "posting_date": ["between", [start, end]],
-		**_seg_filter(segment)})
+		**_seg_filter(segment)}) + sum(r.amount for r in _tally_sales(start, end, segment))
+
+
+TALLY_SALES = ("Tally Sales %", "Tally Non Cabin Sales %", "Tally Credit Note %")
+
+
+def _tally_sales(start, end, segment=None) -> list:
+	"""SK 26-Oct: until change list point 18 turns them into Sales Invoices, the year's sales came from Tally as Journal
+	Entries ("Tally Sales 825 | party"). Their income-account amount (before GST) counts as sales; credit notes reduce it.
+	Once point 18 cancels them for real invoices they drop out here by themselves (only posted entries count)."""
+	jes = frappe.get_all("Journal Entry", filters={"docstatus": 1, "posting_date": ["between", [start, end]]},
+		or_filters=[["user_remark", "like", w] for w in TALLY_SALES], fields=["name", "posting_date", "user_remark"], limit=0)
+	if not jes:
+		return []
+	income = set(frappe.get_all("Account", filters={"root_type": "Income"}, pluck="name"))
+	amounts = {}
+	for a in frappe.get_all("Journal Entry Account", filters={"parent": ["in", [j.name for j in jes]], "account": ["in", list(income) or [""]]},
+			fields=["parent", "credit", "debit"], limit=0):
+		amounts[a.parent] = amounts.get(a.parent, 0) + flt(a.credit) - flt(a.debit)
+	out = []
+	for j in jes:
+		remark = j.user_remark or ""
+		main = segments.NON_CABIN if "non cabin" in remark.lower() else segments.CABIN
+		if segment in segments.TREE and segment != main:
+			continue
+		party = remark.split("|", 1)[1].strip() if "|" in remark else remark
+		out.append(frappe._dict(name=j.name, posting_date=j.posting_date, customer_name=party[:80], amount=amounts.get(j.name, 0),
+			voucher=remark.split("|", 1)[0].replace("Tally", "").strip()))
+	return out
 
 
 def _orders(start, end, segment=None) -> list:
-	return frappe.get_all("Sales Order", filters={"docstatus": 1, "transaction_date": ["between", [start, end]], **_seg_filter(segment)},
-		fields=["name", "customer_name", "base_net_total", "transaction_date", "customer_group", "delivery_date"],
+	# DEC-013 (SK 25-Oct): the draft Sales Orders are real orders; only cancelled ones are left out
+	return frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "transaction_date": ["between", [start, end]], **_seg_filter(segment)},
+		fields=["name", "customer_name", "base_net_total", "transaction_date", "customer_group", "delivery_date", "docstatus"],
 		order_by="base_net_total desc", limit=500)
 
 
@@ -98,15 +127,18 @@ def _orders_card(start, end, prev_start, prev_end, segment=None, key="orders"):
 	rows = _orders(start, end, segment)
 	prev = sum(flt(r.base_net_total) for r in _orders(prev_start, prev_end, segment))
 	return _card(key, "Orders this month", sum(flt(r.base_net_total) for r in rows), "money", prev,
-		[_row(r.customer_name, f"{r.transaction_date} · {segments.SEGMENT_OF_GROUP.get(r.customer_group) or r.customer_group or ''}",
+		[_row(r.customer_name, f"{r.transaction_date} · {segments.SEGMENT_OF_GROUP.get(r.customer_group) or r.customer_group or ''}"
+			f"{' · draft' if r.docstatus == 0 else ''}",
 			r.base_net_total, "Sales Order", r.name) for r in rows[:50]])
 
 
 def _sales_card(start, end, prev_start, prev_end, segment=None):
 	rows = frappe.get_all("Sales Invoice", filters={"docstatus": 1, "is_return": 0, "posting_date": ["between", [start, end]], **_seg_filter(segment)},
 		fields=["name", "customer_name", "base_net_total", "posting_date"], order_by="base_net_total desc", limit=50)
+	tally = sorted(_tally_sales(start, end, segment), key=lambda r: -r.amount)
 	return _card("sales", "Sales (invoiced, before GST)", _invoiced(start, end, segment), "money", _invoiced(prev_start, prev_end, segment),
-		[_row(r.customer_name, str(r.posting_date), r.base_net_total, "Sales Invoice", r.name) for r in rows])
+		[_row(r.customer_name, str(r.posting_date), r.base_net_total, "Sales Invoice", r.name) for r in rows]
+		+ [_row(r.customer_name, f"{r.posting_date} · Tally {r.voucher}", r.amount, "Journal Entry", r.name) for r in tally[:80]])
 
 
 def _receivables(segment=None):
@@ -143,7 +175,9 @@ def _open_deal_statuses() -> list[str]:
 def _pipeline_card(segment=None):
 	rows = frappe.get_all("CRM Deal", filters={"status": ["in", _open_deal_statuses() or [""]], **_crm_seg(segment)},
 		fields=["name", "organization", "deal_value", "status", "deal_owner", "sk_segment"], order_by="deal_value desc", limit=300)
-	return _card("pipeline", "Open deals (pipeline)", sum(flt(r.deal_value) for r in rows), "money", None,
+	value = sum(flt(r.deal_value) for r in rows)
+	# deals made from leads have no value until the quotation: then show how many are open instead of Rs 0
+	return _card("pipeline", "Open deals (pipeline)" if value else "Open deals (no value yet)", value or len(rows), "money" if value else "count", None,
 		[_row(r.organization or r.name, f"{r.status} · {_name(r.deal_owner)}{' · ' + r.sk_segment if r.sk_segment else ''}", r.deal_value,
 			"CRM Deal", r.name) for r in rows[:60]])
 
@@ -183,7 +217,7 @@ def _not_contacted():
 
 
 def _late_orders(segment=None):
-	return frappe.get_all("Sales Order", filters={"docstatus": 1, "delivery_date": ["<", nowdate()], "per_delivered": ["<", 100],
+	return frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "delivery_date": ["<", nowdate()], "per_delivered": ["<", 100],
 		"status": ["not in", ["Closed", "Completed", "On Hold"]], **_seg_filter(segment)},
 		fields=["name", "customer_name", "delivery_date", "base_net_total"], order_by="delivery_date asc", limit=100)
 

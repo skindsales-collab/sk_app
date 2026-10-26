@@ -551,3 +551,80 @@ def share_link(doctype: str, name: str) -> dict:
 	party = doc.get("customer_name") or doc.get("party_name") or doc.get("customer") or ""
 	return {"url": url, "file_name": f"{name}.pdf", "pdf": _pdf(doctype, name),
 		"message": _("Dear {0}, please find {1} {2} from SK Ind Tech Solutions: {3}").format(party, _(doctype), name, url)}
+
+
+# Swati 26-Oct (item 8): a Customer name column on the deals list, in Frappe CRM (/crm/deals) and in My Deals
+CUSTOMER_FIELD = "sk_customer_name"
+DEAL_LIST_FUNCTIONS = ("Sales", "Marketing", "Machine Shifting", "Management")
+
+
+def ensure_deal_customer_field():
+	if not frappe.db.exists("DocType", "CRM Deal"):
+		return
+	from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
+	create_custom_fields({"CRM Deal": [{"fieldname": CUSTOMER_FIELD, "label": "Customer Name", "fieldtype": "Data",
+		"read_only": 1, "in_list_view": 1, "in_standard_filter": 1, "insert_after": "organization"}]}, update=True)
+
+
+def deal_customer_name(doc) -> str | None:
+	"""The person the salesperson talks to (primary contact, else the lead's name), else the company."""
+	contacts = doc.get("contacts") or []
+	primary = next((c for c in contacts if c.get("is_primary")), contacts[0] if contacts else None)
+	person = (primary and primary.get("full_name")) or " ".join(x for x in (doc.get("first_name"), doc.get("last_name")) if x) \
+		or doc.get("lead_name")
+	if not person and doc.get("lead"):
+		lead = frappe.db.get_value("CRM Lead", doc.lead, ["first_name", "last_name", "lead_name"], as_dict=True) or {}
+		person = lead.get("lead_name") or " ".join(x for x in (lead.get("first_name"), lead.get("last_name")) if x)
+	return (person or doc.get("organization") or "").strip()[:140] or None
+
+
+def set_deal_customer(doc, method=None):
+	if doc.meta.has_field(CUSTOMER_FIELD):
+		doc.set(CUSTOMER_FIELD, deal_customer_name(doc))
+
+
+def backfill_deal_customers():
+	if not frappe.db.exists("DocType", "CRM Deal") or not frappe.get_meta("CRM Deal").has_field(CUSTOMER_FIELD):
+		return
+	for name in frappe.get_all("CRM Deal", filters={CUSTOMER_FIELD: ["is", "not set"]}, pluck="name"):
+		frappe.db.set_value("CRM Deal", name, CUSTOMER_FIELD, deal_customer_name(frappe.get_doc("CRM Deal", name)), update_modified=False)
+
+
+def ensure_deal_list_views(users: list[str] | None = None):
+	"""Frappe CRM shows each person's standard deals list (CRM View Settings, is_standard) when one exists: give the
+	sales people one with Customer Name first, or add the column to the one they already have."""
+	if not frappe.db.exists("DocType", "CRM View Settings") or not frappe.get_meta("CRM Deal").has_field(CUSTOMER_FIELD):
+		return
+	from frappe.model.base_document import get_controller
+
+	from sk_app.store import _users_with_function
+
+	defaults = get_controller("CRM Deal").default_list_data()
+	col = {"label": "Customer Name", "type": "Data", "key": CUSTOMER_FIELD, "width": "12rem"}
+	users = users or list(dict.fromkeys(u for f in DEAL_LIST_FUNCTIONS for u in _users_with_function(f)))
+	for user in users:
+		name = frappe.db.get_value("CRM View Settings", {"dt": "CRM Deal", "type": "list", "is_standard": 1, "user": user})
+		if name:
+			view = frappe.get_doc("CRM View Settings", name)
+			columns = frappe.parse_json(view.columns or "[]") or list(defaults["columns"])
+			rows = frappe.parse_json(view.rows or "[]") or list(defaults["rows"])
+		else:
+			view = frappe.get_doc({"doctype": "CRM View Settings", "dt": "CRM Deal", "type": "list", "is_standard": 1,
+				"user": user, "label": "List", "load_default_columns": 0})
+			columns, rows = list(defaults["columns"]), list(defaults["rows"])
+		if any(c.get("key") == CUSTOMER_FIELD for c in columns):
+			continue
+		view.columns = frappe.as_json([col] + columns)
+		view.rows = frappe.as_json(rows + [CUSTOMER_FIELD] if CUSTOMER_FIELD not in rows else rows)
+		view.flags.ignore_permissions = True
+		view.save()
+
+
+def setup_deal_customer_column():
+	try:
+		ensure_deal_customer_field()
+		backfill_deal_customers()
+		ensure_deal_list_views()
+	except Exception:
+		frappe.log_error("SK App deals Customer Name column")

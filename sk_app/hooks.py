@@ -24,7 +24,7 @@ doc_events = {
 	"File": {"after_insert": "sk_app.crm.on_file_attached"},
 	"SK Library Item": {"validate": "sk_app.library.make_public"},
 	"CRM Lead": {"validate": "sk_app.segments.set_main"},
-	"CRM Deal": {"validate": "sk_app.segments.set_main"},
+	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.crm.set_deal_customer"]},
 	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal"},
 	"SK App User": {"on_update": "sk_app.segments.on_app_user_update"},
 }
