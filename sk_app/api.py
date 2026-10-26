@@ -618,3 +618,25 @@ def buy_send_bill(supplier, photo, amount=None, bill_no=None, against=None, note
 @frappe.whitelist()
 def buy_last_rates(q=None):
 	return purchase.last_rates(_me().user, q)
+
+
+@frappe.whitelist()
+def team_follow_up(person=None):
+	"""Sales manager's review (SK, 26-Oct: Rushi sees Swati, Pranali and Rahul's leads and deals with his own):
+	one summary line per person and the open leads / deals of everyone, or of one person."""
+	profile = _me()
+	people = [{"user": profile.user, "full_name": profile.full_name or profile.user}] + [
+		{"user": p.user, "full_name": p.full_name or p.user} for p in day_report._team(profile.user)]
+	allowed = {p["user"] for p in people}
+	if person and person not in allowed:
+		frappe.throw(_("{0} is not in your team").format(person), frappe.PermissionError)
+	summary, rows = [], []
+	for p in people:
+		items = crm.follow_up(p["user"])
+		month = kpi.scorecard(p["user"])
+		summary.append({**p, "open": len(items), "overdue": sum(1 for r in items if r["overdue"]), "new": sum(1 for r in items if r["new"]),
+			"deal_value": sum(flt(r.get("value")) for r in items if r["doctype"] == "CRM Deal"), "score": month.get("score")})
+		if not person or person == p["user"]:
+			rows += [{**r, "owner": p["user"], "owner_name": p["full_name"]} for r in items]
+	rows.sort(key=lambda r: (not r["overdue"], not r["new"]))
+	return {"people": summary, "rows": rows}

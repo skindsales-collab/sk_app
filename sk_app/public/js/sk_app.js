@@ -126,7 +126,7 @@
 	};
 	// mobile-number logins and Home for people in several functions (SK, 26-Oct-2026)
 	Object.assign(T.English, {
-		logins: "Logins", for_everyone: "For everyone", set_pin: "Set your own PIN", set_pin_why: "HR gave you a first PIN. Make your own PIN now (4 to 8 digits). Do not tell anyone.",
+		logins: "Logins", team_leads: "Team Leads", for_everyone: "For everyone", set_pin: "Set your own PIN", set_pin_why: "HR gave you a first PIN. Make your own PIN now (4 to 8 digits). Do not tell anyone.",
 		old_pin: "PIN from HR", new_pin: "New PIN", new_pin2: "New PIN again", pin_mismatch: "The two new PINs are not the same",
 		pin_saved: "PIN saved", no_login: "No login yet", has_login: "Have login", closed_login: "Login closed",
 		make_login: "Make login", new_login: "New login", name: "Name", functions_pick: "Function(s)", reports_to: "Reports to",
@@ -137,7 +137,7 @@
 		pin_set_pending: "PIN not set yet",
 	});
 	Object.assign(T.Marathi, {
-		logins: "लॉगिन", for_everyone: "सर्वांसाठी", set_pin: "तुमचा स्वतःचा पिन ठेवा", set_pin_why: "HR ने पहिला पिन दिला आहे. आता तुमचा स्वतःचा पिन ठेवा (4 ते 8 अंक). कोणालाही सांगू नका.",
+		logins: "लॉगिन", team_leads: "टीमचे लीड", for_everyone: "सर्वांसाठी", set_pin: "तुमचा स्वतःचा पिन ठेवा", set_pin_why: "HR ने पहिला पिन दिला आहे. आता तुमचा स्वतःचा पिन ठेवा (4 ते 8 अंक). कोणालाही सांगू नका.",
 		old_pin: "HR ने दिलेला पिन", new_pin: "नवीन पिन", new_pin2: "नवीन पिन पुन्हा", pin_mismatch: "दोन्ही नवीन पिन सारखे नाहीत",
 		pin_saved: "पिन सेव्ह झाला", no_login: "अजून लॉगिन नाही", has_login: "लॉगिन आहे", closed_login: "लॉगिन बंद",
 		make_login: "लॉगिन बनवा", new_login: "नवीन लॉगिन", name: "नाव", functions_pick: "काम (फंक्शन)", reports_to: "कोणाला रिपोर्ट",
@@ -381,7 +381,7 @@
 		job_cards: "🛠️", inspections: "✅", stock_alerts: "📦", material_requests: "🧾", invoice_photo: "📷",
 		collections: "💰", team_scorecards: "👥", site_checklist: "📋", ceo_view: "📊",
 		calendar: "📅", follow_up: "🔔", new_lead: "➕", training: "🎓", day_report: "📝", team_reports: "🗂️",
-		calls: "📞", whatsapp: "💬", mail: "✉️", reminders: "⏰", library: "🏢", logins: "🔑",
+		calls: "📞", whatsapp: "💬", mail: "✉️", reminders: "⏰", library: "🏢", logins: "🔑", team_leads: "👥",
 		stock_check: "📦", receive: "🚚", issue: "📤", store_requests: "📋", dispatch: "🚛", low_stock: "⚠️", stock_count: "🔢", new_item: "🆕",
 		buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅",
 	};
@@ -1606,12 +1606,30 @@
 		return false;
 	}
 
+	// Sales manager: the whole team's leads and deals with his own (SK, 26-Oct-2026)
+	let teamPerson = "";
+	async function renderTeamLeads() {
+		const d = await call("team_follow_up", teamPerson ? { person: teamPerson } : {});
+		const chip = (u, label) => `<button class="sk-chip ${teamPerson === u ? "on" : ""}" data-teamp="${esc(u)}">${esc(label)}</button>`;
+		const people = d.people.map((p) => `<li class="sk-item"><button class="sk-fu-main" data-teamp="${esc(p.user)}"><div class="sk-item-title">${esc(p.full_name)}</div>
+			<div class="sk-item-meta">${p.open} ${t("open_items")} · ${p.new} ${t("new_badge")} · <span class="${p.overdue ? "sk-due" : ""}">${p.overdue} ${t("overdue")}</span>${p.deal_value ? ` · ₹${Number(p.deal_value).toLocaleString("en-IN")}` : ""}</div></button>
+			${p.score != null ? `<b>${Math.round(p.score)}%</b>` : ""}</li>`).join("");
+		const rows = d.rows.map((r) => `<li class="sk-fu ${r.overdue ? "late" : r.new ? "new" : ""}"><button class="sk-fu-main" data-open="${esc(r.doctype)}" data-name="${esc(r.name)}">
+			<div class="sk-item-title">${esc(r.title)} ${r.new ? `<span class="sk-badge">${t("new_badge")}</span>` : ""}${r.overdue ? `<span class="sk-badge bad">${t("overdue")}</span>` : ""}</div>
+			<div class="sk-item-meta">👤 ${esc(r.owner_name)} · ${esc(r.status || "")} · ${r.doctype === "CRM Deal" ? t("deals") : t("leads")}</div>
+			${r.next || r.due ? `<div class="sk-item-meta">${t("next")}: ${esc(r.next || "")} ${r.due ? "· " + when(r.due) : ""}</div>` : ""}
+			${r.last ? `<div class="sk-item-meta">${t("last")}: ${esc(r.last.text)} · ${when(r.last.on)}</div>` : ""}</button>${contactButtons(r)}</li>`).join("");
+		root.innerHTML = header(t("team_leads")) + `<main><ul class="sk-list">${people}</ul>
+			<div class="sk-row sk-wrap sk-gap">${chip("", t("all"))}${d.people.map((p) => chip(p.user, p.full_name)).join("")}</div>
+			<ul class="sk-list sk-gap">${rows || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+	}
+
 	const LIVE_VIEWS = { my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"),
 		my_kpi: renderKpi, dsi: renderDsi, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
 		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name),
 		reminders: renderReminders, calls: renderCalls, whatsapp: renderWhatsApp, mail: renderMail, library: renderLibrary,
-		logins: renderLogins, stock_check: renderStockCheck, receive: renderReceive, issue: renderIssue, store_requests: renderStoreRequests,
+		logins: renderLogins, team_leads: renderTeamLeads, stock_check: renderStockCheck, receive: renderReceive, issue: renderIssue, store_requests: renderStoreRequests,
 		dispatch: renderDispatch, low_stock: renderLowStock, stock_count: renderStockCount, new_item: renderNewItem,
 		buy_requests: renderBuyRequests, get_rates: renderGetRates, compare: renderCompare, po_follow_up: renderFollowUpPo,
 		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals };
@@ -1698,6 +1716,7 @@
 				toast(t("saved"));
 				return el.dataset.resp === "Problem" ? go("problem") : go(state.view);
 			}
+			if (el.dataset.teamp !== undefined) { teamPerson = el.dataset.teamp; return go("team_leads"); }
 			if (el.dataset.fnpick) { el.classList.toggle("on"); return showWorkstation(); }
 			const act = el.dataset.act;
 			if (act && (act.startsWith("st-") || act.startsWith("pu-"))) return await storeAct(act, el);
