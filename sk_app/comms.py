@@ -45,8 +45,7 @@ def my_calls(user: str, days: int = 7) -> dict:
 	for r in rows:
 		key = (r.reference_doctype, r.reference_docname)
 		if r.reference_docname and key not in titles and r.reference_doctype in crm.CRM_DOCTYPES:
-			v = frappe.db.get_value(r.reference_doctype, r.reference_docname, ["organization", "lead_name"], as_dict=True) or {}
-			titles[key] = v.get("organization") or v.get("lead_name") or r.reference_docname
+			titles[key] = crm.label(r.reference_doctype, r.reference_docname)
 		r["title"] = titles.get(key) or r.to
 		r["note_text"] = frappe.db.get_value("FCRM Note", r.note, "title") if r.note else ""
 	return {"today": call_totals(user, today), "week": call_totals(user, week_start, today), "calls": rows}

@@ -79,7 +79,8 @@ class TestCrmAndDayReport(IntegrationTestCase):
 
 	def test_day_report_needs_text(self):
 		with set_user(REP):
-			self.assertRaises(frappe.ValidationError, api.send_day_report, "  ")
+			# SK 26-Oct: the report is made by itself; a blank send keeps the activity text
+			self.assertTrue(frappe.db.get_value("SK Day Report", api.send_day_report("  "), "work_done"))
 
 	def test_reminder_only_near_work_end_and_until_sent(self):
 		due = day_report.due_at()
@@ -198,7 +199,7 @@ class TestCalendars(IntegrationTestCase):
 			self.assertTrue(any(d["today"] and d["dsi"] for d in w["days"]))
 			m = api.cal_month()
 			self.assertTrue(any(d["company"] == ["Scorecard"] for d in m["days"]))
-			self.assertIn("calendar", api.home()["home"]["tiles"])
+			self.assertNotIn("calendar", api.home()["home"]["tiles"])  # point 15: inside My Day now
 
 	def test_send_to_design_makes_deal(self):
 		"""New Lead "Send to design": the lead becomes a deal (Frappe CRM conversion) with notes and Design Status."""

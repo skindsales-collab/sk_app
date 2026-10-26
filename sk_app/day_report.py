@@ -70,18 +70,18 @@ def get(user: str, day=None) -> dict:
 
 def submit(user: str, work_done: str, problems: str | None = None, plan_tomorrow: str | None = None,
 		photo: str | None = None) -> str:
-	"""Save the user's report for today (one per person per day; sending again updates it)."""
-	if not (work_done or "").strip():
-		frappe.throw(_("Please write the work you did today"))
+	"""Save the user's report for today (one per person per day; sending again updates it). SK 26-Oct: the report
+	is made from the day's ERPNext activity by itself, so typing is optional (a remark only)."""
 	profile = guide.app_user(user)
 	day = getdate()
 	name = _find(user, day)
 	doc = frappe.get_doc("SK Day Report", name) if name else frappe.new_doc("SK Day Report")
 	now = now_datetime()
+	facts = captured(user, day)
 	doc.update({"user": user, "date": day, "function": profile.home if profile else None,
 		"manager": frappe.db.get_value("SK App User", {"user": user}, "manager"),
-		"work_done": work_done.strip(), "problems": (problems or "").strip(), "plan_tomorrow": (plan_tomorrow or "").strip(),
-		**captured(user, day)})
+		"work_done": (work_done or "").strip() or auto_text(facts), "problems": (problems or "").strip(), "plan_tomorrow": (plan_tomorrow or "").strip(),
+		**facts})
 	if photo:
 		doc.photo = photo
 	if not doc.submitted_on:
@@ -91,6 +91,30 @@ def submit(user: str, work_done: str, problems: str | None = None, plan_tomorrow
 	return doc.name
 
 
+def auto_text(facts: dict) -> str:
+	"""The day's work in words, from what the app recorded (calls, leads, notes, jobs done, Work Book, DSI)."""
+	parts = [f"{facts.get('calls_made', 0)} calls ({facts.get('talk_minutes', 0)} min)" if facts.get("calls_made") else "",
+		f"{facts['leads_created']} new leads" if facts.get("leads_created") else "", f"{facts['notes_added']} CRM notes" if facts.get("notes_added") else "",
+		f"{facts['cards_done']} jobs done" if facts.get("cards_done") else "", "DSI done" if facts.get("dsi_done") else ""]
+	head = ", ".join(p for p in parts if p) or "No activity recorded in the app"
+	return f"Auto: {head}" + (f"\n{facts['auto_summary']}" if facts.get("auto_summary") else "")
+
+
+def auto_reports(now=None):
+	"""Hourly: after Work End, everyone who has not sent a report gets one made from the day's activity (SK 26-Oct:
+	"team report should be automatic"). Sending later still adds the person's remark to the same report."""
+	now = get_datetime(now or now_datetime())
+	if now < due_at(now):
+		return
+	for user in frappe.get_all("SK App User", filters={"enabled": 1}, pluck="user"):
+		if _find(user, now.date()):
+			continue
+		try:
+			submit(user, "")
+		except Exception:
+			frappe.log_error(f"SK App auto day report {user}")
+
+
 def reminder(user: str, now=None) -> list[WorkItem]:
 	"""My Day / hourly card item from one hour before Work End until the report is sent."""
 	now = get_datetime(now or now_datetime())
@@ -98,7 +122,7 @@ def reminder(user: str, now=None) -> list[WorkItem]:
 	if now < add_to_date(due, minutes=-REMIND_BEFORE_END_MINUTES) or _find(user, now):
 		return []
 	# always the last job of the day: other work comes first, so no due time (never "overdue") and lowest priority
-	return [WorkItem("day_report", "Send today's Day Report", "SK Day Report", "", minutes=5, priority=9, extra={"due_at": str(due)})]
+	return [WorkItem("day_report", "Day Report (made by itself): add a remark if needed", "SK Day Report", "", minutes=5, priority=9, extra={"due_at": str(due)})]
 
 
 def _team(manager: str) -> list[dict]:

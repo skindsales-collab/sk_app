@@ -166,7 +166,143 @@ def check_plate(v: dict) -> list:
 	return [_row("vehicle_no", "Vehicle no", v.get("vehicle_no"), "green" if same else "amber", None if same else "Written the ERPNext way", [] if same else [nice])]
 
 
-CHECKS = {"lead": check_lead, "supplier": check_supplier, "bill": check_bill, "plate": check_plate}
+def _party(doctype: str, field: str, label: str, text: str, kind: str):
+	"""A supplier / customer / item box: green when it is the ERPNext name, else the nearest names to pick."""
+	text = (text or "").strip()
+	if text and frappe.db.exists(doctype, text):
+		return _row(field, label, text, "green"), text
+	near = _nearest(doctype, "item_name" if doctype == "Item" else "supplier_name" if doctype == "Supplier" else "customer_name", text, kind) if text else []
+	return _row(field, label, text, "amber" if near else "red", f"Pick the {label.lower()} from ERPNext" if text else "Needed by ERPNext", near), (near[0] if near else text)
+
+
+def _amount(field, label, v, limit=None):
+	amt = frappe.utils.flt(v)
+	if amt <= 0:
+		return _row(field, label, v or "", "red", "Needed, more than 0")
+	if limit and amt > limit:
+		return _row(field, label, amt, "amber", f"Above ₹{limit:,.0f}: SK approves it")
+	return _row(field, label, amt, "green")
+
+
+def _date(field, label, v):
+	from frappe.utils import date_diff, getdate, nowdate
+
+	if not v:
+		return _row(field, label, "", "red", "Needed")
+	days = date_diff(nowdate(), getdate(v))
+	if days < 0:
+		return _row(field, label, v, "red", "Date is in the future")
+	return _row(field, label, v, "amber" if days > 30 else "green", "Bill older than 30 days" if days > 30 else None)
+
+
+def check_expense(v: dict) -> list:
+	"""Expense claim from a bill photo (HR Leave & Expense icon)."""
+	from sk_app.purchase import po_limit
+
+	return [_row("expense_type", "Expense type", v.get("expense_type") or "", "green" if v.get("expense_type") else "red",
+		None if v.get("expense_type") else "Pick the type: ERPNext needs it"),
+		_amount("amount", "Amount", v.get("amount"), po_limit()), _date("expense_date", "Bill date", v.get("expense_date"))]
+
+
+def check_voucher(v: dict) -> list:
+	"""Petty cash voucher (Accounts)."""
+	text = (v.get("spent_on") or "").strip()
+	return [_row("remark", "Spent on", text, "green" if len(text) >= 4 else "red", None if len(text) >= 4 else "Say what it was for (ERPNext remark)"),
+		_amount("amount", "Amount", v.get("amount")),
+		_row("account", "Expense head", v.get("account") or "", "green" if v.get("account") else "red", None if v.get("account") else "Pick the expense ledger")]
+
+
+def check_quote(v: dict) -> list:
+	"""Supplier quote (Purchase · Get Rates): supplier and item as in ERPNext, rate against the last rate paid."""
+	sup_row, _sup = _party("Supplier", "supplier", "Supplier", v.get("supplier"), "supplier")
+	item_row, item = _party("Item", "item_code", "Item", v.get("item"), "item")
+	rate = frappe.utils.flt(v.get("rate"))
+	rows = [sup_row, item_row]
+	if rate <= 0:
+		rows.append(_row("rate", "Rate", v.get("rate") or "", "red", "Needed"))
+	else:
+		code = item if frappe.db.exists("Item", item or "") else frappe.db.get_value("Item", {"item_name": item}, "name") if item else None
+		last = frappe.db.get_value("Item", code, "last_purchase_rate") if code else None
+		if last:
+			diff = round((rate - frappe.utils.flt(last)) * 100 / frappe.utils.flt(last))
+			rows.append(_row("rate", "Rate", rate, "amber" if abs(diff) > 15 else "green", f"Last rate ₹{frappe.utils.flt(last):,.2f} ({diff:+d}%)"))
+		else:
+			rows.append(_row("rate", "Rate", rate, "green", "No earlier rate in ERPNext"))
+	return rows
+
+
+def check_receive(v: dict) -> list:
+	"""Receipt without a PO (Stores): supplier and item as in ERPNext, a quantity, and why there is no PO."""
+	sup_row, _s = _party("Supplier", "supplier", "Supplier", v.get("supplier"), "supplier")
+	item_row, _i = _party("Item", "item_code", "Item", v.get("item"), "item")
+	qty = frappe.utils.flt(v.get("qty"))
+	why = (v.get("reason") or "").strip()
+	return [sup_row, item_row, _row("qty", "Quantity", v.get("qty") or "", "green" if qty > 0 else "red", None if qty > 0 else "Needed"),
+		_row("remarks", "Why no PO", why, "green" if why else "red", None if why else "Purchase needs the reason")]
+
+
+def _numbers(line: str) -> list[float]:
+	return [float(x.replace(",", "")) for x in re.findall(r"\d[\d,]*\.?\d*", line or "") if x.replace(",", "").replace(".", "", 1).isdigit()]
+
+
+def _best_line(name: str, lines: list[str]) -> tuple[str | None, float]:
+	words = [w for w in re.findall(r"[a-z0-9]+", (name or "").lower()) if len(w) > 2]
+	best, score = None, 0.0
+	for ln in lines:
+		low = ln.lower()
+		hit = sum(1 for w in words if w in low) / len(words) if words else 0
+		r = max(hit, difflib.SequenceMatcher(None, (name or "").lower(), low[: len(name or "") + 10]).ratio())
+		if r > score:
+			best, score = ln, r
+	return best, score
+
+
+def check_receipt(v: dict) -> list:
+	"""Material received against a PO (Stores, SK 26-Oct): the supplier's invoice photo is read and each PO item is
+	looked for on it, so the quantity entered matches the bill; bill lines that are not on the PO are shown too."""
+	po = v.get("po")
+	if not po or not frappe.db.exists("Purchase Order", po):
+		return []
+	doc = frappe.get_doc("Purchase Order", po)
+	lines = [ln.strip() for ln in (v.get("text") or "").splitlines() if len(ln.strip()) > 3]
+	rows, used = [], set()
+	bill = (v.get("bill_no") or "").strip()
+	if bill:
+		dup = frappe.db.get_value("Purchase Receipt", {"supplier": doc.supplier, "supplier_delivery_note": bill, "docstatus": ["<", 2]}, "name")
+		rows.append(_row("bill_no", "Supplier bill no", bill, "red" if dup else "green", f"Already received: {dup}" if dup else None))
+	else:
+		rows.append(_row("bill_no", "Supplier bill no", "", "amber", "Type the bill / challan number from the photo"))
+	for k, it in enumerate(doc.items):
+		entered = frappe.utils.flt(v.get(f"qty_{k}"))
+		field = f"qty_{k}"
+		if not lines:
+			rows.append(_row(field, it.item_name, entered, "green" if entered > 0 else "amber", None if entered > 0 else "Not received?"))
+			continue
+		line, score = _best_line(it.item_name, lines)
+		if score < 0.5:
+			rows.append(_row(field, it.item_name, entered, "red" if entered > 0 else "amber",
+				"Not found on the bill photo: check before saving" if entered > 0 else "Not on this bill"))
+			continue
+		used.add(line)
+		nums = [n for n in _numbers(line) if 0 < n < 100000]
+		same = any(abs(n - entered) < 0.001 for n in nums)
+		pending = frappe.utils.flt(it.qty) - frappe.utils.flt(it.received_qty)
+		guess = next((n for n in nums if abs(n - pending) < 0.001 or abs(n - frappe.utils.flt(it.qty)) < 0.001), None)
+		if same:
+			rows.append(_row(field, it.item_name, entered, "green", "Same as the bill"))
+		else:
+			opts = [str(int(guess) if guess and guess == int(guess) else guess)] if guess else []
+			rows.append(_row(field, it.item_name, entered, "amber", f"Bill line: {line[:60]}", opts))
+	extra = [ln for ln in lines if ln not in used and _numbers(ln) and re.search(r"[A-Za-z]{4,}", ln)]
+	for ln in extra[:4]:
+		near = _nearest("Item", "item_name", re.sub(r"[\d.,]+", " ", ln).strip(), "item", n=2)
+		if near:
+			rows.append(_row("extra", "On the bill, not on the PO", ln[:60], "amber", "Add it in ERPNext? Ask Purchase", near))
+	return rows
+
+
+CHECKS = {"lead": check_lead, "receipt": check_receipt, "supplier": check_supplier, "bill": check_bill, "plate": check_plate, "expense": check_expense,
+	"voucher": check_voucher, "quote": check_quote, "receive": check_receive}
 
 
 def check(user: str, kind: str, values: dict) -> dict:

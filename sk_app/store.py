@@ -130,7 +130,7 @@ def open_purchase_orders(user: str) -> list[dict]:
 
 
 def receive(user: str, purchase_order: str | None, items: list[dict], challan_photo=None, goods_photo=None, note=None,
-		supplier=None, reason=None) -> dict:
+		supplier=None, reason=None, bill_no=None) -> dict:
 	"""Material at the gate: a draft Purchase Receipt from the PO (or without PO, with a spoken reason), with the
 	challan photo. Quality / Store owner posts it after checking."""
 	need(user, STORE)
@@ -159,6 +159,8 @@ def receive(user: str, purchase_order: str | None, items: list[dict], challan_ph
 	if not pr.items:
 		frappe.throw(_("Please give the quantity received"))
 	pr.posting_date = nowdate()
+	if bill_no:  # the supplier's invoice / challan number read from the photo (SK 26-Oct)
+		pr.supplier_delivery_note = str(bill_no).strip()[:140]
 	remarks = [x for x in (note, reason and _("Without PO: {0}").format(reason)) if x]
 	if remarks:
 		pr.remarks = "\n".join(remarks)

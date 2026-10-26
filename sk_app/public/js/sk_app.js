@@ -742,6 +742,21 @@
 		idea_q: "💡 या पानासाठी तुमची कल्पना (बोला किंवा लिहा)", idea_sent: "कल्पना AI & ERP डेस्ककडे पाठवली", last_active: "शेवटचे सक्रिय",
 		view_hint: "सदस्यावर टॅप करा: ॲप त्यांना दिसते तसेच, त्यांच्या माहितीसह उघडते. फक्त पाहणे.",
 	});
+	// SK 26-Oct: short main screen with levels, SAS, Leadership & Strategy, Target Action Plan, receipt bill check
+	Object.assign(T.English, {
+		more: "More", grp_work: "My work", grp_me: "Me", grp_help: "Help", leadership: "Leadership & Strategy",
+		sas_self: "self score", sas_assessor: "assessor score", sas_no_assessor: "no assessor score yet", sas_raise: "Raise your SAS score: do these first",
+		sas_weak: "Weakest points", sas_actions: "Actions in the app", sas_evidence: "Proof recorded this month",
+		plan_today: "Today's plan from your target", plan_month: "Month", plan_calls: "Calls", plan_leads: "New leads", plan_quotes: "Quotes",
+		plan_behind: "Behind this month's target by", bill_no_q: "Supplier bill / challan no",
+	});
+	Object.assign(T.Marathi, {
+		more: "अधिक", grp_work: "माझे काम", grp_me: "मी", grp_help: "मदत", leadership: "नेतृत्व व रणनीती",
+		sas_self: "स्वतःचा स्कोअर", sas_assessor: "परीक्षकाचा स्कोअर", sas_no_assessor: "परीक्षकाचा स्कोअर अजून नाही", sas_raise: "SAS स्कोअर वाढवा: हे आधी करा",
+		sas_weak: "सर्वात कमी गुण", sas_actions: "ॲपमधील कृती", sas_evidence: "या महिन्यात नोंदलेला पुरावा",
+		plan_today: "टार्गेटनुसार आजचा प्लॅन", plan_month: "महिना", plan_calls: "कॉल", plan_leads: "नवीन लीड", plan_quotes: "कोटेशन",
+		plan_behind: "या महिन्याच्या टार्गेटपेक्षा मागे", bill_no_q: "सप्लायर बिल / चलन नंबर",
+	});
 	// change list point 13: CEO live dashboards
 	Object.assign(T.English, {
 		dash_overview: "CEO Overview", dash_daily_review: "Daily Review", dash_sales: "Sales", dash_marketing: "Marketing", dash_machine_shifting: "Machine Shifting", dash_job_work: "Job Work", dash_cr100: "100 Cr", dash_finance: "Finance", dash_manufacturing: "Manufacturing", dash_purchase: "Purchase", dash_store: "Store", dash_quality: "Quality", dash_hr: "HR", dash_ai: "AI & ERP",
@@ -837,6 +852,7 @@
 		lk_setup_now: "आत्ता सुरू करा", lk_setup_done: "चेहरा / बोट लॉक तयार. आता पिन लागणार नाही.",
 		lk_reset: "चेहरा / बोट रीसेट", lk_reset_q: "चेहरा / बोट रीसेट करायचे? ती व्यक्ती एकदा पिनने उघडून परत सुरू करेल.", lk_reset_done: "चेहरा / बोट रीसेट झाले" });
 	const ICON = {
+		more: "⋯", leadership: "🧭",
 		my_day: "☀️", my_leads: "🎯", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
 		job_cards: "🛠️", inspections: "✅", stock_alerts: "📦", material_requests: "🧾", invoice_photo: "📷",
 		collections: "💰", team_scorecards: "👥", site_checklist: "📋", ceo_view: "📊",
@@ -898,6 +914,8 @@
 	}
 
 	function toast(msg, bad) {
+		// point 6: an internal code is never shown; a locked app opens the lock screen instead
+		if (String(msg).includes("SK_LOCKED")) { showLock(); msg = t("lk_locked"); }
 		const el = document.createElement("div");
 		el.className = "sk-toast" + (bad ? " bad" : "");
 		el.textContent = msg;
@@ -1044,7 +1062,7 @@
 		const bar = state.viewAs ? `<div class="sk-viewbar"><span>👀 ${t("viewing")} ${esc(state.viewAs.name)} ${t("viewing_app")}</span>
 			<button data-act="view-idea">💡</button><button data-act="view-exit">✕ ${t("exit_view")}</button></div>` : "";
 		return bar + `<header class="sk-head">
-			${state.view !== "home" ? `<button class="sk-back" data-go="home">‹</button>` : `<img src="/assets/sk_app/icons/icon-192.png" class="sk-logo" alt="SK">`}
+			${state.view !== "home" ? `<button class="sk-back" data-go="${state.view === "fnpage" || state.view === "more" ? "home" : state.parent || "home"}">‹</button>` : `<img src="/assets/sk_app/icons/icon-192.png" class="sk-logo" alt="SK">`}
 			<div class="sk-title">${esc(title)}<small>${esc(whoAmI())}</small></div>
 			<button class="sk-lang" data-act="lang">${t("lang")}</button>
 		</header>`;
@@ -1084,16 +1102,9 @@
 		const h = state.home;
 		const fn = h.home;
 		// point 15: red = late or must-do not done, amber = due today, blue = new, green ✓ = all done today
-		const badge = { ...(h.badges || {}) };
-		if (dueNow().length) badge.reminders = { n: dueNow().length, c: "red" };
-		if (!badge.follow_up && (h.new_files || []).length) badge.follow_up = { n: h.new_files.length, c: "blue" };
+		const badge = homeBadges();
 		if (h.must_set_pin && !state.viewAs) return renderSetPin();
-		const tile = (k) => {
-			const m = badge[k];
-			const o = m && typeof m === "object" ? m : m ? { n: m, c: "red" } : null;
-			const dot = !o ? "" : o.c === "green" ? `<b class="sk-dot green">✓</b>` : `<b class="sk-dot ${o.c}">${esc(o.n)}</b>`;
-			return `<button class="sk-tile ${o ? "c-" + o.c : ""} ${o && o.blink ? "blink" : ""}" data-go="${k}"><span class="sk-tile-icon">${ICON[k] || "•"}</span><span>${t(k)}</span>${dot}</button>`;
-		};
+		const tile = (k) => tileBtn(k, badge);
 		const plain = (keys) => `<div class="sk-tiles small">${keys.map(tile).join("")}</div>`;
 		// point 13: the CEO's live dashboards sit in their own row on top
 		const tiles = (keys) => {
@@ -1102,13 +1113,72 @@
 			return (dash.length ? `<h3 class="sk-h sk-fn-row">${t("live_dash")}</h3>${plain(dash)}${rest.length ? `<div class="sk-gap"></div>` : ""}` : "") + (rest.length ? plain(rest) : "");
 		};
 		if (!h.sections) { root.innerHTML = header("SK App") + `<main>${tiles(fn.tiles)}</main>`; return; }
-		// a person in several functions: one labelled row per function, then the tiles everyone has (SK, 26-Oct)
-		const label = (l) => (l && (l[state.lang] || l.English)) || "";
-		// point 17: each function's live process flow on top of its icons; the icons in work order with arrows
-		const rows = h.sections.sections.filter((x) => x.tiles.length).map((x) => `<h3 class="sk-h sk-fn-row">${esc(label(x.label))} · ${t("fl_workflow")}</h3>
-			<div class="sk-flowbox" data-fn="${esc(x.function)}">${flowHtml(x.function)}</div>${seqTiles(x.tiles, tiles)}`).join("");
-		root.innerHTML = header("SK App") + `<main>${rows}<h3 class="sk-h sk-fn-row">${t("for_everyone")}</h3>${tiles(h.sections.shared)}</main>`;
+		// SK 26-Oct: the main screen is short and needs no scrolling: essentials only, the rest one level inside, in the
+		// order the work goes. One function: its flow + main icons. Several: one big icon per function (level 2 = its page).
+		const sects = h.sections.sections.filter((x) => x.tiles.length);
+		const shared = h.sections.main_shared || ["my_day"];
+		const moreDot = moreBadge(badge);
+		const moreTile = `<button class="sk-tile ${moreDot ? "c-red" : ""}" data-go="more"><span class="sk-tile-icon">${ICON.more}</span><span>${t("more")}</span>${moreDot ? `<b class="sk-dot red">${moreDot}</b>` : ""}</button>`;
+		const bottom = `<div class="sk-tiles small sk-bottom">${shared.map(tile).join("")}${moreTile}</div>`;
+		if (sects.length === 1) {
+			const x = sects[0];
+			root.innerHTML = header("SK App") + `<main class="sk-l1"><div class="sk-flowbox" data-fn="${esc(x.function)}">${flowHtml(x.function)}</div>
+				${seqTiles(x.main || x.tiles, plain)}${bottom}</main>`;
+		} else {
+			root.innerHTML = header("SK App") + `<main class="sk-l1"><div class="sk-tiles small sk-fns">${sects.map((x) => {
+				const red = (x.tiles || []).reduce((n, k) => n + redCount(badge[k]), 0);
+				return `<button class="sk-tile ${red ? "c-red" : ""}" data-fnpage="${esc(x.function)}"><span class="sk-tile-icon">${FN_ICON[x.function] || "📁"}</span><span>${esc(fnLabel(x.label))}</span>${red ? `<b class="sk-dot red">${red}</b>` : ""}</button>`;
+			}).join("")}</div>${bottom}</main>`;
+		}
 		loadFlows();
+	}
+	const fnLabel = (l) => (l && (l[state.lang] || l.English)) || "";
+	const FN_ICON = { Sales: "💼", Marketing: "📣", Production: "🏭", Quality: "✅", Stores: "📦", Purchase: "🛒", Accounts: "💰", HR: "👥",
+		Subcontractor: "🔧", AI: "🤖", Management: "🏁", "Machine Shifting": "🏗️", Design: "📐", "IT / ERP": "💻" };
+	const redCount = (m) => (m && typeof m === "object" ? (m.c === "red" ? Number(m.n) || 0 : 0) : Number(m) || 0);
+	// red count on More = red items on the icons that live inside it
+	function moreBadge(badge) {
+		const h = state.home, inside = new Set();
+		(h.sections.more_groups || []).forEach((g) => g.tiles.forEach((k) => inside.add(k)));
+		const sects = h.sections.sections.filter((x) => x.tiles.length);
+		if (sects.length === 1) (sects[0].more || []).forEach((k) => inside.add(k));
+		return [...inside].reduce((n, k) => n + redCount(badge[k]), 0);
+	}
+	function homeBadges() {
+		const h = state.home, badge = { ...(h.badges || {}) };
+		if (dueNow().length) badge.reminders = { n: dueNow().length, c: "red" };
+		if (!badge.follow_up && (h.new_files || []).length) badge.follow_up = { n: h.new_files.length, c: "blue" };
+		return badge;
+	}
+	function tileBtn(k, badge) {
+		const m = badge[k];
+		const o = m && typeof m === "object" ? m : m ? { n: m, c: "red" } : null;
+		const dot = !o ? "" : o.c === "green" ? `<b class="sk-dot green">✓</b>` : `<b class="sk-dot ${o.c}">${esc(o.n)}</b>`;
+		return `<button class="sk-tile ${o ? "c-" + o.c : ""} ${o && o.blink ? "blink" : ""}" data-go="${k}"><span class="sk-tile-icon">${ICON[k] || "•"}</span><span>${t(k)}</span>${dot}</button>`;
+	}
+	// level 2: one function's page = its flow, its main icons, then its other icons (SK 26-Oct)
+	let fnPage = null;
+	function renderFnPage(fn) {
+		fnPage = fn || fnPage;
+		const x = state.home.sections.sections.find((s) => s.function === fnPage);
+		if (!x) return go("home");
+		state.view = "fnpage";
+		const badge = homeBadges();
+		const row = (keys, seq) => keys.length ? `<div class="sk-tiles small ${seq ? "sk-seq" : ""}">${keys.map((k) => tileBtn(k, badge)).join("")}</div>` : "";
+		root.innerHTML = header(`${FN_ICON[x.function] || ""} ${fnLabel(x.label)}`) + `<main class="sk-l1">
+			<div class="sk-flowbox" data-fn="${esc(x.function)}">${flowHtml(x.function)}</div>
+			${row(x.main || x.tiles, true)}${(x.more || []).length ? `<h3 class="sk-h sk-fn-row">${t("more")}</h3>${row(x.more, true)}` : ""}</main>`;
+		loadFlows();
+	}
+	// level 3 "More": the rest in groups, in the order of a working day
+	function renderMore() {
+		const h = state.home, badge = homeBadges();
+		const sects = h.sections ? h.sections.sections.filter((x) => x.tiles.length) : [];
+		const groups = [];
+		if (sects.length === 1 && (sects[0].more || []).length) groups.push([fnLabel(sects[0].label), sects[0].more, true]);
+		(h.sections ? h.sections.more_groups || [] : []).forEach((g) => groups.push([t(g.group), g.tiles, false]));
+		root.innerHTML = header(`${ICON.more} ${t("more")}`) + `<main class="sk-l1">${groups.map(([title, keys, seq]) => `<h3 class="sk-h sk-fn-row">${esc(title)}</h3>
+			<div class="sk-tiles small ${seq ? "sk-seq" : ""}">${keys.map((k) => tileBtn(k, badge)).join("")}</div>`).join("")}</main>`;
 	}
 	// the function's own icons joined by arrows, in the order the work goes (SK's mock-ups 26-Oct)
 	function seqTiles(keys, tiles) {
@@ -1136,7 +1206,7 @@
 		paintFlows();
 	}
 	function paintFlows() {
-		if (state.view !== "home") return;
+		if (state.view !== "home" && state.view !== "fnpage") return;
 		root.querySelectorAll(".sk-flowbox").forEach((el) => { el.innerHTML = flowHtml(el.dataset.fn); });
 	}
 	function renderFlowStage(fi, si) {
@@ -1149,7 +1219,7 @@
 			<ul class="sk-list">${st.rows.map((r, j) => `<li class="sk-item ${r.c ? "k-" + r.c : ""}"><button class="sk-fu-main" data-flowrow="${j}">
 				<div class="sk-item-title">${r.c === "red" ? "🔴 " : r.c === "amber" ? "🟠 " : ""}${esc(r.title)}</div>
 				<div class="sk-item-meta">${esc(r.meta || "")}</div></button>
-				${r.value != null ? `<b>${typeof r.value === "number" ? shortMoneyF(r.value) : esc(r.value)}</b>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
+				${r.value != null && r.value !== 0 ? `<b>${typeof r.value === "number" ? shortMoneyF(r.value) : esc(r.value)}</b>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
 			${st.count > st.rows.length ? `<p class="sk-note">${t("fl_first")} ${st.rows.length}</p>` : ""}
 			<button class="sk-btn wide" data-go="home">‹ ${t("back")}</button></main>`;
 	}
@@ -1272,10 +1342,23 @@
 		}
 		const done = (d.done || []).map((x) => `<li class="sk-item k-done"><div><div class="sk-item-title">✓ ${esc(x.title)}</div><div class="sk-item-meta">${esc(hm(x.time))}</div></div></li>`).join("");
 		S.att = d.attendance;
-		root.innerHTML = header(t("my_day")) + `<main>${attLine(d.attendance)}${cardHtml(state.card || d.card)}
+		const plan = await call("my_day_plan", {}, true).catch(() => null);
+		// today's time plan: the function's routine (manual checklist), meetings and open work in the free time
+		const today = await renderCalToday().catch(() => `<h3 class="sk-h">${t("to_do")}</h3><ul class="sk-list">${d.items.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
+			<h3 class="sk-h">✓ ${t("done_today")}</h3><ul class="sk-list">${done || `<li class="sk-empty">—</li>`}</ul>`);
+		calTab = "today";
+		// SK 26-Oct (point 15): My Day and My Calendar are one icon: Today here, Week / Month as tabs
+		root.innerHTML = header(t("my_day")) + `<main>${calTabs()}${attLine(d.attendance)}${planHtml(plan)}${cardHtml(state.card || d.card)}
 			<button class="sk-btn go wide" data-go="work_book">${t("did_extra")}</button>
-			<h3 class="sk-h">${t("to_do")}</h3><ul class="sk-list">${d.items.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
-			<h3 class="sk-h">✓ ${t("done_today")}</h3><ul class="sk-list">${done || `<li class="sk-empty">—</li>`}</ul></main>`;
+			${today}</main>`;
+	}
+	// Target Action Plan: today's calls / new leads / quotes from the monthly target, done vs plan; red from the 10th if behind
+	function planHtml(p) {
+		if (!p) return "";
+		return `<section class="sk-plan ${p.behind ? "behind" : ""}"><div class="sk-row"><b class="sk-grow">🎯 ${t("plan_today")}</b>
+			<small>${t("plan_month")} ${Math.round(p.orders_done / 1e5 * 10) / 10} / ${Math.round(p.target / 1e5 * 10) / 10} L</small></div>
+			<div class="sk-plan-row">${p.rows.map((r) => `<div class="c-${r.c}"><b>${r.done}/${r.plan}</b><small>${t("plan_" + r.key)}</small></div>`).join("")}</div>
+			${p.behind ? `<div class="sk-note bad">🔴 ${t("plan_behind")} ₹${Math.round(p.gap / 1e5 * 10) / 10} L</div>` : ""}</section>`;
 	}
 
 	// point 12: My Leads has tabs New today (the lead just made is on top, NEW) · To call · All
@@ -1326,7 +1409,25 @@
 				<div class="sk-kpi-num">${k.live ? `${t("actual")} ${fmt(k.actual)} / ${t("target")} ${fmt(k.monthly_target)}` : t("not_live")}</div></li>`;
 		}).join("");
 		const stars = "★".repeat(Math.min(5, Math.round(d.total_score / 20))) + "☆".repeat(5 - Math.min(5, Math.round(d.total_score / 20)));
-		root.innerHTML = header(t("my_kpi")) + `<main><div class="sk-score"><div>${t("score")} · ${esc(d.month)}</div><div class="sk-score-num">${d.total_score}%</div><div class="sk-stars">${stars}</div></div><ul class="sk-list">${rows}</ul></main>`;
+		// SK 26-Oct: the TLC SAS score next to My Score (self now; assessor once TLC gives it)
+		const sas = (d.sas || []).map((x) => `<div class="sk-score sas"><div>TLC SAS · ${esc(x.name)}</div>
+			<div class="sk-score-num">${x.assessor_pct != null ? x.assessor_pct : x.self_pct}%</div><small>${x.assessor_pct != null ? t("sas_assessor") : t("sas_self")} · ${t("target")} ${x.target_pct}%</small></div>`).join("");
+		const weak = (d.sas || []).flatMap((x) => x.weakest).slice(0, 3);
+		root.innerHTML = header(t("my_kpi")) + `<main><div class="sk-scores"><div class="sk-score"><div>${t("score")} · ${esc(d.month)}</div><div class="sk-score-num">${d.total_score}%</div><div class="sk-stars">${stars}</div></div>${sas}</div>
+			<ul class="sk-list">${rows}</ul>${weak.length ? `<h3 class="sk-h">${t("sas_raise")}</h3><ul class="sk-list">${weak.map((w) => `<li class="sk-item k-amber"><div><div class="sk-item-title">${esc(w.topic)} · ${w.score}/4</div><div class="sk-item-meta">${esc(w.text)}</div></div></li>`).join("")}</ul>` : ""}</main>`;
+	}
+
+	// SK 26-Oct: the CEO's Leadership & Strategy page (TLC SAS) at the second level
+	async function renderLeadership() {
+		const d = await call("leadership");
+		const bar = (p, tgt) => `<div class="sk-bar sas"><div style="width:${Math.min(100, p)}%"></div><i style="left:${tgt}%"></i></div>`;
+		root.innerHTML = header(`${ICON.leadership} ${t("leadership")}`) + `<main>
+			<div class="sk-score"><div>TLC SAS · ${esc(d.level)} · ${t("sas_self")} ${esc(d.assessed_on)}</div><div class="sk-score-num">${d.self_pct}%</div><small>${t("target")} ${d.target_pct}% · ${t("sas_no_assessor")}</small></div>
+			${d.subjects.map((x) => `<details class="sk-sas"><summary><b>${esc(x.name)}</b> <span>${x.self_pct}%</span>${bar(x.self_pct, x.target_pct)}<small>${esc(x.owner)}</small></summary>
+				${x.topics.map((tp) => `<div class="sk-row"><span class="sk-grow">${esc(tp.topic)}</span><b>${tp.score}/${tp.out_of}</b></div>${bar(tp.pct, x.target_pct)}`).join("")}
+				<h3 class="sk-h">${t("sas_weak")}</h3><ul class="sk-list">${x.weakest.map((w) => `<li class="sk-item ${w.score <= 1 ? "k-red" : "k-amber"}"><div><div class="sk-item-title">${esc(w.topic)} · ${w.score}/4</div><div class="sk-item-meta">${esc(w.text)}</div></div></li>`).join("")}</ul>
+				<h3 class="sk-h">${t("sas_actions")}</h3><ul class="sk-list">${x.actions.map((a) => `<li class="sk-item"><div class="sk-item-title">▶ ${esc(a)}</div></li>`).join("")}</ul>
+				<h3 class="sk-h">${t("sas_evidence")}</h3><div class="sk-row sk-wrap">${x.evidence.map((e) => `<span class="sk-chip">${esc(e.label)}: <b>${e.value}</b></span>`).join("")}</div></details>`).join("")}</main>`;
 	}
 
 	function formField(id, label, big) {
@@ -1437,7 +1538,7 @@
 
 	async function renderWork(kind) {
 		const problem = kind === "problem";
-		const types = ["Machine breakdown", "Material shortage", "Quality issue", "Safety", "Customer complaint", "IT / app", "Pay / leave", "Other"];
+		const types = ["Machine breakdown", "Material shortage", "Quality issue", "Safety", "Customer complaint", "IT / app", "Leave", "Other"];
 		const pick = problem ? `<div class="sk-chips">${types.map((p) => `<button class="sk-chip" data-ptype="${p}">${p}</button>`).join("")}</div>` : "";
 		let log = "";
 		if (!problem) {
@@ -1636,7 +1737,7 @@
 			await ocrWorker.setParameters({ tessedit_pageseg_mode: "4", preserve_interword_spaces: "1" });
 		}
 		const { data } = await ocrWorker.recognize(await shrink(file, 2000));
-		return window.skParseCard(data.text);
+		return { ...window.skParseCard(data.text), text: data.text };
 	}
 	async function readCard(ev) {
 		const f = ev.target.files[0];
@@ -1681,15 +1782,24 @@
 		{ anchor: "ns-name", kind: "supplier", ids: { supplier_name: "ns-name", gstin: "ns-gstin", mobile: "ns-mobile" }, learn: { supplier_name: "supplier" } },
 		{ anchor: "b-no", kind: "bill", ids: { supplier: "b-sup", bill_no: "b-no", amount: "b-amt" }, learn: { supplier: "supplier" } },
 		{ anchor: "d-vehicle", kind: "plate", ids: { vehicle_no: "d-vehicle" } },
+		// SK 26-Oct: every photo form is checked the ERPNext way before submit, editable, with suggestions
+		{ anchor: "ex-amt", kind: "expense", ids: { expense_type: "ex-type", amount: "ex-amt", expense_date: "ex-date" } },
+		{ anchor: "pv-amt", kind: "voucher", ids: { spent_on: "pv-text", amount: "pv-amt", account: "pv-exp" } },
+		{ anchor: "q-rate", kind: "quote", ids: { supplier: "q-sup", item: "q-item", rate: "q-rate" }, learn: { supplier: "supplier", item: "item" } },
+		{ anchor: "r-billno", kind: "receipt", ids: () => Object.fromEntries([["bill_no", "r-billno"], ...((S.po && S.po.items) || []).map((_r, k) => [`qty_${k}`, "r-q" + k])]),
+			extra: () => ({ po: S.po && S.po.name, text: root._ocrText || "" }) },
+		{ anchor: "r-reason", kind: "receive", ids: { supplier: "r-sup", item: "r-item", qty: "r-qty", reason: "r-reason" }, learn: { supplier: "supplier", item: "item" } },
 	];
 	const checkSpec = () => CHECKS.find((c) => document.getElementById(c.anchor));
 	let checkTimer = null;
 	async function runCheck() {
 		const spec = checkSpec();
 		if (!spec) return;
+		const ids = typeof spec.ids === "function" ? spec.ids() : spec.ids;
 		const values = {};
-		Object.entries(spec.ids).forEach(([k, id]) => { values[k] = val(id); });
+		Object.entries(ids).forEach(([k, id]) => { values[k] = val(id); });
 		if (!Object.values(values).some(Boolean)) return;
+		if (spec.extra) Object.assign(values, spec.extra());
 		const d = await call("photo_check", { kind: spec.kind, values: JSON.stringify(values) }).catch(() => null);
 		if (!d || !checkSpec()) return;
 		let box = document.getElementById("chk-box");
@@ -1704,12 +1814,12 @@
 		box.innerHTML = `<h3 class="sk-h">🔍 ${t("check_before")}</h3>${d.rows.map((r) => `<div class="sk-chk ${r.state}">
 			<div class="sk-row"><b>${icon[r.state]}</b><span class="sk-grow">${esc(r.label)}: <b>${esc(r.value == null ? "" : r.value)}</b></span><small class="sk-muted">${esc(r.field)}</small></div>
 			${r.note ? `<div class="sk-item-meta">${esc(r.note)}</div>` : ""}
-			${(r.options || []).length ? `<div class="sk-row sk-wrap">${r.options.map((o) => `<button type="button" class="sk-chip" data-apply="${esc(spec.ids[r.field] || "")}" data-val="${esc(o)}" data-learn="${esc((spec.learn || {})[r.field] || "")}">${esc(o)}</button>`).join("")}</div>` : ""}
+			${(r.options || []).length ? `<div class="sk-row sk-wrap">${r.options.map((o) => `<button type="button" class="sk-chip" data-apply="${esc(ids[r.field] || "")}" data-val="${esc(o)}" data-learn="${esc((spec.learn || {})[r.field] || "")}">${esc(o)}</button>`).join("")}</div>` : ""}
 			</div>`).join("")}${d.red ? `<p class="sk-note bad">${t("check_red")}</p>` : `<p class="sk-note">${t("check_ok")}</p>`}`;
 	}
 	root.addEventListener("change", (ev) => {
 		const spec = checkSpec();
-		if (spec && Object.values(spec.ids).includes(ev.target.id)) { clearTimeout(checkTimer); checkTimer = setTimeout(runCheck, 300); }
+		if (spec && Object.values(typeof spec.ids === "function" ? spec.ids() : spec.ids).includes(ev.target.id)) { clearTimeout(checkTimer); checkTimer = setTimeout(runCheck, 300); }
 	});
 	// Bill / GST certificate photo: read it on the phone and fill the empty boxes, then check (free reader)
 	async function readPaper(inp) {
@@ -1717,7 +1827,10 @@
 		if (!f || !f.type.startsWith("image/")) return;
 		const map = { "ns-photo": (d) => ({ "ns-name": d.organization, "ns-gstin": d.invoice && d.invoice.gstin, "ns-mobile": d.mobile_no }),
 			"b-photo": (d) => ({ "b-no": d.invoice && d.invoice.number, "b-amt": d.invoice && d.invoice.total, "b-sup": d.organization }),
-			"ex-photo": (d) => ({ "ex-amt": d.invoice && d.invoice.total }) };
+			"ex-photo": (d) => ({ "ex-amt": d.invoice && d.invoice.total, "ex-date": d.invoice && /^\d{4}-\d{2}-\d{2}$/.test(d.invoice.date || "") ? d.invoice.date : null }),
+			"pv-photo": (d) => ({ "pv-amt": d.invoice && d.invoice.total, "pv-text": d.organization }),
+			"q-photo": (d) => ({ "q-sup": d.organization }),
+			"r-challan": (d) => { root._ocrText = d.text || ""; return { "r-sup": d.organization, "r-billno": d.invoice && d.invoice.number }; } };
 		if (!map[inp.id]) return;
 		try {
 			const d = await readOnPhone(f, () => {});
@@ -1936,7 +2049,7 @@
 
 	async function renderCalendar() {
 		const body = calTab === "week" ? await renderCalWeek() : calTab === "month" ? await renderCalMonth() : await renderCalToday();
-		root.innerHTML = header(t("calendar")) + `<main>${calTabs()}${body}</main>`;
+		root.innerHTML = header(t("my_day")) + `<main>${calTabs()}${body}</main>`;
 	}
 
 	// ---------- shared ----------
@@ -2098,11 +2211,39 @@
 	};
 	function dashValue(kind, v) {
 		if (v == null) return "—";
-		return kind === "money" ? shortMoney(v) : kind === "pct" ? `${v}%` : Number(v).toLocaleString("en-IN");
+		return kind === "money" ? shortMoney(v) || "—" : kind === "pct" ? `${v}%` : Number(v).toLocaleString("en-IN");
 	}
 	function bars(rows) {
 		const max = Math.max(1, ...rows.map((r) => Number(r.value || 0)));
 		return `<div class="sk-vbars">${rows.map((r) => `<div class="sk-vbar" title="${esc(r.title)}: ${esc(r.value)}"><i style="height:${Math.round(Number(r.value || 0) * 100 / max)}%"></i><small>${esc(r.title)}</small></div>`).join("")}</div>`;
+	}
+	// SK 26-Oct "need graphical": month-wise line / bar chart, target line, values on the points, FY Apr..Mar
+	const CH_COL = { orange: "#f07f22", teal: "#2a9d8f", purple: "#8e5bd6", blue: "#1565c0", green: "#2e7d32", red: "#c62828" };
+	function chartSvg(c) {
+		const W = 320, H = 150, L = 26, B = 18, T = 10;
+		const all = c.series.flatMap((s) => s.values.filter((v) => v != null)).concat(c.target ? [c.target] : []);
+		const mx = Math.max(1, ...all) * 1.15, mn = Math.min(0, ...all);
+		const n = c.labels.length, X = (i) => L + i * (W - L - 8) / (n - 1), Y = (v) => H - B - (v - mn) / (mx - mn) * (H - B - T);
+		let g = "";
+		for (let k = 0; k <= 3; k++) { const v = mn + (mx - mn) * k / 3; g += `<line x1="${L}" x2="${W - 4}" y1="${Y(v)}" y2="${Y(v)}" stroke="#e3e7ee"/><text x="2" y="${Y(v) + 3}" font-size="8" fill="#889">${Math.round(v)}</text>`; }
+		if (mn < 0) g += `<line x1="${L}" x2="${W - 4}" y1="${Y(0)}" y2="${Y(0)}" stroke="#99a"/>`;
+		c.labels.forEach((l, i) => { g += `<text x="${X(i)}" y="${H - 4}" font-size="8" text-anchor="middle" fill="#667">${esc(l)}</text>`; });
+		if (c.target) g += `<line x1="${L}" x2="${W - 4}" y1="${Y(c.target)}" y2="${Y(c.target)}" stroke="#4a90d9" stroke-width="1.5" stroke-dasharray="5 3"/><text x="${W - 6}" y="${Y(c.target) - 3}" font-size="8" text-anchor="end" fill="#4a90d9">${t("target")} ${c.target}</text>`;
+		const k = c.series.length;
+		c.series.forEach((s, si) => {
+			const col = CH_COL[s.c] || s.c;
+			if (c.bars) {
+				const bw = Math.max(3, (W - L) / n / (k + 1));
+				s.values.forEach((v, i) => { if (v == null) return; const x = X(i) - bw * k / 2 + si * bw, y0 = Y(0), y1 = Y(v);
+					g += `<rect x="${x}" y="${Math.min(y0, y1)}" width="${bw - 1}" height="${Math.max(1, Math.abs(y0 - y1))}" fill="${v < 0 ? "#e57373" : col}" rx="1"/>`; });
+				return;
+			}
+			const pts = s.values.map((v, i) => (v == null ? null : [X(i), Y(v), v])).filter(Boolean);
+			g += `<polyline points="${pts.map((p) => p[0] + "," + p[1]).join(" ")}" fill="none" stroke="${col}" stroke-width="2.2"/>`;
+			pts.forEach((p) => { g += `<circle cx="${p[0]}" cy="${p[1]}" r="2.6" fill="${col}"/>${k === 1 ? `<text x="${p[0]}" y="${p[1] - 5}" font-size="8" text-anchor="middle" fill="#333">${p[2]}</text>` : ""}`; });
+		});
+		const legend = c.series.map((s) => `<span style="color:${CH_COL[s.c] || s.c}">●</span> ${esc(s.name)}`).join(" &nbsp;") + (c.target ? ` &nbsp;<span style="color:#4a90d9">┅</span> ${t("target")}` : "");
+		return `<svg viewBox="0 0 ${W} ${H}" class="sk-chart" role="img">${g}</svg><small class="sk-chart-leg">${legend}${c.unit === "L" ? " · ₹ L" : ""}</small>`;
 	}
 	async function renderDash(key) {
 		const d = await call("dash_page", { key, ...(dashMonth ? { month: dashMonth } : {}), ...(dashSeg ? { segment: dashSeg } : {}) });
@@ -2117,9 +2258,9 @@
 			${segs}
 			<div class="sk-dash-cards">${d.cards.map((c, i) => {
 				const diff = c.prev != null && c.kind === "money" && c.prev ? Math.round((c.value - c.prev) * 100 / Math.abs(c.prev)) : null;
-				return `<button class="sk-dash-card ${c.c ? "c-" + c.c : ""} ${c.kind === "series" ? "wide" : ""}" data-dcard="${i}">
+				return `<button class="sk-dash-card ${c.c ? "c-" + c.c : ""} ${c.kind === "series" || c.kind === "chart" ? "wide" : ""}" data-dcard="${i}">
 					<span class="sk-dash-label">${esc(c.label)}</span>
-					${c.kind === "series" ? bars(c.rows || []) : c.kind === "list" ? `<span class="sk-dash-mini">${(c.rows || []).slice(0, 4).map((r) => `${esc(r.title)}: <b>${esc(typeof r.value === "number" && r.value > 9999 ? shortMoney(r.value) : r.value == null ? "" : r.value)}</b>`).join("<br>")}</span>`
+					${c.kind === "chart" ? chartSvg(c) : c.kind === "series" ? bars(c.rows || []) : c.kind === "list" ? `<span class="sk-dash-mini">${(c.rows || []).slice(0, 4).map((r) => `${esc(r.title)}: <b>${esc(typeof r.value === "number" && r.value > 9999 ? shortMoney(r.value) : r.value == null ? "" : r.value)}</b>`).join("<br>")}</span>`
 						: `<b class="sk-dash-value">${dashValue(c.kind, c.value)}</b>`}
 					${c.prev != null ? `<small>${t("vs_last")}: ${dashValue(c.kind, c.prev)}${diff != null ? ` (${diff >= 0 ? "▲" : "▼"} ${Math.abs(diff)}%)` : ""}</small>` : ""}</button>`;
 			}).join("")}</div>
@@ -2132,7 +2273,7 @@
 			<ul class="sk-list">${rows.map((r, j) => `<li class="sk-item ${r.c ? "k-" + r.c : ""}"><button class="sk-fu-main" data-drow="${j}" data-dcardi="${i}">
 				<div class="sk-item-title">${r.c === "red" ? "🔴 " : r.c === "amber" ? "🟠 " : r.c === "green" ? "🟢 " : ""}${esc(r.title)}</div>
 				<div class="sk-item-meta">${esc(r.meta || "")}</div></button>
-				${r.value != null ? `<b>${typeof r.value === "number" && Math.abs(r.value) > 9999 ? shortMoney(r.value) : esc(r.value)}</b>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+				${r.value != null && r.value !== 0 ? `<b>${typeof r.value === "number" && Math.abs(r.value) > 9999 ? shortMoney(r.value) : esc(r.value)}</b>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
 	}
 	function openDashRow(i, j) {
 		const r = dashData.cards[i].rows[j];
@@ -2500,7 +2641,8 @@
 	// ERPNext document under their own login (drafts where Accounts / the owner must check first).
 	const S = {}; // screen state: lists from the server, the picked PO / job / order, the items picked for rates
 	const num = (x) => Number(x || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
-	const money = (x) => "Rs " + Number(x || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 });
+	// point 8 (SK 26-Oct): no "Rs 0" anywhere; an amount that is zero or not known is simply not shown
+	const money = (x) => (Number(x || 0) ? "Rs " + Number(x).toLocaleString("en-IN", { maximumFractionDigits: 0 }) : "");
 	const qtyBox = (id, value, label) => `<input id="${id}" class="sk-qty" type="number" inputmode="decimal" step="any" value="${value == null ? "" : esc(value)}" aria-label="${esc(label || "")}">`;
 	const empty = () => `<li class="sk-empty">${t("nothing")}</li>`;
 	const li = (title, meta, right, extra) => `<li class="sk-item ${extra || ""}"><div><div class="sk-item-title">${title}</div><div class="sk-item-meta">${meta || ""}</div></div>${right || ""}</li>`;
@@ -2588,8 +2730,9 @@
 	function receiveForm(i) {
 		const p = S.pos[i];
 		S.po = p;
+		root._ocrText = "";
 		root.innerHTML = header(t("receive")) + `<main class="sk-form"><h3 class="sk-h">${esc(p.supplier_name)} · ${esc(p.name)}</h3>
-			${photoField("r-challan", "📷 " + t("challan_photo"))}
+			${photoField("r-challan", "📷 " + t("challan_photo"))}${formField("r-billno", t("bill_no_q"))}
 			<ul class="sk-list">${p.items.map((r, k) => li(esc(r.item_name), `${t("ordered")} ${num(r.qty)} · ${t("pending")} ${num(r.pending)} ${esc(r.uom || "")}`,
 				qtyBox("r-q" + k, r.pending, r.item_name))).join("")}</ul>
 			${photoField("r-goods", "📷 " + t("goods_photo"))}${formField("r-note", t("note_q"))}
@@ -2784,7 +2927,7 @@
 			case "st-nopo": return receiveNoPo();
 			case "st-receive": {
 				el.disabled = true;
-				const args = { challan_photo: await photoUrl("r-challan"), goods_photo: await photoUrl("r-goods"), note: val("r-note") };
+				const args = { challan_photo: await photoUrl("r-challan"), goods_photo: await photoUrl("r-goods"), note: val("r-note"), bill_no: val("r-billno") };
 				if (S.po) {
 					args.purchase_order = S.po.name;
 					args.items = JSON.stringify(S.po.items.map((r, k) => ({ po_detail: r.name, qty: val("r-q" + k) })));
@@ -3415,7 +3558,7 @@
 		document.body.prepend(a);
 	}
 
-	const LIVE_VIEWS = { my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"),
+	const LIVE_VIEWS = { fnpage: () => renderFnPage(), more: renderMore, leadership: renderLeadership, my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"),
 		my_kpi: renderKpi, dsi: renderDsi, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
 		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name),
@@ -3451,6 +3594,9 @@
 		closeSheet();
 		if (view === "erpnext_desk") { window.location.href = "/app"; return; }
 		if (view !== state.view) clearDraftIfOther(view);
+		// back from an icon opened on a function page or More goes back there (levels 2 and 3, SK 26-Oct)
+		if (view === "home" || view === "fnpage" || view === "more") state.parent = null;
+		else if (state.view === "fnpage" || state.view === "more") state.parent = state.view;
 		state.view = view;
 		if (view === "home") contacts = null;
 		try {
@@ -3481,6 +3627,7 @@
 		const el = ev.target.closest("button, [data-go]");
 		if (!el) return;
 		try {
+			if (el.dataset.fnpage) { fnPage = el.dataset.fnpage; return go("fnpage"); }
 			if (el.dataset.go) { if (el.dataset.go === "follow_up") fuCalls = false; return go(el.dataset.go); }
 			if (el.dataset.open) { current = { doctype: el.dataset.open, name: el.dataset.name }; return go("detail"); }
 			if (el.dataset.lesson && !el.dataset.act) return renderLesson(el.dataset.lesson);
@@ -3517,7 +3664,7 @@
 				if (x) document.getElementById("f-wamsg").value = (state.lang === "Marathi" && x.text_marathi) || x.text || x.title;
 				return;
 			}
-			if (el.dataset.cal) { calTab = el.dataset.cal; if (calTab === "today") calDay = null; return go("calendar"); }
+			if (el.dataset.cal) { calTab = el.dataset.cal; if (calTab === "today") { calDay = null; return go("my_day"); } return go("calendar"); }
 			if (el.dataset.week) { const d = new Date(el.dataset.week); d.setDate(d.getDate() + Number(el.dataset.step)); calDay = d.toISOString().slice(0, 10); return go("calendar"); }
 			if (el.dataset.month) {
 				let [y, m] = el.dataset.month.split("-").map(Number);

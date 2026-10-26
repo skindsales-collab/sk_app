@@ -16,10 +16,11 @@ PAGES = [
 	("overview", "CEO Overview", "CEO आढावा", "🏁"), ("daily_review", "Daily Review", "दैनिक आढावा", "🗓️"),
 	("sales", "Sales", "विक्री", "💼"), ("marketing", "Marketing", "मार्केटिंग", "📣"),
 	("machine_shifting", "Machine Shifting", "मशीन शिफ्टिंग", "🏗️"), ("job_work", "Job Work", "जॉब वर्क", "⚙️"),
-	("cr100", "100 Cr", "100 कोटी", "🎯"), ("finance", "Finance", "वित्त", "💰"),
+	("finance", "Finance", "वित्त", "💰"),
 	("manufacturing", "Manufacturing", "उत्पादन", "🏭"), ("purchase", "Purchase", "खरेदी", "🛒"),
 	("store", "Store", "स्टोअर", "📦"), ("quality", "Quality", "गुणवत्ता", "✅"), ("hr", "HR", "एचआर", "👥"),
 	("ai", "AI & ERP", "AI आणि ERP", "🤖"),
+	("cr100", "100 Cr", "100 कोटी", "🎯"),  # SK 26-Oct: "100 Cr on the second screen, not the first"
 ]
 PAGE_KEYS = [p[0] for p in PAGES]
 GOAL_CR, GOAL_FY = 100, 2030  # SK: Rs 100 Cr sales in FY 2030-31
@@ -299,21 +300,135 @@ def _team_scorecard(start, end, users=None):
 	return rows
 
 
+# ---------- month-wise charts (SK 26-Oct: "need graphical", like SK's Excel: target line vs actual, FY cumulative) ----------
+
+def _fy_start(day=None):
+	d = getdate(day)
+	return getdate(f"{d.year if d.month >= 4 else d.year - 1}-04-01")
+
+
+def _fy_labels(fy):
+	return [f"{add_months(fy, i):%b}" for i in range(12)]
+
+
+def _bucket(rows, date_field, value) -> dict:
+	out = {}
+	for r in rows:
+		k = str(r.get(date_field))[:7]
+		out[k] = out.get(k, 0.0) + flt(value(r))
+	return out
+
+
+def _fy_values(fy, by_month: dict) -> list:
+	"""12 values Apr..Mar from {"YYYY-MM": value}; months still to come are None (no zero line into the future)."""
+	this = str(getdate())[:7]
+	vals = []
+	for i in range(12):
+		k = str(add_months(fy, i))[:7]
+		vals.append(None if k > this else round(flt(by_month.get(k)) / LAKH, 1))
+	return vals
+
+
+def _invoice_months(fy, segment=None) -> dict:
+	end = get_last_day(add_months(fy, 11))
+	inv = frappe.get_all("Sales Invoice", filters={"docstatus": 1, "is_return": 0, "posting_date": ["between", [fy, end]], **_seg_filter(segment)},
+		fields=["posting_date", "base_net_total"], limit=0)
+	out = _bucket(inv, "posting_date", lambda r: r.base_net_total)
+	for k, v in _bucket(_tally_sales(fy, end, segment), "posting_date", lambda r: r.amount).items():
+		out[k] = out.get(k, 0.0) + v
+	return out
+
+
+def _order_months(fy, segment=None) -> dict:
+	return _bucket(_orders(fy, get_last_day(add_months(fy, 11)), segment), "transaction_date", lambda r: r.base_net_total)
+
+
+def _chart(key, label, fy, series, target=None, unit="L", bars=False, value=None, rows=None, c=None) -> dict:
+	"""A month-wise chart card: series = [(name, colour, values)], target = monthly target line (same unit)."""
+	return {"key": key, "label": label, "kind": "chart", "value": value, "unit": unit, "bars": bars, "labels": _fy_labels(fy),
+		"series": [{"name": n, "c": col, "values": v} for n, col, v in series], "target": target, "rows": rows or [], "c": c, "prev": None}
+
+
+def _cum(vals) -> float:
+	return round(sum(v for v in vals if v), 1)
+
+
+def _month_rows(fy, series) -> list:
+	labels = _fy_labels(fy)
+	return [_row(f"{labels[i]} {add_months(fy, i):%y}", " · ".join(f"{n} {v[i]} L" for n, _c, v in series if v[i] is not None))
+		for i in range(12) if any(v[i] is not None for _n, _c, v in series)]
+
+
+def _overview_charts(segment=None) -> list:
+	fy = _fy_start()
+	target = round(sum(_targets().values()) / LAKH, 1) or None
+	total = _fy_values(fy, _invoice_months(fy, segment))
+	cab = _fy_values(fy, _invoice_months(fy, segments.CABIN))
+	non = _fy_values(fy, _invoice_months(fy, segments.NON_CABIN))
+	book = _fy_values(fy, _order_months(fy, segment))
+	inv_series = [("Invoice", "orange", total)]
+	seg_series = [("Cabin", "teal", cab), ("Non-Cabin", "purple", non)]
+	return [
+		_chart("inv_chart", f"Invoice by month · FY so far ₹{_cum(total)} L", fy, inv_series, target, value=_cum(total), rows=_month_rows(fy, inv_series)),
+		_chart("seg_chart", f"Cabin ₹{_cum(cab)} L · Non-Cabin ₹{_cum(non)} L (FY)", fy, seg_series, value=_cum(cab) + _cum(non),
+			rows=_month_rows(fy, seg_series)),
+		_chart("book_chart", f"Order booking by month · FY ₹{_cum(book)} L", fy, [("Orders", "blue", book)], target, value=_cum(book),
+			rows=_month_rows(fy, [("Orders", "blue", book)])),
+	]
+
+
+def _profit_chart(user) -> dict:
+	from sk_app import ledger
+
+	fy = _fy_start()
+	mw = ledger.month_wise(user or "Administrator", fy)
+	by = {r["month"]: r for r in mw["rows"]}
+	gross = _fy_values(fy, {k: r["gross"] for k, r in by.items()})
+	net = _fy_values(fy, {k: r["net"] for k, r in by.items()})
+	series = [("Gross", "green", gross), ("Net", "blue", net)]
+	return _chart("profit_chart", f"Gross ₹{_cum(gross)} L · Net ₹{_cum(net)} L (FY)", fy, series, bars=True, value=_cum(net),
+		rows=_month_rows(fy, series), c="red" if _cum(net) < 0 else None)
+
+
+def _count_chart(key, label, doctype, date_field, filters=None, unit="") -> dict | None:
+	"""A function's KPI by month as a count (1-2 per function, SK 26-Oct point 4)."""
+	if not _has(doctype):
+		return None
+	fy = _fy_start()
+	rows = frappe.get_all(doctype, filters={date_field: [">=", fy], **(filters or {})}, fields=[date_field], limit=0)
+	by = _bucket(rows, date_field, lambda r: 1)
+	this = str(getdate())[:7]
+	vals = [None if str(add_months(fy, i))[:7] > this else int(by.get(str(add_months(fy, i))[:7], 0)) for i in range(12)]
+	return _chart(key, f"{label} · FY {sum(v or 0 for v in vals)}", fy, [(label, "orange", vals)], unit=unit, value=sum(v or 0 for v in vals),
+		rows=[_row(f"{_fy_labels(fy)[i]}", "", v) for i, v in enumerate(vals) if v is not None])
+
+
 # ---------- pages ----------
 
 def _overview(start, end, ps, pe, segment):
 	attention = _attention()
 	target = sum(_targets().values())
 	orders = _orders_card(start, end, ps, pe, segment)
-	cards = [orders, _safe(lambda: _sales_card(start, end, ps, pe, segment)), _safe(lambda: _receivables_card(segment)),
+	cards = [*(_safe(lambda: _overview_charts(segment), []) or []), _safe(lambda: _profit_chart(None)),
+		orders, _safe(lambda: _sales_card(start, end, ps, pe, segment)), _safe(lambda: _receivables_card(segment)),
 		_safe(_cash_card), _safe(lambda: _pipeline_card(segment)) if _has("CRM Deal") else None,
 		_safe(lambda: _leads_card(start, end, ps, pe, segment)) if _has("CRM Lead") else None]
 	if target:
 		cards.insert(1, _card("target", "Orders vs monthly target", round(flt(orders["value"]) * 100 / target), "pct", None,
 			_team_scorecard(start, end)))
+	cards.append(_safe(_sas_card))
 	cards.append(_card("attention", "Needs your attention", sum(len(a["rows"]) for a in attention), "count", None,
 		[r for a in attention for r in a["rows"]][:100], "red" if attention else None))
 	return cards
+
+
+def _sas_card():
+	from sk_app import sas
+
+	d = sas.leadership("Administrator")
+	return _card("sas", f"TLC SAS score (self, target {d['target_pct']}%)", d["self_pct"], "pct", None,
+		[_row(s["name"], f"{s['self_score']}/{s['out_of']} · {s['owner']}", f"{s['self_pct']}%", c="green" if s["self_pct"] >= s["target_pct"] else "amber")
+			for s in d["subjects"]])
 
 
 def _attention() -> list[dict]:
@@ -334,6 +449,12 @@ def _attention() -> list[dict]:
 	nc = _safe(_not_contacted, [])
 	if nc:
 		out.append({"label": "Leads nobody called", "rows": [_row(r.organization or r.first_name, f"{_name(r.lead_owner)} · since {str(r.creation)[:10]}", None, "CRM Lead", r.name, "red") for r in nc[:20]]})
+	from sk_app import plan
+
+	behind = _safe(plan.behind_list, [])
+	if behind:  # Target Action Plan: red flag from the 10th when the month's orders are behind
+		out.append({"label": "Behind this month's target", "rows": [_row(_name(b["user"]), f"done {round(b['done'] / LAKH, 1)} L of {round(b['expected'] / LAKH, 1)} L due by today",
+			b["gap"], "User", b["user"], "red") for b in behind]})
 	if now_datetime().hour >= 18:
 		missing = _safe(lambda: [p for p in _review(getdate())["rows"] if p["c"] == "red"], [])
 		if missing:
@@ -343,7 +464,9 @@ def _attention() -> list[dict]:
 
 def _sales(start, end, ps, pe, segment, sub=None, owner_users=None):
 	seg = sub or segment
-	cards = [_orders_card(start, end, ps, pe, seg), _safe(lambda: _sales_card(start, end, ps, pe, seg))]
+	charts = _safe(lambda: _overview_charts(seg), []) or []
+	cards = [charts[2] if len(charts) > 2 else None, charts[0] if charts else None,
+		_orders_card(start, end, ps, pe, seg), _safe(lambda: _sales_card(start, end, ps, pe, seg))]
 	if _has("CRM Deal"):
 		deals = frappe.get_all("CRM Deal", filters={"status": ["in", _open_deal_statuses() or [""]], **_crm_seg(seg)},
 			fields=["status", "deal_value"], limit=1000)
@@ -390,6 +513,8 @@ def _marketing(start, end, ps, pe, segment):
 	won = frappe.get_all("CRM Deal", filters={"creation": ["between", [f"{start} 00:00:00", f"{end} 23:59:59"]], **_crm_seg(segment)},
 		fields=["name", "organization", "source", "deal_value", "status"], limit=300) if _has("CRM Deal") else []
 	return [
+		_safe(lambda: _count_chart("quote_chart", "Quotes sent", "Quotation", "transaction_date", {"docstatus": ["<", 2], **_seg_filter(segment)})),
+		_safe(lambda: _count_chart("lead_chart", "New leads", "CRM Lead", "creation", _crm_seg(segment))),
 		_leads_card(start, end, ps, pe, segment),
 		_card("by_source", "Leads by source", len(rows), "list", None, [_row(k, "", v) for k, v in sorted(by.items(), key=lambda x: -x[1])]),
 		_card("digital", "Digital leads (IndiaMART, JustDial ...)", len(dig), "count", None,
@@ -431,7 +556,7 @@ def _finance(start, end, ps, pe, segment, user=None):
 	for r in rec:
 		for k, v in r.ages.items():
 			buckets[k] += v
-	cards = [_safe(_cash_card), _receivables_card(segment),
+	cards = [_safe(lambda: _profit_chart(user)), _safe(_cash_card), _receivables_card(segment),
 		_card("ageing", "Receivables ageing", sum(buckets.values()), "money", None, [_row(k, "", v, c="red" if k == "Over 60 days" and v else None) for k, v in buckets.items()]),
 		_safe(_payables_card)]
 
@@ -458,6 +583,8 @@ def _manufacturing(start, end, ps, pe, segment):
 		load[j.workstation or "Not set"] = load.get(j.workstation or "Not set", 0) + 1
 	done = frappe.db.count("Work Order", {"status": "Completed", "modified": [">=", f"{start} 00:00:00"]})
 	return [
+		_safe(lambda: _count_chart("wo_chart", "Cabins / jobs finished", "Work Order", "actual_end_date", {"status": "Completed"})),
+		_safe(lambda: _count_chart("dn_chart", "Dispatches", "Delivery Note", "posting_date", {"docstatus": 1})),
 		_card("in_production", "Cabins / jobs in production", len(wos), "count", None,
 			[_row(w.item_name, f"{w.status} · due {w.expected_delivery_date or '?'}", w.qty, "Work Order", w.name,
 				"red" if w in late else None) for w in wos[:80]]),
@@ -482,6 +609,7 @@ def _purchase(start, end, ps, pe, segment):
 		fields=["name", "schedule_date", "status"], limit=200)
 	limit = po_limit()
 	return [
+		_safe(lambda: _count_chart("po_chart", "Purchase orders", "Purchase Order", "transaction_date", {"docstatus": 1})),
 		_card("open_po", "Open POs", sum(flt(p.grand_total) for p in open_po), "money", None,
 			[_row(p.supplier_name, f"needed by {p.schedule_date}", p.grand_total, "Purchase Order", p.name) for p in open_po[:60]]),
 		_card("approvals", "POs waiting (draft)", len(waiting), "count", None,
@@ -505,6 +633,7 @@ def _store(start, end, ps, pe, segment, user=None):
 	issues = frappe.get_all("Stock Entry", filters={"posting_date": today, "docstatus": ["<", 2]}, fields=["name", "stock_entry_type", "total_outgoing_value"])
 	dispatch = frappe.get_all("Delivery Note", filters={"posting_date": today, "docstatus": ["<", 2]}, fields=["name", "customer_name", "base_net_total"])
 	return [
+		_safe(lambda: _count_chart("rec_chart", "Receipts", "Purchase Receipt", "posting_date", {"docstatus": 1})),
 		_card("stock_value", "Stock value", value, "money"),
 		_card("low", "Low stock items", len(low), "count", None,
 			[_row(r["item_name"] or r["item_code"], f"{r['warehouse']} · have {r['qty']} / level {r['level']}", None, "Item", r["item_code"], "red") for r in low[:80]],
@@ -516,7 +645,8 @@ def _store(start, end, ps, pe, segment, user=None):
 
 
 def _quality(start, end, ps, pe, segment):
-	cards = []
+	cards = [_safe(lambda: _count_chart("qi_chart", "Inspections", "Quality Inspection", "report_date", {"docstatus": ["<", 2]})),
+		_safe(lambda: _count_chart("nc_chart", "Problems found (NC)", "Non Conformance", "creation"))]
 	if _has("Quality Inspection"):
 		qi = frappe.get_all("Quality Inspection", filters={"report_date": ["between", [start, end]], "docstatus": ["<", 2]},
 			fields=["name", "item_name", "status", "reference_name", "report_date"], order_by="report_date desc", limit=200)
@@ -543,7 +673,9 @@ def _hr(start, end, ps, pe, segment):
 	users = frappe.get_all("SK App User", filters={"enabled": 1}, fields=["user", "full_name"])
 	last = {u.name: u.last_active for u in frappe.get_all("User", filters={"name": ["in", [u.user for u in users] or [""]]}, fields=["name", "last_active"])}
 	used = [u for u in users if last.get(u.user) and getdate(last[u.user]) == today]
-	cards = [_card("app_today", "Used the app today", len(used), "count", None,
+	cards = [_safe(lambda: _count_chart("att_chart", "Present days (Optick + thumb)", "Attendance", "attendance_date",
+		{"docstatus": 1, "status": ["in", ["Present", "Half Day", "Work From Home"]]})),
+		_card("app_today", "Used the app today", len(used), "count", None,
 		[_row(u.full_name or u.user, f"last {str(last.get(u.user) or 'never')[:16]}", None, "User", u.user,
 			None if u in used else "red") for u in sorted(users, key=lambda x: x in used)])]
 	if _has("Attendance"):
@@ -648,7 +780,7 @@ def badges(user: str) -> dict:
 	for item in _attention():
 		n = len(item["rows"])
 		page_key = {"Dues over 60 days": "finance", "POs waiting for your OK": "purchase", "Late orders": "manufacturing",
-			"Leads nobody called": "marketing", "No day report today": "daily_review"}.get(item["label"])
+			"Leads nobody called": "marketing", "No day report today": "daily_review", "Behind this month's target": "sales"}.get(item["label"])
 		if page_key:
 			out[f"dash_{page_key}"] = {"n": n, "c": "red"}
 		out["dash_overview"] = {"n": out.get("dash_overview", {}).get("n", 0) + n, "c": "red"}
