@@ -2,6 +2,15 @@
 (function () {
 	const root = document.getElementById("sk-app");
 	const CSRF = root.dataset.csrf;
+	// SK 26-Oct: after a deploy an open app kept the old screens; Home now reloads itself once a new version is live
+	const LOADED_V = ((document.currentScript && document.currentScript.src) || "").split("v=")[1] || "";
+	function reloadIfNew(h) {
+		if (h && h.v && LOADED_V && h.v !== LOADED_V && !state.viewAs && state.view === "home" && !document.querySelector(".sk-sheet")) {
+			location.reload();
+			return true;
+		}
+		return false;
+	}
 	let state = { lang: "English", home: null, card: null, view: "home" };
 
 	const T = {
@@ -3372,7 +3381,7 @@
 			if (view === "home") {
 				renderHome();
 				// red counts change as jobs are done and checks are saved: refresh them quietly
-				return call("home").then((h) => { state.home = h; if (state.view === "home" && !document.querySelector(".sk-sheet")) renderHome(); }).catch(() => {});
+				return call("home").then((h) => { if (reloadIfNew(h)) return; state.home = h; if (state.view === "home" && !document.querySelector(".sk-sheet")) renderHome(); }).catch(() => {});
 			}
 			const fn = LIVE_VIEWS[view];
 			return fn ? await fn() : renderSoon(view);
@@ -3991,6 +4000,7 @@
 		if (document.hidden || !state.home) return;
 		try {
 			const h = await call("home");
+			if (reloadIfNew(h)) return;
 			const known = new Set((state.home.new_files || []).map((f) => f.name));
 			const fresh = (h.new_files || []).filter((f) => !known.has(f.name));
 			const newCard = h.card && (!state.card || h.card.name !== state.card.name);

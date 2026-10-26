@@ -52,7 +52,9 @@ def home():
 			main["tiles"] = main["tiles"][:1] + ["logins"] + main["tiles"][1:]
 		if sections and sections["sections"] and not any("logins" in x["tiles"] for x in sections["sections"]):
 			sections["sections"][0]["tiles"] = ["logins"] + sections["sections"][0]["tiles"]
-	return {"user": profile.user, "full_name": profile.full_name, "language": profile.language,
+	from sk_app.www.sk.index import asset_version
+
+	return {"user": profile.user, "full_name": profile.full_name, "language": profile.language, "v": asset_version(),
 		"mobile": me.get("mobile_no") or me.get("phone"),
 		"home": main, "functions": functions,
 		# SK: a person in several functions sees all of them on one Home, one labelled row each
