@@ -825,13 +825,13 @@
 	Object.assign(T.Marathi, { fl_workflow: "कामाचा क्रम", fl_loading: "आकडे येत आहेत", fl_days: "दिवस", fl_oldest: "सर्वात जुने",
 		fl_on_time: "सर्व वेळेवर", fl_work: "काम करा", fl_first: "पहिले दाखवले" });
 	Object.assign(T.English, { lk_locked: "Locked", lk_touch: "Touch finger or look at the phone", lk_open_face: "Open with face / finger",
-		lk_ask_ceo: "Not working or new phone? Ask the CEO to reset it.", lk_pin: "Your PIN", lk_open: "Open",
+		lk_ask_ceo: "Not working or new phone? Ask the CEO to reset it.", lk_pin: "Your PIN (the one you log in with)", lk_open: "Open", lk_relogin: "Forgot PIN? Log in again",
 		lk_cancelled: "Not checked. Tap the button and touch the finger sensor or look at the phone.",
 		lk_setup: "Set up face / finger", lk_setup_why: "From now on the app opens only with your phone's fingerprint or face lock, no PIN. Your finger and face stay on the phone; nothing is sent.",
 		lk_setup_now: "Set up now", lk_setup_done: "Face / finger set up. The PIN is not needed any more.",
 		lk_reset: "Reset face / finger", lk_reset_q: "Reset face / finger? The person opens with the PIN once and sets it up again.", lk_reset_done: "Face / finger reset" });
 	Object.assign(T.Marathi, { lk_locked: "लॉक आहे", lk_touch: "बोट लावा किंवा फोनकडे पहा", lk_open_face: "चेहरा / बोटाने उघडा",
-		lk_ask_ceo: "चालत नाही किंवा नवीन फोन? CEO ला रीसेट करायला सांगा.", lk_pin: "तुमचा पिन", lk_open: "उघडा",
+		lk_ask_ceo: "चालत नाही किंवा नवीन फोन? CEO ला रीसेट करायला सांगा.", lk_pin: "तुमचा पिन (लॉगिनचा)", lk_open: "उघडा", lk_relogin: "पिन विसरलात? पुन्हा लॉगिन करा",
 		lk_cancelled: "तपासले नाही. बटण दाबा आणि बोट लावा किंवा फोनकडे पहा.",
 		lk_setup: "चेहरा / बोट लॉक सुरू करा", lk_setup_why: "आता पासून ॲप फक्त फोनच्या बोट / चेहरा लॉकने उघडेल, पिन नाही. बोट आणि चेहरा फोनवरच राहतात; काहीही पाठवले जात नाही.",
 		lk_setup_now: "आत्ता सुरू करा", lk_setup_done: "चेहरा / बोट लॉक तयार. आता पिन लागणार नाही.",
@@ -4102,7 +4102,8 @@
 			${face ? `<p class="sk-big">👆 ${t("lk_touch")}</p><button class="sk-btn go wide" data-lock="face">🙂 ${t("lk_open_face")}</button>
 				<p class="sk-note">${t("lk_ask_ceo")}</p>`
 			: `<label class="sk-field"><span>${t("lk_pin")}</span><input id="lk-pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8"></label>
-				<button class="sk-btn go wide" data-lock="pin">${t("lk_open")}</button>`}
+				<button class="sk-btn go wide" data-lock="pin">${t("lk_open")}</button>
+				<button class="sk-btn wide" data-lock="relogin">${t("lk_relogin")}</button>`}
 			<p class="sk-lock-msg" id="lk-msg"></p></div>`;
 		if (face) setTimeout(() => el.querySelector("[data-lock=face]") && el.querySelector("[data-lock=face]").click(), 300);
 	}
@@ -4124,6 +4125,10 @@
 		const msg = document.getElementById("lk-msg");
 		b.disabled = true;
 		try {
+			if (b.dataset.lock === "relogin") {
+				await fetch("/api/method/logout", { method: "POST", credentials: "same-origin", headers: { "X-Frappe-CSRF-Token": CSRF } }).catch(() => {});
+				return location.reload();
+			}
 			if (b.dataset.lock === "face") await afterUnlock(await faceUnlock());
 			else await afterUnlock(await call("unlock_pin", { pin: (document.getElementById("lk-pin") || {}).value || "" }, true));
 		} catch (e) {
