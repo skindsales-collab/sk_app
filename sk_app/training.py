@@ -79,8 +79,10 @@ APP_LESSONS = [
 
 
 def seed_lessons():
+	from sk_app.manuals import FUNCTION_LESSONS
+
 	frappe.db.sql("""update `tabSK Training Lesson` set lesson_type='App usage' where ifnull(lesson_type, '')=''""")
-	for title, title_mr, function, seq, content, content_mr in APP_LESSONS:
+	for title, title_mr, function, seq, content, content_mr in APP_LESSONS + FUNCTION_LESSONS:
 		name = frappe.db.get_value("SK Training Lesson", {"title": title})
 		if name:  # app lessons follow the app: keep their text up to date
 			frappe.db.set_value("SK Training Lesson", name, {"content": content, "content_marathi": content_mr}, update_modified=False)

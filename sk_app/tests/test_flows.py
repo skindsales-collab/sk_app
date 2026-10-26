@@ -25,3 +25,13 @@ class TestFlows(IntegrationTestCase):
 		self.assertTrue(all(f["function"] == "Management" for f in ceo["flows"]))
 		self.assertGreaterEqual(len(ceo["flows"]), 2)
 		self.assertEqual(run(REP, flows.for_user, ["Nothing"])["flows"], [])
+
+	def test_function_manuals_seeded(self):
+		from sk_app.manuals import FUNCTION_LESSONS
+		from sk_app.training import seed_lessons
+
+		seed_lessons()
+		have = set(frappe.get_all("SK Training Lesson", filters={"published": 1}, pluck="function"))
+		for fn in ("Production", "Subcontractor", "Stores", "Purchase", "Quality", "Accounts", "HR", "AI", "Management"):
+			self.assertIn(fn, have)
+		self.assertEqual(len({x[0] for x in FUNCTION_LESSONS}), len(FUNCTION_LESSONS))
