@@ -196,3 +196,8 @@ Score = actual / target (capped at 120%) x weight. Sources that are not live yet
   voice, with ❓ Ask a question: it goes to the person's manager (or the function head) as a ToDo, the answer comes back
   to the person and can be added to the FAQ with one tap. The Finance, HR and Manufacturing manuals themselves come to SK
   as PDFs first and are loaded only after SK's OK.
+- **Point 8, product cards** (`products.py`): one card per product / service = SK Library Item (category Product) with
+  Item Group, photos (attached), sizes, brochure, video and internal notes (staff only, never in a customer message).
+  Company & Products → Products lists Cabin and Non-Cabin; Item Groups with no card yet show greyed so the list is
+  complete. New Lead has "Product asked" (`sk_product` on CRM Lead / Deal), and the lead / deal page shows "Products for
+  this customer" with one-tap WhatsApp share. Photos, sizes and brochures come from SK / Sales.

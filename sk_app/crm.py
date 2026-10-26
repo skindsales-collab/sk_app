@@ -51,8 +51,18 @@ def options() -> dict:
 		"sources": frappe.get_all("CRM Lead Source", pluck="name", order_by="name asc"),
 		"segments": SEGMENTS,
 		"segment_tree": SEGMENT_TREE,
+		"products": _product_names(),
 		"call_outcomes": CALL_OUTCOMES,
 	}
+
+
+def _product_names() -> list:
+	from sk_app.products import names_for
+
+	try:
+		return names_for()
+	except Exception:
+		return []
 
 
 def _closed(status_doctype: str) -> list[str]:
@@ -177,10 +187,21 @@ DETAIL_FIELDS = {
 }
 
 
+def _products(doctype: str, name: str) -> list:
+	"""Point 8: product cards for this customer (the product asked first), for one-tap sharing."""
+	try:
+		from sk_app.products import for_record
+
+		return for_record(doctype, name)
+	except Exception:
+		frappe.log_error("SK App product cards")
+		return []
+
+
 def detail(doctype: str, name: str) -> dict:
 	_check(doctype, name)
 	meta = frappe.get_meta(doctype)
-	fields = [f for f in DETAIL_FIELDS[doctype] + ["sk_segment"] if f == "name" or meta.has_field(f)]
+	fields = [f for f in DETAIL_FIELDS[doctype] + ["sk_segment", "sk_product"] if f == "name" or meta.has_field(f)]
 	doc = frappe.db.get_value(doctype, name, fields, as_dict=True)
 	ref = {"reference_doctype": doctype, "reference_docname": name}
 	deal = None
@@ -211,6 +232,7 @@ def detail(doctype: str, name: str) -> dict:
 			order_by="creation desc", limit=30),
 		"files": _files(doctype, name) + (_files("CRM Deal", deal["name"]) if deal and doctype == "CRM Lead" else []),
 		"deal": deal and deal["name"],
+		"products": _products(doctype, name),
 		**_erp_docs(deal),
 		"crm_url": f"/crm/{'leads' if doctype == 'CRM Lead' else 'deals'}/{name}",
 	}
@@ -234,7 +256,7 @@ def _attach(file_url: str | None, doctype: str, name: str, user: str):
 
 def new_lead(user: str, first_name: str, mobile_no: str | None = None, organization: str | None = None,
 		email: str | None = None, source: str | None = None, segment: str | None = None,
-		requirement: str | None = None, photo: str | None = None) -> str:
+		requirement: str | None = None, photo: str | None = None, product: str | None = None) -> str:
 	if not installed():
 		frappe.throw(_("Frappe CRM is not installed"))
 	if not (first_name or "").strip():
@@ -251,6 +273,8 @@ def new_lead(user: str, first_name: str, mobile_no: str | None = None, organizat
 	})
 	if segment and doc.meta.has_field("sk_segment"):
 		doc.sk_segment = segment
+	if product and doc.meta.has_field("sk_product"):
+		doc.sk_product = product[:140]
 	doc.insert()
 	if (requirement or "").strip():
 		frappe.get_doc({"doctype": "FCRM Note", "title": _("Requirement"), "content": requirement.strip(),

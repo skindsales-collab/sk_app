@@ -33,6 +33,9 @@ def after_migrate():
 	from sk_app.complaints import ensure_setup
 
 	ensure_setup()
+	from sk_app.products import ensure_fields as product_fields
+
+	product_fields()
 	segments.sync_user_permissions()
 	from sk_app.training import seed_lessons
 

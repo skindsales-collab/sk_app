@@ -766,6 +766,11 @@
 		faq_answer: "Your answer (speak or type)", faq_add: "Add to the FAQ for everyone" });
 	Object.assign(T.Marathi, { faq_ask: "प्रश्न विचारा", faq_q: "तुमचा प्रश्न (बोला किंवा लिहा)", faq_sent: "प्रश्न पाठवला:", faq_to_answer: "तुम्ही उत्तर द्यायचे प्रश्न",
 		faq_answer: "तुमचे उत्तर (बोला किंवा लिहा)", faq_add: "सर्वांसाठी FAQ मध्ये जोडा" });
+	// change list point 8: product cards
+	Object.assign(T.English, { product_asked: "Product asked (optional)", products_for: "Products for this customer", card_missing: "Card not made yet (photos, sizes, brochure needed)",
+		brochure: "Brochure" });
+	Object.assign(T.Marathi, { product_asked: "विचारलेले उत्पादन (ऐच्छिक)", products_for: "या ग्राहकासाठी उत्पादने", card_missing: "कार्ड अजून बनले नाही (फोटो, साईझ, ब्रोशर हवे)",
+		brochure: "ब्रोशर" });
 	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";
 	T.Marathi.mic_blocked = "माईक / कॅमेरा बंद आहे. Chrome → ⋮ → Settings → Site settings → Microphone (किंवा Camera) → ही साईट → Allow. मग परत येऊन 🎤 दाबा.";
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
@@ -1399,6 +1404,7 @@
 			<div class="sk-form">${formField("f-note", t("note_q"), true)}${photoField("f-photo", t("attach"), true)}
 				<button class="sk-btn ok wide" data-act="save-note">${t("add_note")}</button>
 				<button class="sk-btn wide sk-gap" data-act="reminder-new" data-doctype="${esc(doctype)}" data-name="${esc(name)}">⏰ + ${t("reminder")}</button></div>
+			${(d.products || []).length ? `<h3 class="sk-h">${t("products_for")}</h3>${productStrip(d.products)}` : ""}
 			${sec(t("quotations"), d.quotations.map((q) => erpDocRow("Quotation", q, mobile)).join(""))}
 			${sec(t("sales_orders"), d.sales_orders.map((q) => erpDocRow("Sales Order", q, mobile)).join(""))}
 			${sec(t("files"), files)}${sec(t("tasks"), tasks)}${sec(t("emails"), mails.map((m) => `<li class="sk-item"><div><div class="sk-item-title">${m.sent_or_received === "Received" ? "📥" : "📤"} ${esc(m.subject || "")}</div>
@@ -1468,7 +1474,7 @@
 			${formField("f-first", t("cust_name"))}${formField("f-org", t("company"))}
 			<label class="sk-field"><span>${t("mobile")}</span><div class="sk-input-row"><input id="f-mobile" type="tel"></div></label>
 			<label class="sk-field"><span>${t("email")}</span><div class="sk-input-row"><input id="f-email" type="email"></div></label>
-			${sel("f-source", t("source"), o.sources)}${segmentSelect("f-segment", o.segment_tree, o.segments)}
+			${sel("f-source", t("source"), o.sources)}${segmentSelect("f-segment", o.segment_tree, o.segments)}${(o.products || []).length ? sel("f-product", t("product_asked"), o.products) : ""}
 			${formField("f-req", t("requirement"), true)}
 			<button class="sk-btn ok wide" data-act="save-lead">${t("save")}</button>
 			<details class="sk-gap"><summary>📄 ${t("upload_list")}</summary>${uploadBox()}</details></main>`;
@@ -2085,8 +2091,42 @@
 				${text ? `<div class="sk-libtext">${esc(text)}</div>` : ""}<div class="sk-row">${open}${send}${share}${copy}</div></div></li>`;
 		}).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>`;
 	}
+	// point 8: one card per product, used everywhere; the internal part is never put in a customer message
+	function productMessage(c) {
+		const mr = state.lang === "Marathi";
+		return [(mr && c.title_marathi) || c.title, (mr && c.text_marathi) || c.text, c.sizes, c.file ? absUrl(c.file) : "", c.video_link, c.link]
+			.filter(Boolean).join("\n");
+	}
+	function productStrip(cards) {
+		S.pcards = cards;
+		return `<div class="sk-pstrip">${cards.map((c, i) => `<div class="sk-pcard">${c.photos && c.photos[0] ? `<img src="${esc(c.photos[0])}" alt="">` : `<div class="sk-pph">📷</div>`}
+			<b>${esc((state.lang === "Marathi" && c.title_marathi) || c.title)}</b>
+			<button class="sk-chip on" data-act="p-send" data-i="${i}">💬 ${t("send")}</button></div>`).join("")}</div>`;
+	}
+	async function renderProducts() {
+		const cat = await call("product_catalogue");
+		const mr = state.lang === "Marathi";
+		const all = [].concat(...Object.values(cat));
+		S.pcards = all;
+		return Object.entries(cat).map(([main, rows]) => `<h3 class="sk-h">${esc(t(main))}</h3><ul class="sk-list">${rows.map((c) => {
+			const i = all.indexOf(c);
+			if (!c.ready) return `<li class="sk-item sk-off"><div><div class="sk-item-title">${esc(c.title)}</div><div class="sk-item-meta">${t("card_missing")}</div></div></li>`;
+			return `<li class="sk-item"><div class="sk-grow">${c.photos.length ? `<div class="sk-pstrip">${c.photos.slice(0, 5).map((p) => `<a href="${esc(p)}" target="_blank"><img class="sk-pthumb" src="${esc(p)}" alt=""></a>`).join("")}</div>` : ""}
+				<div class="sk-item-title">${esc((mr && c.title_marathi) || c.title)}</div>
+				${(mr && c.text_marathi) || c.text ? `<div class="sk-libtext">${esc((mr && c.text_marathi) || c.text)}</div>` : ""}
+				${c.sizes ? `<div class="sk-libtext">📐 ${esc(c.sizes)}</div>` : ""}
+				${c.internal_notes ? `<div class="sk-item-meta">🔒 ${esc(c.internal_notes)}</div>` : ""}
+				<div class="sk-row sk-wrap">${c.file ? `<a class="sk-chip" href="${esc(c.file)}" target="_blank">📄 ${t("brochure")}</a>` : ""}${c.video_link ? `<a class="sk-chip" href="${esc(c.video_link)}" target="_blank">▶ Video</a>` : ""}
+				<button class="sk-chip on" data-act="p-send" data-i="${i}">💬 ${t("send")}</button></div></div></li>`;
+		}).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>`).join("");
+	}
 	async function renderLibrary() {
 		const cats = ["Company", "Product", "Customer FAQ", "Message Template", "Sales Manual"];
+		if (libCat === "Product") {
+			const body = await renderProducts();
+			root.innerHTML = header(t("library")) + `<main><div class="cal-tabs sk-wrap">${cats.map((c) => `<button class="${libCat === c ? "on" : ""}" data-libcat="${esc(c)}">${t("cat_" + c)}</button>`).join("")}</div>${body}</main>`;
+			return;
+		}
 		const rows = await call("library", { category: libCat });
 		root.innerHTML = header(t("library")) + `<main><div class="cal-tabs sk-wrap">${cats.map((c) => `<button class="${libCat === c ? "on" : ""}" data-libcat="${esc(c)}">${t("cat_" + c)}</button>`).join("")}</div>
 			${libraryList(rows)}</main>`;
@@ -3331,6 +3371,7 @@
 				await call("training_answer", { todo: el.dataset.todo, text: val("faq-ans"), add_to_faq: document.getElementById("faq-add").checked ? 1 : 0 }, true);
 				closeSheet(); toast(t("saved")); return go("training");
 			}
+			if (act === "p-send") return waTextSheet(productMessage(S.pcards[Number(el.dataset.i)]));
 			if (act === "cp-new") return renderNewComplaint();
 			if (act === "cp-save") {
 				const cust = val("cp-cust");
@@ -3527,7 +3568,7 @@
 				if (!val("f-segment")) { toast(t("pick_segment")); document.getElementById("f-segment").focus(); return; }
 				el.disabled = true;
 				const name = await call("new_lead", { first_name: val("f-first"), organization: val("f-org"), mobile_no: val("f-mobile"),
-					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl }, true);
+					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl, product: val("f-product") }, true);
 				cardUrl = null;
 				clearDraft();
 				return leadSaved({ name, title: val("f-org") || val("f-first"), person: val("f-first"), mobile: val("f-mobile"),

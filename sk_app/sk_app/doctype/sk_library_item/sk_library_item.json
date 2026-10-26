@@ -27,7 +27,12 @@
   "page_to",
   "column_2",
   "text",
-  "text_marathi"
+  "text_marathi",
+  "product_section",
+  "item_group",
+  "sizes",
+  "video_link",
+  "internal_notes"
  ],
  "fields": [
   {
@@ -130,6 +135,37 @@
    "fieldname": "text_marathi",
    "fieldtype": "Small Text",
    "label": "Answer / message (Marathi)"
+  },
+  {
+   "fieldname": "product_section",
+   "fieldtype": "Section Break",
+   "label": "Product card (category Product)",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "options": "Item Group",
+   "label": "Item Group",
+   "description": "The ERPNext product this card is for. Attach 3-5 photos to this record."
+  },
+  {
+   "fieldname": "sizes",
+   "fieldtype": "Small Text",
+   "label": "Standard sizes and specification",
+   "description": "One size per line, e.g. 8 x 6 ft: 2 persons, table"
+  },
+  {
+   "fieldname": "video_link",
+   "fieldtype": "Data",
+   "options": "URL",
+   "label": "Video link (YouTube)"
+  },
+  {
+   "fieldname": "internal_notes",
+   "fieldtype": "Small Text",
+   "label": "Internal only: price range, delivery time, competitor notes",
+   "description": "Shown to staff only, never sent to a customer"
   }
  ],
  "permissions": [

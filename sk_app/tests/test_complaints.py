@@ -54,3 +54,23 @@ class TestComplaints(IntegrationTestCase):
 		complaints.on_nc_resolved(nc, STORE, "Sealed the AC point")
 		self.assertEqual(frappe.db.get_value("Issue", r["name"], "sk_stage"), "Fixed")
 		self.assertRaises(frappe.ValidationError, complaints.register, SELLER, cust, "x", "Not a type")
+
+
+class TestProductCards(IntegrationTestCase):
+	"""Point 8: one card per product, Item Groups without a card still listed."""
+
+	def test_catalogue_by_segment(self):
+		from sk_app import products
+
+		for g in ("SK Test Farmhouse Cabin", "SK Test Machine Shifting"):
+			if not frappe.db.exists("Item Group", g):
+				frappe.get_doc({"doctype": "Item Group", "item_group_name": g, "parent_item_group": "All Item Groups", "is_group": 0}).insert(ignore_permissions=True)
+		frappe.get_doc({"doctype": "SK Library Item", "title": "SK Test Farmhouse Cabin card", "category": "Product", "enabled": 1,
+			"audience": "Customer", "function": "All", "item_group": "SK Test Farmhouse Cabin", "sizes": "12 x 10 ft",
+			"internal_notes": "Rs 3-4 L"}).insert(ignore_permissions=True)
+		cat = products.catalogue()
+		cabin = {c["title"]: c for c in cat["Cabin"]}
+		self.assertTrue(cabin["SK Test Farmhouse Cabin card"]["ready"])
+		self.assertNotIn("SK Test Farmhouse Cabin", cabin)  # the group has its card
+		self.assertIn("SK Test Machine Shifting", [c["title"] for c in cat["Non-Cabin"]])
+		self.assertIn("SK Test Farmhouse Cabin card", products.names_for())
