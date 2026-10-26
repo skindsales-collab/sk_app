@@ -161,7 +161,25 @@ def my_leads():
 @frappe.whitelist()
 def my_kpi(day=None):
 	profile = _me()
-	return kpi.scorecard(profile.user, day)
+	from sk_app import sas
+
+	# SK 26-Oct: the TLC SAS score next to My Score
+	return {**kpi.scorecard(profile.user, day), "sas": sas.for_user(profile.user)}
+
+
+@frappe.whitelist()
+def my_day_plan(day=None):
+	"""Today's calls / leads / quotes from the person's monthly target (Target Action Plan, SK 26-Oct)."""
+	from sk_app import plan
+
+	return plan.day_plan(_me().user, day)
+
+
+@frappe.whitelist()
+def leadership():
+	from sk_app import sas
+
+	return sas.leadership(_me().user)
 
 
 @frappe.whitelist()
@@ -194,6 +212,7 @@ def add_work(description, entry_type="Extra Work", problem_type=None, reference_
 		frappe.throw(_("Unknown entry type"))
 	if reference_doctype and reference_name and not frappe.has_permission(reference_doctype, "read", reference_name):
 		frappe.throw(_("No access to {0}").format(reference_name), frappe.PermissionError)
+	owner = problem_owner(profile.user, problem_type) if entry_type == "Problem" and not assigned_to else None
 	doc = frappe.get_doc({
 		"doctype": "SK Work Log", "user": profile.user, "date": getdate(), "entry_type": entry_type,
 		"problem_type": problem_type, "description": description, "reference_doctype": reference_doctype,
@@ -203,7 +222,29 @@ def add_work(description, entry_type="Extra Work", problem_type=None, reference_
 		from frappe.desk.form.assign_to import add as assign
 
 		assign({"assign_to": [assigned_to], "doctype": "SK Work Log", "name": doc.name, "description": description})
+	elif owner:  # point 12: the function owner gets it as a ToDo (the sender may not share documents themselves)
+		frappe.get_doc({"doctype": "ToDo", "allocated_to": owner, "reference_type": "SK Work Log", "reference_name": doc.name,
+			"description": f"Problem ({problem_type or 'Other'}) from {profile.full_name or profile.user}: {description}", "priority": "High",
+			"date": getdate(), "assigned_by": profile.user}).insert(ignore_permissions=True)
 	return doc.name
+
+
+# point 12 (SK 26-Oct): a problem goes to the owner of the function it belongs to; app / ERP problems to AI & ERP
+# (Samir). Every problem also stays in the AI & ERP Improvement Inbox.
+PROBLEM_OWNER = {"Machine breakdown": "Production", "Safety": "Production", "Material shortage": "Stores",
+	"Quality issue": "Quality", "Customer complaint": "Sales", "IT / app": "AI", "Leave": "HR", "Pay / leave": "HR", "Other": "AI"}
+
+
+def problem_owner(user: str, problem_type: str | None) -> str | None:
+	from sk_app.store import _users_with_function
+
+	function = PROBLEM_OWNER.get(problem_type or "Other", "AI")
+	for fn in (function, "AI"):
+		people = [p for p in _users_with_function(fn) if p != user]
+		heads = [p for p in people if frappe.db.exists("SK App User", {"manager": p, "enabled": 1})]
+		if heads or people:
+			return (heads or people)[0]
+	return None
 
 
 @frappe.whitelist(methods=["POST"])
@@ -683,8 +724,8 @@ def store_open_pos():
 
 
 @frappe.whitelist(methods=["POST"])
-def store_receive(items, purchase_order=None, challan_photo=None, goods_photo=None, note=None, supplier=None, reason=None):
-	return store.receive(_me().user, purchase_order, _list(items), challan_photo, goods_photo, note, supplier, reason)
+def store_receive(items, purchase_order=None, challan_photo=None, goods_photo=None, note=None, supplier=None, reason=None, bill_no=None):
+	return store.receive(_me().user, purchase_order, _list(items), challan_photo, goods_photo, note, supplier, reason, bill_no)
 
 
 @frappe.whitelist()
@@ -1269,3 +1310,47 @@ def expense_claim(expense_type, amount, expense_date=None, note=None, photo=None
 @frappe.whitelist(methods=["POST"])
 def expense_decide(name, ok, note=None):
 	return hr.decide_expense(_me().user, name, ok, note)
+
+
+# ---- ERP flow in the app (SK 26-Oct): Customer → Quotation → Sales Order → Work Order ----
+
+@frappe.whitelist(methods=["POST"])
+def flow_make_customer(deal):
+	from sk_app import erp_flow
+
+	return erp_flow.make_customer(_me().user, deal)
+
+
+@frappe.whitelist(methods=["POST"])
+def flow_make_quotation(deal, items, valid_days=15, note=None):
+	from sk_app import erp_flow
+
+	return erp_flow.make_quotation(_me().user, deal, _list(items), int(valid_days or 15), note)
+
+
+@frappe.whitelist(methods=["POST"])
+def flow_order_received(quotation, delivery_date=None, po_no=None):
+	from sk_app import erp_flow
+
+	return erp_flow.order_received(_me().user, quotation, delivery_date, po_no)
+
+
+@frappe.whitelist(methods=["POST"])
+def flow_confirm_order(sales_order):
+	from sk_app import erp_flow
+
+	return erp_flow.confirm_order(_me().user, sales_order)
+
+
+@frappe.whitelist()
+def flow_orders_to_plan():
+	from sk_app import erp_flow
+
+	return erp_flow.orders_to_plan(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def flow_make_work_order(sales_order, so_item):
+	from sk_app import erp_flow
+
+	return erp_flow.make_work_order(_me().user, sales_order, so_item)

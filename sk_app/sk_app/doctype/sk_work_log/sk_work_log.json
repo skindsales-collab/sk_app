@@ -56,7 +56,7 @@
    "fieldtype": "Select",
    "label": "Problem Type",
    "depends_on": "eval:doc.entry_type=='Problem'",
-   "options": "\nMachine breakdown\nMaterial shortage\nQuality issue\nSafety\nCustomer complaint\nIT / app\nPay / leave\nOther"
+   "options": "\nMachine breakdown\nMaterial shortage\nQuality issue\nSafety\nCustomer complaint\nIT / app\nLeave\nPay / leave\nOther"
   },
   {
    "fieldname": "description",

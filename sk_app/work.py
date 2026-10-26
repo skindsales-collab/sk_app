@@ -55,6 +55,12 @@ def _lead_status_types() -> dict:
 	return {r.name: r.type for r in frappe.get_all("CRM Lead Status", fields=["name", "type"])}
 
 
+def _label(doctype, name):
+	from sk_app.crm import label
+
+	return label(doctype, name)
+
+
 def open_leads(user: str) -> list[WorkItem]:
 	"""Frappe CRM leads owned by the user and not converted or closed."""
 	if not frappe.db.exists("DocType", "CRM Lead"):
@@ -71,7 +77,7 @@ def open_leads(user: str) -> list[WorkItem]:
 	for r in rows:
 		if types.get(r.status) in CLOSED_LEAD_TYPES:
 			continue
-		title = r.organization or r.lead_name or r.name
+		title = _label("CRM Lead", r.name)
 		if not r.first_responded_on:
 			due = get_datetime(r.response_by) if r.response_by else add_to_date(r.creation, minutes=5)
 			items.append(WorkItem("lead_new", title, "CRM Lead", r.name, due=due, minutes=10, priority=1,
@@ -99,7 +105,7 @@ def open_deals(user: str) -> list[WorkItem]:
 		limit=30,
 	)
 	return [
-		WorkItem("deal", r.organization or r.lead_name or r.name, "CRM Deal", r.name,
+		WorkItem("deal", _label("CRM Deal", r.name), "CRM Deal", r.name,
 			due=get_datetime(r.expected_closure_date) if r.expected_closure_date else None,
 			minutes=30, priority=2, extra={"status": r.status, "next_step": r.next_step, "value": r.deal_value,
 				"customer": r.get("sk_customer_name") or r.lead_name})
@@ -115,7 +121,8 @@ def open_crm_tasks(user: str) -> list[WorkItem]:
 		fields=["name", "title", "due_date", "priority", "reference_doctype", "reference_docname"], order_by="due_date asc", limit=30)
 	prio = {"High": 1, "Medium": 2, "Low": 3}
 	return [
-		WorkItem("crm_task", r.title, r.reference_doctype or "CRM Task", r.reference_docname or r.name,
+		WorkItem("crm_task", f"{r.title} · {_label(r.reference_doctype, r.reference_docname)}" if r.reference_docname else r.title,
+			r.reference_doctype or "CRM Task", r.reference_docname or r.name,
 			due=get_datetime(r.due_date) if r.due_date else None, minutes=15, priority=prio.get(r.priority, 2),
 			extra={"task": r.name})
 		for r in rows

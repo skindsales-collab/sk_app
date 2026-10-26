@@ -37,10 +37,10 @@ APP_LESSONS = [
 	("My Day, Work Book and DSI", "माझा दिवस, कामाची वही आणि DSI", "All", 6,
 		"<ol><li><b>My Day</b>: all your open work, overdue first.</li><li><b>Work Book</b>: write any extra work you did (type, voice, photo).</li>"
 		"<li><b>DSI</b>: one Daily Small Improvement every day before 5:30 pm: what you made better, before and after, photo.</li>"
-		"<li><b>Report Problem</b>: machine, material, quality, safety, customer, IT, pay/leave.</li></ol>",
+		"<li><b>Report Problem</b>: machine, material, quality, safety, customer, IT, leave.</li></ol>",
 		"<ol><li><b>माझा दिवस</b>: तुमची सर्व उघडी कामे, उशिराची आधी.</li><li><b>कामाची वही</b>: केलेले जादा काम लिहा (टाईप, आवाज, फोटो).</li>"
 		"<li><b>DSI</b>: रोज संध्याकाळी 5:30 पूर्वी एक छोटी सुधारणा: काय सुधारले, आधी आणि नंतर, फोटो.</li>"
-		"<li><b>समस्या कळवा</b>: मशीन, मटेरियल, गुणवत्ता, सुरक्षा, ग्राहक, IT, पगार/रजा.</li></ol>"),
+		"<li><b>समस्या कळवा</b>: मशीन, मटेरियल, गुणवत्ता, सुरक्षा, ग्राहक, IT, रजा.</li></ol>"),
 	("My Score: KRA and KPI", "माझा स्कोअर: KRA आणि KPI", "All", 7,
 		"<ol><li><b>My Score</b> shows your monthly targets and how much is done, counted from ERPNext.</li>"
 		"<li>Green = target met, yellow = 80-99%, red = below 80%.</li><li>Score = done ÷ target × weight, up to 120% for each KPI.</li></ol>",
@@ -79,17 +79,26 @@ APP_LESSONS = [
 
 
 def seed_lessons():
+	from sk_app.manual_lessons import MANUAL_LESSONS, TOPIC
 	from sk_app.manuals import FUNCTION_LESSONS
 
 	frappe.db.sql("""update `tabSK Training Lesson` set lesson_type='App usage' where ifnull(lesson_type, '')=''""")
-	for title, title_mr, function, seq, content, content_mr in APP_LESSONS + FUNCTION_LESSONS:
+	rows = [(*r, [], "Using the app", "App usage") for r in APP_LESSONS + FUNCTION_LESSONS]
+	rows += [(*r, TOPIC, "My function") for r in MANUAL_LESSONS]
+	for title, title_mr, function, seq, content, content_mr, questions, topic, kind in rows:
+		qs = [{"question": q, "choice_1": c[0], "choice_2": c[1], "choice_3": c[2], "correct": str(ok)} for q, c, ok in questions]
 		name = frappe.db.get_value("SK Training Lesson", {"title": title})
-		if name:  # app lessons follow the app: keep their text up to date
+		if name:  # app lessons follow the app: keep their text up to date; check questions only while HR has none
 			frappe.db.set_value("SK Training Lesson", name, {"content": content, "content_marathi": content_mr}, update_modified=False)
+			doc = frappe.get_doc("SK Training Lesson", name)
+			if qs and not doc.questions:
+				for q in qs:
+					doc.append("questions", q)
+				doc.save(ignore_permissions=True)
 			continue
 		frappe.get_doc({"doctype": "SK Training Lesson", "title": title, "title_marathi": title_mr, "function": function,
-			"topic": "Using the app", "lesson_type": "App usage", "sequence": seq, "minutes": 2, "published": 1,
-			"content": content, "content_marathi": content_mr}).insert(ignore_permissions=True)
+			"topic": topic, "lesson_type": kind, "sequence": seq, "minutes": 2 if not qs else 4, "published": 1,
+			"content": content, "content_marathi": content_mr, "questions": qs}).insert(ignore_permissions=True)
 
 
 def _functions(user: str, function: str | None = None) -> list[str]:

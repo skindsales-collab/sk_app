@@ -58,6 +58,18 @@ def options() -> dict:
 	}
 
 
+def label(doctype: str, name: str) -> str:
+	"""Customer · product for a lead / deal, never the CRM number when a name is known (SK 26-Oct point 7)."""
+	if doctype not in ("CRM Lead", "CRM Deal") or not name or not frappe.db.exists(doctype, name):
+		return name or ""
+	meta = frappe.get_meta(doctype)
+	fields = [f for f in ("organization", "lead_name", "first_name", "sk_customer_name", "sk_product", "sk_segment") if meta.has_field(f)]
+	v = frappe.db.get_value(doctype, name, fields, as_dict=True) or {}
+	who = v.get("organization") or v.get("sk_customer_name") or v.get("lead_name") or v.get("first_name") or name
+	what = v.get("sk_product") or v.get("sk_segment")
+	return f"{who} · {what}" if what else who
+
+
 def _product_names() -> list:
 	from sk_app.products import names_for
 

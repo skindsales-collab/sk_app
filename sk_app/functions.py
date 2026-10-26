@@ -5,18 +5,19 @@ DSI, Report Problem, My KPI) driven by their ERPNext tasks, and its own tiles ar
 """
 
 # SK 26-Oct (point 10): Work Book is part of My Day now ("I did extra work"), so it has no icon of its own
-COMMON_TILES = ["my_day", "calendar", "reminders", "day_report", "dsi", "problem", "my_kpi", "training"]
+# point 15 (SK 26-Oct): My Calendar is inside My Day (Today / Week / Month tabs), so it has no icon of its own
+COMMON_TILES = ["my_day", "reminders", "day_report", "dsi", "problem", "my_kpi", "training"]
 # free contact tiles: the phone's own dialer / WhatsApp / mail, logged in CRM; paid parts show locked inside them
 CONTACT_TILES = ["calls", "whatsapp", "mail"]
 # point 13: the CEO's live dashboards, one icon per function (sk_app.dashboards.PAGES)
 DASH_TILES = ["dash_overview", "dash_daily_review", "dash_sales", "dash_marketing", "dash_machine_shifting", "dash_job_work",
-	"dash_cr100", "dash_finance", "dash_manufacturing", "dash_purchase", "dash_store", "dash_quality", "dash_hr", "dash_ai"]
+	"dash_finance", "dash_manufacturing", "dash_purchase", "dash_store", "dash_quality", "dash_hr", "dash_ai", "dash_cr100"]
 
 FUNCTIONS = {
 	"Sales": {
 		"label": {"English": "Sales", "Marathi": "विक्री"},
 		# point 17 (SK's mock-up 26-Oct): own icons in work order New Lead → My Leads → My Deals → Customers → Follow-up → Complaints
-		"tiles": ["my_day", "calendar", "new_lead", "my_leads", "my_deals", "customers", "follow_up", "complaints", *CONTACT_TILES, "reminders", "library",
+		"tiles": ["my_day", "new_lead", "my_leads", "my_deals", "customers", "follow_up", "complaints", *CONTACT_TILES, "reminders", "library",
 			"day_report", "my_kpi", "dsi", "problem", "training"],
 		"live": True,
 		# not Sales Manager: in Frappe CRM that role shows every lead of the company (SK 26-Oct: each salesperson sees
@@ -26,7 +27,7 @@ FUNCTIONS = {
 	},
 	"Marketing": {
 		"label": {"English": "Marketing", "Marathi": "मार्केटिंग"},
-		"tiles": ["my_day", "calendar", "new_lead", "my_leads", "follow_up", "complaints", *CONTACT_TILES, "reminders", "library", "day_report",
+		"tiles": ["my_day", "new_lead", "my_leads", "follow_up", "complaints", *CONTACT_TILES, "reminders", "library", "day_report",
 			"my_kpi", "dsi", "problem", "training"],
 		"live": True,  # uses the same CRM lead screens as Sales
 		"erpnext_roles": ["Sales User"],
@@ -35,7 +36,7 @@ FUNCTIONS = {
 	"Production": {
 		"label": {"English": "Production", "Marathi": "उत्पादन"},
 		# point 17 (SK's mock-up): Need Material → Job Cards → Order Board → Progress Photos → Ready to Dispatch → Non-Conformance
-		"tiles": ["my_day", "need_material", "job_cards", "order_board", "progress_photos", "ready_dispatch", "non_conformance", "complaints", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "to_plan", "need_material", "job_cards", "order_board", "progress_photos", "ready_dispatch", "non_conformance", "complaints", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Manufacturing User", "Manufacturing Manager"],
 		"desk": "/app/manufacturing",
@@ -124,7 +125,7 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": [*DASH_TILES, "view_member", "attendance", "lead_sources", "customers", "complaints", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
+		"tiles": [*DASH_TILES, "leadership", "view_member", "attendance", "lead_sources", "customers", "complaints", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "reminders", "day_report", "my_kpi", "dsi", "problem",
 			"library", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager", "Purchase Manager", "Purchase User"],  # SK approves big POs
@@ -159,7 +160,7 @@ def home_for(function: str | None, has_team: bool = False) -> dict:
 
 
 # tiles every person gets whatever their function (SK): they appear once, in the "For everyone" row
-SHARED_TILES = ["my_day", "calendar", "reminders", "calls", "whatsapp", "mail", "problem", "training", "library", "my_kpi",
+SHARED_TILES = ["my_day", "reminders", "calls", "whatsapp", "mail", "problem", "training", "library", "my_kpi",
 	"team_reports", "leave_expense", "dsi", "day_report"]
 
 
@@ -173,6 +174,41 @@ def function_list(profile) -> list[str]:
 	return out
 
 
+# SK 26-Oct: "main screen should not be long, only essentials; the rest on a second / third screen in a logical
+# sequence; applicable on each screen". Level 1 = function icons (or, for one function, its flow + these few
+# icons), level 2 = the function page, level 3 = "More" with the rest in groups. Order = the order the work goes.
+MAIN_TILES = {
+	"Sales": ["new_lead", "my_leads", "follow_up", "my_deals", "team_leads"],
+	"Marketing": ["new_lead", "my_leads", "follow_up"],
+	"Production": ["to_plan", "job_cards", "need_material", "order_board", "ready_dispatch"],
+	"Quality": ["inspect", "final_check", "non_conformance"],
+	"Stores": ["store_requests", "receive", "issue", "dispatch"],
+	"Purchase": ["buy_requests", "get_rates", "po_follow_up", "bills"],
+	"Accounts": ["cash_today", "to_collect", "to_pay", "invoices"],
+	"HR": ["attendance", "team_scorecards"],
+	"Subcontractor": ["my_jobs", "need_material", "my_fixes"],
+	"AI": ["improvement_inbox", "erp_gaps", "app_users", "dept_visits"],
+	# point 10: the CEO's first screen = overview, approvals, team; the 100 Cr page is inside Dashboards (SK 26-Oct)
+	"Management": ["dash_overview", "po_approvals", "pay_approvals", "dash_daily_review", "view_member", "leadership"],
+}
+# level 1 shared row: only My Day (with the calendar inside) and More
+MAIN_SHARED = ["my_day"]
+# level 3 "More": the shared tiles in groups, in the order of a working day
+SHARED_GROUPS = [
+	("grp_work", ["reminders", "calls", "whatsapp", "mail", "team_reports", "dsi", "day_report"]),
+	("grp_me", ["my_kpi", "training", "leave_expense"]),
+	("grp_help", ["problem", "library"]),
+]
+
+
+def split_main(function: str, tiles: list[str]) -> tuple[list[str], list[str]]:
+	"""(main, more) of a function's own tiles: the essentials first in the function's order, the rest in theirs.
+	Functions without a list keep their first four on the main screen."""
+	want = MAIN_TILES.get(function)
+	main = [t for t in want if t in tiles] if want else tiles[:4]
+	return main, [t for t in tiles if t not in main]
+
+
 def sections_for(functions: list[str], has_team: bool = False) -> dict:
 	"""Home for one or several functions (SK: a person in two functions sees both on one screen, no switching).
 	Each function gets a labelled row of its own tiles; the shared tiles come once at the end, with
@@ -184,32 +220,44 @@ def sections_for(functions: list[str], has_team: bool = False) -> dict:
 	for h in homes:
 		own = [t for t in h["tiles"] if t not in SHARED_TILES and t not in seen]
 		seen.update(own)
-		sections.append({"function": h["function"], "label": h["label"], "tiles": own, "live": h["live"], "desk": h["desk"]})
+		main, more = split_main(h["function"], own)
+		sections.append({"function": h["function"], "label": h["label"], "tiles": own, "main": main, "more": more,
+			"live": h["live"], "desk": h["desk"]})
 	shared = []
 	for h in homes:
 		shared += [t for t in h["tiles"] if t in SHARED_TILES and t not in shared]
 	last = [t for t in ("dsi", "day_report") if t in shared]
 	shared = ["my_day"] + [t for t in shared if t not in last and t != "my_day"] + last
-	return {"sections": sections, "shared": shared}
+	grouped = [(g, [t for t in keys if t in shared]) for g, keys in SHARED_GROUPS]
+	rest = [t for t in shared if t not in MAIN_SHARED and not any(t in keys for _g, keys in grouped)]
+	if rest:
+		grouped[0] = (grouped[0][0], grouped[0][1] + rest)
+	return {"sections": sections, "shared": shared, "main_shared": [t for t in MAIN_SHARED if t in shared],
+		"more_groups": [{"group": g, "tiles": keys} for g, keys in grouped if keys]}
 
 
-# Fixed work in each function's week (change list point 9c, proposed to SK). The week planner puts these first and fills
+# Fixed work in each function's week (change list point 9c; 26-Oct also the daily checklists of the manuals). The week planner puts these first and fills
 # the rest of each day's free hours with open work. days: Mon..Sat or "daily"; at: "HH:MM" or None (any time that day).
 ROUTINE = {
 	"Sales": [("Mon", "10:00", 60, "Team meeting (Rushi)"), ("daily", "09:30", 30, "Call today's new leads first"),
 		("Tue Wed Thu Fri", None, 120, "Customer visits"), ("Sat", "16:00", 60, "Weekly report + pipeline review")],
-	"Marketing": [("daily", "09:30", 30, "Call today's new leads first"), ("Sat", "16:00", 60, "Weekly report + pipeline review")],
+	"Marketing": [("daily", "09:30", 30, "Call today's new leads first"), ("daily", "10:00", 20, "GeM: new cabin tenders"),
+		("daily", None, 30, "IndiaMART / JustDial: answer new enquiries in 5 minutes"),
+		("Sat", "12:00", 30, "Google Business: 3 site photos + review links"), ("Sat", "16:00", 60, "Weekly report + pipeline review")],
 	"Machine Shifting": [("Mon", "09:30", 60, "Jobs plan for the week"), ("Tue Thu", None, 120, "Site surveys"),
 		("Sat", "16:00", 60, "Weekly report")],
 	"Stores": [("daily", "09:30", 30, "Receipts and issues"), ("Wed", "11:00", 30, "Low-stock list to Purchase"),
-		("Sat", "15:00", 60, "Stock count (one rack)")],
+		("Sat", "15:00", 60, "Stock count (one rack)"), ("daily", "15:00", 15, "5S (15 minutes)")],
 	"Purchase": [("daily", "09:30", 30, "Today's buy requests"), ("Thu", "11:00", 60, "Rate comparison"),
 		("Fri", "11:00", 60, "PO follow-up calls")],
-	"Production": [("daily", "09:15", 15, "Job plan for the day"), ("Fri", "15:00", 45, "Dispatch plan")],
-	"Quality": [("daily", "09:15", 15, "Job plan for the day"), ("daily", "16:00", 30, "Final checks before dispatch")],
+	"Production": [("daily", "09:15", 15, "Job plan for the day"), ("Mon", "09:30", 30, "Capacity vs orders, contractor plan"),
+		("daily", "15:00", 15, "5S (15 minutes)"), ("Fri", "15:00", 45, "Dispatch plan")],
+	"Subcontractor": [("daily", "15:00", 15, "5S (15 minutes)")],
+	"Quality": [("daily", "09:15", 15, "Job plan for the day"), ("daily", "16:00", 30, "Final checks before dispatch"),
+		("daily", "15:00", 15, "5S (15 minutes)"), ("Wed", "11:00", 30, "Top 3 defects with root cause")],
 	"Accounts": [("daily", "10:00", 45, "Collection calls"), ("Mon", "11:00", 45, "Payments plan for the week"),
-		("Fri", "15:00", 60, "Bank reconciliation")],
-	"HR": [("daily", "09:45", 30, "Attendance check"), ("Fri", "15:00", 60, "Leave and expense approvals")],
+		("Fri", "15:00", 60, "Bank reconciliation"), ("Fri", "16:00", 30, "Friday cash statement")],
+	"HR": [("daily", "09:45", 30, "Attendance check"), ("Mon", "11:00", 30, "Training lesson for one function"), ("Fri", "15:00", 60, "Leave and expense approvals")],
 	"AI": [("daily", "09:30", 30, "Improvement Inbox sorting"),
 		("Mon", "11:00", 150, "Department visit: Sales & Marketing (leads, quotes, CRM data)"),
 		("Tue", "11:00", 150, "Department visit: Store & Purchase (receipts, stock, POs, suppliers)"),
@@ -217,5 +265,6 @@ ROUTINE = {
 		("Thu", "11:00", 150, "Department visit: Finance & HR (bills, payments, attendance, leave)"),
 		("Fri", "11:00", 150, "ERP data clean-up + test new app changes on sk-dev"),
 		("Sat", "11:00", 90, "Review with SK + weekly report")],
-	"Management": [("Mon", "10:00", 60, "Sales team meeting"), ("Sat", "11:00", 90, "Weekly review (AI & ERP report)")],
+	"Management": [("daily", "09:30", 10, "Dashboard: orders, quotes, dispatch, cash"), ("Mon", "10:00", 60, "Sales team meeting"),
+		("Wed", "11:00", 60, "Factory + dispatch review"), ("Fri", "16:00", 30, "Cash review"), ("Sat", "11:00", 90, "Weekly review (AI & ERP report)")],
 }
