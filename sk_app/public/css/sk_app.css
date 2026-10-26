@@ -196,3 +196,4 @@ button.sk-open { background: none; border: 0; }
 .sk-point { background: var(--card); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
 .sk-point .sk-row { margin-top: 6px; }
 .sk-point [data-v="1"].on { background: #1e8e3e; border-color: #1e8e3e; }
+.sk-bulk { width: 100%; font-size: 14px; font-family: inherit; padding: 8px; border: 1px solid var(--line, #ccc); border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; }

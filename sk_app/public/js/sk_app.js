@@ -485,6 +485,22 @@
 		qty_matches: "बिलाप्रमाणे नग", no_damage_rust: "तुटफूट / गंज नाही", size_as_ordered: "ऑर्डरप्रमाणे साईज व ग्रेड",
 		size_as_drawing: "ड्रॉइंगप्रमाणे साईज", weld_finish: "वेल्डिंग व फिनिश ठीक", clean_safe: "स्वच्छ, धारदार कडा नाहीत",
 	});
+	Object.assign(T.English, {
+		bulk_logins: "Add many logins (paste list)",
+		bulk_help: "One person per line: Name | Mobile | Function | Employee ID | Workstation | Reports to (mobile) | Language. Only name, mobile and function are needed.",
+		make_logins: "Make all logins",
+		logins_made: "logins made",
+		bulk_pin_note: "Write down or WhatsApp each PIN now: it is shown only once.",
+		keeps_password: "Admin: keeps the same password",
+	});
+	Object.assign(T.Marathi, {
+		bulk_logins: "एकदम अनेक लॉगिन (यादी पेस्ट करा)",
+		bulk_help: "प्रत्येक ओळीत एक व्यक्ती: नाव | मोबाईल | विभाग | Employee ID | वर्कस्टेशन | रिपोर्ट (मोबाईल) | भाषा. नाव, मोबाईल व विभाग पुरेसे.",
+		make_logins: "सर्व लॉगिन बनवा",
+		logins_made: "लॉगिन बनले",
+		bulk_pin_note: "प्रत्येक पिन आत्ताच लिहून घ्या किंवा WhatsApp करा: तो एकदाच दिसतो.",
+		keeps_password: "ॲडमिन: तोच पासवर्ड राहील",
+	});
 	const ICON = {
 		my_day: "☀️", my_leads: "📞", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
 		job_cards: "🛠️", inspections: "✅", stock_alerts: "📦", material_requests: "🧾", invoice_photo: "📷",
@@ -698,6 +714,7 @@
 		root.innerHTML = header(t("logins")) + `<main>
 			<p class="sk-note">${people.length} ${t("people_n")} · ${none.length} ${t("without_login")}</p>
 			<button class="sk-btn go wide" data-act="login-new">➕ ${t("new_login")}</button>
+			<button class="sk-btn wide" data-act="login-bulk-open">📋 ${t("bulk_logins")}</button>
 			${group(t("no_login"), "none")}${group(t("has_login"), "active")}${group(t("closed_login"), "closed")}</main>`;
 		if (!loginOpts) loginOpts = await call("hr_login_options").catch(() => null);
 	}
@@ -730,10 +747,26 @@
 		const msg = `${t("login_link")}: ${location.origin}/sk\n${t("mobile")}: ${r.mobile}\n${t("first_pin")}: ${r.pin}`;
 		root._pinMsg = { mobile: r.mobile, text: msg };
 		sheet(`<h3 class="sk-h">✅ ${t("login_ready")}</h3>
-			<p class="sk-big">${t("mobile")}: <b>${esc(r.mobile || "")}</b><br>${t("first_pin")}: <b>${esc(r.pin)}</b></p>
+			<p class="sk-big">${t("mobile")}: <b>${esc(r.mobile || "")}</b><br>${r.pin ? `${t("first_pin")}: <b>${esc(r.pin)}</b>` : t("keeps_password")}</p>
 			<p class="sk-note">${t("pin_note")}</p>
 			<button class="sk-btn ok wide" data-act="login-wa">💬 ${t("send")} WhatsApp</button>
 			<button class="sk-btn wide" data-act="close-sheet">${t("done")}</button>`);
+	}
+
+	// many logins at once: HR pastes the staff list, one line per person
+	function bulkSheet() {
+		sheet(`<h3 class="sk-h">📋 ${t("bulk_logins")}</h3><p class="sk-note">${t("bulk_help")}</p>
+			<textarea id="g-bulk" class="sk-bulk" rows="10" placeholder="Yogesh B. | 9970960806 | Stores | HR-EMP-00009"></textarea>
+			<button class="sk-btn ok wide" data-act="login-bulk">${t("make_logins")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+	function bulkResult(rows) {
+		root._bulk = rows;
+		const ok = rows.filter((r) => !r.error).length;
+		root.innerHTML = header(t("bulk_logins")) + `<main><p class="sk-note">✅ ${ok} / ${rows.length} ${t("logins_made")}. ${t("bulk_pin_note")}</p>
+			<ul class="sk-list">${rows.map((r, i) => `<li class="sk-item ${r.error ? "k-lead_new" : ""}"><div><div class="sk-item-title">${esc(r.full_name)}</div>
+				<div class="sk-item-meta">${esc(r.mobile)} · ${r.error ? `<span class="sk-due">${esc(r.error)}</span>` : r.pin ? `${t("first_pin")}: <b>${esc(r.pin)}</b>` : t("keeps_password")}</div></div>
+				${r.pin ? `<button class="sk-chip on" data-act="login-bulk-wa" data-i="${i}">💬 WhatsApp</button>` : ""}</li>`).join("")}</ul>
+			<button class="sk-btn wide" data-go="logins">${t("back")}</button></main>`;
 	}
 
 	function itemRow(i) {
@@ -2040,6 +2073,18 @@
 				state.home.must_set_pin = false;
 				toast(t("pin_saved"));
 				return go("home");
+			}
+			if (act === "login-bulk-open") return bulkSheet();
+			if (act === "login-bulk") {
+				el.disabled = true;
+				const rows = await call("hr_bulk_logins", { text: val("g-bulk") }, true);
+				closeSheet();
+				return bulkResult(rows);
+			}
+			if (act === "login-bulk-wa") {
+				const r = root._bulk[Number(el.dataset.i)];
+				const msg = `${t("login_link")}: ${location.origin}/sk\n${t("mobile")}: ${r.mobile}\n${t("first_pin")}: ${r.pin}`;
+				return window.open("https://wa.me/" + waNumber(r.mobile) + "?text=" + encodeURIComponent(msg), "_blank");
 			}
 			if (act === "login-new") return loginSheet(el.dataset.i !== undefined ? root._people[Number(el.dataset.i)] : null);
 			if (act === "login-make") {

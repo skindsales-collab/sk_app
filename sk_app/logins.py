@@ -123,15 +123,20 @@ def make_login(by: str, mobile, functions, employee=None, full_name=None, manage
 	if not full_name:
 		frappe.throw(_("Please give the person's name"))
 
-	user_id = emp.user_id if emp and emp.user_id else None
-	other = frappe.db.get_value("User", {"mobile_no": mobile, "name": ["!=", user_id or ""]}, "name")
+	# a person without an Employee is found again by the hidden ID from his mobile, so editing works too
+	user_id = emp.user_id if emp and emp.user_id else f"{mobile}@{HIDDEN_DOMAIN}"
+	other = frappe.db.get_value("User", {"mobile_no": mobile, "name": ["!=", user_id]}, "name")
+	if not other and not emp:
+		# same mobile, other name: a second person, not an edit of the first
+		have = frappe.db.get_value("User", user_id, "full_name")
+		if have and have.strip().lower() != full_name.lower():
+			other = have
 	if other:
 		frappe.throw(_("Mobile {0} is already the login of {1}").format(mobile, other))
-	if not user_id:
-		user_id = f"{mobile}@{HIDDEN_DOMAIN}"
 
 	roles = {r for f in functions for r in FUNCTIONS[f]["erpnext_roles"] if frappe.db.exists("Role", r)}
-	if frappe.db.exists("User", user_id):
+	was_new = not frappe.db.exists("User", user_id)
+	if not was_new:
 		user = frappe.get_doc("User", user_id)
 		user.enabled = 1
 	else:
@@ -144,12 +149,16 @@ def make_login(by: str, mobile, functions, employee=None, full_name=None, manage
 		if r not in have:
 			user.append("roles", {"role": r})
 	user.flags.no_welcome_mail = True
-	if user.is_new():
+	if was_new:
 		user.insert(ignore_permissions=True)
 	else:
 		user.save(ignore_permissions=True)
-	pin = new_pin()
-	update_password(user.name, pin)
+	# an admin keeps the password they already have (the person making logins is often the admin himself);
+	# everyone else gets a first PIN, which also becomes their ERPNext password
+	keep = not was_new and "System Manager" in {r.role for r in user.get("roles")}
+	pin = None if keep else new_pin()
+	if pin:
+		update_password(user.name, pin)
 
 	if emp:
 		updates = {"cell_number": mobile}
@@ -165,13 +174,54 @@ def make_login(by: str, mobile, functions, employee=None, full_name=None, manage
 	name = frappe.db.get_value("SK App User", {"user": user.name})
 	app = frappe.get_doc("SK App User", name) if name else frappe.get_doc({"doctype": "SK App User", "user": user.name})
 	app.update({"home": functions[0], "enabled": 1, "language": language, "manager": manager or app.get("manager"),
-		"workstation": workstation or None, "must_set_pin": 1, "employee": emp.name if emp else app.get("employee")})
+		"workstation": workstation or None, "must_set_pin": 0 if keep else 1, "employee": emp.name if emp else app.get("employee")})
 	app.set("functions", [{"function": f} for f in functions[1:]])
 	if name:
 		app.save(ignore_permissions=True)
 	else:
 		app.insert(ignore_permissions=True)
 	return {"user": user.name, "mobile": mobile, "pin": pin, "full_name": full_name, "functions": functions}
+
+
+def bulk_make(by: str, text: str) -> list[dict]:
+	"""Many logins in one go from a pasted list, one person per line:
+	Name | Mobile | Function + Function | Employee ID | Workstation | Reports to (mobile) | Language
+	Only name, mobile and function are needed. Each line is made on its own, so one bad line does not stop the
+	others; "Reports to" is set after all lines are made, so a manager can be lower in the list."""
+	_check_manager(by)
+	names = {f.lower(): f for f in FUNCTIONS}
+	out, managers = [], []
+	for n, line in enumerate((text or "").splitlines(), 1):
+		if not line.strip() or line.strip().startswith("#"):
+			continue
+		cols = [c.strip() for c in line.split("|")] + [""] * 7
+		name, mobile, fns, employee, workstation, reports_to, language = cols[:7]
+		row = {"line": n, "full_name": name, "mobile": mobile}
+		try:
+			functions = [names.get(f.strip().lower(), f.strip()) for f in fns.split("+") if f.strip()]
+			unknown = [f for f in functions if f not in FUNCTIONS]
+			if unknown:
+				frappe.throw(_("Unknown function: {0}").format(", ".join(unknown)))
+			frappe.db.savepoint("sk_bulk")
+			row.update(make_login(by, mobile, functions, employee=employee or None, full_name=name, language=language or "English",
+				workstation=workstation or None))
+			if reports_to:
+				managers.append((row["user"], reports_to))
+		except Exception as e:
+			frappe.db.rollback(save_point="sk_bulk")
+			frappe.clear_messages()
+			row["error"] = str(e) or e.__class__.__name__
+		out.append(row)
+	for user, reports_to in managers:
+		mgr = frappe.db.get_value("User", {"mobile_no": clean_mobile(reports_to)}, "name") if re.search(r"\d{10}", reports_to) \
+			else frappe.db.get_value("User", {"full_name": reports_to}, "name")
+		row = next(r for r in out if r.get("user") == user)
+		if mgr:
+			frappe.db.set_value("SK App User", {"user": user}, "manager", mgr)
+			row["manager"] = mgr
+		else:
+			row["error"] = _("Login made, but manager {0} not found").format(reports_to)
+	return out
 
 
 def reset_pin(by: str, user: str) -> dict:

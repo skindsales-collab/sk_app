@@ -423,6 +423,12 @@ def hr_make_login(mobile, functions, employee=None, full_name=None, manager=None
 
 
 @frappe.whitelist(methods=["POST"])
+def hr_bulk_logins(text):
+	_me()
+	return logins.bulk_make(frappe.session.user, text)
+
+
+@frappe.whitelist(methods=["POST"])
 def hr_reset_pin(user):
 	_me()
 	return logins.reset_pin(frappe.session.user, user)
