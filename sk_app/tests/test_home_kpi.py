@@ -85,3 +85,20 @@ class TestHomeKpi(IntegrationTestCase):
 			if all(p["v"] is None for p in t["points"]):
 				self.assertTrue(t["need"])  # says what to enter in ERPNext
 		self.assertIsNone(run("Administrator", home_kpi.for_user, ["Nothing"])["chart"])
+
+	def test_actions_to_improve_graph(self):
+		"""SK 26-Oct: actions that lift the graph, added by AI / manager / CEO, shown first by priority, closed by the owner."""
+		run(MGR, home_kpi.add_action, REP, "Call 10 old customers for repeat orders", "High")
+		run("Administrator", home_kpi.add_action, REP, "Send cabin catalogue on WhatsApp", "Low")
+		with self.assertRaises(frappe.PermissionError):
+			run(REP, home_kpi.add_action, MGR, "Not my team", "High")  # a salesperson cannot give the manager actions
+		r = run(REP, home_kpi.actions)
+		texts = [a["text"] for a in r["actions"] if not a["done"]]
+		self.assertLess(texts.index("Call 10 old customers for repeat orders"), texts.index("Send cabin catalogue on WhatsApp"))
+		self.assertGreaterEqual(run(REP, home_kpi.for_user, ["Sales"])["actions"], 2)
+		self.assertIn(REP, [p["user"] for p in run(MGR, home_kpi.actions, REP)["team"]])
+		first = next(a for a in r["actions"] if a["text"].startswith("Call 10"))
+		with self.assertRaises(frappe.PermissionError):
+			run(MGR, home_kpi.finish_action, first["name"])  # only the person who has it closes it
+		run(REP, home_kpi.finish_action, first["name"], "Called 10, 2 quotes asked")
+		self.assertTrue(next(a for a in run(REP, home_kpi.actions)["actions"] if a["name"] == first["name"])["done"])

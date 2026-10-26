@@ -1189,6 +1189,21 @@ def save_el_points(job_card, points=None, photo=None, note=None):
 
 
 @frappe.whitelist()
+def kpi_actions(member=None):
+	return home_kpi.actions(_me().user, member)
+
+
+@frappe.whitelist()
+def add_kpi_action(text, member=None, priority="Medium", date=None):
+	return home_kpi.add_action(_me().user, member, text, priority, date)
+
+
+@frappe.whitelist()
+def finish_kpi_action(name, note=None, photo=None):
+	return home_kpi.finish_action(_me().user, name, note, photo)
+
+
+@frappe.whitelist()
 def my_home_kpi():
 	"""Main screen Rev 2 (SK 26-Oct): the person's one KPI chart against target and the Today strip."""
 	profile = _me()

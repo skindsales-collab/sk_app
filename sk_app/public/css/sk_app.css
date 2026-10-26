@@ -419,3 +419,7 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 .sk-elrow { display: grid; grid-template-columns: 1fr 48px 70px 48px; gap: 6px; align-items: center; margin-bottom: 6px; }
 .sk-elrow input { font-size: 18px; text-align: center; padding: 10px 4px; border-radius: 10px; border: 1px solid #b8c4d2; }
 .sk-elrow .sk-btn { padding: 10px 0; font-size: 20px; }
+.sk-kact { border: 1px solid #b8c4d2; background: var(--card); color: var(--ink); border-radius: 16px; padding: 4px 9px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.sk-kact.on { background: #fff4e0; border-color: #e0a100; }
+.sk-kact b { background: var(--red); color: #fff; border-radius: 8px; padding: 0 5px; }
+.sk-khead > b { flex: 1; min-width: 0; }

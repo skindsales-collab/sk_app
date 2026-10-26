@@ -259,5 +259,74 @@ def chart_for(user: str, functions: list[str]) -> dict | None:
 	return None
 
 
+# ---------- Actions to improve the graph (SK 26-Oct) ----------
+# "action needs to improve graph on main screen with some icon, that input will be given by AI & other; it helps to
+# understand the work to take on priority for graph improvement". Each action is an ERPNext ToDo of the person (so it
+# also shows in My Day), added by the person, their manager, the CEO or the AI desk (and Claude's Friday summary).
+ACTION_MARK = "[KPI] "
+PRIORITY = {"High": 0, "Medium": 1, "Low": 2}
+
+
+def _may_act_for(user: str, member: str) -> bool:
+	from sk_app.day_report import _team
+	from sk_app.logins import profile_functions
+
+	if user == member or user == "Administrator" or {"Management", "AI"} & set(profile_functions(user)):
+		return True
+	return member in {p.user for p in _team(user)}
+
+
+def _check(user: str, member: str):
+	if not _may_act_for(user, member):
+		frappe.throw(frappe._("You can add actions only for yourself and your team"), frappe.PermissionError)
+
+
+def open_actions(user: str) -> int:
+	return frappe.db.count("ToDo", {"allocated_to": user, "status": "Open", "description": ["like", ACTION_MARK + "%"]})
+
+
+def actions(user: str, member=None) -> dict:
+	member = member or user
+	_check(user, member)
+	rows = frappe.get_all("ToDo", filters={"allocated_to": member, "description": ["like", ACTION_MARK + "%"], "status": ["in", ["Open", "Closed"]],
+		"modified": [">=", add_days(nowdate(), -30)]}, fields=["name", "description", "priority", "date", "status", "assigned_by", "modified"], limit=200)
+	today = getdate()
+	out = [{"name": r.name, "text": r.description[len(ACTION_MARK):], "priority": r.priority or "Medium", "date": str(r.date or ""),
+		"done": r.status == "Closed", "late": r.status == "Open" and bool(r.date) and getdate(r.date) < today,
+		"by": frappe.db.get_value("User", r.assigned_by, "full_name") or r.assigned_by or ""} for r in rows]
+	out.sort(key=lambda a: (a["done"], not a["late"], PRIORITY.get(a["priority"], 1), a["date"] or "9999"))
+	from sk_app.day_report import _team
+
+	team = [{"user": user, "name": frappe.db.get_value("User", user, "full_name") or user}] + \
+		[{"user": p.user, "name": p.full_name or p.user} for p in _team(user)]
+	return {"member": member, "actions": out, "team": team}
+
+
+def add_action(user: str, member: str, text: str, priority="Medium", date=None) -> dict:
+	member = member or user
+	_check(user, member)
+	text = (text or "").strip()
+	if not text:
+		frappe.throw(frappe._("Please write the action"))
+	todo = frappe.get_doc({"doctype": "ToDo", "allocated_to": member, "assigned_by": user, "description": ACTION_MARK + text[:500],
+		"priority": priority if priority in PRIORITY else "Medium", "date": getdate(date) if date else add_days(nowdate(), 7)})
+	todo.insert(ignore_permissions=True)
+	return {"name": todo.name}
+
+
+def finish_action(user: str, name: str, note=None, photo=None) -> dict:
+	from sk_app.store import attach
+
+	todo = frappe.get_doc("ToDo", name)
+	if not todo.description.startswith(ACTION_MARK) or todo.allocated_to != user:
+		frappe.throw(frappe._("Only the person who has the action can close it"), frappe.PermissionError)
+	todo.status = "Closed"
+	todo.save(ignore_permissions=True)
+	if note:
+		todo.add_comment("Comment", note)
+	attach(photo, "ToDo", todo.name, user)
+	return {"ok": True}
+
+
 def for_user(user: str, functions: list[str]) -> dict:
-	return {"chart": chart_for(user, functions), "at": nowdate()}
+	return {"chart": chart_for(user, functions), "actions": _safe(lambda: open_actions(user), 0), "at": nowdate()}

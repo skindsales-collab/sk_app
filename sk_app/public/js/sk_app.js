@@ -866,6 +866,9 @@
 	// main screen Rev 2 (SK 26-Oct)
 	Object.assign(T.English, { k_of: "of", k_no_target: "target not set", k_behind: "behind by", k_on_track: "on track", k_target: "target", k_off: "off target",
 		k_no_data: "No data yet", k_week: "Week", k_month: "Month", kl_Orders: "Orders", kl_Invoices: "Invoices",
+		ka_short: "Actions", ka_title: "Actions to improve the graph", ka_why: "Do these first: they lift your graph. Added by AI, your manager or the CEO, or by you.",
+		ka_high: "High", ka_medium: "Medium", ka_low: "Low", ka_by_date: "by", ka_from: "from", ka_none: "No actions yet. Add the first one below.",
+		ka_new: "New action (what will lift the graph?)", ka_add: "Add action", ka_what_done: "What did you do?", ka_proof: "Proof photo",
 		d_title: "Decide now", d_gap: "gap to target", d_none: "Nothing late. Good work.",
 		el_points: "Electrical points", el_month: "Points this month", el_pts: "points", el_light: "Light points", el_fan: "Fan points",
 		el_socket_5a: "5A sockets", el_socket_15a: "15A sockets", el_ac_point: "AC points", el_mcb_db: "MCB / DB", el_earthing: "Earthing", el_other_points: "Other points" });
@@ -875,6 +878,9 @@
 		"kt_Days to build 100 sq ft": "100 चौ.फूट बनवायला दिवस", "kt_Projects with correct P&L": "बरोबर नफा-तोटा असलेले प्रोजेक्ट", "kt_Days to recruit": "भरतीसाठी दिवस",
 		"kt_Stock accuracy": "स्टॉक अचूकता", "kt_QC first-time pass": "QC पहिल्यांदा पास", "kt_POs received on time": "वेळेवर आलेले PO",
 		"kt_ERP tasks finished": "पूर्ण ERP कामे", "kt_Jobs finished": "पूर्ण कामे",
+		ka_short: "कृती", ka_title: "ग्राफ सुधारण्यासाठी कृती", ka_why: "हे आधी करा: यामुळे तुमचा ग्राफ वर जाईल. AI, मॅनेजर, CEO किंवा तुम्ही जोडलेले.",
+		ka_high: "जास्त", ka_medium: "मध्यम", ka_low: "कमी", ka_by_date: "पर्यंत", ka_from: "कडून", ka_none: "अजून कृती नाही. खाली पहिली जोडा.",
+		ka_new: "नवीन कृती (ग्राफ कशाने वर जाईल?)", ka_add: "कृती जोडा", ka_what_done: "काय केले?", ka_proof: "पुराव्याचा फोटो",
 		d_title: "आता निर्णय घ्या", d_gap: "टार्गेटपासून फरक", d_none: "काहीही उशीर नाही. छान.",
 		el_points: "इलेक्ट्रिकल पॉइंट", el_month: "या महिन्याचे पॉइंट", el_pts: "पॉइंट", el_light: "लाइट पॉइंट", el_fan: "फॅन पॉइंट",
 		el_socket_5a: "5A सॉकेट", el_socket_15a: "15A सॉकेट", el_ac_point: "AC पॉइंट", el_mcb_db: "MCB / DB", el_earthing: "अर्थिंग", el_other_points: "इतर पॉइंट" });
@@ -1267,7 +1273,10 @@
 			sub = `${now.month}: ${now.actual}${c.unit} · ${t("k_target")} ${c.target}${c.unit}${now.gap ? ` · <b class="sk-due">${t("k_off")}</b>` : ` · <b class="sk-ok">${t("k_on_track")}</b>`}`;
 		} else sub = `<span class="sk-due">${esc(c.need || t("k_no_data"))}</span>`;
 		const tabs = c.kind === "money" ? `<span class="sk-ktabs">${["week", "month"].map((v) => `<button class="sk-chip ${kpiView === v ? "on" : ""}" data-kview="${v}">${t("k_" + v)}</button>`).join("")}</span>` : "";
-		return `<div class="sk-kcard"><div class="sk-khead"><b>${esc(t("kt_" + c.title) !== "kt_" + c.title ? t("kt_" + c.title) : c.title)}</b>${tabs}</div><small>${sub}</small>
+		// SK 26-Oct: the actions that lift this graph, from AI, the manager or the CEO, one tap away
+		const n = kpiData.actions || 0;
+		const act = `<button class="sk-kact ${n ? "on" : ""}" data-go="kpi_actions">🎯 ${t("ka_short")}${n ? ` <b>${n}</b>` : ""}</button>`;
+		return `<div class="sk-kcard"><div class="sk-khead"><b>${esc(t("kt_" + c.title) !== "kt_" + c.title ? t("kt_" + c.title) : c.title)}</b>${tabs}${act}</div><small>${sub}</small>
 			${c.kind === "money" ? moneySvg(c) : trendSvg(c)}</div>`;
 	}
 	// amount up the side, weeks (running total this month) or months along the bottom (SK 26-Oct)
@@ -1356,6 +1365,51 @@
 		ev.stopPropagation();
 		kpiView = b.dataset.kview;
 		paintKpi();
+	}, true);
+
+	// ---------- Actions to improve the graph (SK 26-Oct): input by AI, the manager, the CEO; done with proof ----------
+	let kaData = null, kaMember = null;
+	async function renderKpiActions() {
+		kaData = await call("kpi_actions", kaMember ? { member: kaMember } : {});
+		const pick = kaData.team.length > 1 ? `<select class="sk-select" id="ka-member">${kaData.team.map((p) => `<option value="${esc(p.user)}" ${p.user === kaData.member ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select>` : "";
+		const mine = kaData.member === state.home.user;
+		root.innerHTML = header(`🎯 ${t("ka_title")}`) + `<main><p class="sk-note">${t("ka_why")}</p>${pick}
+			<ul class="sk-list">${kaData.actions.map((a, i) => `<li class="sk-item ${a.done ? "" : a.late ? "k-lead_new" : "k-deal"}"><div>
+				<div class="sk-item-title">${a.done ? "✅ " : a.late ? "🔴 " : a.priority === "High" ? "🟠 " : ""}${esc(a.text)}</div>
+				<div class="sk-item-meta">${t("ka_" + a.priority.toLowerCase())} · ${a.date ? `${t("ka_by_date")} ${esc(a.date)}` : ""} · ${t("ka_from")} ${esc(a.by)}</div></div>
+				${!a.done && mine ? `<button class="sk-btn ok" data-kadone="${i}">✓</button>` : ""}</li>`).join("") || `<li class="sk-empty">${t("ka_none")}</li>`}</ul>
+			<div class="sk-form" id="ka-add">${formField("ka-text", t("ka_new"), true)}
+				<div class="sk-chips">${["High", "Medium", "Low"].map((p) => `<button class="sk-chip ${p === "High" ? "on" : ""}" data-q="${p}" data-kaprio="${p}">${t("ka_" + p.toLowerCase())}</button>`).join("")}</div>
+				<label class="sk-field"><span>${t("ka_by_date")}</span><input id="ka-date" type="date"></label>
+				<button class="sk-btn go wide" data-kaadd="1">＋ ${t("ka_add")}</button></div>
+			<button class="sk-btn wide" data-go="home">‹ ${t("back")}</button></main>`;
+		const m = document.getElementById("ka-member");
+		if (m) m.onchange = () => { kaMember = m.value; renderKpiActions(); };
+	}
+	function renderKpiDone(i) {
+		const a = kaData.actions[i];
+		root.innerHTML = header(`✅ ${t("ka_title")}`) + `<main class="sk-form"><p class="sk-item-title">${esc(a.text)}</p>
+			${formField("ka-note", t("ka_what_done"), true)}${photoField("ka-photo", t("ka_proof"))}
+			<button class="sk-btn ok wide" data-kafinish="${i}">✓ ${t("done")}</button><button class="sk-btn wide" data-go="kpi_actions">‹ ${t("back")}</button></main>`;
+	}
+	document.addEventListener("click", async (ev) => {
+		const b = ev.target.closest("[data-kadone],[data-kaadd],[data-kafinish]");
+		if (!b || !root.contains(b)) return;
+		ev.stopPropagation();
+		if (b.dataset.kadone !== undefined) return renderKpiDone(Number(b.dataset.kadone));
+		b.disabled = true;
+		try {
+			if (b.dataset.kaadd) {
+				const prio = (root.querySelector("[data-kaprio].on") || {}).dataset;
+				await call("add_kpi_action", { text: val("ka-text"), member: kaData.member, priority: prio ? prio.kaprio : "Medium", date: val("ka-date") || null }, true);
+			} else {
+				const a = kaData.actions[Number(b.dataset.kafinish)];
+				await call("finish_kpi_action", { name: a.name, note: val("ka-note") || null, photo: await photoUrl("ka-photo") }, true);
+			}
+			toast(t("saved"));
+			kpiData = null;
+			go("kpi_actions");
+		} catch (e) { toast(e.message, true); b.disabled = false; }
 	}, true);
 
 	// ---------- Electrical points (SK 26-Oct): Satish enters the points done in each cabin with a photo ----------
@@ -3836,7 +3890,7 @@
 	}
 
 	const LIVE_VIEWS = { fnpage: () => renderFnPage(), more: renderMore, leadership: renderLeadership, to_plan: renderToPlan, my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"),
-		my_kpi: renderKpi, dsi: renderDsi, el_points: renderElPoints, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
+		my_kpi: renderKpi, dsi: renderDsi, el_points: renderElPoints, kpi_actions: renderKpiActions, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
 		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name),
 		reminders: renderReminders, calls: renderCalls, whatsapp: renderWhatsApp, mail: renderMail, library: renderLibrary,
