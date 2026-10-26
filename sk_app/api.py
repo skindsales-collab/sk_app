@@ -42,11 +42,19 @@ def home():
 	me = frappe.db.get_value("User", profile.user, ["mobile_no", "phone"], as_dict=True) or {}
 	team = _has_team(profile.user)
 	functions = logins.profile_functions(profile.user)
+	main = home_for(profile.home, has_team=team)
+	sections = sections_for(functions, has_team=team) if len(functions) > 1 else None
+	# whoever may make logins (HR, the admin) always has the Logins icon, whatever their main function
+	if logins._can_manage(profile.user):
+		if "logins" not in main["tiles"]:
+			main["tiles"] = main["tiles"][:1] + ["logins"] + main["tiles"][1:]
+		if sections and sections["sections"] and not any("logins" in x["tiles"] for x in sections["sections"]):
+			sections["sections"][0]["tiles"] = ["logins"] + sections["sections"][0]["tiles"]
 	return {"user": profile.user, "full_name": profile.full_name, "language": profile.language,
 		"mobile": me.get("mobile_no") or me.get("phone"),
-		"home": home_for(profile.home, has_team=team), "functions": functions,
+		"home": main, "functions": functions,
 		# SK: a person in several functions sees all of them on one Home, one labelled row each
-		"sections": sections_for(functions, has_team=team) if len(functions) > 1 else None,
+		"sections": sections,
 		"must_set_pin": bool(frappe.db.get_value("SK App User", profile.name, "must_set_pin")),
 		"card": _latest_card(profile.user),
 		"new_files": crm.files_to_send(profile.user), "day_report_sent": bool(day_report._find(profile.user, getdate())),

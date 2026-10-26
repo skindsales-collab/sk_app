@@ -141,3 +141,15 @@ Nobody | 9876500011 | Cooking
 			r2 = logins.make_login("Administrator", MOBILE, ["Management", "Sales"], full_name="Test Admin")
 		self.assertIsNone(r2["pin"])
 		check_password(r["user"], r["pin"])
+
+	def test_admin_always_has_logins_icon(self):
+		with set_user(CLERK):
+			self.assertNotIn("logins", api.home()["home"]["tiles"])
+		with set_user(HR):
+			self.assertIn("logins", api.home()["home"]["tiles"])
+		frappe.db.set_value("SK App User", HR, "home", "Sales")
+		try:
+			with set_user(HR):
+				self.assertIn("logins", api.home()["home"]["tiles"])
+		finally:
+			frappe.db.set_value("SK App User", HR, "home", "HR")
