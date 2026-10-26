@@ -75,7 +75,8 @@ def _last_activity(doctype: str, names: list[str]) -> dict:
 
 def follow_up(user: str) -> list[dict]:
 	"""All open leads and deals of the user with their next due action, overdue first."""
-	if not installed():
+	# people outside Sales / Marketing (Accounts, Store, factory ...) have no CRM access: nothing to follow up
+	if not installed() or not frappe.has_permission("CRM Lead", "read", user=user):
 		return []
 	now = now_datetime()
 	tasks = _open_tasks_by_doc(user)
@@ -100,7 +101,7 @@ def follow_up(user: str) -> list[dict]:
 	deal_filters = {"deal_owner": user}
 	if closed_deals:
 		deal_filters["status"] = ["not in", closed_deals]
-	for r in frappe.get_list("CRM Deal", filters=deal_filters, limit_page_length=200, order_by="modified desc",
+	for r in [] if not frappe.has_permission("CRM Deal", "read", user=user) else frappe.get_list("CRM Deal", filters=deal_filters, limit_page_length=200, order_by="modified desc",
 			fields=["name", "organization", "lead_name", "status", "mobile_no", "phone", "email", "next_step",
 				"expected_closure_date", "deal_value"]):
 		task = tasks.get(("CRM Deal", r.name))

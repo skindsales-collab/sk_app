@@ -155,7 +155,13 @@ def make_login(by: str, mobile, functions, employee=None, full_name=None, manage
 		user.save(ignore_permissions=True)
 	# an admin keeps the password they already have (the person making logins is often the admin himself);
 	# everyone else gets a first PIN, which also becomes their ERPNext password
-	keep = not was_new and "System Manager" in {r.role for r in user.get("roles")}
+	# an edit of a working login (functions, manager ...) keeps the person's own PIN; HR uses Reset PIN for a new one
+	editing = bool(frappe.db.get_value("SK App User", {"user": user.name, "enabled": 1}))
+	# the functions decide admin rights: when the admin gives someone only non-admin functions, admin is taken off
+	if not ADMIN_FUNCTIONS & set(functions) and user.name != by and "System Manager" in frappe.get_roles(by) \
+			and "System Manager" in {r.role for r in user.get("roles")}:
+		user.remove_roles("System Manager")
+	keep = not was_new and (editing or "System Manager" in {r.role for r in user.get("roles")})
 	pin = None if keep else new_pin()
 	if pin:
 		update_password(user.name, pin)
@@ -251,7 +257,11 @@ def close_login(by: str, user: str) -> dict:
 def set_own_pin(user: str, old_pin, new_pin_value) -> dict:
 	"""The person changes the PIN HR gave them (first login) or any time later."""
 	new_pin_value = check_pin(new_pin_value)
-	check_password(user, str(old_pin or ""))  # throws on a wrong old PIN
+	try:
+		check_password(user, str(old_pin or ""))
+	except frappe.AuthenticationError:
+		# not an AuthenticationError: ERPNext would log the person out on that, and the next Save then fails
+		frappe.throw(_("The old PIN is wrong. Please type the PIN HR gave you."))
 	update_password(user, new_pin_value)
 	frappe.db.set_value("SK App User", {"user": user}, "must_set_pin", 0)
 	return {"ok": True}
