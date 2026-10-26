@@ -29,6 +29,21 @@ Purchase, Accounts, HR, Machine Shifting, Design, IT / ERP and Management alread
 Work Book, DSI, Report Problem and My Score. Their own tiles (job cards, inspections, stock alerts ...) open ERPNext
 until they are built in later phases. Each person has a separate login: their ERPNext user, with their own roles.
 
+### Store and Purchase (live)
+
+Store (`sk_app/store.py`): Stock Check (live qty per store), Receive against a PO with challan photo (draft Purchase
+Receipt), Issue to a job (Stock Entry *Material Transfer for Manufacture*, posted at once), Requests from Production
+(issue from stock or send the short qty to Purchase), Dispatch with cabin / number-plate photos (draft Delivery Note,
+Accounts and the salesperson get a task), Low Stock (Item re-order levels → Material Request), monthly Stock Count
+(differences only → draft Stock Reconciliation) and New Item from a photo (made disabled, admin enables it).
+
+Purchase (`sk_app/purchase.py`): Requests, Get Rates (Request for Quotation + WhatsApp / mail text sent from the phone),
+Compare quotes (Supplier Quotation from a photo of the reply), Purchase Order (placed at once up to the limit; above it
+SK approves on the **PO Approvals** tile; limit `sk_po_approval_limit` in site config, default Rs 50,000), delivery
+Follow-up, Suppliers (new supplier with GSTIN duplicate check), Bills (photo to Accounts as a task) and Last Rates.
+
+Only people in that function (or the admin) can use these screens; documents are saved under their own login.
+
 ### Logins by mobile number
 
 Everyone logs in at `/sk` with their **mobile number and PIN** (email login stays as an option). HR opens the

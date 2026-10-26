@@ -41,15 +41,17 @@ FUNCTIONS = {
 	},
 	"Stores": {
 		"label": {"English": "Stores", "Marathi": "स्टोअर"},
-		"tiles": COMMON_TILES + ["stock_alerts"],
-		"live": False,
-		"erpnext_roles": ["Stock User"],
+		# SK draft F01: My Day first, then the Store icons, then the common ones
+		"tiles": ["my_day", "stock_check", "receive", "issue", "store_requests", "dispatch", "low_stock", "stock_count", "new_item", *COMMON_TILES[1:]],
+		"live": True,
+		# Stock Manager: needed to make stock count drafts and to pick accounts on receipts / delivery notes
+		"erpnext_roles": ["Stock User", "Stock Manager"],
 		"desk": "/app/stock",
 	},
 	"Purchase": {
 		"label": {"English": "Purchase", "Marathi": "खरेदी"},
-		"tiles": COMMON_TILES + ["material_requests"],
-		"live": False,
+		"tiles": ["my_day", "buy_requests", "get_rates", "compare", "po_follow_up", "suppliers", "bills", "last_rates", "stock_check", *COMMON_TILES[1:]],
+		"live": True,
 		"erpnext_roles": ["Purchase User"],
 		"desk": "/app/buying",
 	},
@@ -105,10 +107,10 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": ["ceo_view", "team_reports", "logins", "calls", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
+		"tiles": ["ceo_view", "po_approvals", "team_reports", "logins", "calls", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
 			"library", "training"],
 		"live": False,
-		"erpnext_roles": ["System Manager"],
+		"erpnext_roles": ["System Manager", "Purchase Manager", "Purchase User"],  # SK approves big POs
 		"desk": "/app",
 	},
 }

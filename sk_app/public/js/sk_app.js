@@ -147,12 +147,243 @@
 		edit_login: "काम बदला", login_link: "तुमचे SK App लॉगिन", people_n: "लोक", without_login: "लॉगिनशिवाय",
 		pin_set_pending: "पिन अजून ठेवला नाही",
 	});
+	// Store and Purchase screens (26-Oct-2026)
+	Object.assign(T.English, {
+		stock_check: "Stock Check",
+		receive: "Receive",
+		issue: "Issue",
+		store_requests: "Requests",
+		dispatch: "Dispatch",
+		low_stock: "Low Stock",
+		stock_count: "Stock Count",
+		new_item: "New Item",
+		buy_requests: "Requests",
+		get_rates: "Get Rates",
+		compare: "Compare",
+		po_follow_up: "Follow-up",
+		suppliers: "Suppliers",
+		bills: "Bills",
+		last_rates: "Last Rates",
+		po_approvals: "PO Approvals",
+		search_item: "Item (type or speak)",
+		low: "Low",
+		received: "Last received",
+		issued: "Last issued",
+		used_in_jobs: "Used in jobs",
+		receive_help: "Material at the gate: tap its Purchase Order.",
+		without_po: "Without Purchase Order",
+		challan_photo: "Photo of supplier challan",
+		ordered: "Ordered",
+		pending: "Pending",
+		goods_photo: "Photo of material at gate",
+		save_receipt: "Save · send for checking",
+		supplier: "Supplier",
+		item: "Item",
+		qty: "Quantity",
+		why_no_po: "Why no PO? (speak)",
+		issue_help: "Tap the job, then type or speak what is given.",
+		job_card: "Job Card",
+		needed: "Needed",
+		given: "Given",
+		other_item: "Other item",
+		taken_by: "Taken by",
+		taker_photo: "Photo of person taking material",
+		needed_by: "needed",
+		short: "Short",
+		to_purchase: "Purchase",
+		loaded_photo: "Photo of loaded cabin",
+		plate_photo: "Photo of vehicle number plate",
+		vehicle_no: "Vehicle number",
+		driver_mobile: "Driver mobile",
+		dispatch_tell: "Dispatch · tell Accounts & Sales",
+		have: "Have",
+		reorder_at: "re-order at",
+		order: "Order",
+		no_low: "Nothing below re-order level (or no levels set yet).",
+		send_all_purchase: "Send all to Purchase",
+		store_name: "Store",
+		count_help: "Count each item and type or speak the number. Leave blank what you did not count.",
+		rack_photo: "Photo of rack",
+		send_differences: "Send differences for OK",
+		item_photo: "Photo of item / label",
+		item_name: "Item name",
+		group: "Group",
+		unit: "Unit",
+		send_approval: "Send for approval",
+		similar: "Similar items already in ERPNext. Same item?",
+		urgent: "Urgent",
+		get_rates_selected: "Get rates for selected",
+		items: "Items",
+		add_item_first: "Pick an item first",
+		add_item: "Add item",
+		no_suggestion: "No past supplier for this item. Add suppliers below.",
+		add_supplier: "Add supplier",
+		need_by: "Need by",
+		send_rate_request: "Make rate request",
+		add_quote: "Add quote (photo / screenshot)",
+		quotes: "quotes",
+		best: "Best",
+		days: "days",
+		make_po: "Make PO",
+		last_purchase: "Last purchase",
+		saving_vs_last: "Saving vs last rate",
+		approval_rule: "SK must approve a PO above",
+		quote_photo: "Photo / screenshot of supplier's reply",
+		rate: "Rate (Rs, before GST)",
+		delivery_days: "Delivery days",
+		days_late: "days late",
+		due_today: "due today",
+		note: "Note",
+		new_supplier: "New Supplier",
+		gst_photo: "Photo of GST certificate / visiting card",
+		supplier_name: "Supplier name",
+		cheque_photo: "Photo of cancelled cheque (bank details)",
+		bill_photo: "Photo of supplier bill",
+		bill_no: "Bill number",
+		amount: "Amount (Rs, with GST)",
+		bill_for: "For which job / order",
+		send_accounts: "Send to Accounts",
+		approve: "Approve",
+		reject: "Reject",
+		receipt_saved: "Receipt saved",
+		issued_ok: "Issued",
+		kept_draft: "Saved as draft, owner to check",
+		sent_purchase: "Sent to Purchase",
+		dispatched: "Dispatch saved",
+		differences_sent: "differences sent",
+		no_differences: "No differences. Well done!",
+		sent_approval: "Sent for approval",
+		tick_items: "Tick the items first",
+		sent_sk: "sent to SK for approval",
+		po_placed: "PO placed",
+		supplier_said: "What did the supplier say?",
+		promised_date: "New promised date",
+		approved: "Approved",
+		rejected: "Rejected",
+		reject_why: "Why reject?",
+	});
+	Object.assign(T.Marathi, {
+		stock_check: "स्टॉक तपासा",
+		receive: "माल आला",
+		issue: "माल द्या",
+		store_requests: "मागण्या",
+		dispatch: "डिस्पॅच",
+		low_stock: "कमी स्टॉक",
+		stock_count: "स्टॉक मोजणी",
+		new_item: "नवीन आयटम",
+		buy_requests: "खरेदी मागण्या",
+		get_rates: "दर मागवा",
+		compare: "दर तुलना",
+		po_follow_up: "पाठपुरावा",
+		suppliers: "सप्लायर",
+		bills: "बिले",
+		last_rates: "मागील दर",
+		po_approvals: "PO मंजुरी",
+		search_item: "आयटम (टाइप करा किंवा बोला)",
+		low: "कमी",
+		received: "शेवटचा आलेला",
+		issued: "शेवटचा दिलेला",
+		used_in_jobs: "कोणत्या कामात वापरला",
+		receive_help: "गेटवर माल आला: त्याची PO टॅप करा.",
+		without_po: "PO शिवाय",
+		challan_photo: "सप्लायर चलनाचा फोटो",
+		ordered: "ऑर्डर",
+		pending: "बाकी",
+		goods_photo: "गेटवरील मालाचा फोटो",
+		save_receipt: "सेव्ह · तपासणीला पाठवा",
+		supplier: "सप्लायर",
+		item: "आयटम",
+		qty: "संख्या",
+		why_no_po: "PO का नाही? (बोला)",
+		issue_help: "काम टॅप करा, मग काय दिले ते टाइप करा किंवा बोला.",
+		job_card: "जॉब कार्ड",
+		needed: "लागणारे",
+		given: "दिलेले",
+		other_item: "इतर आयटम",
+		taken_by: "कोणी घेतले",
+		taker_photo: "माल घेणाऱ्याचा फोटो",
+		needed_by: "पर्यंत हवे",
+		short: "कमी",
+		to_purchase: "खरेदी",
+		loaded_photo: "लोड केलेल्या केबिनचा फोटो",
+		plate_photo: "गाडीच्या नंबर प्लेटचा फोटो",
+		vehicle_no: "गाडी नंबर",
+		driver_mobile: "ड्रायव्हर मोबाईल",
+		dispatch_tell: "डिस्पॅच · अकाउंट्स व सेल्सला कळवा",
+		have: "आहे",
+		reorder_at: "पुन्हा ऑर्डर पातळी",
+		order: "ऑर्डर",
+		no_low: "काहीही कमी नाही (किंवा पातळी अजून ठरवली नाही).",
+		send_all_purchase: "सर्व खरेदीला पाठवा",
+		store_name: "स्टोअर",
+		count_help: "प्रत्येक आयटम मोजा आणि संख्या टाइप करा किंवा बोला. न मोजलेले रिकामे ठेवा.",
+		rack_photo: "रॅकचा फोटो",
+		send_differences: "फरक मंजुरीला पाठवा",
+		item_photo: "आयटम / लेबलचा फोटो",
+		item_name: "आयटमचे नाव",
+		group: "गट",
+		unit: "युनिट",
+		send_approval: "मंजुरीला पाठवा",
+		similar: "असेच आयटम ERPNext मध्ये आहेत. हाच आहे का?",
+		urgent: "तातडीचे",
+		get_rates_selected: "निवडलेल्यांचे दर मागवा",
+		items: "आयटम",
+		add_item_first: "आधी आयटम निवडा",
+		add_item: "आयटम जोडा",
+		no_suggestion: "या आयटमचा जुना सप्लायर नाही. खाली सप्लायर जोडा.",
+		add_supplier: "सप्लायर जोडा",
+		need_by: "कधीपर्यंत हवे",
+		send_rate_request: "दर मागणी करा",
+		add_quote: "दर जोडा (फोटो / स्क्रीनशॉट)",
+		quotes: "दर",
+		best: "सर्वात चांगला",
+		days: "दिवस",
+		make_po: "PO बनवा",
+		last_purchase: "मागील खरेदी",
+		saving_vs_last: "मागील दरापेक्षा बचत",
+		approval_rule: "यापेक्षा मोठ्या PO ला SK ची मंजुरी लागते:",
+		quote_photo: "सप्लायरच्या उत्तराचा फोटो / स्क्रीनशॉट",
+		rate: "दर (रु, GST आधी)",
+		delivery_days: "डिलिव्हरी दिवस",
+		days_late: "दिवस उशीर",
+		due_today: "आज यायचे",
+		note: "नोंद",
+		new_supplier: "नवीन सप्लायर",
+		gst_photo: "GST सर्टिफिकेट / व्हिजिटिंग कार्डचा फोटो",
+		supplier_name: "सप्लायरचे नाव",
+		cheque_photo: "रद्द चेकचा फोटो (बँक तपशील)",
+		bill_photo: "सप्लायर बिलाचा फोटो",
+		bill_no: "बिल नंबर",
+		amount: "रक्कम (रु, GST सह)",
+		bill_for: "कोणत्या काम / ऑर्डरसाठी",
+		send_accounts: "अकाउंट्सला पाठवा",
+		approve: "मंजूर",
+		reject: "नामंजूर",
+		receipt_saved: "पावती सेव्ह झाली",
+		issued_ok: "माल दिला",
+		kept_draft: "ड्राफ्ट म्हणून सेव्ह, मालक तपासतील",
+		sent_purchase: "खरेदीला पाठवले",
+		dispatched: "डिस्पॅच सेव्ह झाले",
+		differences_sent: "फरक पाठवले",
+		no_differences: "काहीही फरक नाही. छान!",
+		sent_approval: "मंजुरीला पाठवले",
+		tick_items: "आधी आयटम निवडा",
+		sent_sk: "SK कडे मंजुरीला पाठवले",
+		po_placed: "PO दिली",
+		supplier_said: "सप्लायर काय म्हणाला?",
+		promised_date: "नवीन दिलेली तारीख",
+		approved: "मंजूर केले",
+		rejected: "नामंजूर केले",
+		reject_why: "का नामंजूर?",
+	});
 	const ICON = {
 		my_day: "☀️", my_leads: "📞", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
 		job_cards: "🛠️", inspections: "✅", stock_alerts: "📦", material_requests: "🧾", invoice_photo: "📷",
 		collections: "💰", team_scorecards: "👥", site_checklist: "📋", ceo_view: "📊",
 		calendar: "📅", follow_up: "🔔", new_lead: "➕", training: "🎓", day_report: "📝", team_reports: "🗂️",
 		calls: "📞", whatsapp: "💬", mail: "✉️", reminders: "⏰", library: "🏢", logins: "🔑",
+		stock_check: "📦", receive: "🚚", issue: "📤", store_requests: "📋", dispatch: "🚛", low_stock: "⚠️", stock_count: "🔢", new_item: "🆕",
+		buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
 	const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -307,6 +538,7 @@
 		const h = state.home;
 		const fn = h.home;
 		const badge = {
+			...(h.badges || {}),
 			follow_up: (h.new_files || []).length,
 			reminders: dueNow().length,
 			day_report: !h.day_report_sent && new Date().getHours() >= 17 ? "!" : 0,
@@ -994,12 +1226,395 @@
 		sel.addEventListener("change", () => { const o = sel.selectedOptions[0]; if (o && o.dataset.mobile) document.getElementById("f-wa").value = o.dataset.mobile; });
 	}
 
+	// ---------- Store and Purchase (SK drafts F01 / F02, 26-Oct-2026) ----------
+	// Store and Purchase people mostly tap and take photos; numbers can be spoken with the 🎤. Every save makes the
+	// ERPNext document under their own login (drafts where Accounts / the owner must check first).
+	const S = {}; // screen state: lists from the server, the picked PO / job / order, the items picked for rates
+	const num = (x) => Number(x || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
+	const money = (x) => "Rs " + Number(x || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 });
+	const qtyBox = (id, value, label) => `<input id="${id}" class="sk-qty" type="number" inputmode="decimal" step="any" value="${value == null ? "" : esc(value)}" aria-label="${esc(label || "")}">`;
+	const empty = () => `<li class="sk-empty">${t("nothing")}</li>`;
+	const li = (title, meta, right, extra) => `<li class="sk-item ${extra || ""}"><div><div class="sk-item-title">${title}</div><div class="sk-item-meta">${meta || ""}</div></div>${right || ""}</li>`;
+	function pick(id, label, list, attr) {
+		return `<label class="sk-field"><span>${esc(label)}</span><select id="${id}" class="sk-select" ${attr || ""}><option value=""></option>${(list || []).map((x) => typeof x === "string" ? `<option>${esc(x)}</option>` : `<option value="${esc(x.value)}">${esc(x.label)}</option>`).join("")}</select></label>`;
+	}
+	// type or speak a few letters, then pick from the list (suppliers / items from ERPNext)
+	function finder(id, label, kind) {
+		return `<label class="sk-field"><span>${esc(label)}</span><div class="sk-input-row"><input id="${id}" list="${id}-dl" data-find="${kind}" autocomplete="off">
+			<div class="sk-micbox"><button class="sk-mic" data-mic="${id}">🎤</button></div></div><datalist id="${id}-dl"></datalist></label>`;
+	}
+	let findTimer = null;
+	root.addEventListener("input", (ev) => {
+		const el = ev.target;
+		if (!el.dataset || !el.dataset.find) return;
+		clearTimeout(findTimer);
+		findTimer = setTimeout(async () => {
+			const rows = el.dataset.find === "supplier" ? await call("buy_suppliers", { q: el.value }) : await call("store_search", { q: el.value });
+			const dl = document.getElementById(el.id + "-dl");
+			if (dl) dl.innerHTML = rows.map((r) => el.dataset.find === "supplier" ? `<option value="${esc(r.name)}">${esc(r.supplier_name)}</option>`
+				: `<option value="${esc(r.item_code)}">${esc(r.item_name)} · ${num(r.qty)} ${esc(r.uom || "")}</option>`).join("");
+		}, 300);
+	});
+
+	async function renderStockCheck() {
+		root.innerHTML = header(t("stock_check")) + `<main class="sk-form">${formField("s-q", t("search_item"))}
+			<button class="sk-btn go wide" data-act="st-search">🔎 ${t("search")}</button><ul class="sk-list sk-gap" id="s-res"></ul></main>`;
+		return stockResults("");
+	}
+	async function stockResults(q) {
+		S.items = await call("store_search", { q });
+		document.getElementById("s-res").innerHTML = S.items.map((r, i) => li(`${esc(r.item_name)} ${r.low ? `<span class="sk-due">${t("low")}</span>` : ""}`,
+			`${esc(r.item_code)} · ${esc(r.group || "")}<br>${r.warehouses.map((w) => `${esc(w.warehouse)}: ${num(w.qty)}`).join(" · ")}`,
+			`<button class="sk-open" data-act="st-item" data-i="${i}"><b>${num(r.qty)}</b> ${esc(r.uom || "")}<br><small>${money(r.value)}</small></button>`)).join("") || empty();
+	}
+	async function itemSheet(code) {
+		const d = await call("store_item", { item_code: code });
+		const mv = (rows) => rows.map((r) => `<li>${esc(r.posting_date)} · ${num(r.actual_qty)} · ${esc(r.voucher_type)} ${esc(r.voucher_no)}</li>`).join("") || `<li>${t("none")}</li>`;
+		sheet(`<h3 class="sk-h">📦 ${esc(d.item_name)}</h3><p class="sk-note">${esc(d.item_code)} · ${esc(d.item_group || "")}</p>
+			<b>${t("received")}</b><ul class="sk-mini">${mv(d.received)}</ul><b>${t("issued")}</b><ul class="sk-mini">${mv(d.issued)}</ul>
+			<b>${t("used_in_jobs")}</b><ul class="sk-mini">${d.jobs.map((j) => `<li>${esc(j.work_order)} · ${num(j.qty)}</li>`).join("") || `<li>${t("none")}</li>`}</ul>
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+
+	async function renderReceive() {
+		S.pos = await call("store_open_pos");
+		root.innerHTML = header(t("receive")) + `<main><p class="sk-note">${t("receive_help")}</p><ul class="sk-list">${S.pos.map((p, i) => li(esc(p.supplier_name),
+			`${esc(p.name)} · ${t("due")} ${esc(p.schedule_date || "")} · ${p.items.length} ${t("open_items")}`,
+			`<button class="sk-chip on" data-act="st-po" data-i="${i}">${t("receive")}</button>`, p.late ? "k-lead_new" : "")).join("") || empty()}</ul>
+			<button class="sk-btn wide sk-gap" data-act="st-nopo">${t("without_po")}</button></main>`;
+	}
+	function receiveForm(i) {
+		const p = S.pos[i];
+		S.po = p;
+		root.innerHTML = header(t("receive")) + `<main class="sk-form"><h3 class="sk-h">${esc(p.supplier_name)} · ${esc(p.name)}</h3>
+			${photoField("r-challan", "📷 " + t("challan_photo"))}
+			<ul class="sk-list">${p.items.map((r, k) => li(esc(r.item_name), `${t("ordered")} ${num(r.qty)} · ${t("pending")} ${num(r.pending)} ${esc(r.uom || "")}`,
+				qtyBox("r-q" + k, r.pending, r.item_name))).join("")}</ul>
+			${photoField("r-goods", "📷 " + t("goods_photo"))}${formField("r-note", t("note_q"))}
+			<button class="sk-btn go wide" data-act="st-receive">${t("save_receipt")}</button></main>`;
+	}
+	function receiveNoPo() {
+		S.po = null;
+		root.innerHTML = header(t("without_po")) + `<main class="sk-form">${finder("r-sup", t("supplier"), "supplier")}${finder("r-item", t("item"), "item")}
+			<label class="sk-field"><span>${t("qty")}</span>${qtyBox("r-qty")}</label>${formField("r-reason", t("why_no_po"), true)}
+			${photoField("r-challan", "📷 " + t("challan_photo"))}<button class="sk-btn go wide" data-act="st-receive">${t("save_receipt")}</button></main>`;
+	}
+
+	async function renderIssue() {
+		S.wos = await call("store_work_orders");
+		root.innerHTML = header(t("issue")) + `<main><p class="sk-note">${t("issue_help")}</p><ul class="sk-list">${S.wos.map((w, i) => li(esc(w.item_name || w.production_item),
+			`${esc(w.name)} · ${num(w.qty)} · ${(w.job_cards || []).map((j) => esc(j.operation || "")).filter(Boolean).join(", ")}`,
+			`<button class="sk-chip on" data-act="st-wo" data-i="${i}">${t("issue")}</button>`)).join("") || empty()}</ul></main>`;
+	}
+	function issueForm(i) {
+		const w = S.wos[i];
+		S.wo = w;
+		root.innerHTML = header(t("issue")) + `<main class="sk-form"><h3 class="sk-h">${esc(w.item_name || w.production_item)} · ${esc(w.name)}</h3>
+			${pick("i-jc", t("job_card"), (w.job_cards || []).map((j) => ({ value: j.name, label: `${j.name} · ${j.operation || ""} · ${j.workstation || ""}` })))}
+			<ul class="sk-list">${w.items.map((r, k) => li(esc(r.item_name || r.item_code), `${t("needed")} ${num(r.required_qty)} · ${t("given")} ${num(r.transferred_qty)} · ${esc(r.source_warehouse || "")}`,
+				qtyBox("i-q" + k, "", r.item_name))).join("")}</ul>
+			${finder("i-extra", t("other_item"), "item")}<label class="sk-field"><span>${t("qty")}</span>${qtyBox("i-extra-q")}</label>
+			${formField("i-who", t("taken_by"))}${photoField("i-photo", "📷 " + t("taker_photo"))}
+			<button class="sk-btn ok wide" data-act="st-issue">✓ ${t("issue")}</button></main>`;
+	}
+
+	async function renderStoreRequests() {
+		S.reqs = await call("store_requests", { kind: "store" });
+		root.innerHTML = header(t("store_requests")) + `<main><ul class="sk-list">${S.reqs.map((r, i) => li(`${esc(r.item_name)} · ${num(r.qty)} ${esc(r.uom || "")}`,
+			`${esc(r.by)} · ${esc(r.request)}${r.work_order ? " · " + esc(r.work_order) : ""} · ${t("needed_by")} ${esc(r.needed_by)}${r.age_hours > 2 ? ` <span class="sk-due">${num(r.age_hours)} h</span>` : ""}`,
+			`<div class="sk-col">${r.short ? `<span class="sk-due">${t("short")} ${num(r.short)}</span><button class="sk-chip" data-act="st-req-buy" data-i="${i}">→ ${t("to_purchase")}</button>`
+				: `<button class="sk-chip on" data-act="st-req-issue" data-i="${i}">${t("issue")}</button>`}</div>`, r.short ? "k-lead_new" : "")).join("") || empty()}</ul></main>`;
+	}
+
+	async function renderDispatch() {
+		S.sos = await call("store_dispatch_orders");
+		root.innerHTML = header(t("dispatch")) + `<main><ul class="sk-list">${S.sos.map((o, i) => li(esc(o.customer_name), `${esc(o.name)} · ${money(o.grand_total)} · ${t("due")} ${esc(o.delivery_date || "")}`,
+			`<button class="sk-chip on" data-act="st-so" data-i="${i}">${t("dispatch")}</button>`)).join("") || empty()}</ul></main>`;
+	}
+	function dispatchForm(i) {
+		const o = S.sos[i];
+		S.so = o;
+		root.innerHTML = header(t("dispatch")) + `<main class="sk-form"><h3 class="sk-h">${esc(o.customer_name)} · ${esc(o.name)}</h3>
+			${photoField("d-cabin", "📷 " + t("loaded_photo"))}${photoField("d-plate", "📷 " + t("plate_photo"))}
+			${formField("d-vehicle", t("vehicle_no"))}<label class="sk-field"><span>${t("driver_mobile")}</span><div class="sk-input-row"><input id="d-driver" type="tel"></div></label>
+			${formField("d-note", t("note_q"))}<button class="sk-btn ok wide" data-act="st-dispatch">✓ ${t("dispatch_tell")}</button></main>`;
+	}
+
+	async function renderLowStock() {
+		S.low = await call("store_low_stock");
+		root.innerHTML = header(t("low_stock")) + `<main><ul class="sk-list">${S.low.map((r) => li(esc(r.item_name), `${esc(r.warehouse)} · ${t("have")} ${num(r.qty)} · ${t("reorder_at")} ${num(r.level)}`,
+			`<span class="sk-chip">${t("order")} ${num(r.order)}</span>`, "k-lead_new")).join("") || `<li class="sk-empty">${t("no_low")}</li>`}</ul>
+			${S.low.length ? `<button class="sk-btn go wide" data-act="st-order-low">${t("send_all_purchase")} (${S.low.length})</button>` : ""}</main>`;
+	}
+
+	async function renderStockCount() {
+		const whs = await call("store_warehouses");
+		root.innerHTML = header(t("stock_count")) + `<main class="sk-form">${pick("c-wh", t("store_name"), whs, 'data-act-change="st-count-wh"')}<div id="c-list"></div></main>`;
+		document.getElementById("c-wh").addEventListener("change", countList);
+	}
+	async function countList() {
+		const wh = val("c-wh");
+		S.count = wh ? await call("store_count_list", { warehouse: wh }) : [];
+		document.getElementById("c-list").innerHTML = `<p class="sk-note">${t("count_help")}</p><ul class="sk-list">${S.count.map((r, k) => li(esc(r.item_name),
+			`${esc(r.item_code)} · ERPNext ${num(r.qty)}`, `<div class="sk-input-row sk-countbox">${qtyBox("c-q" + k, "", r.item_name)}<div class="sk-micbox"><button class="sk-mic" data-mic="c-q${k}">🎤</button></div></div>`)).join("") || empty()}</ul>
+			${photoField("c-photo", "📷 " + t("rack_photo"))}<button class="sk-btn go wide" data-act="st-count">${t("send_differences")}</button>`;
+	}
+
+	async function renderNewItem() {
+		const o = await call("store_item_options");
+		root.innerHTML = header(t("new_item")) + `<main class="sk-form">${photoField("n-photo", "📷 " + t("item_photo"))}${formField("n-name", t("item_name"))}
+			<div id="n-similar"></div>${pick("n-group", t("group"), o.groups)}${pick("n-uom", t("unit"), o.uoms)}${pick("n-wh", t("store_name"), o.warehouses)}
+			<button class="sk-btn go wide" data-act="st-new-item">${t("send_approval")}</button></main>`;
+		document.getElementById("n-name").addEventListener("change", async () => {
+			const rows = await call("store_similar", { name: val("n-name") });
+			document.getElementById("n-similar").innerHTML = rows.length ? `<p class="sk-note">⚠ ${t("similar")}: ${rows.map((r) => `${esc(r.item_name)} (${esc(r.item_code)})`).join(", ")}</p>` : "";
+		});
+	}
+
+	// ---------- Purchase ----------
+	async function renderBuyRequests() {
+		S.breqs = await call("buy_requests");
+		root.innerHTML = header(t("buy_requests")) + `<main><ul class="sk-list">${S.breqs.map((r, i) => li(`<label class="sk-check"><input type="checkbox" data-breq="${i}"> ${esc(r.item_name)} · ${num(r.qty)} ${esc(r.uom || "")}</label>`,
+			`${esc(r.by)} · ${esc(r.request)} · ${t("needed_by")} ${esc(r.needed_by)}${r.last_rate ? ` · ${t("last")} ${money(r.last_rate)} (${esc(r.last_supplier)})` : ""}`,
+			r.urgent ? `<span class="sk-due">${t("urgent")}</span>` : "", r.urgent ? "k-lead_new" : "")).join("") || empty()}</ul>
+			${S.breqs.length ? `<button class="sk-btn go wide" data-act="pu-rates-selected">💬 ${t("get_rates_selected")}</button>` : ""}</main>`;
+	}
+
+	async function renderGetRates() {
+		S.rateItems = S.rateItems || [];
+		const first = S.rateItems[0];
+		const sugg = first ? await call("buy_suggest", { item_code: first.item_code }) : [];
+		S.sugg = sugg;
+		const d = new Date(); d.setDate(d.getDate() + 3);
+		root.innerHTML = header(t("get_rates")) + `<main class="sk-form">
+			<h3 class="sk-h">${t("items")}</h3><ul class="sk-list">${S.rateItems.map((r, k) => li(esc(r.item_name || r.item_code), "", qtyBox("g-q" + k, r.qty))).join("") || `<li class="sk-empty">${t("add_item_first")}</li>`}</ul>
+			${finder("g-item", t("add_item"), "item")}<label class="sk-field"><span>${t("qty")}</span>${qtyBox("g-qty")}</label>
+			<button class="sk-btn wide" data-act="pu-add-item">+ ${t("add_item")}</button>
+			<h3 class="sk-h">${t("suppliers")}</h3><ul class="sk-list">${sugg.map((s, k) => li(`<label class="sk-check"><input type="checkbox" data-sup="${esc(s.name)}" ${k < 3 ? "checked" : ""}> ${esc(s.supplier_name)}</label>`,
+				[s.gstin, s.supplier_group, s.last_bill && t("last") + " " + s.last_bill].filter(Boolean).map(esc).join(" · "))).join("") || `<li class="sk-empty">${t("no_suggestion")}</li>`}</ul>
+			${finder("g-sup", t("add_supplier"), "supplier")}
+			<label class="sk-field"><span>${t("need_by")}</span><input id="g-date" type="date" class="sk-select" value="${d.toISOString().slice(0, 10)}"></label>
+			<button class="sk-btn go wide" data-act="pu-rfq">💬 ${t("send_rate_request")}</button></main>`;
+	}
+	function rfqSent(r) {
+		S.rfq = r;
+		sheet(`<h3 class="sk-h">✅ ${esc(r.name)}</h3><p class="sk-note">${esc(r.text)}</p>
+			${r.suppliers.map((s, k) => `<div class="sk-row sk-wrap sk-gap"><b>${esc(s.supplier_name)}</b>
+				<button class="sk-chip on" data-act="pu-wa" data-k="${k}">💬 WhatsApp</button>
+				${s.email_id ? `<a class="sk-chip" href="mailto:${esc(s.email_id)}?subject=${encodeURIComponent("Rate request " + r.name)}&body=${encodeURIComponent(r.text)}">✉️ ${t("email")}</a>` : ""}</div>`).join("")}
+			<button class="sk-btn wide" data-act="close-sheet">${t("done")}</button>`);
+	}
+
+	async function renderCompare() {
+		S.quoted = await call("buy_quoted_items");
+		root.innerHTML = header(t("compare")) + `<main><button class="sk-btn go wide" data-act="pu-quote-new">📷 + ${t("add_quote")}</button>
+			<ul class="sk-list sk-gap">${S.quoted.map((r, i) => li(esc(r.item_name), `${r.quotes} ${t("quotes")}`, `<button class="sk-open" data-act="pu-cmp" data-i="${i}">›</button>`)).join("") || empty()}</ul></main>`;
+	}
+	async function compareItem(code) {
+		const c = await call("buy_compare", { item_code: code });
+		S.cmp = c;
+		root.innerHTML = header(t("compare")) + `<main><h3 class="sk-h">${esc(c.item_name)}</h3><ul class="sk-list">${c.quotes.map((q, k) => li(`${esc(q.supplier)} ${k === 0 ? `<span class="sk-chip on">${t("best")}</span>` : ""}`,
+			`${money(q.rate)} × ${num(q.qty)} · ${q.lead_time_days || "-"} ${t("days")} · ${esc(q.name)}`,
+			`<button class="sk-chip" data-act="pu-po" data-sq="${esc(q.name)}" data-total="${q.rate * q.qty}">${t("make_po")}</button>`)).join("") || empty()}
+			${c.last ? li(t("last_purchase"), `${esc(c.last.supplier)} · ${esc(c.last.date)}`, `<b>${money(c.last.rate)}</b>`) : ""}</ul>
+			${c.saving != null ? `<p class="sk-note">${t("saving_vs_last")}: <b>${money(c.saving)}</b></p>` : ""}
+			<p class="sk-note">${t("approval_rule")} ${money(c.limit)}</p></main>`;
+	}
+	function quoteSheet() {
+		sheet(`<h3 class="sk-h">📷 ${t("add_quote")}</h3>${photoField("q-photo", "📷 " + t("quote_photo"))}${finder("q-sup", t("supplier"), "supplier")}${finder("q-item", t("item"), "item")}
+			<label class="sk-field"><span>${t("qty")}</span>${qtyBox("q-qty", S.rateItems && S.rateItems[0] ? S.rateItems[0].qty : "")}</label>
+			<label class="sk-field"><span>${t("rate")}</span><div class="sk-input-row">${qtyBox("q-rate")}<div class="sk-micbox"><button class="sk-mic" data-mic="q-rate">🎤</button></div></div></label>
+			<label class="sk-field"><span>${t("delivery_days")}</span>${qtyBox("q-days")}</label>
+			<button class="sk-btn ok wide" data-act="pu-quote-save">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+
+	async function renderFollowUpPo() {
+		S.late = await call("buy_follow_up");
+		root.innerHTML = header(t("po_follow_up")) + `<main><ul class="sk-list">${S.late.map((p, i) => li(esc(p.supplier_name),
+			`${esc(p.name)} · ${esc(p.items)} · ${p.days_late > 0 ? `<span class="sk-due">${p.days_late} ${t("days_late")}</span>` : t("due_today")}`,
+			`<div class="sk-col">${p.mobile ? `<a class="sk-chip" href="tel:${esc(p.mobile)}">📞</a><a class="sk-chip" target="_blank" href="https://wa.me/${waNumber(p.mobile)}">💬</a>` : ""}
+			<button class="sk-chip" data-act="pu-note" data-i="${i}">🎤 ${t("note")}</button></div>`, p.days_late > 0 ? "k-lead_new" : "")).join("") || empty()}</ul></main>`;
+	}
+
+	async function renderSuppliers() {
+		root.innerHTML = header(t("suppliers")) + `<main class="sk-form"><button class="sk-btn go wide" data-act="pu-sup-new">+ ${t("new_supplier")}</button>
+			${formField("p-q", t("search"))}<button class="sk-btn wide" data-act="pu-sup-search">🔎 ${t("search")}</button><ul class="sk-list sk-gap" id="p-res"></ul></main>`;
+		return supplierResults("");
+	}
+	async function supplierResults(q) {
+		const rows = await call("buy_suppliers", { q });
+		document.getElementById("p-res").innerHTML = rows.map((s) => li(esc(s.supplier_name), [s.gstin, s.supplier_group].filter(Boolean).map(esc).join(" · "),
+			s.mobile_no ? `<a class="sk-chip" href="tel:${esc(s.mobile_no)}">📞</a>` : "")).join("") || empty();
+	}
+	async function newSupplierForm() {
+		const groups = await call("buy_supplier_groups");
+		root.innerHTML = header(t("new_supplier")) + `<main class="sk-form">${photoField("ns-photo", "📷 " + t("gst_photo"))}${formField("ns-name", t("supplier_name"))}
+			${formField("ns-gstin", "GSTIN")}<label class="sk-field"><span>${t("mobile")}</span><div class="sk-input-row"><input id="ns-mobile" type="tel"></div></label>
+			${pick("ns-group", t("group"), groups)}${photoField("ns-cheque", "📷 " + t("cheque_photo"))}
+			<button class="sk-btn go wide" data-act="pu-sup-save">${t("save")}</button></main>`;
+	}
+
+	function renderBills() {
+		root.innerHTML = header(t("bills")) + `<main class="sk-form">${photoField("b-photo", "📷 " + t("bill_photo"))}${finder("b-sup", t("supplier"), "supplier")}
+			${formField("b-no", t("bill_no"))}<label class="sk-field"><span>${t("amount")}</span>${qtyBox("b-amt")}</label>${formField("b-for", t("bill_for"))}
+			<button class="sk-btn go wide" data-act="pu-bill">${t("send_accounts")}</button></main>`;
+	}
+
+	async function renderLastRates() {
+		root.innerHTML = header(t("last_rates")) + `<main class="sk-form">${formField("lr-q", t("search_item"))}<button class="sk-btn go wide" data-act="pu-lr">🔎 ${t("search")}</button><ul class="sk-list sk-gap" id="lr-res"></ul></main>`;
+	}
+
+	async function renderApprovals() {
+		S.appr = await call("buy_approvals");
+		root.innerHTML = header(t("po_approvals")) + `<main><ul class="sk-list">${S.appr.map((p, i) => li(esc(p.supplier_name), `${esc(p.name)} · ${t("due")} ${esc(p.schedule_date || "")}`,
+			`<div class="sk-col"><b>${money(p.grand_total)}</b><a class="sk-chip" href="/app/purchase-order/${encodeURIComponent(p.name)}">PDF</a>
+			<button class="sk-chip on" data-act="pu-approve" data-i="${i}">✓ ${t("approve")}</button><button class="sk-chip bad" data-act="pu-reject" data-i="${i}">✗ ${t("reject")}</button></div>`)).join("") || empty()}</ul></main>`;
+	}
+
+	// taps on the Store / Purchase screens; returns true when handled
+	async function storeAct(act, el) {
+		const i = Number(el.dataset.i);
+		const saved = (msg) => toast(msg || t("saved"));
+		switch (act) {
+			case "st-search": return stockResults(val("s-q"));
+			case "st-item": return itemSheet(S.items[i].item_code);
+			case "st-po": return receiveForm(i);
+			case "st-nopo": return receiveNoPo();
+			case "st-receive": {
+				el.disabled = true;
+				const args = { challan_photo: await photoUrl("r-challan"), goods_photo: await photoUrl("r-goods"), note: val("r-note") };
+				if (S.po) {
+					args.purchase_order = S.po.name;
+					args.items = JSON.stringify(S.po.items.map((r, k) => ({ po_detail: r.name, qty: val("r-q" + k) })));
+				} else {
+					Object.assign(args, { supplier: val("r-sup"), reason: val("r-reason"), items: JSON.stringify([{ item_code: val("r-item"), qty: val("r-qty") }]) });
+				}
+				const r = await call("store_receive", args, true);
+				saved(`${t("receipt_saved")}: ${r.name}`);
+				return go("receive");
+			}
+			case "st-wo": return issueForm(i);
+			case "st-issue": {
+				el.disabled = true;
+				const items = S.wo.items.map((r, k) => ({ item_code: r.item_code, qty: val("i-q" + k) })).filter((x) => Number(x.qty) > 0);
+				if (val("i-extra") && Number(val("i-extra-q")) > 0) items.push({ item_code: val("i-extra"), qty: val("i-extra-q") });
+				const r = await call("store_issue", { work_order: S.wo.name, items: JSON.stringify(items), taken_by: val("i-who"), job_card: val("i-jc") || null, photo: await photoUrl("i-photo") }, true);
+				saved(r.posted ? `${t("issued_ok")}: ${r.name}` : `${t("kept_draft")}: ${r.name}`);
+				return go("issue");
+			}
+			case "st-req-issue": { const r = await call("store_request_issue", { request: S.reqs[i].request }, true); saved(r.posted ? `${t("issued_ok")}: ${r.name}` : `${t("kept_draft")}: ${r.name}`); return go("store_requests"); }
+			case "st-req-buy": { const r = await call("store_request_to_purchase", { request: S.reqs[i].request }, true); saved(`${t("sent_purchase")}: ${r.name}`); return go("store_requests"); }
+			case "st-so": return dispatchForm(i);
+			case "st-dispatch": {
+				el.disabled = true;
+				const r = await call("store_dispatch", { sales_order: S.so.name, vehicle_no: val("d-vehicle"), driver_mobile: val("d-driver"), note: val("d-note"),
+					cabin_photo: await photoUrl("d-cabin"), plate_photo: await photoUrl("d-plate") }, true);
+				saved(`${t("dispatched")}: ${r.name}`);
+				return go("dispatch");
+			}
+			case "st-order-low": { el.disabled = true; const r = await call("store_order_low", {}, true); saved(`${t("sent_purchase")}: ${r.name}`); return go("low_stock"); }
+			case "st-count": {
+				el.disabled = true;
+				const counts = S.count.map((r, k) => ({ item_code: r.item_code, qty: val("c-q" + k) })).filter((x) => x.qty !== "");
+				const r = await call("store_count", { warehouse: val("c-wh"), counts: JSON.stringify(counts), photo: await photoUrl("c-photo") }, true);
+				saved(r.name ? `${r.differences} ${t("differences_sent")}: ${r.name}` : t("no_differences"));
+				el.disabled = false;
+				return;
+			}
+			case "st-new-item": {
+				el.disabled = true;
+				const r = await call("store_new_item", { item_name: val("n-name"), item_group: val("n-group"), uom: val("n-uom"), warehouse: val("n-wh") || null, photo: await photoUrl("n-photo") }, true);
+				saved(`${t("sent_approval")}: ${r.name}`);
+				return go("home");
+			}
+			case "pu-rates-selected": {
+				S.rateItems = [...root.querySelectorAll("[data-breq]:checked")].map((c) => S.breqs[Number(c.dataset.breq)])
+					.map((r) => ({ item_code: r.item_code, item_name: r.item_name, qty: r.qty, uom: r.uom, request: r.request, row: r.row }));
+				if (!S.rateItems.length) return toast(t("tick_items"), true);
+				return go("get_rates");
+			}
+			case "pu-add-item": {
+				if (!val("g-item")) return toast(t("add_item_first"), true);
+				S.rateItems = S.rateItems || [];
+				S.rateItems.forEach((r, k) => { r.qty = val("g-q" + k) || r.qty; });
+				S.rateItems.push({ item_code: val("g-item"), qty: val("g-qty") || 1 });
+				return go("get_rates");
+			}
+			case "pu-rfq": {
+				el.disabled = true;
+				const items = (S.rateItems || []).map((r, k) => ({ ...r, qty: val("g-q" + k) || r.qty }));
+				const sups = [...root.querySelectorAll("[data-sup]:checked")].map((c) => c.dataset.sup);
+				if (val("g-sup")) sups.push(val("g-sup"));
+				const r = await call("buy_rfq", { items: JSON.stringify(items), suppliers: JSON.stringify(sups), need_by: val("g-date") }, true);
+				el.disabled = false;
+				return rfqSent(r);
+			}
+			case "pu-wa": { const s = S.rfq.suppliers[Number(el.dataset.k)]; return window.open("https://wa.me/" + (s.mobile_no ? waNumber(s.mobile_no) : "") + "?text=" + encodeURIComponent(S.rfq.text), "_blank"); }
+			case "pu-cmp": return compareItem(S.quoted[i].item_code);
+			case "pu-quote-new": return quoteSheet();
+			case "pu-quote-save": {
+				el.disabled = true;
+				await call("buy_quote", { supplier: val("q-sup"), item_code: val("q-item"), qty: val("q-qty"), rate: val("q-rate"), days: val("q-days"),
+					photo: await photoUrl("q-photo"), rfq: S.rfq ? S.rfq.name : null }, true);
+				closeSheet();
+				saved();
+				return compareItem(val("q-item") || (S.cmp && S.cmp.item_code));
+			}
+			case "pu-po": {
+				el.disabled = true;
+				const r = await call("buy_make_po", { supplier_quotation: el.dataset.sq }, true);
+				saved(r.needs_approval ? `${r.name}: ${t("sent_sk")}` : r.posted ? `${t("po_placed")}: ${r.name}` : `${t("kept_draft")}: ${r.name}`);
+				return;
+			}
+			case "pu-note": {
+				const p = S.late[i];
+				S.notePo = p.name;
+				return sheet(`<h3 class="sk-h">${esc(p.supplier_name)} · ${esc(p.name)}</h3>${formField("fn-text", t("supplier_said"), true)}
+					<label class="sk-field"><span>${t("promised_date")}</span><input id="fn-date" type="date" class="sk-select"></label>
+					<button class="sk-btn ok wide" data-act="pu-note-save">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+			}
+			case "pu-note-save": { await call("buy_follow_up_note", { purchase_order: S.notePo, text: val("fn-text"), promised: val("fn-date") || null }, true); closeSheet(); return saved(); }
+			case "pu-sup-search": return supplierResults(val("p-q"));
+			case "pu-sup-new": return newSupplierForm();
+			case "pu-sup-save": {
+				el.disabled = true;
+				const r = await call("buy_new_supplier", { supplier_name: val("ns-name"), gstin: val("ns-gstin"), mobile: val("ns-mobile"), group: val("ns-group") || null,
+					photo: await photoUrl("ns-photo"), cheque_photo: await photoUrl("ns-cheque") }, true);
+				saved(`${t("saved")}: ${r.name}`);
+				return go("suppliers");
+			}
+			case "pu-bill": {
+				el.disabled = true;
+				const r = await call("buy_send_bill", { supplier: val("b-sup"), photo: await photoUrl("b-photo"), amount: val("b-amt"), bill_no: val("b-no"), against: val("b-for") }, true);
+				saved(`${t("sent_accounts")} (${r.sent_to})`);
+				return go("bills");
+			}
+			case "pu-lr": {
+				const rows = await call("buy_last_rates", { q: val("lr-q") });
+				document.getElementById("lr-res").innerHTML = rows.map((r) => li(esc(r.item_name), `${esc(r.supplier)} · ${esc(r.date)}`, `<b>${money(r.rate)}</b> / ${esc(r.uom || "")}`)).join("") || empty();
+				return;
+			}
+			case "pu-approve": { await call("buy_decide", { purchase_order: S.appr[i].name, approve: 1 }, true); saved(t("approved")); return go("po_approvals"); }
+			case "pu-reject": {
+				const why = window.prompt(t("reject_why"));
+				if (why === null) return;
+				await call("buy_decide", { purchase_order: S.appr[i].name, approve: 0, reason: why }, true);
+				saved(t("rejected"));
+				return go("po_approvals");
+			}
+		}
+		return false;
+	}
+
 	const LIVE_VIEWS = { my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"),
 		my_kpi: renderKpi, dsi: renderDsi, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
 		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name),
 		reminders: renderReminders, calls: renderCalls, whatsapp: renderWhatsApp, mail: renderMail, library: renderLibrary,
-		logins: renderLogins };
+		logins: renderLogins, stock_check: renderStockCheck, receive: renderReceive, issue: renderIssue, store_requests: renderStoreRequests,
+		dispatch: renderDispatch, low_stock: renderLowStock, stock_count: renderStockCount, new_item: renderNewItem,
+		buy_requests: renderBuyRequests, get_rates: renderGetRates, compare: renderCompare, po_follow_up: renderFollowUpPo,
+		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals };
 
 	async function go(view) {
 		state.view = view;
@@ -1085,6 +1700,7 @@
 			}
 			if (el.dataset.fnpick) { el.classList.toggle("on"); return showWorkstation(); }
 			const act = el.dataset.act;
+			if (act && (act.startsWith("st-") || act.startsWith("pu-"))) return await storeAct(act, el);
 			if (act === "pin-save") {
 				if (val("p-new") !== val("p-new2")) return toast(t("pin_mismatch"), true);
 				el.disabled = true;
