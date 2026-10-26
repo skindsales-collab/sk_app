@@ -650,8 +650,57 @@
 		paid_from: "कुठून दिले",
 		segment: "विभाग",
 	});
+	// change list Rev 13, part A: AI & ERP desk, week plan, saved lead, mic / camera
+	Object.assign(T.English, {
+		improvement_inbox: "Improvement Inbox", dept_visits: "Department Visit", erp_gaps: "ERP Gaps", app_users: "App Users",
+		change_list: "Change List", projects: "Projects", training_progress: "Training Progress", erpnext_desk: "ERPNext desk",
+		inbox_new: "New, to sort", inbox_working: "Being fixed", sort_as: "Sort as", works_close: "Works: close + DSI",
+		fix_note: "What was done? (speak)", visit_note: "What did you find? (speak)", not_today: "not in the app today",
+		problems_open: "Open problems", visit_plan: "Visit plan", last_notes: "Last visit notes", logged_today: "Today",
+		never: "Never logged in", earlier: "Not today", first_pin_left: "first PIN", of_word: "of", made_word: "made",
+		people_n2: "people", lessons_n: "lessons", finished_n: "finished all", open_tasks: "open tasks", late_tasks: "late",
+		did_extra: "＋ I did extra work", to_do: "To do", move_to: "Move to", moved: "moved", load: "Load",
+		routine: "Weekly routine", new_today: "New today", to_call: "To call", lead_saved: "Lead saved in ERPNext CRM → Leads",
+		lead_no: "Lead no", owner: "Owner", call_now: "Call now", open_lead: "Open lead", another_lead: "Another lead",
+		camera: "Camera", gallery: "Gallery / screenshot", pdf_file: "PDF / file", retake: "Retake", remove: "Remove",
+		uploading: "Sending…", uploaded: "Sent ✓", upload_retry: "Network weak, trying again…",
+		open_chrome: "Mic / camera work best in Chrome. Tap here to open the SK App in Chrome.",
+		cash_today: "Cash / Bank", to_collect: "Receivables", to_pay: "Payables", bills_to_post: "Purchase Invoice and Debit Note",
+		invoices: "Sales Invoice and Credit Note", expenses: "Journal Voucher", dir_expenses: "Direct and Indirect Expenses",
+		segment_pnl: "Segment Wise P&L", month_close: "Month Wise Report", ledger_wise: "Ledger-wise", work_tab: "To do",
+		opening: "Opening", closing: "Closing", dr: "Dr", cr: "Cr", bills_n: "bills", returns_n: "debit / credit notes",
+		drafts_n: "drafts", net: "Net", direct: "Direct", indirect: "Indirect", gross: "Gross", net_pl: "Net P&L",
+		common_cost: "Common (not split yet)", closing_list: "Closing checklist", month_pl: "Month-wise P&L", inv_n: "invoices",
+		erp_roles: "ERPNext roles", upload_failed: "File could not be sent.", draft_back: "Your unsaved form was filled back in.",
+	});
+	Object.assign(T.Marathi, {
+		improvement_inbox: "सुधारणा इनबॉक्स", dept_visits: "विभाग भेट", erp_gaps: "ERP त्रुटी", app_users: "ॲप वापरकर्ते",
+		change_list: "बदल यादी", projects: "प्रकल्प", training_progress: "प्रशिक्षण प्रगती", erpnext_desk: "ERPNext डेस्क",
+		inbox_new: "नवीन, वर्गीकरण बाकी", inbox_working: "दुरुस्ती चालू", sort_as: "प्रकार", works_close: "चालते: बंद + DSI",
+		fix_note: "काय केले? (बोला)", visit_note: "काय आढळले? (बोला)", not_today: "आज ॲपमध्ये नाही",
+		problems_open: "उघड्या समस्या", visit_plan: "भेटीचे नियोजन", last_notes: "मागील भेटीच्या नोंदी", logged_today: "आज",
+		never: "कधीच लॉगिन नाही", earlier: "आज नाही", first_pin_left: "पहिला PIN", of_word: "पैकी", made_word: "बनले",
+		people_n2: "लोक", lessons_n: "धडे", finished_n: "सर्व पूर्ण", open_tasks: "उघडी कामे", late_tasks: "उशीर",
+		did_extra: "＋ मी जादा काम केले", to_do: "करायचे", move_to: "या दिवशी हलवा", moved: "हलवले", load: "भार",
+		routine: "आठवड्याचे ठरलेले काम", new_today: "आजचे नवीन", to_call: "कॉल करायचे", lead_saved: "लीड ERPNext CRM → Leads मध्ये सेव्ह झाली",
+		lead_no: "लीड नं.", owner: "मालक", call_now: "आता कॉल करा", open_lead: "लीड उघडा", another_lead: "दुसरी लीड",
+		camera: "कॅमेरा", gallery: "गॅलरी / स्क्रीनशॉट", pdf_file: "PDF / फाईल", retake: "पुन्हा घ्या", remove: "काढा",
+		uploading: "पाठवत आहे…", uploaded: "पाठवले ✓", upload_retry: "नेटवर्क कमी, पुन्हा प्रयत्न…",
+		open_chrome: "माईक / कॅमेरा Chrome मध्ये नीट चालतात. SK App Chrome मध्ये उघडण्यासाठी येथे दाबा.",
+		cash_today: "कॅश / बँक", to_collect: "येणे (Receivables)", to_pay: "देणे (Payables)", bills_to_post: "खरेदी बिल आणि डेबिट नोट",
+		invoices: "विक्री बिल आणि क्रेडिट नोट", expenses: "जर्नल व्हाउचर", dir_expenses: "प्रत्यक्ष आणि अप्रत्यक्ष खर्च",
+		segment_pnl: "विभागवार नफा-तोटा", month_close: "महिनावार अहवाल", ledger_wise: "लेजरनुसार", work_tab: "करायचे",
+		opening: "सुरुवातीची शिल्लक", closing: "शिल्लक", dr: "Dr", cr: "Cr", bills_n: "बिले", returns_n: "डेबिट / क्रेडिट नोट",
+		drafts_n: "ड्राफ्ट", net: "निव्वळ", direct: "प्रत्यक्ष", indirect: "अप्रत्यक्ष", gross: "एकूण नफा", net_pl: "निव्वळ नफा-तोटा",
+		common_cost: "सामायिक (विभागले नाही)", closing_list: "क्लोजिंग यादी", month_pl: "महिनावार नफा-तोटा", inv_n: "बिले",
+		erp_roles: "ERPNext रोल", upload_failed: "फाईल पाठवता आली नाही.", draft_back: "सेव्ह न केलेला फॉर्म परत भरला.",
+	});
+	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";
+	T.Marathi.mic_blocked = "माईक / कॅमेरा बंद आहे. Chrome → ⋮ → Settings → Site settings → Microphone (किंवा Camera) → ही साईट → Allow. मग परत येऊन 🎤 दाबा.";
+	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
+	T.Marathi.mic_network = "आवाजासाठी इंटरनेट हवे. मोबाईल डेटा तपासा, किंवा कीबोर्डवरील 🎤 वापरा.";
 	const ICON = {
-		my_day: "☀️", my_leads: "📞", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
+		my_day: "☀️", my_leads: "🎯", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
 		job_cards: "🛠️", inspections: "✅", stock_alerts: "📦", material_requests: "🧾", invoice_photo: "📷",
 		collections: "💰", team_scorecards: "👥", site_checklist: "📋", ceo_view: "📊",
 		calendar: "📅", follow_up: "🔔", new_lead: "➕", training: "🎓", day_report: "📝", team_reports: "🗂️",
@@ -660,6 +709,8 @@
 		buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅",
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁",
+		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
+		training_progress: "📈", erpnext_desk: "🖥️", dir_expenses: "🧾",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
@@ -690,8 +741,12 @@
 		fd.append("file", file, file.name);
 		fd.append("is_private", "1");
 		const res = await fetch("/api/method/upload_file", { method: "POST", body: fd, headers: { "X-Frappe-CSRF-Token": CSRF }, credentials: "same-origin" });
-		const data = await res.json();
-		if (!res.ok) throw new Error("Upload failed");
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) {
+			let msg = "";
+			try { msg = JSON.parse(JSON.parse(data._server_messages)[0]).message; } catch (e) { msg = data.exception || ""; }
+			throw new Error((t("upload_failed") + " " + String(msg).replace(/<[^>]*>/g, "")).trim());
+		}
 		return data.message.file_url;
 	}
 
@@ -751,11 +806,76 @@
 			if (button) { button.classList.remove("on"); button.textContent = "🎤"; }
 			if (L.hint) L.hint.remove();
 			input.value = (L.base + L.got).trim() || input.value.trim();
+			// number / mobile boxes: spoken words become digits ("दहा" → 10, "साडे तीन" → 3.5, "10 kilo" → 10)
+			if (L.got && (input.type === "number" || input.type === "tel" || /numeric|decimal|tel/.test(input.inputMode || ""))) {
+				input.value = input.type === "tel" ? spokenDigits(L.got) : spokenNumber(L.got);
+			}
+			// search-and-pick boxes search after speaking too, like after typing
+			input.dispatchEvent(new Event("input", { bubbles: true }));
 			if (listening === L) listening = null;
 			if (L.error && L.error !== "aborted") toast(micError(L.error), true);
 			else if (!L.got && !L.error) toast(t("mic_nospeech"), true);
 		};
 		try { rec.start(); } catch (e) { listening = null; toast(micError(""), true); }
+	}
+
+	const MR_DIGITS = { "०": 0, "१": 1, "२": 2, "३": 3, "४": 4, "५": 5, "६": 6, "७": 7, "८": 8, "९": 9 };
+	const WORD_NUM = { zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+		eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19,
+		twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90, hundred: 100,
+		"शून्य": 0, "एक": 1, "दोन": 2, "तीन": 3, "चार": 4, "पाच": 5, "सहा": 6, "सात": 7, "आठ": 8, "नऊ": 9, "दहा": 10,
+		"अकरा": 11, "बारा": 12, "तेरा": 13, "चौदा": 14, "पंधरा": 15, "सोळा": 16, "सतरा": 17, "अठरा": 18, "एकोणीस": 19, "वीस": 20,
+		"पंचवीस": 25, "तीस": 30, "चाळीस": 40, "पन्नास": 50, "साठ": 60, "सत्तर": 70, "ऐंशी": 80, "नव्वद": 90, "शंभर": 100 };
+	const MULT = { hundred: 100, thousand: 1000, lakh: 100000, "शंभर": 100, "हजार": 1000, "लाख": 100000 };
+	function mrToAscii(text) { return String(text).replace(/[०-९]/g, (c) => MR_DIGITS[c]); }
+	// "10 kilo" → 10, "two hundred fifty" → 250, "साडे तीन" → 3.5, "दीड" → 1.5, "अडीच" → 2.5
+	function spokenNumber(text) {
+		const s = mrToAscii(text).toLowerCase().replace(/,/g, "");
+		const m = s.match(/-?\d+(\.\d+)?/);
+		let half = /साडे|sade/.test(s) ? 0.5 : 0;
+		if (/दीड/.test(s)) return "1.5";
+		if (/अडीच/.test(s)) return "2.5";
+		if (m) return String(Number(m[0]) + half);
+		let total = 0, cur = 0, found = false;
+		for (const w of s.split(/[\s-]+/)) {
+			if (MULT[w] && w !== "hundred" && w !== "शंभर") { total += (cur || 1) * MULT[w]; cur = 0; found = true; }
+			else if (w === "hundred" || w === "शंभर") { cur = (cur || 1) * 100; found = true; }
+			else if (WORD_NUM[w] !== undefined) { cur += WORD_NUM[w]; found = true; }
+			else if (w === "point" || w === "दशांश") { /* rare: ignore */ }
+		}
+		return found ? String(total + cur + half) : "";
+	}
+	// mobile numbers are spoken in groups ("98220 41234", "nine eight two two zero ..."): keep every digit in order
+	function spokenDigits(text) {
+		const s = mrToAscii(text).toLowerCase();
+		let out = "";
+		for (const w of s.split(/[\s,-]+/)) {
+			if (/^\d+$/.test(w)) out += w;
+			else if (WORD_NUM[w] !== undefined && WORD_NUM[w] < 10) out += WORD_NUM[w];
+			else if (w === "double" && out) out += out.slice(-1);
+		}
+		return out;
+	}
+	// one mic + EN / मर switch next to any box (every 🎤 in the app uses this)
+	function micBox(id, lang) {
+		if (lang && !micLang[id]) micLang[id] = lang;
+		return `<div class="sk-micbox"><button type="button" class="sk-mic" data-mic="${id}" title="${t("speak")}">🎤</button>
+			<button type="button" class="sk-miclang" data-miclang="${id}">${(micLang[id] || (state.lang === "Marathi" ? "mr" : "en")) === "en" ? "EN" : "मर"}</button></div>`;
+	}
+	// mobile, e-mail and WhatsApp boxes get a 🎤 too (point 4): added after each screen is drawn
+	function addMics(scope) {
+		scope.querySelectorAll('input[type="tel"], input[type="email"]').forEach((inp) => {
+			if (!inp.id || inp.dataset.mic === "1" || (inp.parentElement && inp.parentElement.querySelector(".sk-micbox"))) return;
+			inp.dataset.mic = "1";
+			inp.insertAdjacentHTML("afterend", micBox(inp.id, "en"));
+			const row = inp.parentElement;
+			if (row && !row.classList.contains("sk-input-row")) {
+				const wrap = document.createElement("div");
+				wrap.className = "sk-input-row";
+				inp.before(wrap);
+				wrap.append(inp, inp.nextElementSibling);
+			}
+		});
 	}
 
 	function readAloud(text) {
@@ -785,7 +905,7 @@
 		const h = root.querySelector(".sk-head");
 		if (h) document.body.style.paddingTop = h.offsetHeight + "px";
 	}
-	new MutationObserver(fitHead).observe(root, { childList: true });
+	new MutationObserver(() => { fitHead(); addMics(root); }).observe(root, { childList: true, subtree: true });
 	window.addEventListener("resize", fitHead);
 
 	function cardHtml(card) {
@@ -814,14 +934,17 @@
 	function renderHome() {
 		const h = state.home;
 		const fn = h.home;
-		const badge = {
-			...(h.badges || {}),
-			follow_up: (h.new_files || []).length,
-			reminders: dueNow().length,
-			day_report: !h.day_report_sent && new Date().getHours() >= 17 ? "!" : 0,
-		};
+		// point 15: red = late or must-do not done, amber = due today, blue = new, green ✓ = all done today
+		const badge = { ...(h.badges || {}) };
+		if (dueNow().length) badge.reminders = { n: dueNow().length, c: "red" };
+		if (!badge.follow_up && (h.new_files || []).length) badge.follow_up = { n: h.new_files.length, c: "blue" };
 		if (h.must_set_pin) return renderSetPin();
-		const tile = (k) => `<button class="sk-tile" data-go="${k}"><span class="sk-tile-icon">${ICON[k] || "•"}</span><span>${t(k)}</span>${badge[k] ? `<b class="sk-dot">${esc(badge[k])}</b>` : ""}</button>`;
+		const tile = (k) => {
+			const m = badge[k];
+			const o = m && typeof m === "object" ? m : m ? { n: m, c: "red" } : null;
+			const dot = !o ? "" : o.c === "green" ? `<b class="sk-dot green">✓</b>` : `<b class="sk-dot ${o.c}">${esc(o.n)}</b>`;
+			return `<button class="sk-tile ${o ? "c-" + o.c : ""} ${o && o.blink ? "blink" : ""}" data-go="${k}"><span class="sk-tile-icon">${ICON[k] || "•"}</span><span>${t(k)}</span>${dot}</button>`;
+		};
 		const tiles = (keys) => `<div class="sk-tiles small">${keys.map(tile).join("")}</div>`;
 		if (!h.sections) { root.innerHTML = header("SK App") + `<main>${tiles(fn.tiles)}</main>`; return; }
 		// a person in several functions: one labelled row per function, then the tiles everyone has (SK, 26-Oct)
@@ -848,7 +971,8 @@
 		const none = people.filter((p) => p.state === "none");
 		const fnLabel = (f) => { const o = loginOpts && loginOpts.functions.find((x) => x.name === f); return o ? (o.label[state.lang] || o.label.English || f) : f; };
 		const row = (p, i) => {
-			const sub = [p.designation, p.mobile, p.functions.map(fnLabel).join(" + ")].filter(Boolean).join(" · ");
+			const sub = [p.designation, p.mobile, p.functions.map(fnLabel).join(" + ")].filter(Boolean).join(" · ") +
+				(p.roles && p.roles.length ? ` · ${t("erp_roles")}: ${p.roles.join(", ")}` : "");
 			const warn = p.state === "active" && p.must_set_pin ? ` <span class="sk-due">${t("pin_set_pending")}</span>` : "";
 			const btn = p.state === "none" ? `<button class="sk-chip on" data-act="login-new" data-i="${i}">+ ${t("make_login")}</button>`
 				: p.state === "closed" ? `<button class="sk-chip" data-act="login-new" data-i="${i}">↺ ${t("make_login")}</button>`
@@ -934,13 +1058,49 @@
 		if (!state.card || Date.now() - new Date(String(state.card.slot_start).replace(" ", "T")).getTime() > 10 * 60 * 1000) {
 			state.card = await call("next_card", {}, true).catch(() => state.card);
 		}
-		root.innerHTML = header(t("my_day")) + `<main>${cardHtml(state.card || d.card)}<ul class="sk-list">${d.items.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+		const done = (d.done || []).map((x) => `<li class="sk-item k-done"><div><div class="sk-item-title">✓ ${esc(x.title)}</div><div class="sk-item-meta">${esc(hm(x.time))}</div></div></li>`).join("");
+		root.innerHTML = header(t("my_day")) + `<main>${cardHtml(state.card || d.card)}
+			<button class="sk-btn go wide" data-go="work_book">${t("did_extra")}</button>
+			<h3 class="sk-h">${t("to_do")}</h3><ul class="sk-list">${d.items.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
+			<h3 class="sk-h">✓ ${t("done_today")}</h3><ul class="sk-list">${done || `<li class="sk-empty">—</li>`}</ul></main>`;
 	}
 
+	// point 12: My Leads has tabs New today (the lead just made is on top, NEW) · To call · All
+	let leadTab = "new_today";
 	async function renderLeads(which) {
 		const d = await call("my_leads");
-		const rows = which === "my_deals" ? d.deals : d.leads;
-		root.innerHTML = header(t(which)) + `<main><ul class="sk-list">${rows.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+		let rows = which === "my_deals" ? d.deals : d.leads;
+		let tabs = "";
+		if (which === "my_leads") {
+			const today = new Date().toISOString().slice(0, 10);
+			const local = (x) => { const c = new Date(String(x.created || "").replace(" ", "T")); return isNaN(c) ? "" : `${c.getFullYear()}-${pad2(c.getMonth() + 1)}-${pad2(c.getDate())}`; };
+			const now = new Date(); const day = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
+			const groups = {
+				new_today: rows.filter((r) => local(r) === day || (r.created || "").slice(0, 10) === today).sort((a, b) => String(b.created).localeCompare(String(a.created))),
+				to_call: rows.filter((r) => r.kind === "lead_new" || (r.due && new Date(r.due.replace(" ", "T")) <= now)),
+				all: rows,
+			};
+			if (!groups[leadTab].length && leadTab === "new_today") leadTab = groups.to_call.length ? "to_call" : "all";
+			tabs = `<div class="cal-tabs">${Object.keys(groups).map((k) => `<button class="${leadTab === k ? "on" : ""}" data-ltab="${k}">${t(k)} ${groups[k].length}</button>`).join("")}</div>`;
+			rows = groups[leadTab].map((r) => ({ ...r, title: (local(r) === day ? "🆕 " : "") + r.title }));
+		}
+		root.innerHTML = header(t(which)) + `<main>${tabs}<ul class="sk-list">${rows.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+	}
+
+	// point 12: after Save the person sees where the lead went, its number, and what to do next
+	function leadSaved(r) {
+		state.view = "lead_saved";
+		const now = new Date();
+		root.innerHTML = header(t("new_lead")) + `<main><section class="sk-card sk-saved">
+			<div class="sk-card-label">✅ ${t("lead_saved")}</div>
+			<div class="sk-card-text">${esc(r.title)}${r.person && r.person !== r.title ? " · " + esc(r.person) : ""}</div>
+			<div class="sk-card-meta">${t("lead_no")} <b>${esc(r.name)}</b> · ${t("owner")} ${esc((state.home && state.home.full_name) || "")} · ${pad2(now.getHours())}:${pad2(now.getMinutes())}</div>
+			<div class="sk-card-meta">${[r.segment, r.source].filter(Boolean).map(esc).join(" · ")}</div></section>
+			${r.mobile ? `<button class="sk-btn ok wide" data-contact="Call" data-doctype="CRM Lead" data-name="${esc(r.name)}" data-mobile="${esc(r.mobile)}">📞 ${t("call_now")}</button>
+			<button class="sk-btn wide" data-contact="WhatsApp" data-doctype="CRM Lead" data-name="${esc(r.name)}" data-mobile="${esc(r.mobile)}">💬 WhatsApp</button>` : ""}
+			<button class="sk-btn wide" data-open="CRM Lead" data-name="${esc(r.name)}">📄 ${t("open_lead")}</button>
+			<a class="sk-btn wide" href="/crm/leads/${encodeURIComponent(r.name)}">${t("open_erp")}</a>
+			<button class="sk-btn go wide" data-go="new_lead">＋ ${t("another_lead")}</button></main>`;
 	}
 
 	async function renderKpi() {
@@ -959,17 +1119,95 @@
 	function formField(id, label, big) {
 		return `<label class="sk-field"><span>${esc(label)}</span><div class="sk-input-row">
 			${big ? `<textarea id="${id}" rows="3"></textarea>` : `<input id="${id}">`}
-			<div class="sk-micbox"><button class="sk-mic" data-mic="${id}" title="${t("speak")}">🎤</button>
-			<button class="sk-miclang" data-miclang="${id}">${(micLang[id] || (state.lang === "Marathi" ? "mr" : "en")) === "en" ? "EN" : "मर"}</button></div></div></label>`;
+			${micBox(id)}</div></label>`;
 	}
 
+	// Every photo button (point 4): 📷 Camera · 🖼 Gallery / screenshot · 📄 PDF, a preview with ✕ / 🔄, the photo made
+	// small on the phone (about 300 KB, paper stays readable) and sent at once in the background, retrying by itself
+	const ANY_FILE = "image/*,application/pdf,.dwg,.dxf,.xlsx,.xls,.docx,.doc";
 	function photoField(id, label, anyFile) {
-		return `<label class="sk-field"><span>${esc(label || t("photo"))}</span><input id="${id || "f-photo"}" type="file" ${anyFile ? 'accept="image/*,application/pdf,.dwg,.dxf,.xlsx,.docx"' : 'accept="image/*" capture="environment"'}></label>`;
+		id = id || "f-photo";
+		return `<div class="sk-field sk-photo"><span>${esc(label || t("photo"))}</span>
+			<input id="${id}" type="file" class="sk-file" data-any="${anyFile ? 1 : 0}" accept="image/*,application/pdf" hidden>
+			<div class="sk-row sk-wrap"><button type="button" class="sk-chip" data-pick="${id}" data-how="camera">📷 ${t("camera")}</button>
+			<button type="button" class="sk-chip" data-pick="${id}" data-how="gallery">🖼 ${t("gallery")}</button>
+			<button type="button" class="sk-chip" data-pick="${id}" data-how="file">📄 ${t("pdf_file")}</button></div>
+			<div class="sk-preview" id="${id}-pv"></div></div>`;
 	}
+	function pickFile(id, how) {
+		const inp = document.getElementById(id);
+		if (!inp) return;
+		inp.removeAttribute("capture");
+		if (how === "camera") { inp.accept = "image/*"; inp.setAttribute("capture", "environment"); }
+		else if (how === "gallery") inp.accept = "image/*";
+		else inp.accept = inp.dataset.any === "1" ? ANY_FILE : "application/pdf,image/*";
+		saveDraft(); // low-memory phones may close the page while the camera is open
+		inp.click();
+	}
+	async function smallPhoto(file) {
+		if (!/^image\/(jpeg|png|webp|heic|heif)/.test(file.type) || file.size < 400 * 1024) return file;
+		try {
+			const c = await shrink(file, 1600);
+			const blob = await new Promise((ok) => c.toBlob(ok, "image/jpeg", 0.72));
+			return blob && blob.size < file.size ? new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }) : file;
+		} catch (e) { return file; }
+	}
+	async function uploadRetry(file, note) {
+		for (let n = 0; ; n++) {
+			try { return await upload(file); } catch (e) {
+				if (n >= 3) throw e;
+				if (note) note.textContent = "⏳ " + t("upload_retry");
+				await new Promise((ok) => setTimeout(ok, 2000 * 2 ** n));
+			}
+		}
+	}
+	function photoPicked(inp) {
+		const pv = document.getElementById(inp.id + "-pv");
+		const f = inp.files[0];
+		inp._up = null;
+		if (!pv) return;
+		if (!f) { pv.innerHTML = ""; return; }
+		const isImg = f.type.startsWith("image/");
+		pv.innerHTML = `${isImg ? `<img src="${URL.createObjectURL(f)}" alt="">` : `<div class="sk-filechip">📄 ${esc(f.name)} · ${Math.round(f.size / 1024)} KB</div>`}
+			<div class="sk-row"><small class="sk-upnote">⏳ ${t("uploading")}</small>
+			<button type="button" class="sk-chip" data-pick="${inp.id}" data-how="${isImg ? "camera" : "file"}">🔄 ${t("retake")}</button>
+			<button type="button" class="sk-chip bad" data-unpick="${inp.id}">✕ ${t("remove")}</button></div>`;
+		const note = pv.querySelector(".sk-upnote");
+		inp._up = smallPhoto(f).then((small) => uploadRetry(small, note)).then((url) => { note.textContent = t("uploaded"); return url; },
+			(e) => { note.textContent = "⚠ " + e.message; inp._up = null; throw e; });
+		inp._up.catch(() => {});
+	}
+	root.addEventListener("change", (ev) => { if (ev.target.classList && ev.target.classList.contains("sk-file")) photoPicked(ev.target); }, true);
 
 	async function photoUrl(id) {
 		const f = document.getElementById(id || "f-photo");
-		return f && f.files[0] ? upload(f.files[0]) : null;
+		if (!f || !f.files[0]) return null;
+		return f._up ? f._up : uploadRetry(await smallPhoto(f.files[0]));
+	}
+
+	// a draft of the open form is kept on the phone; if the page was closed (camera on low-memory phones) it comes back
+	const DRAFT = "sk_draft";
+	function saveDraft() {
+		if (!state.view || state.view === "home" || state.view === "detail") return;
+		const values = {};
+		root.querySelectorAll("main input[id], main textarea[id], main select[id]").forEach((el) => {
+			if (el.type !== "file" && el.type !== "password" && el.value) values[el.id] = el.value;
+		});
+		try { localStorage.setItem(DRAFT, JSON.stringify({ view: state.view, at: Date.now(), values })); } catch (e) { /* private mode */ }
+	}
+	function clearDraftIfOther(view) {
+		try { const d = JSON.parse(localStorage.getItem(DRAFT) || "null"); if (d && d.view !== view) clearDraft(); } catch (e) { /* fine */ }
+	}
+	function clearDraft() { try { localStorage.removeItem(DRAFT); } catch (e) { /* fine */ } }
+	let draftTimer = null;
+	root.addEventListener("input", () => { clearTimeout(draftTimer); draftTimer = setTimeout(saveDraft, 500); });
+	async function restoreDraft() {
+		let d = null;
+		try { d = JSON.parse(localStorage.getItem(DRAFT) || "null"); } catch (e) { d = null; }
+		if (!d || Date.now() - d.at > 20 * 60 * 1000 || !LIVE_VIEWS[d.view] || !Object.keys(d.values || {}).length) return;
+		await go(d.view);
+		Object.entries(d.values).forEach(([id, v]) => { const el = document.getElementById(id); if (el && !el.value) el.value = v; });
+		toast(t("draft_back"));
 	}
 
 	function renderDsi() {
@@ -1018,8 +1256,15 @@
 
 	function when(s) { return s ? esc(String(s).slice(5, 16)) : ""; }
 
+	// Swati 26-Oct: from the Calls icon, Follow-up shows only calls to make now (new, late or due today); a search box
+	// finds any customer by name, person or mobile
+	let fuCalls = false, fuQuery = "";
 	async function renderFollowUp() {
-		const rows = await call("follow_up");
+		let rows = await call("follow_up");
+		const end = new Date(); end.setHours(23, 59, 59);
+		if (fuCalls) rows = rows.filter((r) => r.mobile && (r.new || r.overdue || (r.due && new Date(String(r.due).replace(" ", "T")) <= end)));
+		const q = fuQuery.toLowerCase();
+		if (q) rows = rows.filter((r) => [r.title, r.person, r.mobile, r.name].join(" ").toLowerCase().includes(q));
 		const li = rows.map((r) => `<li class="sk-fu ${r.overdue ? "late" : r.new ? "new" : ""}">
 			<button class="sk-fu-main" data-open="${esc(r.doctype)}" data-name="${esc(r.name)}">
 				<div class="sk-item-title">${esc(r.title)} ${r.new ? `<span class="sk-badge">${t("new_badge")}</span>` : ""}${r.overdue ? `<span class="sk-badge bad">${t("overdue")}</span>` : ""}</div>
@@ -1027,7 +1272,9 @@
 				${r.next || r.due ? `<div class="sk-item-meta">${t("next")}: ${esc(r.next || "")} ${r.due ? "· " + when(r.due) : ""}</div>` : ""}
 				${r.last ? `<div class="sk-item-meta">${t("last")}: ${esc(r.last.text)} · ${when(r.last.on)}</div>` : ""}
 			</button>${contactButtons(r)}</li>`).join("");
-		root.innerHTML = header(t("follow_up")) + `<main>${fileBanners()}<button class="sk-btn go wide" data-go="new_lead">➕ ${t("new_lead")}</button><ul class="sk-list sk-gap">${li || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+		root.innerHTML = header(fuCalls ? `📞 ${t("follow_up")}` : t("follow_up")) + `<main>${fileBanners()}<button class="sk-btn go wide" data-go="new_lead">➕ ${t("new_lead")}</button>
+			<div class="sk-input-row sk-gap"><input id="fu-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(fuQuery)}">${micBox("fu-q")}</div>
+			<ul class="sk-list sk-gap">${li || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
 	}
 
 	function erpDocRow(doctype, d, mobile) {
@@ -1182,7 +1429,7 @@
 		note.textContent = "⏳ " + t("photo_reading");
 		ev.target.after(note);
 		try {
-			const up = upload(f).then((u) => { cardUrl = u; return u; });
+			const up = (ev.target._up || uploadRetry(f)).then((u) => { cardUrl = u; return u; });
 			let d = {};
 			try { d = (await call("read_photo", { file_url: await up }, true)) || {}; } catch (e) { d = {}; }
 			if (!fill(d)) {
@@ -1275,7 +1522,7 @@
 				${r.plan_tomorrow ? `<div class="sk-item-meta">${t("plan_q")}: ${esc(r.plan_tomorrow)}</div>` : ""}
 				${r.photo ? `<a href="${esc(r.photo)}" target="_blank">📷 ${t("photo")}</a>` : ""}
 				<div class="sk-chips sk-gap">${ratings.map((x) => `<button class="sk-chip ${r.manager_rating === x ? "on" : ""}" data-rate="${esc(r.name)}" data-rating="${x}">${x}</button>`).join("")}</div>
-				<div class="sk-input-row"><input id="c-${esc(r.name)}" placeholder="${t("comment")}" value="${esc(r.manager_comment || "")}"><button class="sk-mic" data-mic="c-${esc(r.name)}">🎤</button></div>
+				<div class="sk-input-row"><input id="c-${esc(r.name)}" placeholder="${t("comment")}" value="${esc(r.manager_comment || "")}">${micBox("c-" + r.name)}</div>
 				<button class="sk-btn wide" data-act="save-review" data-report="${esc(r.name)}">${t("save_review")}</button></div></li>`;
 		}).join("");
 		root.innerHTML = header(t("team_reports")) + `<main><div class="sk-score"><input type="date" id="f-day" class="sk-date" value="${esc(d.date)}"><div class="sk-score-num">${d.sent} / ${d.total}</div><div>${t("sent_of")}</div></div>
@@ -1316,6 +1563,7 @@
 
 	async function renderCalWeek() {
 		const d = await call("cal_week", calDay ? { day: calDay } : {});
+		root._week = d.days;
 		let html = `<div class="sk-score sk-cal-head"><button class="sk-nav" data-week="${esc(d.start)}" data-step="-7">‹</button>
 			<div><div>${t("week")} ${d.week_no} · ${esc(d.start.slice(8))}/${esc(d.start.slice(5, 7))} – ${esc(d.end.slice(8))}/${esc(d.end.slice(5, 7))}</div>
 			<small>${d.orders_target ? `${t("orders")} ${lakh(d.orders)} / ${lakh(d.orders_target)} · ` : ""}${d.open_items} ${t("open_items")}</small></div>
@@ -1324,10 +1572,22 @@
 			const chips = x.company.map((c) => `<span class="chip2 navy">${esc(c)}</span>`).join("") +
 				x.events.map((e) => `<span class="chip2 yel">${e.time ? esc(e.time) + " " : ""}${esc(e.title)}</span>`).join("") +
 				(x.orders ? `<span class="chip2 green">${t("order")} ${lakh(x.orders)}</span>` : "") + (x.dsi ? `<span class="chip2 green">DSI ✓</span>` : "") +
-				x.due.map((i) => `<button class="chip2 ${i.overdue ? "red" : ""}" ${i.doctype && i.doctype.startsWith("CRM ") ? `data-open="${esc(i.doctype)}" data-name="${esc(i.name)}"` : ""}>${i.overdue ? "⚠ " : ""}${esc(i.title)}</button>`).join("");
-			return `<div class="day ${x.today ? "today" : ""} ${x.working ? "" : "off"}"><h4><span>${t("d_" + x.day)} ${esc(x.date.slice(8))}</span><span class="sk-item-meta">${x.due.length} ${t("open_items")}</span></h4>${chips || `<span class="sk-item-meta">—</span>`}</div>`;
+				(x.routine || []).map((r) => `<span class="chip2 navy">🔁 ${r.at ? esc(r.at) + " " : ""}${esc(r.title)}</span>`).join("") +
+				x.due.map((i) => `<span class="chip2 ${i.overdue ? "red" : ""}"><button class="sk-link" ${i.doctype && i.doctype.startsWith("CRM ") ? `data-open="${esc(i.doctype)}" data-name="${esc(i.name)}"` : ""}>${i.overdue ? "⚠ " : ""}${i.moved ? "↪ " : ""}${esc(i.title)}</button>
+					<button class="sk-link" data-move="${esc(i.key)}" data-title="${esc(i.title)}" title="${t("move_to")}">⇄</button></span>`).join("");
+			const h = (m) => `${Math.floor(m / 60)}h${m % 60 ? " " + pad2(m % 60) : ""}`;
+			const load = x.capacity ? `<span class="sk-item-meta ${x.over ? "sk-amber" : ""}">${t("load")} ${h(x.load)} / ${h(x.capacity)}</span>` : "";
+			return `<div class="day ${x.today ? "today" : ""} ${x.working ? "" : "off"} ${x.over ? "over" : ""}"><h4><span>${t("d_" + x.day)} ${esc(x.date.slice(8))}</span><span class="sk-item-meta">${x.due.length} ${t("open_items")}</span>${load}</h4>${chips || `<span class="sk-item-meta">—</span>`}</div>`;
 		}).join("");
 		return html;
+	}
+
+	function moveSheet(key, title) {
+		const days = (root._week || []).filter((x) => x.working && x.capacity);
+		sheet(`<h3 class="sk-h">⇄ ${t("move_to")}</h3><p class="sk-note">${esc(title)}</p>
+			<div class="sk-row sk-wrap">${days.map((x) => `<button class="sk-chip" data-moveday="${esc(x.date)}" data-key="${esc(key)}">${t("d_" + x.day)} ${esc(x.date.slice(8))}</button>`).join("")}
+			<button class="sk-chip" data-moveday="" data-key="${esc(key)}">↺</button></div>
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
 	}
 
 	async function renderCalMonth() {
@@ -1416,14 +1676,15 @@
 			<div class="sk-item-meta">${when(c.creation)} · ${t("talk_time")} ${dur(c.duration)}${c.note_text ? " · " + esc(c.note_text) : ""}</div></button></li>`).join("");
 		root.innerHTML = header(t("calls")) + `<main>
 			<div class="sk-facts">${talkBox(t("today"), d.today)}</div><div class="sk-facts">${talkBox(t("this_week"), d.week)}</div>
-			<button class="sk-btn go wide" data-go="follow_up">📞 ${t("follow_up")}</button>
+			<button class="sk-btn go wide" data-act="call-follow">📞 ${t("follow_up")}</button>
 			<button class="sk-btn wide sk-gap" data-act="call-add">➕ ${t("add_call")}</button>
 			${team}<h3 class="sk-h">${t("history")}</h3><ul class="sk-list">${rows || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
 			${lockedRow(t("rec_locked"))}</main>`;
 	}
 	function addCallSheet() {
 		const outs = (crmOpts && crmOpts.call_outcomes) || ["Talked", "No answer", "Busy", "Missed", "Call back later", "Wrong number"];
-		sheet(`<h3 class="sk-h">➕ ${t("add_call")}</h3>${contactSelect("f-callwho")}
+		sheet(`<h3 class="sk-h">➕ ${t("add_call")}</h3>
+			<div class="sk-input-row"><input id="f-callq" type="search" placeholder="🔎 ${t("search")}" data-filter="f-callwho">${micBox("f-callq")}</div>${contactSelect("f-callwho")}
 			<div class="sk-contact sk-two"><button class="sk-chip on" data-dir="Outgoing">📤 ${t("outgoing")}</button><button class="sk-chip" data-dir="Incoming">📥 ${t("incoming")}</button></div>
 			<div class="sk-chips">${outs.map((x, i) => `<button class="sk-chip ${i === 0 ? "on" : ""}" data-ptype="${esc(x)}">${esc(x)}</button>`).join("")}</div>
 			<label class="sk-field"><span>${t("talk_min")}</span><input id="f-callmin" type="number" inputmode="decimal" min="0" step="0.5" value="1"></label>
@@ -1535,8 +1796,22 @@
 	// type or speak a few letters, then pick from the list (suppliers / items from ERPNext)
 	function finder(id, label, kind) {
 		return `<label class="sk-field"><span>${esc(label)}</span><div class="sk-input-row"><input id="${id}" list="${id}-dl" data-find="${kind}" autocomplete="off">
-			<div class="sk-micbox"><button class="sk-mic" data-mic="${id}">🎤</button></div></div><datalist id="${id}-dl"></datalist></label>`;
+			${micBox(id)}</div><datalist id="${id}-dl"></datalist></label>`;
 	}
+	// search boxes: Follow-up list and the customer list in Add call
+	let fuTimer = null;
+	root.addEventListener("input", (ev) => {
+		const el = ev.target;
+		if (el.id === "fu-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { fuQuery = el.value; renderFollowUp().then(() => { const i = document.getElementById("fu-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
+		if (el.dataset && el.dataset.filter) {
+			const q = el.value.toLowerCase();
+			const sel = document.getElementById(el.dataset.filter);
+			if (!sel) return;
+			let first = null;
+			[...sel.options].forEach((o) => { const hit = !o.value || o.text.toLowerCase().includes(q) || (o.dataset.mobile || "").includes(q); o.hidden = !hit; if (hit && o.value && !first) first = o; });
+			if (q && first) sel.value = first.value;
+		}
+	});
 	let findTimer = null;
 	root.addEventListener("input", (ev) => {
 		const el = ev.target;
@@ -1650,7 +1925,7 @@
 		const wh = val("c-wh");
 		S.count = wh ? await call("store_count_list", { warehouse: wh }) : [];
 		document.getElementById("c-list").innerHTML = `<p class="sk-note">${t("count_help")}</p><ul class="sk-list">${S.count.map((r, k) => li(esc(r.item_name),
-			`${esc(r.item_code)} · ERPNext ${num(r.qty)}`, `<div class="sk-input-row sk-countbox">${qtyBox("c-q" + k, "", r.item_name)}<div class="sk-micbox"><button class="sk-mic" data-mic="c-q${k}">🎤</button></div></div>`)).join("") || empty()}</ul>
+			`${esc(r.item_code)} · ERPNext ${num(r.qty)}`, `<div class="sk-input-row sk-countbox">${qtyBox("c-q" + k, "", r.item_name)}${micBox("c-q" + k)}</div>`)).join("") || empty()}</ul>
 			${photoField("c-photo", "📷 " + t("rack_photo"))}<button class="sk-btn go wide" data-act="st-count">${t("send_differences")}</button>`;
 	}
 
@@ -1717,7 +1992,7 @@
 	function quoteSheet() {
 		sheet(`<h3 class="sk-h">📷 ${t("add_quote")}</h3>${photoField("q-photo", "📷 " + t("quote_photo"))}${finder("q-sup", t("supplier"), "supplier")}${finder("q-item", t("item"), "item")}
 			<label class="sk-field"><span>${t("qty")}</span>${qtyBox("q-qty", S.rateItems && S.rateItems[0] ? S.rateItems[0].qty : "")}</label>
-			<label class="sk-field"><span>${t("rate")}</span><div class="sk-input-row">${qtyBox("q-rate")}<div class="sk-micbox"><button class="sk-mic" data-mic="q-rate">🎤</button></div></div></label>
+			<label class="sk-field"><span>${t("rate")}</span><div class="sk-input-row">${qtyBox("q-rate")}${micBox("q-rate")}</div></label>
 			<label class="sk-field"><span>${t("delivery_days")}</span>${qtyBox("q-days")}</label>
 			<button class="sk-btn ok wide" data-act="pu-quote-save">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
 	}
@@ -2110,7 +2385,7 @@
 				`<div class="sk-col"><b>${money(r.outstanding_amount)}</b>${r.mobile ? `<a class="sk-chip" href="tel:${esc(r.mobile)}">📞</a><button class="sk-chip" data-act="fin-wa" data-i="${i}">💬</button>` : ""}
 				<button class="sk-chip" data-act="fin-promise" data-i="${i}">🤝 ${t("promise")}</button><button class="sk-chip on" data-act="fin-recv" data-i="${i}">₹ ${t("received")}</button></div>`); };
 		const total = S.dues.reduce((s, r) => s + r.outstanding_amount, 0);
-		root.innerHTML = header(t("to_collect")) + `<main><p class="sk-note">${t("total_due")}: <b>${money(total)}</b> · ${S.dues.length} ${t("invoices")}</p>
+		root.innerHTML = header(t("to_collect")) + `<main><p class="sk-note">${t("total_due")}: <b>${money(total)}</b> · ${S.dues.length} ${t("inv_n")}</p>
 			${groups.map(([k, label]) => { const rows = S.dues.filter((r) => r.bucket === k); return rows.length ? `<h3 class="sk-h">${label} (${money(rows.reduce((s, r) => s + r.outstanding_amount, 0))})</h3><ul class="sk-list">${rows.map(row).join("")}</ul>` : ""; }).join("") || `<p class="sk-empty">${t("nothing")}</p>`}</main>`;
 	}
 	async function renderToPay(view) {
@@ -2158,6 +2433,82 @@
 				`<b class="${r.margin < 0 ? "sk-due" : ""}">${money(r.margin)}${pct(r)}</b>`)).join("") || empty()}</ul>
 			<p class="sk-note">${t("pnl_note")}</p></main>`;
 	}
+	// ---------- Ledger-wise Accounts screens (SK / Shraddha, 26-Oct) ----------
+	const FIN_LEDGER = { cash_today: "bank", to_collect: "receivable", to_pay: "payable", bills_to_post: "purchase", invoices: "sales",
+		expenses: "journal", dir_expenses: "expenses" };
+	const finTab = {};
+	let finMonth = null; // "YYYY-MM-01"; empty = this month
+	const short = (x) => String(x || "").replace(/ - [A-Z]+$/, "");
+	function monthNav() {
+		const d = finMonth ? new Date(finMonth) : new Date();
+		const label = d.toLocaleDateString(state.lang === "Marathi" ? "mr-IN" : "en-IN", { month: "long", year: "numeric" });
+		return `<div class="sk-score sk-cal-head"><button class="sk-nav" data-finmonth="-1">‹</button><div>${esc(label)}</div><button class="sk-nav" data-finmonth="1">›</button></div>`;
+	}
+	async function finScreen(view, work) {
+		const kind = FIN_LEDGER[view];
+		const tab = work ? finTab[view] || "ledger" : "ledger";
+		const tabs = work ? `<div class="cal-tabs"><button class="${tab === "ledger" ? "on" : ""}" data-fintab="ledger" data-view="${view}">${t("ledger_wise")}</button>
+			<button class="${tab === "work" ? "on" : ""}" data-fintab="work" data-view="${view}">${t("work_tab")}</button></div>` : "";
+		if (tab === "work") {
+			await work();
+			const main = root.querySelector("main");
+			if (main) main.insertAdjacentHTML("afterbegin", tabs);
+			return;
+		}
+		const d = await call("fin_ledgers", { kind, ...(finMonth ? { month: finMonth } : {}) });
+		S.ledger = { kind, rows: d.rows, view };
+		let body;
+		if (kind === "purchase" || kind === "sales") {
+			body = d.rows.map((r, i) => li(esc(r.title || r.ledger), `${r.count} ${t("bills_n")}${r.returns ? ` · ${t("returns_n")} ${money(r.returns)}` : ""}${r.drafts ? ` · <span class="sk-due">${r.drafts} ${t("drafts_n")}</span>` : ""}`,
+				`<div class="sk-col"><b>${money(r.net)}</b><button class="sk-chip" data-ledger="${i}">›</button></div>`)).join("");
+			body = `<p class="sk-note">${t("bills_n")} ${money(d.total.bills)} · ${t("returns_n")} ${money(d.total.returns)} · <b>${t("net")} ${money(d.total.net)}</b></p><ul class="sk-list">${body || empty()}</ul>`;
+		} else if (kind === "expenses") {
+			const part = (g) => { const rows = d.rows.map((r, i) => [r, i]).filter(([r]) => r.group === g);
+				return `<h3 class="sk-h">${t(g.toLowerCase())} (${money(rows.reduce((a, [r]) => a + r.amount, 0))})</h3><ul class="sk-list">${rows.map(([r, i]) => li(esc(short(r.ledger)),
+					`<span class="chip2 ${r.segment === "Cabin" ? "navy" : r.segment === "Non-Cabin" ? "yel" : ""}">${esc(r.segment)}</span>`, `<div class="sk-col"><b>${money(r.amount)}</b><button class="sk-chip" data-ledger="${i}">›</button></div>`)).join("") || empty()}</ul>`; };
+			body = `<p class="sk-note"><b>${money(d.total.amount)}</b></p>${part("Direct")}${part("Indirect")}`;
+		} else {
+			body = `<p class="sk-note">${t("opening")} ${money(d.total.opening * (kind === "payable" ? 1 : 1))} · ${t("dr")} ${money(d.total.debit)} · ${t("cr")} ${money(d.total.credit)} · <b>${t("closing")} ${money(d.total.closing)}</b></p>
+				<ul class="sk-list">${d.rows.map((r, i) => li(esc(short(r.ledger)), `${t("opening")} ${money(r.opening)} · ${t("dr")} ${money(r.debit)} · ${t("cr")} ${money(r.credit)}`,
+					`<div class="sk-col"><b class="${r.closing < 0 ? "sk-due" : ""}">${money(r.closing)}</b><button class="sk-chip" data-ledger="${i}">›</button></div>`)).join("") || empty()}</ul>`;
+		}
+		root.innerHTML = header(t(view)) + `<main>${tabs}${monthNav()}${body}</main>`;
+	}
+	async function renderLedgerEntries(i) {
+		const r = S.ledger.rows[i];
+		const kind = S.ledger.kind;
+		const d = await call("fin_ledger_entries", { kind, ledger_name: r.ledger, ...(finMonth ? { month: finMonth } : {}) });
+		const slug = (dt) => String(dt || "").toLowerCase().replace(/ /g, "-");
+		const rows = (kind === "purchase" || kind === "sales")
+			? d.rows.map((x) => li(`${x.is_return ? "↩ " : ""}${esc(x.name)}`, `${esc(x.posting_date)} · ${esc(x.status || "")}${x.docstatus === 0 ? ` · <span class="sk-due">${t("drafts_n")}</span>` : ""}`,
+				`<div class="sk-col"><b>${money(x.grand_total)}</b><a class="sk-chip" href="/app/${slug(x.doctype)}/${encodeURIComponent(x.name)}">›</a></div>`)).join("")
+			: d.rows.map((x) => li(`${esc(x.posting_date)} · ${esc(x.voucher_type)}`, `${esc(x.voucher_no)}${x.party ? " · " + esc(x.party) : ""}${x.remarks ? "<br>" + esc(x.remarks) : x.against ? "<br>" + esc(short(x.against)) : ""}`,
+				`<div class="sk-col"><b>${x.debit ? t("dr") + " " + money(x.debit) : t("cr") + " " + money(x.credit)}</b><small>${money(x.balance * (d.sign || 1))}</small><a class="sk-chip" href="/app/${slug(x.voucher_type)}/${encodeURIComponent(x.voucher_no)}">›</a></div>`)).join("");
+		state.view = "ledger_entries";
+		root.innerHTML = header(short(r.title || r.ledger)) + `<main>${d.opening !== undefined ? `<p class="sk-note">${t("opening")} ${money(d.opening)} → <b>${t("closing")} ${money(d.closing)}</b></p>` : ""}
+			<ul class="sk-list">${rows || empty()}</ul><button class="sk-btn wide" data-go="${esc(S.ledger.view)}">‹ ${t("back")}</button></main>`;
+	}
+	async function renderSegmentWise() {
+		const p = await call("fin_segment_wise", finMonth ? { month: finMonth } : {});
+		const name = (s) => (s === "Common" ? t("common_cost") : s);
+		root.innerHTML = header(t("segment_pnl")) + `<main>${monthNav()}${p.rows.map((r) => `<section class="sk-card ${r.net < 0 ? "" : "sk-saved"}">
+			<div class="sk-card-label">${esc(name(r.segment))} · ${t("net_pl")}</div><div class="sk-card-text ${r.net < 0 ? "sk-due" : ""}">${money(r.net)}${r.net_pct == null ? "" : ` · ${r.net_pct}%`}</div>
+			<div class="sk-card-meta">${t("income")} ${money(r.income)} · ${t("direct")} ${money(r.direct)} · ${t("gross")} ${money(r.gross)} · ${t("indirect")} ${money(r.indirect)}</div></section>`).join("")}
+			<p class="sk-note"><b>${t("net_pl")} ${money(p.total.net)}</b> · ${t("pnl_note")}</p></main>`;
+	}
+	async function renderMonthWise() {
+		const tab = finTab.month_close || "ledger";
+		const tabs = `<div class="cal-tabs"><button class="${tab === "ledger" ? "on" : ""}" data-fintab="ledger" data-view="month_close">${t("month_pl")}</button>
+			<button class="${tab === "work" ? "on" : ""}" data-fintab="work" data-view="month_close">${t("closing_list")}</button></div>`;
+		if (tab === "work") { await renderMonthClose(); root.querySelector("main").insertAdjacentHTML("afterbegin", tabs); return; }
+		const p = await call("fin_month_wise");
+		const mon = (m) => new Date(m + "-01").toLocaleDateString(state.lang === "Marathi" ? "mr-IN" : "en-IN", { month: "short", year: "2-digit" });
+		root.innerHTML = header(t("month_close")) + `<main>${tabs}<div class="sk-table-wrap"><table class="sk-table"><tr><th></th><th>${t("income")}</th><th>${t("direct")}</th><th>${t("indirect")}</th><th>${t("net")}</th></tr>
+			${p.rows.map((r) => `<tr><td>${esc(mon(r.month))}</td><td>${lakh(r.income)}</td><td>${lakh(r.direct)}</td><td>${lakh(r.indirect)}</td><td class="${r.net < 0 ? "sk-due" : ""}"><b>${lakh(r.net)}</b></td></tr>`).join("")}
+			<tr><th>Σ</th><th>${lakh(p.total.income)}</th><th>${lakh(p.total.direct)}</th><th>${lakh(p.total.indirect)}</th><th>${lakh(p.total.net)}</th></tr></table></div>
+			<p class="sk-note">${t("pnl_note")}</p></main>`;
+	}
+
 	async function renderMonthClose() {
 		S.close = await call("fin_month_close");
 		root.innerHTML = header(t("month_close")) + `<main><ul class="sk-list">${S.close.map((c, i) => li(`${c.done ? "✅" : c.late ? "🔴" : "⬜"} ${t("mc_" + c.key)}`,
@@ -2258,6 +2609,79 @@
 			<ul class="sk-list sk-gap">${rows || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
 	}
 
+	// ---------- AI & ERP desk (Samir, points 9a / 9d / 9e) ----------
+	async function renderInbox() {
+		const d = await call("ai_inbox");
+		S.inbox = d;
+		const row = (x, i, working) => li(`${x.kind === "dsi" ? "💡" : "🚩"} ${esc(x.title)}`,
+			`${esc(x.by)} · ${esc(x.date)} · ${esc(working ? x.category : x.type || "")}${working && x.due ? ` · ${t("due")} ${esc(x.due)}` : ""}`,
+			working ? `<button class="sk-chip ok" data-aiclose="${esc(x.todo)}">✓</button>` : `<button class="sk-chip on" data-aisort="${i}">${t("sort_as")}</button>`,
+			x.kind === "dsi" ? "" : "k-lead_new");
+		root.innerHTML = header(t("improvement_inbox")) + `<main>
+			<h3 class="sk-h">${t("inbox_new")} (${d.new.length})</h3><ul class="sk-list">${d.new.map((x, i) => row(x, i, false)).join("") || empty()}</ul>
+			<h3 class="sk-h">${t("inbox_working")} (${d.working.length})</h3><ul class="sk-list">${d.working.map((x, i) => row(x, i, true)).join("") || empty()}</ul></main>`;
+	}
+	function aiSortSheet(i) {
+		const x = S.inbox.new[i];
+		sheet(`<h3 class="sk-h">${t("sort_as")}</h3><p class="sk-note">${esc(x.title)}<br><small>${esc(x.by)} · ${esc(x.date)}</small></p>
+			${formField("ai-note", t("comment"))}
+			<div class="sk-row sk-wrap">${S.inbox.categories.map((c) => `<button class="sk-chip ${c === "Not needed" ? "" : "on"}" data-aicat="${esc(c)}" data-i="${i}">${esc(c)}</button>`).join("")}</div>
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+	async function renderVisit() {
+		const d = await call("ai_visit");
+		root.innerHTML = header(t("dept_visits")) + `<main>
+			<div class="sk-score"><div>${esc(d.department)}</div><small>${d.people.length} ${t("people_n2")} · ${d.not_today} ${t("not_today")}</small></div>
+			<ul class="sk-list">${d.people.map((p) => li(esc(p.full_name), `${esc(p.function || "")} · ${p.today ? "✅ " + t("logged_today") : "⚠ " + t("not_today")} · DSI ${p.dsi_week}`, "", p.today ? "" : "k-lead_new")).join("") || empty()}</ul>
+			<h3 class="sk-h">${t("problems_open")} (${d.problems.length})</h3>
+			<ul class="sk-list">${d.problems.map((r) => li(esc(r.description), `${esc(r.problem_type || "")} · ${esc(r.date)}`)).join("") || empty()}</ul>
+			${formField("ai-vnote", t("visit_note"), true)}<button class="sk-btn ok wide" data-act="ai-visit-note" data-dept="${esc(d.department)}">${t("save")}</button>
+			<h3 class="sk-h">${t("last_notes")}</h3><ul class="sk-list">${d.notes.map((n) => li(esc(n.description), esc(n.date))).join("") || empty()}</ul>
+			<h3 class="sk-h">${t("visit_plan")}</h3><ul class="sk-list">${d.plan.map((p) => li(t("d_" + ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][p.day]), esc(p.department))).join("")}</ul></main>`;
+	}
+	async function renderGaps() {
+		const rows = await call("ai_gaps");
+		root.innerHTML = header(t("erp_gaps")) + `<main><ul class="sk-list">${rows.map((r) => li(esc(r.label),
+			r.kind === "gap" ? `<b class="${r.count ? "sk-due" : ""}">${num(r.count)}</b> ${t("of_word")} ${num(r.of)}` : `${num(r.count)} ${t("made_word")}`,
+			`<a class="sk-open" href="${esc(r.link)}">›</a>`, r.kind === "gap" && r.count ? "k-lead_new" : "")).join("") || empty()}</ul></main>`;
+	}
+	async function renderAppUsers() {
+		const d = await call("ai_app_users");
+		const lab = { today: "✅ " + t("logged_today"), earlier: "⚠ " + t("earlier"), never: "⛔ " + t("never") };
+		root.innerHTML = header(t("app_users")) + `<main><div class="sk-score"><div>${d.today} / ${d.total}</div><small>${t("logged_today")}</small></div>
+			<ul class="sk-list">${d.rows.map((r) => li(esc(r.full_name || r.user), `${esc(r.function || "")} · ${lab[r.state]}${r.last_login ? " · " + esc(r.last_login.slice(0, 16)) : ""}${r.first_pin ? " · " + t("first_pin_left") : ""}${r.problems ? ` · 🚩 ${r.problems}` : ""}`,
+				"", r.state === "today" ? "" : "k-lead_new")).join("") || empty()}</ul></main>`;
+	}
+	async function renderChangeList() {
+		const rows = await call("ai_change_list");
+		const states = ["SK OK", "Building", "Testing", "Live"];
+		root.innerHTML = header(t("change_list")) + `<main><ul class="sk-list">${rows.map((r) => `<li class="sk-item"><div class="sk-grow"><div class="sk-item-title">${r.no}. ${esc(r.title)}</div>
+			<div class="sk-row sk-wrap">${states.map((s) => `<button class="sk-chip ${r.status === s ? "on" : ""}" data-chg="${r.no}" data-st="${esc(s)}">${esc(s)}</button>`).join("")}</div></div></li>`).join("")}</ul></main>`;
+	}
+	async function renderProjects() {
+		const rows = await call("ai_projects");
+		root.innerHTML = header(t("projects")) + `<main><ul class="sk-list">${rows.map((p) => li(esc(p.title || p.name),
+			`${p.percent}% · ${p.open} ${t("open_tasks")}${p.late ? ` · <span class="sk-due">${p.late} ${t("late_tasks")}</span>` : ""}${p.end ? " · " + esc(p.end) : ""}`,
+			`<a class="sk-open" href="/app/project/${encodeURIComponent(p.name)}">›</a>`)).join("") || empty()}</ul>
+			<a class="sk-btn wide" href="/app/project/new">＋ ${t("projects")}</a></main>`;
+	}
+	async function renderTrainingProgress() {
+		const rows = await call("ai_training");
+		root.innerHTML = header(t("training_progress")) + `<main><ul class="sk-list">${rows.map((r) => `<li class="sk-kpi c-${r.done_pct >= 80 ? "green" : r.done_pct >= 50 ? "yellow" : "red"}">
+			<div class="sk-kpi-top"><span>${esc(r.function)}</span><span>${r.done_pct}%</span></div><div class="sk-bar"><div style="width:${r.done_pct}%"></div></div>
+			<div class="sk-kpi-num">${r.people} ${t("people_n2")} · ${r.lessons} ${t("lessons_n")} · ${r.finished} ${t("finished_n")}</div></li>`).join("") || empty()}</ul></main>`;
+	}
+
+	// opened from a link inside WhatsApp / Facebook: their small browsers often have no voice typing (point 4)
+	function inAppBrowserBanner() {
+		if (!/FBAN|FBAV|FB_IAB|Instagram|WhatsApp|; wv\)/i.test(navigator.userAgent) || document.querySelector(".sk-chrome")) return;
+		const a = document.createElement("a");
+		a.className = "sk-banner sk-chrome";
+		a.href = `intent://${location.host}/sk#Intent;scheme=https;package=com.android.chrome;end`;
+		a.textContent = "🌐 " + t("open_chrome");
+		document.body.prepend(a);
+	}
+
 	const LIVE_VIEWS = { my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"),
 		my_kpi: renderKpi, dsi: renderDsi, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
@@ -2270,10 +2694,27 @@
 		order_board: renderOrderBoard, job_cards: () => renderJobs("job_cards"), my_jobs: () => renderJobs("my_jobs"), need_material: renderNeedMaterial,
 		progress_photos: renderProgressPhotos, ready_dispatch: renderReadyDispatch, non_conformance: () => renderNcs("non_conformance"),
 		my_fixes: () => renderNcs("my_fixes"), inspect: () => renderInspect("inspect"), final_check: () => renderInspect("final_check"),
-		cash_today: renderCash, to_collect: renderCollect, to_pay: () => renderToPay("to_pay"), pay_approvals: () => renderToPay("pay_approvals"),
-		bills_to_post: renderBillsToPost, invoices: renderInvoices, expenses: renderExpenses, segment_pnl: renderSegmentPnl, month_close: renderMonthClose };
+		cash_today: () => finScreen("cash_today", renderCash), to_collect: () => finScreen("to_collect", renderCollect),
+		to_pay: () => finScreen("to_pay", () => renderToPay("to_pay")), pay_approvals: () => renderToPay("pay_approvals"),
+		bills_to_post: () => finScreen("bills_to_post", renderBillsToPost), invoices: () => finScreen("invoices", renderInvoices),
+		expenses: () => finScreen("expenses", renderExpenses), dir_expenses: () => finScreen("dir_expenses"),
+		segment_pnl: renderSegmentWise, month_close: renderMonthWise,
+		improvement_inbox: renderInbox, dept_visits: renderVisit, erp_gaps: renderGaps, app_users: renderAppUsers, change_list: renderChangeList,
+		projects: renderProjects, training_progress: renderTrainingProgress };
+
+	const reported = new Set();
+	function reportError(view, msg) {
+		const key = view + msg;
+		if (reported.has(key)) return;
+		reported.add(key);
+		call("report_screen_error", { view, message: String(msg).slice(0, 300) }, true).catch(() => {});
+	}
 
 	async function go(view) {
+		stopListening(); // a mic left on keeps listening into the old screen (point 4)
+		closeSheet();
+		if (view === "erpnext_desk") { window.location.href = "/app"; return; }
+		if (view !== state.view) clearDraftIfOther(view);
 		state.view = view;
 		if (view === "home") contacts = null;
 		try {
@@ -2284,14 +2725,20 @@
 			}
 			const fn = LIVE_VIEWS[view];
 			return fn ? await fn() : renderSoon(view);
-		} catch (e) { toast(e.message, true); }
+		} catch (e) {
+			if (view !== "home" && state.view === view) {
+				root.innerHTML = header(t(view)) + `<main><p class="sk-note bad">⚠ ${esc(e.message)}</p>
+					<button class="sk-btn wide" data-go="${esc(view)}">↻ ${t("refresh")}</button><button class="sk-btn wide" data-go="home">${t("back")}</button></main>`;
+				reportError(view, e.message);
+			} else toast(e.message, true);
+		}
 	}
 
 	root.addEventListener("click", async (ev) => {
 		const el = ev.target.closest("button, [data-go]");
 		if (!el) return;
 		try {
-			if (el.dataset.go) return go(el.dataset.go);
+			if (el.dataset.go) { if (el.dataset.go === "follow_up") fuCalls = false; return go(el.dataset.go); }
 			if (el.dataset.open) { current = { doctype: el.dataset.open, name: el.dataset.name }; return go("detail"); }
 			if (el.dataset.lesson && !el.dataset.act) return renderLesson(el.dataset.lesson);
 			if (el.dataset.train) { trainTab = el.dataset.train; return go("training"); }
@@ -2349,6 +2796,42 @@
 				return;
 			}
 			if (el.dataset.mic) return speakInto(document.getElementById(el.dataset.mic), el);
+			if (el.dataset.pick) return pickFile(el.dataset.pick, el.dataset.how);
+			if (el.dataset.fintab) { finTab[el.dataset.view] = el.dataset.fintab; return go(el.dataset.view); }
+			if (el.dataset.ledger !== undefined) return renderLedgerEntries(Number(el.dataset.ledger));
+			if (el.dataset.finmonth) {
+				const d = finMonth ? new Date(finMonth) : new Date();
+				d.setDate(1); d.setMonth(d.getMonth() + Number(el.dataset.finmonth));
+				finMonth = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-01`;
+				return go(state.view);
+			}
+			if (el.dataset.unpick) { const inp = document.getElementById(el.dataset.unpick); inp.value = ""; return photoPicked(inp); }
+			if (el.dataset.ltab) { leadTab = el.dataset.ltab; return go("my_leads"); }
+			if (el.dataset.move) return moveSheet(el.dataset.move, el.dataset.title);
+			if (el.dataset.moveday !== undefined) {
+				await call("cal_move", { key: el.dataset.key, day: el.dataset.moveday || null }, true);
+				closeSheet();
+				toast(t("saved"));
+				return go("calendar");
+			}
+			if (el.dataset.aisort) return aiSortSheet(Number(el.dataset.aisort));
+			if (el.dataset.aicat) {
+				const x = S.inbox.new[Number(el.dataset.i)];
+				await call("ai_sort", { doctype: x.doctype, name: x.name, category: el.dataset.aicat, note: val("ai-note") || null }, true);
+				closeSheet();
+				toast(t("saved"));
+				return go("improvement_inbox");
+			}
+			if (el.dataset.aiclose) {
+				sheet(`<h3 class="sk-h">✅ ${t("works_close")}</h3>${formField("ai-fix", t("fix_note"), true)}
+					<button class="sk-btn ok wide" data-act="ai-close" data-todo="${esc(el.dataset.aiclose)}">${t("save")}</button>
+					<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+				return;
+			}
+			if (el.dataset.chg) {
+				await call("ai_set_change", { no: el.dataset.chg, status: el.dataset.st }, true);
+				return go("change_list");
+			}
 			if (el.dataset.ptype) {
 				(el.parentElement || root).querySelectorAll(".sk-chip").forEach((c) => c.classList.remove("on"));
 				el.classList.add("on");
@@ -2426,6 +2909,7 @@
 			if (act === "save-dsi") {
 				el.disabled = true;
 				await call("add_dsi", { what_changed: val("f-what"), before_text: val("f-before"), after_text: val("f-after"), photo: await photoUrl() }, true);
+				clearDraft();
 				toast(t("saved"));
 				return go("home");
 			}
@@ -2434,9 +2918,23 @@
 				const chip = root.querySelector(".sk-chip.on");
 				await call("add_work", { description: val("f-desc"), entry_type: el.dataset.kind, problem_type: chip ? chip.dataset.ptype : null, photo: await photoUrl() }, true);
 				toast(t("saved"));
-				return go(el.dataset.kind === "Problem" ? "home" : "work_book");
+				clearDraft();
+				return go(el.dataset.kind === "Problem" ? "home" : "my_day");
 			}
 			if (act === "close-sheet") { pending = null; return closeSheet(); }
+			if (act === "ai-close") {
+				el.disabled = true;
+				await call("ai_close", { todo: el.dataset.todo, note: val("ai-fix") || null }, true);
+				closeSheet();
+				toast(t("saved"));
+				return go("improvement_inbox");
+			}
+			if (act === "ai-visit-note") {
+				el.disabled = true;
+				await call("ai_visit_note", { department: el.dataset.dept, text: val("ai-vnote") }, true);
+				toast(t("saved"));
+				return go("dept_visits");
+			}
 			if (act === "status") {
 				await call("set_crm_status", { doctype: current.doctype, name: current.name, status: el.dataset.status }, true);
 				toast(t("saved"));
@@ -2498,6 +2996,7 @@
 				return go(state.view);
 			}
 			if (act === "call-add") { await options(); return addCallSheet(); }
+			if (act === "call-follow") { fuCalls = true; fuQuery = ""; return go("follow_up"); }
 			if (act === "call-save") {
 				const who = val("f-callwho");
 				if (!who) throw new Error(t("pick_customer"));
@@ -2565,9 +3064,9 @@
 				const name = await call("new_lead", { first_name: val("f-first"), organization: val("f-org"), mobile_no: val("f-mobile"),
 					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl }, true);
 				cardUrl = null;
-				toast(t("saved"));
-				current = { doctype: "CRM Lead", name };
-				return go("detail");
+				clearDraft();
+				return leadSaved({ name, title: val("f-org") || val("f-first"), person: val("f-first"), mobile: val("f-mobile"),
+					segment: val("f-segment"), source: val("f-source") });
 			}
 			if (act === "lesson-done") {
 				const n = Number(el.dataset.n || 0);
@@ -2606,6 +3105,8 @@
 			state.lang = state.home.language || "English";
 			state.card = state.home.card;
 			renderHome();
+			inAppBrowserBanner();
+			restoreDraft().catch(() => {});
 			if (!state.card || Date.now() - new Date(state.card.slot_start.replace(" ", "T")).getTime() > 60 * 60 * 1000) {
 				state.card = await call("next_card", {}, true);
 				if (state.view === "home") renderHome();

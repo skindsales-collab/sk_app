@@ -4,7 +4,8 @@ Sales is the pilot and is fully live. Every other function already gets the comm
 DSI, Report Problem, My KPI) driven by their ERPNext tasks, and its own tiles are switched on in later phases.
 """
 
-COMMON_TILES = ["my_day", "calendar", "reminders", "day_report", "work_book", "dsi", "problem", "my_kpi", "training"]
+# SK 26-Oct (point 10): Work Book is part of My Day now ("I did extra work"), so it has no icon of its own
+COMMON_TILES = ["my_day", "calendar", "reminders", "day_report", "dsi", "problem", "my_kpi", "training"]
 # free contact tiles: the phone's own dialer / WhatsApp / mail, logged in CRM; paid parts show locked inside them
 CONTACT_TILES = ["calls", "whatsapp", "mail"]
 
@@ -12,7 +13,7 @@ FUNCTIONS = {
 	"Sales": {
 		"label": {"English": "Sales", "Marathi": "विक्री"},
 		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "my_deals", "reminders", "library",
-			"day_report", "my_kpi", "work_book", "dsi", "problem", "training"],
+			"day_report", "my_kpi", "dsi", "problem", "training"],
 		"live": True,
 		# not Sales Manager: in Frappe CRM that role shows every lead of the company (SK 26-Oct: each salesperson sees
 		# only their own; the sales manager sees his team on the Team Leads icon)
@@ -22,7 +23,7 @@ FUNCTIONS = {
 	"Marketing": {
 		"label": {"English": "Marketing", "Marathi": "मार्केटिंग"},
 		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "reminders", "library", "day_report",
-			"my_kpi", "work_book", "dsi", "problem", "training"],
+			"my_kpi", "dsi", "problem", "training"],
 		"live": True,  # uses the same CRM lead screens as Sales
 		"erpnext_roles": ["Sales User"],
 		"desk": "/crm",
@@ -60,7 +61,9 @@ FUNCTIONS = {
 	"Accounts": {
 		"label": {"English": "Accounts", "Marathi": "लेखा"},
 		# SK draft F06: My Day, the Finance icons, then calls / WhatsApp for collections and the common ones
-		"tiles": ["my_day", "cash_today", "to_collect", "to_pay", "bills_to_post", "invoices", "expenses", "segment_pnl", "month_close",
+		# SK / Shraddha 26-Oct: ledger-wise screens; Expenses is the Journal Voucher list, plus Direct and Indirect Expenses
+		"tiles": ["my_day", "cash_today", "to_collect", "to_pay", "bills_to_post", "invoices", "expenses", "dir_expenses", "segment_pnl",
+			"month_close",
 			*CONTACT_TILES, *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Accounts User", "Accounts Manager"],
@@ -96,11 +99,13 @@ FUNCTIONS = {
 		"desk": "/sk",
 	},
 	"AI": {
-		"label": {"English": "AI desk", "Marathi": "AI डेस्क"},
-		"tiles": COMMON_TILES,
-		"live": False,
-		"erpnext_roles": ["Projects User"],
-		"desk": "/app/todo",
+		# SK 26-Oct: Samir's desk. Main job ERP implementation, plus technology improvements in every department
+		"label": {"English": "AI & ERP", "Marathi": "AI आणि ERP"},
+		"tiles": ["my_day", "improvement_inbox", "dept_visits", "erp_gaps", "app_users", "change_list", "projects",
+			"training_progress", "erpnext_desk", *COMMON_TILES[1:]],
+		"live": True,
+		"erpnext_roles": ["Projects User", "Projects Manager"],
+		"desk": "/app/project",
 	},
 	"IT / ERP": {
 		"label": {"English": "IT / ERP", "Marathi": "आयटी / ईआरपी"},
@@ -144,7 +149,7 @@ def home_for(function: str | None, has_team: bool = False) -> dict:
 
 # tiles every person gets whatever their function (SK): they appear once, in the "For everyone" row
 SHARED_TILES = ["my_day", "calendar", "reminders", "calls", "whatsapp", "mail", "problem", "training", "library", "my_kpi",
-	"work_book", "team_reports", "dsi", "day_report"]
+	"team_reports", "dsi", "day_report"]
 
 
 def function_list(profile) -> list[str]:
@@ -175,3 +180,31 @@ def sections_for(functions: list[str], has_team: bool = False) -> dict:
 	last = [t for t in ("dsi", "day_report") if t in shared]
 	shared = ["my_day"] + [t for t in shared if t not in last and t != "my_day"] + last
 	return {"sections": sections, "shared": shared}
+
+
+# Fixed work in each function's week (change list point 9c, proposed to SK). The week planner puts these first and fills
+# the rest of each day's free hours with open work. days: Mon..Sat or "daily"; at: "HH:MM" or None (any time that day).
+ROUTINE = {
+	"Sales": [("Mon", "10:00", 60, "Team meeting (Rushi)"), ("daily", "09:30", 30, "Call today's new leads first"),
+		("Tue Wed Thu Fri", None, 120, "Customer visits"), ("Sat", "16:00", 60, "Weekly report + pipeline review")],
+	"Marketing": [("daily", "09:30", 30, "Call today's new leads first"), ("Sat", "16:00", 60, "Weekly report + pipeline review")],
+	"Machine Shifting": [("Mon", "09:30", 60, "Jobs plan for the week"), ("Tue Thu", None, 120, "Site surveys"),
+		("Sat", "16:00", 60, "Weekly report")],
+	"Stores": [("daily", "09:30", 30, "Receipts and issues"), ("Wed", "11:00", 30, "Low-stock list to Purchase"),
+		("Sat", "15:00", 60, "Stock count (one rack)")],
+	"Purchase": [("daily", "09:30", 30, "Today's buy requests"), ("Thu", "11:00", 60, "Rate comparison"),
+		("Fri", "11:00", 60, "PO follow-up calls")],
+	"Production": [("daily", "09:15", 15, "Job plan for the day"), ("Fri", "15:00", 45, "Dispatch plan")],
+	"Quality": [("daily", "09:15", 15, "Job plan for the day"), ("daily", "16:00", 30, "Final checks before dispatch")],
+	"Accounts": [("daily", "10:00", 45, "Collection calls"), ("Mon", "11:00", 45, "Payments plan for the week"),
+		("Fri", "15:00", 60, "Bank reconciliation")],
+	"HR": [("daily", "09:45", 30, "Attendance check"), ("Fri", "15:00", 60, "Leave and expense approvals")],
+	"AI": [("daily", "09:30", 30, "Improvement Inbox sorting"),
+		("Mon", "11:00", 150, "Department visit: Sales & Marketing (leads, quotes, CRM data)"),
+		("Tue", "11:00", 150, "Department visit: Store & Purchase (receipts, stock, POs, suppliers)"),
+		("Wed", "11:00", 150, "Department visit: Production, subcontractors, Quality"),
+		("Thu", "11:00", 150, "Department visit: Finance & HR (bills, payments, attendance, leave)"),
+		("Fri", "11:00", 150, "ERP data clean-up + test new app changes on sk-dev"),
+		("Sat", "11:00", 90, "Review with SK + weekly report")],
+	"Management": [("Mon", "10:00", 60, "Sales team meeting"), ("Sat", "11:00", 90, "Weekly review (AI & ERP report)")],
+}

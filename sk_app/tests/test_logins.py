@@ -143,13 +143,17 @@ Nobody | 9876500011 | Cooking
 		self.assertIsNone(r2["pin"])
 		check_password(r["user"], r["pin"])
 
-	def test_admin_always_has_logins_icon(self):
+	def test_logins_icon_follows_the_function(self):
 		with set_user(CLERK):
 			self.assertNotIn("logins", api.home()["home"]["tiles"])
 		with set_user(HR):
 			self.assertIn("logins", api.home()["home"]["tiles"])
+		# SK 26-Oct: an HR role left on a salesperson no longer brings the Logins icon
 		frappe.db.set_value("SK App User", HR, "home", "Sales")
 		try:
+			with set_user(HR):
+				self.assertNotIn("logins", api.home()["home"]["tiles"])
+			frappe.db.set_value("SK App User", HR, "home", "Management")
 			with set_user(HR):
 				self.assertIn("logins", api.home()["home"]["tiles"])
 		finally:

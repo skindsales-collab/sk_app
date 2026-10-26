@@ -75,10 +75,10 @@ def open_leads(user: str) -> list[WorkItem]:
 		if not r.first_responded_on:
 			due = get_datetime(r.response_by) if r.response_by else add_to_date(r.creation, minutes=5)
 			items.append(WorkItem("lead_new", title, "CRM Lead", r.name, due=due, minutes=10, priority=1,
-				extra={"source": r.source, "status": r.status}))
+				extra={"source": r.source, "status": r.status, "created": str(r.creation)}))
 		else:
 			items.append(WorkItem("lead_followup", title, "CRM Lead", r.name, minutes=15, priority=2,
-				extra={"source": r.source, "status": r.status}))
+				extra={"source": r.source, "status": r.status, "created": str(r.creation)}))
 	return items
 
 

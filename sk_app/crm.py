@@ -219,6 +219,13 @@ def _attach(file_url: str | None, doctype: str, name: str, user: str):
 	file_name = frappe.db.get_value("File", {"file_url": file_url, "owner": user, "attached_to_name": ["is", "not set"]})
 	if file_name:
 		frappe.db.set_value("File", file_name, {"attached_to_doctype": doctype, "attached_to_name": name})
+		return
+	# Swati 26-Oct: the same photo sent twice, or a file ERPNext already had, has no free File row: attach a copy
+	src = frappe.db.get_value("File", {"file_url": file_url}, ["file_name", "is_private"], as_dict=True)
+	if not src or frappe.db.exists("File", {"file_url": file_url, "attached_to_doctype": doctype, "attached_to_name": name}):
+		return
+	frappe.get_doc({"doctype": "File", "file_url": file_url, "file_name": src.file_name, "is_private": src.is_private,
+		"attached_to_doctype": doctype, "attached_to_name": name}).insert(ignore_permissions=True)
 
 
 def new_lead(user: str, first_name: str, mobile_no: str | None = None, organization: str | None = None,

@@ -130,3 +130,25 @@ Score = actual / target (capped at 120%) x weight. Sources that are not live yet
 ## Tests
 
 `python -m pytest tests` runs the pure-logic tests (scoring, working hours, ranking, setup data) without a bench.
+
+## Change list Rev 13, part A (26-Oct-2026)
+
+- **Admin icons by function only**: Logins for HR and Management; Team Reports for a person with team members or
+  Management. Editing a login sets the ERPNext roles to the chosen functions' roles (old HR / Sales Manager roles
+  are taken off); the Logins screen shows each person's ERPNext roles.
+- **Real week plan** (My Calendar → My Week): each function's weekly routine (`functions.ROUTINE`) first, then open
+  work spread over the working days by free hours, overdue first; day load shown, overloaded days amber;
+  "⇄ Move to" another day.
+- **AI & ERP desk** (`ai_desk.py`, Samir): Improvement Inbox (every DSI and Report Problem; sort → ToDo, close →
+  DSI), Department Visit, ERP Gaps, App Users, Change List, Projects, Training Progress, ERPNext desk.
+- **Work Book inside My Day**: "＋ I did extra work" and "Done today".
+- **New lead**: saved screen with the lead number and where it is (ERPNext CRM → Leads); My Leads tabs
+  New today · To call · All.
+- **Icon colours** (`colours.py`): red late / must-do, amber due today, blue new, green ✓ done; DSI red until posted.
+- **Mic and camera**: every photo button offers Camera · Gallery · PDF, shows a preview, shrinks photos to about
+  300 KB and sends them at once with retries; spoken numbers become digits; mic on mobile / e-mail boxes;
+  forms survive the camera closing the page; "Open in Chrome" inside WhatsApp / Facebook.
+- **Accounts ledger-wise** (`ledger.py`): Cash / Bank, Receivables, Payables, Purchase Invoice and Debit Note,
+  Sales Invoice and Credit Note, Journal Voucher, Direct and Indirect Expenses, Segment Wise P&L (Cabin /
+  Non-Cabin net) and the Month Wise Report.
+- A screen that fails shows the reason and lands in the AI & ERP inbox.

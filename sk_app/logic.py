@@ -222,3 +222,80 @@ def plan_day(items: list[WorkItem], now: datetime, work_start, work_end, lunch_s
 			later.append(item)
 	slots.sort(key=lambda s: s["start"])
 	return slots, later
+
+
+def _minutes(t) -> int:
+	t = to_time(t)
+	return t.hour * 60 + t.minute
+
+
+def item_key(item: WorkItem) -> str:
+	"""Stable id of a work item across reloads (used to remember 'Move to Tue')."""
+	return f"{item.doctype}:{item.name or item.title}"
+
+
+def plan_week(items: list[WorkItem], days: list[date], now: datetime, work_start, work_end, lunch_start, lunch_end,
+		working_days: list[str], busy: dict | None = None, routine: list[tuple] | None = None,
+		moves: dict | None = None) -> dict:
+	"""Spread open work over the working days of the week by each day's free minutes (change list point 9c).
+
+	busy: {date: minutes taken by meetings / events}; routine: [(days, at, minutes, title)] fixed weekly work placed
+	first; moves: {item_key: "YYYY-MM-DD"} days the person picked. Overdue work goes on today as far as it fits, then
+	the next days; work due later goes on its due day (earlier if that day is full); work with no due date fills what
+	is left. Returns {date: {"routine": [...], "items": [(item, flag)], "capacity": m, "load": m}}."""
+	busy, moves = busy or {}, moves or {}
+	today = now.date()
+	open_days = [d for d in days if d >= today and DAY_NAMES[d.weekday()] in working_days]
+	full = _minutes(work_end) - _minutes(work_start) - max(0, _minutes(lunch_end) - _minutes(lunch_start))
+	plan = {}
+	for d in days:
+		cap = 0
+		if d in open_days:
+			cap = full
+			if d == today:
+				left = _minutes(work_end) - (now.hour * 60 + now.minute)
+				cap = max(0, min(full, left))
+			cap = max(0, cap - int(busy.get(d, 0)))
+		plan[d] = {"routine": [], "items": [], "capacity": cap, "load": 0}
+	for d in open_days:
+		name = DAY_NAMES[d.weekday()]
+		for when, at, mins, title in routine or []:
+			if when == "daily" or name in when.split():
+				if d == today and at and _minutes(at) + mins <= now.hour * 60 + now.minute:
+					continue  # already past today
+				plan[d]["routine"].append({"title": title, "at": at, "minutes": mins})
+				plan[d]["load"] += mins
+	if not open_days:
+		return plan
+
+	def free(d):
+		return plan[d]["capacity"] - plan[d]["load"]
+
+	def put(d, item, flag):
+		plan[d]["items"].append((item, flag))
+		plan[d]["load"] += max(5, item.minutes or 15)
+
+	work = [i for i in rank_items(items, now) if i.kind not in OFF_CARD]
+	overdue = [i for i in work if i.due and i.due <= now]
+	later = [i for i in work if i.due and i.due > now]
+	no_due = [i for i in work if not i.due]
+	for group in (overdue, later, no_due):
+		for item in group:
+			need = max(5, item.minutes or 15)
+			picked = moves.get(item_key(item))
+			picked = date.fromisoformat(picked) if picked else None
+			if picked in open_days:
+				put(picked, item, "moved")
+				continue
+			flag = "overdue" if group is overdue else ""
+			if group is later:
+				due_day = item.due.date()
+				if due_day > open_days[-1]:
+					continue  # due next week: not this week's work
+				order = [d for d in reversed(open_days) if d <= due_day]
+				order = order or open_days[:1]
+			else:
+				order = open_days
+			target = next((d for d in order if free(d) >= need), None)
+			put(target or (order[0] if group is later else open_days[-1]), item, flag)
+	return plan
