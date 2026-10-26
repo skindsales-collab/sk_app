@@ -213,3 +213,8 @@ def setup_site():
 		frappe.db.set_single_value("System Settings", "allow_login_using_mobile_number", 1)
 	if not frappe.db.exists("Role", "SK Subcontractor"):
 		frappe.get_doc({"doctype": "Role", "role_name": "SK Subcontractor", "desk_access": 0}).insert(ignore_permissions=True)
+	# a subcontractor asks for material by item: ERPNext checks he may read the Item (only read, no prices screen)
+	if not frappe.db.exists("Custom DocPerm", {"parent": "Item", "role": "SK Subcontractor"}):
+		from frappe.permissions import add_permission
+
+		add_permission("Item", "SK Subcontractor", 0)

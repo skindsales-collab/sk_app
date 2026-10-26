@@ -27,15 +27,15 @@ FUNCTIONS = {
 	},
 	"Production": {
 		"label": {"English": "Production", "Marathi": "उत्पादन"},
-		"tiles": COMMON_TILES + ["job_cards"],
-		"live": False,
-		"erpnext_roles": ["Manufacturing User"],
+		"tiles": ["my_day", "order_board", "job_cards", "need_material", "progress_photos", "ready_dispatch", "non_conformance", *COMMON_TILES[1:]],
+		"live": True,
+		"erpnext_roles": ["Manufacturing User", "Manufacturing Manager"],
 		"desk": "/app/manufacturing",
 	},
 	"Quality": {
 		"label": {"English": "Quality", "Marathi": "गुणवत्ता"},
-		"tiles": COMMON_TILES + ["inspections"],
-		"live": False,
+		"tiles": ["my_day", "inspect", "final_check", "non_conformance", "order_board", *COMMON_TILES[1:]],
+		"live": True,
 		"erpnext_roles": ["Quality Manager"],
 		"desk": "/app/quality",
 	},
@@ -86,8 +86,8 @@ FUNCTIONS = {
 	"Subcontractor": {
 		"label": {"English": "Production (subcontractor)", "Marathi": "उत्पादन (कंत्राटदार)"},
 		# very simple screen (SK): own jobs only; job tiles come with the Production screens
-		"tiles": ["my_day", "problem", "training", "day_report"],
-		"live": False,
+		"tiles": ["my_day", "my_jobs", "need_material", "my_fixes", "problem", "training", "day_report"],
+		"live": True,
 		"erpnext_roles": ["SK Subcontractor"],
 		"desk": "/sk",
 	},

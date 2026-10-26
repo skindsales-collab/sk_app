@@ -24,8 +24,8 @@ and read-aloud for the guide card.
 
 ### All functions
 
-Every function has a home screen (`sk_app/functions.py`): Sales and Marketing are live; Production, Quality, Stores,
-Purchase, Accounts, HR, Machine Shifting, Design, IT / ERP and Management already get My Day (their ERPNext tasks),
+Every function has a home screen (`sk_app/functions.py`): Sales, Marketing, Store, Purchase, Production and Quality
+are live; Accounts, HR, Machine Shifting, Design, IT / ERP and Management already get My Day (their ERPNext tasks),
 Work Book, DSI, Report Problem and My Score. Their own tiles (job cards, inspections, stock alerts ...) open ERPNext
 until they are built in later phases. Each person has a separate login: their ERPNext user, with their own roles.
 
@@ -43,6 +43,23 @@ SK approves on the **PO Approvals** tile; limit `sk_po_approval_limit` in site c
 Follow-up, Suppliers (new supplier with GSTIN duplicate check), Bills (photo to Accounts as a task) and Last Rates.
 
 Only people in that function (or the admin) can use these screens; documents are saved under their own login.
+
+### Production, subcontractors and Quality (live)
+
+Production (`sk_app/production.py`): Order Board (every open Work Order with its Job Cards as coloured stages, late
+and "no Sales Order / delivery date" flags), Job Cards, Need Material (Material Request *Material Transfer* to the
+job; spoken words that match no item go to Store as a task), Progress Photos on the Work Order and Ready to Dispatch
+(all stages done, with the QC result). Each **subcontractor** login has a workstation and sees only that
+workstation's Job Cards: big ▶ Start / 📸 Photo / ✅ Done buttons, the drawing PDF, Need Material and Problem.
+Done closes the time log, saves photos and "Workers used", tries to post the Job Card (kept as a draft with a note
+when ERPNext refuses) and gives Quality a check task.
+
+Quality (`sk_app/quality.py`): Inspect lists checks waiting (incoming = Purchase Receipts of the last 14 days, stage
+= finished Job Cards, final = operations named final / inspection / QC). The checklist comes from the Quality
+Inspection Template (guessed from the operation name; a short standard list when none exists): one OK / Not OK tap
+per point, a spoken note for every Not OK, photos. The Quality Inspection is saved under the inspector's login; a
+rejected stage opens a **Non Conformance** with a task for the workstation's subcontractor (his **To Fix** tile) and
+Production; a rejected receipt tells Store and Purchase. Fixed = what was done + after photo, NC resolved.
 
 ### Logins by mobile number
 
