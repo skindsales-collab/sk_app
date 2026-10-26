@@ -69,6 +69,7 @@ def today(user: str, now=None) -> dict:
 	events = _events(day, day)
 	fixed = [(get_datetime(e.starts_on), get_datetime(e.ends_on or e.starts_on), e.subject) for e in events
 		if not e.all_day and get_datetime(e.starts_on) >= now]
+	fixed += routine_today(user, day, now)
 	slots, later = plan_day(items, now, s.work_start or "09:00", s.work_end or "18:00", s.lunch_start or "13:00",
 		s.lunch_end or "14:00", fixed)
 	done = done_today(user, day)
@@ -80,6 +81,23 @@ def today(user: str, now=None) -> dict:
 			**({"item": _item(x["item"])} if x["item"] else {})} for x in slots],
 		"later": [_item(i) for i in later],
 	}
+
+
+def routine_today(user: str, day, now) -> list[tuple]:
+	"""The fixed daily / weekly routine of the person's functions (their manual's daily checklist) as today's fixed
+	slots on My Day, from now on (SK 26-Oct: the manual's daily checklist goes to My Day)."""
+	from datetime import datetime, timedelta
+
+	from sk_app.logic import to_time
+
+	name, out = DAY_NAMES[day.weekday()], []
+	for when, at, mins, title in _routine(user):
+		if not at or not (when == "daily" or name in when.split()):
+			continue
+		start = datetime.combine(day, to_time(at))
+		if start >= now.replace(tzinfo=None):
+			out.append((start, start + timedelta(minutes=mins), "🔁 " + title))
+	return out
 
 
 def _due_by_day(items, start, end, now) -> dict:

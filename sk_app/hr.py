@@ -356,7 +356,7 @@ def today(user: str, day=None) -> dict:
 
 
 def month(user: str, month=None, employee=None) -> dict:
-	"""Present / late / half day / leave / absent (= working day with no check-in) per person, for salary."""
+	"""Present / late / half day / leave / absent (= working day with no check-in) per person."""
 	if employee:
 		emp_user = frappe.db.get_value("Employee", employee, "user_id")
 		if emp_user != user:

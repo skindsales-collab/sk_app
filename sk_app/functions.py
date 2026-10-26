@@ -193,23 +193,28 @@ def sections_for(functions: list[str], has_team: bool = False) -> dict:
 	return {"sections": sections, "shared": shared}
 
 
-# Fixed work in each function's week (change list point 9c, proposed to SK). The week planner puts these first and fills
+# Fixed work in each function's week (change list point 9c; 26-Oct also the daily checklists of the manuals). The week planner puts these first and fills
 # the rest of each day's free hours with open work. days: Mon..Sat or "daily"; at: "HH:MM" or None (any time that day).
 ROUTINE = {
 	"Sales": [("Mon", "10:00", 60, "Team meeting (Rushi)"), ("daily", "09:30", 30, "Call today's new leads first"),
 		("Tue Wed Thu Fri", None, 120, "Customer visits"), ("Sat", "16:00", 60, "Weekly report + pipeline review")],
-	"Marketing": [("daily", "09:30", 30, "Call today's new leads first"), ("Sat", "16:00", 60, "Weekly report + pipeline review")],
+	"Marketing": [("daily", "09:30", 30, "Call today's new leads first"), ("daily", "10:00", 20, "GeM: new cabin tenders"),
+		("daily", None, 30, "IndiaMART / JustDial: answer new enquiries in 5 minutes"),
+		("Sat", "12:00", 30, "Google Business: 3 site photos + review links"), ("Sat", "16:00", 60, "Weekly report + pipeline review")],
 	"Machine Shifting": [("Mon", "09:30", 60, "Jobs plan for the week"), ("Tue Thu", None, 120, "Site surveys"),
 		("Sat", "16:00", 60, "Weekly report")],
 	"Stores": [("daily", "09:30", 30, "Receipts and issues"), ("Wed", "11:00", 30, "Low-stock list to Purchase"),
-		("Sat", "15:00", 60, "Stock count (one rack)")],
+		("Sat", "15:00", 60, "Stock count (one rack)"), ("daily", "15:00", 15, "5S (15 minutes)")],
 	"Purchase": [("daily", "09:30", 30, "Today's buy requests"), ("Thu", "11:00", 60, "Rate comparison"),
 		("Fri", "11:00", 60, "PO follow-up calls")],
-	"Production": [("daily", "09:15", 15, "Job plan for the day"), ("Fri", "15:00", 45, "Dispatch plan")],
-	"Quality": [("daily", "09:15", 15, "Job plan for the day"), ("daily", "16:00", 30, "Final checks before dispatch")],
+	"Production": [("daily", "09:15", 15, "Job plan for the day"), ("Mon", "09:30", 30, "Capacity vs orders, contractor plan"),
+		("daily", "15:00", 15, "5S (15 minutes)"), ("Fri", "15:00", 45, "Dispatch plan")],
+	"Subcontractor": [("daily", "15:00", 15, "5S (15 minutes)")],
+	"Quality": [("daily", "09:15", 15, "Job plan for the day"), ("daily", "16:00", 30, "Final checks before dispatch"),
+		("daily", "15:00", 15, "5S (15 minutes)"), ("Wed", "11:00", 30, "Top 3 defects with root cause")],
 	"Accounts": [("daily", "10:00", 45, "Collection calls"), ("Mon", "11:00", 45, "Payments plan for the week"),
-		("Fri", "15:00", 60, "Bank reconciliation")],
-	"HR": [("daily", "09:45", 30, "Attendance check"), ("Fri", "15:00", 60, "Leave and expense approvals")],
+		("Fri", "15:00", 60, "Bank reconciliation"), ("Fri", "16:00", 30, "Friday cash statement")],
+	"HR": [("daily", "09:45", 30, "Attendance check"), ("Mon", "11:00", 30, "Training lesson for one function"), ("Fri", "15:00", 60, "Leave and expense approvals")],
 	"AI": [("daily", "09:30", 30, "Improvement Inbox sorting"),
 		("Mon", "11:00", 150, "Department visit: Sales & Marketing (leads, quotes, CRM data)"),
 		("Tue", "11:00", 150, "Department visit: Store & Purchase (receipts, stock, POs, suppliers)"),
@@ -217,5 +222,6 @@ ROUTINE = {
 		("Thu", "11:00", 150, "Department visit: Finance & HR (bills, payments, attendance, leave)"),
 		("Fri", "11:00", 150, "ERP data clean-up + test new app changes on sk-dev"),
 		("Sat", "11:00", 90, "Review with SK + weekly report")],
-	"Management": [("Mon", "10:00", 60, "Sales team meeting"), ("Sat", "11:00", 90, "Weekly review (AI & ERP report)")],
+	"Management": [("daily", "09:30", 10, "Dashboard: orders, quotes, dispatch, cash"), ("Mon", "10:00", 60, "Sales team meeting"),
+		("Wed", "11:00", 60, "Factory + dispatch review"), ("Fri", "16:00", 30, "Cash review"), ("Sat", "11:00", 90, "Weekly review (AI & ERP report)")],
 }
