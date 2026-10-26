@@ -820,6 +820,10 @@
 	T.Marathi.mic_blocked = "माईक / कॅमेरा बंद आहे. Chrome → ⋮ → Settings → Site settings → Microphone (किंवा Camera) → ही साईट → Allow. मग परत येऊन 🎤 दाबा.";
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
 	T.Marathi.mic_network = "आवाजासाठी इंटरनेट हवे. मोबाईल डेटा तपासा, किंवा कीबोर्डवरील 🎤 वापरा.";
+	Object.assign(T.English, { fl_workflow: "work flow", fl_loading: "live figures loading", fl_days: "days", fl_oldest: "oldest",
+		fl_on_time: "all on time", fl_work: "Work on it", fl_first: "Showing the first" });
+	Object.assign(T.Marathi, { fl_workflow: "कामाचा क्रम", fl_loading: "आकडे येत आहेत", fl_days: "दिवस", fl_oldest: "सर्वात जुने",
+		fl_on_time: "सर्व वेळेवर", fl_work: "काम करा", fl_first: "पहिले दाखवले" });
 	Object.assign(T.English, { lk_locked: "Locked", lk_touch: "Touch finger or look at the phone", lk_open_face: "Open with face / finger",
 		lk_ask_ceo: "Not working or new phone? Ask the CEO to reset it.", lk_pin: "Your PIN", lk_open: "Open",
 		lk_cancelled: "Not checked. Tap the button and touch the finger sensor or look at the phone.",
@@ -1100,9 +1104,65 @@
 		if (!h.sections) { root.innerHTML = header("SK App") + `<main>${tiles(fn.tiles)}</main>`; return; }
 		// a person in several functions: one labelled row per function, then the tiles everyone has (SK, 26-Oct)
 		const label = (l) => (l && (l[state.lang] || l.English)) || "";
-		const rows = h.sections.sections.filter((x) => x.tiles.length).map((x) => `<h3 class="sk-h sk-fn-row">${esc(label(x.label))}</h3>${tiles(x.tiles)}`).join("");
+		// point 17: each function's live process flow on top of its icons; the icons in work order with arrows
+		const rows = h.sections.sections.filter((x) => x.tiles.length).map((x) => `<h3 class="sk-h sk-fn-row">${esc(label(x.label))} · ${t("fl_workflow")}</h3>
+			<div class="sk-flowbox" data-fn="${esc(x.function)}">${flowHtml(x.function)}</div>${seqTiles(x.tiles, tiles)}`).join("");
 		root.innerHTML = header("SK App") + `<main>${rows}<h3 class="sk-h sk-fn-row">${t("for_everyone")}</h3>${tiles(h.sections.shared)}</main>`;
+		loadFlows();
 	}
+	// the function's own icons joined by arrows, in the order the work goes (SK's mock-ups 26-Oct)
+	function seqTiles(keys, tiles) {
+		const html = tiles(keys);
+		return html.replace(/<div class="sk-tiles small">/g, '<div class="sk-tiles small sk-seq">');
+	}
+	// ---------- Point 17: live process flow ----------
+	let flowData = null, flowAt = 0, flowLoading = false;
+	const shortMoneyF = (v) => (Math.abs(v) >= 1e7 ? `₹${(v / 1e7).toFixed(2)} Cr` : Math.abs(v) >= 1e5 ? `₹${(v / 1e5).toFixed(1)} L` : `₹${Math.round(v).toLocaleString("en-IN")}`);
+	function flowHtml(fn) {
+		if (!flowData) return `<p class="sk-note">… ${t("fl_loading")}</p>`;
+		const flows = flowData.flows.map((f, i) => [f, i]).filter(([f]) => f.function === fn);
+		if (!flows.length) return "";
+		return flows.map(([f, fi]) => `${f.label ? `<div class="sk-flow-name">${esc(f.label)}</div>` : ""}<div class="sk-flow">${f.stages.map((st, si) =>
+			`${si ? `<span class="sk-flow-arrow">➜</span>` : ""}<button class="sk-flow-box ${st.c ? "c-" + st.c : ""}" data-flow="${fi}:${si}">
+				<span class="sk-flow-icon">${st.icon}</span><span class="sk-flow-label">${esc(st.label)}</span>
+				<b class="sk-flow-n">${st.count}</b>${st.value ? `<small>${shortMoneyF(st.value)}</small>` : ""}
+				${st.late ? `<small class="sk-flow-late">${st.late} ${t("late")} · ${st.oldest} ${t("fl_days")}</small>` : ""}</button>`).join("")}</div>`).join("");
+	}
+	async function loadFlows(force) {
+		if (flowLoading || (!force && flowData && Date.now() - flowAt < 60 * 1000)) return paintFlows();
+		flowLoading = true;
+		try { flowData = await call("my_flow"); flowAt = Date.now(); } catch (e) { flowData = flowData || { flows: [] }; }
+		flowLoading = false;
+		paintFlows();
+	}
+	function paintFlows() {
+		if (state.view !== "home") return;
+		root.querySelectorAll(".sk-flowbox").forEach((el) => { el.innerHTML = flowHtml(el.dataset.fn); });
+	}
+	function renderFlowStage(fi, si) {
+		const f = flowData.flows[fi], st = f.stages[si];
+		state.view = "flow";
+		root._flowRows = st.rows;
+		root.innerHTML = header(`${st.icon} ${st.label}`) + `<main>
+			<p class="sk-note">${st.count} · ${st.value ? shortMoneyF(st.value) + " · " : ""}${st.late ? `<span class="sk-due">${st.late} ${t("late")}, ${t("fl_oldest")} ${st.oldest} ${t("fl_days")}</span>` : t("fl_on_time")}</p>
+			${st.go && ICON[st.go] ? `<button class="sk-btn go wide" data-go="${esc(st.go)}">${ICON[st.go]} ${t("fl_work")}: ${t(st.go)}</button>` : ""}
+			<ul class="sk-list">${st.rows.map((r, j) => `<li class="sk-item ${r.c ? "k-" + r.c : ""}"><button class="sk-fu-main" data-flowrow="${j}">
+				<div class="sk-item-title">${r.c === "red" ? "🔴 " : r.c === "amber" ? "🟠 " : ""}${esc(r.title)}</div>
+				<div class="sk-item-meta">${esc(r.meta || "")}</div></button>
+				${r.value != null ? `<b>${typeof r.value === "number" ? shortMoneyF(r.value) : esc(r.value)}</b>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
+			${st.count > st.rows.length ? `<p class="sk-note">${t("fl_first")} ${st.rows.length}</p>` : ""}
+			<button class="sk-btn wide" data-go="home">‹ ${t("back")}</button></main>`;
+	}
+	document.addEventListener("click", (ev) => {
+		const b = ev.target.closest("[data-flow],[data-flowrow]");
+		if (!b || !root.contains(b)) return;
+		ev.stopPropagation();
+		if (b.dataset.flow) { const [fi, si] = b.dataset.flow.split(":").map(Number); return renderFlowStage(fi, si); }
+		const r = root._flowRows[Number(b.dataset.flowrow)];
+		if (!r || !r.doctype || !r.name || r.doctype === "User") return;
+		if (r.doctype === "CRM Lead" || r.doctype === "CRM Deal") { current = { doctype: r.doctype, name: r.name }; return go("detail"); }
+		window.open(`/app/${r.doctype.toLowerCase().replace(/ /g, "-")}/${encodeURIComponent(r.name)}`, "_blank");
+	}, true);
 
 	function renderSetPin() {
 		state.view = "home";

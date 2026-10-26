@@ -11,7 +11,8 @@ from frappe import _
 from frappe.utils import getdate, now_datetime, strip_html
 
 # reading screens that are never opened for another person
-NEVER = {"view_as", "view_members", "view_suggest", "login_methods", "my_pin", "pin_status"}
+NEVER = {"view_as", "view_members", "view_suggest", "login_methods", "my_pin", "pin_status", "lock_now", "unlock_pin", "face_options",
+	"face_setup", "face_unlock", "reset_face"}
 
 
 def can_view(user: str) -> bool:

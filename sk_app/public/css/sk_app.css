@@ -296,3 +296,27 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 .sk-lock-box h2 { margin: 8px 0 4px; }
 .sk-lock-msg { color: #b42318; min-height: 1.4em; }
 @media (prefers-color-scheme: dark) { .sk-lock-msg { color: #ff8a80; } }
+
+/* point 17: live process flow (stage boxes joined by arrows) and the function's icons in work order */
+.sk-flow-name { font-weight: 600; margin: 10px 0 4px; font-size: 15px; }
+.sk-flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 4px; margin: 4px 0 10px; }
+.sk-flow-arrow { align-self: center; color: var(--muted, #667085); font-size: 16px; }
+.sk-flow-box { flex: 1 1 88px; max-width: 132px; min-height: 92px; border: 1px solid var(--line, #d0d5dd); border-radius: 12px; background: var(--card, #fff);
+	color: var(--ink); padding: 6px 4px; display: flex; flex-direction: column; align-items: center; gap: 1px; font: inherit; font-size: 12px; cursor: pointer; }
+.sk-flow-icon { font-size: 20px; }
+.sk-flow-label { text-align: center; line-height: 1.15; }
+.sk-flow-n { font-size: 20px; }
+.sk-flow-box small { font-size: 11px; }
+.sk-flow-late { color: #b42318; font-weight: 600; }
+.sk-flow-box.c-red { border-color: #f04438; background: #fef3f2; color: #1d2939; }
+.sk-flow-box.c-amber { border-color: #f79009; background: #fffaeb; color: #1d2939; }
+.sk-flow-box.c-green { border-color: #12b76a; background: #ecfdf3; color: #1d2939; }
+.sk-seq .sk-tile { position: relative; }
+.sk-seq .sk-tile:not(:last-child)::after { content: "➜"; position: absolute; right: -9px; top: 38%; font-size: 12px; color: var(--muted, #667085); }
+@media (prefers-color-scheme: dark) {
+	.sk-flow-box { background: #1b2230; border-color: #3a4456; color: #e8ecf3; }
+	.sk-flow-box.c-red { background: #4a1f1c; border-color: #f97066; color: #fff; }
+	.sk-flow-box.c-amber { background: #4a3510; border-color: #fdb022; color: #fff; }
+	.sk-flow-box.c-green { background: #0f3b27; border-color: #32d583; color: #fff; }
+	.sk-flow-late { color: #fda29b; }
+}

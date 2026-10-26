@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import ai_desk, applock, calendar_view, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, segments, store, training, view_member, work
+from sk_app import ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, segments, store, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -47,7 +47,8 @@ def home():
 	team = _has_team(profile.user)
 	functions = logins.profile_functions(profile.user)
 	main = home_for(profile.home, has_team=team)
-	sections = sections_for(functions, has_team=team) if len(functions) > 1 else None
+	# point 17 (SK 26-Oct): every Home has two parts: "my function" (with its process flow) and "for everyone"
+	sections = sections_for(functions or [profile.home], has_team=team) if (functions or profile.home) else None
 	# Logins only for the CEO (point 20, SK 26-Oct): HR and ERPNext roles left over from before no longer bring it
 	if logins._can_manage(profile.user) and "Management" in set(functions or [profile.home]):
 		if "logins" not in main["tiles"]:
@@ -1120,6 +1121,13 @@ def view_suggest(member, text, view=None, photo=None):
 
 
 # point 13: CEO live dashboards
+@frappe.whitelist()
+def my_flow():
+	"""Point 17: the live process flow of each of the person's functions (the CEO: one per function)."""
+	profile = _me()
+	return flows.for_user(profile.user, logins.profile_functions(profile.user) or [profile.home])
+
+
 @frappe.whitelist()
 def dash_page(key="overview", month=None, segment=None):
 	return dashboards.page(_me().user, key, month, segment)
