@@ -163,3 +163,18 @@ button.sk-open { background: none; border: 0; }
 .sk-tiles.small .sk-tile-icon { font-size: 26px; }
 .sk-dot { position: absolute; top: 4px; right: 6px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: var(--red); color: #fff; font-size: 11px; line-height: 18px; }
 @media (max-width: 340px) { .sk-tiles.small { grid-template-columns: repeat(3, 1fr); } }
+
+/* mobile-number login page, Home rows per function, HR logins (26-Oct-2026) */
+.sk-login { max-width: 420px; margin: 0 auto; padding: 32px 16px; text-align: center; }
+.sk-login-logo { width: 84px; height: 84px; border-radius: 18px; }
+.sk-login h1 { margin: 12px 0 2px; font-size: 26px; }
+.sk-login-co { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+.sk-login .sk-field { display: block; text-align: left; margin-bottom: 14px; }
+.sk-login input { width: 100%; box-sizing: border-box; font-size: 22px; padding: 12px; border-radius: 10px; border: 1px solid #b8c4d2; letter-spacing: 1px; background: var(--card); color: var(--ink); }
+.sk-login-msg { color: var(--red); min-height: 22px; }
+.sk-login-help { color: var(--muted); font-size: 14px; }
+.sk-fn-row { margin: 18px 0 8px; }
+.sk-wrap { flex-wrap: wrap; gap: 8px; }
+.sk-chip.bad { color: var(--red); border-color: var(--red); }
+.sk-big { font-size: 22px; line-height: 1.6; }
+.sk-item.sk-person { flex-direction: column; align-items: stretch; gap: 8px; }

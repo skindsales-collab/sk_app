@@ -1,8 +1,42 @@
 {% extends "templates/sk_shell.html" %}
 {% block content %}
+{% if guest %}
+<main class="sk-login">
+	<img src="/assets/sk_app/icons/icon-192.png" alt="SK" class="sk-login-logo">
+	<h1>SK App</h1>
+	<p class="sk-login-co">SK Ind Tech Solutions Pvt Ltd</p>
+	<form id="sk-login">
+		<label class="sk-field"><span>Mobile number · मोबाईल नंबर</span>
+			<input id="l-mobile" type="tel" inputmode="numeric" autocomplete="username" placeholder="98XXXXXXXX" required></label>
+		<label class="sk-field"><span>PIN · पिन</span>
+			<input id="l-pin" type="password" inputmode="numeric" autocomplete="current-password" required></label>
+		<button class="sk-btn go wide" type="submit">Login · लॉगिन</button>
+		<p id="l-msg" class="sk-login-msg"></p>
+	</form>
+	<p class="sk-login-help">Forgot PIN? Ask HR to reset it. · पिन विसरलात? HR ला सांगा.</p>
+	<a class="sk-link" href="/login?redirect-to=/sk">Login with email (optional) · ईमेलने लॉगिन</a>
+</main>
+<script>
+document.getElementById("sk-login").addEventListener("submit", async (e) => {
+	e.preventDefault();
+	const msg = document.getElementById("l-msg");
+	let m = document.getElementById("l-mobile").value.replace(/\D/g, "");
+	if (m.length === 12 && m.startsWith("91")) m = m.slice(2);
+	if (m.length === 11 && m.startsWith("0")) m = m.slice(1);
+	if (m.length !== 10) { msg.textContent = "Please type your 10-digit mobile number · 10 अंकी मोबाईल नंबर टाका"; return; }
+	msg.textContent = "…";
+	const body = new URLSearchParams({ usr: m, pwd: document.getElementById("l-pin").value });
+	const res = await fetch("/api/method/login", { method: "POST", body, headers: { Accept: "application/json" }, credentials: "same-origin" });
+	if (res.ok) { window.location.reload(); return; }
+	msg.textContent = res.status === 429 ? "Too many tries. Wait a few minutes · खूप प्रयत्न झाले, थोडा वेळ थांबा"
+		: "Mobile number or PIN is wrong · मोबाईल नंबर किंवा पिन चुकीचा";
+});
+</script>
+{% else %}
 <div id="sk-app" data-csrf="{{ csrf_token }}" data-user="{{ user }}">
 	<div class="sk-loading">SK App…</div>
 </div>
 <script src="/assets/sk_app/js/card_parse.js?v={{ v }}"></script>
 <script src="/assets/sk_app/js/sk_app.js?v={{ v }}"></script>
+{% endif %}
 {% endblock %}

@@ -4,9 +4,9 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime
 
-from sk_app import calendar_view, claude, comms, crm, day_report, guide, kpi, training, work
+from sk_app import calendar_view, claude, comms, crm, day_report, guide, kpi, logins, training, work
 from sk_app import library as lib
-from sk_app.functions import home_for
+from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
 
 CARD_REUSE_MINUTES = 10
@@ -40,9 +40,15 @@ def _latest_card(user):
 def home():
 	profile = _me()
 	me = frappe.db.get_value("User", profile.user, ["mobile_no", "phone"], as_dict=True) or {}
+	team = _has_team(profile.user)
+	functions = logins.profile_functions(profile.user)
 	return {"user": profile.user, "full_name": profile.full_name, "language": profile.language,
 		"mobile": me.get("mobile_no") or me.get("phone"),
-		"home": home_for(profile.home, has_team=_has_team(profile.user)), "card": _latest_card(profile.user),
+		"home": home_for(profile.home, has_team=team), "functions": functions,
+		# SK: a person in several functions sees all of them on one Home, one labelled row each
+		"sections": sections_for(functions, has_team=team) if len(functions) > 1 else None,
+		"must_set_pin": bool(frappe.db.get_value("SK App User", profile.name, "must_set_pin")),
+		"card": _latest_card(profile.user),
 		"new_files": crm.files_to_send(profile.user), "day_report_sent": bool(day_report._find(profile.user, getdate())),
 		"due_reminders": comms.due_reminders(profile.user)}
 
@@ -370,3 +376,49 @@ def library_pdf(item):
 	frappe.local.response.filename = f"{title}.pdf"
 	frappe.local.response.filecontent = data
 	frappe.local.response.type = "pdf"
+
+
+# ---- Logins by mobile number (HR) and own PIN ----
+
+@frappe.whitelist(methods=["POST"])
+def set_pin(old_pin, new_pin):
+	return logins.set_own_pin(_me().user, old_pin, new_pin)
+
+
+@frappe.whitelist()
+def hr_people():
+	_me()
+	return logins.people(frappe.session.user)
+
+
+@frappe.whitelist()
+def hr_login_options():
+	"""Choices for the HR "make login" form: functions, managers and workstations (for subcontractors)."""
+	_me()
+	logins._check_manager(frappe.session.user)
+	from sk_app.functions import FUNCTIONS
+
+	admin = "System Manager" in frappe.get_roles()
+	return {"functions": [{"name": f, "label": spec["label"]} for f, spec in FUNCTIONS.items()
+			if admin or f not in logins.ADMIN_FUNCTIONS],
+		"managers": frappe.get_all("SK App User", filters={"enabled": 1}, fields=["user", "full_name"], order_by="full_name asc"),
+		"workstations": frappe.get_all("Workstation", pluck="name", order_by="name asc")}
+
+
+@frappe.whitelist(methods=["POST"])
+def hr_make_login(mobile, functions, employee=None, full_name=None, manager=None, language="English", workstation=None):
+	_me()
+	functions = frappe.parse_json(functions) if isinstance(functions, str) else functions
+	return logins.make_login(frappe.session.user, mobile, functions, employee, full_name, manager, language, workstation)
+
+
+@frappe.whitelist(methods=["POST"])
+def hr_reset_pin(user):
+	_me()
+	return logins.reset_pin(frappe.session.user, user)
+
+
+@frappe.whitelist(methods=["POST"])
+def hr_close_login(user):
+	_me()
+	return logins.close_login(frappe.session.user, user)
