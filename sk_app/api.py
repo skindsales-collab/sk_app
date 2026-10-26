@@ -18,7 +18,9 @@ def _me(unlocked=True):
 	user = frappe.session.user
 	if user in ("Guest", None):
 		frappe.throw(_("Please log in"), frappe.PermissionError)
-	if unlocked:  # point 20: the app opens only with face / finger (or PIN until set up) and locks after 30 min idle
+	# point 20: the app opens only with face / finger (or PIN until set up) and locks after 30 min idle. In View Member
+	# App the CEO's own lock was checked by view_as; the member's session lock does not apply to the CEO's view.
+	if unlocked and not frappe.flags.sk_viewing:
 		applock.check()
 	profile = guide.app_user(user)
 	if not profile and "System Manager" in frappe.get_roles(user) and not frappe.db.exists("SK App User", {"user": user}):
