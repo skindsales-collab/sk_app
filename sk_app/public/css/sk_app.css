@@ -197,3 +197,35 @@ button.sk-open { background: none; border: 0; }
 .sk-point .sk-row { margin-top: 6px; }
 .sk-point [data-v="1"].on { background: #1e8e3e; border-color: #1e8e3e; }
 .sk-bulk { width: 100%; font-size: 14px; font-family: inherit; padding: 8px; border: 1px solid var(--line, #ccc); border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; }
+
+/* point 15: every icon shows its pending work in colour */
+.sk-tile.c-red { box-shadow: inset 0 0 0 2px var(--red); background: #fdecec; }
+.sk-tile.c-amber { box-shadow: inset 0 0 0 2px #e69500; background: #fff4df; }
+.sk-tile.c-blue { box-shadow: inset 0 0 0 2px #1f6fd1; }
+.sk-tile.c-green { box-shadow: inset 0 0 0 2px #2e9e4f; }
+.sk-dot.amber { background: #e69500; }
+.sk-dot.blue { background: #1f6fd1; }
+.sk-dot.green { background: #2e9e4f; }
+.sk-tile.blink { animation: sk-blink 1.2s ease-in-out infinite; }
+@keyframes sk-blink { 50% { background: #f8c9c9; } }
+/* point 4: photo buttons with preview */
+.sk-photo .sk-row { gap: 6px; }
+.sk-preview img { max-width: 100%; max-height: 180px; border-radius: 10px; margin-top: 6px; display: block; }
+.sk-preview .sk-row { align-items: center; margin-top: 4px; }
+.sk-filechip { margin-top: 6px; padding: 8px 10px; background: #eef2f7; border-radius: 8px; font-size: 13px; }
+.sk-upnote { color: #556; flex: 1; }
+.sk-chrome { display: block; position: relative; z-index: 50; text-decoration: none; }
+/* point 9c: week plan load */
+.sk-amber { color: #b36b00; font-weight: 700; }
+.day.over { box-shadow: inset 4px 0 0 #e69500; }
+.chip2 .sk-link { padding: 0 2px; font: inherit; color: inherit; }
+.sk-saved { border-left: 5px solid #2e9e4f; }
+.k-done .sk-item-title { color: #2e7d32; }
+/* Swati 26-Oct: a small pull-down while tapping an icon reloaded the whole app (Chrome pull-to-refresh) */
+html, body { overscroll-behavior-y: contain; }
+.sk-note.bad { color: var(--red); font-weight: 600; }
+/* Accounts: month-wise P&L table */
+.sk-table-wrap { overflow-x: auto; margin: 8px 0; }
+.sk-table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--card); border-radius: 10px; }
+.sk-table th, .sk-table td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #e6e9ef; white-space: nowrap; }
+.sk-table th:first-child, .sk-table td:first-child { text-align: left; }

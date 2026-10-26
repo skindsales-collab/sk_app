@@ -1,11 +1,13 @@
 """Today / My Week / My Month calendars on the phone, built from the same open work as My Day plus ERPNext Events,
 company dates (SK App Settings), orders booked and DSI."""
 
+import json
+
 import frappe
 from frappe.utils import add_days, flt, get_datetime, getdate, now_datetime, strip_html
 
 from sk_app import guide, kpi, work
-from sk_app.logic import DAY_NAMES, company_dates, month_range, parse_lines, plan_day, rank_items
+from sk_app.logic import DAY_NAMES, company_dates, item_key, month_range, parse_lines, plan_day, plan_week, rank_items
 
 
 def _settings():
@@ -41,6 +43,22 @@ def _item(i) -> dict:
 		"due": str(i.due) if i.due else None, **i.extra}
 
 
+def done_today(user: str, day) -> list[dict]:
+	"""What the person finished on the day: cards done, Work Book / extra work, calls (My Day "Done today")."""
+	period = ["between", [f"{day} 00:00:00", f"{day} 23:59:59"]]
+	done = [{"time": str(c.responded_on or c.slot_start), "title": strip_html(c.card_text or "")[:120]}
+		for c in frappe.get_all("SK Guide Card", filters={"user": user, "response": "Done", "slot_start": period},
+			fields=["card_text", "slot_start", "responded_on"])]
+	done += [{"time": str(w.creation), "title": f"{w.entry_type}: {(w.description or '')[:100]}"}
+		for w in frappe.get_all("SK Work Log", filters={"user": user, "date": day}, fields=["entry_type", "description", "creation"])]
+	if frappe.db.exists("DocType", "CRM Call Log"):
+		done += [{"time": str(c.creation), "title": f"Call {c.status}: {c.reference_docname or ''}"}
+			for c in frappe.get_all("CRM Call Log", filters={"caller": user, "creation": period},
+				fields=["status", "reference_docname", "creation"])]
+	done.sort(key=lambda d: d["time"])
+	return done
+
+
 def today(user: str, now=None) -> dict:
 	now = get_datetime(now or now_datetime())
 	day = now.date()
@@ -53,17 +71,7 @@ def today(user: str, now=None) -> dict:
 		if not e.all_day and get_datetime(e.starts_on) >= now]
 	slots, later = plan_day(items, now, s.work_start or "09:00", s.work_end or "18:00", s.lunch_start or "13:00",
 		s.lunch_end or "14:00", fixed)
-	period = ["between", [f"{day} 00:00:00", f"{day} 23:59:59"]]
-	done = [{"time": str(c.responded_on or c.slot_start), "title": strip_html(c.card_text or "")[:120]}
-		for c in frappe.get_all("SK Guide Card", filters={"user": user, "response": "Done", "slot_start": period},
-			fields=["card_text", "slot_start", "responded_on"])]
-	done += [{"time": str(w.creation), "title": f"{w.entry_type}: {(w.description or '')[:100]}"}
-		for w in frappe.get_all("SK Work Log", filters={"user": user, "date": day}, fields=["entry_type", "description", "creation"])]
-	if frappe.db.exists("DocType", "CRM Call Log"):
-		done += [{"time": str(c.creation), "title": f"Call {c.status}: {c.reference_docname or ''}"}
-			for c in frappe.get_all("CRM Call Log", filters={"caller": user, "creation": period},
-				fields=["status", "reference_docname", "creation"])]
-	done.sort(key=lambda d: d["time"])
+	done = done_today(user, day)
 	all_day = [e.subject for e in events if e.all_day] + company_dates(s.company_dates, day.year, day.month).get(day.day, [])
 	return {
 		"date": str(day), "now": str(now), "work_start": str(s.work_start), "work_end": str(s.work_end),
@@ -85,27 +93,76 @@ def _due_by_day(items, start, end, now) -> dict:
 	return out
 
 
+MOVES_KEY = "sk_week_moves"
+
+
+def _moves(user: str) -> dict:
+	try:
+		return json.loads(frappe.defaults.get_user_default(MOVES_KEY, user) or "{}")
+	except ValueError:
+		return {}
+
+
+def move_item(user: str, key: str, day) -> dict:
+	"""'Move to Tue': the person puts one open item on another day of the week (kept until the item is done)."""
+	moves = {k: v for k, v in _moves(user).items() if getdate(v) >= add_days(getdate(), -7)}
+	if day:
+		moves[str(key)[:200]] = str(getdate(day))
+	else:
+		moves.pop(key, None)
+	frappe.defaults.set_user_default(MOVES_KEY, json.dumps(moves), user)
+	return {"ok": True}
+
+
+def _routine(user: str) -> list[tuple]:
+	from sk_app.functions import ROUTINE
+	from sk_app.logins import profile_functions
+
+	out = []
+	for f in profile_functions(user):
+		out += [r for r in ROUTINE.get(f, []) if r not in out]
+	return out + [("daily", "17:30", 15, "DSI + Day Report")]
+
+
+def _event_minutes(events) -> dict:
+	out = {}
+	for e in events:
+		if e.all_day:
+			continue
+		start, end = get_datetime(e.starts_on), get_datetime(e.ends_on or e.starts_on)
+		out[start.date()] = out.get(start.date(), 0) + max(0, int((end - start).total_seconds() // 60))
+	return out
+
+
 def week(user: str, day=None) -> dict:
+	"""A real weekly plan (change list point 9c): fixed weekly routine of the person's functions first, then open
+	work spread over the working days by free hours, most urgent first. Overloaded days come back amber."""
 	day = getdate(day)
 	start = add_days(day, -day.weekday())
 	end = add_days(start, 6)
 	now = now_datetime()
 	s = _settings()
 	profile = guide.app_user(user)
-	due = _due_by_day([i for i in work.collect(user, profile.home if profile else None) if i.kind != "reminder"], start, end, now)
+	items = [i for i in work.collect(user, profile.home if profile else None) if i.kind != "reminder"]
 	orders = _orders_by_day(user, start, end)
 	events = _events(start, end)
-	working = parse_lines((s.working_days or "").replace(",", "\n"))
+	working = parse_lines((s.working_days or "").replace(",", "\n")) or DAY_NAMES[:6]
+	dates = [add_days(start, n) for n in range(7)]
+	plan = plan_week(items, dates, now, s.work_start or "09:00", s.work_end or "18:00", s.lunch_start or "13:00",
+		s.lunch_end or "14:00", working, busy=_event_minutes(events), routine=_routine(user), moves=_moves(user))
 	dsi = set(str(d) for d in frappe.get_all("SK DSI Entry", filters={"user": user, "date": ["between", [start, end]]}, pluck="date"))
 	days = []
-	for n in range(7):
-		d = add_days(start, n)
+	for d in dates:
 		key = str(d)
+		p = plan[d]
 		labels = company_dates(s.company_dates, d.year, d.month).get(d.day, [])
 		days.append({"date": key, "day": DAY_NAMES[d.weekday()], "working": DAY_NAMES[d.weekday()] in working,
 			"today": d == getdate(now), "company": labels,
 			"events": [{"title": e.subject, "time": None if e.all_day else str(e.starts_on)[11:16]} for e in events if str(e.starts_on)[:10] == key],
-			"due": due.get(key, []), "orders": orders.get(key, 0.0), "dsi": key in dsi})
+			"routine": p["routine"],
+			"due": [{**_item(i), "key": item_key(i), "overdue": flag == "overdue", "moved": flag == "moved"} for i, flag in p["items"]],
+			"load": p["load"], "capacity": p["capacity"], "over": p["load"] > p["capacity"] and p["capacity"] > 0,
+			"orders": orders.get(key, 0.0), "dsi": key in dsi})
 	m_start, m_end = month_range(day)
 	month_days = sum(1 for n in range((m_end - m_start).days + 1) if DAY_NAMES[add_days(m_start, n).weekday()] in working)
 	week_days = sum(1 for x in days if x["working"])

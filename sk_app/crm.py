@@ -25,8 +25,17 @@ def installed() -> bool:
 def _check(doctype: str, name: str, ptype: str = "read"):
 	if doctype not in CRM_DOCTYPES:
 		frappe.throw(_("Not a CRM record"))
-	if not frappe.has_permission(doctype, ptype, name):
+	if not frappe.has_permission(doctype, ptype, name) and not _in_my_team(doctype, name):
 		frappe.throw(_("No access to {0}").format(name), frappe.PermissionError)
+
+
+def _in_my_team(doctype: str, name: str) -> bool:
+	"""A sales manager opens his own people's leads / deals from Team Leads without the ERPNext Sales Manager role
+	(that role shows every lead of the company in CRM, SK 26-Oct: each person sees only their own)."""
+	from sk_app.day_report import _team
+
+	owner = frappe.db.get_value(doctype, name, "lead_owner" if doctype == "CRM Lead" else "deal_owner")
+	return bool(owner) and owner in {p.user for p in _team(frappe.session.user)}
 
 
 def options() -> dict:
@@ -73,11 +82,13 @@ def _last_activity(doctype: str, names: list[str]) -> dict:
 	return out
 
 
-def follow_up(user: str) -> list[dict]:
-	"""All open leads and deals of the user with their next due action, overdue first."""
+def follow_up(user: str, for_manager: bool = False) -> list[dict]:
+	"""All open leads and deals of the user with their next due action, overdue first.
+	for_manager: read for the person's manager (Team Leads), who may not hold CRM rights on others' records."""
 	# people outside Sales / Marketing (Accounts, Store, factory ...) have no CRM access: nothing to follow up
 	if not installed() or not frappe.has_permission("CRM Lead", "read", user=user):
 		return []
+	get = frappe.get_all if for_manager else frappe.get_list
 	now = now_datetime()
 	tasks = _open_tasks_by_doc(user)
 	rows = []
@@ -85,7 +96,7 @@ def follow_up(user: str) -> list[dict]:
 	lead_filters = {"lead_owner": user, "converted": 0}
 	if closed_leads:
 		lead_filters["status"] = ["not in", closed_leads]
-	for r in frappe.get_list("CRM Lead", filters=lead_filters, limit_page_length=200, order_by="modified desc",
+	for r in get("CRM Lead", filters=lead_filters, limit_page_length=200, order_by="modified desc",
 			fields=["name", "lead_name", "organization", "status", "mobile_no", "phone", "email", "source",
 				"response_by", "first_responded_on", "creation"]):
 		task = tasks.get(("CRM Lead", r.name))
@@ -101,7 +112,7 @@ def follow_up(user: str) -> list[dict]:
 	deal_filters = {"deal_owner": user}
 	if closed_deals:
 		deal_filters["status"] = ["not in", closed_deals]
-	for r in [] if not frappe.has_permission("CRM Deal", "read", user=user) else frappe.get_list("CRM Deal", filters=deal_filters, limit_page_length=200, order_by="modified desc",
+	for r in [] if not frappe.has_permission("CRM Deal", "read", user=user) else get("CRM Deal", filters=deal_filters, limit_page_length=200, order_by="modified desc",
 			fields=["name", "organization", "lead_name", "status", "mobile_no", "phone", "email", "next_step",
 				"expected_closure_date", "deal_value"]):
 		task = tasks.get(("CRM Deal", r.name))
@@ -208,6 +219,13 @@ def _attach(file_url: str | None, doctype: str, name: str, user: str):
 	file_name = frappe.db.get_value("File", {"file_url": file_url, "owner": user, "attached_to_name": ["is", "not set"]})
 	if file_name:
 		frappe.db.set_value("File", file_name, {"attached_to_doctype": doctype, "attached_to_name": name})
+		return
+	# Swati 26-Oct: the same photo sent twice, or a file ERPNext already had, has no free File row: attach a copy
+	src = frappe.db.get_value("File", {"file_url": file_url}, ["file_name", "is_private"], as_dict=True)
+	if not src or frappe.db.exists("File", {"file_url": file_url, "attached_to_doctype": doctype, "attached_to_name": name}):
+		return
+	frappe.get_doc({"doctype": "File", "file_url": file_url, "file_name": src.file_name, "is_private": src.is_private,
+		"attached_to_doctype": doctype, "attached_to_name": name}).insert(ignore_permissions=True)
 
 
 def new_lead(user: str, first_name: str, mobile_no: str | None = None, organization: str | None = None,

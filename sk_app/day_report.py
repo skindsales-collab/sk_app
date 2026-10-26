@@ -103,11 +103,14 @@ def reminder(user: str, now=None) -> list[WorkItem]:
 
 def _team(manager: str) -> list[dict]:
 	"""Everyone under `manager`, down the whole chain (a CEO sees the managers and their people too). The CEO /
-	Management function and System / HR Managers see everyone in the app."""
+	Management function sees everyone in the app."""
+	from sk_app.logins import profile_functions
+
 	people = frappe.get_all("SK App User", filters={"enabled": 1}, fields=["user", "full_name", "home", "manager"],
 		order_by="full_name asc")
-	me = next((p for p in people if p.user == manager), None)
-	if (me and me.home == "Management") or {"System Manager", "HR Manager"} & set(frappe.get_roles(manager)):
+	# SK 26-Oct: decided by the app function only, not by ERPNext roles (an old HR / admin role gave Samir and Rahul
+	# everyone's reports)
+	if manager == "Administrator" or "Management" in profile_functions(manager):
 		return [p for p in people if p.user != manager]
 	under, todo = set(), [manager]
 	while todo:

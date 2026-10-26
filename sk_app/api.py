@@ -2,9 +2,9 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_to_date, cint, flt, getdate, now_datetime
+from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import calendar_view, claude, comms, crm, day_report, finance, guide, kpi, logins, production, purchase, quality, store, training, work
+from sk_app import ai_desk, calendar_view, claude, colours, comms, crm, day_report, finance, guide, kpi, ledger, logins, production, purchase, quality, store, training, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -44,8 +44,8 @@ def home():
 	functions = logins.profile_functions(profile.user)
 	main = home_for(profile.home, has_team=team)
 	sections = sections_for(functions, has_team=team) if len(functions) > 1 else None
-	# whoever may make logins (HR, the admin) always has the Logins icon, whatever their main function
-	if logins._can_manage(profile.user):
+	# Logins only for HR and Management (SK 26-Oct): an ERPNext role left over from before no longer brings it
+	if logins._can_manage(profile.user) and {"HR", "Management"} & set(functions or [profile.home]):
 		if "logins" not in main["tiles"]:
 			main["tiles"] = main["tiles"][:1] + ["logins"] + main["tiles"][1:]
 		if sections and sections["sections"] and not any("logins" in x["tiles"] for x in sections["sections"]):
@@ -58,29 +58,44 @@ def home():
 		"must_set_pin": bool(frappe.db.get_value("SK App User", profile.name, "must_set_pin")),
 		"card": _latest_card(profile.user),
 		"new_files": crm.files_to_send(profile.user), "day_report_sent": bool(day_report._find(profile.user, getdate())),
-		"due_reminders": comms.due_reminders(profile.user), "badges": _badges(profile.user, functions)}
+		"due_reminders": comms.due_reminders(profile.user), "badges": _colours(profile, functions)}
+
+
+def _colours(profile, functions):
+	"""Point 15: each icon's pending work as red / amber / blue / green with a count."""
+	counts = _badges(profile.user, functions)
+	try:
+		items = work.collect(profile.user, profile.home)
+		return colours.for_user(profile.user, items, bool(frappe.db.exists("SK DSI Entry", {"user": profile.user, "date": getdate()})),
+			bool(day_report._find(profile.user, getdate())), counts)
+	except Exception:
+		frappe.log_error("SK App icon colours")
+		return counts
 
 
 def _badges(user, functions):
 	"""Red counts on Store / Purchase / approval icons; never breaks Home if ERPNext data is odd."""
 	try:
 		return {**store.badges(user, functions), **purchase.badges(user, functions), **production.badges(user, functions),
-			**quality.badges(user, functions), **finance.badges(user, functions)}
+			**quality.badges(user, functions), **finance.badges(user, functions), **ai_desk.badges(user, functions)}
 	except Exception:
 		frappe.log_error("SK App badges")
 		return {}
 
 
 def _has_team(user):
-	return bool(frappe.db.exists("SK App User", {"manager": user, "enabled": 1})) or bool(
-		{"System Manager", "HR Manager"} & set(frappe.get_roles(user)))
+	"""Team Reports: a person with team members (Reports to) or the CEO / Management, never by ERPNext role alone."""
+	return bool(frappe.db.exists("SK App User", {"manager": user, "enabled": 1})) or \
+		"Management" in logins.profile_functions(user)
 
 
 @frappe.whitelist()
 def my_day():
 	profile = _me()
 	items = rank_items(work.collect(profile.user, profile.home), now_datetime())
-	return {"items": [_item_dict(i) for i in items], "card": _latest_card(profile.user)}
+	# point 10: Work Book is inside My Day now, as "Done today" + "I did extra work"
+	return {"items": [_item_dict(i) for i in items], "card": _latest_card(profile.user),
+		"done": calendar_view.done_today(profile.user, getdate())}
 
 
 @frappe.whitelist(methods=["POST"])
@@ -166,6 +181,17 @@ def add_work(description, entry_type="Extra Work", problem_type=None, reference_
 
 		assign({"assign_to": [assigned_to], "doctype": "SK Work Log", "name": doc.name, "description": description})
 	return doc.name
+
+
+@frappe.whitelist(methods=["POST"])
+def report_screen_error(view, message):
+	"""A screen that failed on the phone goes to the AI & ERP Improvement Inbox by itself (once a day per screen)."""
+	profile = _me()
+	text = f"App screen '{str(view)[:40]}' failed: {strip_html(str(message or ''))[:300]}"
+	if frappe.db.exists("SK Work Log", {"user": profile.user, "date": getdate(), "description": text}):
+		return None
+	return frappe.get_doc({"doctype": "SK Work Log", "user": profile.user, "date": getdate(), "entry_type": "Problem",
+		"problem_type": "IT / app", "description": text}).insert(ignore_permissions=True).name
 
 
 @frappe.whitelist()
@@ -315,6 +341,12 @@ def cal_today():
 @frappe.whitelist()
 def cal_week(day=None):
 	return calendar_view.week(_me().user, day)
+
+
+@frappe.whitelist(methods=["POST"])
+def cal_move(key, day=None):
+	"""Move one open item to another day of the week plan (or back, with no day)."""
+	return calendar_view.move_item(_me().user, key, day)
 
 
 @frappe.whitelist()
@@ -759,7 +791,7 @@ def team_follow_up(person=None):
 		frappe.throw(_("{0} is not in your team").format(person), frappe.PermissionError)
 	summary, rows = [], []
 	for p in people:
-		items = crm.follow_up(p["user"])
+		items = crm.follow_up(p["user"], for_manager=p["user"] != profile.user)
 		month = kpi.scorecard(p["user"])
 		summary.append({**p, "open": len(items), "overdue": sum(1 for r in items if r["overdue"]), "new": sum(1 for r in items if r["new"]),
 			"deal_value": sum(flt(r.get("value")) for r in items if r["doctype"] == "CRM Deal"), "score": month.get("score")})
@@ -848,3 +880,80 @@ def qc_open_ncs():
 @frappe.whitelist(methods=["POST"])
 def qc_close_nc(name, action, photo=None):
 	return quality.close_nc(_me().user, name, action, photo)
+
+
+# ---------- AI & ERP desk (Samir) ----------
+@frappe.whitelist()
+def ai_inbox():
+	return ai_desk.inbox(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def ai_sort(doctype, name, category, note=None, due=None):
+	return ai_desk.sort_item(_me().user, doctype, name, category, note, due)
+
+
+@frappe.whitelist(methods=["POST"])
+def ai_close(todo, note=None):
+	return ai_desk.close_item(_me().user, todo, note)
+
+
+@frappe.whitelist()
+def ai_visit(day=None):
+	return ai_desk.visit(_me().user, day)
+
+
+@frappe.whitelist(methods=["POST"])
+def ai_visit_note(department, text):
+	return ai_desk.visit_note(_me().user, department, text)
+
+
+@frappe.whitelist()
+def ai_gaps():
+	return ai_desk.erp_gaps(_me().user)
+
+
+@frappe.whitelist()
+def ai_app_users():
+	return ai_desk.app_users(_me().user)
+
+
+@frappe.whitelist()
+def ai_change_list():
+	return ai_desk.change_list(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def ai_set_change(no, status):
+	return ai_desk.set_change(_me().user, no, status)
+
+
+@frappe.whitelist()
+def ai_projects():
+	return ai_desk.projects(_me().user)
+
+
+@frappe.whitelist()
+def ai_training():
+	return ai_desk.training_progress(_me().user)
+
+
+# ---------- Ledger-wise Accounts screens ----------
+@frappe.whitelist()
+def fin_ledgers(kind, month=None):
+	return ledger.ledgers(_me().user, kind, month)
+
+
+@frappe.whitelist()
+def fin_ledger_entries(kind, ledger_name, month=None):
+	return ledger.entries(_me().user, kind, ledger_name, month)
+
+
+@frappe.whitelist()
+def fin_segment_wise(month=None):
+	return ledger.segment_wise(_me().user, month)
+
+
+@frappe.whitelist()
+def fin_month_wise(year_start=None):
+	return ledger.month_wise(_me().user, year_start)

@@ -51,6 +51,16 @@ def _check_manager(user: str):
 		frappe.throw(_("Only HR can make logins"), frappe.PermissionError)
 
 
+# every role the app hands out through a function, plus the roles that bring admin screens (Logins, all leads)
+FUNCTION_ROLES = {r for spec in FUNCTIONS.values() for r in spec["erpnext_roles"]} | LOGIN_ROLES | {"Sales Manager"}
+
+
+def old_function_roles(user: str, keep: set) -> set:
+	"""Roles from functions the person does not have any more (e.g. HR Manager left from before the app)."""
+	have = set(frappe.get_all("Has Role", filters={"parent": user, "parenttype": "User"}, pluck="role"))
+	return (have & FUNCTION_ROLES) - set(keep)
+
+
 def profile_functions(user: str) -> list[str]:
 	from sk_app.functions import function_list
 
@@ -97,7 +107,10 @@ def _row(name, designation, employee, u, a, cell):
 		"functions": profile_functions(u.name) if (u and a) else [], "manager": a.manager if a else None,
 		"workstation": a.workstation if a else None, "must_set_pin": bool(a and a.must_set_pin),
 		"last_login": str(u.last_login) if u and u.last_login else None,
-		"hidden_id": bool(u and u.name.endswith("@" + HIDDEN_DOMAIN))}
+		"hidden_id": bool(u and u.name.endswith("@" + HIDDEN_DOMAIN)),
+		# SK 26-Oct: the person's ERPNext roles on the Logins screen, so a left-over admin / HR role is easy to see
+		"roles": sorted(set(frappe.get_all("Has Role", filters={"parent": u.name, "parenttype": "User"}, pluck="role"))
+			& FUNCTION_ROLES) if u else []}
 
 
 def make_login(by: str, mobile, functions, employee=None, full_name=None, manager=None, language="English",
@@ -157,10 +170,12 @@ def make_login(by: str, mobile, functions, employee=None, full_name=None, manage
 	# everyone else gets a first PIN, which also becomes their ERPNext password
 	# an edit of a working login (functions, manager ...) keeps the person's own PIN; HR uses Reset PIN for a new one
 	editing = bool(frappe.db.get_value("SK App User", {"user": user.name, "enabled": 1}))
-	# the functions decide admin rights: when the admin gives someone only non-admin functions, admin is taken off
-	if not ADMIN_FUNCTIONS & set(functions) and user.name != by and "System Manager" in frappe.get_roles(by) \
-			and "System Manager" in {r.role for r in user.get("roles")}:
-		user.remove_roles("System Manager")
+	# the functions decide the ERPNext roles (SK 26-Oct): roles of functions the person no longer has are taken off
+	extra = old_function_roles(user.name, roles) if user.name != by and "Management" not in functions else set()
+	if "System Manager" in extra and "System Manager" not in frappe.get_roles(by):
+		extra.discard("System Manager")  # only the admin takes admin rights off
+	if extra:
+		user.remove_roles(*sorted(extra))
 	keep = not was_new and (editing or "System Manager" in {r.role for r in user.get("roles")})
 	pin = None if keep else new_pin()
 	if pin:

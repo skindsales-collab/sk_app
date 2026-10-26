@@ -143,13 +143,17 @@ Nobody | 9876500011 | Cooking
 		self.assertIsNone(r2["pin"])
 		check_password(r["user"], r["pin"])
 
-	def test_admin_always_has_logins_icon(self):
+	def test_logins_icon_follows_the_function(self):
 		with set_user(CLERK):
 			self.assertNotIn("logins", api.home()["home"]["tiles"])
 		with set_user(HR):
 			self.assertIn("logins", api.home()["home"]["tiles"])
+		# SK 26-Oct: an HR role left on a salesperson no longer brings the Logins icon
 		frappe.db.set_value("SK App User", HR, "home", "Sales")
 		try:
+			with set_user(HR):
+				self.assertNotIn("logins", api.home()["home"]["tiles"])
+			frappe.db.set_value("SK App User", HR, "home", "Management")
 			with set_user(HR):
 				self.assertIn("logins", api.home()["home"]["tiles"])
 		finally:
@@ -175,3 +179,14 @@ Nobody | 9876500011 | Cooking
 				self.fail("wrong old PIN must not be an AuthenticationError")
 			except frappe.ValidationError:
 				pass
+
+	def test_salespeople_do_not_get_sales_manager(self):
+		with set_user(HR):
+			r = api.hr_make_login(MOBILE, ["Sales", "Marketing"], full_name="Test Swati")
+		self.assertNotIn("Sales Manager", frappe.get_roles(r["user"]))
+		frappe.get_doc("User", r["user"]).add_roles("Sales Manager")
+		from sk_app.patches.sales_people_own_leads_only import execute
+
+		execute()
+		self.assertNotIn("Sales Manager", frappe.get_roles(r["user"]))
+		self.assertIn("Sales User", frappe.get_roles(r["user"]))
