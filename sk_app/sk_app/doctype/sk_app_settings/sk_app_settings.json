@@ -45,7 +45,8 @@
   "lead_owner_digital",
   "lead_owner_cabin",
   "lead_owner_noncabin",
-  "last_lead_scan"
+  "last_lead_scan",
+  "segment_user_permissions"
  ],
  "fields": [
   {
@@ -246,6 +247,13 @@
    "fieldtype": "Datetime",
    "label": "Last mail check",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "segment_user_permissions",
+   "fieldtype": "Check",
+   "label": "Cabin / Non-Cabin rule on ERPNext desk too",
+   "description": "Adds ERPNext User Permission on Customer Group per person (Cabin team: Cabin, Aditya: Non-Cabin). Switch on only after the old customers are tagged."
   }
  ],
  "permissions": [

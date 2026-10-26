@@ -8,7 +8,10 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, get_datetime, now_datetime, strip_html, time_diff_in_seconds
 
-SEGMENTS = ["Cabin", "Machine Shifting", "Job Work", "Modular / Labour Camp", "LGSF", "Other"]
+from sk_app.segments import SUB_SEGMENTS as SEGMENTS
+from sk_app.segments import TREE as SEGMENT_TREE
+from sk_app.segments import sub_of
+
 CALL_OUTCOMES = ["Talked", "No answer", "Busy", "Missed", "Call back later", "Wrong number"]
 CALL_LOG_STATUS = {"Talked": "Completed", "Call back later": "Completed", "No answer": "No Answer", "Busy": "Busy", "Missed": "No Answer",
 	"Wrong number": "Failed"}
@@ -47,6 +50,7 @@ def options() -> dict:
 		"deal_statuses": frappe.get_all("CRM Deal Status", fields=["name", "type"], order_by="position asc"),
 		"sources": frappe.get_all("CRM Lead Source", pluck="name", order_by="name asc"),
 		"segments": SEGMENTS,
+		"segment_tree": SEGMENT_TREE,
 		"call_outcomes": CALL_OUTCOMES,
 	}
 
@@ -235,6 +239,10 @@ def new_lead(user: str, first_name: str, mobile_no: str | None = None, organizat
 		frappe.throw(_("Frappe CRM is not installed"))
 	if not (first_name or "").strip():
 		frappe.throw(_("Please give the customer's name"))
+	# point 2: segment is required, so the right team (Cabin or Non-Cabin) gets the lead
+	segment = sub_of(segment)
+	if not segment:
+		frappe.throw(_("Please pick the segment (Cabin or Non-Cabin)"))
 	status = frappe.get_all("CRM Lead Status", order_by="position asc", pluck="name", limit=1)
 	doc = frappe.get_doc({
 		"doctype": "CRM Lead", "first_name": first_name.strip(), "mobile_no": (mobile_no or "").strip() or None,

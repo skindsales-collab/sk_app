@@ -8,11 +8,14 @@ DSI, Report Problem, My KPI) driven by their ERPNext tasks, and its own tiles ar
 COMMON_TILES = ["my_day", "calendar", "reminders", "day_report", "dsi", "problem", "my_kpi", "training"]
 # free contact tiles: the phone's own dialer / WhatsApp / mail, logged in CRM; paid parts show locked inside them
 CONTACT_TILES = ["calls", "whatsapp", "mail"]
+# point 13: the CEO's live dashboards, one icon per function (sk_app.dashboards.PAGES)
+DASH_TILES = ["dash_overview", "dash_daily_review", "dash_sales", "dash_marketing", "dash_machine_shifting", "dash_job_work",
+	"dash_cr100", "dash_finance", "dash_manufacturing", "dash_purchase", "dash_store", "dash_quality", "dash_hr", "dash_ai"]
 
 FUNCTIONS = {
 	"Sales": {
 		"label": {"English": "Sales", "Marathi": "विक्री"},
-		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "my_deals", "reminders", "library",
+		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "my_deals", "customers", "reminders", "library",
 			"day_report", "my_kpi", "dsi", "problem", "training"],
 		"live": True,
 		# not Sales Manager: in Frappe CRM that role shows every lead of the company (SK 26-Oct: each salesperson sees
@@ -78,7 +81,7 @@ FUNCTIONS = {
 	},
 	"Machine Shifting": {
 		"label": {"English": "Machine Shifting", "Marathi": "मशीन शिफ्टिंग"},
-		"tiles": COMMON_TILES + ["my_deals", "site_checklist"],
+		"tiles": COMMON_TILES + ["my_deals", "customers", "site_checklist"],
 		"live": False,
 		"erpnext_roles": ["Projects User", "Sales User"],
 		"desk": "/crm",
@@ -116,7 +119,7 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": ["ceo_view", "lead_sources", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
+		"tiles": [*DASH_TILES, "view_member", "lead_sources", "customers", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
 			"library", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager", "Purchase Manager", "Purchase User"],  # SK approves big POs

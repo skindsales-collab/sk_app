@@ -1,10 +1,12 @@
 """Endpoints used by the SK App phone screens. Every call works on the logged-in ERPNext user only."""
 
+import json
+
 import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import ai_desk, calendar_view, claude, colours, comms, crm, day_report, finance, guide, kpi, lead_sources, ledger, logins, mailbox, production, purchase, quality, store, training, work
+from sk_app import ai_desk, calendar_view, claude, colours, comms, crm, dashboards, day_report, finance, guide, kpi, lead_sources, ledger, logins, mailbox, production, purchase, quality, segments, store, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -66,11 +68,17 @@ def _colours(profile, functions):
 	counts = _badges(profile.user, functions)
 	try:
 		items = work.collect(profile.user, profile.home)
-		return colours.for_user(profile.user, items, bool(frappe.db.exists("SK DSI Entry", {"user": profile.user, "date": getdate()})),
+		out = colours.for_user(profile.user, items, bool(frappe.db.exists("SK DSI Entry", {"user": profile.user, "date": getdate()})),
 			bool(day_report._find(profile.user, getdate())), counts)
 	except Exception:
 		frappe.log_error("SK App icon colours")
-		return counts
+		out = counts
+	if "Management" in functions:  # point 13: red number on each live dashboard icon
+		try:
+			out.update(dashboards.badges(profile.user))
+		except Exception:
+			frappe.log_error("SK App dashboard badges")
+	return out
 
 
 def _badges(user, functions):
@@ -1015,3 +1023,39 @@ def lead_sources_switch(setting, on):
 def lead_sources_check_now():
 	lead_sources.status(_me().user)  # same rights as the page
 	return lead_sources.scan()
+
+
+# point 2: Cabin / Non-Cabin customers
+@frappe.whitelist()
+def customers(tab="mine", q=None, segment=None):
+	return segments.customers(_me().user, tab, q, segment)
+
+
+@frappe.whitelist(methods=["POST"])
+def tag_customer(customer, segment):
+	return segments.tag(_me().user, customer, segment)
+
+
+# point 3: CEO "View Member App"
+@frappe.whitelist()
+def view_members():
+	return view_member.members(_me().user)
+
+
+@frappe.whitelist()
+def view_as(member, method, args=None, view=None):
+	viewer = _me().user
+	if isinstance(args, str):
+		args = json.loads(args or "{}")
+	return view_member.view_as(viewer, member, method, args or {}, view)
+
+
+@frappe.whitelist(methods=["POST"])
+def view_suggest(member, text, view=None, photo=None):
+	return view_member.suggest(_me().user, member, view, text, photo)
+
+
+# point 13: CEO live dashboards
+@frappe.whitelist()
+def dash_page(key="overview", month=None, segment=None):
+	return dashboards.page(_me().user, key, month, segment)

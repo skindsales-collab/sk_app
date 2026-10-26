@@ -12,6 +12,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cint, getdate, strip_html
 
+from sk_app import segments
 from sk_app.functions import FUNCTIONS
 
 TAG = "[AI & ERP]"
@@ -175,7 +176,7 @@ def erp_gaps(user: str) -> list[dict]:
 	rows = [
 		("Suppliers without GSTIN", _count("Supplier", {"disabled": 0, "gstin": ["in", ["", None]]}) if frappe.db.has_column("Supplier", "gstin") else None,
 			_count("Supplier", {"disabled": 0}), "/app/supplier?gstin=%5B%22is%22%2C%22not%20set%22%5D"),
-		("Customers without segment", _count("Customer", {"disabled": 0, "sk_segment": ["in", ["", None]]}) if frappe.db.has_column("Customer", "sk_segment") else None,
+		("Customers without segment", _count("Customer", {"disabled": 0, "customer_group": ["not in", segments.all_groups()]}),
 			_count("Customer", {"disabled": 0}), "/app/customer"),
 		("Customers without mobile", _count("Customer", {"disabled": 0, "mobile_no": ["in", ["", None]]}) if frappe.db.has_column("Customer", "mobile_no") else None,
 			_count("Customer", {"disabled": 0}), "/app/customer"),

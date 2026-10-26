@@ -49,7 +49,7 @@ class TestMailLeads(IntegrationTestCase):
 		self.assertEqual(d["email"], "ramesh.patil@example.com")
 		self.assertEqual(d["organization"], "Patil Agro Industries")
 		self.assertIn("cabin", d["requirement"].lower())
-		self.assertEqual(lead_sources.segment_of(d["requirement"]), "Cabin")
+		self.assertEqual(lead_sources.segment_of(d["requirement"]), "Standard Cabin (GI / ACP)")
 		j = lead_sources.parse_mail("JD lead", JUSTDIAL, "JustDial")
 		self.assertEqual((j["first_name"], j["mobile_no"]), ("Suresh", "9822012345"))
 		self.assertEqual(lead_sources.segment_of(j["requirement"]), "Machine Shifting")

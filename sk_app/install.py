@@ -27,22 +27,21 @@ def after_migrate():
 	setup_site()
 	ensure_crm_fields()
 	ensure_mail_fields()
+	from sk_app import segments
+
+	segments.ensure_customer_groups()
+	segments.sync_user_permissions()
 	from sk_app.training import seed_lessons
 
 	seed_lessons()
 
 
 def ensure_crm_fields():
-	"""Segment on CRM Lead and CRM Deal (Cabin, Machine Shifting, Job Work ...), used by the app's new-lead form."""
-	if not frappe.db.exists("DocType", "CRM Lead"):
-		return
-	from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+	"""Two-level segment on CRM Lead and CRM Deal (Cabin: Standard / LGSF / Modular; Non-Cabin: Machine Shifting /
+	Job Work / Other), used by the app's new-lead form."""
+	from sk_app.segments import ensure_fields
 
-	from sk_app.crm import SEGMENTS
-
-	field = {"fieldname": "sk_segment", "label": "Segment", "fieldtype": "Select", "options": "\n" + "\n".join(SEGMENTS),
-		"insert_after": "source", "in_standard_filter": 1}
-	create_custom_fields({"CRM Lead": [field], "CRM Deal": [field]}, update=True)
+	ensure_fields()
 
 
 def ensure_mail_fields():

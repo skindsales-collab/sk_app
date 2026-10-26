@@ -233,3 +233,25 @@ html, body { overscroll-behavior-y: contain; }
 .sk-mailtext { max-height: 40vh; overflow-y: auto; white-space: pre-wrap; background: #f4f6fa; padding: 10px; border-radius: 8px; }
 .sk-muted { color: #8a93a3; }
 li.sk-off { opacity: .6; }
+/* point 3: CEO viewing a member's app (view only) */
+.sk-viewbar { position: sticky; top: 0; z-index: 60; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #ffd84d; color: #3a3000; font-weight: 700; }
+.sk-viewbar span { flex: 1; }
+.sk-viewbar button { border: 0; border-radius: 16px; padding: 6px 12px; font-weight: 700; background: #fff; }
+body.sk-viewing main .sk-micbox, body.sk-viewing main .sk-photo { display: none; }
+/* point 13: CEO live dashboards */
+.sk-dash-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.sk-dash-card { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; padding: 12px; border: 0; border-radius: 12px; background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.08); min-height: 92px; font: inherit; color: inherit; }
+.sk-dash-card.wide { grid-column: 1 / -1; }
+.sk-dash-card.c-red { box-shadow: inset 4px 0 0 var(--red), 0 1px 3px rgba(0,0,0,.08); }
+.sk-dash-card.c-amber { box-shadow: inset 4px 0 0 #e69500, 0 1px 3px rgba(0,0,0,.08); }
+.sk-dash-label { font-size: 13px; color: #556; }
+.sk-dash-value { font-size: 22px; }
+.sk-dash-mini { font-size: 13px; line-height: 1.4; }
+.sk-dash-card small { color: #778; font-size: 12px; }
+.sk-vbars { display: flex; align-items: flex-end; gap: 4px; height: 90px; width: 100%; }
+.sk-vbar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+.sk-vbar i { display: block; width: 100%; background: #1f3a68; border-radius: 3px 3px 0 0; min-height: 2px; }
+.sk-vbar small { font-size: 9px; color: #778; white-space: nowrap; }
+li.k-red { box-shadow: inset 4px 0 0 var(--red); }
+li.k-amber { box-shadow: inset 4px 0 0 #e69500; }
+li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }

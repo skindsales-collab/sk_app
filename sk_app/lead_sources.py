@@ -92,12 +92,17 @@ def parse_mail(subject: str | None, body: str | None, source: str | None = None)
 
 
 def segment_of(text: str) -> str:
+	"""Sub-segment from the enquiry words (point 2: two levels, Cabin / Non-Cabin)."""
 	low = (text or "").lower()
 	if "job work" in low or "machining" in low:
 		return "Job Work"
 	if any(w in low for w in NON_CABIN_WORDS):
 		return "Machine Shifting"
-	return "Cabin"
+	if "lgsf" in low or "light gauge" in low or "sgsf" in low:
+		return "LGSF"
+	if "labour camp" in low or "labor camp" in low or "modular" in low or "colony" in low:
+		return "Modular / Labour Camp"
+	return "Standard Cabin (GI / ACP)"
 
 
 def _fallback_owner() -> str | None:
@@ -113,7 +118,9 @@ def owner_for(source: str | None, segment: str) -> str | None:
 	"""Who gets the lead (SK): machine shifting / job work → Aditya; IndiaMART / JustDial (digital) → Pranali;
 	other cabin enquiries and GeM → Rushi, who gives them to the team."""
 	s = frappe.get_cached_doc("SK App Settings")
-	if segment in ("Machine Shifting", "Job Work") and s.get("lead_owner_noncabin"):
+	from sk_app.segments import NON_CABIN, main_of
+
+	if main_of(segment) == NON_CABIN and s.get("lead_owner_noncabin"):
 		return s.lead_owner_noncabin
 	if source in ("IndiaMART", "JustDial") and s.get("lead_owner_digital"):
 		return s.lead_owner_digital
@@ -142,7 +149,9 @@ def make_lead(data: dict, source: str | None, owner: str | None = None, note: st
 	if not frappe.db.exists("DocType", "CRM Lead"):
 		frappe.throw(_("Frappe CRM is not installed"))
 	text = " ".join(str(data.get(k) or "") for k in ("requirement", "organization"))
-	segment = data.get("segment") or segment_of(text)
+	from sk_app.segments import sub_of
+
+	segment = sub_of(data.get("segment")) or segment_of(text)
 	requirement = "\n".join(p for p in (data.get("requirement"), data.get("city") and f"City: {data['city']}", note) if p)
 	old = find_duplicate(data.get("mobile_no"), data.get("email"))
 	if old:

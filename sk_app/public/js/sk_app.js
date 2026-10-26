@@ -709,6 +709,41 @@
 		on_word: "चालू", off_word: "बंद", this_month2: "या महिन्यात", source_word: "स्रोत",
 		erp_roles: "ERPNext रोल", upload_failed: "फाईल पाठवता आली नाही.", draft_back: "सेव्ह न केलेला फॉर्म परत भरला.",
 	});
+	// change list point 2: Cabin / Non-Cabin customers
+	Object.assign(T.English, {
+		customers: "Customers", seg_not_set: "Segment not set", seg_all: "All", seg_cabin: "Cabin", seg_noncabin: "Non-Cabin",
+		pick_segment: "Please pick the segment (Cabin or Non-Cabin)", orders_word: "orders", tag_hint: "Tap the segment: the right team then sees this customer.",
+		seen_by_mgmt: "Customers without a segment are seen by Management only until tagged.",
+		"Cabin": "Cabin", "Non-Cabin": "Non-Cabin",
+	});
+	Object.assign(T.Marathi, {
+		customers: "ग्राहक", seg_not_set: "विभाग ठरवलेला नाही", seg_all: "सर्व", seg_cabin: "केबिन", seg_noncabin: "नॉन-केबिन",
+		pick_segment: "कृपया विभाग निवडा (केबिन की नॉन-केबिन)", orders_word: "ऑर्डर", tag_hint: "विभागावर टॅप करा: योग्य टीमला हा ग्राहक दिसेल.",
+		seen_by_mgmt: "विभाग नसलेले ग्राहक टॅग होईपर्यंत फक्त व्यवस्थापनाला दिसतात.",
+		"Cabin": "केबिन", "Non-Cabin": "नॉन-केबिन",
+	});
+	// change list point 3: CEO "View Member App"
+	Object.assign(T.English, {
+		view_member: "View Member App", viewing: "Viewing", viewing_app: "app", exit_view: "Exit", view_only: "View only: nothing is saved, sent or called in the member's name",
+		idea_q: "💡 Your idea for this page (speak or type)", idea_sent: "Idea sent to the AI & ERP desk", last_active: "last active",
+		view_hint: "Tap a member: the app opens exactly as they see it, with their data. View only.",
+	});
+	Object.assign(T.Marathi, {
+		view_member: "सदस्याचे ॲप पहा", viewing: "पाहत आहे:", viewing_app: "यांचे ॲप", exit_view: "बाहेर", view_only: "फक्त पाहणे: सदस्याच्या नावाने काहीही सेव्ह, पाठवले किंवा कॉल होत नाही",
+		idea_q: "💡 या पानासाठी तुमची कल्पना (बोला किंवा लिहा)", idea_sent: "कल्पना AI & ERP डेस्ककडे पाठवली", last_active: "शेवटचे सक्रिय",
+		view_hint: "सदस्यावर टॅप करा: ॲप त्यांना दिसते तसेच, त्यांच्या माहितीसह उघडते. फक्त पाहणे.",
+	});
+	// change list point 13: CEO live dashboards
+	Object.assign(T.English, {
+		dash_overview: "CEO Overview", dash_daily_review: "Daily Review", dash_sales: "Sales", dash_marketing: "Marketing", dash_machine_shifting: "Machine Shifting", dash_job_work: "Job Work", dash_cr100: "100 Cr", dash_finance: "Finance", dash_manufacturing: "Manufacturing", dash_purchase: "Purchase", dash_store: "Store", dash_quality: "Quality", dash_hr: "HR", dash_ai: "AI & ERP",
+		live_dash: "📊 Live dashboards (ERPNext)", vs_last: "last month", dash_open: "Tap a number to see its list, then a row for the full record.",
+		swipe_hint: "Swipe left / right for the next page", open_desk: "Open in ERPNext",
+	});
+	Object.assign(T.Marathi, {
+		dash_overview: "CEO आढावा", dash_daily_review: "दैनिक आढावा", dash_sales: "विक्री", dash_marketing: "मार्केटिंग", dash_machine_shifting: "मशीन शिफ्टिंग", dash_job_work: "जॉब वर्क", dash_cr100: "100 कोटी", dash_finance: "वित्त", dash_manufacturing: "उत्पादन", dash_purchase: "खरेदी", dash_store: "स्टोअर", dash_quality: "गुणवत्ता", dash_hr: "एचआर", dash_ai: "AI आणि ERP",
+		live_dash: "📊 लाईव्ह डॅशबोर्ड (ERPNext)", vs_last: "मागील महिना", dash_open: "यादीसाठी आकड्यावर टॅप करा, पूर्ण माहितीसाठी ओळीवर.",
+		swipe_hint: "पुढील पानासाठी डावीकडे / उजवीकडे सरकवा", open_desk: "ERPNext मध्ये उघडा",
+	});
 	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";
 	T.Marathi.mic_blocked = "माईक / कॅमेरा बंद आहे. Chrome → ⋮ → Settings → Site settings → Microphone (किंवा Camera) → ही साईट → Allow. मग परत येऊन 🎤 दाबा.";
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
@@ -724,13 +759,21 @@
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
-		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾",
+		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", view_member: "👀",
+		dash_overview: "🏁", dash_daily_review: "🗓️", dash_sales: "💼", dash_marketing: "📣", dash_machine_shifting: "🏗️", dash_job_work: "⚙️", dash_cr100: "🎯", dash_finance: "💰", dash_manufacturing: "🏭", dash_purchase: "🛒", dash_store: "📦", dash_quality: "✅", dash_hr: "👥", dash_ai: "🤖",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
 	const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+	// while the CEO views a member's app every reading screen runs as the member (their own permissions); saving is blocked
+	const VIEW_OWN = new Set(["view_members", "view_suggest", "report_screen_error"]);
 	async function call(method, args, post) {
+		if (state.viewAs && !VIEW_OWN.has(method)) {
+			if (post) throw new Error(t("view_only"));
+			args = { member: state.viewAs.user, method, args: JSON.stringify(args || {}), view: state.view };
+			method = "view_as";
+		}
 		const opts = { headers: { Accept: "application/json", "X-Frappe-CSRF-Token": CSRF }, credentials: "same-origin" };
 		let url = "/api/method/sk_app.api." + method;
 		if (post) {
@@ -908,7 +951,9 @@
 
 	// fixed at the top on every screen: back / logo, screen title, the person's name and function, language
 	function header(title) {
-		return `<header class="sk-head">
+		const bar = state.viewAs ? `<div class="sk-viewbar"><span>👀 ${t("viewing")} ${esc(state.viewAs.name)} ${t("viewing_app")}</span>
+			<button data-act="view-idea">💡</button><button data-act="view-exit">✕ ${t("exit_view")}</button></div>` : "";
+		return bar + `<header class="sk-head">
 			${state.view !== "home" ? `<button class="sk-back" data-go="home">‹</button>` : `<img src="/assets/sk_app/icons/icon-192.png" class="sk-logo" alt="SK">`}
 			<div class="sk-title">${esc(title)}<small>${esc(whoAmI())}</small></div>
 			<button class="sk-lang" data-act="lang">${t("lang")}</button>
@@ -952,14 +997,20 @@
 		const badge = { ...(h.badges || {}) };
 		if (dueNow().length) badge.reminders = { n: dueNow().length, c: "red" };
 		if (!badge.follow_up && (h.new_files || []).length) badge.follow_up = { n: h.new_files.length, c: "blue" };
-		if (h.must_set_pin) return renderSetPin();
+		if (h.must_set_pin && !state.viewAs) return renderSetPin();
 		const tile = (k) => {
 			const m = badge[k];
 			const o = m && typeof m === "object" ? m : m ? { n: m, c: "red" } : null;
 			const dot = !o ? "" : o.c === "green" ? `<b class="sk-dot green">✓</b>` : `<b class="sk-dot ${o.c}">${esc(o.n)}</b>`;
 			return `<button class="sk-tile ${o ? "c-" + o.c : ""} ${o && o.blink ? "blink" : ""}" data-go="${k}"><span class="sk-tile-icon">${ICON[k] || "•"}</span><span>${t(k)}</span>${dot}</button>`;
 		};
-		const tiles = (keys) => `<div class="sk-tiles small">${keys.map(tile).join("")}</div>`;
+		const plain = (keys) => `<div class="sk-tiles small">${keys.map(tile).join("")}</div>`;
+		// point 13: the CEO's live dashboards sit in their own row on top
+		const tiles = (keys) => {
+			const dash = keys.filter((k) => k.startsWith("dash_"));
+			const rest = keys.filter((k) => !k.startsWith("dash_"));
+			return (dash.length ? `<h3 class="sk-h sk-fn-row">${t("live_dash")}</h3>${plain(dash)}${rest.length ? `<div class="sk-gap"></div>` : ""}` : "") + (rest.length ? plain(rest) : "");
+		};
 		if (!h.sections) { root.innerHTML = header("SK App") + `<main>${tiles(fn.tiles)}</main>`; return; }
 		// a person in several functions: one labelled row per function, then the tiles everyone has (SK, 26-Oct)
 		const label = (l) => (l && (l[state.lang] || l.English)) || "";
@@ -1380,6 +1431,13 @@
 		a.click();
 	}
 
+	// two levels like Tally (point 2): Cabin → Standard / LGSF / Modular, Non-Cabin → Machine Shifting / Job Work / Other
+	function segmentSelect(id, tree, flat) {
+		const groups = tree ? Object.entries(tree).map(([main, subs]) => `<optgroup label="${esc(t(main))}">${subs.map((x) => `<option>${esc(x)}</option>`).join("")}</optgroup>`).join("")
+			: (flat || []).map((x) => `<option>${esc(x)}</option>`).join("");
+		return `<label class="sk-field"><span>${t("segment")} *</span><select id="${id}" class="sk-select"><option value=""></option>${groups}</select></label>`;
+	}
+
 	async function renderNewLead() {
 		const o = await options();
 		const sel = (id, label, items) => `<label class="sk-field"><span>${esc(label)}</span><select id="${id}" class="sk-select"><option value=""></option>${(items || []).map((x) => `<option>${esc(x)}</option>`).join("")}</select></label>`;
@@ -1388,7 +1446,7 @@
 			${formField("f-first", t("cust_name"))}${formField("f-org", t("company"))}
 			<label class="sk-field"><span>${t("mobile")}</span><div class="sk-input-row"><input id="f-mobile" type="tel"></div></label>
 			<label class="sk-field"><span>${t("email")}</span><div class="sk-input-row"><input id="f-email" type="email"></div></label>
-			${sel("f-source", t("source"), o.sources)}${sel("f-segment", t("segment"), o.segments)}
+			${sel("f-source", t("source"), o.sources)}${segmentSelect("f-segment", o.segment_tree, o.segments)}
 			${formField("f-req", t("requirement"), true)}
 			<button class="sk-btn ok wide" data-act="save-lead">${t("save")}</button>
 			<details class="sk-gap"><summary>📄 ${t("upload_list")}</summary>${uploadBox()}</details></main>`;
@@ -1775,6 +1833,128 @@
 			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
 	}
 
+	// CEO live dashboards (point 13): one page per function, live from ERPNext; number → its list → the full record
+	let dashMonth = null, dashSeg = "", dashData = null;
+	const shortMoney = (x) => {
+		const v = Number(x || 0), a = Math.abs(v);
+		return a >= 1e7 ? `Rs ${(v / 1e7).toFixed(2)} Cr` : a >= 1e5 ? `Rs ${(v / 1e5).toFixed(1)} L` : money(v);
+	};
+	function dashValue(kind, v) {
+		if (v == null) return "—";
+		return kind === "money" ? shortMoney(v) : kind === "pct" ? `${v}%` : Number(v).toLocaleString("en-IN");
+	}
+	function bars(rows) {
+		const max = Math.max(1, ...rows.map((r) => Number(r.value || 0)));
+		return `<div class="sk-vbars">${rows.map((r) => `<div class="sk-vbar" title="${esc(r.title)}: ${esc(r.value)}"><i style="height:${Math.round(Number(r.value || 0) * 100 / max)}%"></i><small>${esc(r.title)}</small></div>`).join("")}</div>`;
+	}
+	async function renderDash(key) {
+		const d = await call("dash_page", { key, ...(dashMonth ? { month: dashMonth } : {}), ...(dashSeg ? { segment: dashSeg } : {}) });
+		if (state.view !== "dash_" + key) return;
+		dashData = d;
+		const title = d.title[state.lang] || d.title.English;
+		const m = new Date(d.month);
+		const segs = ["machine_shifting", "job_work"].includes(key) ? "" : `<div class="sk-row sk-wrap">${[["", t("seg_all")], ["Cabin", t("seg_cabin")], ["Non-Cabin", t("seg_noncabin")]]
+			.map(([k, label]) => `<button class="sk-chip ${dashSeg === k ? "on" : ""}" data-dashseg="${k}">${label}</button>`).join("")}</div>`;
+		root.innerHTML = header(title) + `<main class="sk-dash">
+			<div class="sk-row"><button class="sk-chip" data-dashmonth="-1">‹</button><b style="flex:1;text-align:center">${m.toLocaleString(state.lang === "Marathi" ? "mr-IN" : "en-IN", { month: "long", year: "numeric" })}</b><button class="sk-chip" data-dashmonth="1">›</button></div>
+			${segs}
+			<div class="sk-dash-cards">${d.cards.map((c, i) => {
+				const diff = c.prev != null && c.kind === "money" && c.prev ? Math.round((c.value - c.prev) * 100 / Math.abs(c.prev)) : null;
+				return `<button class="sk-dash-card ${c.c ? "c-" + c.c : ""} ${c.kind === "series" ? "wide" : ""}" data-dcard="${i}">
+					<span class="sk-dash-label">${esc(c.label)}</span>
+					${c.kind === "series" ? bars(c.rows || []) : c.kind === "list" ? `<span class="sk-dash-mini">${(c.rows || []).slice(0, 4).map((r) => `${esc(r.title)}: <b>${esc(typeof r.value === "number" && r.value > 9999 ? shortMoney(r.value) : r.value == null ? "" : r.value)}</b>`).join("<br>")}</span>`
+						: `<b class="sk-dash-value">${dashValue(c.kind, c.value)}</b>`}
+					${c.prev != null ? `<small>${t("vs_last")}: ${dashValue(c.kind, c.prev)}${diff != null ? ` (${diff >= 0 ? "▲" : "▼"} ${Math.abs(diff)}%)` : ""}</small>` : ""}</button>`;
+			}).join("")}</div>
+			<p class="sk-note">${t("dash_open")} ${t("swipe_hint")} · ${esc(d.refreshed_at)}</p></main>`;
+	}
+	function renderDashList(i) {
+		const c = dashData.cards[i];
+		const rows = c.rows || [];
+		root.innerHTML = header(c.label) + `<main><button class="sk-btn wide" data-go="${esc(state.view)}">‹ ${esc(dashData.title[state.lang] || dashData.title.English)}</button>
+			<ul class="sk-list">${rows.map((r, j) => `<li class="sk-item ${r.c ? "k-" + r.c : ""}"><button class="sk-fu-main" data-drow="${j}" data-dcardi="${i}">
+				<div class="sk-item-title">${r.c === "red" ? "🔴 " : r.c === "amber" ? "🟠 " : r.c === "green" ? "🟢 " : ""}${esc(r.title)}</div>
+				<div class="sk-item-meta">${esc(r.meta || "")}</div></button>
+				${r.value != null ? `<b>${typeof r.value === "number" && Math.abs(r.value) > 9999 ? shortMoney(r.value) : esc(r.value)}</b>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+	}
+	function openDashRow(i, j) {
+		const r = dashData.cards[i].rows[j];
+		if (!r.doctype || !r.name) return;
+		if (r.doctype === "CRM Lead" || r.doctype === "CRM Deal") { current = { doctype: r.doctype, name: r.name }; return go("detail"); }
+		if (r.doctype === "User") return;
+		window.open(`/app/${r.doctype.toLowerCase().replace(/ /g, "-")}/${encodeURIComponent(r.name)}`, "_blank");
+	}
+	// swipe left / right on a dashboard page: the next / previous function
+	let touchX = null;
+	root.addEventListener("touchstart", (ev) => { touchX = state.view.startsWith("dash_") && ev.touches.length === 1 ? ev.touches[0].clientX : null; }, { passive: true });
+	root.addEventListener("touchend", (ev) => {
+		if (touchX == null || !dashData || !state.view.startsWith("dash_")) return;
+		const dx = ev.changedTouches[0].clientX - touchX;
+		touchX = null;
+		if (Math.abs(dx) < 80) return;
+		const pages = dashData.pages, at = pages.indexOf(state.view.slice(5));
+		const next = pages[(at + (dx < 0 ? 1 : -1) + pages.length) % pages.length];
+		go("dash_" + next);
+	}, { passive: true });
+
+	// View Member App (point 3): all members by function, last active; tap one to open their app as they see it
+	let vmQuery = "";
+	async function renderViewMember() {
+		const d = await call("view_members");
+		const q = vmQuery.toLowerCase();
+		root.innerHTML = header(t("view_member")) + `<main><p class="sk-note">${t("view_hint")}</p>
+			<div class="sk-input-row sk-gap"><input id="vm-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(vmQuery)}">${micBox("vm-q")}</div>
+			${d.groups.map((g) => {
+				const people = g.people.filter((p) => !q || p.full_name.toLowerCase().includes(q));
+				return people.length ? `<h3 class="sk-h">${esc((g.label && (g.label[state.lang] || g.label.English)) || g.function)}</h3><ul class="sk-list">${people.map((p) => `<li class="sk-item"><button class="sk-fu-main" data-act="view-enter" data-user="${esc(p.user)}" data-uname="${esc(p.full_name)}">
+					<div class="sk-item-title">👤 ${esc(p.full_name)}</div><div class="sk-item-meta">${p.functions.map(esc).join(", ")} · ${t("last_active")}: ${esc(p.last_active || t("never"))}</div></button></li>`).join("")}</ul>` : "";
+			}).join("")}</main>`;
+	}
+	async function enterView(user, name) {
+		state.own = { home: state.home, lang: state.lang };
+		state.viewAs = { user, name };
+		crmOpts = null; contacts = null;
+		try {
+			state.view = "home";
+			state.home = await call("home");
+		} catch (e) { state.viewAs = null; state.home = state.own.home; throw e; }
+		state.lang = state.home.language || "English";
+		document.body.classList.add("sk-viewing");
+		return go("home");
+	}
+	function exitView() {
+		if (!state.viewAs) return go("home");
+		state.viewAs = null;
+		state.home = state.own.home; state.lang = state.own.lang;
+		crmOpts = null; contacts = null;
+		document.body.classList.remove("sk-viewing");
+		return go("view_member");
+	}
+
+	// Customers by segment (point 2): the cabin team sees Cabin customers, Aditya Non-Cabin, Management both.
+	// "Segment not set": Management, Rushi and Aditya tag old customers with one tap.
+	let custTab = "mine", custSeg = "", custQuery = "";
+	async function renderCustomers() {
+		const d = await call("customers", { tab: custTab, q: custQuery, segment: custSeg });
+		S.cust = d.rows;
+		const tab = (k, label) => `<button class="${custTab === k ? "on" : ""}" data-custtab="${k}">${label}</button>`;
+		const segChips = d.main === "Both" && custTab === "mine" ? `<div class="sk-row sk-wrap">${[["", t("seg_all")], ["Cabin", t("seg_cabin")], ["Non-Cabin", t("seg_noncabin")]]
+			.map(([k, label]) => `<button class="sk-chip ${custSeg === k ? "on" : ""}" data-custseg="${k}">${label}</button>`).join("")}</div>` : "";
+		const tagRow = (r, i) => Object.entries(d.tree).map(([main, subs]) => `<div class="sk-row sk-wrap"><span class="chip2 ${main === "Cabin" ? "navy" : "yel"}">${esc(t(main))}</span>${subs.map((x) =>
+			`<button class="sk-chip" data-act="cust-tag" data-i="${i}" data-seg="${esc(x)}">${esc(x)}</button>`).join("")}</div>`).join("");
+		root.innerHTML = header(t("customers")) + `<main>
+			${d.can_tag ? `<div class="cal-tabs">${tab("mine", "🏠 " + (d.main === "Both" ? t("customers") : t(d.main)))}${tab("not_set", `❓ ${t("seg_not_set")}${d.not_set ? ` (${d.not_set})` : ""}`)}</div>` : ""}
+			${segChips}
+			<div class="sk-input-row sk-gap"><input id="cust-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(custQuery)}">${micBox("cust-q")}</div>
+			${custTab === "not_set" ? `<p class="sk-note">${t("tag_hint")} ${t("seen_by_mgmt")}</p>` : ""}
+			<ul class="sk-list">${d.rows.map((r, i) => `<li class="sk-item"><div style="flex:1">
+				<div class="sk-item-title">${esc(r.customer_name || r.name)}</div>
+				<div class="sk-item-meta">${[r.segment ? `<span class="chip2 ${r.main === "Cabin" ? "navy" : "yel"}">${esc(r.segment)}</span>` : esc(r.customer_group || ""),
+					r.mobile_no ? esc(r.mobile_no) : "", r.orders ? `${money(r.orders)} ${t("orders_word")}` : ""].filter(Boolean).join(" · ")}</div>
+				${custTab === "not_set" ? tagRow(r, i) : ""}</div>
+				${r.mobile_no ? `<a class="sk-chip" href="tel:${esc(r.mobile_no)}">📞</a>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+	}
+
 	// Lead Sources (Samir / SK): IndiaMART, JustDial and GeM from mails (free), the Excel upload, mailboxes set up or not
 	async function renderLeadSources() {
 		const d = await call("lead_sources_status");
@@ -1874,6 +2054,8 @@
 	let fuTimer = null;
 	root.addEventListener("input", (ev) => {
 		const el = ev.target;
+		if (el.id === "vm-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { vmQuery = el.value; renderViewMember().then(() => { const i = document.getElementById("vm-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 300); return; }
+		if (el.id === "cust-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { custQuery = el.value; renderCustomers().then(() => { const i = document.getElementById("cust-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
 		if (el.id === "fu-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { fuQuery = el.value; renderFollowUp().then(() => { const i = document.getElementById("fu-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
 		if (el.dataset && el.dataset.filter) {
 			const q = el.value.toLowerCase();
@@ -2772,7 +2954,9 @@
 		expenses: () => finScreen("expenses", renderExpenses), dir_expenses: () => finScreen("dir_expenses"),
 		segment_pnl: renderSegmentWise, month_close: renderMonthWise,
 		improvement_inbox: renderInbox, dept_visits: renderVisit, erp_gaps: renderGaps, app_users: renderAppUsers, change_list: renderChangeList,
-		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources };
+		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources, customers: renderCustomers, view_member: renderViewMember };
+	["overview", "daily_review", "sales", "marketing", "machine_shifting", "job_work", "cr100", "finance", "manufacturing", "purchase",
+		"store", "quality", "hr", "ai"].forEach((k) => { LIVE_VIEWS["dash_" + k] = () => renderDash(k); });
 
 	const reported = new Set();
 	function reportError(view, msg) {
@@ -2805,6 +2989,13 @@
 			} else toast(e.message, true);
 		}
 	}
+
+	// view only: no call, WhatsApp or mail goes out in the member's name
+	document.addEventListener("click", (ev) => {
+		if (!state.viewAs) return;
+		const a = ev.target.closest('a[href^="tel:"], a[href^="mailto:"], a[href*="wa.me"], a[href^="whatsapp:"], a[href^="sms:"]');
+		if (a) { ev.preventDefault(); ev.stopPropagation(); toast(t("view_only")); }
+	}, true);
 
 	root.addEventListener("click", async (ev) => {
 		const el = ev.target.closest("button, [data-go]");
@@ -2870,6 +3061,17 @@
 			if (el.dataset.mic) return speakInto(document.getElementById(el.dataset.mic), el);
 			if (el.dataset.pick) return pickFile(el.dataset.pick, el.dataset.how);
 			if (el.dataset.mailtab) { mailTab = el.dataset.mailtab; return go("mail"); }
+			if (el.dataset.dcard !== undefined) return renderDashList(Number(el.dataset.dcard));
+			if (el.dataset.drow !== undefined) return openDashRow(Number(el.dataset.dcardi), Number(el.dataset.drow));
+			if (el.dataset.dashseg !== undefined) { dashSeg = el.dataset.dashseg; return go(state.view); }
+			if (el.dataset.dashmonth) {
+				const d = dashMonth ? new Date(dashMonth) : new Date();
+				d.setDate(1); d.setMonth(d.getMonth() + Number(el.dataset.dashmonth));
+				dashMonth = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-01`;
+				return go(state.view);
+			}
+			if (el.dataset.custtab) { custTab = el.dataset.custtab; return go("customers"); }
+			if (el.dataset.custseg !== undefined) { custSeg = el.dataset.custseg; return go("customers"); }
 			if (el.dataset.tmail !== undefined) return teamMailSheet(Number(el.dataset.tmail));
 			if (el.dataset.fintab) { finTab[el.dataset.view] = el.dataset.fintab; return go(el.dataset.view); }
 			if (el.dataset.ledger !== undefined) return renderLedgerEntries(Number(el.dataset.ledger));
@@ -2976,6 +3178,7 @@
 			if (act === "read" && state.card) return readAloud(state.card.card_text);
 			if (act === "lang") {
 				state.lang = state.lang === "English" ? "Marathi" : "English";
+				if (state.viewAs) return go(state.view); // the member's own language setting is not changed
 				await call("set_language", { language: state.lang }, true);
 				state.card = await call("next_card", { force: 1 }, true);
 				return go(state.view);
@@ -3013,6 +3216,25 @@
 				closeSheet();
 				toast(t("saved"));
 				return go("mail");
+			}
+			if (act === "view-enter") return enterView(el.dataset.user, el.dataset.uname);
+			if (act === "view-exit") return exitView();
+			if (act === "view-idea") {
+				sheet(`<h3 class="sk-h">💡 ${esc(state.viewAs.name)} · ${esc(t(state.view))}</h3>${formField("vi-text", t("idea_q"), true)}
+					<button class="sk-btn ok wide" data-act="view-idea-save">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+				return;
+			}
+			if (act === "view-idea-save") {
+				await call("view_suggest", { member: state.viewAs.user, view: state.view, text: val("vi-text") }, true);
+				closeSheet();
+				toast(t("idea_sent"));
+				return;
+			}
+			if (act === "cust-tag") {
+				const r = S.cust[Number(el.dataset.i)];
+				await call("tag_customer", { customer: r.name, segment: el.dataset.seg }, true);
+				toast(t("saved"));
+				return go("customers");
 			}
 			if (act === "ls-check") { const r = await call("lead_sources_check_now", {}, true); toast(`${r.made || 0} ${t("leads_made")}`); return go("lead_sources"); }
 			if (act === "ls-switch") { await call("lead_sources_switch", { setting: el.dataset.setting, on: el.dataset.on }, true); return go("lead_sources"); }
@@ -3163,6 +3385,7 @@
 				return;
 			}
 			if (act === "save-lead") {
+				if (!val("f-segment")) { toast(t("pick_segment")); document.getElementById("f-segment").focus(); return; }
 				el.disabled = true;
 				const name = await call("new_lead", { first_name: val("f-first"), organization: val("f-org"), mobile_no: val("f-mobile"),
 					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl }, true);

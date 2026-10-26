@@ -23,7 +23,8 @@
   "functions",
   "workstation",
   "language",
-  "manager"
+  "manager",
+  "sk_main_segment"
  ],
  "fields": [
   {
@@ -103,6 +104,13 @@
    "default": "0",
    "read_only": 1,
    "description": "Set when HR makes or resets the login; cleared when the person sets their own PIN."
+  },
+  {
+   "fieldname": "sk_main_segment",
+   "fieldtype": "Select",
+   "label": "Segment (customers seen)",
+   "options": "\nCabin\nNon-Cabin\nBoth",
+   "description": "Cabin team sees Cabin customers, Aditya Non-Cabin, Management / Accounts both. Blank: from the function."
   }
  ],
  "permissions": [

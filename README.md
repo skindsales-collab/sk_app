@@ -165,3 +165,23 @@ Score = actual / target (capped at 120%) x weight. Sources that are not live yet
   IndiaMART's Leads API is a paid add-on and is not used.
 - **Excel upload**: the IndiaMART Lead Manager export (or a JustDial list) uploaded from New Lead or Lead Sources.
 - **Lead Sources** page (AI & ERP, CEO): sources on / off, leads today / this month, check now, mailboxes set up.
+
+## Change list Rev 13, part C: segments, View Member App, CEO dashboards (26-Oct-2026)
+
+- **Point 2, Cabin / Non-Cabin** (`segments.py`): Customer Group is the segment. The tree is All Customer Groups → Cabin
+  (Standard Cabin (GI / ACP), LGSF, Modular / Labour Camp) and Non-Cabin (Machine Shifting, Job Work, Other Non-Cabin).
+  CRM Lead / Deal keep the sub-segment in `sk_segment` and get `sk_main_segment`, filled on save. Segment is required on a
+  new lead. A customer made from a won deal gets the deal's group. SK App User → *Segment (customers seen)*: Cabin team
+  Cabin, Aditya Non-Cabin, Management / Accounts both (blank = from the function). The 🏠 Customers icon shows only the
+  person's segment; Management, the sales manager and Aditya also get "Segment not set" with one-tap tagging (the old
+  Commercial / Government / Individual group moves to Customer Type and is noted on the customer). The same rule on the
+  ERPNext desk (User Permission on Customer Group) is a switch in SK App Settings, off until old customers are tagged.
+  The Tally import of old customers comes later, after SK checks the match list.
+- **Point 3, 👀 View Member App** (`view_member.py`): the CEO picks a member and the app opens as that member sees it.
+  Every reading screen runs with the member's own ERPNext permissions (`api.view_as`, GET endpoints only, rolled back
+  after). Save / send / call are blocked, mic and camera are hidden, and the PIN page is never shown. A yellow bar has
+  💡 (idea goes to the AI & ERP inbox with the page name) and Exit. Each view is written to Activity Log.
+- **Point 13, 📊 Live dashboards** (`dashboards.py`): 14 icons on the CEO Home: Overview, Daily Review, Sales, Marketing,
+  Machine Shifting, Job Work, 100 Cr, Finance, Manufacturing, Purchase, Store, Quality, HR, AI & ERP. Each is live from
+  ERPNext with month and Cabin / Non-Cabin filters and last month's figure. A number opens its list and a row opens
+  the record. Swipe left / right moves between pages. A red number on an icon means items need attention there.
