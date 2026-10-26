@@ -4,7 +4,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime
 
-from sk_app import calendar_view, claude, comms, crm, day_report, guide, kpi, logins, production, purchase, quality, store, training, work
+from sk_app import calendar_view, claude, comms, crm, day_report, finance, guide, kpi, logins, production, purchase, quality, store, training, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -57,7 +57,7 @@ def _badges(user, functions):
 	"""Red counts on Store / Purchase / approval icons; never breaks Home if ERPNext data is odd."""
 	try:
 		return {**store.badges(user, functions), **purchase.badges(user, functions), **production.badges(user, functions),
-			**quality.badges(user, functions)}
+			**quality.badges(user, functions), **finance.badges(user, functions)}
 	except Exception:
 		frappe.log_error("SK App badges")
 		return {}
@@ -438,6 +438,118 @@ def hr_reset_pin(user):
 def hr_close_login(user):
 	_me()
 	return logins.close_login(frappe.session.user, user)
+
+
+# ---------- Finance (SK draft F06) ----------
+
+@frappe.whitelist()
+def fin_cash():
+	return finance.cash_today(_me().user)
+
+
+@frappe.whitelist()
+def fin_collect():
+	return finance.to_collect(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def fin_promise(sales_invoice, text=None, promised_on=None):
+	return finance.promise(_me().user, sales_invoice, text, promised_on)
+
+
+@frappe.whitelist(methods=["POST"])
+def fin_receive(reference_doctype, reference_name, amount, mode=None, reference_no=None, reference_date=None, photo=None):
+	return finance.receive_payment(_me().user, reference_doctype, reference_name, amount, mode, reference_no, reference_date, photo)
+
+
+@frappe.whitelist()
+def fin_to_pay():
+	return finance.to_pay(_me().user)
+
+
+@frappe.whitelist()
+def fin_pay_approvals():
+	return finance.pay_approvals(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def fin_approve_payment(purchase_invoice):
+	return finance.approve_payment(_me().user, purchase_invoice)
+
+
+@frappe.whitelist(methods=["POST"])
+def fin_ask_approval(purchase_invoice):
+	return finance.ask_approval(_me().user, purchase_invoice)
+
+
+@frappe.whitelist(methods=["POST"])
+def fin_pay(purchase_invoice, amount=None, mode=None, reference_no=None, reference_date=None, photo=None):
+	return finance.pay(_me().user, purchase_invoice, amount, mode, reference_no, reference_date, photo)
+
+
+@frappe.whitelist()
+def fin_bills():
+	return finance.bills_to_post(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def fin_make_bill(purchase_order, bill_no, bill_date=None, todo=None, photo=None):
+	return finance.make_bill(_me().user, purchase_order, bill_no, bill_date, todo, photo)
+
+
+@frappe.whitelist(methods=["POST"])
+def fin_post(doctype, name):
+	return finance.post(_me().user, doctype, name)
+
+
+@frappe.whitelist(methods=["POST"])
+def fin_bill_photo_done(todo):
+	return finance.done_bill_photo(_me().user, todo)
+
+
+@frappe.whitelist()
+def fin_invoices():
+	return finance.invoices(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def fin_make_invoice(delivery_note):
+	return finance.make_invoice(_me().user, delivery_note)
+
+
+@frappe.whitelist()
+def fin_expenses():
+	return finance.expenses(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def fin_pay_expense(expense_claim):
+	return finance.pay_expense(_me().user, expense_claim)
+
+
+@frappe.whitelist()
+def fin_voucher_options():
+	return finance.voucher_options(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def fin_petty_cash(expense_account, amount, cash_account, cost_center=None, narration=None, photo=None):
+	return finance.petty_cash(_me().user, expense_account, amount, cash_account, cost_center, narration, photo)
+
+
+@frappe.whitelist()
+def fin_segment_pnl(month=None):
+	return finance.segment_pnl(_me().user, month)
+
+
+@frappe.whitelist()
+def fin_month_close():
+	return finance.month_close(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def fin_tick_close(key, done=1):
+	return finance.tick_close(_me().user, key, done)
 
 
 # ---------- Store (SK draft F01) ----------

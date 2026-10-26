@@ -501,6 +501,155 @@
 		bulk_pin_note: "प्रत्येक पिन आत्ताच लिहून घ्या किंवा WhatsApp करा: तो एकदाच दिसतो.",
 		keeps_password: "ॲडमिन: तोच पासवर्ड राहील",
 	});
+	// Finance screens (26-Oct-2026)
+	Object.assign(T.English, {
+		cash_today: "Cash Today",
+		to_collect: "To Collect",
+		to_pay: "To Pay",
+		pay_approvals: "Payment OK",
+		bills_to_post: "Bills to Post",
+		invoices: "Invoices",
+		expenses: "Expenses",
+		segment_pnl: "Segment P&L",
+		month_close: "Month Close",
+		pay_mode: "Mode",
+		utr_no: "UTR / cheque no.",
+		pay_date: "Payment date",
+		pay_proof: "Payment screenshot / photo",
+		bank_cash_now: "Bank + cash now",
+		in_today: "in today",
+		out_today: "out today",
+		today_payments: "Payments today",
+		no_bank_yet: "No bank or cash account in ERPNext yet: ask Samir to add the bank account.",
+		over_60: "Over 60 days",
+		d31_60: "31 to 60 days",
+		d0_30: "1 to 30 days late",
+		not_due: "Not yet due",
+		days_late: "days late",
+		promise: "Promise",
+		received: "Received",
+		total_due: "Total due",
+		pay_rule: "Above the PO limit, SK's OK is needed before paying.",
+		bill: "Bill",
+		ask_sk: "Ask SK",
+		paid: "Paid",
+		bill_photos: "Bill photos from Purchase / Store",
+		see_photo: "photo",
+		make_bill: "Make bill",
+		already_done: "Done",
+		drafts_check: "Drafts to check and post",
+		check: "Check",
+		post: "Post",
+		posted: "posted",
+		dispatched_no_invoice: "Dispatched, no invoice yet",
+		make_invoice: "Make invoice",
+		petty_cash: "Petty cash voucher",
+		claims_to_pay: "Approved expense claims to pay",
+		this_month: "This month margin",
+		income: "Income",
+		cost: "Cost",
+		pnl_note: "From ERPNext books by cost centre. Only as good as the entries made.",
+		mc_stock_close: "Stock closing",
+		mc_pnl: "P&L",
+		mc_mar: "MAR (monthly review)",
+		mc_gstr1: "GSTR-1",
+		mc_gstr3b: "GSTR-3B",
+		by_date: "By",
+		wa_due_1: "Dear",
+		wa_due_2: "Gentle reminder: invoice",
+		wa_due_3: "has",
+		wa_due_4: "Kindly arrange the payment. Thank you.",
+		what_customer_said: "What did the customer say? (speak)",
+		promised_on: "Promised date",
+		save_payment: "Save payment",
+		kept_draft: "saved as draft (see note in ERPNext)",
+		asked_sk: "SK is asked",
+		against_po: "Against PO",
+		supplier_bill_no: "Supplier's bill no.",
+		bill_date: "Bill date",
+		no_po_bill: "No open PO for this supplier: make this bill in ERPNext.",
+		pick_po: "Please pick the PO",
+		draft_made: "draft made, check and post",
+		voucher_photo: "Voucher / bill photo",
+		spent_on: "Spent on what? (speak)",
+		expense_head: "Expense head",
+		paid_from: "Paid from",
+		segment: "Segment",
+	});
+	Object.assign(T.Marathi, {
+		cash_today: "आजची रोकड",
+		to_collect: "येणे बाकी",
+		to_pay: "देणे बाकी",
+		pay_approvals: "पेमेंट मंजुरी",
+		bills_to_post: "बिल पोस्ट करा",
+		invoices: "इनव्हॉइस",
+		expenses: "खर्च",
+		segment_pnl: "विभागवार नफा",
+		month_close: "महिना बंद",
+		pay_mode: "प्रकार",
+		utr_no: "UTR / चेक नं.",
+		pay_date: "पेमेंट तारीख",
+		pay_proof: "पेमेंट स्क्रीनशॉट / फोटो",
+		bank_cash_now: "आता बँक + रोकड",
+		in_today: "आज आले",
+		out_today: "आज गेले",
+		today_payments: "आजचे पेमेंट",
+		no_bank_yet: "ERPNext मध्ये बँक / कॅश खाते नाही: समीरला बँक खाते टाकायला सांगा.",
+		over_60: "60 दिवसांपेक्षा जास्त",
+		d31_60: "31 ते 60 दिवस",
+		d0_30: "1 ते 30 दिवस उशीर",
+		not_due: "अजून मुदत आहे",
+		days_late: "दिवस उशीर",
+		promise: "वचन",
+		received: "मिळाले",
+		total_due: "एकूण येणे",
+		pay_rule: "PO मर्यादेपेक्षा जास्त रकमेसाठी पेमेंटआधी SK ची मंजुरी लागते.",
+		bill: "बिल",
+		ask_sk: "SK ला विचारा",
+		paid: "दिले",
+		bill_photos: "खरेदी / स्टोअरकडून आलेले बिल फोटो",
+		see_photo: "फोटो",
+		make_bill: "बिल बनवा",
+		already_done: "झाले",
+		drafts_check: "तपासून पोस्ट करायचे ड्राफ्ट",
+		check: "तपासा",
+		post: "पोस्ट",
+		posted: "पोस्ट झाले",
+		dispatched_no_invoice: "डिस्पॅच झाले, इनव्हॉइस नाही",
+		make_invoice: "इनव्हॉइस बनवा",
+		petty_cash: "पेटी कॅश व्हाउचर",
+		claims_to_pay: "मंजूर खर्च, पेमेंट बाकी",
+		this_month: "या महिन्याचा नफा",
+		income: "उत्पन्न",
+		cost: "खर्च",
+		pnl_note: "ERPNext च्या हिशोबातून, कॉस्ट सेंटरनुसार. नोंदी जितक्या बरोबर तितके बरोबर.",
+		mc_stock_close: "स्टॉक क्लोजिंग",
+		mc_pnl: "नफा-तोटा",
+		mc_mar: "MAR (मासिक आढावा)",
+		mc_gstr1: "GSTR-1",
+		mc_gstr3b: "GSTR-3B",
+		by_date: "तारीख",
+		wa_due_1: "नमस्कार",
+		wa_due_2: "आठवण: इनव्हॉइस",
+		wa_due_3: "ची रक्कम",
+		wa_due_4: "कृपया पेमेंट करावे. धन्यवाद.",
+		what_customer_said: "ग्राहक काय म्हणाले? (बोला)",
+		promised_on: "वचन दिलेली तारीख",
+		save_payment: "पेमेंट सेव्ह करा",
+		kept_draft: "ड्राफ्ट म्हणून सेव्ह (ERPNext मध्ये नोंद पहा)",
+		asked_sk: "SK ला विचारले",
+		against_po: "कोणत्या PO साठी",
+		supplier_bill_no: "सप्लायरचा बिल नं.",
+		bill_date: "बिल तारीख",
+		no_po_bill: "या सप्लायरचा उघडा PO नाही: हे बिल ERPNext मध्ये बनवा.",
+		pick_po: "PO निवडा",
+		draft_made: "ड्राफ्ट बनला, तपासून पोस्ट करा",
+		voucher_photo: "व्हाउचर / बिल फोटो",
+		spent_on: "कशावर खर्च? (बोला)",
+		expense_head: "खर्च खाते",
+		paid_from: "कुठून दिले",
+		segment: "विभाग",
+	});
 	const ICON = {
 		my_day: "☀️", my_leads: "📞", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
 		job_cards: "🛠️", inspections: "✅", stock_alerts: "📦", material_requests: "🧾", invoice_photo: "📷",
@@ -511,6 +660,7 @@
 		buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅",
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁",
+		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
 	const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -1937,6 +2087,159 @@
 		return false;
 	}
 
+	// ---------- Finance (SK draft F06, 26-Oct-2026) ----------
+	const MODES = ["Bank Draft", "Wire Transfer", "Cheque", "Cash", "UPI"];
+	const payFields = (pre, amount) => `<label class="sk-field"><span>${t("amount")}</span>${qtyBox(pre + "-amt", amount)}</label>
+		${pick(pre + "-mode", t("pay_mode"), MODES)}${formField(pre + "-ref", t("utr_no"))}
+		<label class="sk-field"><span>${t("pay_date")}</span><input id="${pre}-date" type="date" class="sk-select" value="${new Date().toISOString().slice(0, 10)}"></label>
+		${photoField(pre + "-photo", "📷 " + t("pay_proof"))}`;
+	async function renderCash() {
+		const c = await call("fin_cash");
+		root.innerHTML = header(t("cash_today")) + `<main><section class="sk-card"><div class="sk-card-label">${t("bank_cash_now")}</div>
+			<div class="sk-card-text">${money(c.total)}</div><div class="sk-card-meta">⬇ ${t("in_today")} ${money(c.in)} · ⬆ ${t("out_today")} ${money(c.out)}</div></section>
+			<ul class="sk-list">${c.accounts.map((a) => li(esc(a.account_name), esc(a.account_type), `<b>${money(a.balance)}</b>`)).join("") || empty()}</ul>
+			<h3 class="sk-h">${t("today_payments")}</h3><ul class="sk-list">${c.today.map((p) => li(esc(p.party_name || ""), `${esc(p.name)} · ${esc(p.mode_of_payment || "")} ${esc(p.reference_no || "")}`,
+				`<b>${p.payment_type === "Pay" ? "⬆" : "⬇"} ${money(p.paid_amount)}</b>`)).join("") || empty()}</ul>
+			${c.accounts.length ? "" : `<p class="sk-note">⚠ ${t("no_bank_yet")}</p>`}</main>`;
+	}
+	async function renderCollect() {
+		S.dues = await call("fin_collect");
+		const groups = [["d60_plus", t("over_60")], ["d31_60", t("d31_60")], ["d0_30", t("d0_30")], ["not_due", t("not_due")]];
+		const row = (r) => { const i = S.dues.indexOf(r);
+			return li(esc(r.customer_name), `${esc(r.name)} · ${t("due")} ${esc(r.due_date)}${r.days_late > 0 ? ` · <span class="sk-due">${r.days_late} ${t("days_late")}</span>` : ""}${r.promise ? `<br>🤝 ${esc(r.promise)}` : ""}`,
+				`<div class="sk-col"><b>${money(r.outstanding_amount)}</b>${r.mobile ? `<a class="sk-chip" href="tel:${esc(r.mobile)}">📞</a><button class="sk-chip" data-act="fin-wa" data-i="${i}">💬</button>` : ""}
+				<button class="sk-chip" data-act="fin-promise" data-i="${i}">🤝 ${t("promise")}</button><button class="sk-chip on" data-act="fin-recv" data-i="${i}">₹ ${t("received")}</button></div>`); };
+		const total = S.dues.reduce((s, r) => s + r.outstanding_amount, 0);
+		root.innerHTML = header(t("to_collect")) + `<main><p class="sk-note">${t("total_due")}: <b>${money(total)}</b> · ${S.dues.length} ${t("invoices")}</p>
+			${groups.map(([k, label]) => { const rows = S.dues.filter((r) => r.bucket === k); return rows.length ? `<h3 class="sk-h">${label} (${money(rows.reduce((s, r) => s + r.outstanding_amount, 0))})</h3><ul class="sk-list">${rows.map(row).join("")}</ul>` : ""; }).join("") || `<p class="sk-empty">${t("nothing")}</p>`}</main>`;
+	}
+	async function renderToPay(view) {
+		const boss = view === "pay_approvals";
+		S.bills = await call(boss ? "fin_pay_approvals" : "fin_to_pay");
+		root.innerHTML = header(t(view)) + `<main>${boss ? "" : `<p class="sk-note">${t("pay_rule")}</p>`}<ul class="sk-list">${S.bills.map((b, i) => li(esc(b.supplier_name),
+			`${esc(b.name)}${b.bill_no ? " · " + t("bill") + " " + esc(b.bill_no) : ""} · ${t("due")} ${esc(b.due_date)}${b.days_late > 0 ? ` · <span class="sk-due">${b.days_late} ${t("days_late")}</span>` : ""}`,
+			`<div class="sk-col"><b>${money(b.outstanding_amount)}</b>${boss ? `<button class="sk-chip on" data-act="fin-approve" data-i="${i}">✓ ${t("approve")}</button>`
+				: b.needs_ok && !b.approved ? `<button class="sk-chip" data-act="fin-ask" data-i="${i}">🙋 ${t("ask_sk")}</button>`
+				: `<button class="sk-chip on" data-act="fin-pay" data-i="${i}">₹ ${t("paid")}</button>`}${b.approved ? `<span class="sk-chip on">SK ✓</span>` : ""}</div>`)).join("") || empty()}</ul></main>`;
+	}
+	async function renderBillsToPost() {
+		S.fb = await call("fin_bills");
+		root.innerHTML = header(t("bills_to_post")) + `<main><h3 class="sk-h">📷 ${t("bill_photos")} (${S.fb.photos.length})</h3>
+			<ul class="sk-list">${S.fb.photos.map((p, i) => li(esc(p.supplier_name || p.reference_name), `${esc(p.description)}${p.photo ? ` · <a href="${esc(p.photo)}" target="_blank">📷 ${t("see_photo")}</a>` : ""}`,
+				`<div class="sk-col"><button class="sk-chip on" data-act="fin-bill" data-i="${i}">${t("make_bill")}</button><button class="sk-chip" data-act="fin-bill-done" data-i="${i}">✓ ${t("already_done")}</button></div>`)).join("") || empty()}</ul>
+			<h3 class="sk-h">📝 ${t("drafts_check")} (${S.fb.drafts.length})</h3>
+			<ul class="sk-list">${S.fb.drafts.map((d, i) => li(esc(d.supplier_name), `${esc(d.name)}${d.bill_no ? " · " + esc(d.bill_no) : ""} · ${esc(d.posting_date)}`,
+				`<div class="sk-col"><b>${money(d.grand_total)}</b><a class="sk-chip" href="/app/purchase-invoice/${encodeURIComponent(d.name)}">${t("check")}</a>
+				<button class="sk-chip on" data-act="fin-post-pi" data-i="${i}">✓ ${t("post")}</button></div>`)).join("") || empty()}</ul></main>`;
+	}
+	async function renderInvoices() {
+		S.fi = await call("fin_invoices");
+		root.innerHTML = header(t("invoices")) + `<main><h3 class="sk-h">🚛 ${t("dispatched_no_invoice")} (${S.fi.to_bill.length})</h3>
+			<ul class="sk-list">${S.fi.to_bill.map((d, i) => li(esc(d.customer_name), `${esc(d.name)} · ${esc(d.posting_date)}${d.vehicle_no ? " · " + esc(d.vehicle_no) : ""}${d.days > 0 ? ` · <span class="sk-due">${d.days} ${t("days_late")}</span>` : ""}`,
+				`<div class="sk-col"><b>${money(d.grand_total)}</b><button class="sk-chip on" data-act="fin-make-inv" data-i="${i}">${t("make_invoice")}</button></div>`)).join("") || empty()}</ul>
+			<h3 class="sk-h">📝 ${t("drafts_check")} (${S.fi.drafts.length})</h3>
+			<ul class="sk-list">${S.fi.drafts.map((d, i) => li(esc(d.customer_name), `${esc(d.name)} · ${esc(d.posting_date)}`,
+				`<div class="sk-col"><b>${money(d.grand_total)}</b><a class="sk-chip" href="/app/sales-invoice/${encodeURIComponent(d.name)}">${t("check")}</a>
+				<button class="sk-chip on" data-act="fin-post-si" data-i="${i}">✓ ${t("post")}</button></div>`)).join("") || empty()}</ul></main>`;
+	}
+	async function renderExpenses() {
+		S.claims = await call("fin_expenses");
+		root.innerHTML = header(t("expenses")) + `<main><button class="sk-btn go wide" data-act="fin-voucher">📷 + ${t("petty_cash")}</button>
+			<h3 class="sk-h">${t("claims_to_pay")}</h3><ul class="sk-list">${S.claims.map((c, i) => li(esc(c.employee_name), `${esc(c.name)} · ${esc(c.posting_date)}`,
+				`<div class="sk-col"><b>${money(c.total_sanctioned_amount || c.grand_total)}</b><button class="sk-chip on" data-act="fin-pay-claim" data-i="${i}">₹ ${t("paid")}</button></div>`)).join("") || empty()}</ul></main>`;
+	}
+	async function renderSegmentPnl() {
+		const p = await call("fin_segment_pnl");
+		const pct = (r) => r.margin_pct == null ? "" : ` · ${r.margin_pct}%`;
+		root.innerHTML = header(t("segment_pnl")) + `<main><p class="sk-note">${esc(p.from)} → ${esc(p.to)}</p>
+			<section class="sk-card"><div class="sk-card-label">${t("this_month")}</div><div class="sk-card-text">${money(p.total.margin)}</div>
+			<div class="sk-card-meta">${t("income")} ${money(p.total.income)} · ${t("cost")} ${money(p.total.cost)}</div></section>
+			<ul class="sk-list">${p.rows.map((r) => li(esc(r.cost_center), `${t("income")} ${money(r.income)} · ${t("cost")} ${money(r.cost)}`,
+				`<b class="${r.margin < 0 ? "sk-due" : ""}">${money(r.margin)}${pct(r)}</b>`)).join("") || empty()}</ul>
+			<p class="sk-note">${t("pnl_note")}</p></main>`;
+	}
+	async function renderMonthClose() {
+		S.close = await call("fin_month_close");
+		root.innerHTML = header(t("month_close")) + `<main><ul class="sk-list">${S.close.map((c, i) => li(`${c.done ? "✅" : c.late ? "🔴" : "⬜"} ${t("mc_" + c.key)}`,
+			`${t("by_date")} ${esc(c.due)}${c.done ? ` · ${esc(c.by || "")} ${esc(c.on || "")}` : ""}`,
+			`<button class="sk-chip ${c.done ? "" : "on"}" data-act="fin-tick" data-i="${i}">${c.done ? "↺" : "✓ " + t("done")}</button>`)).join("")}</ul></main>`;
+	}
+
+	async function finAct(act, el) {
+		const i = Number(el.dataset.i);
+		switch (act) {
+			case "fin-wa": {
+				const r = S.dues[i];
+				const msg = `${t("wa_due_1")} ${r.customer_name},\n${t("wa_due_2")} ${r.name} ${t("wa_due_3")} ${money(r.outstanding_amount)} (${t("due")} ${r.due_date}).\n${t("wa_due_4")}\n- SK Ind Tech Solutions`;
+				return window.open("https://wa.me/" + waNumber(r.mobile) + "?text=" + encodeURIComponent(msg), "_blank");
+			}
+			case "fin-promise": S.inv = S.dues[i];
+				return sheet(`<h3 class="sk-h">🤝 ${esc(S.inv.customer_name)} · ${money(S.inv.outstanding_amount)}</h3>${formField("fp-text", t("what_customer_said"), true)}
+					<label class="sk-field"><span>${t("promised_on")}</span><input id="fp-date" type="date" class="sk-select"></label>
+					<button class="sk-btn ok wide" data-act="fin-promise-save">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+			case "fin-promise-save": el.disabled = true;
+				await call("fin_promise", { sales_invoice: S.inv.name, text: val("fp-text"), promised_on: val("fp-date") || null }, true);
+				closeSheet(); toast(t("saved")); return go("to_collect");
+			case "fin-recv": S.inv = S.dues[i];
+				return sheet(`<h3 class="sk-h">₹ ${esc(S.inv.customer_name)} · ${esc(S.inv.name)}</h3>${payFields("fr", S.inv.outstanding_amount)}
+					<button class="sk-btn ok wide" data-act="fin-recv-save">${t("save_payment")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+			case "fin-recv-save": {
+				el.disabled = true;
+				const r = await call("fin_receive", { reference_doctype: "Sales Invoice", reference_name: S.inv.name, amount: val("fr-amt"), mode: val("fr-mode") || null,
+					reference_no: val("fr-ref") || null, reference_date: val("fr-date"), photo: await photoUrl("fr-photo") }, true);
+				closeSheet(); toast(r.posted ? `✓ ${r.name}` : `${r.name}: ${t("kept_draft")}`, !r.posted); return go("to_collect");
+			}
+			case "fin-ask": await call("fin_ask_approval", { purchase_invoice: S.bills[i].name }, true); return toast(t("asked_sk"));
+			case "fin-approve": await call("fin_approve_payment", { purchase_invoice: S.bills[i].name }, true); toast(t("approved")); return go("pay_approvals");
+			case "fin-pay": S.bill = S.bills[i];
+				return sheet(`<h3 class="sk-h">₹ ${esc(S.bill.supplier_name)} · ${esc(S.bill.name)}</h3>${payFields("fy", S.bill.outstanding_amount)}
+					<button class="sk-btn ok wide" data-act="fin-pay-save">${t("save_payment")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+			case "fin-pay-save": {
+				el.disabled = true;
+				const r = await call("fin_pay", { purchase_invoice: S.bill.name, amount: val("fy-amt"), mode: val("fy-mode") || null, reference_no: val("fy-ref") || null,
+					reference_date: val("fy-date"), photo: await photoUrl("fy-photo") }, true);
+				closeSheet(); toast(r.posted ? `✓ ${r.name}` : `${r.name}: ${t("kept_draft")}`, !r.posted); return go("to_pay");
+			}
+			case "fin-bill": S.photo = S.fb.photos[i];
+				return sheet(`<h3 class="sk-h">🧾 ${esc(S.photo.supplier_name || "")}</h3><p class="sk-note">${esc(S.photo.description)}</p>
+					${pick("fb-po", t("against_po"), S.photo.orders.map((o) => ({ value: o.name, label: `${o.name} · ${money(o.grand_total)} · ${o.transaction_date}` })))}
+					${formField("fb-no", t("supplier_bill_no"))}<label class="sk-field"><span>${t("bill_date")}</span><input id="fb-date" type="date" class="sk-select" value="${new Date().toISOString().slice(0, 10)}"></label>
+					<button class="sk-btn ok wide" data-act="fin-bill-save">${t("make_bill")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>
+					${S.photo.orders.length ? "" : `<p class="sk-note">⚠ ${t("no_po_bill")}</p>`}`);
+			case "fin-bill-save": {
+				if (!val("fb-po")) return toast(t("pick_po"), true);
+				el.disabled = true;
+				const r = await call("fin_make_bill", { purchase_order: val("fb-po"), bill_no: val("fb-no"), bill_date: val("fb-date"), todo: S.photo.name }, true);
+				closeSheet(); toast(`${r.name}: ${t("draft_made")}`); return go("bills_to_post");
+			}
+			case "fin-bill-done": await call("fin_bill_photo_done", { todo: S.fb.photos[i].name }, true); return go("bills_to_post");
+			case "fin-post-pi": case "fin-post-si": {
+				el.disabled = true;
+				const d = act === "fin-post-pi" ? S.fb.drafts[i] : S.fi.drafts[i];
+				const r = await call("fin_post", { doctype: act === "fin-post-pi" ? "Purchase Invoice" : "Sales Invoice", name: d.name }, true);
+				toast(r.posted ? `✓ ${r.name} ${t("posted")}` : `${r.name}: ${r.reason || t("kept_draft")}`, !r.posted);
+				return go(act === "fin-post-pi" ? "bills_to_post" : "invoices");
+			}
+			case "fin-make-inv": { el.disabled = true; const r = await call("fin_make_invoice", { delivery_note: S.fi.to_bill[i].name }, true); toast(`${r.name}: ${t("draft_made")}`); return go("invoices"); }
+			case "fin-pay-claim": { el.disabled = true; const r = await call("fin_pay_expense", { expense_claim: S.claims[i].name }, true); toast(r.posted ? `✓ ${r.name}` : `${r.name}: ${t("kept_draft")}`, !r.posted); return go("expenses"); }
+			case "fin-voucher": {
+				const o = await call("fin_voucher_options");
+				return sheet(`<h3 class="sk-h">📷 ${t("petty_cash")}</h3>${photoField("pv-photo", "📷 " + t("voucher_photo"))}${formField("pv-text", t("spent_on"), true)}
+					<label class="sk-field"><span>${t("amount")}</span>${qtyBox("pv-amt")}</label>${pick("pv-exp", t("expense_head"), o.expense_accounts)}
+					${pick("pv-cash", t("paid_from"), o.cash_accounts)}${pick("pv-cc", t("segment"), o.cost_centers)}
+					<button class="sk-btn ok wide" data-act="fin-voucher-save">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+			}
+			case "fin-voucher-save": {
+				el.disabled = true;
+				const r = await call("fin_petty_cash", { expense_account: val("pv-exp"), amount: val("pv-amt"), cash_account: val("pv-cash"), cost_center: val("pv-cc") || null,
+					narration: val("pv-text"), photo: await photoUrl("pv-photo") }, true);
+				closeSheet(); toast(r.posted ? `✓ ${r.name}` : `${r.name}: ${t("kept_draft")}`, !r.posted); return go("expenses");
+			}
+			case "fin-tick": { const c = S.close[i]; await call("fin_tick_close", { key: c.key, done: c.done ? 0 : 1 }, true); return go("month_close"); }
+		}
+		return false;
+	}
+
 	// Sales manager: the whole team's leads and deals with his own (SK, 26-Oct-2026)
 	let teamPerson = "";
 	async function renderTeamLeads() {
@@ -1966,7 +2269,9 @@
 		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals,
 		order_board: renderOrderBoard, job_cards: () => renderJobs("job_cards"), my_jobs: () => renderJobs("my_jobs"), need_material: renderNeedMaterial,
 		progress_photos: renderProgressPhotos, ready_dispatch: renderReadyDispatch, non_conformance: () => renderNcs("non_conformance"),
-		my_fixes: () => renderNcs("my_fixes"), inspect: () => renderInspect("inspect"), final_check: () => renderInspect("final_check") };
+		my_fixes: () => renderNcs("my_fixes"), inspect: () => renderInspect("inspect"), final_check: () => renderInspect("final_check"),
+		cash_today: renderCash, to_collect: renderCollect, to_pay: () => renderToPay("to_pay"), pay_approvals: () => renderToPay("pay_approvals"),
+		bills_to_post: renderBillsToPost, invoices: renderInvoices, expenses: renderExpenses, segment_pnl: renderSegmentPnl, month_close: renderMonthClose };
 
 	async function go(view) {
 		state.view = view;
@@ -2059,6 +2364,7 @@
 			const act = el.dataset.act;
 			if (act && (act.startsWith("st-") || act.startsWith("pu-"))) return await storeAct(act, el);
 			if (act && (act.startsWith("pr-") || act.startsWith("qc-"))) return await prodAct(act, el);
+			if (act && act.startsWith("fin-")) return await finAct(act, el);
 			if (el.dataset.qok !== undefined) {
 				const k = el.dataset.qok;
 				root.querySelectorAll(`[data-qok="${k}"]`).forEach((c) => c.classList.remove("on"));

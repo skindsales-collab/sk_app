@@ -24,8 +24,8 @@ and read-aloud for the guide card.
 
 ### All functions
 
-Every function has a home screen (`sk_app/functions.py`): Sales, Marketing, Store, Purchase, Production and Quality
-are live; Accounts, HR, Machine Shifting, Design, IT / ERP and Management already get My Day (their ERPNext tasks),
+Every function has a home screen (`sk_app/functions.py`): Sales, Marketing, Store, Purchase, Production, Quality and
+Accounts are live; HR, Machine Shifting, Design, IT / ERP and Management already get My Day (their ERPNext tasks),
 Work Book, DSI, Report Problem and My Score. Their own tiles (job cards, inspections, stock alerts ...) open ERPNext
 until they are built in later phases. Each person has a separate login: their ERPNext user, with their own roles.
 
@@ -43,6 +43,17 @@ SK approves on the **PO Approvals** tile; limit `sk_po_approval_limit` in site c
 Follow-up, Suppliers (new supplier with GSTIN duplicate check), Bills (photo to Accounts as a task) and Last Rates.
 
 Only people in that function (or the admin) can use these screens; documents are saved under their own login.
+
+### Finance (live)
+
+Finance (`sk_app/finance.py`, owner Accounts): Cash Today (bank / cash balances, money in and out today), To Collect
+(customer dues by age with Call / WhatsApp reminder, spoken promise with a reminder on the promised day, payment
+received → Payment Entry from the invoice; the salesperson is told), To Pay (supplier and contractor dues; above
+`sk_po_approval_limit` SK approves on the **Payment OK** tile before paying), Bills to Post (bill photos sent by
+Purchase / Store → Purchase Invoice from the PO with the supplier's bill no., drafts checked and posted), Invoices
+(Delivery Notes without invoice → Sales Invoice draft → Post), Expenses (approved Expense Claims to pay, petty cash
+voucher with photo and spoken narration → Journal Entry), Segment P&L (this month's income, cost and margin by cost
+centre from the GL) and Month Close (stock closing 2nd, P&L 7th, MAR 10th, GSTR-1 11th, GSTR-3B 20th, ticked as ToDos).
 
 ### Production, subcontractors and Quality (live)
 
