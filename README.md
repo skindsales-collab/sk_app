@@ -218,3 +218,7 @@ Score = actual / target (capped at 120%) x weight. Sources that are not live yet
   Expense Claim with bill photo, approved by the manager (Employee approver, else Reports to, else app manager, else HR).
   Approved claims Accounts cannot post yet get a ToDo to Accounts. ERPNext v16 needs a Holiday List Assignment for leave.
 - PO approval limit is Rs 5,000 (SK 26-Oct); site config `sk_po_approval_limit` changes it.
+- **Send to design** (SK OK 26-Oct): New Lead has a "Send to design (AI drawing)" switch for Cabin segments, on by
+  default. On save the lead becomes a CRM Deal through Frappe CRM's own conversion (owner = salesperson), Design Status
+  "Sent to Design" when that option exists, with the lead's photos and requirement notes copied to the deal, because the
+  AI design pickup reads deals only.

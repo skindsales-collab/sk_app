@@ -175,7 +175,7 @@ def open_work_orders(user: str) -> list[dict]:
 	need(user, STORE, "Production")
 	wos = frappe.get_all("Work Order", filters={"docstatus": 1, "status": ["not in", ["Completed", "Stopped", "Closed", "Cancelled"]]},
 		fields=["name", "production_item", "item_name", "qty", "wip_warehouse", "sales_order", "expected_delivery_date"],
-		order_by="expected_delivery_date asc, creation asc", limit=50)
+		order_by="expected_delivery_date asc, creation asc", limit=200)
 	for wo in wos:
 		wo["items"] = frappe.get_all("Work Order Item", filters={"parent": wo.name},
 			fields=["item_code", "item_name", "required_qty", "transferred_qty", "source_warehouse"], order_by="idx asc")

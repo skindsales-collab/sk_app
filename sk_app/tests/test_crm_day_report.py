@@ -199,3 +199,18 @@ class TestCalendars(IntegrationTestCase):
 			m = api.cal_month()
 			self.assertTrue(any(d["company"] == ["Scorecard"] for d in m["days"]))
 			self.assertIn("calendar", api.home()["home"]["tiles"])
+
+	def test_send_to_design_makes_deal(self):
+		"""New Lead "Send to design": the lead becomes a deal (Frappe CRM conversion) with notes and Design Status."""
+		if not frappe.db.exists("DocType", "CRM Lead"):
+			self.skipTest("Frappe CRM not installed")
+		with set_user(REP):
+			lead = api.new_lead("Mahesh", mobile_no="9876500077", organization="SK Test Design Co " + frappe.generate_hash(length=5),
+				segment="Standard Cabin (GI / ACP)", requirement="20x10 ft site office, 2 windows")
+			r = api.lead_to_design(lead)
+		self.assertTrue(r["sent"], r)
+		self.assertEqual(frappe.db.get_value("CRM Deal", r["deal"], "lead"), lead)
+		self.assertTrue(frappe.db.exists("FCRM Note", {"reference_doctype": "CRM Deal", "reference_docname": r["deal"]}))
+		with set_user(REP):
+			job = api.new_lead("Kiran", mobile_no="9876500078", segment="Machine Shifting")
+			self.assertFalse(api.lead_to_design(job)["sent"])

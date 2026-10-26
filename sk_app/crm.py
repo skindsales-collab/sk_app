@@ -4,13 +4,15 @@ Every read goes through frappe.get_list / has_permission and every write through
 user's own CRM permissions (Sales User / Sales Manager), so the app can never see or change more than CRM allows.
 """
 
+import re
+
 import frappe
 from frappe import _
 from frappe.utils import add_to_date, get_datetime, now_datetime, strip_html, time_diff_in_seconds
 
 from sk_app.segments import SUB_SEGMENTS as SEGMENTS
 from sk_app.segments import TREE as SEGMENT_TREE
-from sk_app.segments import sub_of
+from sk_app.segments import CABIN, main_of, sub_of
 
 CALL_OUTCOMES = ["Talked", "No answer", "Busy", "Missed", "Call back later", "Wrong number"]
 CALL_LOG_STATUS = {"Talked": "Completed", "Call back later": "Completed", "No answer": "No Answer", "Busy": "Busy", "Missed": "No Answer",
@@ -418,6 +420,49 @@ def _design_status_field(doctype: str) -> str | None:
 		if df.fieldtype == "Select" and REVISION_STATUS in (df.options or "").split("\n"):
 			return df.fieldname
 	return None
+
+
+SENT_STATUS = "Sent to Design"
+CONVERT = "crm.fcrm.doctype.crm_lead.crm_lead.convert_to_deal"
+
+
+def send_to_design(user: str, lead: str) -> dict:
+	"""New Lead "Send to design" switch (SK OK 26-Oct): the AI design pickup reads CRM Deals only, so the lead becomes a
+	deal with Frappe CRM's own conversion (deal.lead links back), owned by the salesperson, Design Status "Sent to
+	Design", with the lead's photos / sketch and requirement notes copied onto the deal. Cabin segments only."""
+	_check("CRM Lead", lead, "write")
+	seg = frappe.db.get_value("CRM Lead", lead, "sk_segment") if frappe.get_meta("CRM Lead").has_field("sk_segment") else None
+	if seg and main_of(seg) != CABIN:
+		return {"sent": False, "reason": _("Only Cabin enquiries go to design")}
+	deal = frappe.db.get_value("CRM Deal", {"lead": lead})
+	if not deal:
+		frappe.db.savepoint("sk_to_design")
+		try:
+			deal = frappe.get_attr(CONVERT)(lead)
+		except Exception as e:
+			frappe.db.rollback(save_point="sk_to_design")
+			frappe.clear_messages()
+			frappe.log_error("SK App send to design")
+			return {"sent": False, "reason": re.sub(r"<[^>]*>", "", str(e))[:200] or _("Could not make the deal")}
+		deal = deal if isinstance(deal, str) else frappe.db.get_value("CRM Deal", {"lead": lead})
+	doc = frappe.get_doc("CRM Deal", deal)
+	if doc.meta.has_field("deal_owner") and not doc.get("deal_owner"):
+		doc.deal_owner = user
+	if seg and doc.meta.has_field("sk_segment") and not doc.get("sk_segment"):
+		doc.sk_segment = seg
+	field = _design_status_field("CRM Deal")
+	status_set = bool(field and SENT_STATUS in (doc.meta.get_field(field).options or "").split("\n"))
+	if status_set:
+		doc.set(field, SENT_STATUS)
+	doc.flags.ignore_permissions = True
+	doc.save()
+	for f in frappe.get_all("File", filters={"attached_to_doctype": "CRM Lead", "attached_to_name": lead}, pluck="file_url"):
+		_attach(f, "CRM Deal", deal, user)
+	for n in frappe.get_all("FCRM Note", filters={"reference_doctype": "CRM Lead", "reference_docname": lead}, fields=["title", "content"]):
+		if not frappe.db.exists("FCRM Note", {"reference_doctype": "CRM Deal", "reference_docname": deal, "content": n.content}):
+			frappe.get_doc({"doctype": "FCRM Note", "title": n.title, "content": n.content, "reference_doctype": "CRM Deal",
+				"reference_docname": deal}).insert(ignore_permissions=True)
+	return {"sent": True, "deal": deal, "status_set": status_set}
 
 
 def _design_target(doctype: str, name: str) -> tuple[str, str]:

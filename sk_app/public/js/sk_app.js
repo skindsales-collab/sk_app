@@ -805,6 +805,8 @@
 		lv_mine: "माझ्या रजा", ex_type: "खर्चाचा प्रकार", ex_amount: "रक्कम (रु)", ex_date: "तारीख", ex_bill: "बिलाचा फोटो", ex_note: "कशासाठी (बोला किंवा लिहा)",
 		ex_claim: "खर्च मागा", ex_mine: "माझे खर्च", lv_approve: "✓ मंजूर", lv_reject: "✗ नामंजूर", ex_posted: "मंजूर: अकाउंट्स पैसे देईल",
 		no_employee: "तुमचे लॉगिन अजून ERPNext कर्मचाऱ्याशी जोडलेले नाही. कृपया HR ला सांगा." });
+	Object.assign(T.English, { send_design: "Send to design (AI drawing)", design_sent: "Sent to design as deal", design_not_sent: "Not sent to design:" });
+	Object.assign(T.Marathi, { send_design: "डिझाईनला पाठवा (AI ड्रॉइंग)", design_sent: "डिझाईनला डील म्हणून पाठवले", design_not_sent: "डिझाईनला पाठवले नाही:" });
 	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";
 	T.Marathi.mic_blocked = "माईक / कॅमेरा बंद आहे. Chrome → ⋮ → Settings → Site settings → Microphone (किंवा Camera) → ही साईट → Allow. मग परत येऊन 🎤 दाबा.";
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
@@ -1304,6 +1306,13 @@
 			(e) => { note.textContent = "⚠ " + e.message; inp._up = null; throw e; });
 		inp._up.catch(() => {});
 	}
+	// "Send to design" shows only for Cabin segments (the AI design pickup makes cabin drawings)
+	root.addEventListener("change", (ev) => {
+		if (ev.target.id !== "f-segment") return;
+		const row = document.getElementById("f-design-row");
+		const tree = (crmOpts && crmOpts.segment_tree) || {};
+		if (row) row.hidden = !((tree.Cabin || []).includes(ev.target.value));
+	});
 	root.addEventListener("change", (ev) => { if (ev.target.classList && ev.target.classList.contains("sk-file")) { photoPicked(ev.target); photoNote(ev.target); } }, true);
 
 	async function photoUrl(id) {
@@ -1510,6 +1519,7 @@
 			<label class="sk-field"><span>${t("mobile")}</span><div class="sk-input-row"><input id="f-mobile" type="tel"></div></label>
 			<label class="sk-field"><span>${t("email")}</span><div class="sk-input-row"><input id="f-email" type="email"></div></label>
 			${sel("f-source", t("source"), o.sources)}${segmentSelect("f-segment", o.segment_tree, o.segments)}${(o.products || []).length ? sel("f-product", t("product_asked"), o.products) : ""}
+			<label class="sk-check" id="f-design-row" hidden><input id="f-design" type="checkbox" checked> ✏️ ${t("send_design")}</label>
 			${formField("f-req", t("requirement"), true)}
 			<button class="sk-btn ok wide" data-act="save-lead">${t("save")}</button>
 			<details class="sk-gap"><summary>📄 ${t("upload_list")}</summary>${uploadBox()}</details></main>`;
@@ -3901,6 +3911,11 @@
 				el.disabled = true;
 				const name = await call("new_lead", { first_name: val("f-first"), organization: val("f-org"), mobile_no: val("f-mobile"),
 					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl, product: val("f-product") }, true);
+				const dz = document.getElementById("f-design");
+				if (dz && dz.checked && !document.getElementById("f-design-row").hidden) {
+					const r = await call("lead_to_design", { name }, true).catch((e) => ({ sent: false, reason: e.message }));
+					toast(r.sent ? `✏️ ${t("design_sent")} ${r.deal}` : `⚠ ${t("design_not_sent")} ${r.reason || ""}`, !r.sent);
+				}
 				cardUrl = null;
 				clearDraft();
 				return leadSaved({ name, title: val("f-org") || val("f-first"), person: val("f-first"), mobile: val("f-mobile"),

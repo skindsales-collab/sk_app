@@ -255,6 +255,12 @@ def new_lead(first_name, mobile_no=None, organization=None, email=None, source=N
 
 
 @frappe.whitelist(methods=["POST"])
+def lead_to_design(name):
+	"""New Lead "Send to design" switch: the lead becomes a deal that the AI design pickup reads."""
+	return crm.send_to_design(_me().user, name)
+
+
+@frappe.whitelist(methods=["POST"])
 def set_crm_status(doctype, name, status):
 	_me()
 	return crm.set_status(doctype, name, status)
