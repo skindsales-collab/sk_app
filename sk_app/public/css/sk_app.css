@@ -178,3 +178,10 @@ button.sk-open { background: none; border: 0; }
 .sk-chip.bad { color: var(--red); border-color: var(--red); }
 .sk-big { font-size: 22px; line-height: 1.6; }
 .sk-item.sk-person { flex-direction: column; align-items: stretch; gap: 8px; }
+/* Store and Purchase screens */
+.sk-qty { width: 90px; font-size: 18px; padding: 10px; border: 1px solid #b8c4d2; border-radius: 10px; background: var(--card); color: var(--ink); text-align: right; }
+.sk-col { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.sk-check { display: flex; gap: 8px; align-items: center; }
+.sk-check input { width: 22px; height: 22px; }
+.sk-mini { margin: 4px 0 12px; padding-left: 18px; font-size: 14px; color: var(--muted); }
+.sk-countbox { flex: 0 0 auto; }

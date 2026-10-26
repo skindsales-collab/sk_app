@@ -4,7 +4,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime
 
-from sk_app import calendar_view, claude, comms, crm, day_report, guide, kpi, logins, training, work
+from sk_app import calendar_view, claude, comms, crm, day_report, guide, kpi, logins, purchase, store, training, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -50,7 +50,16 @@ def home():
 		"must_set_pin": bool(frappe.db.get_value("SK App User", profile.name, "must_set_pin")),
 		"card": _latest_card(profile.user),
 		"new_files": crm.files_to_send(profile.user), "day_report_sent": bool(day_report._find(profile.user, getdate())),
-		"due_reminders": comms.due_reminders(profile.user)}
+		"due_reminders": comms.due_reminders(profile.user), "badges": _badges(profile.user, functions)}
+
+
+def _badges(user, functions):
+	"""Red counts on Store / Purchase / approval icons; never breaks Home if ERPNext data is odd."""
+	try:
+		return {**store.badges(user, functions), **purchase.badges(user, functions)}
+	except Exception:
+		frappe.log_error("SK App badges")
+		return {}
 
 
 def _has_team(user):
@@ -422,3 +431,190 @@ def hr_reset_pin(user):
 def hr_close_login(user):
 	_me()
 	return logins.close_login(frappe.session.user, user)
+
+
+# ---------- Store (SK draft F01) ----------
+
+def _list(v):
+	return frappe.parse_json(v) if isinstance(v, str) else (v or [])
+
+
+@frappe.whitelist()
+def store_search(q=None):
+	return store.stock_search(_me().user, q)
+
+
+@frappe.whitelist()
+def store_item(item_code):
+	return store.item_detail(_me().user, item_code)
+
+
+@frappe.whitelist()
+def store_open_pos():
+	return store.open_purchase_orders(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def store_receive(items, purchase_order=None, challan_photo=None, goods_photo=None, note=None, supplier=None, reason=None):
+	return store.receive(_me().user, purchase_order, _list(items), challan_photo, goods_photo, note, supplier, reason)
+
+
+@frappe.whitelist()
+def store_work_orders():
+	return store.open_work_orders(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def store_issue(work_order, items, taken_by=None, job_card=None, photo=None):
+	return store.issue(_me().user, work_order, _list(items), taken_by, job_card, photo)
+
+
+@frappe.whitelist()
+def store_requests(kind="store"):
+	return store.material_requests(_me().user, kind)
+
+
+@frappe.whitelist(methods=["POST"])
+def store_request_issue(request):
+	return store.request_issue(_me().user, request)
+
+
+@frappe.whitelist(methods=["POST"])
+def store_request_to_purchase(request):
+	return store.request_to_purchase(_me().user, request)
+
+
+@frappe.whitelist()
+def store_low_stock():
+	return store.low_stock(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def store_order_low(item_codes=None):
+	return store.order_low(_me().user, _list(item_codes) or None)
+
+
+@frappe.whitelist()
+def store_dispatch_orders():
+	return store.orders_to_dispatch(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def store_dispatch(sales_order, vehicle_no=None, driver_mobile=None, cabin_photo=None, plate_photo=None, note=None):
+	return store.dispatch(_me().user, sales_order, vehicle_no, driver_mobile, cabin_photo, plate_photo, note)
+
+
+@frappe.whitelist()
+def store_warehouses():
+	return store.warehouses(_me().user)
+
+
+@frappe.whitelist()
+def store_count_list(warehouse):
+	return store.count_list(_me().user, warehouse)
+
+
+@frappe.whitelist(methods=["POST"])
+def store_count(warehouse, counts, photo=None):
+	return store.stock_count(_me().user, warehouse, _list(counts), photo)
+
+
+@frappe.whitelist()
+def store_item_options():
+	return store.item_options(_me().user)
+
+
+@frappe.whitelist()
+def store_similar(name):
+	return store.similar_items(_me().user, name)
+
+
+@frappe.whitelist(methods=["POST"])
+def store_new_item(item_name, item_group, uom, warehouse=None, photo=None):
+	return store.new_item(_me().user, item_name, item_group, uom, warehouse, photo)
+
+
+# ---------- Purchase (SK draft F02) ----------
+
+@frappe.whitelist()
+def buy_requests():
+	return purchase.requests(_me().user)
+
+
+@frappe.whitelist()
+def buy_suggest(item_code):
+	return purchase.suggest_suppliers(_me().user, item_code)
+
+
+@frappe.whitelist()
+def buy_suppliers(q=None):
+	return purchase.suppliers(_me().user, q)
+
+
+@frappe.whitelist(methods=["POST"])
+def buy_rfq(items, suppliers, need_by=None):
+	return purchase.make_rfq(_me().user, _list(items), _list(suppliers), need_by)
+
+
+@frappe.whitelist(methods=["POST"])
+def buy_quote(supplier, item_code, qty, rate, days=None, photo=None, rfq=None):
+	return purchase.add_quote(_me().user, supplier, item_code, qty, rate, days, photo, rfq)
+
+
+@frappe.whitelist()
+def buy_compare(item_code):
+	return purchase.compare(_me().user, item_code)
+
+
+@frappe.whitelist()
+def buy_quoted_items():
+	"""Items with quotes in the last 30 days, for the Compare screen."""
+	purchase.need(_me().user, purchase.PURCHASE)
+	return frappe.db.sql("""select i.item_code, i.item_name, count(*) quotes from `tabSupplier Quotation Item` i
+		join `tabSupplier Quotation` q on q.name = i.parent where q.docstatus < 2 and q.transaction_date >= %s
+		group by i.item_code, i.item_name order by max(q.creation) desc""", add_to_date(getdate(), days=-30), as_dict=True)
+
+
+@frappe.whitelist(methods=["POST"])
+def buy_make_po(supplier_quotation, schedule_date=None, terms=None):
+	return purchase.make_po(_me().user, supplier_quotation, schedule_date, terms)
+
+
+@frappe.whitelist()
+def buy_approvals():
+	return purchase.approvals(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def buy_decide(purchase_order, approve, reason=None):
+	return purchase.decide(_me().user, purchase_order, bool(cint(approve)), reason)
+
+
+@frappe.whitelist()
+def buy_follow_up():
+	return purchase.follow_up(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def buy_follow_up_note(purchase_order, text, promised=None):
+	return purchase.follow_up_note(_me().user, purchase_order, text, promised)
+
+
+@frappe.whitelist(methods=["POST"])
+def buy_new_supplier(supplier_name, gstin=None, mobile=None, group=None, photo=None, cheque_photo=None):
+	return purchase.new_supplier(_me().user, supplier_name, gstin, mobile, group, photo, cheque_photo)
+
+
+@frappe.whitelist()
+def buy_supplier_groups():
+	return frappe.get_all("Supplier Group", filters={"is_group": 0}, pluck="name", order_by="name asc")
+
+
+@frappe.whitelist(methods=["POST"])
+def buy_send_bill(supplier, photo, amount=None, bill_no=None, against=None, note=None):
+	return purchase.send_bill(_me().user, supplier, photo, amount, bill_no, against, note)
+
+
+@frappe.whitelist()
+def buy_last_rates(q=None):
+	return purchase.last_rates(_me().user, q)
