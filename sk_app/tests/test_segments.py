@@ -122,3 +122,25 @@ class TestCeoDashboards(IntegrationTestCase):
 		from sk_app.functions import DASH_TILES
 
 		self.assertEqual([f"dash_{k}" for k in dashboards.PAGE_KEYS], DASH_TILES)
+
+	def test_tally_sales_and_draft_orders_count(self):
+		"""Live sk-dev: the year's sales are Tally Journal Entries and the orders are drafts (SK 26-Oct: "not getting live data")."""
+		from frappe.utils import nowdate
+
+		from sk_app import dashboards
+
+		company = frappe.db.get_value("Company", {}, "name")
+		if not company:
+			self.skipTest("needs an ERPNext company")
+		income = frappe.db.get_value("Account", {"company": company, "root_type": "Income", "is_group": 0}, "name")
+		debtor = frappe.db.get_value("Account", {"company": company, "account_type": "Cash", "is_group": 0}, "name")
+		start, end, _ps, _pe = dashboards._period(None)
+		before = dashboards._invoiced(start, end)
+		je = frappe.get_doc({"doctype": "Journal Entry", "company": company, "posting_date": nowdate(),
+			"user_remark": "Tally Non Cabin Sales 9001 | SK Test Party", "accounts": [
+				{"account": debtor, "debit_in_account_currency": 11800},
+				{"account": income, "credit_in_account_currency": 11800}]}).insert(ignore_permissions=True)
+		je.submit()
+		self.assertEqual(dashboards._invoiced(start, end) - before, 11800)
+		self.assertTrue(any(r.name == je.name for r in dashboards._tally_sales(start, end, "Non-Cabin")))
+		self.assertFalse(any(r.name == je.name for r in dashboards._tally_sales(start, end, "Cabin")))
