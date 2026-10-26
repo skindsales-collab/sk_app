@@ -207,3 +207,14 @@ Score = actual / target (capped at 120%) x weight. Sources that are not live yet
   open POs, GSTIN format with state and PAN, and the number plate format. GST certificate and bill photos are read on the
   phone (free reader) to fill empty boxes. A picked suggestion is remembered in the new SK Photo Match list. Every photo
   also shows which ERPNext record it goes to, with a warning if it is too dark or blurred.
+- **Point 16 + HR step, attendance, leave and expenses** (`hr.py`): HR (Aarti) uploads the Optick "Basic Report" file
+  (or the eSSL thumb machine file) on Attendance → Upload. Each row becomes an ERPNext Employee Checkin (device "Optick"
+  / "Office thumb") and, while no Shift Type does auto attendance, a submitted Attendance (late after SK App Settings
+  "Late after", 09:15). People are matched by Attendance Device ID, then mobile, then name; a person not found is picked
+  once and their ID is saved on the Employee. "23:00:00 Auto Checkout" is a missed out-punch (no OUT made). Absent is
+  never written from the file. Attendance → Today / Month shows present, late, no check-in, leave and absent days; HR fixes a
+  day from a person's "Ask HR to fix". My Day shows "In 9:02 (Optick)" on top; tap it for my month, selfie check-in
+  (backup, with location) and "Ask HR to fix". Everyone (not subcontractors) has Leave & Expense: Leave Application and
+  Expense Claim with bill photo, approved by the manager (Employee approver, else Reports to, else app manager, else HR).
+  Approved claims Accounts cannot post yet get a ToDo to Accounts. ERPNext v16 needs a Holiday List Assignment for leave.
+- PO approval limit is Rs 5,000 (SK 26-Oct); site config `sk_po_approval_limit` changes it.

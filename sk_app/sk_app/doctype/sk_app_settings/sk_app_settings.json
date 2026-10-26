@@ -46,7 +46,11 @@
   "lead_owner_cabin",
   "lead_owner_noncabin",
   "last_lead_scan",
-  "segment_user_permissions"
+  "segment_user_permissions",
+  "attendance_section",
+  "late_after",
+  "half_day_below",
+  "attendance_from_file"
  ],
  "fields": [
   {
@@ -254,6 +258,32 @@
    "fieldtype": "Check",
    "label": "Cabin / Non-Cabin rule on ERPNext desk too",
    "description": "Adds ERPNext User Permission on Customer Group per person (Cabin team: Cabin, Aditya: Non-Cabin). Switch on only after the old customers are tagged."
+  },
+  {
+   "fieldname": "attendance_section",
+   "fieldtype": "Section Break",
+   "label": "Attendance (Optick / thumb machine)"
+  },
+  {
+   "default": "09:15:00",
+   "fieldname": "late_after",
+   "fieldtype": "Time",
+   "label": "Late after",
+   "description": "Check-in after this time is marked late (SK / Aarti to confirm the shift times)."
+  },
+  {
+   "default": "0",
+   "fieldname": "half_day_below",
+   "fieldtype": "Float",
+   "label": "Half day below (hours)",
+   "description": "0 = never mark half day from the file. Only used when both in and out punches are real."
+  },
+  {
+   "default": "1",
+   "fieldname": "attendance_from_file",
+   "fieldtype": "Check",
+   "label": "Mark Attendance from the uploaded file",
+   "description": "Switch off once an ERPNext Shift Type with Auto attendance is set; then only Employee Checkins are made."
   }
  ],
  "permissions": [

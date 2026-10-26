@@ -74,8 +74,9 @@ FUNCTIONS = {
 	},
 	"HR": {
 		"label": {"English": "HR", "Marathi": "एचआर"},
-		"tiles": COMMON_TILES + ["logins", "team_scorecards", "mail"],
-		"live": False,
+		# point 16 + HR draft Rev 2: Attendance (Optick file upload, today, month, fixes); leave and expense approvals
+		"tiles": COMMON_TILES[:1] + ["attendance", "logins"] + COMMON_TILES[1:] + ["team_scorecards", "mail"],
+		"live": True,
 		"erpnext_roles": ["HR User", "HR Manager"],
 		"desk": "/app/hr",
 	},
@@ -119,7 +120,7 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": [*DASH_TILES, "view_member", "lead_sources", "customers", "complaints", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
+		"tiles": [*DASH_TILES, "view_member", "attendance", "lead_sources", "customers", "complaints", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
 			"library", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager", "Purchase Manager", "Purchase User"],  # SK approves big POs
@@ -143,6 +144,9 @@ def home_for(function: str | None, has_team: bool = False) -> dict:
 	if has_team and "my_leads" in home["tiles"] and "team_leads" not in home["tiles"]:
 		i = home["tiles"].index("my_leads")
 		home["tiles"] = home["tiles"][:i] + ["team_leads"] + home["tiles"][i:]
+	# HR draft Rev 2: everyone applies for leave and claims expenses (managers approve there); not subcontractors
+	if (function or "") != "Subcontractor" and "leave_expense" not in home["tiles"]:
+		home["tiles"] = home["tiles"] + ["leave_expense"]
 	# SK: My Day is always the first tile; DSI and the Day Report are the day's last jobs, so their tiles come last
 	last = [t for t in ("dsi", "day_report") if t in home["tiles"]]
 	middle = [t for t in home["tiles"] if t not in last and t != "my_day"]
@@ -152,7 +156,7 @@ def home_for(function: str | None, has_team: bool = False) -> dict:
 
 # tiles every person gets whatever their function (SK): they appear once, in the "For everyone" row
 SHARED_TILES = ["my_day", "calendar", "reminders", "calls", "whatsapp", "mail", "problem", "training", "library", "my_kpi",
-	"team_reports", "dsi", "day_report"]
+	"team_reports", "leave_expense", "dsi", "day_report"]
 
 
 def function_list(profile) -> list[str]:

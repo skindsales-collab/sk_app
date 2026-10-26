@@ -776,6 +776,35 @@
 		check_ok: "Looks right. Tap a suggestion to use it, then Save.", goes_to: "Goes to", photo_dark: "Photo is dark: retake in light?", photo_blur: "Photo looks blurred: retake?" });
 	Object.assign(T.Marathi, { check_before: "सेव्ह करण्यापूर्वी तपासा (ERPNext प्रमाणे)", check_red: "✗ लाल ओळी ERPNext ला हव्या आहेत: भरा किंवा दुरुस्त करा, मग सेव्ह करा.",
 		check_ok: "बरोबर दिसते. सूचना वापरायची असल्यास टॅप करा, मग सेव्ह करा.", goes_to: "कुठे जाईल", photo_dark: "फोटो अंधारात आहे: प्रकाशात पुन्हा घ्या?", photo_blur: "फोटो धूसर आहे: पुन्हा घ्या?" });
+	// change list point 16 + HR draft Rev 2: attendance (Optick / thumb), leave, expenses
+	Object.assign(T.English, { attendance: "Attendance", leave_expense: "Leave & Expense", att_in: "In", att_out: "Out", att_no_in: "No check-in yet",
+		att_wait_file: "Check-in not here yet (HR uploads the Optick file)", att_leave: "On leave", att_off: "Day off", att_late: "late",
+		att_my_month: "My attendance", att_present: "Present", att_absent: "Absent", att_half: "Half day", att_missed: "If Optick missed me",
+		att_selfie: "🤳 Selfie check-in (backup)", att_ask_fix: "✋ Ask HR to fix", att_fix_what: "What to fix (e.g. I came at 9:05, Optick did not read)",
+		att_today: "Today", att_month: "Month", att_upload: "Upload", att_late_after: "Late after", att_no_checkin: "No check-in",
+		att_fix_req: "Fix requests", att_file: "Optick / thumb machine file (Excel or CSV)", att_device: "Machine", att_check_file: "Check file",
+		att_save: "✅ Save check-ins", att_rows: "rows", att_matched: "matched", att_not_found: "not found: pick the employee once",
+		att_missed_out: "missed out-punch (Optick 23:00 Auto Checkout)", att_already: "already in ERPNext", att_made: "check-ins saved",
+		att_att_made: "attendance marked", att_reason: "Reason (speak or write)", att_fix: "Fix", att_status: "Status", att_skip: "skip",
+		lv_leave: "Leave", lv_expense: "Expense", lv_to_approve: "To approve", lv_type: "Leave type", lv_from: "From", lv_to: "To",
+		lv_half: "Half day", lv_reason: "Reason (speak or write)", lv_apply: "Apply for leave", lv_sent: "Sent for approval to", lv_left: "left",
+		lv_mine: "My leave", ex_type: "Expense type", ex_amount: "Amount (Rs)", ex_date: "Date", ex_bill: "Bill photo", ex_note: "What for (speak or write)",
+		ex_claim: "Claim expense", ex_mine: "My expense claims", lv_approve: "✓ Approve", lv_reject: "✗ Reject", ex_posted: "Approved: Accounts pays it",
+		no_employee: "Your login is not linked to an ERPNext Employee yet. Please ask HR." });
+	Object.assign(T.Marathi, { attendance: "हजेरी", leave_expense: "रजा व खर्च", att_in: "आत", att_out: "बाहेर", att_no_in: "अजून हजेरी नाही",
+		att_wait_file: "हजेरी अजून आली नाही (HR ऑप्टिक फाईल अपलोड करते)", att_leave: "रजेवर", att_off: "सुट्टी", att_late: "उशीर",
+		att_my_month: "माझी हजेरी", att_present: "हजर", att_absent: "गैरहजर", att_half: "अर्धा दिवस", att_missed: "ऑप्टिकने हजेरी घेतली नाही तर",
+		att_selfie: "🤳 सेल्फी हजेरी (बॅकअप)", att_ask_fix: "✋ HR ला दुरुस्ती सांगा", att_fix_what: "काय दुरुस्त करायचे (उदा. मी 9:05 ला आलो, ऑप्टिकने घेतले नाही)",
+		att_today: "आज", att_month: "महिना", att_upload: "अपलोड", att_late_after: "उशीर नंतर", att_no_checkin: "हजेरी नाही",
+		att_fix_req: "दुरुस्ती विनंत्या", att_file: "ऑप्टिक / थंब मशीन फाईल (Excel किंवा CSV)", att_device: "मशीन", att_check_file: "फाईल तपासा",
+		att_save: "✅ हजेरी सेव्ह करा", att_rows: "ओळी", att_matched: "जुळले", att_not_found: "सापडले नाही: एकदा कर्मचारी निवडा",
+		att_missed_out: "बाहेर जाण्याची नोंद नाही (ऑप्टिक 23:00 Auto Checkout)", att_already: "आधीच ERPNext मध्ये", att_made: "हजेरी नोंदी सेव्ह",
+		att_att_made: "हजेरी लावली", att_reason: "कारण (बोला किंवा लिहा)", att_fix: "दुरुस्त करा", att_status: "स्थिती", att_skip: "वगळा",
+		lv_leave: "रजा", lv_expense: "खर्च", lv_to_approve: "मंजुरीसाठी", lv_type: "रजेचा प्रकार", lv_from: "पासून", lv_to: "पर्यंत",
+		lv_half: "अर्धा दिवस", lv_reason: "कारण (बोला किंवा लिहा)", lv_apply: "रजेचा अर्ज करा", lv_sent: "मंजुरीसाठी पाठवले:", lv_left: "शिल्लक",
+		lv_mine: "माझ्या रजा", ex_type: "खर्चाचा प्रकार", ex_amount: "रक्कम (रु)", ex_date: "तारीख", ex_bill: "बिलाचा फोटो", ex_note: "कशासाठी (बोला किंवा लिहा)",
+		ex_claim: "खर्च मागा", ex_mine: "माझे खर्च", lv_approve: "✓ मंजूर", lv_reject: "✗ नामंजूर", ex_posted: "मंजूर: अकाउंट्स पैसे देईल",
+		no_employee: "तुमचे लॉगिन अजून ERPNext कर्मचाऱ्याशी जोडलेले नाही. कृपया HR ला सांगा." });
 	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";
 	T.Marathi.mic_blocked = "माईक / कॅमेरा बंद आहे. Chrome → ⋮ → Settings → Site settings → Microphone (किंवा Camera) → ही साईट → Allow. मग परत येऊन 🎤 दाबा.";
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
@@ -791,7 +820,7 @@
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
-		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", view_member: "👀", complaints: "🛠️",
+		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
 		dash_overview: "🏁", dash_daily_review: "🗓️", dash_sales: "💼", dash_marketing: "📣", dash_machine_shifting: "🏗️", dash_job_work: "⚙️", dash_cr100: "🎯", dash_finance: "💰", dash_manufacturing: "🏭", dash_purchase: "🛒", dash_store: "📦", dash_quality: "✅", dash_hr: "👥", dash_ai: "🤖",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
@@ -1156,7 +1185,8 @@
 			state.card = await call("next_card", {}, true).catch(() => state.card);
 		}
 		const done = (d.done || []).map((x) => `<li class="sk-item k-done"><div><div class="sk-item-title">✓ ${esc(x.title)}</div><div class="sk-item-meta">${esc(hm(x.time))}</div></div></li>`).join("");
-		root.innerHTML = header(t("my_day")) + `<main>${cardHtml(state.card || d.card)}
+		S.att = d.attendance;
+		root.innerHTML = header(t("my_day")) + `<main>${attLine(d.attendance)}${cardHtml(state.card || d.card)}
 			<button class="sk-btn go wide" data-go="work_book">${t("did_extra")}</button>
 			<h3 class="sk-h">${t("to_do")}</h3><ul class="sk-list">${d.items.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
 			<h3 class="sk-h">✓ ${t("done_today")}</h3><ul class="sk-list">${done || `<li class="sk-empty">—</li>`}</ul></main>`;
@@ -1221,7 +1251,7 @@
 
 	// Every photo button (point 4): 📷 Camera · 🖼 Gallery / screenshot · 📄 PDF, a preview with ✕ / 🔄, the photo made
 	// small on the phone (about 300 KB, paper stays readable) and sent at once in the background, retrying by itself
-	const ANY_FILE = "image/*,application/pdf,.dwg,.dxf,.xlsx,.xls,.docx,.doc";
+	const ANY_FILE = "image/*,application/pdf,.dwg,.dxf,.xlsx,.xls,.csv,.docx,.doc";
 	function photoField(id, label, anyFile) {
 		id = id || "f-photo";
 		return `<div class="sk-field sk-photo"><span>${esc(label || t("photo"))}</span>
@@ -1592,7 +1622,8 @@
 		const f = inp.files[0];
 		if (!f || !f.type.startsWith("image/")) return;
 		const map = { "ns-photo": (d) => ({ "ns-name": d.organization, "ns-gstin": d.invoice && d.invoice.gstin, "ns-mobile": d.mobile_no }),
-			"b-photo": (d) => ({ "b-no": d.invoice && d.invoice.number, "b-amt": d.invoice && d.invoice.total, "b-sup": d.organization }) };
+			"b-photo": (d) => ({ "b-no": d.invoice && d.invoice.number, "b-amt": d.invoice && d.invoice.total, "b-sup": d.organization }),
+			"ex-photo": (d) => ({ "ex-amt": d.invoice && d.invoice.total }) };
 		if (!map[inp.id]) return;
 		try {
 			const d = await readOnPhone(f, () => {});
@@ -1607,7 +1638,8 @@
 		new_item: "Item", job_cards: "Job Card", my_jobs: "Job Card", progress_photos: "Work Order", non_conformance: "Non Conformance", my_fixes: "Non Conformance",
 		inspect: "Quality Inspection", final_check: "Quality Inspection", dsi: "SK DSI Entry", problem: "SK Work Log", day_report: "SK Day Report",
 		detail: "CRM note / file", new_lead: "CRM Lead", complaints: "Issue (complaint)", bills: "Purchase Invoice (draft)", suppliers: "Supplier",
-		to_collect: "Payment Entry (draft)", to_pay: "Payment Entry (draft)", expenses: "Journal Entry (draft)", my_day: "SK Work Log" };
+		to_collect: "Payment Entry (draft)", to_pay: "Payment Entry (draft)", expenses: "Journal Entry (draft)", my_day: "Employee Checkin (selfie)",
+		leave_expense: "Expense Claim" };
 	async function photoQuality(file) {
 		const img = await createImageBitmap(file);
 		const c = document.createElement("canvas");
@@ -2074,6 +2106,128 @@
 				<button class="sk-btn wide" data-act="cp-ok" data-ok="0" data-name="${esc(d.name)}">👎 ${t("cp_not_ok")}</button>` : ""}
 			${wa ? `<a class="sk-btn wide" href="${wa}" target="_blank">💬 ${t("cp_wa")}</a>` : ""}
 			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+
+	// Point 16: my Optick / thumb check-in on top of My Day; tap it for my month, selfie backup and "ask HR to fix"
+	function attLine(a) {
+		if (!a) return "";
+		let text = "", c = a.state || "";
+		if (a.in) text = `✓ ${t("att_in")} ${esc(a.in)} (${esc(a.source)})${a.out ? ` · ${t("att_out")} ${esc(a.out)}` : ""}${a.state === "amber" ? ` · ${t("att_late")}` : ""}`;
+		else if (a.leave) text = `🌴 ${t("att_leave")} (${esc(a.leave)})`;
+		else if (a.off) text = `🏖 ${t("att_off")}`;
+		else if (a.state === "red") text = `✗ ${t("att_no_in")}`;
+		else if (a.waiting_file) text = `⏳ ${t("att_wait_file")}`;
+		else text = `🕘 ${t("att_late_after")} ${esc(a.late_after)}`;
+		return `<button class="sk-attline ${c}" data-act="att-me">${text} ›</button>`;
+	}
+	function attSheet() {
+		const a = S.att;
+		if (!a) { toast(t("no_employee"), true); return; }
+		const m = a.month || {};
+		const days = (xs) => (xs || []).length ? ` · ${xs.join(", ")}` : "";
+		sheet(`<h3 class="sk-h">🕘 ${t("att_my_month")}</h3>
+			<ul class="sk-list">${li(t("att_present"), "", `<b>${m.present || 0}</b>`)}${li(t("att_late"), days(m.late_days).slice(3), `<b>${m.late || 0}</b>`)}
+			${m.half_day ? li(t("att_half"), "", `<b>${m.half_day}</b>`) : ""}${li(t("att_leave"), days(m.leave_days).slice(3), `<b>${m.leave || 0}</b>`)}
+			${li(t("att_absent"), days(m.absent_days).slice(3), `<b>${m.absent || 0}</b>`, m.absent ? "k-red" : "")}</ul>
+			<h3 class="sk-h">${t("att_missed")}</h3>
+			${photoField("att-selfie", "🤳 " + t("photo"))}
+			<button class="sk-btn go wide" data-act="att-selfie">${t("att_selfie")} · ${esc(a.next || "IN")}</button>
+			<label class="sk-field"><span>${t("ex_date")}</span><input id="att-day" type="date" value="${new Date().toISOString().slice(0, 10)}"></label>
+			${formField("att-fix", t("att_fix_what"), true)}
+			<button class="sk-btn wide" data-act="att-ask">${t("att_ask_fix")}</button>
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+	function where() {
+		return new Promise((ok) => {
+			if (!navigator.geolocation) return ok({});
+			navigator.geolocation.getCurrentPosition((p) => ok({ lat: p.coords.latitude, lng: p.coords.longitude }), () => ok({}), { timeout: 8000, maximumAge: 60000 });
+		});
+	}
+
+	// HR (Aarti): Today · Month · Upload the Optick / thumb machine file
+	let attTab = "today", attMonth = "", attPreview = null;
+	async function renderAttendance() {
+		const tab = (k) => `<button class="${attTab === k ? "on" : ""}" data-atttab="${k}">${t("att_" + k)}</button>`;
+		let body = "";
+		if (attTab === "today") {
+			const d = await call("hr_today");
+			S.attFix = d.fix_requests;
+			const g = d.groups;
+			const person = (r, extra) => li(esc(r.name), extra, r.mobile && !r.in ? `<a class="sk-chip" href="tel:${esc(r.mobile)}">📞</a>` : "");
+			const sec = (k, label, rows, fn, cls) => `<h3 class="sk-h ${cls || ""}">${label} · ${rows.length}</h3><ul class="sk-list">${rows.map(fn).join("") || `<li class="sk-empty">—</li>`}</ul>`;
+			body = `<p class="sk-note">${esc(d.day)} · ${t("att_late_after")} ${esc(d.late_after)} · ${Object.entries(d.by_source).map(([k, v]) => `${esc(k)} ${v}`).join(" · ") || "—"}</p>
+				${d.fix_requests.length ? sec("fix", "✋ " + t("att_fix_req"), d.fix_requests, (r, i) => li(esc(r.text), esc(r.date || ""), `<button class="sk-chip" data-act="att-fixsheet" data-i="${i}">${t("att_fix")}</button>`, "k-lead_new")) : ""}
+				${sec("present", "✓ " + t("att_present"), g.present, (r) => person(r, `${esc(r.in)}${r.out ? " – " + esc(r.out) : ""} · ${esc(r.source || "")}`))}
+				${sec("late", "⏰ " + t("att_late"), g.late, (r) => person(r, `${esc(r.in || "")} · ${esc(r.source || "")}`), "k-amber")}
+				${sec("no_checkin", "✗ " + t("att_no_checkin"), g.no_checkin, (r) => person(r, d.uploaded_today ? "" : t("att_wait_file")))}
+				${sec("on_leave", "🌴 " + t("att_leave"), g.on_leave, (r) => person(r, esc(r.leave_type || "")))}
+				${g.off.length ? sec("off", "🏖 " + t("att_off"), g.off, (r) => person(r, "")) : ""}`;
+		} else if (attTab === "month") {
+			const d = await call("hr_month", attMonth ? { month: attMonth } : {});
+			body = `<div class="sk-row"><button class="sk-chip" data-attmonth="-1">‹</button><b>${esc(d.month)}</b><button class="sk-chip" data-attmonth="1">›</button></div>
+				<table class="sk-atttable"><tr><th></th><th>${t("att_present")}</th><th>${t("att_late")}</th><th>½</th><th>${t("att_leave")}</th><th>${t("att_absent")}</th></tr>
+				${d.rows.map((r) => `<tr><td>${esc(r.name)}</td><td>${r.present}</td><td>${r.late}</td><td>${r.half_day}</td><td>${r.leave}</td><td class="${r.absent ? "bad" : ""}">${r.absent}</td></tr>`).join("")}</table>`;
+		} else {
+			const p = attPreview;
+			body = `<div class="sk-form">${pick("att-device", t("att_device"), ["Optick", "Office thumb"])}
+				${photoField("att-file", "📄 " + t("att_file"), true)}
+				<button class="sk-btn go wide" data-act="att-preview">🔍 ${t("att_check_file")}</button></div>
+				${p ? `<section class="sk-card"><div class="sk-card-text">${p.rows} ${t("att_rows")} (${esc(p.from)} – ${esc(p.to)}) · ${p.matched.length} ${t("att_matched")} ✓ · ${p.late} ${t("att_late")} · ${p.already} ${t("att_already")}</div></section>
+				${p.not_found.length ? `<h3 class="sk-h k-amber">⚠ ${p.not_found.length} ${t("att_not_found")}</h3>${p.not_found.map((r, i) => `<label class="sk-field"><span>${esc(r.name)} · ID ${esc(r.id)} · ${esc(r.mobile)}</span>
+					<select class="sk-select" id="att-m-${i}"><option value="">${t("att_skip")}</option>${p.employees.map((e) => `<option value="${esc(e.name)}" ${r.options[0] === e.name ? "selected" : ""}>${esc(e.employee_name)}</option>`).join("")}</select></label>`).join("")}` : ""}
+				<ul class="sk-list">${p.matched.map((r) => li(`✓ ${esc(r.employee_name)}`, `${esc(r.name)} · ${esc(r.how)} · ${r.rows} ${t("att_rows")}`)).join("")}</ul>
+				${p.missed_out.length ? `<h3 class="sk-h">⚠ ${p.missed_out.length} ${t("att_missed_out")}</h3><ul class="sk-list">${Object.entries(p.missed_out.reduce((a, r) => { (a[r.name] = a[r.name] || []).push(r.date.slice(8)); return a; }, {}))
+					.map(([n, ds]) => li(`${esc(n)} · ${ds.length}`, ds.map(esc).join(", "))).join("")}</ul>` : ""}
+				<button class="sk-btn ok wide" data-act="att-save">${t("att_save")}</button><div id="att-result"></div>` : ""}`;
+		}
+		root.innerHTML = header(t("attendance")) + `<main><div class="cal-tabs">${tab("today")}${tab("month")}${tab("upload")}</div>${body}</main>`;
+		if (attTab === "upload" && attPreview) { const s = document.getElementById("att-device"); if (s) s.value = attPreview.device; }
+	}
+	function attFixSheet(r) {
+		sheet(`<h3 class="sk-h">✋ ${esc(r.text)}</h3>
+			<label class="sk-field"><span>${t("ex_date")}</span><input id="fx-day" type="date" value="${esc(r.date || "")}"></label>
+			${pick("fx-status", t("att_status"), [{ value: "Present", label: t("att_present") }, { value: "Half Day", label: t("att_half") }, { value: "Absent", label: t("att_absent") }, { value: "Work From Home", label: "Work From Home" }])}
+			${formField("fx-reason", t("att_reason"), true)}
+			<button class="sk-btn ok wide" data-act="att-fix" data-employee="${esc(r.employee)}" data-todo="${esc(r.todo)}">${t("att_fix")}</button>
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+
+	// Everyone: Leave & Expense; managers approve their team's here (HR / CEO see all waiting)
+	let lvTab = "leave";
+	async function renderLeaveExpense() {
+		const d = await call("leave_expense");
+		S.lv = d;
+		const chip = (st) => `<span class="chip2 ${/Approved|Paid/.test(st) ? "green" : /Rejected|Cancelled/.test(st) ? "red" : "yel"}">${esc(st)}</span>`;
+		const tab = (k, label) => `<button class="${lvTab === k ? "on" : ""}" data-lvtab="${k}">${label}</button>`;
+		let body = "";
+		if (!d.employee && lvTab !== "approve") body = `<p class="sk-note">${t("no_employee")}</p>`;
+		else if (lvTab === "leave") {
+			body = `<div class="sk-row sk-wrap">${d.leave_types.filter((x) => x.balance !== null).map((x) => `<span class="chip2 navy">${esc(x.name)}: ${x.balance} ${t("lv_left")}</span>`).join("")}</div>
+				<div class="sk-form">${pick("lv-type", t("lv_type"), d.leave_types.map((x) => ({ value: x.name, label: x.balance !== null ? `${x.name} (${x.balance} ${t("lv_left")})` : x.name })))}
+				<label class="sk-field"><span>${t("lv_from")}</span><input id="lv-from" type="date"></label>
+				<label class="sk-field"><span>${t("lv_to")}</span><input id="lv-to" type="date"></label>
+				<label class="sk-check"><input id="lv-half" type="checkbox"> ${t("lv_half")}</label>
+				${formField("lv-reason", t("lv_reason"), true)}
+				<button class="sk-btn ok wide" data-act="lv-apply">${t("lv_apply")}</button></div>
+				<h3 class="sk-h">${t("lv_mine")}</h3><ul class="sk-list">${d.my_leave.map((l) => li(`${esc(l.leave_type)} · ${esc(l.from_date)}${l.to_date !== l.from_date ? " – " + esc(l.to_date) : ""}`,
+					`${l.total_leave_days || ""} · ${esc(l.description || "")}`, chip(l.status))).join("") || `<li class="sk-empty">—</li>`}</ul>`;
+		} else if (lvTab === "expense") {
+			body = `<div class="sk-form">${photoField("ex-photo", "📷 " + t("ex_bill"))}${pick("ex-type", t("ex_type"), d.expense_types)}
+				<label class="sk-field"><span>${t("ex_amount")}</span><input id="ex-amt" type="number" inputmode="decimal" min="0"></label>
+				<label class="sk-field"><span>${t("ex_date")}</span><input id="ex-date" type="date" value="${new Date().toISOString().slice(0, 10)}"></label>
+				${formField("ex-note", t("ex_note"), true)}
+				<button class="sk-btn ok wide" data-act="ex-claim">${t("ex_claim")}</button></div>
+				<h3 class="sk-h">${t("ex_mine")}</h3><ul class="sk-list">${d.my_claims.map((c) => li(`${money(c.total_claimed_amount)} · ${esc(c.type || "")}`, `${esc(c.posting_date)} · ${esc(c.remark || "")}`,
+					chip(c.docstatus === 1 ? c.status : c.approval_status))).join("") || `<li class="sk-empty">—</li>`}</ul>`;
+		} else {
+			const btns = (kind, name) => `<div class="sk-row"><button class="sk-chip ok" data-act="lv-decide" data-kind="${kind}" data-name="${esc(name)}" data-ok="1">${t("lv_approve")}</button>
+				<button class="sk-chip bad" data-act="lv-decide" data-kind="${kind}" data-name="${esc(name)}" data-ok="0">${t("lv_reject")}</button></div>`;
+			body = `<h3 class="sk-h">🌴 ${t("lv_leave")}</h3><ul class="sk-list">${d.leave_to_approve.map((l) => `<li class="sk-item"><div style="flex:1"><div class="sk-item-title">${esc(l.employee_name)}: ${esc(l.leave_type)}</div>
+					<div class="sk-item-meta">${esc(l.from_date)}${l.to_date !== l.from_date ? " – " + esc(l.to_date) : ""} · ${l.total_leave_days || ""} · ${esc(l.description || "")}</div>${btns("leave", l.name)}</div></li>`).join("") || `<li class="sk-empty">—</li>`}</ul>
+				<h3 class="sk-h">💸 ${t("lv_expense")}</h3><ul class="sk-list">${d.claims_to_approve.map((c) => `<li class="sk-item"><div style="flex:1"><div class="sk-item-title">${esc(c.employee_name)}: ${money(c.total_claimed_amount)}</div>
+					<div class="sk-item-meta">${esc(c.type || "")} · ${esc(c.posting_date)} · ${esc(c.remark || "")} <a href="/app/expense-claim/${encodeURIComponent(c.name)}">📎</a></div>${btns("expense", c.name)}</div></li>`).join("") || `<li class="sk-empty">—</li>`}</ul>`;
+		}
+		root.innerHTML = header(t("leave_expense")) + `<main><div class="cal-tabs">${tab("leave", "🌴 " + t("lv_leave"))}${tab("expense", "💸 " + t("lv_expense"))}${tab("approve", `✅ ${t("lv_to_approve")}${d.to_approve ? ` (${d.to_approve})` : ""}`)}</div>${body}</main>`;
 	}
 
 	// View Member App (point 3): all members by function, last active; tap one to open their app as they see it
@@ -3184,7 +3338,8 @@
 		expenses: () => finScreen("expenses", renderExpenses), dir_expenses: () => finScreen("dir_expenses"),
 		segment_pnl: renderSegmentWise, month_close: renderMonthWise,
 		improvement_inbox: renderInbox, dept_visits: renderVisit, erp_gaps: renderGaps, app_users: renderAppUsers, change_list: renderChangeList,
-		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources, customers: renderCustomers, view_member: renderViewMember, complaints: renderComplaints };
+		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources, customers: renderCustomers, view_member: renderViewMember, complaints: renderComplaints,
+		attendance: renderAttendance, leave_expense: renderLeaveExpense };
 	["overview", "daily_review", "sales", "marketing", "machine_shifting", "job_work", "cr100", "finance", "manufacturing", "purchase",
 		"store", "quality", "hr", "ai"].forEach((k) => { LIVE_VIEWS["dash_" + k] = () => renderDash(k); });
 
@@ -3311,6 +3466,14 @@
 				return;
 			}
 			if (el.dataset.cptab) { cpTab = el.dataset.cptab; return go("complaints"); }
+			if (el.dataset.atttab) { attTab = el.dataset.atttab; return go("attendance"); }
+			if (el.dataset.attmonth) {
+				const d = new Date((attMonth || new Date().toISOString().slice(0, 7) + "-01") + "T00:00:00");
+				d.setMonth(d.getMonth() + Number(el.dataset.attmonth));
+				attMonth = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-01`;
+				return go("attendance");
+			}
+			if (el.dataset.lvtab) { lvTab = el.dataset.lvtab; return go("leave_expense"); }
 			if (el.dataset.cp) return complaintSheet(el.dataset.cp);
 			if (el.dataset.custtab) { custTab = el.dataset.custtab; return go("customers"); }
 			if (el.dataset.custseg !== undefined) { custSeg = el.dataset.custseg; return go("customers"); }
@@ -3501,6 +3664,70 @@
 			if (act === "cp-ok") {
 				await call("complaint_customer", { name: el.dataset.name, ok: el.dataset.ok, note: val("cp-note"), photo: await photoUrl("cp-proof") }, true);
 				closeSheet(); toast(t("saved")); return go("complaints");
+			}
+			if (act === "att-me") return attSheet();
+			if (act === "att-selfie") {
+				const photo = await photoUrl("att-selfie");
+				if (!photo) { toast(t("photo"), true); return; }
+				el.disabled = true;
+				try {
+					const r = await call("attendance_selfie", { photo, ...(await where()) }, true);
+					toast(`✓ ${r.log_type} ${r.time}`);
+				} finally { el.disabled = false; }
+				closeSheet(); return go("my_day");
+			}
+			if (act === "att-ask") {
+				await call("attendance_ask_fix", { text: val("att-fix"), day: val("att-day") }, true);
+				closeSheet(); toast(t("saved")); return;
+			}
+			if (act === "att-fixsheet") return attFixSheet(S.attFix[Number(el.dataset.i)]);
+			if (act === "att-fix") {
+				await call("hr_fix", { employee: el.dataset.employee, day: val("fx-day"), status: val("fx-status"), reason: val("fx-reason"), todo: el.dataset.todo }, true);
+				closeSheet(); toast(t("saved")); return go("attendance");
+			}
+			if (act === "att-preview") {
+				const url = await photoUrl("att-file");
+				if (!url) { toast(t("att_file"), true); return; }
+				el.disabled = true;
+				try { attPreview = { ...(await call("hr_upload_preview", { file_url: url, device: val("att-device") || "Optick" }, true)), file_url: url }; } finally { el.disabled = false; }
+				return go("attendance");
+			}
+			if (act === "att-save") {
+				const p = attPreview, matches = {};
+				p.not_found.forEach((r, i) => { const v = val("att-m-" + i); if (v) matches[r.id || r.mobile || r.name] = v; });
+				el.disabled = true;
+				try {
+					const r = await call("hr_upload_save", { file_url: p.file_url, matches: JSON.stringify(matches), device: p.device }, true);
+					document.getElementById("att-result").innerHTML = `<p class="sk-note">✅ ${r.checkins} ${t("att_made")} · ${r.attendance} ${t("att_att_made")} · ${r.missed_out} ${t("att_missed_out")}${r.not_matched ? ` · ${r.not_matched} ${t("att_skip")}` : ""}</p>
+						${r.errors.map((x) => `<p class="sk-note bad">⚠ ${esc(x)}</p>`).join("")}`;
+					attPreview = null;
+				} finally { el.disabled = false; }
+				return;
+			}
+			if (act === "lv-apply") {
+				el.disabled = true;
+				try {
+					const r = await call("leave_apply", { leave_type: val("lv-type"), from_date: val("lv-from"), to_date: val("lv-to") || val("lv-from"),
+						half_day: document.getElementById("lv-half").checked ? 1 : 0, reason: val("lv-reason") }, true);
+					clearDraft(); toast(`${t("lv_sent")} ${r.approver || "HR"}`);
+				} finally { el.disabled = false; }
+				return go("leave_expense");
+			}
+			if (act === "ex-claim") {
+				el.disabled = true;
+				try {
+					const r = await call("expense_claim", { expense_type: val("ex-type"), amount: val("ex-amt"), expense_date: val("ex-date"), note: val("ex-note"), photo: await photoUrl("ex-photo") }, true);
+					clearDraft(); toast(`${t("lv_sent")} ${r.approver || "HR"}`);
+				} finally { el.disabled = false; }
+				return go("leave_expense");
+			}
+			if (act === "lv-decide") {
+				el.disabled = true;
+				try {
+					const r = await call(el.dataset.kind === "leave" ? "leave_decide" : "expense_decide", { name: el.dataset.name, ok: el.dataset.ok }, true);
+					toast(r.posted ? t("ex_posted") : r.status);
+				} finally { el.disabled = false; }
+				return go("leave_expense");
 			}
 			if (act === "view-enter") return enterView(el.dataset.user, el.dataset.uname);
 			if (act === "view-exit") return exitView();

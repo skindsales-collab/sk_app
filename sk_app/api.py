@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import ai_desk, calendar_view, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, segments, store, training, view_member, work
+from sk_app import ai_desk, calendar_view, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, segments, store, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -86,7 +86,7 @@ def _badges(user, functions):
 	try:
 		return {**store.badges(user, functions), **purchase.badges(user, functions), **production.badges(user, functions),
 			**quality.badges(user, functions), **finance.badges(user, functions), **ai_desk.badges(user, functions),
-			**({"mail": n} if (n := mailbox.badge(user)) else {}), **complaints.badge(user)}
+			**({"mail": n} if (n := mailbox.badge(user)) else {}), **complaints.badge(user), **hr.badges(user, functions)}
 	except Exception:
 		frappe.log_error("SK App badges")
 		return {}
@@ -104,7 +104,16 @@ def my_day():
 	items = rank_items(work.collect(profile.user, profile.home), now_datetime())
 	# point 10: Work Book is inside My Day now, as "Done today" + "I did extra work"
 	return {"items": [_item_dict(i) for i in items], "card": _latest_card(profile.user),
-		"done": calendar_view.done_today(profile.user, getdate())}
+		"done": calendar_view.done_today(profile.user, getdate()), "attendance": _attendance_line(profile.user)}
+
+
+def _attendance_line(user):
+	"""Point 16: today's Optick / thumb check-in on top of My Day; never breaks My Day."""
+	try:
+		return hr.my_line(user)
+	except Exception:
+		frappe.log_error("SK App attendance line")
+		return None
 
 
 @frappe.whitelist(methods=["POST"])
@@ -1133,3 +1142,67 @@ def photo_check(kind, values=None):
 @frappe.whitelist(methods=["POST"])
 def photo_learn(kind, read_text, chosen):
 	return photocheck.learn(_me().user, kind, read_text, chosen)
+
+
+# point 16 + HR step 5: Optick / thumb attendance, leave and expenses
+@frappe.whitelist()
+def hr_today(day=None):
+	return hr.today(_me().user, day)
+
+
+@frappe.whitelist()
+def hr_month(month=None):
+	return hr.month(_me().user, month)
+
+
+@frappe.whitelist(methods=["POST"])
+def hr_upload_preview(file_url, device="Optick"):
+	return hr.upload_preview(_me().user, file_url, device)
+
+
+@frappe.whitelist(methods=["POST"])
+def hr_upload_save(file_url, matches=None, device="Optick"):
+	if isinstance(matches, str):
+		matches = json.loads(matches or "{}")
+	return hr.upload_save(_me().user, file_url, matches, device)
+
+
+@frappe.whitelist(methods=["POST"])
+def hr_fix(employee, day, status, reason, todo=None):
+	return hr.fix_attendance(_me().user, employee, day, status, reason, todo)
+
+
+@frappe.whitelist(methods=["POST"])
+def attendance_selfie(photo, lat=None, lng=None):
+	return hr.selfie_checkin(_me().user, photo, lat, lng)
+
+
+@frappe.whitelist(methods=["POST"])
+def attendance_ask_fix(text, day=None):
+	return hr.ask_fix(_me().user, day, text)
+
+
+@frappe.whitelist()
+def leave_expense():
+	user = _me().user
+	return {**hr.options(user), **hr.listing(user)}
+
+
+@frappe.whitelist(methods=["POST"])
+def leave_apply(leave_type, from_date, to_date=None, half_day=0, reason=None):
+	return hr.apply_leave(_me().user, leave_type, from_date, to_date, half_day, reason)
+
+
+@frappe.whitelist(methods=["POST"])
+def leave_decide(name, ok, note=None):
+	return hr.decide_leave(_me().user, name, ok, note)
+
+
+@frappe.whitelist(methods=["POST"])
+def expense_claim(expense_type, amount, expense_date=None, note=None, photo=None):
+	return hr.claim_expense(_me().user, expense_type, amount, expense_date, note, photo)
+
+
+@frappe.whitelist(methods=["POST"])
+def expense_decide(name, ok, note=None):
+	return hr.decide_expense(_me().user, name, ok, note)
