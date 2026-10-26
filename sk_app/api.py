@@ -1053,6 +1053,11 @@ def tag_customer(customer, segment):
 	return segments.tag(_me().user, customer, segment)
 
 
+@frappe.whitelist(methods=["POST"])
+def tag_customers_from_tally():
+	return segments.tag_from_tally(_me().user)
+
+
 # point 3: CEO "View Member App"
 @frappe.whitelist()
 def view_members():

@@ -720,13 +720,13 @@
 	});
 	// change list point 2: Cabin / Non-Cabin customers
 	Object.assign(T.English, {
-		customers: "Customers", seg_not_set: "Segment not set", seg_all: "All", seg_cabin: "Cabin", seg_noncabin: "Non-Cabin",
+		customers: "Customers", tag_tally: "Tag from Tally (Cabin / Non-Cabin sales)", seg_not_set: "Segment not set", seg_all: "All", seg_cabin: "Cabin", seg_noncabin: "Non-Cabin",
 		pick_segment: "Please pick the segment (Cabin or Non-Cabin)", orders_word: "orders", tag_hint: "Tap the segment: the right team then sees this customer.",
 		seen_by_mgmt: "Customers without a segment are seen by Management only until tagged.",
 		"Cabin": "Cabin", "Non-Cabin": "Non-Cabin",
 	});
 	Object.assign(T.Marathi, {
-		customers: "ग्राहक", seg_not_set: "विभाग ठरवलेला नाही", seg_all: "सर्व", seg_cabin: "केबिन", seg_noncabin: "नॉन-केबिन",
+		customers: "ग्राहक", tag_tally: "Tally प्रमाणे विभाग लावा", seg_not_set: "विभाग ठरवलेला नाही", seg_all: "सर्व", seg_cabin: "केबिन", seg_noncabin: "नॉन-केबिन",
 		pick_segment: "कृपया विभाग निवडा (केबिन की नॉन-केबिन)", orders_word: "ऑर्डर", tag_hint: "विभागावर टॅप करा: योग्य टीमला हा ग्राहक दिसेल.",
 		seen_by_mgmt: "विभाग नसलेले ग्राहक टॅग होईपर्यंत फक्त व्यवस्थापनाला दिसतात.",
 		"Cabin": "केबिन", "Non-Cabin": "नॉन-केबिन",
@@ -2299,6 +2299,7 @@
 			${segChips}
 			<div class="sk-input-row sk-gap"><input id="cust-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(custQuery)}">${micBox("cust-q")}</div>
 			${custTab === "not_set" ? `<p class="sk-note">${t("tag_hint")} ${t("seen_by_mgmt")}</p>` : ""}
+			${custTab === "not_set" && d.from_tally ? `<button class="sk-btn go wide" data-act="cust-tally">📒 ${t("tag_tally")} (${d.from_tally})</button>` : ""}
 			<ul class="sk-list">${d.rows.map((r, i) => `<li class="sk-item"><div style="flex:1">
 				<div class="sk-item-title">${esc(r.customer_name || r.name)}</div>
 				<div class="sk-item-meta">${[r.segment ? `<span class="chip2 ${r.main === "Cabin" ? "navy" : "yel"}">${esc(r.segment)}</span>` : esc(r.customer_group || ""),
@@ -3760,6 +3761,11 @@
 				closeSheet();
 				toast(t("idea_sent"));
 				return;
+			}
+			if (act === "cust-tally") {
+				const r = await call("tag_customers_from_tally", {}, true);
+				toast(`✓ ${t("seg_cabin")} ${r.cabin} · ${t("seg_noncabin")} ${r.non_cabin}`);
+				return go("customers");
 			}
 			if (act === "cust-tag") {
 				const r = S.cust[Number(el.dataset.i)];
