@@ -13,6 +13,8 @@ website_route_rules = [
 
 scheduler_events = {
 	"hourly": ["sk_app.guide.hourly"],
+	# IndiaMART / JustDial / GeM mails to the team mailboxes become CRM leads (free route, point 14)
+	"cron": {"*/5 * * * *": ["sk_app.lead_sources.scan"]},
 }
 
 doc_events = {

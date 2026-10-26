@@ -152,3 +152,16 @@ Score = actual / target (capped at 120%) x weight. Sources that are not live yet
   Sales Invoice and Credit Note, Journal Voucher, Direct and Indirect Expenses, Segment Wise P&L (Cabin /
   Non-Cabin net) and the Month Wise Report.
 - A screen that fails shows the reason and lands in the AI & ERP inbox.
+
+## Change list Rev 13, part B: team mailboxes and auto leads (26-Oct-2026)
+
+- **Mail → Team mailbox** (`mailbox.py`): cabin@ for Sales / Marketing, service@ for Aditya, acc@ for Accounts,
+  sales@ for the CEO, info@ for HR (SK App Settings → Team mailboxes). Each mail shows New → Taken by … →
+  Replied / Lead made / Not a lead; "I'll answer", "Give to" (manager), "Make lead", reply from the team mailbox
+  signed with the person's name and mobile. The mails come from ERPNext Email Accounts.
+- **Auto leads, free** (`lead_sources.py`, every 5 minutes): IndiaMART enquiry mails, JustDial lead mails and GeM
+  bid alerts become CRM leads with source, segment and owner (digital → Pranali, cabin / GeM → Rushi, machine
+  shifting / job work → Aditya; SK App Settings). Same mobile within 90 days → a note on the earlier lead.
+  IndiaMART's Leads API is a paid add-on and is not used.
+- **Excel upload**: the IndiaMART Lead Manager export (or a JustDial list) uploaded from New Lead or Lead Sources.
+- **Lead Sources** page (AI & ERP, CEO): sources on / off, leads today / this month, check now, mailboxes set up.

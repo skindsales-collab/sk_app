@@ -4,7 +4,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import ai_desk, calendar_view, claude, colours, comms, crm, day_report, finance, guide, kpi, ledger, logins, production, purchase, quality, store, training, work
+from sk_app import ai_desk, calendar_view, claude, colours, comms, crm, day_report, finance, guide, kpi, lead_sources, ledger, logins, mailbox, production, purchase, quality, store, training, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -77,7 +77,8 @@ def _badges(user, functions):
 	"""Red counts on Store / Purchase / approval icons; never breaks Home if ERPNext data is odd."""
 	try:
 		return {**store.badges(user, functions), **purchase.badges(user, functions), **production.badges(user, functions),
-			**quality.badges(user, functions), **finance.badges(user, functions), **ai_desk.badges(user, functions)}
+			**quality.badges(user, functions), **finance.badges(user, functions), **ai_desk.badges(user, functions),
+			**({"mail": n} if (n := mailbox.badge(user)) else {})}
 	except Exception:
 		frappe.log_error("SK App badges")
 		return {}
@@ -957,3 +958,60 @@ def fin_segment_wise(month=None):
 @frappe.whitelist()
 def fin_month_wise(year_start=None):
 	return ledger.month_wise(_me().user, year_start)
+
+
+# ---------- Team mailboxes and auto leads (point 14) ----------
+@frappe.whitelist()
+def team_mail(days=30):
+	return mailbox.inbox(_me().user, cint(days) or 30)
+
+
+@frappe.whitelist()
+def team_mail_read(comm):
+	return mailbox.read(_me().user, comm)
+
+
+@frappe.whitelist(methods=["POST"])
+def team_mail_take(comm):
+	return mailbox.take(_me().user, comm)
+
+
+@frappe.whitelist(methods=["POST"])
+def team_mail_give(comm, to_user):
+	return mailbox.give(_me().user, comm, to_user)
+
+
+@frappe.whitelist(methods=["POST"])
+def team_mail_not_lead(comm):
+	return mailbox.not_a_lead(_me().user, comm)
+
+
+@frappe.whitelist(methods=["POST"])
+def team_mail_lead(comm, segment=None):
+	return mailbox.make_lead(_me().user, comm, segment)
+
+
+@frappe.whitelist(methods=["POST"])
+def team_mail_reply(comm, message):
+	return mailbox.reply(_me().user, comm, message)
+
+
+@frappe.whitelist(methods=["POST"])
+def leads_upload(file_url, source="IndiaMART"):
+	return lead_sources.upload(_me().user, file_url, source)
+
+
+@frappe.whitelist()
+def lead_sources_status():
+	return lead_sources.status(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def lead_sources_switch(setting, on):
+	return lead_sources.switch(_me().user, setting, on)
+
+
+@frappe.whitelist(methods=["POST"])
+def lead_sources_check_now():
+	lead_sources.status(_me().user)  # same rights as the page
+	return lead_sources.scan()

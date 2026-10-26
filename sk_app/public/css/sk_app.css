@@ -229,3 +229,7 @@ html, body { overscroll-behavior-y: contain; }
 .sk-table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--card); border-radius: 10px; }
 .sk-table th, .sk-table td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #e6e9ef; white-space: nowrap; }
 .sk-table th:first-child, .sk-table td:first-child { text-align: left; }
+/* point 14: team mailbox */
+.sk-mailtext { max-height: 40vh; overflow-y: auto; white-space: pre-wrap; background: #f4f6fa; padding: 10px; border-radius: 8px; }
+.sk-muted { color: #8a93a3; }
+li.sk-off { opacity: .6; }

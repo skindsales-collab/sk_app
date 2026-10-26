@@ -671,6 +671,13 @@
 		opening: "Opening", closing: "Closing", dr: "Dr", cr: "Cr", bills_n: "bills", returns_n: "debit / credit notes",
 		drafts_n: "drafts", net: "Net", direct: "Direct", indirect: "Indirect", gross: "Gross", net_pl: "Net P&L",
 		common_cost: "Common (not split yet)", closing_list: "Closing checklist", month_pl: "Month-wise P&L", inv_n: "invoices",
+		team_box: "Team mailbox", my_customers: "My customers", st_New: "New", st_Taken: "Taken", st_Replied: "Replied",
+		"st_Lead made": "Lead made", "st_Not a lead": "Not a lead", take: "I'll answer", give_to: "Give to", make_lead_btn: "Make lead",
+		not_lead: "Not a lead", reply: "Reply", reply_q: "Your reply (speak or type)", by_word: "by", lead_sources: "Lead Sources",
+		upload_list: "Upload IndiaMART / JustDial list (Excel)", leads_made: "new leads", added_old: "added to earlier leads",
+		skipped_n: "rows without mobile / e-mail", last_check: "Last mail check", check_now: "Check mails now",
+		pull_api: "IndiaMART Pull API: paid add-on, Phase 2", mailboxes: "Mailboxes", set_up: "set up", not_set_up: "not set up in ERPNext yet",
+		on_word: "On", off_word: "Off", this_month2: "this month", source_word: "Source",
 		erp_roles: "ERPNext roles", upload_failed: "File could not be sent.", draft_back: "Your unsaved form was filled back in.",
 	});
 	Object.assign(T.Marathi, {
@@ -693,6 +700,13 @@
 		opening: "सुरुवातीची शिल्लक", closing: "शिल्लक", dr: "Dr", cr: "Cr", bills_n: "बिले", returns_n: "डेबिट / क्रेडिट नोट",
 		drafts_n: "ड्राफ्ट", net: "निव्वळ", direct: "प्रत्यक्ष", indirect: "अप्रत्यक्ष", gross: "एकूण नफा", net_pl: "निव्वळ नफा-तोटा",
 		common_cost: "सामायिक (विभागले नाही)", closing_list: "क्लोजिंग यादी", month_pl: "महिनावार नफा-तोटा", inv_n: "बिले",
+		team_box: "टीम मेलबॉक्स", my_customers: "माझे ग्राहक", st_New: "नवीन", st_Taken: "घेतले", st_Replied: "उत्तर दिले",
+		"st_Lead made": "लीड बनली", "st_Not a lead": "लीड नाही", take: "मी उत्तर देतो", give_to: "यांना द्या", make_lead_btn: "लीड बनवा",
+		not_lead: "लीड नाही", reply: "उत्तर", reply_q: "तुमचे उत्तर (बोला किंवा लिहा)", by_word: "", lead_sources: "लीड स्रोत",
+		upload_list: "IndiaMART / JustDial यादी (Excel) अपलोड करा", leads_made: "नवीन लीड", added_old: "जुन्या लीडमध्ये जोडले",
+		skipped_n: "मोबाईल / ईमेल नसलेल्या ओळी", last_check: "शेवटची मेल तपासणी", check_now: "आता मेल तपासा",
+		pull_api: "IndiaMART Pull API: पैशाची सेवा, टप्पा 2", mailboxes: "मेलबॉक्स", set_up: "तयार", not_set_up: "ERPNext मध्ये अजून नाही",
+		on_word: "चालू", off_word: "बंद", this_month2: "या महिन्यात", source_word: "स्रोत",
 		erp_roles: "ERPNext रोल", upload_failed: "फाईल पाठवता आली नाही.", draft_back: "सेव्ह न केलेला फॉर्म परत भरला.",
 	});
 	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";
@@ -710,7 +724,7 @@
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
-		training_progress: "📈", erpnext_desk: "🖥️", dir_expenses: "🧾",
+		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
@@ -1376,7 +1390,8 @@
 			<label class="sk-field"><span>${t("email")}</span><div class="sk-input-row"><input id="f-email" type="email"></div></label>
 			${sel("f-source", t("source"), o.sources)}${sel("f-segment", t("segment"), o.segments)}
 			${formField("f-req", t("requirement"), true)}
-			<button class="sk-btn ok wide" data-act="save-lead">${t("save")}</button></main>`;
+			<button class="sk-btn ok wide" data-act="save-lead">${t("save")}</button>
+			<details class="sk-gap"><summary>📄 ${t("upload_list")}</summary>${uploadBox()}</details></main>`;
 		document.getElementById("f-card").addEventListener("change", readCard);
 	}
 
@@ -1715,14 +1730,71 @@
 	}
 
 	// ---------- Mail: free once the company Email Account is connected in ERPNext ----------
+	// point 14: Team mailbox (cabin@ for the sales team, service@ for Aditya, acc@ Accounts, sales@ CEO, info@ HR) and
+	// My customers (mails on my own leads / deals). Each team mail shows New → Taken by … → Replied / Lead made.
+	let mailTab = "team";
 	async function renderMail() {
+		const team = await call("team_mail").catch(() => ({ boxes: [], mails: [] }));
+		if (!team.boxes.length) mailTab = "mine";
+		const tabs = team.boxes.length ? `<div class="cal-tabs"><button class="${mailTab === "team" ? "on" : ""}" data-mailtab="team">📥 ${t("team_box")}${team.new ? ` (${team.new})` : ""}</button>
+			<button class="${mailTab === "mine" ? "on" : ""}" data-mailtab="mine">👤 ${t("my_customers")}</button></div>` : "";
+		if (mailTab === "team") {
+			S.tmail = team.mails;
+			const chip = (m) => `<span class="chip2 ${m.status === "New" ? "red" : m.status === "Taken" ? "yel" : "green"}">${t("st_" + m.status)}${m.status === "Taken" && m.taken_by_name ? " · " + esc(m.taken_by_name) : ""}</span>`;
+			root.innerHTML = header(t("mail")) + `<main>${tabs}<p class="sk-note">${team.boxes.map(esc).join(" · ")}</p>
+				<ul class="sk-list">${team.mails.map((m, i) => `<li class="sk-item ${m.status === "New" ? "k-lead_new" : ""}"><button class="sk-fu-main" data-tmail="${i}">
+					<div class="sk-item-title">${m.source ? `<span class="chip2 navy">${esc(m.source)}</span> ` : ""}${esc(m.subject || "")}</div>
+					<div class="sk-item-meta">${esc(m.sender_full_name || m.sender || "")} · ${when(m.communication_date)}${m.has_attachment ? " · 📎" : ""} · ${chip(m)}</div>
+					<div class="sk-item-meta">${esc(m.preview || "")}</div></button></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+			return;
+		}
 		const d = await call("my_mail");
-		root.innerHTML = header(t("mail")) + `<main>${d.ready ? "" : `<div class="sk-locked">✉️ ${t("mail_not_ready")}</div>`}
+		root.innerHTML = header(t("mail")) + `<main>${tabs}${d.ready ? "" : `<div class="sk-locked">✉️ ${t("mail_not_ready")}</div>`}
 			<ul class="sk-list">${d.mails.map((m) => `<li class="sk-item"><button class="sk-fu-main" data-open="${esc(m.reference_doctype)}" data-name="${esc(m.reference_name)}">
 				<div class="sk-item-title">${m.sent_or_received === "Received" ? "📥" : "📤"} ${esc(m.subject || "")}</div>
 				<div class="sk-item-meta">${esc(m.title)} · ${when(m.communication_date)}${m.has_attachment ? " · 📎" : ""}</div>
 				<div class="sk-item-meta">${esc(m.preview || "")}</div></button></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
 	}
+	async function teamMailSheet(i) {
+		const m = S.tmail[i];
+		const d = await call("team_mail_read", { comm: m.name });
+		S.tmailOpen = d;
+		const lead = d.reference_doctype && d.reference_doctype.startsWith("CRM ") && d.reference_name;
+		sheet(`<h3 class="sk-h">✉️ ${esc(d.subject || "")}</h3><p class="sk-item-meta">${esc(d.from_name || d.sender || "")} → ${esc(d.box)} · ${esc(d.date.slice(0, 16))}</p>
+			<div class="sk-libtext sk-mailtext">${esc(d.text)}</div>
+			${d.files.map((f) => `<a class="sk-chip" href="${esc(f.file_url)}" target="_blank">📎 ${esc(f.file_name)}</a>`).join("")}
+			<div class="sk-row sk-wrap sk-gap">
+				${d.sk_mail_status !== "Taken" || d.sk_taken_by !== state.home.user ? `<button class="sk-chip on" data-act="tm-take" data-comm="${esc(d.name)}">✋ ${t("take")}</button>` : ""}
+				${lead ? `<button class="sk-chip" data-open="${esc(d.reference_doctype)}" data-name="${esc(d.reference_name)}">📄 ${t("open_lead")}</button>`
+					: `<button class="sk-chip on" data-act="tm-lead" data-comm="${esc(d.name)}">➕ ${t("make_lead_btn")}</button><button class="sk-chip" data-act="tm-notlead" data-comm="${esc(d.name)}">✕ ${t("not_lead")}</button>`}
+			</div>
+			${hasTeam() && d.people.length ? `<label class="sk-field"><span>${t("give_to")}</span><select id="tm-give" class="sk-select"><option value=""></option>${d.people.map((p) => `<option value="${esc(p.user)}">${esc(p.full_name || p.user)}</option>`).join("")}</select></label>
+				<button class="sk-btn wide" data-act="tm-give" data-comm="${esc(d.name)}">👉 ${t("give_to")}</button>` : ""}
+			${formField("tm-reply", t("reply_q"), true)}
+			<button class="sk-btn ok wide" data-act="tm-reply" data-comm="${esc(d.name)}">✉️ ${t("reply")}</button>
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+
+	// Lead Sources (Samir / SK): IndiaMART, JustDial and GeM from mails (free), the Excel upload, mailboxes set up or not
+	async function renderLeadSources() {
+		const d = await call("lead_sources_status");
+		root.innerHTML = header(t("lead_sources")) + `<main>
+			<p class="sk-note">${t("last_check")}: ${esc(d.last_scan ? d.last_scan.slice(0, 16) : "—")}</p>
+			<button class="sk-btn go wide" data-act="ls-check">↻ ${t("check_now")}</button>
+			<ul class="sk-list sk-gap">${d.sources.map((x) => li(`${x.on ? "🟢" : "⚪"} ${esc(x.source)}`,
+				`${x.today} ${t("today")} · ${x.month} ${t("this_month2")}${x.last ? " · " + esc(x.last.slice(0, 16)) : ""}`,
+				`<button class="sk-chip ${x.on ? "on" : ""}" data-act="ls-switch" data-setting="${esc(x.setting)}" data-on="${x.on ? 0 : 1}">${x.on ? t("on_word") : t("off_word")}</button>`)).join("")}
+				${li(`<span class="sk-muted">🔒 ${t("pull_api")}</span>`, "", "", "sk-off")}</ul>
+			${uploadBox()}
+			<h3 class="sk-h">${t("mailboxes")}</h3><ul class="sk-list">${d.mailboxes.map((b) => li(esc(b.email), esc(b.who.join(", ")),
+				b.set_up ? `<span class="chip2 green">✓ ${t("set_up")}</span>` : `<span class="chip2 red">${t("not_set_up")}</span>`, b.set_up ? "" : "k-lead_new")).join("")}</ul></main>`;
+	}
+	function uploadBox() {
+		return `<div class="sk-form sk-gap">${photoField("ls-file", "📄 " + t("upload_list"), true)}
+			<label class="sk-field"><span>${t("source_word")}</span><select id="ls-src" class="sk-select"><option>IndiaMART</option><option>JustDial</option><option>GeM</option><option>Other</option></select></label>
+			<button class="sk-btn ok wide" data-act="ls-upload">⬆ ${t("upload_list")}</button><div id="ls-result"></div></div>`;
+	}
+
 	async function mailSheet(doctype, name, email) {
 		const ready = (await call("my_mail")).ready;
 		if (!ready) { window.location.href = "mailto:" + (email || ""); return; }
@@ -2700,7 +2772,7 @@
 		expenses: () => finScreen("expenses", renderExpenses), dir_expenses: () => finScreen("dir_expenses"),
 		segment_pnl: renderSegmentWise, month_close: renderMonthWise,
 		improvement_inbox: renderInbox, dept_visits: renderVisit, erp_gaps: renderGaps, app_users: renderAppUsers, change_list: renderChangeList,
-		projects: renderProjects, training_progress: renderTrainingProgress };
+		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources };
 
 	const reported = new Set();
 	function reportError(view, msg) {
@@ -2797,6 +2869,8 @@
 			}
 			if (el.dataset.mic) return speakInto(document.getElementById(el.dataset.mic), el);
 			if (el.dataset.pick) return pickFile(el.dataset.pick, el.dataset.how);
+			if (el.dataset.mailtab) { mailTab = el.dataset.mailtab; return go("mail"); }
+			if (el.dataset.tmail !== undefined) return teamMailSheet(Number(el.dataset.tmail));
 			if (el.dataset.fintab) { finTab[el.dataset.view] = el.dataset.fintab; return go(el.dataset.view); }
 			if (el.dataset.ledger !== undefined) return renderLedgerEntries(Number(el.dataset.ledger));
 			if (el.dataset.finmonth) {
@@ -2922,6 +2996,35 @@
 				return go(el.dataset.kind === "Problem" ? "home" : "my_day");
 			}
 			if (act === "close-sheet") { pending = null; return closeSheet(); }
+			if (act && act.startsWith("tm-")) {
+				const comm = el.dataset.comm;
+				el.disabled = true;
+				if (act === "tm-take") await call("team_mail_take", { comm }, true);
+				if (act === "tm-notlead") await call("team_mail_not_lead", { comm }, true);
+				if (act === "tm-give") { if (!val("tm-give")) throw new Error(t("give_to")); await call("team_mail_give", { comm, to_user: val("tm-give") }, true); }
+				if (act === "tm-reply") await call("team_mail_reply", { comm, message: val("tm-reply") }, true);
+				if (act === "tm-lead") {
+					const r = await call("team_mail_lead", { comm }, true);
+					closeSheet();
+					toast(`✅ ${t("lead_saved")}: ${r.lead}`);
+					current = { doctype: "CRM Lead", name: r.lead };
+					return go("detail");
+				}
+				closeSheet();
+				toast(t("saved"));
+				return go("mail");
+			}
+			if (act === "ls-check") { const r = await call("lead_sources_check_now", {}, true); toast(`${r.made || 0} ${t("leads_made")}`); return go("lead_sources"); }
+			if (act === "ls-switch") { await call("lead_sources_switch", { setting: el.dataset.setting, on: el.dataset.on }, true); return go("lead_sources"); }
+			if (act === "ls-upload") {
+				const url = await photoUrl("ls-file");
+				if (!url) throw new Error(t("upload_list"));
+				el.disabled = true;
+				const r = await call("leads_upload", { file_url: url, source: val("ls-src") || "IndiaMART" }, true);
+				document.getElementById("ls-result").innerHTML = `<p class="sk-note">✅ ${r.made} ${t("leads_made")} · ${r.added_to_old} ${t("added_old")} · ${r.skipped} ${t("skipped_n")}</p>`;
+				el.disabled = false;
+				return;
+			}
 			if (act === "ai-close") {
 				el.disabled = true;
 				await call("ai_close", { todo: el.dataset.todo, note: val("ai-fix") || null }, true);

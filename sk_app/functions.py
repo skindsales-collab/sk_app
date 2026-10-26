@@ -71,7 +71,7 @@ FUNCTIONS = {
 	},
 	"HR": {
 		"label": {"English": "HR", "Marathi": "एचआर"},
-		"tiles": COMMON_TILES + ["logins", "team_scorecards"],
+		"tiles": COMMON_TILES + ["logins", "team_scorecards", "mail"],
 		"live": False,
 		"erpnext_roles": ["HR User", "HR Manager"],
 		"desk": "/app/hr",
@@ -101,7 +101,7 @@ FUNCTIONS = {
 	"AI": {
 		# SK 26-Oct: Samir's desk. Main job ERP implementation, plus technology improvements in every department
 		"label": {"English": "AI & ERP", "Marathi": "AI आणि ERP"},
-		"tiles": ["my_day", "improvement_inbox", "dept_visits", "erp_gaps", "app_users", "change_list", "projects",
+		"tiles": ["my_day", "improvement_inbox", "dept_visits", "erp_gaps", "app_users", "lead_sources", "change_list", "projects",
 			"training_progress", "erpnext_desk", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Projects User", "Projects Manager"],
@@ -116,7 +116,7 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": ["ceo_view", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
+		"tiles": ["ceo_view", "lead_sources", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
 			"library", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager", "Purchase Manager", "Purchase User"],  # SK approves big POs

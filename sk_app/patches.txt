@@ -2,3 +2,4 @@
 
 [post_model_sync]
 sk_app.patches.sales_people_own_leads_only
+sk_app.patches.mailboxes_and_auto_leads_on
