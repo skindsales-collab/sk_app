@@ -1,4 +1,4 @@
-"""Logins by mobile number (SK, 26-Oct-2026): HR makes every login from the person's mobile number and gives a PIN.
+"""Logins by mobile number (SK, 26-Oct-2026): the CEO makes every login (point 20; HR did until then) from the person's mobile number and gives a PIN.
 
 ERPNext still needs an email as the user ID, so people without one get a hidden ID <mobile>@staff.skind.local that
 is never mailed. Email login keeps working as an option. The person sets their own PIN at the first login.
@@ -43,12 +43,13 @@ def check_pin(pin) -> str:
 
 
 def _can_manage(user: str) -> bool:
-	return bool(LOGIN_ROLES & set(frappe.get_roles(user)))
+	"""Point 20 (SK 26-Oct): only the CEO (Sunil = SK) makes logins and resets PIN / face / finger, no longer HR."""
+	return user == "Administrator" or "Management" in profile_functions(user)
 
 
 def _check_manager(user: str):
 	if not _can_manage(user):
-		frappe.throw(_("Only HR can make logins"), frappe.PermissionError)
+		frappe.throw(_("Only the CEO can make logins or reset a PIN"), frappe.PermissionError)
 
 
 # every role the app hands out through a function, plus the roles that bring admin screens (Logins, all leads)

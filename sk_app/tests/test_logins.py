@@ -8,6 +8,7 @@ from sk_app.functions import function_list, sections_for
 from sk_app.tests.test_sk_app_api import make_user
 
 HR = "sk_test_hr@example.com"
+CEO = "sk_test_login_ceo@example.com"
 CLERK = "sk_test_clerk@example.com"
 MOBILE = "9876500011"
 
@@ -17,10 +18,13 @@ class TestLogins(IntegrationTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		logins.setup_site()
-		for email, roles in ((HR, ["HR Manager", "Employee"]), (CLERK, ["Sales User", "Employee"])):
+		# point 20 (SK 26-Oct): only the CEO makes logins and resets PINs, no longer HR
+		for email, roles, home in ((HR, ["HR Manager", "Employee"], "HR"), (CLERK, ["Sales User", "Employee"], "Sales"),
+				(CEO, ["Employee"], "Management")):
 			make_user(email, roles)
 			if not frappe.db.exists("SK App User", email):
-				frappe.get_doc({"doctype": "SK App User", "user": email, "home": "HR" if email == HR else "Sales"}).insert()
+				frappe.get_doc({"doctype": "SK App User", "user": email, "home": home}).insert()
+			frappe.db.set_value("SK App User", email, "home", home)
 		if not frappe.db.exists("Workstation", "SK Test Fabrication"):
 			frappe.get_doc({"doctype": "Workstation", "workstation_name": "SK Test Fabrication"}).insert()
 
@@ -51,7 +55,7 @@ class TestLogins(IntegrationTestCase):
 		self.assertEqual(len(own), len(set(own)))
 
 	def test_hr_makes_login_from_mobile_and_person_sets_pin(self):
-		with set_user(HR):
+		with set_user(CEO):
 			r = api.hr_make_login("+91 98765 00011", '["Sales", "Purchase"]', full_name="Test Worker", language="Marathi")
 		self.assertEqual(r["user"], f"{MOBILE}@{logins.HIDDEN_DOMAIN}")
 		self.assertEqual(len(r["pin"]), 6)
@@ -70,12 +74,12 @@ class TestLogins(IntegrationTestCase):
 		self.assertRaises(frappe.AuthenticationError, check_password, r["user"], r["pin"])
 
 	def test_same_mobile_twice_is_blocked(self):
-		with set_user(HR):
+		with set_user(CEO):
 			api.hr_make_login(MOBILE, ["Sales"], full_name="First")
-			self.assertRaises(frappe.ValidationError, logins.make_login, HR, MOBILE, ["Sales"], None, "Second")
+			self.assertRaises(frappe.ValidationError, logins.make_login, CEO, MOBILE, ["Sales"], None, "Second")
 
 	def test_subcontractor_needs_workstation_and_gets_no_employee_role(self):
-		with set_user(HR):
+		with set_user(CEO):
 			self.assertRaises(frappe.ValidationError, api.hr_make_login, "9876500012", ["Subcontractor"], full_name="Ranjit T")
 			r = api.hr_make_login("9876500012", ["Subcontractor"], full_name="Ranjit T", workstation="SK Test Fabrication")
 		roles = set(frappe.get_roles(r["user"]))
@@ -83,16 +87,18 @@ class TestLogins(IntegrationTestCase):
 		self.assertNotIn("Employee", roles)
 		self.assertEqual(frappe.db.get_value("SK App User", {"user": r["user"]}, "workstation"), "SK Test Fabrication")
 
-	def test_only_hr_makes_logins_and_hr_cannot_give_admin(self):
-		with set_user(CLERK):
-			self.assertRaises(frappe.PermissionError, api.hr_people)
-			self.assertRaises(frappe.PermissionError, api.hr_make_login, MOBILE, ["Sales"], None, "X")
+	def test_only_ceo_makes_logins_and_cannot_give_admin_without_admin(self):
+		for who in (CLERK, HR):
+			with set_user(who):
+				self.assertRaises(frappe.PermissionError, api.hr_people)
+				self.assertRaises(frappe.PermissionError, api.hr_make_login, MOBILE, ["Sales"], None, "X")
+				self.assertRaises(frappe.PermissionError, api.hr_reset_pin, CLERK)
 		if logins.ADMIN_FUNCTIONS:
-			with set_user(HR):
+			with set_user(CEO):
 				self.assertRaises(frappe.PermissionError, api.hr_make_login, MOBILE, [next(iter(logins.ADMIN_FUNCTIONS))], None, "X")
 
 	def test_reset_and_close(self):
-		with set_user(HR):
+		with set_user(CEO):
 			r = api.hr_make_login(MOBILE, ["Sales"], full_name="Leaver")
 			again = api.hr_reset_pin(r["user"])
 			self.assertNotEqual(again["pin"], "")
@@ -105,7 +111,7 @@ class TestLogins(IntegrationTestCase):
 		self.assertEqual(frappe.db.get_value("User", r["user"], "enabled"), 0)
 
 	def test_login_with_mobile_number(self):
-		with set_user(HR):
+		with set_user(CEO):
 			r = api.hr_make_login(MOBILE, ["Sales"], full_name="Phone Login")
 		self.assertTrue(frappe.db.get_single_value("System Settings", "allow_login_using_mobile_number"))
 		from frappe.core.doctype.user.user import User
@@ -123,7 +129,7 @@ Test Fitter | 9876500014 | Subcontractor | | SK Test Fabrication | | Marathi
 Bad Line | 12345 | Sales
 Nobody | 9876500011 | Cooking
 """
-		with set_user(HR):
+		with set_user(CEO):
 			rows = api.hr_bulk_logins(text)
 		self.assertEqual([bool(r.get("error")) for r in rows], [False, False, False, True, True])
 		rep, boss, fitter = rows[:3]
@@ -146,18 +152,11 @@ Nobody | 9876500011 | Cooking
 	def test_logins_icon_follows_the_function(self):
 		with set_user(CLERK):
 			self.assertNotIn("logins", api.home()["home"]["tiles"])
-		with set_user(HR):
+		with set_user(CEO):
 			self.assertIn("logins", api.home()["home"]["tiles"])
-		# SK 26-Oct: an HR role left on a salesperson no longer brings the Logins icon
-		frappe.db.set_value("SK App User", HR, "home", "Sales")
-		try:
-			with set_user(HR):
-				self.assertNotIn("logins", api.home()["home"]["tiles"])
-			frappe.db.set_value("SK App User", HR, "home", "Management")
-			with set_user(HR):
-				self.assertIn("logins", api.home()["home"]["tiles"])
-		finally:
-			frappe.db.set_value("SK App User", HR, "home", "HR")
+		# point 20 (SK 26-Oct): "remove this login or reset PIN option from HR"
+		with set_user(HR):
+			self.assertNotIn("logins", api.home()["home"]["tiles"])
 
 	def test_edit_keeps_pin_and_admin_can_take_admin_off(self):
 		with set_user("Administrator"):
@@ -169,7 +168,7 @@ Nobody | 9876500011 | Cooking
 		check_password(r["user"], r["pin"])
 
 	def test_wrong_old_pin_does_not_log_out(self):
-		with set_user(HR):
+		with set_user(CEO):
 			r = api.hr_make_login(MOBILE, ["Sales"], full_name="Test Pin")
 		with set_user(r["user"]):
 			self.assertRaises(frappe.ValidationError, logins.set_own_pin, r["user"], "000000", "4321")
@@ -181,7 +180,7 @@ Nobody | 9876500011 | Cooking
 				pass
 
 	def test_salespeople_do_not_get_sales_manager(self):
-		with set_user(HR):
+		with set_user(CEO):
 			r = api.hr_make_login(MOBILE, ["Sales", "Marketing"], full_name="Test Swati")
 		self.assertNotIn("Sales Manager", frappe.get_roles(r["user"]))
 		frappe.get_doc("User", r["user"]).add_roles("Sales Manager")

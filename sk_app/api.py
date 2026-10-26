@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import ai_desk, calendar_view, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, segments, store, training, view_member, work
+from sk_app import ai_desk, applock, calendar_view, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, segments, store, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -14,10 +14,12 @@ from sk_app.logic import rank_items
 CARD_REUSE_MINUTES = 10
 
 
-def _me():
+def _me(unlocked=True):
 	user = frappe.session.user
 	if user in ("Guest", None):
 		frappe.throw(_("Please log in"), frappe.PermissionError)
+	if unlocked:  # point 20: the app opens only with face / finger (or PIN until set up) and locks after 30 min idle
+		applock.check()
 	profile = guide.app_user(user)
 	if not profile and "System Manager" in frappe.get_roles(user) and not frappe.db.exists("SK App User", {"user": user}):
 		# admins can try the app at once: Administrator cannot be picked in the SK App User form (ERPNext hides it)
@@ -46,8 +48,8 @@ def home():
 	functions = logins.profile_functions(profile.user)
 	main = home_for(profile.home, has_team=team)
 	sections = sections_for(functions, has_team=team) if len(functions) > 1 else None
-	# Logins only for HR and Management (SK 26-Oct): an ERPNext role left over from before no longer brings it
-	if logins._can_manage(profile.user) and {"HR", "Management"} & set(functions or [profile.home]):
+	# Logins only for the CEO (point 20, SK 26-Oct): HR and ERPNext roles left over from before no longer bring it
+	if logins._can_manage(profile.user) and "Management" in set(functions or [profile.home]):
 		if "logins" not in main["tiles"]:
 			main["tiles"] = main["tiles"][:1] + ["logins"] + main["tiles"][1:]
 		if sections and sections["sections"] and not any("logins" in x["tiles"] for x in sections["sections"]):
@@ -504,6 +506,46 @@ def hr_reset_pin(user):
 def hr_close_login(user):
 	_me()
 	return logins.close_login(frappe.session.user, user)
+
+
+@frappe.whitelist(methods=["POST"])
+def reset_face(user):
+	"""Point 20: CEO only. New phone or finger not working: the person sets face / finger up again."""
+	_me()
+	return applock.reset(frappe.session.user, user)
+
+
+# ---- App lock (point 20): these work while the app is locked ----
+
+@frappe.whitelist()
+def lock_status():
+	return applock.status(_me(unlocked=False).user)
+
+
+@frappe.whitelist(methods=["POST"])
+def lock_now():
+	return applock.lock(_me(unlocked=False).user)
+
+
+@frappe.whitelist(methods=["POST"])
+def unlock_pin(pin):
+	return applock.unlock_pin(_me(unlocked=False).user, pin)
+
+
+@frappe.whitelist(methods=["POST"])
+def face_options(purpose="unlock"):
+	user = _me(unlocked=purpose == "setup").user
+	return applock.options(user, "setup" if purpose == "setup" else "unlock")
+
+
+@frappe.whitelist(methods=["POST"])
+def face_setup(credential, device=None):
+	return applock.register(_me().user, credential, device)
+
+
+@frappe.whitelist(methods=["POST"])
+def face_unlock(credential):
+	return applock.verify(_me(unlocked=False).user, credential)
 
 
 # ---------- Finance (SK draft F06) ----------

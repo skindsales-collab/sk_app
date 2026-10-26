@@ -69,8 +69,8 @@ class TestChangeListA(IntegrationTestCase):
 		self.assertNotIn("logins", h["home"]["tiles"])
 		self.assertNotIn("team_reports", h["home"]["tiles"])
 		self.assertNotIn("work_book", h["home"]["tiles"])  # point 10: inside My Day now
-		with set_user(HRP):
-			self.assertIn("logins", api.home()["home"]["tiles"])
+		with set_user(HRP):  # point 20 (SK 26-Oct): Logins / Reset PIN removed from HR, CEO only
+			self.assertNotIn("logins", api.home()["home"]["tiles"])
 		with set_user(CEO):
 			tiles = api.home()["home"]["tiles"]
 		self.assertIn("logins", tiles)

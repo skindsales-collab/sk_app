@@ -288,3 +288,11 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 	.sk-attline.amber { background: #4a3810; color: #fff1d0; }
 	.sk-attline.red { background: #4a1820; color: #ffe3e7; }
 }
+
+/* point 20: app lock (face / finger), covers the screen; the work under it stays */
+.sk-lock { position: fixed; inset: 0; z-index: 1000; background: var(--bg); color: var(--ink); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.sk-lock-box { width: 100%; max-width: 380px; text-align: center; }
+.sk-lock-icon { font-size: 56px; }
+.sk-lock-box h2 { margin: 8px 0 4px; }
+.sk-lock-msg { color: #b42318; min-height: 1.4em; }
+@media (prefers-color-scheme: dark) { .sk-lock-msg { color: #ff8a80; } }

@@ -37,3 +37,6 @@ has_permission = {
 
 after_install = "sk_app.install.after_install"
 after_migrate = "sk_app.install.after_migrate"
+
+# point 20: logging in opens the app at once; after that it locks after SK App Settings → lock minutes without use
+on_session_creation = "sk_app.applock.on_login"
