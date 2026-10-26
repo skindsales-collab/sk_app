@@ -57,9 +57,11 @@ FUNCTIONS = {
 	},
 	"Accounts": {
 		"label": {"English": "Accounts", "Marathi": "लेखा"},
-		"tiles": COMMON_TILES + ["invoice_photo", "collections"],
-		"live": False,
-		"erpnext_roles": ["Accounts User"],
+		# SK draft F06: My Day, the Finance icons, then calls / WhatsApp for collections and the common ones
+		"tiles": ["my_day", "cash_today", "to_collect", "to_pay", "bills_to_post", "invoices", "expenses", "segment_pnl", "month_close",
+			*CONTACT_TILES, *COMMON_TILES[1:]],
+		"live": True,
+		"erpnext_roles": ["Accounts User", "Accounts Manager"],
 		"desk": "/app/accounting",
 	},
 	"HR": {
@@ -107,7 +109,7 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": ["ceo_view", "po_approvals", "team_reports", "logins", "calls", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
+		"tiles": ["ceo_view", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
 			"library", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager", "Purchase Manager", "Purchase User"],  # SK approves big POs
