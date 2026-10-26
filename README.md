@@ -191,3 +191,8 @@ Score = actual / target (capped at 120%) x weight. Sources that are not live yet
   By type it goes to Production (factory faults also make a Non Conformance for the workstation subcontractor's My
   Fixes), Store, Design / AI desk, Accounts, Aditya or the sales manager, with a ToDo and a red number. Steps: Accept with a
   fix date → Fixed with an after-fix photo → Customer OK closes it, Not OK sends it back. A passed fix date shows red.
+- **Point 7, manuals and FAQ** (`training.py`): a person in two functions now sees the lessons of both (Sales also
+  Marketing). Training → FAQ shows the FAQ of each of the person's functions (SK Library Item, category FAQ), searchable by
+  voice, with ❓ Ask a question: it goes to the person's manager (or the function head) as a ToDo, the answer comes back
+  to the person and can be added to the FAQ with one tap. The Finance, HR and Manufacturing manuals themselves come to SK
+  as PDFs first and are loaded only after SK's OK.

@@ -761,6 +761,11 @@
 		cp_late: "उशीर", st_Registered: "नोंदवली", st_Accepted: "स्वीकारली", st_Fixed: "दुरुस्त", st_Closed: "बंद", "st_Not OK": "समाधानी नाही",
 		cp_pick_customer: "कृपया यादीतून ग्राहक निवडा", cp_note: "ग्राहक काय म्हणाला (बोला किंवा लिहा)",
 	});
+	// change list point 7: FAQ per function
+	Object.assign(T.English, { faq_ask: "Ask a question", faq_q: "Your question (speak or type)", faq_sent: "Question sent to", faq_to_answer: "Questions for you to answer",
+		faq_answer: "Your answer (speak or type)", faq_add: "Add to the FAQ for everyone" });
+	Object.assign(T.Marathi, { faq_ask: "प्रश्न विचारा", faq_q: "तुमचा प्रश्न (बोला किंवा लिहा)", faq_sent: "प्रश्न पाठवला:", faq_to_answer: "तुम्ही उत्तर द्यायचे प्रश्न",
+		faq_answer: "तुमचे उत्तर (बोला किंवा लिहा)", faq_add: "सर्वांसाठी FAQ मध्ये जोडा" });
 	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";
 	T.Marathi.mic_blocked = "माईक / कॅमेरा बंद आहे. Chrome → ⋮ → Settings → Site settings → Microphone (किंवा Camera) → ही साईट → Allow. मग परत येऊन 🎤 दाबा.";
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
@@ -1533,6 +1538,7 @@
 
 	// Training: 1) My function (e.g. Sales Manual lessons) 2) App usage 3) customer FAQ; managers also see their team
 	let lessons = [], trainTab = "My function";
+	let faqQuery = "";
 	async function renderTraining() {
 		const mr = state.lang === "Marathi";
 		const tabs = [["My function", t("my_function")], ["App usage", t("app_usage")], ["FAQ", t("faq")]];
@@ -1540,7 +1546,14 @@
 		const bar = `<div class="cal-tabs">${tabs.map(([k, l]) => `<button class="${trainTab === k ? "on" : ""}" data-train="${k}">${l}</button>`).join("")}</div>`;
 		let body = "";
 		if (trainTab === "FAQ") {
-			body = libraryList(await call("library", { category: "Customer FAQ" }));
+			// point 7: FAQ of each of my functions, search by voice, "Ask a question" to the function owner
+			const d = await call("training_faq", faqQuery ? { q: faqQuery } : {});
+			S.faqAsk = d.to_answer;
+			body = `<div class="sk-input-row sk-gap"><input id="faq-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(faqQuery)}">${micBox("faq-q")}</div>
+				${d.to_answer.length ? `<h3 class="sk-h">❓ ${t("faq_to_answer")}</h3><ul class="sk-list">${d.to_answer.map((a, i) => `<li class="sk-item k-amber"><button class="sk-fu-main" data-act="faq-answer" data-i="${i}">
+					<div class="sk-item-title">${esc(a.question)}</div><div class="sk-item-meta">${esc(a.by)}</div></button></li>`).join("")}</ul>` : ""}
+				${libraryList(d.rows)}
+				<button class="sk-btn go wide" data-act="faq-ask">❓ ${t("faq_ask")}</button>`;
 		} else if (trainTab === "Team") {
 			const d = await call("team_training");
 			body = `<ul class="sk-list">${d.people.map((p) => `<li class="sk-item"><div class="sk-grow"><div class="sk-item-title">${esc(p.full_name)}</div>
@@ -2135,6 +2148,7 @@
 			}, 300);
 			return;
 		}
+		if (el.id === "faq-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { faqQuery = el.value; renderTraining().then(() => { const i = document.getElementById("faq-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
 		if (el.id === "vm-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { vmQuery = el.value; renderViewMember().then(() => { const i = document.getElementById("vm-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 300); return; }
 		if (el.id === "cust-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { custQuery = el.value; renderCustomers().then(() => { const i = document.getElementById("cust-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
 		if (el.id === "fu-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { fuQuery = el.value; renderFollowUp().then(() => { const i = document.getElementById("fu-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
@@ -3299,6 +3313,23 @@
 				closeSheet();
 				toast(t("saved"));
 				return go("mail");
+			}
+			if (act === "faq-ask") {
+				sheet(`<h3 class="sk-h">❓ ${t("faq_ask")}</h3>${formField("faq-text", t("faq_q"), true)}
+					<button class="sk-btn ok wide" data-act="faq-ask-send">${t("send")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+				return;
+			}
+			if (act === "faq-ask-send") { const r = await call("training_ask", { question: val("faq-text") }, true); closeSheet(); toast(`${t("faq_sent")} ${r.owner}`); return; }
+			if (act === "faq-answer") {
+				const a = S.faqAsk[Number(el.dataset.i)];
+				sheet(`<h3 class="sk-h">❓ ${esc(a.question)}</h3><p class="sk-item-meta">${esc(a.by)}</p>${formField("faq-ans", t("faq_answer"), true)}
+					<label class="sk-row"><input type="checkbox" id="faq-add" checked> ${t("faq_add")}</label>
+					<button class="sk-btn ok wide" data-act="faq-answer-send" data-todo="${esc(a.name)}">${t("send")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+				return;
+			}
+			if (act === "faq-answer-send") {
+				await call("training_answer", { todo: el.dataset.todo, text: val("faq-ans"), add_to_faq: document.getElementById("faq-add").checked ? 1 : 0 }, true);
+				closeSheet(); toast(t("saved")); return go("training");
 			}
 			if (act === "cp-new") return renderNewComplaint();
 			if (act === "cp-save") {

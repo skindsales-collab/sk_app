@@ -1097,3 +1097,19 @@ def complaint_fixed(name, note=None, photo=None, cost=None):
 @frappe.whitelist(methods=["POST"])
 def complaint_customer(name, ok, note=None, photo=None):
 	return complaints.customer_answer(_me().user, name, ok, note, photo)
+
+
+# point 7: FAQ per function with "Ask a question"
+@frappe.whitelist()
+def training_faq(q=None):
+	return training.faq(_me().user, q)
+
+
+@frappe.whitelist(methods=["POST"])
+def training_ask(question, function=None):
+	return training.ask(_me().user, question, function)
+
+
+@frappe.whitelist(methods=["POST"])
+def training_answer(todo, text, add_to_faq=1):
+	return training.answer(_me().user, todo, text, add_to_faq)
