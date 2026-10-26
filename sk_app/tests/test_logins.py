@@ -29,6 +29,7 @@ class TestLogins(IntegrationTestCase):
 		for u in set(frappe.get_all("User", filters={"mobile_no": ["in", mobiles]}, pluck="name")
 				+ frappe.get_all("User", filters={"name": ["in", [f"{m}@{logins.HIDDEN_DOMAIN}" for m in mobiles]]}, pluck="name")):
 			frappe.db.delete("SK App User", {"user": u})
+			frappe.db.delete("SK App User Function", {"parent": u})
 			frappe.delete_doc("User", u, force=True, ignore_permissions=True)
 
 	def test_clean_mobile(self):
@@ -153,3 +154,24 @@ Nobody | 9876500011 | Cooking
 				self.assertIn("logins", api.home()["home"]["tiles"])
 		finally:
 			frappe.db.set_value("SK App User", HR, "home", "HR")
+
+	def test_edit_keeps_pin_and_admin_can_take_admin_off(self):
+		with set_user("Administrator"):
+			r = logins.make_login("Administrator", MOBILE, ["Management"], full_name="Test Rahul")
+			frappe.db.set_value("SK App User", {"user": r["user"]}, "must_set_pin", 0)
+			r2 = logins.make_login("Administrator", MOBILE, ["Sales", "Marketing"], full_name="Test Rahul")
+		self.assertIsNone(r2["pin"])
+		self.assertNotIn("System Manager", frappe.get_roles(r["user"]))
+		check_password(r["user"], r["pin"])
+
+	def test_wrong_old_pin_does_not_log_out(self):
+		with set_user(HR):
+			r = api.hr_make_login(MOBILE, ["Sales"], full_name="Test Pin")
+		with set_user(r["user"]):
+			self.assertRaises(frappe.ValidationError, logins.set_own_pin, r["user"], "000000", "4321")
+			try:
+				logins.set_own_pin(r["user"], "000000", "4321")
+			except frappe.AuthenticationError:
+				self.fail("wrong old PIN must not be an AuthenticationError")
+			except frappe.ValidationError:
+				pass

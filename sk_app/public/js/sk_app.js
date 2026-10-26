@@ -491,7 +491,7 @@
 		make_logins: "Make all logins",
 		logins_made: "logins made",
 		bulk_pin_note: "Write down or WhatsApp each PIN now: it is shown only once.",
-		keeps_password: "Admin: keeps the same password",
+		keeps_password: "Keeps own PIN / password (use Reset PIN for a new one)",
 	});
 	Object.assign(T.Marathi, {
 		bulk_logins: "एकदम अनेक लॉगिन (यादी पेस्ट करा)",
@@ -499,7 +499,7 @@
 		make_logins: "सर्व लॉगिन बनवा",
 		logins_made: "लॉगिन बनले",
 		bulk_pin_note: "प्रत्येक पिन आत्ताच लिहून घ्या किंवा WhatsApp करा: तो एकदाच दिसतो.",
-		keeps_password: "ॲडमिन: तोच पासवर्ड राहील",
+		keeps_password: "स्वतःचा पिन / पासवर्ड तसाच (नवीनसाठी Reset PIN)",
 	});
 	// Finance screens (26-Oct-2026)
 	Object.assign(T.English, {
