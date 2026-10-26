@@ -8,11 +8,14 @@ DSI, Report Problem, My KPI) driven by their ERPNext tasks, and its own tiles ar
 COMMON_TILES = ["my_day", "calendar", "reminders", "day_report", "dsi", "problem", "my_kpi", "training"]
 # free contact tiles: the phone's own dialer / WhatsApp / mail, logged in CRM; paid parts show locked inside them
 CONTACT_TILES = ["calls", "whatsapp", "mail"]
+# point 13: the CEO's live dashboards, one icon per function (sk_app.dashboards.PAGES)
+DASH_TILES = ["dash_overview", "dash_daily_review", "dash_sales", "dash_marketing", "dash_machine_shifting", "dash_job_work",
+	"dash_cr100", "dash_finance", "dash_manufacturing", "dash_purchase", "dash_store", "dash_quality", "dash_hr", "dash_ai"]
 
 FUNCTIONS = {
 	"Sales": {
 		"label": {"English": "Sales", "Marathi": "विक्री"},
-		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "my_deals", "reminders", "library",
+		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "my_deals", "customers", "complaints", "reminders", "library",
 			"day_report", "my_kpi", "dsi", "problem", "training"],
 		"live": True,
 		# not Sales Manager: in Frappe CRM that role shows every lead of the company (SK 26-Oct: each salesperson sees
@@ -22,7 +25,7 @@ FUNCTIONS = {
 	},
 	"Marketing": {
 		"label": {"English": "Marketing", "Marathi": "मार्केटिंग"},
-		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "reminders", "library", "day_report",
+		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "complaints", "reminders", "library", "day_report",
 			"my_kpi", "dsi", "problem", "training"],
 		"live": True,  # uses the same CRM lead screens as Sales
 		"erpnext_roles": ["Sales User"],
@@ -30,14 +33,14 @@ FUNCTIONS = {
 	},
 	"Production": {
 		"label": {"English": "Production", "Marathi": "उत्पादन"},
-		"tiles": ["my_day", "order_board", "job_cards", "need_material", "progress_photos", "ready_dispatch", "non_conformance", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "order_board", "job_cards", "need_material", "progress_photos", "ready_dispatch", "non_conformance", "complaints", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Manufacturing User", "Manufacturing Manager"],
 		"desk": "/app/manufacturing",
 	},
 	"Quality": {
 		"label": {"English": "Quality", "Marathi": "गुणवत्ता"},
-		"tiles": ["my_day", "inspect", "final_check", "non_conformance", "order_board", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "inspect", "final_check", "non_conformance", "order_board", "complaints", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Quality Manager"],
 		"desk": "/app/quality",
@@ -45,7 +48,7 @@ FUNCTIONS = {
 	"Stores": {
 		"label": {"English": "Stores", "Marathi": "स्टोअर"},
 		# SK draft F01: My Day first, then the Store icons, then the common ones
-		"tiles": ["my_day", "stock_check", "receive", "issue", "store_requests", "dispatch", "low_stock", "stock_count", "new_item", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "stock_check", "receive", "issue", "store_requests", "dispatch", "low_stock", "stock_count", "new_item", "complaints", *COMMON_TILES[1:]],
 		"live": True,
 		# Stock Manager: needed to make stock count drafts and to pick accounts on receipts / delivery notes
 		"erpnext_roles": ["Stock User", "Stock Manager"],
@@ -63,7 +66,7 @@ FUNCTIONS = {
 		# SK draft F06: My Day, the Finance icons, then calls / WhatsApp for collections and the common ones
 		# SK / Shraddha 26-Oct: ledger-wise screens; Expenses is the Journal Voucher list, plus Direct and Indirect Expenses
 		"tiles": ["my_day", "cash_today", "to_collect", "to_pay", "bills_to_post", "invoices", "expenses", "dir_expenses", "segment_pnl",
-			"month_close",
+			"month_close", "complaints",
 			*CONTACT_TILES, *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Accounts User", "Accounts Manager"],
@@ -71,14 +74,15 @@ FUNCTIONS = {
 	},
 	"HR": {
 		"label": {"English": "HR", "Marathi": "एचआर"},
-		"tiles": COMMON_TILES + ["logins", "team_scorecards"],
-		"live": False,
+		# point 16 + HR draft Rev 2: Attendance (Optick file upload, today, month, fixes); leave and expense approvals
+		"tiles": COMMON_TILES[:1] + ["attendance", "logins"] + COMMON_TILES[1:] + ["team_scorecards", "mail"],
+		"live": True,
 		"erpnext_roles": ["HR User", "HR Manager"],
 		"desk": "/app/hr",
 	},
 	"Machine Shifting": {
 		"label": {"English": "Machine Shifting", "Marathi": "मशीन शिफ्टिंग"},
-		"tiles": COMMON_TILES + ["my_deals", "site_checklist"],
+		"tiles": COMMON_TILES + ["my_deals", "customers", "complaints", "site_checklist"],
 		"live": False,
 		"erpnext_roles": ["Projects User", "Sales User"],
 		"desk": "/crm",
@@ -101,7 +105,7 @@ FUNCTIONS = {
 	"AI": {
 		# SK 26-Oct: Samir's desk. Main job ERP implementation, plus technology improvements in every department
 		"label": {"English": "AI & ERP", "Marathi": "AI आणि ERP"},
-		"tiles": ["my_day", "improvement_inbox", "dept_visits", "erp_gaps", "app_users", "change_list", "projects",
+		"tiles": ["my_day", "improvement_inbox", "dept_visits", "erp_gaps", "app_users", "lead_sources", "change_list", "projects", "complaints",
 			"training_progress", "erpnext_desk", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Projects User", "Projects Manager"],
@@ -116,7 +120,7 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": ["ceo_view", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
+		"tiles": [*DASH_TILES, "view_member", "attendance", "lead_sources", "customers", "complaints", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
 			"library", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager", "Purchase Manager", "Purchase User"],  # SK approves big POs
@@ -140,6 +144,9 @@ def home_for(function: str | None, has_team: bool = False) -> dict:
 	if has_team and "my_leads" in home["tiles"] and "team_leads" not in home["tiles"]:
 		i = home["tiles"].index("my_leads")
 		home["tiles"] = home["tiles"][:i] + ["team_leads"] + home["tiles"][i:]
+	# HR draft Rev 2: everyone applies for leave and claims expenses (managers approve there); not subcontractors
+	if (function or "") != "Subcontractor" and "leave_expense" not in home["tiles"]:
+		home["tiles"] = home["tiles"] + ["leave_expense"]
 	# SK: My Day is always the first tile; DSI and the Day Report are the day's last jobs, so their tiles come last
 	last = [t for t in ("dsi", "day_report") if t in home["tiles"]]
 	middle = [t for t in home["tiles"] if t not in last and t != "my_day"]
@@ -149,7 +156,7 @@ def home_for(function: str | None, has_team: bool = False) -> dict:
 
 # tiles every person gets whatever their function (SK): they appear once, in the "For everyone" row
 SHARED_TILES = ["my_day", "calendar", "reminders", "calls", "whatsapp", "mail", "problem", "training", "library", "my_kpi",
-	"team_reports", "dsi", "day_report"]
+	"team_reports", "leave_expense", "dsi", "day_report"]
 
 
 def function_list(profile) -> list[str]:

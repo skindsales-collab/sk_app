@@ -34,7 +34,23 @@
   "claude_calls_month",
   "library_section",
   "library_pack",
-  "sales_manual"
+  "sales_manual",
+  "mail_section",
+  "mailbox_map",
+  "auto_leads",
+  "indiamart_mail",
+  "justdial_mail",
+  "gem_mail",
+  "column_leads",
+  "lead_owner_digital",
+  "lead_owner_cabin",
+  "lead_owner_noncabin",
+  "last_lead_scan",
+  "segment_user_permissions",
+  "attendance_section",
+  "late_after",
+  "half_day_below",
+  "attendance_from_file"
  ],
  "fields": [
   {
@@ -168,6 +184,106 @@
    "fieldtype": "Attach",
    "label": "Sales Manual (PDF)",
    "description": "The full manual. Library items of the pack open only their pages of it."
+  },
+  {
+   "fieldname": "mail_section",
+   "fieldtype": "Section Break",
+   "label": "Team mailboxes and auto leads"
+  },
+  {
+   "fieldname": "mailbox_map",
+   "fieldtype": "Small Text",
+   "label": "Team mailboxes",
+   "default": "cabin@skind.tech: Sales, Marketing\nservice@skind.tech: Machine Shifting, service@skind.tech\nacc@skind.tech: Accounts\nsales@skind.tech: Management\ninfo@skind.tech: HR",
+   "description": "One line per mailbox: e-mail: who sees it in the app (app functions such as Sales, Accounts, or a person's login)."
+  },
+  {
+   "fieldname": "auto_leads",
+   "fieldtype": "Check",
+   "label": "Make leads from IndiaMART / JustDial / GeM mails",
+   "default": "1"
+  },
+  {
+   "fieldname": "indiamart_mail",
+   "fieldtype": "Check",
+   "label": "IndiaMART enquiry mails",
+   "default": "1"
+  },
+  {
+   "fieldname": "justdial_mail",
+   "fieldtype": "Check",
+   "label": "JustDial lead mails",
+   "default": "1"
+  },
+  {
+   "fieldname": "gem_mail",
+   "fieldtype": "Check",
+   "label": "GeM bid alert mails",
+   "default": "1"
+  },
+  {
+   "fieldname": "column_leads",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lead_owner_digital",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Owner of IndiaMART / JustDial leads",
+   "description": "Digital leads (Pranali)."
+  },
+  {
+   "fieldname": "lead_owner_cabin",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Owner of cabin leads (mail, GeM)",
+   "description": "Rushi gives them to the team."
+  },
+  {
+   "fieldname": "lead_owner_noncabin",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Owner of machine shifting / job work leads",
+   "description": "Aditya."
+  },
+  {
+   "fieldname": "last_lead_scan",
+   "fieldtype": "Datetime",
+   "label": "Last mail check",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "segment_user_permissions",
+   "fieldtype": "Check",
+   "label": "Cabin / Non-Cabin rule on ERPNext desk too",
+   "description": "Adds ERPNext User Permission on Customer Group per person (Cabin team: Cabin, Aditya: Non-Cabin). Switch on only after the old customers are tagged."
+  },
+  {
+   "fieldname": "attendance_section",
+   "fieldtype": "Section Break",
+   "label": "Attendance (Optick / thumb machine)"
+  },
+  {
+   "default": "09:15:00",
+   "fieldname": "late_after",
+   "fieldtype": "Time",
+   "label": "Late after",
+   "description": "Check-in after this time is marked late (SK / Aarti to confirm the shift times)."
+  },
+  {
+   "default": "0",
+   "fieldname": "half_day_below",
+   "fieldtype": "Float",
+   "label": "Half day below (hours)",
+   "description": "0 = never mark half day from the file. Only used when both in and out punches are real."
+  },
+  {
+   "default": "1",
+   "fieldname": "attendance_from_file",
+   "fieldtype": "Check",
+   "label": "Mark Attendance from the uploaded file",
+   "description": "Switch off once an ERPNext Shift Type with Auto attendance is set; then only Employee Checkins are made."
   }
  ],
  "permissions": [

@@ -13,6 +13,8 @@ website_route_rules = [
 
 scheduler_events = {
 	"hourly": ["sk_app.guide.hourly"],
+	# IndiaMART / JustDial / GeM mails to the team mailboxes become CRM leads (free route, point 14)
+	"cron": {"*/5 * * * *": ["sk_app.lead_sources.scan"]},
 }
 
 doc_events = {
@@ -21,6 +23,10 @@ doc_events = {
 	"SK Day Report": {"before_insert": "sk_app.permissions.stamp_user"},
 	"File": {"after_insert": "sk_app.crm.on_file_attached"},
 	"SK Library Item": {"validate": "sk_app.library.make_public"},
+	"CRM Lead": {"validate": "sk_app.segments.set_main"},
+	"CRM Deal": {"validate": "sk_app.segments.set_main"},
+	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal"},
+	"SK App User": {"on_update": "sk_app.segments.on_app_user_update"},
 }
 
 has_permission = {

@@ -80,6 +80,9 @@ def for_user(user: str, items: list, dsi_done: bool, report_sent: bool, counts: 
 	for k, v in (counts or {}).items():
 		if k in out or not v:
 			continue
+		if isinstance(v, dict):  # already coloured (complaints: red)
+			out[k] = v
+			continue
 		# counts from the function icons (requests to issue, bills to post, approvals ...): waiting for me today
 		out[k] = _mark(v, "blue" if k == "improvement_inbox" else "amber")
 	return out

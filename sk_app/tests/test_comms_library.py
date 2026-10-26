@@ -30,7 +30,7 @@ class TestCommsAndLibrary(IntegrationTestCase):
 		cls.crm = bool(frappe.db.exists("DocType", "CRM Lead"))
 
 	def _lead(self, org):
-		return api.new_lead("Suresh", mobile_no="9822011111", organization=f"{org} {frappe.generate_hash(length=5)}")
+		return api.new_lead("Suresh", mobile_no="9822011111", organization=f"{org} {frappe.generate_hash(length=5)}", segment="LGSF")
 
 	def test_call_talk_time_summary_and_team_view(self):
 		if not self.crm:

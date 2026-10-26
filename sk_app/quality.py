@@ -191,6 +191,9 @@ def close_nc(user: str, name: str, action: str, photo=None) -> dict:
 	nc.save()
 	attach(photo, "Non Conformance", nc.name, user)
 	frappe.db.set_value("ToDo", {"reference_type": "Non Conformance", "reference_name": nc.name, "status": "Open"}, "status", "Closed")
+	from sk_app.complaints import on_nc_resolved
+
+	on_nc_resolved(nc.name, user, action, photo)  # point 5: a customer complaint fixed in the factory
 	return {"name": nc.name, "status": nc.status}
 
 

@@ -152,3 +152,73 @@ Score = actual / target (capped at 120%) x weight. Sources that are not live yet
   Sales Invoice and Credit Note, Journal Voucher, Direct and Indirect Expenses, Segment Wise P&L (Cabin /
   Non-Cabin net) and the Month Wise Report.
 - A screen that fails shows the reason and lands in the AI & ERP inbox.
+
+## Change list Rev 13, part B: team mailboxes and auto leads (26-Oct-2026)
+
+- **Mail → Team mailbox** (`mailbox.py`): cabin@ for Sales / Marketing, service@ for Aditya, acc@ for Accounts,
+  sales@ for the CEO, info@ for HR (SK App Settings → Team mailboxes). Each mail shows New → Taken by … →
+  Replied / Lead made / Not a lead; "I'll answer", "Give to" (manager), "Make lead", reply from the team mailbox
+  signed with the person's name and mobile. The mails come from ERPNext Email Accounts.
+- **Auto leads, free** (`lead_sources.py`, every 5 minutes): IndiaMART enquiry mails, JustDial lead mails and GeM
+  bid alerts become CRM leads with source, segment and owner (digital → Pranali, cabin / GeM → Rushi, machine
+  shifting / job work → Aditya; SK App Settings). Same mobile within 90 days → a note on the earlier lead.
+  IndiaMART's Leads API is a paid add-on and is not used.
+- **Excel upload**: the IndiaMART Lead Manager export (or a JustDial list) uploaded from New Lead or Lead Sources.
+- **Lead Sources** page (AI & ERP, CEO): sources on / off, leads today / this month, check now, mailboxes set up.
+
+## Change list Rev 13, part C: segments, View Member App, CEO dashboards (26-Oct-2026)
+
+- **Point 2, Cabin / Non-Cabin** (`segments.py`): Customer Group is the segment. The tree is All Customer Groups → Cabin
+  (Standard Cabin (GI / ACP), LGSF, Modular / Labour Camp) and Non-Cabin (Machine Shifting, Job Work, Other Non-Cabin).
+  CRM Lead / Deal keep the sub-segment in `sk_segment` and get `sk_main_segment`, filled on save. Segment is required on a
+  new lead. A customer made from a won deal gets the deal's group. SK App User → *Segment (customers seen)*: Cabin team
+  Cabin, Aditya Non-Cabin, Management / Accounts both (blank = from the function). The 🏠 Customers icon shows only the
+  person's segment; Management, the sales manager and Aditya also get "Segment not set" with one-tap tagging (the old
+  Commercial / Government / Individual group moves to Customer Type and is noted on the customer). The same rule on the
+  ERPNext desk (User Permission on Customer Group) is a switch in SK App Settings, off until old customers are tagged.
+  The Tally import of old customers comes later, after SK checks the match list.
+- **Point 3, 👀 View Member App** (`view_member.py`): the CEO picks a member and the app opens as that member sees it.
+  Every reading screen runs with the member's own ERPNext permissions (`api.view_as`, GET endpoints only, rolled back
+  after). Save / send / call are blocked, mic and camera are hidden, and the PIN page is never shown. A yellow bar has
+  💡 (idea goes to the AI & ERP inbox with the page name) and Exit. Each view is written to Activity Log.
+- **Point 13, 📊 Live dashboards** (`dashboards.py`): 14 icons on the CEO Home: Overview, Daily Review, Sales, Marketing,
+  Machine Shifting, Job Work, 100 Cr, Finance, Manufacturing, Purchase, Store, Quality, HR, AI & ERP. Each is live from
+  ERPNext with month and Cabin / Non-Cabin filters and last month's figure. A number opens its list and a row opens
+  the record. Swipe left / right moves between pages. A red number on an icon means items need attention there.
+- **Point 5, 🛠️ Complaints** (`complaints.py`): the salesperson registers a complaint (customer from their segment or
+  untagged, latest order picked by itself, spoken / written text, photos / files, one of 10 types). It is kept as a
+  standard ERPNext Issue with SK fields (stage, order / delivery / invoice, segment, sent to, fix by, customer OK, cost).
+  By type it goes to Production (factory faults also make a Non Conformance for the workstation subcontractor's My
+  Fixes), Store, Design / AI desk, Accounts, Aditya or the sales manager, with a ToDo and a red number. Steps: Accept with a
+  fix date → Fixed with an after-fix photo → Customer OK closes it, Not OK sends it back. A passed fix date shows red.
+- **Point 7, manuals and FAQ** (`training.py`): a person in two functions now sees the lessons of both (Sales also
+  Marketing). Training → FAQ shows the FAQ of each of the person's functions (SK Library Item, category FAQ), searchable by
+  voice, with ❓ Ask a question: it goes to the person's manager (or the function head) as a ToDo, the answer comes back
+  to the person and can be added to the FAQ with one tap. The Finance, HR and Manufacturing manuals themselves come to SK
+  as PDFs first and are loaded only after SK's OK.
+- **Point 8, product cards** (`products.py`): one card per product / service = SK Library Item (category Product) with
+  Item Group, photos (attached), sizes, brochure, video and internal notes (staff only, never in a customer message).
+  Company & Products → Products lists Cabin and Non-Cabin; Item Groups with no card yet show greyed so the list is
+  complete. New Lead has "Product asked" (`sk_product` on CRM Lead / Deal), and the lead / deal page shows "Products for
+  this customer" with one-tap WhatsApp share. Photos, sizes and brochures come from SK / Sales.
+- **Point 1, check before saving** (`photocheck.py`): on New Lead, New Supplier, supplier bill and Dispatch, a
+  "Check before saving" card shows each value with its ERPNext field: green ✓ fits, amber ⚠ suggestion, red ✗ needed.
+  It checks duplicate mobile (lead / customer), nearest customer / supplier, duplicate bill number, bill total against
+  open POs, GSTIN format with state and PAN, and the number plate format. GST certificate and bill photos are read on the
+  phone (free reader) to fill empty boxes. A picked suggestion is remembered in the new SK Photo Match list. Every photo
+  also shows which ERPNext record it goes to, with a warning if it is too dark or blurred.
+- **Point 16 + HR step, attendance, leave and expenses** (`hr.py`): HR (Aarti) uploads the Optick "Basic Report" file
+  (or the eSSL thumb machine file) on Attendance → Upload. Each row becomes an ERPNext Employee Checkin (device "Optick"
+  / "Office thumb") and, while no Shift Type does auto attendance, a submitted Attendance (late after SK App Settings
+  "Late after", 09:15). People are matched by Attendance Device ID, then mobile, then name; a person not found is picked
+  once and their ID is saved on the Employee. "23:00:00 Auto Checkout" is a missed out-punch (no OUT made). Absent is
+  never written from the file. Attendance → Today / Month shows present, late, no check-in, leave and absent days; HR fixes a
+  day from a person's "Ask HR to fix". My Day shows "In 9:02 (Optick)" on top; tap it for my month, selfie check-in
+  (backup, with location) and "Ask HR to fix". Everyone (not subcontractors) has Leave & Expense: Leave Application and
+  Expense Claim with bill photo, approved by the manager (Employee approver, else Reports to, else app manager, else HR).
+  Approved claims Accounts cannot post yet get a ToDo to Accounts. ERPNext v16 needs a Holiday List Assignment for leave.
+- PO approval limit is Rs 5,000 (SK 26-Oct); site config `sk_po_approval_limit` changes it.
+- **Send to design** (SK OK 26-Oct): New Lead has a "Send to design (AI drawing)" switch for Cabin segments, on by
+  default. On save the lead becomes a CRM Deal through Frappe CRM's own conversion (owner = salesperson), Design Status
+  "Sent to Design" when that option exists, with the lead's photos and requirement notes copied to the deal, because the
+  AI design pickup reads deals only.

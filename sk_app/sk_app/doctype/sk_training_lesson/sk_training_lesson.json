@@ -47,7 +47,7 @@
    "fieldname": "function",
    "fieldtype": "Select",
    "label": "For Function",
-   "options": "All\nSales\nMarketing\nProduction\nQuality\nStores\nPurchase\nAccounts\nHR\nMachine Shifting\nDesign\nIT / ERP\nManagement",
+   "options": "All\nSales\nMarketing\nProduction\nSubcontractor\nQuality\nStores\nPurchase\nAccounts\nHR\nMachine Shifting\nDesign\nAI\nIT / ERP\nManagement",
    "default": "All",
    "in_list_view": 1,
    "in_standard_filter": 1

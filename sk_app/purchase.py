@@ -10,8 +10,8 @@ from frappe.utils import add_days, flt, fmt_money, getdate, nowdate
 from sk_app.store import _company, _todo, _users_with_function, attach, material_requests, need, try_submit, uom
 
 PURCHASE = "Purchase"
-# SK to confirm the limit (draft F02 proposal Rs 50,000); can be changed in site config "sk_po_approval_limit"
-DEFAULT_PO_LIMIT = 50000
+# SK 26-Oct-2026: Rs 5,000 (draft F02 had proposed Rs 50,000); can be changed in site config "sk_po_approval_limit"
+DEFAULT_PO_LIMIT = 5000
 
 
 def po_limit() -> float:

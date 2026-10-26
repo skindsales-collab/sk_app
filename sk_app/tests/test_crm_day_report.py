@@ -109,13 +109,13 @@ class TestCrmAndDayReport(IntegrationTestCase):
 			self.skipTest("Frappe CRM not installed")
 		with set_user(REP):
 			calls_before = day_report.captured(REP)["calls_made"]
-			name = api.new_lead("Ramesh", mobile_no="9876543210", organization="SK Test Cabins Ltd", segment="Cabin",
+			name = api.new_lead("Ramesh", mobile_no="9876543210", organization="SK Test Cabins Ltd", segment="Standard Cabin (GI / ACP)",
 				requirement="2 site cabins 20x10")
 			rows = [r for r in api.follow_up() if r["name"] == name]
 			self.assertTrue(rows and rows[0]["new"])
 			api.log_contact("CRM Lead", name, "Call", "Talked", "Wants quote by Monday")
 			d = api.crm_detail("CRM Lead", name)
-			self.assertEqual(d["doc"]["sk_segment"], "Cabin")
+			self.assertEqual(d["doc"]["sk_segment"], "Standard Cabin (GI / ACP)")
 			self.assertEqual(len(d["calls"]), 1)
 			self.assertTrue(any("Requirement" in n["title"] for n in d["notes"]))
 			self.assertTrue(frappe.db.get_value("CRM Lead", name, "first_responded_on"))
@@ -129,7 +129,7 @@ class TestCrmAndDayReport(IntegrationTestCase):
 		if not self.crm:
 			self.skipTest("Frappe CRM not installed")
 		with set_user(REP):
-			lead = api.new_lead("Suresh", mobile_no="9876500000", organization="SK Test Drawing Co " + frappe.generate_hash(length=5))
+			lead = api.new_lead("Suresh", mobile_no="9876500000", organization="SK Test Drawing Co " + frappe.generate_hash(length=5), segment="LGSF")
 		with set_user(BOSS):  # stands in for the AI design user
 			def attach(fname):
 				return frappe.get_doc({"doctype": "File", "file_name": fname, "content": pdf_bytes() if fname.endswith(".pdf") else b"x", "is_private": 1,
@@ -161,7 +161,7 @@ class TestCrmAndDayReport(IntegrationTestCase):
 		create_custom_fields({"CRM Lead": [{"fieldname": "sk_test_design_status", "label": "Design Status", "fieldtype": "Select",
 			"options": "\nSent to Design\nDrawing Sent\nRevision Requested\nDrawing Approved", "insert_after": "status"}]})
 		with set_user(REP):
-			lead = api.new_lead("Mahesh", mobile_no="9876511111", organization="SK Test Correction Co")
+			lead = api.new_lead("Mahesh", mobile_no="9876511111", organization="SK Test Correction Co", segment="Job Work")
 			self.assertRaises(frappe.ValidationError, api.request_correction, "CRM Lead", lead, "  ")
 			r = api.request_correction("CRM Lead", lead, "Door on the 10 ft side, add one window")
 			self.assertTrue(r["status_set"])
@@ -199,3 +199,18 @@ class TestCalendars(IntegrationTestCase):
 			m = api.cal_month()
 			self.assertTrue(any(d["company"] == ["Scorecard"] for d in m["days"]))
 			self.assertIn("calendar", api.home()["home"]["tiles"])
+
+	def test_send_to_design_makes_deal(self):
+		"""New Lead "Send to design": the lead becomes a deal (Frappe CRM conversion) with notes and Design Status."""
+		if not frappe.db.exists("DocType", "CRM Lead"):
+			self.skipTest("Frappe CRM not installed")
+		with set_user(REP):
+			lead = api.new_lead("Mahesh", mobile_no="9876500077", organization="SK Test Design Co " + frappe.generate_hash(length=5),
+				segment="Standard Cabin (GI / ACP)", requirement="20x10 ft site office, 2 windows")
+			r = api.lead_to_design(lead)
+		self.assertTrue(r["sent"], r)
+		self.assertEqual(frappe.db.get_value("CRM Deal", r["deal"], "lead"), lead)
+		self.assertTrue(frappe.db.exists("FCRM Note", {"reference_doctype": "CRM Deal", "reference_docname": r["deal"]}))
+		with set_user(REP):
+			job = api.new_lead("Kiran", mobile_no="9876500078", segment="Machine Shifting")
+			self.assertFalse(api.lead_to_design(job)["sent"])

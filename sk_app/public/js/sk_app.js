@@ -671,6 +671,13 @@
 		opening: "Opening", closing: "Closing", dr: "Dr", cr: "Cr", bills_n: "bills", returns_n: "debit / credit notes",
 		drafts_n: "drafts", net: "Net", direct: "Direct", indirect: "Indirect", gross: "Gross", net_pl: "Net P&L",
 		common_cost: "Common (not split yet)", closing_list: "Closing checklist", month_pl: "Month-wise P&L", inv_n: "invoices",
+		team_box: "Team mailbox", my_customers: "My customers", st_New: "New", st_Taken: "Taken", st_Replied: "Replied",
+		"st_Lead made": "Lead made", "st_Not a lead": "Not a lead", take: "I'll answer", give_to: "Give to", make_lead_btn: "Make lead",
+		not_lead: "Not a lead", reply: "Reply", reply_q: "Your reply (speak or type)", by_word: "by", lead_sources: "Lead Sources",
+		upload_list: "Upload IndiaMART / JustDial list (Excel)", leads_made: "new leads", added_old: "added to earlier leads",
+		skipped_n: "rows without mobile / e-mail", last_check: "Last mail check", check_now: "Check mails now",
+		pull_api: "IndiaMART Pull API: paid add-on, Phase 2", mailboxes: "Mailboxes", set_up: "set up", not_set_up: "not set up in ERPNext yet",
+		on_word: "On", off_word: "Off", this_month2: "this month", source_word: "Source",
 		erp_roles: "ERPNext roles", upload_failed: "File could not be sent.", draft_back: "Your unsaved form was filled back in.",
 	});
 	Object.assign(T.Marathi, {
@@ -693,8 +700,113 @@
 		opening: "सुरुवातीची शिल्लक", closing: "शिल्लक", dr: "Dr", cr: "Cr", bills_n: "बिले", returns_n: "डेबिट / क्रेडिट नोट",
 		drafts_n: "ड्राफ्ट", net: "निव्वळ", direct: "प्रत्यक्ष", indirect: "अप्रत्यक्ष", gross: "एकूण नफा", net_pl: "निव्वळ नफा-तोटा",
 		common_cost: "सामायिक (विभागले नाही)", closing_list: "क्लोजिंग यादी", month_pl: "महिनावार नफा-तोटा", inv_n: "बिले",
+		team_box: "टीम मेलबॉक्स", my_customers: "माझे ग्राहक", st_New: "नवीन", st_Taken: "घेतले", st_Replied: "उत्तर दिले",
+		"st_Lead made": "लीड बनली", "st_Not a lead": "लीड नाही", take: "मी उत्तर देतो", give_to: "यांना द्या", make_lead_btn: "लीड बनवा",
+		not_lead: "लीड नाही", reply: "उत्तर", reply_q: "तुमचे उत्तर (बोला किंवा लिहा)", by_word: "", lead_sources: "लीड स्रोत",
+		upload_list: "IndiaMART / JustDial यादी (Excel) अपलोड करा", leads_made: "नवीन लीड", added_old: "जुन्या लीडमध्ये जोडले",
+		skipped_n: "मोबाईल / ईमेल नसलेल्या ओळी", last_check: "शेवटची मेल तपासणी", check_now: "आता मेल तपासा",
+		pull_api: "IndiaMART Pull API: पैशाची सेवा, टप्पा 2", mailboxes: "मेलबॉक्स", set_up: "तयार", not_set_up: "ERPNext मध्ये अजून नाही",
+		on_word: "चालू", off_word: "बंद", this_month2: "या महिन्यात", source_word: "स्रोत",
 		erp_roles: "ERPNext रोल", upload_failed: "फाईल पाठवता आली नाही.", draft_back: "सेव्ह न केलेला फॉर्म परत भरला.",
 	});
+	// change list point 2: Cabin / Non-Cabin customers
+	Object.assign(T.English, {
+		customers: "Customers", seg_not_set: "Segment not set", seg_all: "All", seg_cabin: "Cabin", seg_noncabin: "Non-Cabin",
+		pick_segment: "Please pick the segment (Cabin or Non-Cabin)", orders_word: "orders", tag_hint: "Tap the segment: the right team then sees this customer.",
+		seen_by_mgmt: "Customers without a segment are seen by Management only until tagged.",
+		"Cabin": "Cabin", "Non-Cabin": "Non-Cabin",
+	});
+	Object.assign(T.Marathi, {
+		customers: "ग्राहक", seg_not_set: "विभाग ठरवलेला नाही", seg_all: "सर्व", seg_cabin: "केबिन", seg_noncabin: "नॉन-केबिन",
+		pick_segment: "कृपया विभाग निवडा (केबिन की नॉन-केबिन)", orders_word: "ऑर्डर", tag_hint: "विभागावर टॅप करा: योग्य टीमला हा ग्राहक दिसेल.",
+		seen_by_mgmt: "विभाग नसलेले ग्राहक टॅग होईपर्यंत फक्त व्यवस्थापनाला दिसतात.",
+		"Cabin": "केबिन", "Non-Cabin": "नॉन-केबिन",
+	});
+	// change list point 3: CEO "View Member App"
+	Object.assign(T.English, {
+		view_member: "View Member App", viewing: "Viewing", viewing_app: "app", exit_view: "Exit", view_only: "View only: nothing is saved, sent or called in the member's name",
+		idea_q: "💡 Your idea for this page (speak or type)", idea_sent: "Idea sent to the AI & ERP desk", last_active: "last active",
+		view_hint: "Tap a member: the app opens exactly as they see it, with their data. View only.",
+	});
+	Object.assign(T.Marathi, {
+		view_member: "सदस्याचे ॲप पहा", viewing: "पाहत आहे:", viewing_app: "यांचे ॲप", exit_view: "बाहेर", view_only: "फक्त पाहणे: सदस्याच्या नावाने काहीही सेव्ह, पाठवले किंवा कॉल होत नाही",
+		idea_q: "💡 या पानासाठी तुमची कल्पना (बोला किंवा लिहा)", idea_sent: "कल्पना AI & ERP डेस्ककडे पाठवली", last_active: "शेवटचे सक्रिय",
+		view_hint: "सदस्यावर टॅप करा: ॲप त्यांना दिसते तसेच, त्यांच्या माहितीसह उघडते. फक्त पाहणे.",
+	});
+	// change list point 13: CEO live dashboards
+	Object.assign(T.English, {
+		dash_overview: "CEO Overview", dash_daily_review: "Daily Review", dash_sales: "Sales", dash_marketing: "Marketing", dash_machine_shifting: "Machine Shifting", dash_job_work: "Job Work", dash_cr100: "100 Cr", dash_finance: "Finance", dash_manufacturing: "Manufacturing", dash_purchase: "Purchase", dash_store: "Store", dash_quality: "Quality", dash_hr: "HR", dash_ai: "AI & ERP",
+		live_dash: "📊 Live dashboards (ERPNext)", vs_last: "last month", dash_open: "Tap a number to see its list, then a row for the full record.",
+		swipe_hint: "Swipe left / right for the next page", open_desk: "Open in ERPNext",
+	});
+	Object.assign(T.Marathi, {
+		dash_overview: "CEO आढावा", dash_daily_review: "दैनिक आढावा", dash_sales: "विक्री", dash_marketing: "मार्केटिंग", dash_machine_shifting: "मशीन शिफ्टिंग", dash_job_work: "जॉब वर्क", dash_cr100: "100 कोटी", dash_finance: "वित्त", dash_manufacturing: "उत्पादन", dash_purchase: "खरेदी", dash_store: "स्टोअर", dash_quality: "गुणवत्ता", dash_hr: "एचआर", dash_ai: "AI आणि ERP",
+		live_dash: "📊 लाईव्ह डॅशबोर्ड (ERPNext)", vs_last: "मागील महिना", dash_open: "यादीसाठी आकड्यावर टॅप करा, पूर्ण माहितीसाठी ओळीवर.",
+		swipe_hint: "पुढील पानासाठी डावीकडे / उजवीकडे सरकवा", open_desk: "ERPNext मध्ये उघडा",
+	});
+	// change list point 5: customer complaints
+	Object.assign(T.English, {
+		complaints: "Complaints", new_complaint: "＋ New complaint", cp_mine: "My complaints", cp_to_fix: "To fix", cp_all: "All",
+		cp_customer: "Customer (type a few letters)", cp_order: "Order / delivery", cp_type: "Complaint type", cp_what: "What is wrong (speak or write)",
+		cp_files: "Photo / video / file", cp_sent: "Complaint sent to", cp_accept: "Accept", cp_fix_by: "Fix by", cp_fixed: "Fixed",
+		cp_after: "After-fix photo", cp_done_what: "What was done", cp_ok: "Customer OK", cp_not_ok: "Customer NOT OK", cp_wa: "WhatsApp update to customer",
+		cp_late: "late", st_Registered: "Registered", st_Accepted: "Accepted", st_Fixed: "Fixed", st_Closed: "Closed", "st_Not OK": "Not OK",
+		cp_pick_customer: "Please pick the customer from the list", cp_note: "Customer says (speak or write)",
+	});
+	Object.assign(T.Marathi, {
+		complaints: "तक्रारी", new_complaint: "＋ नवीन तक्रार", cp_mine: "माझ्या तक्रारी", cp_to_fix: "दुरुस्त करायच्या", cp_all: "सर्व",
+		cp_customer: "ग्राहक (काही अक्षरे लिहा)", cp_order: "ऑर्डर / डिलिव्हरी", cp_type: "तक्रारीचा प्रकार", cp_what: "काय चुकले (बोला किंवा लिहा)",
+		cp_files: "फोटो / व्हिडिओ / फाईल", cp_sent: "तक्रार पाठवली:", cp_accept: "स्वीकारा", cp_fix_by: "दुरुस्ती तारीख", cp_fixed: "दुरुस्त झाले",
+		cp_after: "दुरुस्तीनंतरचा फोटो", cp_done_what: "काय केले", cp_ok: "ग्राहक समाधानी", cp_not_ok: "ग्राहक समाधानी नाही", cp_wa: "ग्राहकाला WhatsApp अपडेट",
+		cp_late: "उशीर", st_Registered: "नोंदवली", st_Accepted: "स्वीकारली", st_Fixed: "दुरुस्त", st_Closed: "बंद", "st_Not OK": "समाधानी नाही",
+		cp_pick_customer: "कृपया यादीतून ग्राहक निवडा", cp_note: "ग्राहक काय म्हणाला (बोला किंवा लिहा)",
+	});
+	// change list point 7: FAQ per function
+	Object.assign(T.English, { faq_ask: "Ask a question", faq_q: "Your question (speak or type)", faq_sent: "Question sent to", faq_to_answer: "Questions for you to answer",
+		faq_answer: "Your answer (speak or type)", faq_add: "Add to the FAQ for everyone" });
+	Object.assign(T.Marathi, { faq_ask: "प्रश्न विचारा", faq_q: "तुमचा प्रश्न (बोला किंवा लिहा)", faq_sent: "प्रश्न पाठवला:", faq_to_answer: "तुम्ही उत्तर द्यायचे प्रश्न",
+		faq_answer: "तुमचे उत्तर (बोला किंवा लिहा)", faq_add: "सर्वांसाठी FAQ मध्ये जोडा" });
+	// change list point 8: product cards
+	Object.assign(T.English, { product_asked: "Product asked (optional)", products_for: "Products for this customer", card_missing: "Card not made yet (photos, sizes, brochure needed)",
+		brochure: "Brochure" });
+	Object.assign(T.Marathi, { product_asked: "विचारलेले उत्पादन (ऐच्छिक)", products_for: "या ग्राहकासाठी उत्पादने", card_missing: "कार्ड अजून बनले नाही (फोटो, साईझ, ब्रोशर हवे)",
+		brochure: "ब्रोशर" });
+	// change list point 1: check before saving
+	Object.assign(T.English, { check_before: "Check before saving (as in ERPNext)", check_red: "✗ Red lines are needed by ERPNext: please fill or correct them, then Save.",
+		check_ok: "Looks right. Tap a suggestion to use it, then Save.", goes_to: "Goes to", photo_dark: "Photo is dark: retake in light?", photo_blur: "Photo looks blurred: retake?" });
+	Object.assign(T.Marathi, { check_before: "सेव्ह करण्यापूर्वी तपासा (ERPNext प्रमाणे)", check_red: "✗ लाल ओळी ERPNext ला हव्या आहेत: भरा किंवा दुरुस्त करा, मग सेव्ह करा.",
+		check_ok: "बरोबर दिसते. सूचना वापरायची असल्यास टॅप करा, मग सेव्ह करा.", goes_to: "कुठे जाईल", photo_dark: "फोटो अंधारात आहे: प्रकाशात पुन्हा घ्या?", photo_blur: "फोटो धूसर आहे: पुन्हा घ्या?" });
+	// change list point 16 + HR draft Rev 2: attendance (Optick / thumb), leave, expenses
+	Object.assign(T.English, { attendance: "Attendance", leave_expense: "Leave & Expense", att_in: "In", att_out: "Out", att_no_in: "No check-in yet",
+		att_wait_file: "Check-in not here yet (HR uploads the Optick file)", att_leave: "On leave", att_off: "Day off", att_late: "late",
+		att_my_month: "My attendance", att_present: "Present", att_absent: "Absent", att_half: "Half day", att_missed: "If Optick missed me",
+		att_selfie: "🤳 Selfie check-in (backup)", att_ask_fix: "✋ Ask HR to fix", att_fix_what: "What to fix (e.g. I came at 9:05, Optick did not read)",
+		att_today: "Today", att_month: "Month", att_upload: "Upload", att_late_after: "Late after", att_no_checkin: "No check-in",
+		att_fix_req: "Fix requests", att_file: "Optick / thumb machine file (Excel or CSV)", att_device: "Machine", att_check_file: "Check file",
+		att_save: "✅ Save check-ins", att_rows: "rows", att_matched: "matched", att_not_found: "not found: pick the employee once",
+		att_missed_out: "missed out-punch (Optick 23:00 Auto Checkout)", att_already: "already in ERPNext", att_made: "check-ins saved",
+		att_att_made: "attendance marked", att_reason: "Reason (speak or write)", att_fix: "Fix", att_status: "Status", att_skip: "skip",
+		lv_leave: "Leave", lv_expense: "Expense", lv_to_approve: "To approve", lv_type: "Leave type", lv_from: "From", lv_to: "To",
+		lv_half: "Half day", lv_reason: "Reason (speak or write)", lv_apply: "Apply for leave", lv_sent: "Sent for approval to", lv_left: "left",
+		lv_mine: "My leave", ex_type: "Expense type", ex_amount: "Amount (Rs)", ex_date: "Date", ex_bill: "Bill photo", ex_note: "What for (speak or write)",
+		ex_claim: "Claim expense", ex_mine: "My expense claims", lv_approve: "✓ Approve", lv_reject: "✗ Reject", ex_posted: "Approved: Accounts pays it",
+		no_employee: "Your login is not linked to an ERPNext Employee yet. Please ask HR." });
+	Object.assign(T.Marathi, { attendance: "हजेरी", leave_expense: "रजा व खर्च", att_in: "आत", att_out: "बाहेर", att_no_in: "अजून हजेरी नाही",
+		att_wait_file: "हजेरी अजून आली नाही (HR ऑप्टिक फाईल अपलोड करते)", att_leave: "रजेवर", att_off: "सुट्टी", att_late: "उशीर",
+		att_my_month: "माझी हजेरी", att_present: "हजर", att_absent: "गैरहजर", att_half: "अर्धा दिवस", att_missed: "ऑप्टिकने हजेरी घेतली नाही तर",
+		att_selfie: "🤳 सेल्फी हजेरी (बॅकअप)", att_ask_fix: "✋ HR ला दुरुस्ती सांगा", att_fix_what: "काय दुरुस्त करायचे (उदा. मी 9:05 ला आलो, ऑप्टिकने घेतले नाही)",
+		att_today: "आज", att_month: "महिना", att_upload: "अपलोड", att_late_after: "उशीर नंतर", att_no_checkin: "हजेरी नाही",
+		att_fix_req: "दुरुस्ती विनंत्या", att_file: "ऑप्टिक / थंब मशीन फाईल (Excel किंवा CSV)", att_device: "मशीन", att_check_file: "फाईल तपासा",
+		att_save: "✅ हजेरी सेव्ह करा", att_rows: "ओळी", att_matched: "जुळले", att_not_found: "सापडले नाही: एकदा कर्मचारी निवडा",
+		att_missed_out: "बाहेर जाण्याची नोंद नाही (ऑप्टिक 23:00 Auto Checkout)", att_already: "आधीच ERPNext मध्ये", att_made: "हजेरी नोंदी सेव्ह",
+		att_att_made: "हजेरी लावली", att_reason: "कारण (बोला किंवा लिहा)", att_fix: "दुरुस्त करा", att_status: "स्थिती", att_skip: "वगळा",
+		lv_leave: "रजा", lv_expense: "खर्च", lv_to_approve: "मंजुरीसाठी", lv_type: "रजेचा प्रकार", lv_from: "पासून", lv_to: "पर्यंत",
+		lv_half: "अर्धा दिवस", lv_reason: "कारण (बोला किंवा लिहा)", lv_apply: "रजेचा अर्ज करा", lv_sent: "मंजुरीसाठी पाठवले:", lv_left: "शिल्लक",
+		lv_mine: "माझ्या रजा", ex_type: "खर्चाचा प्रकार", ex_amount: "रक्कम (रु)", ex_date: "तारीख", ex_bill: "बिलाचा फोटो", ex_note: "कशासाठी (बोला किंवा लिहा)",
+		ex_claim: "खर्च मागा", ex_mine: "माझे खर्च", lv_approve: "✓ मंजूर", lv_reject: "✗ नामंजूर", ex_posted: "मंजूर: अकाउंट्स पैसे देईल",
+		no_employee: "तुमचे लॉगिन अजून ERPNext कर्मचाऱ्याशी जोडलेले नाही. कृपया HR ला सांगा." });
+	Object.assign(T.English, { send_design: "Send to design (AI drawing)", design_sent: "Sent to design as deal", design_not_sent: "Not sent to design:" });
+	Object.assign(T.Marathi, { send_design: "डिझाईनला पाठवा (AI ड्रॉइंग)", design_sent: "डिझाईनला डील म्हणून पाठवले", design_not_sent: "डिझाईनला पाठवले नाही:" });
 	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";
 	T.Marathi.mic_blocked = "माईक / कॅमेरा बंद आहे. Chrome → ⋮ → Settings → Site settings → Microphone (किंवा Camera) → ही साईट → Allow. मग परत येऊन 🎤 दाबा.";
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
@@ -710,13 +822,21 @@
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
-		training_progress: "📈", erpnext_desk: "🖥️", dir_expenses: "🧾",
+		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
+		dash_overview: "🏁", dash_daily_review: "🗓️", dash_sales: "💼", dash_marketing: "📣", dash_machine_shifting: "🏗️", dash_job_work: "⚙️", dash_cr100: "🎯", dash_finance: "💰", dash_manufacturing: "🏭", dash_purchase: "🛒", dash_store: "📦", dash_quality: "✅", dash_hr: "👥", dash_ai: "🤖",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
 	const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+	// while the CEO views a member's app every reading screen runs as the member (their own permissions); saving is blocked
+	const VIEW_OWN = new Set(["view_members", "view_suggest", "report_screen_error"]);
 	async function call(method, args, post) {
+		if (state.viewAs && !VIEW_OWN.has(method)) {
+			if (post) throw new Error(t("view_only"));
+			args = { member: state.viewAs.user, method, args: JSON.stringify(args || {}), view: state.view };
+			method = "view_as";
+		}
 		const opts = { headers: { Accept: "application/json", "X-Frappe-CSRF-Token": CSRF }, credentials: "same-origin" };
 		let url = "/api/method/sk_app.api." + method;
 		if (post) {
@@ -894,7 +1014,9 @@
 
 	// fixed at the top on every screen: back / logo, screen title, the person's name and function, language
 	function header(title) {
-		return `<header class="sk-head">
+		const bar = state.viewAs ? `<div class="sk-viewbar"><span>👀 ${t("viewing")} ${esc(state.viewAs.name)} ${t("viewing_app")}</span>
+			<button data-act="view-idea">💡</button><button data-act="view-exit">✕ ${t("exit_view")}</button></div>` : "";
+		return bar + `<header class="sk-head">
 			${state.view !== "home" ? `<button class="sk-back" data-go="home">‹</button>` : `<img src="/assets/sk_app/icons/icon-192.png" class="sk-logo" alt="SK">`}
 			<div class="sk-title">${esc(title)}<small>${esc(whoAmI())}</small></div>
 			<button class="sk-lang" data-act="lang">${t("lang")}</button>
@@ -938,14 +1060,20 @@
 		const badge = { ...(h.badges || {}) };
 		if (dueNow().length) badge.reminders = { n: dueNow().length, c: "red" };
 		if (!badge.follow_up && (h.new_files || []).length) badge.follow_up = { n: h.new_files.length, c: "blue" };
-		if (h.must_set_pin) return renderSetPin();
+		if (h.must_set_pin && !state.viewAs) return renderSetPin();
 		const tile = (k) => {
 			const m = badge[k];
 			const o = m && typeof m === "object" ? m : m ? { n: m, c: "red" } : null;
 			const dot = !o ? "" : o.c === "green" ? `<b class="sk-dot green">✓</b>` : `<b class="sk-dot ${o.c}">${esc(o.n)}</b>`;
 			return `<button class="sk-tile ${o ? "c-" + o.c : ""} ${o && o.blink ? "blink" : ""}" data-go="${k}"><span class="sk-tile-icon">${ICON[k] || "•"}</span><span>${t(k)}</span>${dot}</button>`;
 		};
-		const tiles = (keys) => `<div class="sk-tiles small">${keys.map(tile).join("")}</div>`;
+		const plain = (keys) => `<div class="sk-tiles small">${keys.map(tile).join("")}</div>`;
+		// point 13: the CEO's live dashboards sit in their own row on top
+		const tiles = (keys) => {
+			const dash = keys.filter((k) => k.startsWith("dash_"));
+			const rest = keys.filter((k) => !k.startsWith("dash_"));
+			return (dash.length ? `<h3 class="sk-h sk-fn-row">${t("live_dash")}</h3>${plain(dash)}${rest.length ? `<div class="sk-gap"></div>` : ""}` : "") + (rest.length ? plain(rest) : "");
+		};
 		if (!h.sections) { root.innerHTML = header("SK App") + `<main>${tiles(fn.tiles)}</main>`; return; }
 		// a person in several functions: one labelled row per function, then the tiles everyone has (SK, 26-Oct)
 		const label = (l) => (l && (l[state.lang] || l.English)) || "";
@@ -1059,7 +1187,8 @@
 			state.card = await call("next_card", {}, true).catch(() => state.card);
 		}
 		const done = (d.done || []).map((x) => `<li class="sk-item k-done"><div><div class="sk-item-title">✓ ${esc(x.title)}</div><div class="sk-item-meta">${esc(hm(x.time))}</div></div></li>`).join("");
-		root.innerHTML = header(t("my_day")) + `<main>${cardHtml(state.card || d.card)}
+		S.att = d.attendance;
+		root.innerHTML = header(t("my_day")) + `<main>${attLine(d.attendance)}${cardHtml(state.card || d.card)}
 			<button class="sk-btn go wide" data-go="work_book">${t("did_extra")}</button>
 			<h3 class="sk-h">${t("to_do")}</h3><ul class="sk-list">${d.items.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
 			<h3 class="sk-h">✓ ${t("done_today")}</h3><ul class="sk-list">${done || `<li class="sk-empty">—</li>`}</ul></main>`;
@@ -1124,7 +1253,7 @@
 
 	// Every photo button (point 4): 📷 Camera · 🖼 Gallery / screenshot · 📄 PDF, a preview with ✕ / 🔄, the photo made
 	// small on the phone (about 300 KB, paper stays readable) and sent at once in the background, retrying by itself
-	const ANY_FILE = "image/*,application/pdf,.dwg,.dxf,.xlsx,.xls,.docx,.doc";
+	const ANY_FILE = "image/*,application/pdf,.dwg,.dxf,.xlsx,.xls,.csv,.docx,.doc";
 	function photoField(id, label, anyFile) {
 		id = id || "f-photo";
 		return `<div class="sk-field sk-photo"><span>${esc(label || t("photo"))}</span>
@@ -1177,7 +1306,14 @@
 			(e) => { note.textContent = "⚠ " + e.message; inp._up = null; throw e; });
 		inp._up.catch(() => {});
 	}
-	root.addEventListener("change", (ev) => { if (ev.target.classList && ev.target.classList.contains("sk-file")) photoPicked(ev.target); }, true);
+	// "Send to design" shows only for Cabin segments (the AI design pickup makes cabin drawings)
+	root.addEventListener("change", (ev) => {
+		if (ev.target.id !== "f-segment") return;
+		const row = document.getElementById("f-design-row");
+		const tree = (crmOpts && crmOpts.segment_tree) || {};
+		if (row) row.hidden = !((tree.Cabin || []).includes(ev.target.value));
+	});
+	root.addEventListener("change", (ev) => { if (ev.target.classList && ev.target.classList.contains("sk-file")) { photoPicked(ev.target); photoNote(ev.target); } }, true);
 
 	async function photoUrl(id) {
 		const f = document.getElementById(id || "f-photo");
@@ -1312,6 +1448,7 @@
 			<div class="sk-form">${formField("f-note", t("note_q"), true)}${photoField("f-photo", t("attach"), true)}
 				<button class="sk-btn ok wide" data-act="save-note">${t("add_note")}</button>
 				<button class="sk-btn wide sk-gap" data-act="reminder-new" data-doctype="${esc(doctype)}" data-name="${esc(name)}">⏰ + ${t("reminder")}</button></div>
+			${(d.products || []).length ? `<h3 class="sk-h">${t("products_for")}</h3>${productStrip(d.products)}` : ""}
 			${sec(t("quotations"), d.quotations.map((q) => erpDocRow("Quotation", q, mobile)).join(""))}
 			${sec(t("sales_orders"), d.sales_orders.map((q) => erpDocRow("Sales Order", q, mobile)).join(""))}
 			${sec(t("files"), files)}${sec(t("tasks"), tasks)}${sec(t("emails"), mails.map((m) => `<li class="sk-item"><div><div class="sk-item-title">${m.sent_or_received === "Received" ? "📥" : "📤"} ${esc(m.subject || "")}</div>
@@ -1366,6 +1503,13 @@
 		a.click();
 	}
 
+	// two levels like Tally (point 2): Cabin → Standard / LGSF / Modular, Non-Cabin → Machine Shifting / Job Work / Other
+	function segmentSelect(id, tree, flat) {
+		const groups = tree ? Object.entries(tree).map(([main, subs]) => `<optgroup label="${esc(t(main))}">${subs.map((x) => `<option>${esc(x)}</option>`).join("")}</optgroup>`).join("")
+			: (flat || []).map((x) => `<option>${esc(x)}</option>`).join("");
+		return `<label class="sk-field"><span>${t("segment")} *</span><select id="${id}" class="sk-select"><option value=""></option>${groups}</select></label>`;
+	}
+
 	async function renderNewLead() {
 		const o = await options();
 		const sel = (id, label, items) => `<label class="sk-field"><span>${esc(label)}</span><select id="${id}" class="sk-select"><option value=""></option>${(items || []).map((x) => `<option>${esc(x)}</option>`).join("")}</select></label>`;
@@ -1374,9 +1518,11 @@
 			${formField("f-first", t("cust_name"))}${formField("f-org", t("company"))}
 			<label class="sk-field"><span>${t("mobile")}</span><div class="sk-input-row"><input id="f-mobile" type="tel"></div></label>
 			<label class="sk-field"><span>${t("email")}</span><div class="sk-input-row"><input id="f-email" type="email"></div></label>
-			${sel("f-source", t("source"), o.sources)}${sel("f-segment", t("segment"), o.segments)}
+			${sel("f-source", t("source"), o.sources)}${segmentSelect("f-segment", o.segment_tree, o.segments)}${(o.products || []).length ? sel("f-product", t("product_asked"), o.products) : ""}
+			<label class="sk-check" id="f-design-row" hidden><input id="f-design" type="checkbox" checked> ✏️ ${t("send_design")}</label>
 			${formField("f-req", t("requirement"), true)}
-			<button class="sk-btn ok wide" data-act="save-lead">${t("save")}</button></main>`;
+			<button class="sk-btn ok wide" data-act="save-lead">${t("save")}</button>
+			<details class="sk-gap"><summary>📄 ${t("upload_list")}</summary>${uploadBox()}</details></main>`;
 		document.getElementById("f-card").addEventListener("change", readCard);
 	}
 
@@ -1438,11 +1584,104 @@
 				if (!fill(d)) { toast(t("read_none"), true); return; }
 			}
 			toast(t("read_ok"));
+			runCheck();
 		} catch (e) { toast(t("read_none"), true); } finally { note.remove(); }
+	}
+
+	// Point 1: "Check before saving". Each value next to its ERPNext field: green ✓ fits, amber ⚠ suggestion, red ✗ needed.
+	// Suggestions come from ERPNext (nearest supplier / customer, duplicate mobile or bill, GSTIN / plate format);
+	// a picked suggestion is remembered for next time. The form's own Save still does the saving.
+	const CHECKS = [
+		{ anchor: "f-first", kind: "lead", ids: { first_name: "f-first", organization: "f-org", mobile_no: "f-mobile", email: "f-email", segment: "f-segment" },
+			learn: { organization: "customer" } },
+		{ anchor: "ns-name", kind: "supplier", ids: { supplier_name: "ns-name", gstin: "ns-gstin", mobile: "ns-mobile" }, learn: { supplier_name: "supplier" } },
+		{ anchor: "b-no", kind: "bill", ids: { supplier: "b-sup", bill_no: "b-no", amount: "b-amt" }, learn: { supplier: "supplier" } },
+		{ anchor: "d-vehicle", kind: "plate", ids: { vehicle_no: "d-vehicle" } },
+	];
+	const checkSpec = () => CHECKS.find((c) => document.getElementById(c.anchor));
+	let checkTimer = null;
+	async function runCheck() {
+		const spec = checkSpec();
+		if (!spec) return;
+		const values = {};
+		Object.entries(spec.ids).forEach(([k, id]) => { values[k] = val(id); });
+		if (!Object.values(values).some(Boolean)) return;
+		const d = await call("photo_check", { kind: spec.kind, values: JSON.stringify(values) }).catch(() => null);
+		if (!d || !checkSpec()) return;
+		let box = document.getElementById("chk-box");
+		if (!box) {
+			box = document.createElement("section");
+			box.id = "chk-box";
+			box.className = "sk-chkbox";
+			const save = root.querySelector("main .sk-btn.ok, main .sk-btn.go");
+			if (save) save.before(box); else root.querySelector("main").appendChild(box);
+		}
+		const icon = { green: "✓", amber: "⚠", red: "✗" };
+		box.innerHTML = `<h3 class="sk-h">🔍 ${t("check_before")}</h3>${d.rows.map((r) => `<div class="sk-chk ${r.state}">
+			<div class="sk-row"><b>${icon[r.state]}</b><span class="sk-grow">${esc(r.label)}: <b>${esc(r.value == null ? "" : r.value)}</b></span><small class="sk-muted">${esc(r.field)}</small></div>
+			${r.note ? `<div class="sk-item-meta">${esc(r.note)}</div>` : ""}
+			${(r.options || []).length ? `<div class="sk-row sk-wrap">${r.options.map((o) => `<button type="button" class="sk-chip" data-apply="${esc(spec.ids[r.field] || "")}" data-val="${esc(o)}" data-learn="${esc((spec.learn || {})[r.field] || "")}">${esc(o)}</button>`).join("")}</div>` : ""}
+			</div>`).join("")}${d.red ? `<p class="sk-note bad">${t("check_red")}</p>` : `<p class="sk-note">${t("check_ok")}</p>`}`;
+	}
+	root.addEventListener("change", (ev) => {
+		const spec = checkSpec();
+		if (spec && Object.values(spec.ids).includes(ev.target.id)) { clearTimeout(checkTimer); checkTimer = setTimeout(runCheck, 300); }
+	});
+	// Bill / GST certificate photo: read it on the phone and fill the empty boxes, then check (free reader)
+	async function readPaper(inp) {
+		const f = inp.files[0];
+		if (!f || !f.type.startsWith("image/")) return;
+		const map = { "ns-photo": (d) => ({ "ns-name": d.organization, "ns-gstin": d.invoice && d.invoice.gstin, "ns-mobile": d.mobile_no }),
+			"b-photo": (d) => ({ "b-no": d.invoice && d.invoice.number, "b-amt": d.invoice && d.invoice.total, "b-sup": d.organization }),
+			"ex-photo": (d) => ({ "ex-amt": d.invoice && d.invoice.total }) };
+		if (!map[inp.id]) return;
+		try {
+			const d = await readOnPhone(f, () => {});
+			const gst = (d.invoice && d.invoice.gstin) || ((d.requirement || "").match(/\b\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]\b/) || [])[0];
+			if (gst) d.invoice = { ...(d.invoice || {}), gstin: gst };
+			Object.entries(map[inp.id](d)).forEach(([id, v]) => { const el = document.getElementById(id); if (el && v && !el.value) el.value = v; });
+			runCheck();
+		} catch (e) { /* reading is a help only; the person can type */ }
+	}
+	// Proof photos: where it goes, and a warning if it is too dark or blurred to read later
+	const RECORD_OF = { receive: "Purchase Receipt (draft)", issue: "Stock Entry", dispatch: "Delivery Note", stock_count: "Stock Reconciliation",
+		new_item: "Item", job_cards: "Job Card", my_jobs: "Job Card", progress_photos: "Work Order", non_conformance: "Non Conformance", my_fixes: "Non Conformance",
+		inspect: "Quality Inspection", final_check: "Quality Inspection", dsi: "SK DSI Entry", problem: "SK Work Log", day_report: "SK Day Report",
+		detail: "CRM note / file", new_lead: "CRM Lead", complaints: "Issue (complaint)", bills: "Purchase Invoice (draft)", suppliers: "Supplier",
+		to_collect: "Payment Entry (draft)", to_pay: "Payment Entry (draft)", expenses: "Journal Entry (draft)", my_day: "Employee Checkin (selfie)",
+		leave_expense: "Expense Claim" };
+	async function photoQuality(file) {
+		const img = await createImageBitmap(file);
+		const c = document.createElement("canvas");
+		c.width = 64; c.height = Math.max(1, Math.round(64 * img.height / img.width));
+		const g = c.getContext("2d");
+		g.drawImage(img, 0, 0, c.width, c.height);
+		const px = g.getImageData(0, 0, c.width, c.height).data;
+		const lum = [];
+		for (let i = 0; i < px.length; i += 4) lum.push(0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]);
+		const mean = lum.reduce((a, b) => a + b, 0) / lum.length;
+		let edge = 0;
+		for (let i = 1; i < lum.length; i++) edge += Math.abs(lum[i] - lum[i - 1]);
+		edge /= lum.length;
+		return mean < 45 ? "dark" : edge < 4 ? "blur" : "";
+	}
+	async function photoNote(inp) {
+		const pv = document.getElementById(inp.id + "-pv");
+		const f = inp.files[0];
+		if (!pv || !f) return;
+		const to = RECORD_OF[state.view];
+		let warn = "";
+		if (f.type.startsWith("image/")) { try { warn = await photoQuality(f); } catch (e) { warn = ""; } }
+		const div = document.createElement("div");
+		div.className = "sk-item-meta";
+		div.innerHTML = [to ? `➜ ${t("goes_to")}: <b>${esc(to)}</b>` : "", warn ? `<span class="sk-amber">⚠ ${t("photo_" + warn)}</span>` : ""].filter(Boolean).join(" · ");
+		if (div.innerHTML) pv.appendChild(div);
+		readPaper(inp);
 	}
 
 	// Training: 1) My function (e.g. Sales Manual lessons) 2) App usage 3) customer FAQ; managers also see their team
 	let lessons = [], trainTab = "My function";
+	let faqQuery = "";
 	async function renderTraining() {
 		const mr = state.lang === "Marathi";
 		const tabs = [["My function", t("my_function")], ["App usage", t("app_usage")], ["FAQ", t("faq")]];
@@ -1450,7 +1689,14 @@
 		const bar = `<div class="cal-tabs">${tabs.map(([k, l]) => `<button class="${trainTab === k ? "on" : ""}" data-train="${k}">${l}</button>`).join("")}</div>`;
 		let body = "";
 		if (trainTab === "FAQ") {
-			body = libraryList(await call("library", { category: "Customer FAQ" }));
+			// point 7: FAQ of each of my functions, search by voice, "Ask a question" to the function owner
+			const d = await call("training_faq", faqQuery ? { q: faqQuery } : {});
+			S.faqAsk = d.to_answer;
+			body = `<div class="sk-input-row sk-gap"><input id="faq-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(faqQuery)}">${micBox("faq-q")}</div>
+				${d.to_answer.length ? `<h3 class="sk-h">❓ ${t("faq_to_answer")}</h3><ul class="sk-list">${d.to_answer.map((a, i) => `<li class="sk-item k-amber"><button class="sk-fu-main" data-act="faq-answer" data-i="${i}">
+					<div class="sk-item-title">${esc(a.question)}</div><div class="sk-item-meta">${esc(a.by)}</div></button></li>`).join("")}</ul>` : ""}
+				${libraryList(d.rows)}
+				<button class="sk-btn go wide" data-act="faq-ask">❓ ${t("faq_ask")}</button>`;
 		} else if (trainTab === "Team") {
 			const d = await call("team_training");
 			body = `<ul class="sk-list">${d.people.map((p) => `<li class="sk-item"><div class="sk-grow"><div class="sk-item-title">${esc(p.full_name)}</div>
@@ -1715,14 +1961,363 @@
 	}
 
 	// ---------- Mail: free once the company Email Account is connected in ERPNext ----------
+	// point 14: Team mailbox (cabin@ for the sales team, service@ for Aditya, acc@ Accounts, sales@ CEO, info@ HR) and
+	// My customers (mails on my own leads / deals). Each team mail shows New → Taken by … → Replied / Lead made.
+	let mailTab = "team";
 	async function renderMail() {
+		const team = await call("team_mail").catch(() => ({ boxes: [], mails: [] }));
+		if (!team.boxes.length) mailTab = "mine";
+		const tabs = team.boxes.length ? `<div class="cal-tabs"><button class="${mailTab === "team" ? "on" : ""}" data-mailtab="team">📥 ${t("team_box")}${team.new ? ` (${team.new})` : ""}</button>
+			<button class="${mailTab === "mine" ? "on" : ""}" data-mailtab="mine">👤 ${t("my_customers")}</button></div>` : "";
+		if (mailTab === "team") {
+			S.tmail = team.mails;
+			const chip = (m) => `<span class="chip2 ${m.status === "New" ? "red" : m.status === "Taken" ? "yel" : "green"}">${t("st_" + m.status)}${m.status === "Taken" && m.taken_by_name ? " · " + esc(m.taken_by_name) : ""}</span>`;
+			root.innerHTML = header(t("mail")) + `<main>${tabs}<p class="sk-note">${team.boxes.map(esc).join(" · ")}</p>
+				<ul class="sk-list">${team.mails.map((m, i) => `<li class="sk-item ${m.status === "New" ? "k-lead_new" : ""}"><button class="sk-fu-main" data-tmail="${i}">
+					<div class="sk-item-title">${m.source ? `<span class="chip2 navy">${esc(m.source)}</span> ` : ""}${esc(m.subject || "")}</div>
+					<div class="sk-item-meta">${esc(m.sender_full_name || m.sender || "")} · ${when(m.communication_date)}${m.has_attachment ? " · 📎" : ""} · ${chip(m)}</div>
+					<div class="sk-item-meta">${esc(m.preview || "")}</div></button></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+			return;
+		}
 		const d = await call("my_mail");
-		root.innerHTML = header(t("mail")) + `<main>${d.ready ? "" : `<div class="sk-locked">✉️ ${t("mail_not_ready")}</div>`}
+		root.innerHTML = header(t("mail")) + `<main>${tabs}${d.ready ? "" : `<div class="sk-locked">✉️ ${t("mail_not_ready")}</div>`}
 			<ul class="sk-list">${d.mails.map((m) => `<li class="sk-item"><button class="sk-fu-main" data-open="${esc(m.reference_doctype)}" data-name="${esc(m.reference_name)}">
 				<div class="sk-item-title">${m.sent_or_received === "Received" ? "📥" : "📤"} ${esc(m.subject || "")}</div>
 				<div class="sk-item-meta">${esc(m.title)} · ${when(m.communication_date)}${m.has_attachment ? " · 📎" : ""}</div>
 				<div class="sk-item-meta">${esc(m.preview || "")}</div></button></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
 	}
+	async function teamMailSheet(i) {
+		const m = S.tmail[i];
+		const d = await call("team_mail_read", { comm: m.name });
+		S.tmailOpen = d;
+		const lead = d.reference_doctype && d.reference_doctype.startsWith("CRM ") && d.reference_name;
+		sheet(`<h3 class="sk-h">✉️ ${esc(d.subject || "")}</h3><p class="sk-item-meta">${esc(d.from_name || d.sender || "")} → ${esc(d.box)} · ${esc(d.date.slice(0, 16))}</p>
+			<div class="sk-libtext sk-mailtext">${esc(d.text)}</div>
+			${d.files.map((f) => `<a class="sk-chip" href="${esc(f.file_url)}" target="_blank">📎 ${esc(f.file_name)}</a>`).join("")}
+			<div class="sk-row sk-wrap sk-gap">
+				${d.sk_mail_status !== "Taken" || d.sk_taken_by !== state.home.user ? `<button class="sk-chip on" data-act="tm-take" data-comm="${esc(d.name)}">✋ ${t("take")}</button>` : ""}
+				${lead ? `<button class="sk-chip" data-open="${esc(d.reference_doctype)}" data-name="${esc(d.reference_name)}">📄 ${t("open_lead")}</button>`
+					: `<button class="sk-chip on" data-act="tm-lead" data-comm="${esc(d.name)}">➕ ${t("make_lead_btn")}</button><button class="sk-chip" data-act="tm-notlead" data-comm="${esc(d.name)}">✕ ${t("not_lead")}</button>`}
+			</div>
+			${hasTeam() && d.people.length ? `<label class="sk-field"><span>${t("give_to")}</span><select id="tm-give" class="sk-select"><option value=""></option>${d.people.map((p) => `<option value="${esc(p.user)}">${esc(p.full_name || p.user)}</option>`).join("")}</select></label>
+				<button class="sk-btn wide" data-act="tm-give" data-comm="${esc(d.name)}">👉 ${t("give_to")}</button>` : ""}
+			${formField("tm-reply", t("reply_q"), true)}
+			<button class="sk-btn ok wide" data-act="tm-reply" data-comm="${esc(d.name)}">✉️ ${t("reply")}</button>
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+
+	// CEO live dashboards (point 13): one page per function, live from ERPNext; number → its list → the full record
+	let dashMonth = null, dashSeg = "", dashData = null;
+	const shortMoney = (x) => {
+		const v = Number(x || 0), a = Math.abs(v);
+		return a >= 1e7 ? `Rs ${(v / 1e7).toFixed(2)} Cr` : a >= 1e5 ? `Rs ${(v / 1e5).toFixed(1)} L` : money(v);
+	};
+	function dashValue(kind, v) {
+		if (v == null) return "—";
+		return kind === "money" ? shortMoney(v) : kind === "pct" ? `${v}%` : Number(v).toLocaleString("en-IN");
+	}
+	function bars(rows) {
+		const max = Math.max(1, ...rows.map((r) => Number(r.value || 0)));
+		return `<div class="sk-vbars">${rows.map((r) => `<div class="sk-vbar" title="${esc(r.title)}: ${esc(r.value)}"><i style="height:${Math.round(Number(r.value || 0) * 100 / max)}%"></i><small>${esc(r.title)}</small></div>`).join("")}</div>`;
+	}
+	async function renderDash(key) {
+		const d = await call("dash_page", { key, ...(dashMonth ? { month: dashMonth } : {}), ...(dashSeg ? { segment: dashSeg } : {}) });
+		if (state.view !== "dash_" + key) return;
+		dashData = d;
+		const title = d.title[state.lang] || d.title.English;
+		const m = new Date(d.month);
+		const segs = ["machine_shifting", "job_work"].includes(key) ? "" : `<div class="sk-row sk-wrap">${[["", t("seg_all")], ["Cabin", t("seg_cabin")], ["Non-Cabin", t("seg_noncabin")]]
+			.map(([k, label]) => `<button class="sk-chip ${dashSeg === k ? "on" : ""}" data-dashseg="${k}">${label}</button>`).join("")}</div>`;
+		root.innerHTML = header(title) + `<main class="sk-dash">
+			<div class="sk-row"><button class="sk-chip" data-dashmonth="-1">‹</button><b style="flex:1;text-align:center">${m.toLocaleString(state.lang === "Marathi" ? "mr-IN" : "en-IN", { month: "long", year: "numeric" })}</b><button class="sk-chip" data-dashmonth="1">›</button></div>
+			${segs}
+			<div class="sk-dash-cards">${d.cards.map((c, i) => {
+				const diff = c.prev != null && c.kind === "money" && c.prev ? Math.round((c.value - c.prev) * 100 / Math.abs(c.prev)) : null;
+				return `<button class="sk-dash-card ${c.c ? "c-" + c.c : ""} ${c.kind === "series" ? "wide" : ""}" data-dcard="${i}">
+					<span class="sk-dash-label">${esc(c.label)}</span>
+					${c.kind === "series" ? bars(c.rows || []) : c.kind === "list" ? `<span class="sk-dash-mini">${(c.rows || []).slice(0, 4).map((r) => `${esc(r.title)}: <b>${esc(typeof r.value === "number" && r.value > 9999 ? shortMoney(r.value) : r.value == null ? "" : r.value)}</b>`).join("<br>")}</span>`
+						: `<b class="sk-dash-value">${dashValue(c.kind, c.value)}</b>`}
+					${c.prev != null ? `<small>${t("vs_last")}: ${dashValue(c.kind, c.prev)}${diff != null ? ` (${diff >= 0 ? "▲" : "▼"} ${Math.abs(diff)}%)` : ""}</small>` : ""}</button>`;
+			}).join("")}</div>
+			<p class="sk-note">${t("dash_open")} ${t("swipe_hint")} · ${esc(d.refreshed_at)}</p></main>`;
+	}
+	function renderDashList(i) {
+		const c = dashData.cards[i];
+		const rows = c.rows || [];
+		root.innerHTML = header(c.label) + `<main><button class="sk-btn wide" data-go="${esc(state.view)}">‹ ${esc(dashData.title[state.lang] || dashData.title.English)}</button>
+			<ul class="sk-list">${rows.map((r, j) => `<li class="sk-item ${r.c ? "k-" + r.c : ""}"><button class="sk-fu-main" data-drow="${j}" data-dcardi="${i}">
+				<div class="sk-item-title">${r.c === "red" ? "🔴 " : r.c === "amber" ? "🟠 " : r.c === "green" ? "🟢 " : ""}${esc(r.title)}</div>
+				<div class="sk-item-meta">${esc(r.meta || "")}</div></button>
+				${r.value != null ? `<b>${typeof r.value === "number" && Math.abs(r.value) > 9999 ? shortMoney(r.value) : esc(r.value)}</b>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+	}
+	function openDashRow(i, j) {
+		const r = dashData.cards[i].rows[j];
+		if (!r.doctype || !r.name) return;
+		if (r.doctype === "CRM Lead" || r.doctype === "CRM Deal") { current = { doctype: r.doctype, name: r.name }; return go("detail"); }
+		if (r.doctype === "User") return;
+		window.open(`/app/${r.doctype.toLowerCase().replace(/ /g, "-")}/${encodeURIComponent(r.name)}`, "_blank");
+	}
+	// swipe left / right on a dashboard page: the next / previous function
+	let touchX = null;
+	root.addEventListener("touchstart", (ev) => { touchX = state.view.startsWith("dash_") && ev.touches.length === 1 ? ev.touches[0].clientX : null; }, { passive: true });
+	root.addEventListener("touchend", (ev) => {
+		if (touchX == null || !dashData || !state.view.startsWith("dash_")) return;
+		const dx = ev.changedTouches[0].clientX - touchX;
+		touchX = null;
+		if (Math.abs(dx) < 80) return;
+		const pages = dashData.pages, at = pages.indexOf(state.view.slice(5));
+		const next = pages[(at + (dx < 0 ? 1 : -1) + pages.length) % pages.length];
+		go("dash_" + next);
+	}, { passive: true });
+
+	// Customer complaints (point 5): register with photo / voice; the concerned person accepts, fixes, the customer confirms
+	let cpTab = "mine";
+	const cpChip = (r) => `<span class="chip2 ${r.late ? "red" : r.sk_stage === "Closed" ? "green" : r.sk_stage === "Fixed" ? "navy" : "yel"}">${t("st_" + r.sk_stage)}${r.late ? " · " + t("cp_late") : ""}</span>`;
+	async function renderComplaints() {
+		const d = await call("complaints_list", { tab: cpTab });
+		S.cp = d.rows;
+		const fns = state.home.functions || [];
+		const tab = (k, label) => `<button class="${cpTab === k ? "on" : ""}" data-cptab="${k}">${label}</button>`;
+		root.innerHTML = header(t("complaints")) + `<main>
+			<div class="cal-tabs">${tab("mine", t("cp_mine"))}${tab("to_fix", `${t("cp_to_fix")}${d.to_fix ? ` (${d.to_fix})` : ""}`)}${fns.includes("Management") ? tab("all", t("cp_all")) : ""}</div>
+			<button class="sk-btn ok wide" data-act="cp-new">${t("new_complaint")}</button>
+			<ul class="sk-list sk-gap">${d.rows.map((r, i) => `<li class="sk-item ${r.late ? "k-red" : ""}"><button class="sk-fu-main" data-cp="${esc(r.name)}">
+				<div class="sk-item-title">${esc(r.customer_name || r.customer || "")}: ${esc(r.issue_type || "")}</div>
+				<div class="sk-item-meta">${cpChip(r)} · ${esc(r.concerned_name || r.sk_concerned_function || "")} · ${t("cp_fix_by")} ${esc(r.sk_fix_by)}</div>
+				<div class="sk-item-meta">${esc(String(r.description || "").replace(/<[^>]*>/g, "").slice(0, 120))}</div></button></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+	}
+	async function renderNewComplaint() {
+		const types = (await call("complaints_list", { tab: "mine" })).types;
+		state.view = "complaints";
+		root.innerHTML = header(t("new_complaint")) + `<main class="sk-form">
+			<label class="sk-field"><span>${t("cp_customer")}</span><div class="sk-input-row"><input id="cp-cust" list="cp-cust-dl" autocomplete="off">${micBox("cp-cust")}</div><datalist id="cp-cust-dl"></datalist></label>
+			<label class="sk-field"><span>${t("cp_order")}</span><select id="cp-order" class="sk-select"><option value=""></option></select></label>
+			${pick("cp-type", t("cp_type"), types)}
+			${formField("cp-text", t("cp_what"), true)}
+			${photoField("cp-f1", "📷 " + t("cp_files"), true)}${photoField("cp-f2", "📷 " + t("cp_files"), true)}
+			<button class="sk-btn ok wide" data-act="cp-save">${t("save")}</button></main>`;
+	}
+	async function complaintSheet(name) {
+		const d = await call("complaint_detail", { name });
+		const wa = d.mobile ? `https://wa.me/${waNumber(d.mobile)}?text=${encodeURIComponent(`${d.customer_name}: your complaint ${d.name} is now "${d.sk_stage}"${d.sk_fix_by ? `, fix by ${d.sk_fix_by}` : ""}. SK Ind Tech Solutions`)}` : "";
+		const open = ["Registered", "Accepted", "Not OK"].includes(d.sk_stage);
+		sheet(`<h3 class="sk-h">🛠️ ${esc(d.customer_name || d.customer)}</h3>
+			<p class="sk-item-meta">${cpChip(d)} · ${esc(d.issue_type || "")} · ${esc(d.sk_sales_order || "")}</p>
+			<div class="sk-libtext">${esc(String(d.description || "").replace(/<[^>]*>/g, ""))}</div>
+			<p class="sk-item-meta">${t("cp_sent")} ${esc(d.concerned_name || "")} · ${t("cp_fix_by")} ${esc(d.sk_fix_by)}</p>
+			${d.files.map((f) => `<a class="sk-chip" href="${esc(f.file_url)}" target="_blank">📎 ${esc(f.file_name)}</a>`).join("")}
+			<ul class="sk-list">${d.steps.map((x) => `<li class="sk-item"><div><div class="sk-item-meta">${esc(x.when)}</div><div>${esc(x.text)}</div></div></li>`).join("")}</ul>
+			${d.is_fixer && open ? `<label class="sk-field"><span>${t("cp_fix_by")}</span><input id="cp-date" type="date" value="${esc(d.sk_fix_by)}"></label>
+				<button class="sk-btn go wide" data-act="cp-accept" data-name="${esc(d.name)}">✋ ${t("cp_accept")}</button>
+				${formField("cp-done", t("cp_done_what"), true)}${photoField("cp-after", "📷 " + t("cp_after"))}
+				<button class="sk-btn ok wide" data-act="cp-fixed" data-name="${esc(d.name)}">✅ ${t("cp_fixed")}</button>` : ""}
+			${d.sk_stage === "Fixed" && !d.is_fixer ? `${formField("cp-note", t("cp_note"), true)}${photoField("cp-proof", "📷 WhatsApp / voice")}
+				<button class="sk-btn ok wide" data-act="cp-ok" data-ok="1" data-name="${esc(d.name)}">👍 ${t("cp_ok")}</button>
+				<button class="sk-btn wide" data-act="cp-ok" data-ok="0" data-name="${esc(d.name)}">👎 ${t("cp_not_ok")}</button>` : ""}
+			${wa ? `<a class="sk-btn wide" href="${wa}" target="_blank">💬 ${t("cp_wa")}</a>` : ""}
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+
+	// Point 16: my Optick / thumb check-in on top of My Day; tap it for my month, selfie backup and "ask HR to fix"
+	function attLine(a) {
+		if (!a) return "";
+		let text = "", c = a.state || "";
+		if (a.in) text = `✓ ${t("att_in")} ${esc(a.in)} (${esc(a.source)})${a.out ? ` · ${t("att_out")} ${esc(a.out)}` : ""}${a.state === "amber" ? ` · ${t("att_late")}` : ""}`;
+		else if (a.leave) text = `🌴 ${t("att_leave")} (${esc(a.leave)})`;
+		else if (a.off) text = `🏖 ${t("att_off")}`;
+		else if (a.state === "red") text = `✗ ${t("att_no_in")}`;
+		else if (a.waiting_file) text = `⏳ ${t("att_wait_file")}`;
+		else text = `🕘 ${t("att_late_after")} ${esc(a.late_after)}`;
+		return `<button class="sk-attline ${c}" data-act="att-me">${text} ›</button>`;
+	}
+	function attSheet() {
+		const a = S.att;
+		if (!a) { toast(t("no_employee"), true); return; }
+		const m = a.month || {};
+		const days = (xs) => (xs || []).length ? ` · ${xs.join(", ")}` : "";
+		sheet(`<h3 class="sk-h">🕘 ${t("att_my_month")}</h3>
+			<ul class="sk-list">${li(t("att_present"), "", `<b>${m.present || 0}</b>`)}${li(t("att_late"), days(m.late_days).slice(3), `<b>${m.late || 0}</b>`)}
+			${m.half_day ? li(t("att_half"), "", `<b>${m.half_day}</b>`) : ""}${li(t("att_leave"), days(m.leave_days).slice(3), `<b>${m.leave || 0}</b>`)}
+			${li(t("att_absent"), days(m.absent_days).slice(3), `<b>${m.absent || 0}</b>`, m.absent ? "k-red" : "")}</ul>
+			<h3 class="sk-h">${t("att_missed")}</h3>
+			${photoField("att-selfie", "🤳 " + t("photo"))}
+			<button class="sk-btn go wide" data-act="att-selfie">${t("att_selfie")} · ${esc(a.next || "IN")}</button>
+			<label class="sk-field"><span>${t("ex_date")}</span><input id="att-day" type="date" value="${new Date().toISOString().slice(0, 10)}"></label>
+			${formField("att-fix", t("att_fix_what"), true)}
+			<button class="sk-btn wide" data-act="att-ask">${t("att_ask_fix")}</button>
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+	function where() {
+		return new Promise((ok) => {
+			if (!navigator.geolocation) return ok({});
+			navigator.geolocation.getCurrentPosition((p) => ok({ lat: p.coords.latitude, lng: p.coords.longitude }), () => ok({}), { timeout: 8000, maximumAge: 60000 });
+		});
+	}
+
+	// HR (Aarti): Today · Month · Upload the Optick / thumb machine file
+	let attTab = "today", attMonth = "", attPreview = null;
+	async function renderAttendance() {
+		const tab = (k) => `<button class="${attTab === k ? "on" : ""}" data-atttab="${k}">${t("att_" + k)}</button>`;
+		let body = "";
+		if (attTab === "today") {
+			const d = await call("hr_today");
+			S.attFix = d.fix_requests;
+			const g = d.groups;
+			const person = (r, extra) => li(esc(r.name), extra, r.mobile && !r.in ? `<a class="sk-chip" href="tel:${esc(r.mobile)}">📞</a>` : "");
+			const sec = (k, label, rows, fn, cls) => `<h3 class="sk-h ${cls || ""}">${label} · ${rows.length}</h3><ul class="sk-list">${rows.map(fn).join("") || `<li class="sk-empty">—</li>`}</ul>`;
+			body = `<p class="sk-note">${esc(d.day)} · ${t("att_late_after")} ${esc(d.late_after)} · ${Object.entries(d.by_source).map(([k, v]) => `${esc(k)} ${v}`).join(" · ") || "—"}</p>
+				${d.fix_requests.length ? sec("fix", "✋ " + t("att_fix_req"), d.fix_requests, (r, i) => li(esc(r.text), esc(r.date || ""), `<button class="sk-chip" data-act="att-fixsheet" data-i="${i}">${t("att_fix")}</button>`, "k-lead_new")) : ""}
+				${sec("present", "✓ " + t("att_present"), g.present, (r) => person(r, `${esc(r.in)}${r.out ? " – " + esc(r.out) : ""} · ${esc(r.source || "")}`))}
+				${sec("late", "⏰ " + t("att_late"), g.late, (r) => person(r, `${esc(r.in || "")} · ${esc(r.source || "")}`), "k-amber")}
+				${sec("no_checkin", "✗ " + t("att_no_checkin"), g.no_checkin, (r) => person(r, d.uploaded_today ? "" : t("att_wait_file")))}
+				${sec("on_leave", "🌴 " + t("att_leave"), g.on_leave, (r) => person(r, esc(r.leave_type || "")))}
+				${g.off.length ? sec("off", "🏖 " + t("att_off"), g.off, (r) => person(r, "")) : ""}`;
+		} else if (attTab === "month") {
+			const d = await call("hr_month", attMonth ? { month: attMonth } : {});
+			body = `<div class="sk-row"><button class="sk-chip" data-attmonth="-1">‹</button><b>${esc(d.month)}</b><button class="sk-chip" data-attmonth="1">›</button></div>
+				<table class="sk-atttable"><tr><th></th><th>${t("att_present")}</th><th>${t("att_late")}</th><th>½</th><th>${t("att_leave")}</th><th>${t("att_absent")}</th></tr>
+				${d.rows.map((r) => `<tr><td>${esc(r.name)}</td><td>${r.present}</td><td>${r.late}</td><td>${r.half_day}</td><td>${r.leave}</td><td class="${r.absent ? "bad" : ""}">${r.absent}</td></tr>`).join("")}</table>`;
+		} else {
+			const p = attPreview;
+			body = `<div class="sk-form">${pick("att-device", t("att_device"), ["Optick", "Office thumb"])}
+				${photoField("att-file", "📄 " + t("att_file"), true)}
+				<button class="sk-btn go wide" data-act="att-preview">🔍 ${t("att_check_file")}</button></div>
+				${p ? `<section class="sk-card"><div class="sk-card-text">${p.rows} ${t("att_rows")} (${esc(p.from)} – ${esc(p.to)}) · ${p.matched.length} ${t("att_matched")} ✓ · ${p.late} ${t("att_late")} · ${p.already} ${t("att_already")}</div></section>
+				${p.not_found.length ? `<h3 class="sk-h k-amber">⚠ ${p.not_found.length} ${t("att_not_found")}</h3>${p.not_found.map((r, i) => `<label class="sk-field"><span>${esc(r.name)} · ID ${esc(r.id)} · ${esc(r.mobile)}</span>
+					<select class="sk-select" id="att-m-${i}"><option value="">${t("att_skip")}</option>${p.employees.map((e) => `<option value="${esc(e.name)}" ${r.options[0] === e.name ? "selected" : ""}>${esc(e.employee_name)}</option>`).join("")}</select></label>`).join("")}` : ""}
+				<ul class="sk-list">${p.matched.map((r) => li(`✓ ${esc(r.employee_name)}`, `${esc(r.name)} · ${esc(r.how)} · ${r.rows} ${t("att_rows")}`)).join("")}</ul>
+				${p.missed_out.length ? `<h3 class="sk-h">⚠ ${p.missed_out.length} ${t("att_missed_out")}</h3><ul class="sk-list">${Object.entries(p.missed_out.reduce((a, r) => { (a[r.name] = a[r.name] || []).push(r.date.slice(8)); return a; }, {}))
+					.map(([n, ds]) => li(`${esc(n)} · ${ds.length}`, ds.map(esc).join(", "))).join("")}</ul>` : ""}
+				<button class="sk-btn ok wide" data-act="att-save">${t("att_save")}</button><div id="att-result"></div>` : ""}`;
+		}
+		root.innerHTML = header(t("attendance")) + `<main><div class="cal-tabs">${tab("today")}${tab("month")}${tab("upload")}</div>${body}</main>`;
+		if (attTab === "upload" && attPreview) { const s = document.getElementById("att-device"); if (s) s.value = attPreview.device; }
+	}
+	function attFixSheet(r) {
+		sheet(`<h3 class="sk-h">✋ ${esc(r.text)}</h3>
+			<label class="sk-field"><span>${t("ex_date")}</span><input id="fx-day" type="date" value="${esc(r.date || "")}"></label>
+			${pick("fx-status", t("att_status"), [{ value: "Present", label: t("att_present") }, { value: "Half Day", label: t("att_half") }, { value: "Absent", label: t("att_absent") }, { value: "Work From Home", label: "Work From Home" }])}
+			${formField("fx-reason", t("att_reason"), true)}
+			<button class="sk-btn ok wide" data-act="att-fix" data-employee="${esc(r.employee)}" data-todo="${esc(r.todo)}">${t("att_fix")}</button>
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+
+	// Everyone: Leave & Expense; managers approve their team's here (HR / CEO see all waiting)
+	let lvTab = "leave";
+	async function renderLeaveExpense() {
+		const d = await call("leave_expense");
+		S.lv = d;
+		const chip = (st) => `<span class="chip2 ${/Approved|Paid/.test(st) ? "green" : /Rejected|Cancelled/.test(st) ? "red" : "yel"}">${esc(st)}</span>`;
+		const tab = (k, label) => `<button class="${lvTab === k ? "on" : ""}" data-lvtab="${k}">${label}</button>`;
+		let body = "";
+		if (!d.employee && lvTab !== "approve") body = `<p class="sk-note">${t("no_employee")}</p>`;
+		else if (lvTab === "leave") {
+			body = `<div class="sk-row sk-wrap">${d.leave_types.filter((x) => x.balance !== null).map((x) => `<span class="chip2 navy">${esc(x.name)}: ${x.balance} ${t("lv_left")}</span>`).join("")}</div>
+				<div class="sk-form">${pick("lv-type", t("lv_type"), d.leave_types.map((x) => ({ value: x.name, label: x.balance !== null ? `${x.name} (${x.balance} ${t("lv_left")})` : x.name })))}
+				<label class="sk-field"><span>${t("lv_from")}</span><input id="lv-from" type="date"></label>
+				<label class="sk-field"><span>${t("lv_to")}</span><input id="lv-to" type="date"></label>
+				<label class="sk-check"><input id="lv-half" type="checkbox"> ${t("lv_half")}</label>
+				${formField("lv-reason", t("lv_reason"), true)}
+				<button class="sk-btn ok wide" data-act="lv-apply">${t("lv_apply")}</button></div>
+				<h3 class="sk-h">${t("lv_mine")}</h3><ul class="sk-list">${d.my_leave.map((l) => li(`${esc(l.leave_type)} · ${esc(l.from_date)}${l.to_date !== l.from_date ? " – " + esc(l.to_date) : ""}`,
+					`${l.total_leave_days || ""} · ${esc(l.description || "")}`, chip(l.status))).join("") || `<li class="sk-empty">—</li>`}</ul>`;
+		} else if (lvTab === "expense") {
+			body = `<div class="sk-form">${photoField("ex-photo", "📷 " + t("ex_bill"))}${pick("ex-type", t("ex_type"), d.expense_types)}
+				<label class="sk-field"><span>${t("ex_amount")}</span><input id="ex-amt" type="number" inputmode="decimal" min="0"></label>
+				<label class="sk-field"><span>${t("ex_date")}</span><input id="ex-date" type="date" value="${new Date().toISOString().slice(0, 10)}"></label>
+				${formField("ex-note", t("ex_note"), true)}
+				<button class="sk-btn ok wide" data-act="ex-claim">${t("ex_claim")}</button></div>
+				<h3 class="sk-h">${t("ex_mine")}</h3><ul class="sk-list">${d.my_claims.map((c) => li(`${money(c.total_claimed_amount)} · ${esc(c.type || "")}`, `${esc(c.posting_date)} · ${esc(c.remark || "")}`,
+					chip(c.docstatus === 1 ? c.status : c.approval_status))).join("") || `<li class="sk-empty">—</li>`}</ul>`;
+		} else {
+			const btns = (kind, name) => `<div class="sk-row"><button class="sk-chip ok" data-act="lv-decide" data-kind="${kind}" data-name="${esc(name)}" data-ok="1">${t("lv_approve")}</button>
+				<button class="sk-chip bad" data-act="lv-decide" data-kind="${kind}" data-name="${esc(name)}" data-ok="0">${t("lv_reject")}</button></div>`;
+			body = `<h3 class="sk-h">🌴 ${t("lv_leave")}</h3><ul class="sk-list">${d.leave_to_approve.map((l) => `<li class="sk-item"><div style="flex:1"><div class="sk-item-title">${esc(l.employee_name)}: ${esc(l.leave_type)}</div>
+					<div class="sk-item-meta">${esc(l.from_date)}${l.to_date !== l.from_date ? " – " + esc(l.to_date) : ""} · ${l.total_leave_days || ""} · ${esc(l.description || "")}</div>${btns("leave", l.name)}</div></li>`).join("") || `<li class="sk-empty">—</li>`}</ul>
+				<h3 class="sk-h">💸 ${t("lv_expense")}</h3><ul class="sk-list">${d.claims_to_approve.map((c) => `<li class="sk-item"><div style="flex:1"><div class="sk-item-title">${esc(c.employee_name)}: ${money(c.total_claimed_amount)}</div>
+					<div class="sk-item-meta">${esc(c.type || "")} · ${esc(c.posting_date)} · ${esc(c.remark || "")} <a href="/app/expense-claim/${encodeURIComponent(c.name)}">📎</a></div>${btns("expense", c.name)}</div></li>`).join("") || `<li class="sk-empty">—</li>`}</ul>`;
+		}
+		root.innerHTML = header(t("leave_expense")) + `<main><div class="cal-tabs">${tab("leave", "🌴 " + t("lv_leave"))}${tab("expense", "💸 " + t("lv_expense"))}${tab("approve", `✅ ${t("lv_to_approve")}${d.to_approve ? ` (${d.to_approve})` : ""}`)}</div>${body}</main>`;
+	}
+
+	// View Member App (point 3): all members by function, last active; tap one to open their app as they see it
+	let vmQuery = "";
+	async function renderViewMember() {
+		const d = await call("view_members");
+		const q = vmQuery.toLowerCase();
+		root.innerHTML = header(t("view_member")) + `<main><p class="sk-note">${t("view_hint")}</p>
+			<div class="sk-input-row sk-gap"><input id="vm-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(vmQuery)}">${micBox("vm-q")}</div>
+			${d.groups.map((g) => {
+				const people = g.people.filter((p) => !q || p.full_name.toLowerCase().includes(q));
+				return people.length ? `<h3 class="sk-h">${esc((g.label && (g.label[state.lang] || g.label.English)) || g.function)}</h3><ul class="sk-list">${people.map((p) => `<li class="sk-item"><button class="sk-fu-main" data-act="view-enter" data-user="${esc(p.user)}" data-uname="${esc(p.full_name)}">
+					<div class="sk-item-title">👤 ${esc(p.full_name)}</div><div class="sk-item-meta">${p.functions.map(esc).join(", ")} · ${t("last_active")}: ${esc(p.last_active || t("never"))}</div></button></li>`).join("")}</ul>` : "";
+			}).join("")}</main>`;
+	}
+	async function enterView(user, name) {
+		state.own = { home: state.home, lang: state.lang };
+		state.viewAs = { user, name };
+		crmOpts = null; contacts = null;
+		try {
+			state.view = "home";
+			state.home = await call("home");
+		} catch (e) { state.viewAs = null; state.home = state.own.home; throw e; }
+		state.lang = state.home.language || "English";
+		document.body.classList.add("sk-viewing");
+		return go("home");
+	}
+	function exitView() {
+		if (!state.viewAs) return go("home");
+		state.viewAs = null;
+		state.home = state.own.home; state.lang = state.own.lang;
+		crmOpts = null; contacts = null;
+		document.body.classList.remove("sk-viewing");
+		return go("view_member");
+	}
+
+	// Customers by segment (point 2): the cabin team sees Cabin customers, Aditya Non-Cabin, Management both.
+	// "Segment not set": Management, Rushi and Aditya tag old customers with one tap.
+	let custTab = "mine", custSeg = "", custQuery = "";
+	async function renderCustomers() {
+		const d = await call("customers", { tab: custTab, q: custQuery, segment: custSeg });
+		S.cust = d.rows;
+		const tab = (k, label) => `<button class="${custTab === k ? "on" : ""}" data-custtab="${k}">${label}</button>`;
+		const segChips = d.main === "Both" && custTab === "mine" ? `<div class="sk-row sk-wrap">${[["", t("seg_all")], ["Cabin", t("seg_cabin")], ["Non-Cabin", t("seg_noncabin")]]
+			.map(([k, label]) => `<button class="sk-chip ${custSeg === k ? "on" : ""}" data-custseg="${k}">${label}</button>`).join("")}</div>` : "";
+		const tagRow = (r, i) => Object.entries(d.tree).map(([main, subs]) => `<div class="sk-row sk-wrap"><span class="chip2 ${main === "Cabin" ? "navy" : "yel"}">${esc(t(main))}</span>${subs.map((x) =>
+			`<button class="sk-chip" data-act="cust-tag" data-i="${i}" data-seg="${esc(x)}">${esc(x)}</button>`).join("")}</div>`).join("");
+		root.innerHTML = header(t("customers")) + `<main>
+			${d.can_tag ? `<div class="cal-tabs">${tab("mine", "🏠 " + (d.main === "Both" ? t("customers") : t(d.main)))}${tab("not_set", `❓ ${t("seg_not_set")}${d.not_set ? ` (${d.not_set})` : ""}`)}</div>` : ""}
+			${segChips}
+			<div class="sk-input-row sk-gap"><input id="cust-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(custQuery)}">${micBox("cust-q")}</div>
+			${custTab === "not_set" ? `<p class="sk-note">${t("tag_hint")} ${t("seen_by_mgmt")}</p>` : ""}
+			<ul class="sk-list">${d.rows.map((r, i) => `<li class="sk-item"><div style="flex:1">
+				<div class="sk-item-title">${esc(r.customer_name || r.name)}</div>
+				<div class="sk-item-meta">${[r.segment ? `<span class="chip2 ${r.main === "Cabin" ? "navy" : "yel"}">${esc(r.segment)}</span>` : esc(r.customer_group || ""),
+					r.mobile_no ? esc(r.mobile_no) : "", r.orders ? `${money(r.orders)} ${t("orders_word")}` : ""].filter(Boolean).join(" · ")}</div>
+				${custTab === "not_set" ? tagRow(r, i) : ""}</div>
+				${r.mobile_no ? `<a class="sk-chip" href="tel:${esc(r.mobile_no)}">📞</a>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+	}
+
+	// Lead Sources (Samir / SK): IndiaMART, JustDial and GeM from mails (free), the Excel upload, mailboxes set up or not
+	async function renderLeadSources() {
+		const d = await call("lead_sources_status");
+		root.innerHTML = header(t("lead_sources")) + `<main>
+			<p class="sk-note">${t("last_check")}: ${esc(d.last_scan ? d.last_scan.slice(0, 16) : "—")}</p>
+			<button class="sk-btn go wide" data-act="ls-check">↻ ${t("check_now")}</button>
+			<ul class="sk-list sk-gap">${d.sources.map((x) => li(`${x.on ? "🟢" : "⚪"} ${esc(x.source)}`,
+				`${x.today} ${t("today")} · ${x.month} ${t("this_month2")}${x.last ? " · " + esc(x.last.slice(0, 16)) : ""}`,
+				`<button class="sk-chip ${x.on ? "on" : ""}" data-act="ls-switch" data-setting="${esc(x.setting)}" data-on="${x.on ? 0 : 1}">${x.on ? t("on_word") : t("off_word")}</button>`)).join("")}
+				${li(`<span class="sk-muted">🔒 ${t("pull_api")}</span>`, "", "", "sk-off")}</ul>
+			${uploadBox()}
+			<h3 class="sk-h">${t("mailboxes")}</h3><ul class="sk-list">${d.mailboxes.map((b) => li(esc(b.email), esc(b.who.join(", ")),
+				b.set_up ? `<span class="chip2 green">✓ ${t("set_up")}</span>` : `<span class="chip2 red">${t("not_set_up")}</span>`, b.set_up ? "" : "k-lead_new")).join("")}</ul></main>`;
+	}
+	function uploadBox() {
+		return `<div class="sk-form sk-gap">${photoField("ls-file", "📄 " + t("upload_list"), true)}
+			<label class="sk-field"><span>${t("source_word")}</span><select id="ls-src" class="sk-select"><option>IndiaMART</option><option>JustDial</option><option>GeM</option><option>Other</option></select></label>
+			<button class="sk-btn ok wide" data-act="ls-upload">⬆ ${t("upload_list")}</button><div id="ls-result"></div></div>`;
+	}
+
 	async function mailSheet(doctype, name, email) {
 		const ready = (await call("my_mail")).ready;
 		if (!ready) { window.location.href = "mailto:" + (email || ""); return; }
@@ -1755,8 +2350,42 @@
 				${text ? `<div class="sk-libtext">${esc(text)}</div>` : ""}<div class="sk-row">${open}${send}${share}${copy}</div></div></li>`;
 		}).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>`;
 	}
+	// point 8: one card per product, used everywhere; the internal part is never put in a customer message
+	function productMessage(c) {
+		const mr = state.lang === "Marathi";
+		return [(mr && c.title_marathi) || c.title, (mr && c.text_marathi) || c.text, c.sizes, c.file ? absUrl(c.file) : "", c.video_link, c.link]
+			.filter(Boolean).join("\n");
+	}
+	function productStrip(cards) {
+		S.pcards = cards;
+		return `<div class="sk-pstrip">${cards.map((c, i) => `<div class="sk-pcard">${c.photos && c.photos[0] ? `<img src="${esc(c.photos[0])}" alt="">` : `<div class="sk-pph">📷</div>`}
+			<b>${esc((state.lang === "Marathi" && c.title_marathi) || c.title)}</b>
+			<button class="sk-chip on" data-act="p-send" data-i="${i}">💬 ${t("send")}</button></div>`).join("")}</div>`;
+	}
+	async function renderProducts() {
+		const cat = await call("product_catalogue");
+		const mr = state.lang === "Marathi";
+		const all = [].concat(...Object.values(cat));
+		S.pcards = all;
+		return Object.entries(cat).map(([main, rows]) => `<h3 class="sk-h">${esc(t(main))}</h3><ul class="sk-list">${rows.map((c) => {
+			const i = all.indexOf(c);
+			if (!c.ready) return `<li class="sk-item sk-off"><div><div class="sk-item-title">${esc(c.title)}</div><div class="sk-item-meta">${t("card_missing")}</div></div></li>`;
+			return `<li class="sk-item"><div class="sk-grow">${c.photos.length ? `<div class="sk-pstrip">${c.photos.slice(0, 5).map((p) => `<a href="${esc(p)}" target="_blank"><img class="sk-pthumb" src="${esc(p)}" alt=""></a>`).join("")}</div>` : ""}
+				<div class="sk-item-title">${esc((mr && c.title_marathi) || c.title)}</div>
+				${(mr && c.text_marathi) || c.text ? `<div class="sk-libtext">${esc((mr && c.text_marathi) || c.text)}</div>` : ""}
+				${c.sizes ? `<div class="sk-libtext">📐 ${esc(c.sizes)}</div>` : ""}
+				${c.internal_notes ? `<div class="sk-item-meta">🔒 ${esc(c.internal_notes)}</div>` : ""}
+				<div class="sk-row sk-wrap">${c.file ? `<a class="sk-chip" href="${esc(c.file)}" target="_blank">📄 ${t("brochure")}</a>` : ""}${c.video_link ? `<a class="sk-chip" href="${esc(c.video_link)}" target="_blank">▶ Video</a>` : ""}
+				<button class="sk-chip on" data-act="p-send" data-i="${i}">💬 ${t("send")}</button></div></div></li>`;
+		}).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>`).join("");
+	}
 	async function renderLibrary() {
 		const cats = ["Company", "Product", "Customer FAQ", "Message Template", "Sales Manual"];
+		if (libCat === "Product") {
+			const body = await renderProducts();
+			root.innerHTML = header(t("library")) + `<main><div class="cal-tabs sk-wrap">${cats.map((c) => `<button class="${libCat === c ? "on" : ""}" data-libcat="${esc(c)}">${t("cat_" + c)}</button>`).join("")}</div>${body}</main>`;
+			return;
+		}
 		const rows = await call("library", { category: libCat });
 		root.innerHTML = header(t("library")) + `<main><div class="cal-tabs sk-wrap">${cats.map((c) => `<button class="${libCat === c ? "on" : ""}" data-libcat="${esc(c)}">${t("cat_" + c)}</button>`).join("")}</div>
 			${libraryList(rows)}</main>`;
@@ -1802,6 +2431,25 @@
 	let fuTimer = null;
 	root.addEventListener("input", (ev) => {
 		const el = ev.target;
+		if (el.id === "cp-cust") {
+			clearTimeout(fuTimer);
+			fuTimer = setTimeout(async () => {
+				const dl = document.getElementById("cp-cust-dl");
+				const hit = dl && [...dl.options].find((x) => x.value === el.value);
+				if (hit) {
+					const o = await call("complaint_orders", { customer: el.value });
+					const sel = document.getElementById("cp-order");
+					if (sel) sel.innerHTML = o.orders.map((r) => `<option value="${esc(r.name)}">${esc(r.name)} · ${esc(r.items)} · ${esc(r.transaction_date)}</option>`).join("") + `<option value=""></option>`;
+					return;
+				}
+				const d = await call("customers", { tab: "pick", q: el.value });
+				if (dl) dl.innerHTML = d.rows.map((r) => `<option value="${esc(r.name)}">${esc(r.customer_name)}${r.segment ? " · " + esc(r.segment) : ""}</option>`).join("");
+			}, 300);
+			return;
+		}
+		if (el.id === "faq-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { faqQuery = el.value; renderTraining().then(() => { const i = document.getElementById("faq-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
+		if (el.id === "vm-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { vmQuery = el.value; renderViewMember().then(() => { const i = document.getElementById("vm-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 300); return; }
+		if (el.id === "cust-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { custQuery = el.value; renderCustomers().then(() => { const i = document.getElementById("cust-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
 		if (el.id === "fu-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { fuQuery = el.value; renderFollowUp().then(() => { const i = document.getElementById("fu-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
 		if (el.dataset && el.dataset.filter) {
 			const q = el.value.toLowerCase();
@@ -2700,7 +3348,10 @@
 		expenses: () => finScreen("expenses", renderExpenses), dir_expenses: () => finScreen("dir_expenses"),
 		segment_pnl: renderSegmentWise, month_close: renderMonthWise,
 		improvement_inbox: renderInbox, dept_visits: renderVisit, erp_gaps: renderGaps, app_users: renderAppUsers, change_list: renderChangeList,
-		projects: renderProjects, training_progress: renderTrainingProgress };
+		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources, customers: renderCustomers, view_member: renderViewMember, complaints: renderComplaints,
+		attendance: renderAttendance, leave_expense: renderLeaveExpense };
+	["overview", "daily_review", "sales", "marketing", "machine_shifting", "job_work", "cr100", "finance", "manufacturing", "purchase",
+		"store", "quality", "hr", "ai"].forEach((k) => { LIVE_VIEWS["dash_" + k] = () => renderDash(k); });
 
 	const reported = new Set();
 	function reportError(view, msg) {
@@ -2733,6 +3384,13 @@
 			} else toast(e.message, true);
 		}
 	}
+
+	// view only: no call, WhatsApp or mail goes out in the member's name
+	document.addEventListener("click", (ev) => {
+		if (!state.viewAs) return;
+		const a = ev.target.closest('a[href^="tel:"], a[href^="mailto:"], a[href*="wa.me"], a[href^="whatsapp:"], a[href^="sms:"]');
+		if (a) { ev.preventDefault(); ev.stopPropagation(); toast(t("view_only")); }
+	}, true);
 
 	root.addEventListener("click", async (ev) => {
 		const el = ev.target.closest("button, [data-go]");
@@ -2797,6 +3455,39 @@
 			}
 			if (el.dataset.mic) return speakInto(document.getElementById(el.dataset.mic), el);
 			if (el.dataset.pick) return pickFile(el.dataset.pick, el.dataset.how);
+			if (el.dataset.mailtab) { mailTab = el.dataset.mailtab; return go("mail"); }
+			if (el.dataset.dcard !== undefined) return renderDashList(Number(el.dataset.dcard));
+			if (el.dataset.drow !== undefined) return openDashRow(Number(el.dataset.dcardi), Number(el.dataset.drow));
+			if (el.dataset.dashseg !== undefined) { dashSeg = el.dataset.dashseg; return go(state.view); }
+			if (el.dataset.dashmonth) {
+				const d = dashMonth ? new Date(dashMonth) : new Date();
+				d.setDate(1); d.setMonth(d.getMonth() + Number(el.dataset.dashmonth));
+				dashMonth = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-01`;
+				return go(state.view);
+			}
+			if (el.dataset.apply !== undefined) {
+				const inp = document.getElementById(el.dataset.apply);
+				if (inp) {
+					const before = inp.value;
+					inp.value = el.dataset.val;
+					if (el.dataset.learn) call("photo_learn", { kind: el.dataset.learn, read_text: before, chosen: el.dataset.val }, true).catch(() => {});
+					runCheck();
+				}
+				return;
+			}
+			if (el.dataset.cptab) { cpTab = el.dataset.cptab; return go("complaints"); }
+			if (el.dataset.atttab) { attTab = el.dataset.atttab; return go("attendance"); }
+			if (el.dataset.attmonth) {
+				const d = new Date((attMonth || new Date().toISOString().slice(0, 7) + "-01") + "T00:00:00");
+				d.setMonth(d.getMonth() + Number(el.dataset.attmonth));
+				attMonth = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-01`;
+				return go("attendance");
+			}
+			if (el.dataset.lvtab) { lvTab = el.dataset.lvtab; return go("leave_expense"); }
+			if (el.dataset.cp) return complaintSheet(el.dataset.cp);
+			if (el.dataset.custtab) { custTab = el.dataset.custtab; return go("customers"); }
+			if (el.dataset.custseg !== undefined) { custSeg = el.dataset.custseg; return go("customers"); }
+			if (el.dataset.tmail !== undefined) return teamMailSheet(Number(el.dataset.tmail));
 			if (el.dataset.fintab) { finTab[el.dataset.view] = el.dataset.fintab; return go(el.dataset.view); }
 			if (el.dataset.ledger !== undefined) return renderLedgerEntries(Number(el.dataset.ledger));
 			if (el.dataset.finmonth) {
@@ -2902,6 +3593,7 @@
 			if (act === "read" && state.card) return readAloud(state.card.card_text);
 			if (act === "lang") {
 				state.lang = state.lang === "English" ? "Marathi" : "English";
+				if (state.viewAs) return go(state.view); // the member's own language setting is not changed
 				await call("set_language", { language: state.lang }, true);
 				state.card = await call("next_card", { force: 1 }, true);
 				return go(state.view);
@@ -2922,6 +3614,161 @@
 				return go(el.dataset.kind === "Problem" ? "home" : "my_day");
 			}
 			if (act === "close-sheet") { pending = null; return closeSheet(); }
+			if (act && act.startsWith("tm-")) {
+				const comm = el.dataset.comm;
+				el.disabled = true;
+				if (act === "tm-take") await call("team_mail_take", { comm }, true);
+				if (act === "tm-notlead") await call("team_mail_not_lead", { comm }, true);
+				if (act === "tm-give") { if (!val("tm-give")) throw new Error(t("give_to")); await call("team_mail_give", { comm, to_user: val("tm-give") }, true); }
+				if (act === "tm-reply") await call("team_mail_reply", { comm, message: val("tm-reply") }, true);
+				if (act === "tm-lead") {
+					const r = await call("team_mail_lead", { comm }, true);
+					closeSheet();
+					toast(`✅ ${t("lead_saved")}: ${r.lead}`);
+					current = { doctype: "CRM Lead", name: r.lead };
+					return go("detail");
+				}
+				closeSheet();
+				toast(t("saved"));
+				return go("mail");
+			}
+			if (act === "faq-ask") {
+				sheet(`<h3 class="sk-h">❓ ${t("faq_ask")}</h3>${formField("faq-text", t("faq_q"), true)}
+					<button class="sk-btn ok wide" data-act="faq-ask-send">${t("send")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+				return;
+			}
+			if (act === "faq-ask-send") { const r = await call("training_ask", { question: val("faq-text") }, true); closeSheet(); toast(`${t("faq_sent")} ${r.owner}`); return; }
+			if (act === "faq-answer") {
+				const a = S.faqAsk[Number(el.dataset.i)];
+				sheet(`<h3 class="sk-h">❓ ${esc(a.question)}</h3><p class="sk-item-meta">${esc(a.by)}</p>${formField("faq-ans", t("faq_answer"), true)}
+					<label class="sk-row"><input type="checkbox" id="faq-add" checked> ${t("faq_add")}</label>
+					<button class="sk-btn ok wide" data-act="faq-answer-send" data-todo="${esc(a.name)}">${t("send")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+				return;
+			}
+			if (act === "faq-answer-send") {
+				await call("training_answer", { todo: el.dataset.todo, text: val("faq-ans"), add_to_faq: document.getElementById("faq-add").checked ? 1 : 0 }, true);
+				closeSheet(); toast(t("saved")); return go("training");
+			}
+			if (act === "p-send") return waTextSheet(productMessage(S.pcards[Number(el.dataset.i)]));
+			if (act === "cp-new") return renderNewComplaint();
+			if (act === "cp-save") {
+				const cust = val("cp-cust");
+				const o = [...document.querySelectorAll("#cp-cust-dl option")].find((x) => x.value === cust);
+				if (!o) { toast(t("cp_pick_customer"), true); return; }
+				el.disabled = true;
+				try {
+					const files = [await photoUrl("cp-f1"), await photoUrl("cp-f2")].filter(Boolean);
+					const r = await call("complaint_new", { customer: cust, text: val("cp-text"), ctype: val("cp-type"), sales_order: val("cp-order"), files: JSON.stringify(files) }, true);
+					clearDraft();
+					toast(`${t("cp_sent")} ${r.person || r.function}`);
+				} finally { el.disabled = false; }
+				cpTab = "mine";
+				return go("complaints");
+			}
+			if (act === "cp-accept") { await call("complaint_accept", { name: el.dataset.name, fix_by: val("cp-date") }, true); toast(t("saved")); return complaintSheet(el.dataset.name); }
+			if (act === "cp-fixed") {
+				el.disabled = true;
+				try { await call("complaint_fixed", { name: el.dataset.name, note: val("cp-done"), photo: await photoUrl("cp-after") }, true); } finally { el.disabled = false; }
+				closeSheet(); toast(t("saved")); return go("complaints");
+			}
+			if (act === "cp-ok") {
+				await call("complaint_customer", { name: el.dataset.name, ok: el.dataset.ok, note: val("cp-note"), photo: await photoUrl("cp-proof") }, true);
+				closeSheet(); toast(t("saved")); return go("complaints");
+			}
+			if (act === "att-me") return attSheet();
+			if (act === "att-selfie") {
+				const photo = await photoUrl("att-selfie");
+				if (!photo) { toast(t("photo"), true); return; }
+				el.disabled = true;
+				try {
+					const r = await call("attendance_selfie", { photo, ...(await where()) }, true);
+					toast(`✓ ${r.log_type} ${r.time}`);
+				} finally { el.disabled = false; }
+				closeSheet(); return go("my_day");
+			}
+			if (act === "att-ask") {
+				await call("attendance_ask_fix", { text: val("att-fix"), day: val("att-day") }, true);
+				closeSheet(); toast(t("saved")); return;
+			}
+			if (act === "att-fixsheet") return attFixSheet(S.attFix[Number(el.dataset.i)]);
+			if (act === "att-fix") {
+				await call("hr_fix", { employee: el.dataset.employee, day: val("fx-day"), status: val("fx-status"), reason: val("fx-reason"), todo: el.dataset.todo }, true);
+				closeSheet(); toast(t("saved")); return go("attendance");
+			}
+			if (act === "att-preview") {
+				const url = await photoUrl("att-file");
+				if (!url) { toast(t("att_file"), true); return; }
+				el.disabled = true;
+				try { attPreview = { ...(await call("hr_upload_preview", { file_url: url, device: val("att-device") || "Optick" }, true)), file_url: url }; } finally { el.disabled = false; }
+				return go("attendance");
+			}
+			if (act === "att-save") {
+				const p = attPreview, matches = {};
+				p.not_found.forEach((r, i) => { const v = val("att-m-" + i); if (v) matches[r.id || r.mobile || r.name] = v; });
+				el.disabled = true;
+				try {
+					const r = await call("hr_upload_save", { file_url: p.file_url, matches: JSON.stringify(matches), device: p.device }, true);
+					document.getElementById("att-result").innerHTML = `<p class="sk-note">✅ ${r.checkins} ${t("att_made")} · ${r.attendance} ${t("att_att_made")} · ${r.missed_out} ${t("att_missed_out")}${r.not_matched ? ` · ${r.not_matched} ${t("att_skip")}` : ""}</p>
+						${r.errors.map((x) => `<p class="sk-note bad">⚠ ${esc(x)}</p>`).join("")}`;
+					attPreview = null;
+				} finally { el.disabled = false; }
+				return;
+			}
+			if (act === "lv-apply") {
+				el.disabled = true;
+				try {
+					const r = await call("leave_apply", { leave_type: val("lv-type"), from_date: val("lv-from"), to_date: val("lv-to") || val("lv-from"),
+						half_day: document.getElementById("lv-half").checked ? 1 : 0, reason: val("lv-reason") }, true);
+					clearDraft(); toast(`${t("lv_sent")} ${r.approver || "HR"}`);
+				} finally { el.disabled = false; }
+				return go("leave_expense");
+			}
+			if (act === "ex-claim") {
+				el.disabled = true;
+				try {
+					const r = await call("expense_claim", { expense_type: val("ex-type"), amount: val("ex-amt"), expense_date: val("ex-date"), note: val("ex-note"), photo: await photoUrl("ex-photo") }, true);
+					clearDraft(); toast(`${t("lv_sent")} ${r.approver || "HR"}`);
+				} finally { el.disabled = false; }
+				return go("leave_expense");
+			}
+			if (act === "lv-decide") {
+				el.disabled = true;
+				try {
+					const r = await call(el.dataset.kind === "leave" ? "leave_decide" : "expense_decide", { name: el.dataset.name, ok: el.dataset.ok }, true);
+					toast(r.posted ? t("ex_posted") : r.status);
+				} finally { el.disabled = false; }
+				return go("leave_expense");
+			}
+			if (act === "view-enter") return enterView(el.dataset.user, el.dataset.uname);
+			if (act === "view-exit") return exitView();
+			if (act === "view-idea") {
+				sheet(`<h3 class="sk-h">💡 ${esc(state.viewAs.name)} · ${esc(t(state.view))}</h3>${formField("vi-text", t("idea_q"), true)}
+					<button class="sk-btn ok wide" data-act="view-idea-save">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+				return;
+			}
+			if (act === "view-idea-save") {
+				await call("view_suggest", { member: state.viewAs.user, view: state.view, text: val("vi-text") }, true);
+				closeSheet();
+				toast(t("idea_sent"));
+				return;
+			}
+			if (act === "cust-tag") {
+				const r = S.cust[Number(el.dataset.i)];
+				await call("tag_customer", { customer: r.name, segment: el.dataset.seg }, true);
+				toast(t("saved"));
+				return go("customers");
+			}
+			if (act === "ls-check") { const r = await call("lead_sources_check_now", {}, true); toast(`${r.made || 0} ${t("leads_made")}`); return go("lead_sources"); }
+			if (act === "ls-switch") { await call("lead_sources_switch", { setting: el.dataset.setting, on: el.dataset.on }, true); return go("lead_sources"); }
+			if (act === "ls-upload") {
+				const url = await photoUrl("ls-file");
+				if (!url) throw new Error(t("upload_list"));
+				el.disabled = true;
+				const r = await call("leads_upload", { file_url: url, source: val("ls-src") || "IndiaMART" }, true);
+				document.getElementById("ls-result").innerHTML = `<p class="sk-note">✅ ${r.made} ${t("leads_made")} · ${r.added_to_old} ${t("added_old")} · ${r.skipped} ${t("skipped_n")}</p>`;
+				el.disabled = false;
+				return;
+			}
 			if (act === "ai-close") {
 				el.disabled = true;
 				await call("ai_close", { todo: el.dataset.todo, note: val("ai-fix") || null }, true);
@@ -3060,9 +3907,15 @@
 				return;
 			}
 			if (act === "save-lead") {
+				if (!val("f-segment")) { toast(t("pick_segment")); document.getElementById("f-segment").focus(); return; }
 				el.disabled = true;
 				const name = await call("new_lead", { first_name: val("f-first"), organization: val("f-org"), mobile_no: val("f-mobile"),
-					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl }, true);
+					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl, product: val("f-product") }, true);
+				const dz = document.getElementById("f-design");
+				if (dz && dz.checked && !document.getElementById("f-design-row").hidden) {
+					const r = await call("lead_to_design", { name }, true).catch((e) => ({ sent: false, reason: e.message }));
+					toast(r.sent ? `✏️ ${t("design_sent")} ${r.deal}` : `⚠ ${t("design_not_sent")} ${r.reason || ""}`, !r.sent);
+				}
 				cardUrl = null;
 				clearDraft();
 				return leadSaved({ name, title: val("f-org") || val("f-first"), person: val("f-first"), mobile: val("f-mobile"),

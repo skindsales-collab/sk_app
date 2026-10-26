@@ -1,10 +1,12 @@
 """Endpoints used by the SK App phone screens. Every call works on the logged-in ERPNext user only."""
 
+import json
+
 import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import ai_desk, calendar_view, claude, colours, comms, crm, day_report, finance, guide, kpi, ledger, logins, production, purchase, quality, store, training, work
+from sk_app import ai_desk, calendar_view, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, segments, store, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -66,18 +68,25 @@ def _colours(profile, functions):
 	counts = _badges(profile.user, functions)
 	try:
 		items = work.collect(profile.user, profile.home)
-		return colours.for_user(profile.user, items, bool(frappe.db.exists("SK DSI Entry", {"user": profile.user, "date": getdate()})),
+		out = colours.for_user(profile.user, items, bool(frappe.db.exists("SK DSI Entry", {"user": profile.user, "date": getdate()})),
 			bool(day_report._find(profile.user, getdate())), counts)
 	except Exception:
 		frappe.log_error("SK App icon colours")
-		return counts
+		out = counts
+	if "Management" in functions:  # point 13: red number on each live dashboard icon
+		try:
+			out.update(dashboards.badges(profile.user))
+		except Exception:
+			frappe.log_error("SK App dashboard badges")
+	return out
 
 
 def _badges(user, functions):
 	"""Red counts on Store / Purchase / approval icons; never breaks Home if ERPNext data is odd."""
 	try:
 		return {**store.badges(user, functions), **purchase.badges(user, functions), **production.badges(user, functions),
-			**quality.badges(user, functions), **finance.badges(user, functions), **ai_desk.badges(user, functions)}
+			**quality.badges(user, functions), **finance.badges(user, functions), **ai_desk.badges(user, functions),
+			**({"mail": n} if (n := mailbox.badge(user)) else {}), **complaints.badge(user), **hr.badges(user, functions)}
 	except Exception:
 		frappe.log_error("SK App badges")
 		return {}
@@ -95,7 +104,16 @@ def my_day():
 	items = rank_items(work.collect(profile.user, profile.home), now_datetime())
 	# point 10: Work Book is inside My Day now, as "Done today" + "I did extra work"
 	return {"items": [_item_dict(i) for i in items], "card": _latest_card(profile.user),
-		"done": calendar_view.done_today(profile.user, getdate())}
+		"done": calendar_view.done_today(profile.user, getdate()), "attendance": _attendance_line(profile.user)}
+
+
+def _attendance_line(user):
+	"""Point 16: today's Optick / thumb check-in on top of My Day; never breaks My Day."""
+	try:
+		return hr.my_line(user)
+	except Exception:
+		frappe.log_error("SK App attendance line")
+		return None
 
 
 @frappe.whitelist(methods=["POST"])
@@ -232,8 +250,14 @@ def crm_detail(doctype, name):
 
 @frappe.whitelist(methods=["POST"])
 def new_lead(first_name, mobile_no=None, organization=None, email=None, source=None, segment=None,
-		requirement=None, photo=None):
-	return crm.new_lead(_me().user, first_name, mobile_no, organization, email, source, segment, requirement, photo)
+		requirement=None, photo=None, product=None):
+	return crm.new_lead(_me().user, first_name, mobile_no, organization, email, source, segment, requirement, photo, product)
+
+
+@frappe.whitelist(methods=["POST"])
+def lead_to_design(name):
+	"""New Lead "Send to design" switch: the lead becomes a deal that the AI design pickup reads."""
+	return crm.send_to_design(_me().user, name)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -957,3 +981,234 @@ def fin_segment_wise(month=None):
 @frappe.whitelist()
 def fin_month_wise(year_start=None):
 	return ledger.month_wise(_me().user, year_start)
+
+
+# ---------- Team mailboxes and auto leads (point 14) ----------
+@frappe.whitelist()
+def team_mail(days=30):
+	return mailbox.inbox(_me().user, cint(days) or 30)
+
+
+@frappe.whitelist()
+def team_mail_read(comm):
+	return mailbox.read(_me().user, comm)
+
+
+@frappe.whitelist(methods=["POST"])
+def team_mail_take(comm):
+	return mailbox.take(_me().user, comm)
+
+
+@frappe.whitelist(methods=["POST"])
+def team_mail_give(comm, to_user):
+	return mailbox.give(_me().user, comm, to_user)
+
+
+@frappe.whitelist(methods=["POST"])
+def team_mail_not_lead(comm):
+	return mailbox.not_a_lead(_me().user, comm)
+
+
+@frappe.whitelist(methods=["POST"])
+def team_mail_lead(comm, segment=None):
+	return mailbox.make_lead(_me().user, comm, segment)
+
+
+@frappe.whitelist(methods=["POST"])
+def team_mail_reply(comm, message):
+	return mailbox.reply(_me().user, comm, message)
+
+
+@frappe.whitelist(methods=["POST"])
+def leads_upload(file_url, source="IndiaMART"):
+	return lead_sources.upload(_me().user, file_url, source)
+
+
+@frappe.whitelist()
+def lead_sources_status():
+	return lead_sources.status(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def lead_sources_switch(setting, on):
+	return lead_sources.switch(_me().user, setting, on)
+
+
+@frappe.whitelist(methods=["POST"])
+def lead_sources_check_now():
+	lead_sources.status(_me().user)  # same rights as the page
+	return lead_sources.scan()
+
+
+# point 2: Cabin / Non-Cabin customers
+@frappe.whitelist()
+def customers(tab="mine", q=None, segment=None):
+	return segments.customers(_me().user, tab, q, segment)
+
+
+@frappe.whitelist(methods=["POST"])
+def tag_customer(customer, segment):
+	return segments.tag(_me().user, customer, segment)
+
+
+# point 3: CEO "View Member App"
+@frappe.whitelist()
+def view_members():
+	return view_member.members(_me().user)
+
+
+@frappe.whitelist()
+def view_as(member, method, args=None, view=None):
+	viewer = _me().user
+	if isinstance(args, str):
+		args = json.loads(args or "{}")
+	return view_member.view_as(viewer, member, method, args or {}, view)
+
+
+@frappe.whitelist(methods=["POST"])
+def view_suggest(member, text, view=None, photo=None):
+	return view_member.suggest(_me().user, member, view, text, photo)
+
+
+# point 13: CEO live dashboards
+@frappe.whitelist()
+def dash_page(key="overview", month=None, segment=None):
+	return dashboards.page(_me().user, key, month, segment)
+
+
+# point 5: customer complaints
+@frappe.whitelist()
+def complaints_list(tab="mine"):
+	return complaints.listing(_me().user, tab)
+
+
+@frappe.whitelist()
+def complaint_orders(customer):
+	return complaints.orders(_me().user, customer)
+
+
+@frappe.whitelist()
+def complaint_detail(name):
+	return complaints.detail(_me().user, name)
+
+
+@frappe.whitelist(methods=["POST"])
+def complaint_new(customer, text, ctype, sales_order=None, files=None):
+	if isinstance(files, str):
+		files = json.loads(files or "[]")
+	return complaints.register(_me().user, customer, text, ctype, sales_order, files)
+
+
+@frappe.whitelist(methods=["POST"])
+def complaint_accept(name, fix_by=None, note=None):
+	return complaints.accept(_me().user, name, fix_by, note)
+
+
+@frappe.whitelist(methods=["POST"])
+def complaint_fixed(name, note=None, photo=None, cost=None):
+	return complaints.fixed(_me().user, name, note, photo, cost)
+
+
+@frappe.whitelist(methods=["POST"])
+def complaint_customer(name, ok, note=None, photo=None):
+	return complaints.customer_answer(_me().user, name, ok, note, photo)
+
+
+# point 7: FAQ per function with "Ask a question"
+@frappe.whitelist()
+def training_faq(q=None):
+	return training.faq(_me().user, q)
+
+
+@frappe.whitelist(methods=["POST"])
+def training_ask(question, function=None):
+	return training.ask(_me().user, question, function)
+
+
+@frappe.whitelist(methods=["POST"])
+def training_answer(todo, text, add_to_faq=1):
+	return training.answer(_me().user, todo, text, add_to_faq)
+
+
+# point 8: product cards
+@frappe.whitelist()
+def product_catalogue(main=None):
+	_me()
+	return products.catalogue(main=main)
+
+
+# point 1: check before saving
+@frappe.whitelist()
+def photo_check(kind, values=None):
+	if isinstance(values, str):
+		values = json.loads(values or "{}")
+	return photocheck.check(_me().user, kind, values or {})
+
+
+@frappe.whitelist(methods=["POST"])
+def photo_learn(kind, read_text, chosen):
+	return photocheck.learn(_me().user, kind, read_text, chosen)
+
+
+# point 16 + HR step 5: Optick / thumb attendance, leave and expenses
+@frappe.whitelist()
+def hr_today(day=None):
+	return hr.today(_me().user, day)
+
+
+@frappe.whitelist()
+def hr_month(month=None):
+	return hr.month(_me().user, month)
+
+
+@frappe.whitelist(methods=["POST"])
+def hr_upload_preview(file_url, device="Optick"):
+	return hr.upload_preview(_me().user, file_url, device)
+
+
+@frappe.whitelist(methods=["POST"])
+def hr_upload_save(file_url, matches=None, device="Optick"):
+	if isinstance(matches, str):
+		matches = json.loads(matches or "{}")
+	return hr.upload_save(_me().user, file_url, matches, device)
+
+
+@frappe.whitelist(methods=["POST"])
+def hr_fix(employee, day, status, reason, todo=None):
+	return hr.fix_attendance(_me().user, employee, day, status, reason, todo)
+
+
+@frappe.whitelist(methods=["POST"])
+def attendance_selfie(photo, lat=None, lng=None):
+	return hr.selfie_checkin(_me().user, photo, lat, lng)
+
+
+@frappe.whitelist(methods=["POST"])
+def attendance_ask_fix(text, day=None):
+	return hr.ask_fix(_me().user, day, text)
+
+
+@frappe.whitelist()
+def leave_expense():
+	user = _me().user
+	return {**hr.options(user), **hr.listing(user)}
+
+
+@frappe.whitelist(methods=["POST"])
+def leave_apply(leave_type, from_date, to_date=None, half_day=0, reason=None):
+	return hr.apply_leave(_me().user, leave_type, from_date, to_date, half_day, reason)
+
+
+@frappe.whitelist(methods=["POST"])
+def leave_decide(name, ok, note=None):
+	return hr.decide_leave(_me().user, name, ok, note)
+
+
+@frappe.whitelist(methods=["POST"])
+def expense_claim(expense_type, amount, expense_date=None, note=None, photo=None):
+	return hr.claim_expense(_me().user, expense_type, amount, expense_date, note, photo)
+
+
+@frappe.whitelist(methods=["POST"])
+def expense_decide(name, ok, note=None):
+	return hr.decide_expense(_me().user, name, ok, note)

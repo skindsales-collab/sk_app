@@ -146,7 +146,7 @@ button.sk-open { background: none; border: 0; }
 .sk-mic.on { background: var(--red); animation: sk-pulse 1s infinite; }
 @keyframes sk-pulse { 50% { opacity: .55; } }
 .sk-listening { color: var(--red); font-size: 14px; font-weight: 600; margin-top: 4px; }
-.sk-banner.rem { background: #fff4d6; border-left: 5px solid var(--yellow); }
+.sk-banner.rem { background: #fff4d6; color: #3b2f00; border-left: 5px solid var(--yellow); }
 .sk-banner .sk-row { margin-top: 6px; }
 .sk-addrem { margin-bottom: 14px; }
 .sk-locked { background: var(--light); color: var(--muted); border: 1px dashed var(--muted); border-radius: 10px; padding: 10px 12px; margin: 14px 0; font-size: 14px; }
@@ -199,8 +199,8 @@ button.sk-open { background: none; border: 0; }
 .sk-bulk { width: 100%; font-size: 14px; font-family: inherit; padding: 8px; border: 1px solid var(--line, #ccc); border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; }
 
 /* point 15: every icon shows its pending work in colour */
-.sk-tile.c-red { box-shadow: inset 0 0 0 2px var(--red); background: #fdecec; }
-.sk-tile.c-amber { box-shadow: inset 0 0 0 2px #e69500; background: #fff4df; }
+.sk-tile.c-red { box-shadow: inset 0 0 0 2px var(--red); background: #fdecec; color: #5c0714; }
+.sk-tile.c-amber { box-shadow: inset 0 0 0 2px #e69500; background: #fff4df; color: #4d3500; }
 .sk-tile.c-blue { box-shadow: inset 0 0 0 2px #1f6fd1; }
 .sk-tile.c-green { box-shadow: inset 0 0 0 2px #2e9e4f; }
 .sk-dot.amber { background: #e69500; }
@@ -212,7 +212,7 @@ button.sk-open { background: none; border: 0; }
 .sk-photo .sk-row { gap: 6px; }
 .sk-preview img { max-width: 100%; max-height: 180px; border-radius: 10px; margin-top: 6px; display: block; }
 .sk-preview .sk-row { align-items: center; margin-top: 4px; }
-.sk-filechip { margin-top: 6px; padding: 8px 10px; background: #eef2f7; border-radius: 8px; font-size: 13px; }
+.sk-filechip { margin-top: 6px; padding: 8px 10px; background: #eef2f7; color: #1b2430; border-radius: 8px; font-size: 13px; }
 .sk-upnote { color: #556; flex: 1; }
 .sk-chrome { display: block; position: relative; z-index: 50; text-decoration: none; }
 /* point 9c: week plan load */
@@ -229,3 +229,62 @@ html, body { overscroll-behavior-y: contain; }
 .sk-table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--card); border-radius: 10px; }
 .sk-table th, .sk-table td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #e6e9ef; white-space: nowrap; }
 .sk-table th:first-child, .sk-table td:first-child { text-align: left; }
+/* point 14: team mailbox */
+.sk-mailtext { max-height: 40vh; overflow-y: auto; white-space: pre-wrap; background: #f4f6fa; color: #1b2430; padding: 10px; border-radius: 8px; }
+.sk-muted { color: #8a93a3; }
+li.sk-off { opacity: .6; }
+/* point 3: CEO viewing a member's app (view only) */
+.sk-viewbar { position: sticky; top: 0; z-index: 60; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #ffd84d; color: #3a3000; font-weight: 700; }
+.sk-viewbar span { flex: 1; }
+.sk-viewbar button { border: 0; border-radius: 16px; padding: 6px 12px; font-weight: 700; background: #fff; color: #1b2430; }
+body.sk-viewing main .sk-micbox, body.sk-viewing main .sk-photo { display: none; }
+/* point 13: CEO live dashboards */
+.sk-dash-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.sk-dash-card { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; padding: 12px; border: 0; border-radius: 12px; background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.08); min-height: 92px; font: inherit; color: inherit; }
+.sk-dash-card.wide { grid-column: 1 / -1; }
+.sk-dash-card.c-red { box-shadow: inset 4px 0 0 var(--red), 0 1px 3px rgba(0,0,0,.08); }
+.sk-dash-card.c-amber { box-shadow: inset 4px 0 0 #e69500, 0 1px 3px rgba(0,0,0,.08); }
+.sk-dash-label { font-size: 13px; color: #556; }
+.sk-dash-value { font-size: 22px; }
+.sk-dash-mini { font-size: 13px; line-height: 1.4; }
+.sk-dash-card small { color: #778; font-size: 12px; }
+.sk-vbars { display: flex; align-items: flex-end; gap: 4px; height: 90px; width: 100%; }
+.sk-vbar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+.sk-vbar i { display: block; width: 100%; background: #1f3a68; border-radius: 3px 3px 0 0; min-height: 2px; }
+.sk-vbar small { font-size: 9px; color: #778; white-space: nowrap; }
+li.k-red { box-shadow: inset 4px 0 0 var(--red); }
+li.k-amber { box-shadow: inset 4px 0 0 #e69500; }
+li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
+/* point 8: product cards */
+.sk-pstrip { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 8px; }
+.sk-pcard { flex: 0 0 120px; display: flex; flex-direction: column; gap: 4px; background: var(--card); border-radius: 10px; padding: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.08); font-size: 13px; }
+.sk-pcard img, .sk-pph { width: 100%; height: 80px; object-fit: cover; border-radius: 6px; background: var(--light); display: flex; align-items: center; justify-content: center; }
+.sk-pthumb { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; }
+/* point 1: check before saving */
+.sk-chkbox { background: var(--card); border-radius: 12px; padding: 10px 12px; margin: 10px 0; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.sk-chk { padding: 6px 0 6px 8px; border-left: 4px solid #2e9e4f; margin: 4px 0; }
+.sk-chk.amber { border-left-color: #e69500; }
+.sk-chk.red { border-left-color: var(--red); }
+.sk-chk.green > .sk-row > b { color: #2e9e4f; } .sk-chk.amber > .sk-row > b { color: #b36b00; } .sk-chk.red > .sk-row > b { color: var(--red); }
+/* point 16: attendance line on My Day, HR month table */
+.sk-attline { display: block; width: 100%; text-align: left; padding: 10px 12px; margin: 0 0 10px; border-radius: 10px; border: 0;
+	font-size: 15px; font-weight: 600; background: #eef2f7; color: var(--navy); border-left: 5px solid #9aa8b8; }
+.sk-attline.green { background: #dff3e5; color: #16692d; border-left-color: #2e9e4f; }
+.sk-attline.amber { background: #fff3cd; color: #7a5a00; border-left-color: #e69500; }
+.sk-attline.red { background: #fde2e6; color: #9b0c22; border-left-color: var(--red); }
+.sk-atttable { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
+.sk-atttable th, .sk-atttable td { padding: 6px 4px; border-bottom: 1px solid #e3e7ee; text-align: center; }
+.sk-atttable td:first-child { text-align: left; }
+.sk-atttable td.bad { color: var(--red); font-weight: 700; }
+.sk-h.k-amber { color: #b36b00; }
+.sk-chip.ok { color: #16692d; border-color: #2e9e4f; }
+/* SK 26-Oct: phones / PCs in dark mode showed light text on the light red / amber icons; keep every highlight readable */
+@media (prefers-color-scheme: dark) {
+	.sk-tile.c-red { background: #4a1820; color: #ffe3e7; }
+	.sk-tile.c-amber { background: #4a3810; color: #fff1d0; }
+	@keyframes sk-blink { 50% { background: #7a2430; } }
+	.sk-attline { background: #22324a; color: #e8edf3; }
+	.sk-attline.green { background: #173d26; color: #d6f5e0; }
+	.sk-attline.amber { background: #4a3810; color: #fff1d0; }
+	.sk-attline.red { background: #4a1820; color: #ffe3e7; }
+}

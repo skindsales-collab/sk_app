@@ -90,9 +90,19 @@ def seed_lessons():
 			"content": content, "content_marathi": content_mr}).insert(ignore_permissions=True)
 
 
+def _functions(user: str, function: str | None = None) -> list[str]:
+	"""All the person's functions (point 7: someone in two functions sees the lessons of both)."""
+	from sk_app.logins import profile_functions
+
+	out = profile_functions(user) or ([function] if function else [])
+	if "Sales" in out and "Marketing" not in out:
+		out.append("Marketing")  # every salesperson has the Marketing features (SK 26-Oct)
+	return out
+
+
 def lessons(user: str, function: str) -> list[dict]:
-	"""Lessons for the person's function, without content (opened one at a time), with done / score."""
-	rows = frappe.get_all("SK Training Lesson", filters={"published": 1, "function": ["in", ["All", function]]},
+	"""Lessons for the person's functions, without content (opened one at a time), with done / score."""
+	rows = frappe.get_all("SK Training Lesson", filters={"published": 1, "function": ["in", ["All", *_functions(user, function)]]},
 		fields=["name", "title", "title_marathi", "topic", "lesson_type", "minutes"],
 		order_by="sequence asc, creation asc")
 	done = {d.lesson: d for d in frappe.get_all("SK Training Done", filters={"user": user}, fields=["lesson", "score", "questions"])}
@@ -148,7 +158,85 @@ def team_progress(manager: str) -> dict:
 
 	out = []
 	for p in _team(manager):
-		total = frappe.db.count("SK Training Lesson", {"published": 1, "function": ["in", ["All", p.home]]})
+		total = frappe.db.count("SK Training Lesson", {"published": 1, "function": ["in", ["All", *_functions(p.user, p.home)]]})
 		done = frappe.db.count("SK Training Done", {"user": p.user})
 		out.append({"user": p.user, "full_name": p.full_name, "function": p.home, "done": done, "total": total})
 	return {"people": out}
+
+
+# ---------- FAQ per function, with "Ask a question" (point 7) ----------
+
+FAQ_TAG = "[FAQ question]"
+
+
+def faq(user: str, q: str | None = None) -> dict:
+	"""FAQ of each of the person's functions (Sales: the customer FAQ too), plus questions waiting for my answer."""
+	functions = _functions(user)
+	cats = ["FAQ", "Customer FAQ"] if {"Sales", "Marketing", "Machine Shifting"} & set(functions) else ["FAQ"]
+	filters = {"enabled": 1, "category": ["in", cats], "function": ["in", ["All", *functions]]}
+	or_filters = None
+	if (q or "").strip():
+		like = f"%{q.strip()}%"
+		or_filters = [["title", "like", like], ["text", "like", like], ["title_marathi", "like", like], ["text_marathi", "like", like]]
+	from sk_app.library import LIST_FIELDS
+
+	rows = frappe.get_all("SK Library Item", filters=filters, or_filters=or_filters, fields=LIST_FIELDS,
+		order_by="function asc, sequence asc, title asc", limit=300)
+	for r in rows:
+		r["kind"] = "file" if r.file else "link" if r.link else "text"
+		r["open_url"] = r.file or r.link
+		r["sendable"] = r.audience == "Customer"
+	asked = frappe.get_all("ToDo", filters={"allocated_to": user, "status": "Open", "description": ["like", f"{FAQ_TAG}%"]},
+		fields=["name", "description", "assigned_by", "date"], order_by="creation asc")
+	for a in asked:
+		a["question"] = frappe.utils.strip_html(a.description)[len(FAQ_TAG):].strip()
+		a["by"] = frappe.utils.get_fullname(a.assigned_by) if a.assigned_by else ""
+	return {"rows": rows, "to_answer": asked, "functions": functions}
+
+
+def _owner_of(user: str, function: str) -> str | None:
+	"""Who answers a function's questions: the person's own manager, else the first person of the function with a team,
+	else Management."""
+	from sk_app.store import _users_with_function
+
+	manager = frappe.db.get_value("SK App User", {"user": user}, "manager")
+	if manager:
+		return manager
+	people = _users_with_function(function)
+	heads = [p for p in people if p != user and frappe.db.exists("SK App User", {"manager": p, "enabled": 1})]
+	return (heads or [p for p in _users_with_function("Management") if p != user] or [None])[0]
+
+
+def ask(user: str, question: str, function: str | None = None) -> dict:
+	if not (question or "").strip():
+		frappe.throw(frappe._("Please speak or type the question"))
+	function = function or (_functions(user) or ["All"])[0]
+	owner = _owner_of(user, function)
+	if not owner:
+		frappe.throw(frappe._("Nobody to answer yet. Please ask your manager."))
+	frappe.get_doc({"doctype": "ToDo", "allocated_to": owner, "assigned_by": user, "status": "Open", "priority": "Medium",
+		"description": f"{FAQ_TAG} {function}: {question.strip()[:500]}", "date": frappe.utils.add_days(frappe.utils.nowdate(), 2)}
+		).insert(ignore_permissions=True)
+	return {"owner": frappe.utils.get_fullname(owner)}
+
+
+def answer(user: str, todo: str, text: str, add_to_faq=1) -> dict:
+	"""The owner answers; the answer goes back to the person and, when useful, into the function's FAQ."""
+	t = frappe.get_doc("ToDo", todo)
+	if t.allocated_to != user or not (t.description or "").startswith(FAQ_TAG):
+		frappe.throw(frappe._("This question is not for you"), frappe.PermissionError)
+	if not (text or "").strip():
+		frappe.throw(frappe._("Please speak or type the answer"))
+	body = frappe.utils.strip_html(t.description)[len(FAQ_TAG):].strip()
+	function, _sep, question = body.partition(": ")
+	item = None
+	if str(add_to_faq) in ("1", "true", "True"):
+		meta = frappe.get_meta("SK Library Item").get_field("function").options.split("\n")
+		item = frappe.get_doc({"doctype": "SK Library Item", "title": question[:140], "category": "FAQ", "audience": "Internal",
+			"function": function if function in meta else "All", "enabled": 1, "text": text.strip()}).insert(ignore_permissions=True).name
+	t.db_set("status", "Closed")
+	if t.assigned_by:
+		frappe.get_doc({"doctype": "ToDo", "allocated_to": t.assigned_by, "assigned_by": user, "status": "Open", "priority": "Low",
+			"description": f"Answer to your question \"{question[:120]}\": {text.strip()[:400]}", "date": frappe.utils.nowdate()}
+			).insert(ignore_permissions=True)
+	return {"faq": item}
