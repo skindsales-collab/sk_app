@@ -37,6 +37,9 @@ def after_migrate():
 
 	product_fields()
 	segments.sync_user_permissions()
+	from sk_app.crm import setup_deal_customer_column
+
+	setup_deal_customer_column()  # Swati item 8
 	from sk_app.training import seed_lessons
 
 	seed_lessons()
