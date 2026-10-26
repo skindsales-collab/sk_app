@@ -4,7 +4,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime
 
-from sk_app import calendar_view, claude, comms, crm, day_report, guide, kpi, logins, purchase, store, training, work
+from sk_app import calendar_view, claude, comms, crm, day_report, guide, kpi, logins, production, purchase, quality, store, training, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -56,7 +56,8 @@ def home():
 def _badges(user, functions):
 	"""Red counts on Store / Purchase / approval icons; never breaks Home if ERPNext data is odd."""
 	try:
-		return {**store.badges(user, functions), **purchase.badges(user, functions)}
+		return {**store.badges(user, functions), **purchase.badges(user, functions), **production.badges(user, functions),
+			**quality.badges(user, functions)}
 	except Exception:
 		frappe.log_error("SK App badges")
 		return {}
@@ -422,6 +423,12 @@ def hr_make_login(mobile, functions, employee=None, full_name=None, manager=None
 
 
 @frappe.whitelist(methods=["POST"])
+def hr_bulk_logins(text):
+	_me()
+	return logins.bulk_make(frappe.session.user, text)
+
+
+@frappe.whitelist(methods=["POST"])
 def hr_reset_pin(user):
 	_me()
 	return logins.reset_pin(frappe.session.user, user)
@@ -618,3 +625,106 @@ def buy_send_bill(supplier, photo, amount=None, bill_no=None, against=None, note
 @frappe.whitelist()
 def buy_last_rates(q=None):
 	return purchase.last_rates(_me().user, q)
+
+
+@frappe.whitelist()
+def team_follow_up(person=None):
+	"""Sales manager's review (SK, 26-Oct: Rushi sees Swati, Pranali and Rahul's leads and deals with his own):
+	one summary line per person and the open leads / deals of everyone, or of one person."""
+	profile = _me()
+	people = [{"user": profile.user, "full_name": profile.full_name or profile.user}] + [
+		{"user": p.user, "full_name": p.full_name or p.user} for p in day_report._team(profile.user)]
+	allowed = {p["user"] for p in people}
+	if person and person not in allowed:
+		frappe.throw(_("{0} is not in your team").format(person), frappe.PermissionError)
+	summary, rows = [], []
+	for p in people:
+		items = crm.follow_up(p["user"])
+		month = kpi.scorecard(p["user"])
+		summary.append({**p, "open": len(items), "overdue": sum(1 for r in items if r["overdue"]), "new": sum(1 for r in items if r["new"]),
+			"deal_value": sum(flt(r.get("value")) for r in items if r["doctype"] == "CRM Deal"), "score": month.get("score")})
+		if not person or person == p["user"]:
+			rows += [{**r, "owner": p["user"], "owner_name": p["full_name"]} for r in items]
+	rows.sort(key=lambda r: (not r["overdue"], not r["new"]))
+	return {"people": summary, "rows": rows}
+
+# ---------- Production + subcontractors (SK draft F03) ----------
+
+@frappe.whitelist()
+def prod_board():
+	return production.order_board(_me().user)
+
+
+@frappe.whitelist()
+def prod_job_cards():
+	return production.job_cards(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def prod_start(job_card, photo=None):
+	return production.start(_me().user, job_card, photo)
+
+
+@frappe.whitelist(methods=["POST"])
+def prod_photo(job_card, photo=None, note=None):
+	return production.add_photo(_me().user, job_card, photo, note)
+
+
+@frappe.whitelist(methods=["POST"])
+def prod_done(job_card, photos=None, workers=None, remark=None):
+	return production.done(_me().user, job_card, _list(photos), workers, remark)
+
+
+@frappe.whitelist(methods=["POST"])
+def prod_need_material(items=None, job_card=None, work_order=None, needed_by=None, spoken=None):
+	return production.need_material(_me().user, _list(items), job_card, work_order, needed_by, spoken)
+
+
+@frappe.whitelist(methods=["POST"])
+def prod_progress_photo(work_order, photo, note=None):
+	return production.progress_photo(_me().user, work_order, photo, note)
+
+
+@frappe.whitelist()
+def prod_ready():
+	return production.ready_to_dispatch(_me().user)
+
+
+# ---------- Quality (SK draft F04) ----------
+
+@frappe.whitelist()
+def qc_pending():
+	return quality.pending(_me().user)
+
+
+@frappe.whitelist()
+def qc_templates(reference_type=None, operation=None, item_code=None):
+	user = _me().user
+	return {"templates": quality.templates(user), "guess": quality.guess_template(reference_type, operation, item_code)}
+
+
+@frappe.whitelist()
+def qc_checklist(template):
+	return quality.checklist(_me().user, template)
+
+
+@frappe.whitelist(methods=["POST"])
+def qc_save(reference_type, reference_name, item_code, points, template=None, sample_size=1, accepted_qty=None,
+		rejected_qty=None, photos=None, remark=None, inspection_type=None):
+	return quality.save(_me().user, reference_type, reference_name, item_code, _list(points), template, sample_size,
+		accepted_qty, rejected_qty, _list(photos), remark, inspection_type)
+
+
+@frappe.whitelist(methods=["POST"])
+def qc_raise_nc(subject, details=None, job_card=None, fixer=None, by_when=None, photos=None):
+	return quality.raise_nc(_me().user, subject, details, job_card, fixer, by_when, _list(photos))
+
+
+@frappe.whitelist()
+def qc_open_ncs():
+	return quality.open_ncs(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def qc_close_nc(name, action, photo=None):
+	return quality.close_nc(_me().user, name, action, photo)

@@ -25,7 +25,9 @@ class TestLogins(IntegrationTestCase):
 			frappe.get_doc({"doctype": "Workstation", "workstation_name": "SK Test Fabrication"}).insert()
 
 	def setUp(self):
-		for u in frappe.get_all("User", filters={"mobile_no": ["in", [MOBILE, "9876500012"]]}, pluck="name"):
+		mobiles = [MOBILE, "9876500012", "9876500013", "9876500014"]
+		for u in set(frappe.get_all("User", filters={"mobile_no": ["in", mobiles]}, pluck="name")
+				+ frappe.get_all("User", filters={"name": ["in", [f"{m}@{logins.HIDDEN_DOMAIN}" for m in mobiles]]}, pluck="name")):
 			frappe.db.delete("SK App User", {"user": u})
 			frappe.delete_doc("User", u, force=True, ignore_permissions=True)
 
@@ -111,3 +113,31 @@ class TestLogins(IntegrationTestCase):
 		self.assertEqual(found["name"], r["user"])
 		self.assertTrue(found["is_authenticated"])
 		self.assertFalse(User.find_by_credentials(MOBILE, "000000")["is_authenticated"])
+
+	def test_many_logins_from_a_pasted_list(self):
+		text = """# name | mobile | functions | employee | workstation | reports to
+Test Rep | 98765 00012 | sales | | | 9876500013
+Test Boss | 9876500013 | Sales + Marketing
+Test Fitter | 9876500014 | Subcontractor | | SK Test Fabrication | | Marathi
+Bad Line | 12345 | Sales
+Nobody | 9876500011 | Cooking
+"""
+		with set_user(HR):
+			rows = api.hr_bulk_logins(text)
+		self.assertEqual([bool(r.get("error")) for r in rows], [False, False, False, True, True])
+		rep, boss, fitter = rows[:3]
+		self.assertEqual(len(rep["pin"]), 6)
+		self.assertEqual(rep["manager"], boss["user"])
+		self.assertEqual(frappe.db.get_value("SK App User", {"user": rep["user"]}, "manager"), boss["user"])
+		self.assertEqual(boss["functions"], ["Sales", "Marketing"])
+		self.assertEqual(frappe.db.get_value("SK App User", {"user": fitter["user"]}, ["workstation", "language"]), ("SK Test Fabrication", "Marathi"))
+		self.assertIn("Cooking", rows[4]["error"])
+		self.assertFalse(frappe.db.exists("User", {"mobile_no": MOBILE}))
+
+	def test_admin_keeps_own_password(self):
+		with set_user("Administrator"):
+			r = logins.make_login("Administrator", MOBILE, ["Management"], full_name="Test Admin")
+			self.assertTrue(r["pin"])
+			r2 = logins.make_login("Administrator", MOBILE, ["Management", "Sales"], full_name="Test Admin")
+		self.assertIsNone(r2["pin"])
+		check_password(r["user"], r["pin"])

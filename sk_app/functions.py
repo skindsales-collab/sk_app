@@ -27,15 +27,15 @@ FUNCTIONS = {
 	},
 	"Production": {
 		"label": {"English": "Production", "Marathi": "उत्पादन"},
-		"tiles": COMMON_TILES + ["job_cards"],
-		"live": False,
-		"erpnext_roles": ["Manufacturing User"],
+		"tiles": ["my_day", "order_board", "job_cards", "need_material", "progress_photos", "ready_dispatch", "non_conformance", *COMMON_TILES[1:]],
+		"live": True,
+		"erpnext_roles": ["Manufacturing User", "Manufacturing Manager"],
 		"desk": "/app/manufacturing",
 	},
 	"Quality": {
 		"label": {"English": "Quality", "Marathi": "गुणवत्ता"},
-		"tiles": COMMON_TILES + ["inspections"],
-		"live": False,
+		"tiles": ["my_day", "inspect", "final_check", "non_conformance", "order_board", *COMMON_TILES[1:]],
+		"live": True,
 		"erpnext_roles": ["Quality Manager"],
 		"desk": "/app/quality",
 	},
@@ -86,8 +86,8 @@ FUNCTIONS = {
 	"Subcontractor": {
 		"label": {"English": "Production (subcontractor)", "Marathi": "उत्पादन (कंत्राटदार)"},
 		# very simple screen (SK): own jobs only; job tiles come with the Production screens
-		"tiles": ["my_day", "problem", "training", "day_report"],
-		"live": False,
+		"tiles": ["my_day", "my_jobs", "need_material", "my_fixes", "problem", "training", "day_report"],
+		"live": True,
 		"erpnext_roles": ["SK Subcontractor"],
 		"desk": "/sk",
 	},
@@ -127,6 +127,10 @@ def home_for(function: str | None, has_team: bool = False) -> dict:
 			"live": False, "erpnext_roles": [], "desk": "/app"}
 	if has_team and "team_reports" not in home["tiles"]:
 		home["tiles"] = home["tiles"][:1] + ["team_reports"] + home["tiles"][1:]
+	# a sales manager reviews the whole team's leads and deals next to his own (SK, 26-Oct-2026)
+	if has_team and "my_leads" in home["tiles"] and "team_leads" not in home["tiles"]:
+		i = home["tiles"].index("my_leads")
+		home["tiles"] = home["tiles"][:i] + ["team_leads"] + home["tiles"][i:]
 	# SK: My Day is always the first tile; DSI and the Day Report are the day's last jobs, so their tiles come last
 	last = [t for t in ("dsi", "day_report") if t in home["tiles"]]
 	middle = [t for t in home["tiles"] if t not in last and t != "my_day"]

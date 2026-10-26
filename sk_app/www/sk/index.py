@@ -14,7 +14,10 @@ def get_context(context):
 	# SK: everyone logs in with their mobile number and PIN on the app's own screen; email login stays as an option
 	context.guest = frappe.session.user == "Guest"
 	if context.guest:
+		from sk_app.otp import enabled
+
 		context.title = _("SK App")
+		context.otp = enabled()
 		return context
 	context.no_breadcrumbs = 1
 	context.title = _("SK App")

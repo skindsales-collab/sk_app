@@ -126,7 +126,7 @@
 	};
 	// mobile-number logins and Home for people in several functions (SK, 26-Oct-2026)
 	Object.assign(T.English, {
-		logins: "Logins", for_everyone: "For everyone", set_pin: "Set your own PIN", set_pin_why: "HR gave you a first PIN. Make your own PIN now (4 to 8 digits). Do not tell anyone.",
+		logins: "Logins", team_leads: "Team Leads", for_everyone: "For everyone", set_pin: "Set your own PIN", set_pin_why: "HR gave you a first PIN. Make your own PIN now (4 to 8 digits). Do not tell anyone.",
 		old_pin: "PIN from HR", new_pin: "New PIN", new_pin2: "New PIN again", pin_mismatch: "The two new PINs are not the same",
 		pin_saved: "PIN saved", no_login: "No login yet", has_login: "Have login", closed_login: "Login closed",
 		make_login: "Make login", new_login: "New login", name: "Name", functions_pick: "Function(s)", reports_to: "Reports to",
@@ -137,7 +137,7 @@
 		pin_set_pending: "PIN not set yet",
 	});
 	Object.assign(T.Marathi, {
-		logins: "लॉगिन", for_everyone: "सर्वांसाठी", set_pin: "तुमचा स्वतःचा पिन ठेवा", set_pin_why: "HR ने पहिला पिन दिला आहे. आता तुमचा स्वतःचा पिन ठेवा (4 ते 8 अंक). कोणालाही सांगू नका.",
+		logins: "लॉगिन", team_leads: "टीमचे लीड", for_everyone: "सर्वांसाठी", set_pin: "तुमचा स्वतःचा पिन ठेवा", set_pin_why: "HR ने पहिला पिन दिला आहे. आता तुमचा स्वतःचा पिन ठेवा (4 ते 8 अंक). कोणालाही सांगू नका.",
 		old_pin: "HR ने दिलेला पिन", new_pin: "नवीन पिन", new_pin2: "नवीन पिन पुन्हा", pin_mismatch: "दोन्ही नवीन पिन सारखे नाहीत",
 		pin_saved: "पिन सेव्ह झाला", no_login: "अजून लॉगिन नाही", has_login: "लॉगिन आहे", closed_login: "लॉगिन बंद",
 		make_login: "लॉगिन बनवा", new_login: "नवीन लॉगिन", name: "नाव", functions_pick: "काम (फंक्शन)", reports_to: "कोणाला रिपोर्ट",
@@ -376,14 +376,141 @@
 		rejected: "नामंजूर केले",
 		reject_why: "का नामंजूर?",
 	});
+	// Production, subcontractor and Quality screens (26-Oct-2026)
+	Object.assign(T.English, {
+		order_board: "Order Board",
+		job_cards: "Job Cards",
+		my_jobs: "My Jobs",
+		need_material: "Need Material",
+		progress_photos: "Progress Photos",
+		ready_dispatch: "Ready to Dispatch",
+		non_conformance: "Non-Conformance",
+		my_fixes: "To Fix",
+		inspect: "Inspect",
+		final_check: "Final Check",
+		board_help: "Every cabin in production, stage by stage. Green done · orange working · grey waiting.",
+		delivery: "Delivery",
+		not_set: "not set",
+		no_order_link: "No Sales Order / delivery date on this job",
+		no_job_cards: "No job cards",
+		started: "started",
+		see_drawing: "See drawing",
+		jobs_today: "jobs for you today",
+		photo_full: "Photo 1: full job",
+		photo_detail: "Photo 2: close-up (joints, finish)",
+		workers_used: "Workers used",
+		anything_tell: "Anything to tell? (speak)",
+		job_done_qc: "Job done · send to Quality",
+		job_done_ok: "Job done. Quality is told.",
+		job_done_draft: "Job done and saved. Office will close it in ERPNext.",
+		say_material: "What do you need? (speak)",
+		send_store: "Send to Store",
+		sent_store: "Sent to Store",
+		cabin: "Cabin",
+		qc_pending: "QC pending",
+		new_nc: "New problem (Non-Conformance)",
+		fixed: "Fixed",
+		incoming: "Incoming (from Store)",
+		stage: "Stage (from Job Cards)",
+		final: "Final (before dispatch)",
+		check_now: "Check",
+		checklist: "Checklist",
+		accepted_qty: "Accepted qty",
+		rejected_qty: "Rejected qty",
+		sample: "Sample checked",
+		save_check: "Save check",
+		not_ok: "Not OK",
+		what_wrong: "What is wrong? (speak)",
+		pick_checklist: "Pick the checklist above.",
+		rework_sent: "Rework sent",
+		defect_photo: "Photo of defect",
+		by_when: "Fix by",
+		send_fixer: "Send to the person who fixes",
+		what_done: "What did you do? (speak)",
+		after_photo: "Photo after fixing",
+		qty_matches: "Quantity matches bill", no_damage_rust: "No damage / rust", size_as_ordered: "Size and grade as ordered",
+		size_as_drawing: "Size as per drawing", weld_finish: "Weld and finish OK", clean_safe: "Clean, no sharp edges",
+	});
+	Object.assign(T.Marathi, {
+		order_board: "ऑर्डर बोर्ड",
+		job_cards: "जॉब कार्ड",
+		my_jobs: "माझी कामे",
+		need_material: "माल हवा",
+		progress_photos: "प्रगती फोटो",
+		ready_dispatch: "डिस्पॅचला तयार",
+		non_conformance: "दोष (NC)",
+		my_fixes: "दुरुस्ती",
+		inspect: "तपासणी",
+		final_check: "अंतिम तपासणी",
+		board_help: "उत्पादनातील प्रत्येक केबिन, टप्प्याने. हिरवा झाले · नारिंगी चालू · राखाडी बाकी.",
+		delivery: "डिलिव्हरी",
+		not_set: "ठरली नाही",
+		no_order_link: "या कामाला सेल्स ऑर्डर / डिलिव्हरी तारीख नाही",
+		no_job_cards: "जॉब कार्ड नाही",
+		started: "सुरू",
+		see_drawing: "ड्रॉइंग पहा",
+		jobs_today: "आज तुमची कामे",
+		photo_full: "फोटो 1: पूर्ण काम",
+		photo_detail: "फोटो 2: जवळून (जोड, फिनिश)",
+		workers_used: "किती कामगार",
+		anything_tell: "काही सांगायचे आहे? (बोला)",
+		job_done_qc: "काम झाले · क्वालिटीला पाठवा",
+		job_done_ok: "काम झाले. क्वालिटीला कळवले.",
+		job_done_draft: "काम झाले व सेव्ह झाले. ऑफिस ERPNext मध्ये बंद करेल.",
+		say_material: "काय हवे? (बोला)",
+		send_store: "स्टोअरला पाठवा",
+		sent_store: "स्टोअरला पाठवले",
+		cabin: "केबिन",
+		qc_pending: "QC बाकी",
+		new_nc: "नवीन दोष (NC)",
+		fixed: "दुरुस्त",
+		incoming: "येणारा माल (स्टोअर)",
+		stage: "टप्पा (जॉब कार्ड)",
+		final: "अंतिम (डिस्पॅच आधी)",
+		check_now: "तपासा",
+		checklist: "चेकलिस्ट",
+		accepted_qty: "स्वीकारलेले",
+		rejected_qty: "नाकारलेले",
+		sample: "किती तपासले",
+		save_check: "तपासणी सेव्ह करा",
+		not_ok: "बरोबर नाही",
+		what_wrong: "काय चुकले? (बोला)",
+		pick_checklist: "वर चेकलिस्ट निवडा.",
+		rework_sent: "पुन्हा कामासाठी पाठवले",
+		defect_photo: "दोषाचा फोटो",
+		by_when: "कधीपर्यंत दुरुस्त",
+		send_fixer: "दुरुस्त करणाऱ्याला पाठवा",
+		what_done: "काय केले? (बोला)",
+		after_photo: "दुरुस्तीनंतरचा फोटो",
+		qty_matches: "बिलाप्रमाणे नग", no_damage_rust: "तुटफूट / गंज नाही", size_as_ordered: "ऑर्डरप्रमाणे साईज व ग्रेड",
+		size_as_drawing: "ड्रॉइंगप्रमाणे साईज", weld_finish: "वेल्डिंग व फिनिश ठीक", clean_safe: "स्वच्छ, धारदार कडा नाहीत",
+	});
+	Object.assign(T.English, {
+		bulk_logins: "Add many logins (paste list)",
+		bulk_help: "One person per line: Name | Mobile | Function | Employee ID | Workstation | Reports to (mobile) | Language. Only name, mobile and function are needed.",
+		make_logins: "Make all logins",
+		logins_made: "logins made",
+		bulk_pin_note: "Write down or WhatsApp each PIN now: it is shown only once.",
+		keeps_password: "Admin: keeps the same password",
+	});
+	Object.assign(T.Marathi, {
+		bulk_logins: "एकदम अनेक लॉगिन (यादी पेस्ट करा)",
+		bulk_help: "प्रत्येक ओळीत एक व्यक्ती: नाव | मोबाईल | विभाग | Employee ID | वर्कस्टेशन | रिपोर्ट (मोबाईल) | भाषा. नाव, मोबाईल व विभाग पुरेसे.",
+		make_logins: "सर्व लॉगिन बनवा",
+		logins_made: "लॉगिन बनले",
+		bulk_pin_note: "प्रत्येक पिन आत्ताच लिहून घ्या किंवा WhatsApp करा: तो एकदाच दिसतो.",
+		keeps_password: "ॲडमिन: तोच पासवर्ड राहील",
+	});
 	const ICON = {
 		my_day: "☀️", my_leads: "📞", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
 		job_cards: "🛠️", inspections: "✅", stock_alerts: "📦", material_requests: "🧾", invoice_photo: "📷",
 		collections: "💰", team_scorecards: "👥", site_checklist: "📋", ceo_view: "📊",
 		calendar: "📅", follow_up: "🔔", new_lead: "➕", training: "🎓", day_report: "📝", team_reports: "🗂️",
-		calls: "📞", whatsapp: "💬", mail: "✉️", reminders: "⏰", library: "🏢", logins: "🔑",
+		calls: "📞", whatsapp: "💬", mail: "✉️", reminders: "⏰", library: "🏢", logins: "🔑", team_leads: "👥",
 		stock_check: "📦", receive: "🚚", issue: "📤", store_requests: "📋", dispatch: "🚛", low_stock: "⚠️", stock_count: "🔢", new_item: "🆕",
 		buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅",
+		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
+		my_fixes: "🔧", inspect: "🔍", final_check: "🏁",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
 	const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -587,6 +714,7 @@
 		root.innerHTML = header(t("logins")) + `<main>
 			<p class="sk-note">${people.length} ${t("people_n")} · ${none.length} ${t("without_login")}</p>
 			<button class="sk-btn go wide" data-act="login-new">➕ ${t("new_login")}</button>
+			<button class="sk-btn wide" data-act="login-bulk-open">📋 ${t("bulk_logins")}</button>
 			${group(t("no_login"), "none")}${group(t("has_login"), "active")}${group(t("closed_login"), "closed")}</main>`;
 		if (!loginOpts) loginOpts = await call("hr_login_options").catch(() => null);
 	}
@@ -619,10 +747,26 @@
 		const msg = `${t("login_link")}: ${location.origin}/sk\n${t("mobile")}: ${r.mobile}\n${t("first_pin")}: ${r.pin}`;
 		root._pinMsg = { mobile: r.mobile, text: msg };
 		sheet(`<h3 class="sk-h">✅ ${t("login_ready")}</h3>
-			<p class="sk-big">${t("mobile")}: <b>${esc(r.mobile || "")}</b><br>${t("first_pin")}: <b>${esc(r.pin)}</b></p>
+			<p class="sk-big">${t("mobile")}: <b>${esc(r.mobile || "")}</b><br>${r.pin ? `${t("first_pin")}: <b>${esc(r.pin)}</b>` : t("keeps_password")}</p>
 			<p class="sk-note">${t("pin_note")}</p>
 			<button class="sk-btn ok wide" data-act="login-wa">💬 ${t("send")} WhatsApp</button>
 			<button class="sk-btn wide" data-act="close-sheet">${t("done")}</button>`);
+	}
+
+	// many logins at once: HR pastes the staff list, one line per person
+	function bulkSheet() {
+		sheet(`<h3 class="sk-h">📋 ${t("bulk_logins")}</h3><p class="sk-note">${t("bulk_help")}</p>
+			<textarea id="g-bulk" class="sk-bulk" rows="10" placeholder="Yogesh B. | 9970960806 | Stores | HR-EMP-00009"></textarea>
+			<button class="sk-btn ok wide" data-act="login-bulk">${t("make_logins")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+	function bulkResult(rows) {
+		root._bulk = rows;
+		const ok = rows.filter((r) => !r.error).length;
+		root.innerHTML = header(t("bulk_logins")) + `<main><p class="sk-note">✅ ${ok} / ${rows.length} ${t("logins_made")}. ${t("bulk_pin_note")}</p>
+			<ul class="sk-list">${rows.map((r, i) => `<li class="sk-item ${r.error ? "k-lead_new" : ""}"><div><div class="sk-item-title">${esc(r.full_name)}</div>
+				<div class="sk-item-meta">${esc(r.mobile)} · ${r.error ? `<span class="sk-due">${esc(r.error)}</span>` : r.pin ? `${t("first_pin")}: <b>${esc(r.pin)}</b>` : t("keeps_password")}</div></div>
+				${r.pin ? `<button class="sk-chip on" data-act="login-bulk-wa" data-i="${i}">💬 WhatsApp</button>` : ""}</li>`).join("")}</ul>
+			<button class="sk-btn wide" data-go="logins">${t("back")}</button></main>`;
 	}
 
 	function itemRow(i) {
@@ -1606,21 +1750,233 @@
 		return false;
 	}
 
+	// ---------- Production, subcontractors and Quality (SK drafts F03 / F04, 26-Oct-2026) ----------
+	const stageChip = (s) => `<span class="sk-stage ${s.state}">${esc(s.operation || "")}</span>`;
+	async function renderOrderBoard() {
+		S.board = await call("prod_board");
+		root.innerHTML = header(t("order_board")) + `<main><p class="sk-note">${t("board_help")}</p><ul class="sk-list">${S.board.map((w) => `<li class="sk-item sk-person ${w.late ? "k-lead_new" : ""}">
+			<div><div class="sk-item-title">${esc(w.item_name || w.production_item)}</div>
+			<div class="sk-item-meta">${esc(w.name)}${w.customer ? " · " + esc(w.customer) : ""} · ${t("delivery")}: ${esc(w.expected_delivery_date || t("not_set"))}${w.late ? ` <span class="sk-due">${t("late")}</span>` : ""}</div>
+			${w.no_order ? `<div class="sk-item-meta sk-due">⚠ ${t("no_order_link")}</div>` : ""}</div>
+			<div class="sk-stages">${w.stages.map(stageChip).join("") || t("no_job_cards")}</div></li>`).join("") || empty()}</ul></main>`;
+	}
+
+	// one big card per job: Start / Photo / Done / Need material / Problem (subcontractor and manager)
+	async function renderJobs(view) {
+		S.jobs = await call("prod_job_cards");
+		const sub = view === "my_jobs";
+		const card = (j, i) => `<section class="sk-card ${j.status === "Work In Progress" ? "sk-working" : ""}">
+			<div class="sk-card-label">${esc(j.operation || "")} · ${esc(j.workstation || "")} <button class="sk-icon" data-act="pr-read" data-i="${i}">🔊</button></div>
+			<div class="sk-card-text">${esc(j.item_name || j.production_item)}</div>
+			<div class="sk-card-meta">${esc(j.name)} · ${esc(j.work_order || "")}${j.started ? ` · ${t("started")} ${esc(j.started.slice(11, 16))}` : ""} · 📷 ${j.photos}</div>
+			<div class="sk-card-actions">
+				${j.started ? "" : `<button class="sk-btn go" data-act="pr-start" data-i="${i}">▶ ${t("start")}</button>`}
+				<button class="sk-btn" data-act="pr-photo" data-i="${i}">📸 ${t("photo")}</button>
+				<button class="sk-btn ok" data-act="pr-done" data-i="${i}">✅ ${t("done")}</button>
+				<button class="sk-btn" data-act="pr-need" data-i="${i}">📦 ${t("need_material")}</button>
+				<button class="sk-btn bad" data-go="problem">⚠ ${t("trouble")}</button>
+			</div>${j.drawing ? `<a class="sk-link" href="${esc(j.drawing.file_url)}" target="_blank">📄 ${t("see_drawing")}</a>` : ""}</section>`;
+		root.innerHTML = header(t(view)) + `<main>${sub ? `<p class="sk-note">🔊 ${S.jobs.length} ${t("jobs_today")}</p>` : ""}${S.jobs.map(card).join("") || `<p class="sk-empty">${t("nothing")}</p>`}</main>`;
+		if (sub && S.jobs.length) readAloud(`${S.jobs.length} ${t("jobs_today")}`);
+	}
+	function doneSheet(i) {
+		const j = S.jobs[i];
+		S.job = j;
+		sheet(`<h3 class="sk-h">✅ ${esc(j.operation || "")} · ${esc(j.item_name || "")}</h3>
+			${photoField("pd-1", "📷 " + t("photo_full"))}${photoField("pd-2", "📷 " + t("photo_detail"))}
+			<label class="sk-field"><span>${t("workers_used")}</span>${qtyBox("pd-workers")}</label>${formField("pd-remark", t("anything_tell"), true)}
+			<button class="sk-btn ok wide" data-act="pr-done-save">✅ ${t("job_done_qc")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+	function needSheet(j) {
+		S.job = j || null;
+		sheet(`<h3 class="sk-h">📦 ${t("need_material")}${j ? " · " + esc(j.operation || "") : ""}</h3>
+			${j ? "" : pick("pn-job", t("job_card"), (S.jobs || []).map((x) => ({ value: x.name, label: `${x.name} · ${x.operation || ""} · ${x.item_name || ""}` })))}
+			${formField("pn-spoken", t("say_material"), true)}${finder("pn-item", t("item"), "item")}<label class="sk-field"><span>${t("qty")}</span>${qtyBox("pn-qty")}</label>
+			<label class="sk-field"><span>${t("needed_by")}</span><input id="pn-date" type="date" class="sk-select" value="${new Date().toISOString().slice(0, 10)}"></label>
+			<button class="sk-btn go wide" data-act="pr-need-save">${t("send_store")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+	async function renderNeedMaterial() {
+		S.jobs = await call("prod_job_cards");
+		root.innerHTML = header(t("need_material")) + `<main></main>`;
+		needSheet(null);
+	}
+	async function renderProgressPhotos() {
+		S.board = S.board || await call("prod_board");
+		root.innerHTML = header(t("progress_photos")) + `<main class="sk-form">${pick("pp-wo", t("cabin"), S.board.map((w) => ({ value: w.name, label: `${w.item_name || w.production_item} · ${w.name}` })))}
+			${photoField("pp-photo", "📷 " + t("photo"))}${formField("pp-note", t("note_q"))}<button class="sk-btn go wide" data-act="pr-progress">${t("save")}</button></main>`;
+	}
+	async function renderReadyDispatch() {
+		const rows = await call("prod_ready");
+		root.innerHTML = header(t("ready_dispatch")) + `<main><ul class="sk-list">${rows.map((w) => li(esc(w.item_name || w.production_item),
+			`${esc(w.name)}${w.customer ? " · " + esc(w.customer) : ""}${w.sales_order ? " · " + esc(w.sales_order) : ` · <span class="sk-due">${t("no_order_link")}</span>`}`,
+			w.qc === "Accepted" ? `<span class="sk-chip on">QC ✓</span>` : `<span class="sk-chip">${w.qc === "Rejected" ? "QC ✗" : t("qc_pending")}</span>`)).join("") || empty()}</ul></main>`;
+	}
+
+	async function renderNcs(view) {
+		S.ncs = await call("qc_open_ncs");
+		const canNew = view === "non_conformance" && (state.home.functions || []).includes("Quality");
+		root.innerHTML = header(t(view)) + `<main>${canNew ? `<button class="sk-btn bad wide" data-act="qc-nc-new">📷 + ${t("new_nc")}</button>` : ""}
+			<ul class="sk-list sk-gap">${S.ncs.map((n, i) => li(esc(n.subject), esc(n.details || "").replace(/\n/g, "<br>"),
+				`<button class="sk-chip on" data-act="qc-nc-fix" data-i="${i}">✓ ${t("fixed")}</button>`, "k-lead_new")).join("") || empty()}</ul></main>`;
+	}
+
+	async function renderInspect(view) {
+		const p = await call("qc_pending");
+		const groups = view === "final_check" ? [["final", t("final")]] : [["incoming", t("incoming")], ["stage", t("stage")], ["final", t("final")]];
+		S.checks = [];
+		const rows = (key) => p[key].map((c) => { S.checks.push(c); const i = S.checks.length - 1;
+			return li(`${esc(c.item_name || c.item_code)}${c.operation ? " · " + esc(c.operation) : ""}`, `${esc(c.reference_name)} · ${esc(c.from || "")} · ${num(c.qty)} · ${when(c.since)}`,
+				`<button class="sk-chip on" data-act="qc-open" data-i="${i}">${t("check_now")}</button>`); }).join("");
+		root.innerHTML = header(t(view)) + `<main>${groups.map(([k, label]) => `<h3 class="sk-h">${label} (${p[k].length})</h3><ul class="sk-list">${rows(k) || empty()}</ul>`).join("")}</main>`;
+	}
+	async function inspectForm(i) {
+		const c = S.checks[i];
+		S.check = c;
+		const o = await call("qc_templates", { reference_type: c.reference_type, operation: c.operation || "", item_code: c.item_code });
+		root.innerHTML = header(t("inspect")) + `<main class="sk-form"><h3 class="sk-h">${esc(c.item_name || c.item_code)}${c.operation ? " · " + esc(c.operation) : ""}</h3>
+			<p class="sk-note">${esc(c.reference_type)} ${esc(c.reference_name)} · ${esc(c.from || "")}</p>
+			${pick("q-tpl", t("checklist"), o.templates)}<div id="q-points"></div>
+			${c.reference_type === "Purchase Receipt" ? `<label class="sk-field"><span>${t("accepted_qty")}</span>${qtyBox("q-acc", c.qty)}</label><label class="sk-field"><span>${t("rejected_qty")}</span>${qtyBox("q-rej", 0)}</label>` : ""}
+			<label class="sk-field"><span>${t("sample")}</span>${qtyBox("q-sample", 1)}</label>
+			${photoField("q-p1", "📷 " + t("photo"))}${photoField("q-p2", "📷 " + t("photo"))}${formField("q-remark", t("note_q"))}
+			<div class="sk-row"><button class="sk-btn ok wide" data-act="qc-save">${t("save_check")}</button></div></main>`;
+		const sel = document.getElementById("q-tpl");
+		sel.addEventListener("change", () => loadPoints(sel.value));
+		if (o.guess) sel.value = o.guess;
+		loadPoints(o.guess || "");
+	}
+	// no template in ERPNext yet: a short standard list so a check is never blocked
+	const DEFAULT_POINTS = { "Purchase Receipt": ["qty_matches", "no_damage_rust", "size_as_ordered"], "Job Card": ["size_as_drawing", "weld_finish", "clean_safe"] };
+	async function loadPoints(tpl) {
+		S.points = tpl ? await call("qc_checklist", { template: tpl })
+			: (DEFAULT_POINTS[S.check.reference_type] || DEFAULT_POINTS["Job Card"]).map((k) => ({ specification: t(k) }));
+		document.getElementById("q-points").innerHTML = S.points.map((p, k) => `<div class="sk-point"><div class="sk-item-title">${esc(p.specification)}${p.value ? ` <small>(${esc(p.value)})</small>` : ""}</div>
+			<div class="sk-row"><button class="sk-chip on" data-qok="${k}" data-v="1">✓ OK</button><button class="sk-chip" data-qok="${k}" data-v="0">✗ ${t("not_ok")}</button></div>
+			<div class="sk-qnote" id="q-note-wrap-${k}" hidden>${formField("q-note-" + k, t("what_wrong"))}</div></div>`).join("") || `<p class="sk-note">${t("pick_checklist")}</p>`;
+	}
+
+	async function prodAct(act, el) {
+		const i = Number(el.dataset.i);
+		switch (act) {
+			case "pr-read": { const j = S.jobs[i]; return readAloud(`${j.operation || ""}. ${j.item_name || ""}`); }
+			case "pr-start": { await call("prod_start", { job_card: S.jobs[i].name }, true); toast(t("saved")); return go(state.view); }
+			case "pr-photo": {
+				const inp = document.createElement("input");
+				inp.type = "file"; inp.accept = "image/*"; inp.capture = "environment";
+				inp.onchange = async () => { if (!inp.files[0]) return; const url = await upload(inp.files[0]); await call("prod_photo", { job_card: S.jobs[i].name, photo: url }, true); toast(t("saved")); go(state.view); };
+				return inp.click();
+			}
+			case "pr-done": return doneSheet(i);
+			case "pr-done-save": {
+				el.disabled = true;
+				const photos = [await photoUrl("pd-1"), await photoUrl("pd-2")].filter(Boolean);
+				const r = await call("prod_done", { job_card: S.job.name, photos: JSON.stringify(photos), workers: val("pd-workers"), remark: val("pd-remark") }, true);
+				closeSheet();
+				toast(r.posted ? t("job_done_ok") : t("job_done_draft"));
+				return go(state.view);
+			}
+			case "pr-need": return needSheet(S.jobs[i]);
+			case "pr-need-save": {
+				el.disabled = true;
+				const items = val("pn-item") && Number(val("pn-qty")) > 0 ? [{ item_code: val("pn-item"), qty: val("pn-qty") }] : [];
+				const jc = S.job ? S.job.name : val("pn-job");
+				const r = await call("prod_need_material", { items: JSON.stringify(items), job_card: jc || null, needed_by: val("pn-date"), spoken: val("pn-spoken") }, true);
+				closeSheet();
+				toast(r.request ? `${t("sent_store")}: ${r.request}` : t("sent_store"));
+				return state.view === "need_material" ? go("home") : undefined;
+			}
+			case "pr-progress": {
+				el.disabled = true;
+				await call("prod_progress_photo", { work_order: val("pp-wo"), photo: await photoUrl("pp-photo"), note: val("pp-note") }, true);
+				toast(t("saved"));
+				return go("progress_photos");
+			}
+			case "qc-open": return inspectForm(i);
+			case "qc-save": {
+				const points = S.points.map((p, k) => {
+					const on = root.querySelector(`[data-qok="${k}"].on`);
+					return { specification: p.specification, value: p.value, ok: on ? Number(on.dataset.v) : 1, note: val("q-note-" + k) };
+				});
+				el.disabled = true;
+				const photos = [await photoUrl("q-p1"), await photoUrl("q-p2")].filter(Boolean);
+				const c = S.check;
+				const r = await call("qc_save", { reference_type: c.reference_type, reference_name: c.reference_name, item_code: c.item_code, points: JSON.stringify(points),
+					template: val("q-tpl") || null, sample_size: val("q-sample") || 1, accepted_qty: val("q-acc") || null, rejected_qty: val("q-rej") || null,
+					photos: JSON.stringify(photos), remark: val("q-remark"), inspection_type: c.inspection_type }, true);
+				toast(r.status === "Accepted" ? `✓ ${t("passed")}: ${r.name}` : `✗ ${t("rework_sent")}${r.non_conformance ? ": " + r.non_conformance : ""}`, r.status !== "Accepted");
+				return go(c.inspection_type === "Outgoing" ? "final_check" : "inspect");
+			}
+			case "qc-nc-new": {
+				S.jobs = S.jobs || await call("prod_job_cards").catch(() => []);
+				return sheet(`<h3 class="sk-h">❗ ${t("new_nc")}</h3>${photoField("nc-photo", "📷 " + t("defect_photo"))}${formField("nc-subject", t("what_wrong"), true)}
+					${pick("nc-job", t("job_card"), (S.jobs || []).map((x) => ({ value: x.name, label: `${x.name} · ${x.operation || ""} · ${x.workstation || ""}` })))}
+					<label class="sk-field"><span>${t("by_when")}</span><input id="nc-date" type="date" class="sk-select"></label>
+					<button class="sk-btn bad wide" data-act="qc-nc-save">${t("send_fixer")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+			}
+			case "qc-nc-save": {
+				el.disabled = true;
+				const photos = [await photoUrl("nc-photo")].filter(Boolean);
+				await call("qc_raise_nc", { subject: val("nc-subject"), details: val("nc-subject"), job_card: val("nc-job") || null, by_when: val("nc-date") || null, photos: JSON.stringify(photos) }, true);
+				closeSheet();
+				toast(t("saved"));
+				return go("non_conformance");
+			}
+			case "qc-nc-fix": {
+				S.nc = S.ncs[i];
+				return sheet(`<h3 class="sk-h">✓ ${esc(S.nc.subject)}</h3>${formField("nf-action", t("what_done"), true)}${photoField("nf-photo", "📷 " + t("after_photo"))}
+					<button class="sk-btn ok wide" data-act="qc-nc-close">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+			}
+			case "qc-nc-close": {
+				el.disabled = true;
+				await call("qc_close_nc", { name: S.nc.name, action: val("nf-action"), photo: await photoUrl("nf-photo") }, true);
+				closeSheet();
+				toast(t("saved"));
+				return go(state.view);
+			}
+		}
+		return false;
+	}
+
+	// Sales manager: the whole team's leads and deals with his own (SK, 26-Oct-2026)
+	let teamPerson = "";
+	async function renderTeamLeads() {
+		const d = await call("team_follow_up", teamPerson ? { person: teamPerson } : {});
+		const chip = (u, label) => `<button class="sk-chip ${teamPerson === u ? "on" : ""}" data-teamp="${esc(u)}">${esc(label)}</button>`;
+		const people = d.people.map((p) => `<li class="sk-item"><button class="sk-fu-main" data-teamp="${esc(p.user)}"><div class="sk-item-title">${esc(p.full_name)}</div>
+			<div class="sk-item-meta">${p.open} ${t("open_items")} · ${p.new} ${t("new_badge")} · <span class="${p.overdue ? "sk-due" : ""}">${p.overdue} ${t("overdue")}</span>${p.deal_value ? ` · ₹${Number(p.deal_value).toLocaleString("en-IN")}` : ""}</div></button>
+			${p.score != null ? `<b>${Math.round(p.score)}%</b>` : ""}</li>`).join("");
+		const rows = d.rows.map((r) => `<li class="sk-fu ${r.overdue ? "late" : r.new ? "new" : ""}"><button class="sk-fu-main" data-open="${esc(r.doctype)}" data-name="${esc(r.name)}">
+			<div class="sk-item-title">${esc(r.title)} ${r.new ? `<span class="sk-badge">${t("new_badge")}</span>` : ""}${r.overdue ? `<span class="sk-badge bad">${t("overdue")}</span>` : ""}</div>
+			<div class="sk-item-meta">👤 ${esc(r.owner_name)} · ${esc(r.status || "")} · ${r.doctype === "CRM Deal" ? t("deals") : t("leads")}</div>
+			${r.next || r.due ? `<div class="sk-item-meta">${t("next")}: ${esc(r.next || "")} ${r.due ? "· " + when(r.due) : ""}</div>` : ""}
+			${r.last ? `<div class="sk-item-meta">${t("last")}: ${esc(r.last.text)} · ${when(r.last.on)}</div>` : ""}</button>${contactButtons(r)}</li>`).join("");
+		root.innerHTML = header(t("team_leads")) + `<main><ul class="sk-list">${people}</ul>
+			<div class="sk-row sk-wrap sk-gap">${chip("", t("all"))}${d.people.map((p) => chip(p.user, p.full_name)).join("")}</div>
+			<ul class="sk-list sk-gap">${rows || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+	}
+
 	const LIVE_VIEWS = { my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"),
 		my_kpi: renderKpi, dsi: renderDsi, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
 		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name),
 		reminders: renderReminders, calls: renderCalls, whatsapp: renderWhatsApp, mail: renderMail, library: renderLibrary,
-		logins: renderLogins, stock_check: renderStockCheck, receive: renderReceive, issue: renderIssue, store_requests: renderStoreRequests,
+		logins: renderLogins, team_leads: renderTeamLeads, stock_check: renderStockCheck, receive: renderReceive, issue: renderIssue, store_requests: renderStoreRequests,
 		dispatch: renderDispatch, low_stock: renderLowStock, stock_count: renderStockCount, new_item: renderNewItem,
 		buy_requests: renderBuyRequests, get_rates: renderGetRates, compare: renderCompare, po_follow_up: renderFollowUpPo,
-		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals };
+		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals,
+		order_board: renderOrderBoard, job_cards: () => renderJobs("job_cards"), my_jobs: () => renderJobs("my_jobs"), need_material: renderNeedMaterial,
+		progress_photos: renderProgressPhotos, ready_dispatch: renderReadyDispatch, non_conformance: () => renderNcs("non_conformance"),
+		my_fixes: () => renderNcs("my_fixes"), inspect: () => renderInspect("inspect"), final_check: () => renderInspect("final_check") };
 
 	async function go(view) {
 		state.view = view;
 		if (view === "home") contacts = null;
 		try {
-			if (view === "home") return renderHome();
+			if (view === "home") {
+				renderHome();
+				// red counts change as jobs are done and checks are saved: refresh them quietly
+				return call("home").then((h) => { state.home = h; if (state.view === "home" && !document.querySelector(".sk-sheet")) renderHome(); }).catch(() => {});
+			}
 			const fn = LIVE_VIEWS[view];
 			return fn ? await fn() : renderSoon(view);
 		} catch (e) { toast(e.message, true); }
@@ -1698,9 +2054,18 @@
 				toast(t("saved"));
 				return el.dataset.resp === "Problem" ? go("problem") : go(state.view);
 			}
+			if (el.dataset.teamp !== undefined) { teamPerson = el.dataset.teamp; return go("team_leads"); }
 			if (el.dataset.fnpick) { el.classList.toggle("on"); return showWorkstation(); }
 			const act = el.dataset.act;
 			if (act && (act.startsWith("st-") || act.startsWith("pu-"))) return await storeAct(act, el);
+			if (act && (act.startsWith("pr-") || act.startsWith("qc-"))) return await prodAct(act, el);
+			if (el.dataset.qok !== undefined) {
+				const k = el.dataset.qok;
+				root.querySelectorAll(`[data-qok="${k}"]`).forEach((c) => c.classList.remove("on"));
+				el.classList.add("on");
+				document.getElementById("q-note-wrap-" + k).hidden = el.dataset.v === "1";
+				return;
+			}
 			if (act === "pin-save") {
 				if (val("p-new") !== val("p-new2")) return toast(t("pin_mismatch"), true);
 				el.disabled = true;
@@ -1708,6 +2073,18 @@
 				state.home.must_set_pin = false;
 				toast(t("pin_saved"));
 				return go("home");
+			}
+			if (act === "login-bulk-open") return bulkSheet();
+			if (act === "login-bulk") {
+				el.disabled = true;
+				const rows = await call("hr_bulk_logins", { text: val("g-bulk") }, true);
+				closeSheet();
+				return bulkResult(rows);
+			}
+			if (act === "login-bulk-wa") {
+				const r = root._bulk[Number(el.dataset.i)];
+				const msg = `${t("login_link")}: ${location.origin}/sk\n${t("mobile")}: ${r.mobile}\n${t("first_pin")}: ${r.pin}`;
+				return window.open("https://wa.me/" + waNumber(r.mobile) + "?text=" + encodeURIComponent(msg), "_blank");
 			}
 			if (act === "login-new") return loginSheet(el.dataset.i !== undefined ? root._people[Number(el.dataset.i)] : null);
 			if (act === "login-make") {
