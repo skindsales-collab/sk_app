@@ -43,7 +43,7 @@ FUNCTIONS = {
 	},
 	"Quality": {
 		"label": {"English": "Quality", "Marathi": "गुणवत्ता"},
-		"tiles": ["my_day", "inspect", "final_check", "non_conformance", "order_board", "complaints", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "inspect", "final_check", "non_conformance", "el_points", "order_board", "complaints", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Quality Manager"],
 		"desk": "/app/quality",
@@ -102,7 +102,7 @@ FUNCTIONS = {
 	"Subcontractor": {
 		"label": {"English": "Production (subcontractor)", "Marathi": "उत्पादन (कंत्राटदार)"},
 		# very simple screen (SK): own jobs only; job tiles come with the Production screens
-		"tiles": ["my_day", "my_jobs", "need_material", "my_fixes", "problem", "training", "day_report"],
+		"tiles": ["my_day", "my_jobs", "el_points", "need_material", "my_fixes", "problem", "training", "day_report", "dsi", "my_kpi"],
 		"live": True,
 		"erpnext_roles": ["SK Subcontractor"],
 		"desk": "/sk",
@@ -178,26 +178,32 @@ def function_list(profile) -> list[str]:
 # sequence; applicable on each screen". Level 1 = function icons (or, for one function, its flow + these few
 # icons), level 2 = the function page, level 3 = "More" with the rest in groups. Order = the order the work goes.
 MAIN_TILES = {
-	"Sales": ["new_lead", "my_leads", "follow_up", "my_deals", "team_leads"],
-	"Marketing": ["new_lead", "my_leads", "follow_up"],
-	"Production": ["to_plan", "job_cards", "need_material", "order_board", "ready_dispatch"],
-	"Quality": ["inspect", "final_check", "non_conformance"],
-	"Stores": ["store_requests", "receive", "issue", "dispatch"],
+	# main screen Rev 2 (SK 26-Oct): four own icons; a sales manager gets Team Leads in place of My Deals
+	"Sales": ["new_lead", "my_leads", "follow_up", "team_leads", "my_deals"],
+	"Marketing": ["new_lead", "my_leads", "follow_up", "my_deals"],
+	"Machine Shifting": ["my_deals", "customers", "site_checklist", "complaints"],
+	"Production": ["to_plan", "job_cards", "need_material", "order_board"],
+	"Quality": ["inspect", "final_check", "non_conformance", "el_points"],
+	"Stores": ["store_requests", "receive", "issue", "stock_count"],
 	"Purchase": ["buy_requests", "get_rates", "po_follow_up", "bills"],
 	"Accounts": ["cash_today", "to_collect", "to_pay", "invoices"],
-	"HR": ["attendance", "team_scorecards"],
-	"Subcontractor": ["my_jobs", "need_material", "my_fixes"],
+	# SK 26-Oct: attendance is not on the main screen (it is in More)
+	"HR": ["leave_expense", "team_scorecards"],
+	"Subcontractor": ["my_jobs", "el_points", "need_material", "my_fixes"],
 	"AI": ["improvement_inbox", "erp_gaps", "app_users", "dept_visits"],
-	# point 10: the CEO's first screen = overview, approvals, team; the 100 Cr page is inside Dashboards (SK 26-Oct)
-	"Management": ["dash_overview", "po_approvals", "pay_approvals", "dash_daily_review", "view_member", "leadership"],
+	# the CEO's first screen = overview, approvals, team; the other dashboards and Leadership are in More (SK 26-Oct)
+	"Management": ["dash_overview", "po_approvals", "pay_approvals", "view_member"],
 }
-# level 1 shared row: only My Day (with the calendar inside) and More
-MAIN_SHARED = ["my_day"]
+MAIN_COUNT = 4
+# main screen Rev 2 (SK 26-Oct): every main screen has the same common row, the Call / WhatsApp / Mail row and
+# My Day + DSI at the bottom (with More); Attendance, Leadership, Training and the Product library are in More
+MAIN_COMMON = ["day_report", "my_kpi", "reminders", "problem"]
+MAIN_CONTACT = ["calls", "whatsapp", "mail"]
+MAIN_SHARED = ["my_day", "dsi"]
 # level 3 "More": the shared tiles in groups, in the order of a working day
 SHARED_GROUPS = [
-	("grp_work", ["reminders", "calls", "whatsapp", "mail", "team_reports", "dsi", "day_report"]),
-	("grp_me", ["my_kpi", "training", "leave_expense"]),
-	("grp_help", ["problem", "library"]),
+	("grp_work", ["team_reports", "leave_expense"]),
+	("grp_me", ["training", "library"]),
 ]
 
 
@@ -205,7 +211,7 @@ def split_main(function: str, tiles: list[str]) -> tuple[list[str], list[str]]:
 	"""(main, more) of a function's own tiles: the essentials first in the function's order, the rest in theirs.
 	Functions without a list keep their first four on the main screen."""
 	want = MAIN_TILES.get(function)
-	main = [t for t in want if t in tiles] if want else tiles[:4]
+	main = ([t for t in want if t in tiles] if want else tiles)[:MAIN_COUNT]
 	return main, [t for t in tiles if t not in main]
 
 
@@ -228,11 +234,13 @@ def sections_for(functions: list[str], has_team: bool = False) -> dict:
 		shared += [t for t in h["tiles"] if t in SHARED_TILES and t not in shared]
 	last = [t for t in ("dsi", "day_report") if t in shared]
 	shared = ["my_day"] + [t for t in shared if t not in last and t != "my_day"] + last
-	grouped = [(g, [t for t in keys if t in shared]) for g, keys in SHARED_GROUPS]
-	rest = [t for t in shared if t not in MAIN_SHARED and not any(t in keys for _g, keys in grouped)]
+	on_main = set(MAIN_SHARED + MAIN_COMMON + MAIN_CONTACT)
+	grouped = [(g, [t for t in keys if t in shared and t not in on_main]) for g, keys in SHARED_GROUPS]
+	rest = [t for t in shared if t not in on_main and not any(t in keys for _g, keys in grouped)]
 	if rest:
 		grouped[0] = (grouped[0][0], grouped[0][1] + rest)
 	return {"sections": sections, "shared": shared, "main_shared": [t for t in MAIN_SHARED if t in shared],
+		"main_common": [t for t in MAIN_COMMON if t in shared], "main_contact": MAIN_CONTACT,
 		"more_groups": [{"group": g, "tiles": keys} for g, keys in grouped if keys]}
 
 

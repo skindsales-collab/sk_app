@@ -12,15 +12,23 @@ class TestPending26Oct(IntegrationTestCase):
 		x = s["sections"][0]
 		self.assertEqual(x["main"], ["new_lead", "my_leads", "follow_up", "my_deals"])
 		self.assertEqual(set(x["main"]) | set(x["more"]), set(x["tiles"]))
-		self.assertEqual(s["main_shared"], ["my_day"])
+		# main screen Rev 2 (SK 26-Oct): My Day + DSI at the bottom, a common row and Call / WhatsApp / Mail
+		self.assertEqual(s["main_shared"], ["my_day", "dsi"])
+		self.assertEqual(s["main_contact"], ["calls", "whatsapp", "mail"])
+		self.assertEqual(s["main_common"], ["day_report", "my_kpi", "reminders", "problem"])
 		inside = [t for g in s["more_groups"] for t in g["tiles"]]
 		self.assertNotIn("calendar", inside)  # inside My Day now
-		self.assertTrue(set(s["shared"]) - {"my_day"} <= set(inside))
+		on_main = set(s["main_shared"] + s["main_common"] + s["main_contact"])
+		self.assertTrue(set(s["shared"]) - on_main <= set(inside))
+		for k in ("training", "library"):  # SK 26-Oct: not on the main screen
+			self.assertIn(k, inside)
 		ceo = functions.sections_for(["Management"])["sections"][0]
-		self.assertLessEqual(len(ceo["main"]), 6)
-		for k in ("leave_expense", "my_kpi", "attendance", "dash_cr100"):
+		self.assertEqual(ceo["main"], ["dash_overview", "po_approvals", "pay_approvals", "view_member"])
+		for k in ("leave_expense", "my_kpi", "attendance", "dash_cr100", "leadership"):
 			self.assertNotIn(k, ceo["main"])
 		self.assertIn("leadership", ceo["tiles"])
+		self.assertNotIn("attendance", functions.sections_for(["HR"])["sections"][0]["main"])
+		self.assertIn("el_points", functions.sections_for(["Quality"])["sections"][0]["main"])
 
 	def test_funnel(self):
 		f = plan.funnel(1500000, 200000, 0.25, 26)

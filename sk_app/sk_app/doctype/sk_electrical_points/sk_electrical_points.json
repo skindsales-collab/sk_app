@@ -1,0 +1,195 @@
+{
+ "doctype": "DocType",
+ "name": "SK Electrical Points",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-10-26 23:40:00.000000",
+ "modified": "2026-10-26 23:40:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "naming_rule": "Expression",
+ "autoname": "format:ELP-{YYYY}-{#####}",
+ "track_changes": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "title_field": "cabin",
+ "field_order": [
+  "job_card",
+  "work_order",
+  "cabin",
+  "user",
+  "date",
+  "column_1",
+  "light",
+  "fan",
+  "socket_5a",
+  "socket_15a",
+  "ac_point",
+  "mcb_db",
+  "earthing",
+  "other_points",
+  "total_points",
+  "photo",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "job_card",
+   "fieldtype": "Link",
+   "label": "Job Card",
+   "options": "Job Card",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "label": "Work Order",
+   "options": "Work Order",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "cabin",
+   "fieldtype": "Data",
+   "label": "Cabin",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "Done By",
+   "options": "User",
+   "reqd": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "reqd": 1,
+   "default": "Today",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "column_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "light",
+   "fieldtype": "Int",
+   "label": "Light points",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "fan",
+   "fieldtype": "Int",
+   "label": "Fan points",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "socket_5a",
+   "fieldtype": "Int",
+   "label": "5A sockets",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "socket_15a",
+   "fieldtype": "Int",
+   "label": "15A sockets",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "ac_point",
+   "fieldtype": "Int",
+   "label": "AC points",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "mcb_db",
+   "fieldtype": "Int",
+   "label": "MCB / DB",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "earthing",
+   "fieldtype": "Int",
+   "label": "Earthing",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "other_points",
+   "fieldtype": "Int",
+   "label": "Other points",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "total_points",
+   "fieldtype": "Int",
+   "label": "Total Points",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "photo",
+   "fieldtype": "Attach Image",
+   "label": "Photo"
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "report": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "Manufacturing Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "report": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "Manufacturing User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "report": 1
+  },
+  {
+   "role": "Quality Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "report": 1
+  },
+  {
+   "role": "SK Subcontractor",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "report": 1
+  }
+ ],
+ "states": [],
+ "links": [],
+ "actions": [],
+ "index_web_pages_for_search": 0
+}

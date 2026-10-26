@@ -223,6 +223,54 @@ def ready_to_dispatch(user: str) -> list[dict]:
 	return out
 
 
+# ---------- Electrical points (SK 26-Oct, main screen Rev 2) ----------
+# Satish (electrician on the Electrical workstation, also the Quality owner) enters the points done in each cabin by
+# type with one photo; the count is kept per Job Card and adds up by month (planning and subcontract billing).
+EL_POINTS = ("light", "fan", "socket_5a", "socket_15a", "ac_point", "mcb_db", "earthing", "other_points")
+EL_WORDS = ("electric", "wiring")
+
+
+def _is_electrical(text: str | None) -> bool:
+	return any(w in (text or "").lower() for w in EL_WORDS)
+
+
+def el_jobs(user: str) -> dict:
+	"""Electrical job cards of the last 60 days, open ones first, with the points already entered; and this month's total."""
+	need(user, PRODUCTION, SUB, "Quality")
+	jobs = [j for j in frappe.get_all("Job Card", filters={"docstatus": ["<", 2], "modified": [">=", frappe.utils.add_days(nowdate(), -60)]},
+		fields=["name", "operation", "workstation", "status", "work_order", "item_name", "docstatus"], order_by="modified desc", limit=300)
+		if _is_electrical(j.operation) or _is_electrical(j.workstation)]
+	done = {}
+	for r in frappe.get_all("SK Electrical Points", filters={"job_card": ["in", [j.name for j in jobs] or [""]]},
+			fields=["name", "job_card", "total_points", *EL_POINTS], order_by="creation desc"):
+		done.setdefault(r.job_card, r)
+	start = frappe.utils.get_first_day(getdate())
+	month = sum(cint(v) for v in frappe.get_all("SK Electrical Points", filters={"date": [">=", start]}, pluck="total_points"))
+	out = [{**j, "points": done.get(j.name)} for j in jobs]
+	out.sort(key=lambda j: (j["status"] == "Completed", bool(j["points"])))
+	return {"jobs": out, "month_total": month, "types": list(EL_POINTS)}
+
+
+def save_el_points(user: str, job_card: str, points: dict, photo=None, note=None) -> dict:
+	need(user, PRODUCTION, SUB, "Quality")
+	jc = frappe.db.get_value("Job Card", job_card, ["name", "work_order", "item_name", "operation", "workstation"], as_dict=True)
+	if not jc:
+		frappe.throw(_("Job {0} not found").format(job_card))
+	if _is_sub_only(user) and jc.workstation != my_workstation(user):
+		frappe.throw(_("This job is not on your workstation"), frappe.PermissionError)
+	name = frappe.db.get_value("SK Electrical Points", {"job_card": job_card})
+	doc = frappe.get_doc("SK Electrical Points", name) if name else frappe.new_doc("SK Electrical Points")
+	doc.update({"job_card": job_card, "work_order": jc.work_order, "cabin": jc.item_name, "user": user, "date": nowdate(),
+		**{f: max(0, cint((points or {}).get(f))) for f in EL_POINTS}})
+	if note:
+		doc.note = note
+	if photo:
+		doc.photo = photo
+	doc.save(ignore_permissions=True)
+	attach(photo, "SK Electrical Points", doc.name, user)
+	return {"name": doc.name, "total_points": doc.total_points}
+
+
 def badges(user: str, functions: list[str]) -> dict:
 	out = {}
 	if SUB in functions or PRODUCTION in functions:
