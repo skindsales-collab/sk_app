@@ -130,3 +130,23 @@ class TestProductionQuality(IntegrationTestCase):
 	def test_others_cannot_use_production(self):
 		self.assertRaises(frappe.PermissionError, run, "sk_test_buyer@example.com", production.job_cards)
 		self.assertRaises(frappe.PermissionError, run, self.ranjit, quality.pending)
+
+	def test_electrical_points(self):
+		"""SK 26-Oct: points done per cabin by type with a photo; total kept on the Job Card's entry; other workstations blocked."""
+		ws = "SK Test Electrical - Satish"
+		if not frappe.db.exists("Workstation", ws):
+			frappe.get_doc({"doctype": "Workstation", "workstation_name": ws}).insert()
+		wo, jcs = self._work_order()
+		frappe.db.set_value("Job Card", jcs[0], "workstation", ws)
+		listed = run(QC, production.el_jobs)
+		self.assertIn(jcs[0], [j["name"] for j in listed["jobs"]])
+		self.assertNotIn(jcs[1], [j["name"] for j in listed["jobs"]])
+		r = run(QC, production.save_el_points, jcs[0], {"light": 6, "fan": 2, "socket_5a": 4, "earthing": 1, "fan_bad": 9})
+		self.assertEqual(r["total_points"], 13)
+		r = run(QC, production.save_el_points, jcs[0], {"light": 8, "fan": -3})  # same cabin again: corrected, not added
+		self.assertEqual(r["total_points"], 8)
+		self.assertEqual(frappe.db.count("SK Electrical Points", {"job_card": jcs[0]}), 1)
+		self.assertEqual(frappe.db.get_value("SK Electrical Points", {"job_card": jcs[0]}, "work_order"), wo.name)
+		self.assertGreaterEqual(run(QC, production.el_jobs)["month_total"], 8)
+		with self.assertRaises(frappe.PermissionError):
+			run(self.ranjit, production.save_el_points, jcs[0], {"light": 1})

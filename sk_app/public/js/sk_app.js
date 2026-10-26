@@ -863,6 +863,27 @@
 		lk_setup: "चेहरा / बोट लॉक सुरू करा", lk_setup_why: "आता पासून ॲप फक्त फोनच्या बोट / चेहरा लॉकने उघडेल, पिन नाही. बोट आणि चेहरा फोनवरच राहतात; काहीही पाठवले जात नाही.",
 		lk_setup_now: "आत्ता सुरू करा", lk_setup_done: "चेहरा / बोट लॉक तयार. आता पिन लागणार नाही.",
 		lk_reset: "चेहरा / बोट रीसेट", lk_reset_q: "चेहरा / बोट रीसेट करायचे? ती व्यक्ती एकदा पिनने उघडून परत सुरू करेल.", lk_reset_done: "चेहरा / बोट रीसेट झाले" });
+	// main screen Rev 2 (SK 26-Oct)
+	Object.assign(T.English, { k_of: "of", k_no_target: "target not set", k_behind: "behind by", k_on_track: "on track", k_target: "target", k_off: "off target",
+		k_no_data: "No data yet", k_week: "Week", k_month: "Month", kl_Orders: "Orders", kl_Invoices: "Invoices",
+		ka_short: "Actions", ka_title: "Actions to improve the graph", ka_why: "Do these first: they lift your graph. Added by AI, your manager or the CEO, or by you.",
+		ka_high: "High", ka_medium: "Medium", ka_low: "Low", ka_by_date: "by", ka_from: "from", ka_none: "No actions yet. Add the first one below.",
+		ka_new: "New action (what will lift the graph?)", ka_add: "Add action", ka_what_done: "What did you do?", ka_proof: "Proof photo",
+		d_title: "Decide now", d_gap: "gap to target", d_none: "Nothing late. Good work.",
+		el_points: "Electrical points", el_month: "Points this month", el_pts: "points", el_light: "Light points", el_fan: "Fan points",
+		el_socket_5a: "5A sockets", el_socket_15a: "15A sockets", el_ac_point: "AC points", el_mcb_db: "MCB / DB", el_earthing: "Earthing", el_other_points: "Other points" });
+	Object.assign(T.Marathi, { k_of: "पैकी", k_no_target: "टार्गेट ठरलेले नाही", k_behind: "मागे", k_on_track: "बरोबर चालू", k_target: "टार्गेट", k_off: "टार्गेटपेक्षा कमी",
+		k_no_data: "अजून डेटा नाही", k_week: "आठवडा", k_month: "महिना", kl_Orders: "ऑर्डर", kl_Invoices: "इनव्हॉइस",
+		"kt_PO booking": "PO बुकिंग", "kt_Team PO booking": "टीम PO बुकिंग", "kt_Non-Cabin sale": "नॉन-केबिन विक्री", "kt_Order booking & invoices": "ऑर्डर बुकिंग व इनव्हॉइस",
+		"kt_Days to build 100 sq ft": "100 चौ.फूट बनवायला दिवस", "kt_Projects with correct P&L": "बरोबर नफा-तोटा असलेले प्रोजेक्ट", "kt_Days to recruit": "भरतीसाठी दिवस",
+		"kt_Stock accuracy": "स्टॉक अचूकता", "kt_QC first-time pass": "QC पहिल्यांदा पास", "kt_POs received on time": "वेळेवर आलेले PO",
+		"kt_ERP tasks finished": "पूर्ण ERP कामे", "kt_Jobs finished": "पूर्ण कामे",
+		ka_short: "कृती", ka_title: "ग्राफ सुधारण्यासाठी कृती", ka_why: "हे आधी करा: यामुळे तुमचा ग्राफ वर जाईल. AI, मॅनेजर, CEO किंवा तुम्ही जोडलेले.",
+		ka_high: "जास्त", ka_medium: "मध्यम", ka_low: "कमी", ka_by_date: "पर्यंत", ka_from: "कडून", ka_none: "अजून कृती नाही. खाली पहिली जोडा.",
+		ka_new: "नवीन कृती (ग्राफ कशाने वर जाईल?)", ka_add: "कृती जोडा", ka_what_done: "काय केले?", ka_proof: "पुराव्याचा फोटो",
+		d_title: "आता निर्णय घ्या", d_gap: "टार्गेटपासून फरक", d_none: "काहीही उशीर नाही. छान.",
+		el_points: "इलेक्ट्रिकल पॉइंट", el_month: "या महिन्याचे पॉइंट", el_pts: "पॉइंट", el_light: "लाइट पॉइंट", el_fan: "फॅन पॉइंट",
+		el_socket_5a: "5A सॉकेट", el_socket_15a: "15A सॉकेट", el_ac_point: "AC पॉइंट", el_mcb_db: "MCB / DB", el_earthing: "अर्थिंग", el_other_points: "इतर पॉइंट" });
 	const ICON = {
 		more: "⋯", leadership: "🧭", to_plan: "🗓️",
 		my_day: "☀️", my_leads: "🎯", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
@@ -873,7 +894,7 @@
 		stock_check: "📦", receive: "🚚", issue: "📤", store_requests: "📋", dispatch: "🚛", low_stock: "⚠️", stock_count: "🔢", new_item: "🆕",
 		buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅",
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
-		my_fixes: "🔧", inspect: "🔍", final_check: "🏁",
+		my_fixes: "🔧", inspect: "🔍", final_check: "🏁", el_points: "🔌",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
 		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
 		dash_overview: "🏁", dash_daily_review: "🗓️", dash_sales: "💼", dash_marketing: "📣", dash_machine_shifting: "🏗️", dash_job_work: "⚙️", dash_cr100: "🎯", dash_finance: "💰", dash_manufacturing: "🏭", dash_purchase: "🛒", dash_store: "📦", dash_quality: "✅", dash_hr: "👥", dash_ai: "🤖",
@@ -1128,23 +1149,28 @@
 		// SK 26-Oct: the main screen is short and needs no scrolling: essentials only, the rest one level inside, in the
 		// order the work goes. One function: its flow + main icons. Several: one big icon per function (level 2 = its page).
 		const sects = h.sections.sections.filter((x) => x.tiles.length);
-		const shared = h.sections.main_shared || ["my_day"];
+		// main screen Rev 2 (SK 26-Oct): the whole phone screen, decision data first: KPI chart against target, the
+		// work flow as 3D arrows, 4 own icons, "Decide now", the common row, Call / WhatsApp / Mail, My Day + DSI + More
+		const S2 = h.sections;
 		const moreDot = moreBadge(badge);
 		const moreTile = `<button class="sk-tile ${moreDot ? "c-red" : ""}" data-go="more"><span class="sk-tile-icon">${ICON.more}</span><span>${t("more")}</span>${moreDot ? `<b class="sk-dot red">${moreDot}</b>` : ""}</button>`;
-		const bottom = `<div class="sk-tiles small sk-bottom">${shared.map(tile).join("")}${moreTile}</div>`;
+		const row = (keys, cls) => keys.length ? `<div class="sk-tiles small ${cls}">${keys.map(tile).join("")}</div>` : "";
+		const contact = `<div class="sk-contact">${(S2.main_contact || []).map((k) => `<button class="sk-cbig c-${k}" data-go="${k}">${ICON[k]} ${t(k)}${redCount(badge[k]) ? `<b class="sk-dot red">${redCount(badge[k])}</b>` : ""}</button>`).join("")}</div>`;
+		const bottom = `<div class="sk-tiles small sk-bottom">${(S2.main_shared || ["my_day"]).map(tile).join("")}${moreTile}</div>`;
+		let middle;
 		if (sects.length === 1) {
 			const x = sects[0];
-			// the CEO's company flow has a row per function: too long for the first screen, so it opens from its own icon
-			const big = x.function === "Management";
-			const flowTile = `<div class="sk-tiles small"><button class="sk-tile" data-fnpage="${esc(x.function)}"><span class="sk-tile-icon">🔀</span><span>${t("co_flow")}</span></button></div>`;
-			root.innerHTML = header("SK App") + `<main class="sk-l1">${big ? "" : `<div class="sk-flowbox" data-fn="${esc(x.function)}">${flowHtml(x.function)}</div>`}
-				${seqTiles(x.main || x.tiles, plain)}${big ? flowTile : ""}${bottom}</main>`;
+			middle = `<div class="sk-flowbox sk-f3" data-fn="${esc(x.function)}" data-mode="3d">${flow3dHtml(x.function)}</div>${row(x.main || x.tiles, "sk-own")}`;
 		} else {
-			root.innerHTML = header("SK App") + `<main class="sk-l1"><div class="sk-tiles small sk-fns">${sects.map((x) => {
+			// several functions: one big icon per function (level 2 = its page with its flow)
+			middle = `<div class="sk-tiles small sk-fns sk-own">${sects.map((x) => {
 				const red = (x.tiles || []).reduce((n, k) => n + redCount(badge[k]), 0);
 				return `<button class="sk-tile ${red ? "c-red" : ""}" data-fnpage="${esc(x.function)}"><span class="sk-tile-icon">${FN_ICON[x.function] || "📁"}</span><span>${esc(fnLabel(x.label))}</span>${red ? `<b class="sk-dot red">${red}</b>` : ""}</button>`;
-			}).join("")}</div>${bottom}</main>`;
+			}).join("")}</div>`;
 		}
+		root.innerHTML = header("SK App") + `<main class="sk-l1 sk-home2"><div class="sk-kpibox">${kpiHtml()}</div>${middle}
+			<div class="sk-decide">${decideHtml()}</div>${row(S2.main_common || [], "sk-common")}${contact}${bottom}</main>`;
+		loadKpi();
 		loadFlows();
 	}
 	const fnLabel = (l) => (l && (l[state.lang] || l.English)) || "";
@@ -1204,11 +1230,228 @@
 		root.innerHTML = header(`${ICON.more} ${t("more")}`) + `<main class="sk-l1">${big}${groups.map(([title, keys, seq]) => `<h3 class="sk-h sk-fn-row">${esc(title)}</h3>
 			<div class="sk-tiles small ${seq ? "sk-seq" : ""}">${keys.map((k) => tileBtn(k, badge)).join("")}</div>`).join("")}</main>`;
 	}
-	// the function's own icons joined by arrows, in the order the work goes (SK's mock-ups 26-Oct)
-	function seqTiles(keys, tiles) {
-		const html = tiles(keys);
-		return html.replace(/<div class="sk-tiles small">/g, '<div class="sk-tiles small sk-seq">');
+	// ---------- main screen Rev 2 (SK 26-Oct): one KPI chart against target, 3D flow, "Decide now" ----------
+	let kpiData = null, kpiAt = 0, kpiLoading = false, kpiView = "week";
+	const kAmt = (v) => (Math.abs(v) >= 1e7 ? `${(v / 1e7).toFixed(1)} Cr` : Math.abs(v) >= 1e5 ? `${(v / 1e5).toFixed(1)} L` : Math.abs(v) >= 1e3 ? `${Math.round(v / 1e3)} K` : `${Math.round(v)}`);
+	async function loadKpi(force) {
+		if (kpiLoading || (!force && kpiData && Date.now() - kpiAt < 5 * 60 * 1000)) return paintKpi();
+		kpiLoading = true;
+		try { kpiData = await call("my_home_kpi", {}, false, true); kpiAt = Date.now(); } catch (e) { kpiData = kpiData || { chart: null }; }
+		kpiLoading = false;
+		paintKpi();
 	}
+	function paintKpi() {
+		if (state.view !== "home") return;
+		const b = root.querySelector(".sk-kpibox");
+		if (b) b.innerHTML = kpiHtml();
+		const d = root.querySelector(".sk-decide");
+		if (d) d.innerHTML = decideHtml();
+	}
+	// the chart's value now and the gap to target (for the "Decide now" strip)
+	function kpiNow() {
+		const c = kpiData && kpiData.chart;
+		if (!c) return null;
+		if (c.kind === "money") {
+			const w = c.week, pts = w.lines[0].points, n = pts.length;
+			const actual = n ? pts[n - 1] : 0, due = n ? w.target[n - 1] : 0;
+			return { actual, target: c.target, gap: c.target ? Math.max(0, due - actual) : 0, money: true };
+		}
+		const v = [...c.points].reverse().find((p) => p.v != null);
+		if (!v) return null;
+		const off = c.good_low ? v.v - c.target : c.target - v.v;
+		return { actual: v.v, target: c.target, gap: Math.max(0, off), unit: c.unit, month: v.m };
+	}
+	function kpiHtml() {
+		if (!kpiData) return `<p class="sk-note">… ${t("fl_loading")}</p>`;
+		const c = kpiData.chart;
+		if (!c) return "";
+		const now = kpiNow();
+		let sub = "";
+		if (c.kind === "money") {
+			sub = `₹${kAmt(now.actual)}${c.target ? ` ${t("k_of")} ₹${kAmt(c.target)}` : ` · ${t("k_no_target")}`}${now.gap ? ` · <b class="sk-due">${t("k_behind")} ₹${kAmt(now.gap)}</b>` : c.target ? ` · <b class="sk-ok">${t("k_on_track")}</b>` : ""}`;
+		} else if (now) {
+			sub = `${now.month}: ${now.actual}${c.unit} · ${t("k_target")} ${c.target}${c.unit}${now.gap ? ` · <b class="sk-due">${t("k_off")}</b>` : ` · <b class="sk-ok">${t("k_on_track")}</b>`}`;
+		} else sub = `<span class="sk-due">${esc(c.need || t("k_no_data"))}</span>`;
+		const tabs = c.kind === "money" ? `<span class="sk-ktabs">${["week", "month"].map((v) => `<button class="sk-chip ${kpiView === v ? "on" : ""}" data-kview="${v}">${t("k_" + v)}</button>`).join("")}</span>` : "";
+		// SK 26-Oct: the actions that lift this graph, from AI, the manager or the CEO, one tap away
+		const n = kpiData.actions || 0;
+		const act = `<button class="sk-kact ${n ? "on" : ""}" data-go="kpi_actions">🎯 ${t("ka_short")}${n ? ` <b>${n}</b>` : ""}</button>`;
+		return `<div class="sk-kcard"><div class="sk-khead"><b>${esc(t("kt_" + c.title) !== "kt_" + c.title ? t("kt_" + c.title) : c.title)}</b>${tabs}${act}</div><small>${sub}</small>
+			${c.kind === "money" ? moneySvg(c) : trendSvg(c)}</div>`;
+	}
+	// amount up the side, weeks (running total this month) or months along the bottom (SK 26-Oct)
+	function moneySvg(c) {
+		const v = kpiView === "month" ? c.month : c.week;
+		const W = 320, H = 150, L = 34, B = 18, T = 12;
+		const tgt = kpiView === "month" ? v.labels.map(() => c.target) : v.target;
+		const all = [...v.lines.flatMap((l) => l.points), ...(c.target ? tgt : [])];
+		const mx = Math.max(1, ...all) * 1.1, n = v.labels.length;
+		const X = (i) => (n === 1 ? (L + W) / 2 : L + i * (W - L - 16) / (n - 1)), Y = (val) => H - B - (val / mx) * (H - B - T);
+		let g = "";
+		(Math.max(0, ...all) ? [0, mx / 2, mx / 1.1] : [0]).forEach((val) => { g += `<line x1="${L}" x2="${W - 4}" y1="${Y(val)}" y2="${Y(val)}" class="sk-grid"/><text x="2" y="${Y(val) + 3}" class="sk-ax">${kAmt(val)}</text>`; });
+		if (c.target) g += `<polyline points="${tgt.map((val, i) => `${X(i)},${Y(val)}`).join(" ")}" class="sk-tline"/><text x="${W - 6}" y="${Y(tgt[n - 1]) - 4}" text-anchor="end" class="sk-tlabel">${t("k_target")} ₹${kAmt(tgt[n - 1])}</text>`;
+		v.lines.forEach((l) => {
+			g += `<polyline points="${l.points.map((val, i) => `${X(i)},${Y(val)}`).join(" ")}" class="sk-kline k-${l.c}"/>`;
+			l.points.forEach((val, i) => { g += `<circle cx="${X(i)}" cy="${Y(val)}" r="3.5" class="sk-kdot k-${l.c}"/>`; });
+			const last = l.points[n - 1];
+			g += `<text x="${X(n - 1) - 5}" y="${Y(last) - 6}" text-anchor="end" class="sk-kval k-${l.c}">${kAmt(last)}</text>`;
+		});
+		v.labels.forEach((m, i) => { g += `<text x="${X(i)}" y="${H - 4}" text-anchor="middle" class="sk-ax">${m}</text>`; });
+		const legend = v.lines.length > 1 ? `<div class="sk-klegend">${v.lines.map((l) => `<span class="k-${l.c}">● ${t("kl_" + l.label)}</span>`).join("")}</div>` : "";
+		return `<svg viewBox="0 0 ${W} ${H}" class="sk-ksvg">${g}</svg>${legend}`;
+	}
+	// month by month against target: green dot = on target, red = not (SK 26-Oct: "trend monitoring")
+	function trendSvg(c) {
+		const W = 320, H = 150, L = 30, B = 18, T = 20;
+		const vals = c.points.map((p) => p.v).filter((x) => x != null);
+		const lo = Math.min(c.target, ...vals) * 0.85, n = c.points.length;
+		let hi = Math.max(c.target, ...vals, lo + 1) * 1.08;
+		if (c.unit === "%") hi = Math.max(Math.min(hi, 100), c.target + 1);
+		const X = (i) => L + i * (W - L - 14) / (n - 1), Y = (v) => H - B - ((v - lo) / (hi - lo)) * (H - B - T);
+		let g = `<line x1="${L}" x2="${W - 4}" y1="${Y(c.target)}" y2="${Y(c.target)}" class="sk-tline"/><text x="${W - 6}" y="${Y(c.target) - 4}" text-anchor="end" class="sk-tlabel">${t("k_target")} ${c.target}${c.unit}</text>`;
+		[lo, hi].forEach((v) => { g += `<text x="2" y="${Y(v) + 3}" class="sk-ax">${Math.round(v)}</text>`; });
+		const pts = c.points.map((p, i) => (p.v == null ? null : `${X(i)},${Y(p.v)}`)).filter(Boolean);
+		if (pts.length > 1) g += `<polyline points="${pts.join(" ")}" class="sk-kline k-o"/>`;
+		c.points.forEach((p, i) => {
+			g += `<text x="${X(i)}" y="${H - 4}" text-anchor="middle" class="sk-ax">${p.m}</text>`;
+			if (p.v == null) return;
+			const ok = c.good_low ? p.v <= c.target : p.v >= c.target;
+			g += `<circle cx="${X(i)}" cy="${Y(p.v)}" r="4.5" class="sk-kdot ${ok ? "ok" : "bad"}"/><text x="${X(i)}" y="${Y(p.v) - 8}" text-anchor="middle" class="sk-kval">${p.v}</text>`;
+			// Accounts: "12/20" projects right of those finished (SK 26-Oct)
+			if (p.note) g += `<text x="${X(i)}" y="${Y(p.v) + 14}" text-anchor="middle" class="sk-ax">${esc(p.note)}</text>`;
+		});
+		return `<svg viewBox="0 0 ${W} ${H}" class="sk-ksvg">${g}</svg>`;
+	}
+	// the work flow as 3D arrows (SK 26-Oct "more attractive 3D shape"); the CEO gets one arrow per function
+	function flow3dHtml(fn) {
+		if (!flowData) return `<p class="sk-note">… ${t("fl_loading")}</p>`;
+		const flows = flowData.flows.map((f, i) => [f, i]).filter(([f]) => f.function === fn);
+		if (!flows.length) return "";
+		const col = (c) => ({ red: "r", amber: "a", green: "g" }[c] || "b");
+		let arrows;
+		if (fn === "Management") {
+			arrows = flows.map(([f]) => {
+				const late = f.stages.reduce((n, st) => n + (st.late || 0), 0);
+				return `<button class="sk-ar3 ${late ? "r" : "g"}" data-fnpage="Management"><b>${late}</b><span>${esc(f.label || f.function)}</span></button>`;
+			});
+		} else {
+			const [f, fi] = flows[0];
+			arrows = f.stages.map((st, si) => `<button class="sk-ar3 ${col(st.c)}" data-flow="${fi}:${si}"><b>${st.count}</b><span>${esc(st.label)}</span></button>`);
+		}
+		return `<div class="sk-flow3d">${arrows.join("")}</div>`;
+	}
+	// "Decide now" (SK 26-Oct: data needed for taking decisions on the main screen): the gap to target and the three
+	// most delayed stages of the person's flows; each opens its list
+	function decideHtml() {
+		const cells = [];
+		const now = kpiNow();
+		if (now && now.target) {
+			cells.push(`<button class="sk-dec ${now.gap ? "bad" : "ok"}" data-go="my_kpi"><b>${now.gap ? (now.money ? "₹" + kAmt(now.gap) : Math.round(now.gap * 10) / 10 + (now.unit || "")) : "✓"}</b><span>${now.gap ? t("d_gap") : t("k_on_track")}</span></button>`);
+		}
+		if (flowData) {
+			const late = [];
+			flowData.flows.forEach((f, fi) => f.stages.forEach((st, si) => { if (st.late) late.push({ st, fi, si, f }); }));
+			late.sort((a, b) => b.st.late - a.st.late || b.st.oldest - a.st.oldest);
+			late.slice(0, 4 - cells.length).forEach(({ st, fi, si, f }) => {
+				cells.push(`<button class="sk-dec bad" data-flow="${fi}:${si}"><b>${st.late}</b><span>${esc(st.label)}${f.label ? ` · ${esc(f.label)}` : ""}</span><small>${st.oldest} ${t("fl_days")}</small></button>`);
+			});
+		}
+		if (!cells.length) return kpiData && flowData ? `<div class="sk-dec ok wide"><b>✓</b><span>${t("d_none")}</span></div>` : "";
+		return `<div class="sk-h sk-dech">⚡ ${t("d_title")}</div><div class="sk-decs">${cells.join("")}</div>`;
+	}
+	document.addEventListener("click", (ev) => {
+		const b = ev.target.closest("[data-kview]");
+		if (!b || !root.contains(b)) return;
+		ev.stopPropagation();
+		kpiView = b.dataset.kview;
+		paintKpi();
+	}, true);
+
+	// ---------- Actions to improve the graph (SK 26-Oct): input by AI, the manager, the CEO; done with proof ----------
+	let kaData = null, kaMember = null;
+	async function renderKpiActions() {
+		kaData = await call("kpi_actions", kaMember ? { member: kaMember } : {});
+		const pick = kaData.team.length > 1 ? `<select class="sk-select" id="ka-member">${kaData.team.map((p) => `<option value="${esc(p.user)}" ${p.user === kaData.member ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select>` : "";
+		const mine = kaData.member === state.home.user;
+		root.innerHTML = header(`🎯 ${t("ka_title")}`) + `<main><p class="sk-note">${t("ka_why")}</p>${pick}
+			<ul class="sk-list">${kaData.actions.map((a, i) => `<li class="sk-item ${a.done ? "" : a.late ? "k-lead_new" : "k-deal"}"><div>
+				<div class="sk-item-title">${a.done ? "✅ " : a.late ? "🔴 " : a.priority === "High" ? "🟠 " : ""}${esc(a.text)}</div>
+				<div class="sk-item-meta">${t("ka_" + a.priority.toLowerCase())} · ${a.date ? `${t("ka_by_date")} ${esc(a.date)}` : ""} · ${t("ka_from")} ${esc(a.by)}</div></div>
+				${!a.done && mine ? `<button class="sk-btn ok" data-kadone="${i}">✓</button>` : ""}</li>`).join("") || `<li class="sk-empty">${t("ka_none")}</li>`}</ul>
+			<div class="sk-form" id="ka-add">${formField("ka-text", t("ka_new"), true)}
+				<div class="sk-chips">${["High", "Medium", "Low"].map((p) => `<button class="sk-chip ${p === "High" ? "on" : ""}" data-q="${p}" data-kaprio="${p}">${t("ka_" + p.toLowerCase())}</button>`).join("")}</div>
+				<label class="sk-field"><span>${t("ka_by_date")}</span><input id="ka-date" type="date"></label>
+				<button class="sk-btn go wide" data-kaadd="1">＋ ${t("ka_add")}</button></div>
+			<button class="sk-btn wide" data-go="home">‹ ${t("back")}</button></main>`;
+		const m = document.getElementById("ka-member");
+		if (m) m.onchange = () => { kaMember = m.value; renderKpiActions(); };
+	}
+	function renderKpiDone(i) {
+		const a = kaData.actions[i];
+		root.innerHTML = header(`✅ ${t("ka_title")}`) + `<main class="sk-form"><p class="sk-item-title">${esc(a.text)}</p>
+			${formField("ka-note", t("ka_what_done"), true)}${photoField("ka-photo", t("ka_proof"))}
+			<button class="sk-btn ok wide" data-kafinish="${i}">✓ ${t("done")}</button><button class="sk-btn wide" data-go="kpi_actions">‹ ${t("back")}</button></main>`;
+	}
+	document.addEventListener("click", async (ev) => {
+		const b = ev.target.closest("[data-kadone],[data-kaadd],[data-kafinish]");
+		if (!b || !root.contains(b)) return;
+		ev.stopPropagation();
+		if (b.dataset.kadone !== undefined) return renderKpiDone(Number(b.dataset.kadone));
+		b.disabled = true;
+		try {
+			if (b.dataset.kaadd) {
+				const prio = (root.querySelector("[data-kaprio].on") || {}).dataset;
+				await call("add_kpi_action", { text: val("ka-text"), member: kaData.member, priority: prio ? prio.kaprio : "Medium", date: val("ka-date") || null }, true);
+			} else {
+				const a = kaData.actions[Number(b.dataset.kafinish)];
+				await call("finish_kpi_action", { name: a.name, note: val("ka-note") || null, photo: await photoUrl("ka-photo") }, true);
+			}
+			toast(t("saved"));
+			kpiData = null;
+			go("kpi_actions");
+		} catch (e) { toast(e.message, true); b.disabled = false; }
+	}, true);
+
+	// ---------- Electrical points (SK 26-Oct): Satish enters the points done in each cabin with a photo ----------
+	let elData = null, elJob = null;
+	async function renderElPoints() {
+		elData = await call("el_jobs");
+		elJob = null;
+		root.innerHTML = header(`${ICON.el_points} ${t("el_points")}`) + `<main><p class="sk-note">${t("el_month")}: <b>${elData.month_total}</b></p>
+			<ul class="sk-list">${elData.jobs.map((j, i) => `<li class="sk-item ${j.points ? "" : "k-lead_new"}"><button class="sk-fu-main" data-eljob="${i}">
+				<div class="sk-item-title">${esc(j.item_name || j.work_order || j.name)}</div>
+				<div class="sk-item-meta">${esc(j.name)} · ${esc(j.operation || "")} · ${esc(j.status)}</div></button>
+				<b>${j.points ? j.points.total_points : "＋"}</b></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+	}
+	function renderElJob(i) {
+		const j = elData.jobs[i];
+		elJob = j;
+		const p = j.points || {};
+		root.innerHTML = header(`${ICON.el_points} ${esc(j.item_name || j.name)}`) + `<main class="sk-form"><p class="sk-note">${esc(j.name)} · ${esc(j.work_order || "")}</p>
+			${elData.types.map((k) => `<div class="sk-elrow"><span>${t("el_" + k)}</span><button type="button" class="sk-btn" data-elstep="${k}" data-d="-1">−</button>
+				<input id="el-${k}" type="number" inputmode="numeric" min="0" value="${Number(p[k]) || 0}"><button type="button" class="sk-btn" data-elstep="${k}" data-d="1">＋</button></div>`).join("")}
+			${photoField("el-photo")}${formField("el-note", t("note_q"))}
+			<button class="sk-btn ok wide" data-elsave="1">${t("save")}</button><button class="sk-btn wide" data-go="el_points">‹ ${t("back")}</button></main>`;
+	}
+	document.addEventListener("click", async (ev) => {
+		const b = ev.target.closest("[data-eljob],[data-elstep],[data-elsave]");
+		if (!b || !root.contains(b)) return;
+		ev.stopPropagation();
+		if (b.dataset.eljob !== undefined) return renderElJob(Number(b.dataset.eljob));
+		if (b.dataset.elstep) {
+			const inp = document.getElementById("el-" + b.dataset.elstep);
+			inp.value = Math.max(0, (Number(inp.value) || 0) + Number(b.dataset.d));
+			return;
+		}
+		b.disabled = true;
+		try {
+			const points = {};
+			elData.types.forEach((k) => { points[k] = Number(document.getElementById("el-" + k).value) || 0; });
+			const r = await call("save_el_points", { job_card: elJob.name, points: JSON.stringify(points), photo: await photoUrl("el-photo"), note: val("el-note") || null }, true);
+			toast(`${t("saved")} · ${r.total_points} ${t("el_pts")}`);
+			go("el_points");
+		} catch (e) { toast(e.message, true); b.disabled = false; }
+	}, true);
 	// ---------- Point 17: live process flow ----------
 	let flowData = null, flowAt = 0, flowLoading = false;
 	const shortMoneyF = (v) => (Math.abs(v) >= 1e7 ? `₹${(v / 1e7).toFixed(2)} Cr` : Math.abs(v) >= 1e5 ? `₹${(v / 1e5).toFixed(1)} L` : `₹${Math.round(v).toLocaleString("en-IN")}`);
@@ -1231,7 +1474,9 @@
 	}
 	function paintFlows() {
 		if (state.view !== "home" && state.view !== "fnpage") return;
-		root.querySelectorAll(".sk-flowbox").forEach((el) => { el.innerHTML = flowHtml(el.dataset.fn); });
+		root.querySelectorAll(".sk-flowbox").forEach((el) => { el.innerHTML = el.dataset.mode === "3d" ? flow3dHtml(el.dataset.fn) : flowHtml(el.dataset.fn); });
+		const d = root.querySelector(".sk-decide");
+		if (d) d.innerHTML = decideHtml();
 	}
 	function renderFlowStage(fi, si) {
 		const f = flowData.flows[fi], st = f.stages[si];
@@ -3645,7 +3890,7 @@
 	}
 
 	const LIVE_VIEWS = { fnpage: () => renderFnPage(), more: renderMore, leadership: renderLeadership, to_plan: renderToPlan, my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"),
-		my_kpi: renderKpi, dsi: renderDsi, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
+		my_kpi: renderKpi, dsi: renderDsi, el_points: renderElPoints, kpi_actions: renderKpiActions, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
 		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name),
 		reminders: renderReminders, calls: renderCalls, whatsapp: renderWhatsApp, mail: renderMail, library: renderLibrary,

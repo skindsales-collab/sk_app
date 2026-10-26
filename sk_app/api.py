@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, segments, store, training, view_member, work
+from sk_app import ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, segments, store, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -57,6 +57,12 @@ def home():
 			main["tiles"] = main["tiles"][:1] + ["logins"] + main["tiles"][1:]
 		if sections and sections["sections"] and not any("logins" in x["tiles"] for x in sections["sections"]):
 			sections["sections"][0]["tiles"] = ["logins"] + sections["sections"][0]["tiles"]
+	# Electrical points: only the electrician's workstation among the subcontractors (Quality / Production always)
+	if sections and "Subcontractor" in (functions or [profile.home]) and not production._is_electrical(production.my_workstation(profile.user)) \
+			and not {"Quality", "Production"} & set(functions or [profile.home]):
+		for x in sections["sections"]:
+			for k in ("tiles", "main", "more"):
+				x[k] = [t for t in x.get(k) or [] if t != "el_points"]
 	from sk_app.www.sk.index import asset_version
 
 	return {"user": profile.user, "full_name": profile.full_name, "language": profile.language, "v": asset_version(),
@@ -1169,6 +1175,39 @@ def my_flow():
 	"""Point 17: the live process flow of each of the person's functions (the CEO: one per function)."""
 	profile = _me()
 	return flows.for_user(profile.user, logins.profile_functions(profile.user) or [profile.home])
+
+
+@frappe.whitelist()
+def el_jobs():
+	return production.el_jobs(_me().user)
+
+
+@frappe.whitelist()
+def save_el_points(job_card, points=None, photo=None, note=None):
+	points = json.loads(points) if isinstance(points, str) else points
+	return production.save_el_points(_me().user, job_card, points or {}, photo, note)
+
+
+@frappe.whitelist()
+def kpi_actions(member=None):
+	return home_kpi.actions(_me().user, member)
+
+
+@frappe.whitelist()
+def add_kpi_action(text, member=None, priority="Medium", date=None):
+	return home_kpi.add_action(_me().user, member, text, priority, date)
+
+
+@frappe.whitelist()
+def finish_kpi_action(name, note=None, photo=None):
+	return home_kpi.finish_action(_me().user, name, note, photo)
+
+
+@frappe.whitelist()
+def my_home_kpi():
+	"""Main screen Rev 2 (SK 26-Oct): the person's one KPI chart against target and the Today strip."""
+	profile = _me()
+	return home_kpi.for_user(profile.user, logins.profile_functions(profile.user) or [profile.home])
 
 
 @frappe.whitelist()
