@@ -15,7 +15,7 @@ DASH_TILES = ["dash_overview", "dash_daily_review", "dash_sales", "dash_marketin
 FUNCTIONS = {
 	"Sales": {
 		"label": {"English": "Sales", "Marathi": "विक्री"},
-		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "my_deals", "customers", "reminders", "library",
+		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "my_deals", "customers", "complaints", "reminders", "library",
 			"day_report", "my_kpi", "dsi", "problem", "training"],
 		"live": True,
 		# not Sales Manager: in Frappe CRM that role shows every lead of the company (SK 26-Oct: each salesperson sees
@@ -25,7 +25,7 @@ FUNCTIONS = {
 	},
 	"Marketing": {
 		"label": {"English": "Marketing", "Marathi": "मार्केटिंग"},
-		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "reminders", "library", "day_report",
+		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "complaints", "reminders", "library", "day_report",
 			"my_kpi", "dsi", "problem", "training"],
 		"live": True,  # uses the same CRM lead screens as Sales
 		"erpnext_roles": ["Sales User"],
@@ -33,14 +33,14 @@ FUNCTIONS = {
 	},
 	"Production": {
 		"label": {"English": "Production", "Marathi": "उत्पादन"},
-		"tiles": ["my_day", "order_board", "job_cards", "need_material", "progress_photos", "ready_dispatch", "non_conformance", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "order_board", "job_cards", "need_material", "progress_photos", "ready_dispatch", "non_conformance", "complaints", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Manufacturing User", "Manufacturing Manager"],
 		"desk": "/app/manufacturing",
 	},
 	"Quality": {
 		"label": {"English": "Quality", "Marathi": "गुणवत्ता"},
-		"tiles": ["my_day", "inspect", "final_check", "non_conformance", "order_board", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "inspect", "final_check", "non_conformance", "order_board", "complaints", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Quality Manager"],
 		"desk": "/app/quality",
@@ -48,7 +48,7 @@ FUNCTIONS = {
 	"Stores": {
 		"label": {"English": "Stores", "Marathi": "स्टोअर"},
 		# SK draft F01: My Day first, then the Store icons, then the common ones
-		"tiles": ["my_day", "stock_check", "receive", "issue", "store_requests", "dispatch", "low_stock", "stock_count", "new_item", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "stock_check", "receive", "issue", "store_requests", "dispatch", "low_stock", "stock_count", "new_item", "complaints", *COMMON_TILES[1:]],
 		"live": True,
 		# Stock Manager: needed to make stock count drafts and to pick accounts on receipts / delivery notes
 		"erpnext_roles": ["Stock User", "Stock Manager"],
@@ -66,7 +66,7 @@ FUNCTIONS = {
 		# SK draft F06: My Day, the Finance icons, then calls / WhatsApp for collections and the common ones
 		# SK / Shraddha 26-Oct: ledger-wise screens; Expenses is the Journal Voucher list, plus Direct and Indirect Expenses
 		"tiles": ["my_day", "cash_today", "to_collect", "to_pay", "bills_to_post", "invoices", "expenses", "dir_expenses", "segment_pnl",
-			"month_close",
+			"month_close", "complaints",
 			*CONTACT_TILES, *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Accounts User", "Accounts Manager"],
@@ -81,7 +81,7 @@ FUNCTIONS = {
 	},
 	"Machine Shifting": {
 		"label": {"English": "Machine Shifting", "Marathi": "मशीन शिफ्टिंग"},
-		"tiles": COMMON_TILES + ["my_deals", "customers", "site_checklist"],
+		"tiles": COMMON_TILES + ["my_deals", "customers", "complaints", "site_checklist"],
 		"live": False,
 		"erpnext_roles": ["Projects User", "Sales User"],
 		"desk": "/crm",
@@ -104,7 +104,7 @@ FUNCTIONS = {
 	"AI": {
 		# SK 26-Oct: Samir's desk. Main job ERP implementation, plus technology improvements in every department
 		"label": {"English": "AI & ERP", "Marathi": "AI आणि ERP"},
-		"tiles": ["my_day", "improvement_inbox", "dept_visits", "erp_gaps", "app_users", "lead_sources", "change_list", "projects",
+		"tiles": ["my_day", "improvement_inbox", "dept_visits", "erp_gaps", "app_users", "lead_sources", "change_list", "projects", "complaints",
 			"training_progress", "erpnext_desk", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Projects User", "Projects Manager"],
@@ -119,7 +119,7 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": [*DASH_TILES, "view_member", "lead_sources", "customers", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
+		"tiles": [*DASH_TILES, "view_member", "lead_sources", "customers", "complaints", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "calendar", "reminders", "day_report", "my_kpi", "dsi", "problem",
 			"library", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager", "Purchase Manager", "Purchase User"],  # SK approves big POs

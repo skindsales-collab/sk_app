@@ -30,6 +30,9 @@ def after_migrate():
 	from sk_app import segments
 
 	segments.ensure_customer_groups()
+	from sk_app.complaints import ensure_setup
+
+	ensure_setup()
 	segments.sync_user_permissions()
 	from sk_app.training import seed_lessons
 

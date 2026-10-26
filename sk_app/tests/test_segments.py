@@ -54,6 +54,8 @@ class TestSegments(IntegrationTestCase):
 		self.assertEqual(names(NONCABIN), {non})
 		self.assertEqual(names(CEO), {cab, non})
 		self.assertEqual(names(CEO, segment="Non-Cabin"), {non})
+		# a form's customer search (complaints): own segment plus untagged old customers, never the other team's
+		self.assertEqual(names(CABIN_REP, tab="pick"), {cab, old})
 		# not tagged: only on the "Segment not set" tab, and only for Management / Aditya / the sales manager
 		self.assertIn(old, names(CEO, tab="not_set"))
 		self.assertRaises(frappe.PermissionError, segments.customers, CABIN_REP, "not_set")

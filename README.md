@@ -185,3 +185,9 @@ Score = actual / target (capped at 120%) x weight. Sources that are not live yet
   Machine Shifting, Job Work, 100 Cr, Finance, Manufacturing, Purchase, Store, Quality, HR, AI & ERP. Each is live from
   ERPNext with month and Cabin / Non-Cabin filters and last month's figure. A number opens its list and a row opens
   the record. Swipe left / right moves between pages. A red number on an icon means items need attention there.
+- **Point 5, 🛠️ Complaints** (`complaints.py`): the salesperson registers a complaint (customer from their segment or
+  untagged, latest order picked by itself, spoken / written text, photos / files, one of 10 types). It is kept as a
+  standard ERPNext Issue with SK fields (stage, order / delivery / invoice, segment, sent to, fix by, customer OK, cost).
+  By type it goes to Production (factory faults also make a Non Conformance for the workstation subcontractor's My
+  Fixes), Store, Design / AI desk, Accounts, Aditya or the sales manager, with a ToDo and a red number. Steps: Accept with a
+  fix date → Fixed with an after-fix photo → Customer OK closes it, Not OK sends it back. A passed fix date shows red.

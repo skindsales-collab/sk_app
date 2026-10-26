@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import ai_desk, calendar_view, claude, colours, comms, crm, dashboards, day_report, finance, guide, kpi, lead_sources, ledger, logins, mailbox, production, purchase, quality, segments, store, training, view_member, work
+from sk_app import ai_desk, calendar_view, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, kpi, lead_sources, ledger, logins, mailbox, production, purchase, quality, segments, store, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -86,7 +86,7 @@ def _badges(user, functions):
 	try:
 		return {**store.badges(user, functions), **purchase.badges(user, functions), **production.badges(user, functions),
 			**quality.badges(user, functions), **finance.badges(user, functions), **ai_desk.badges(user, functions),
-			**({"mail": n} if (n := mailbox.badge(user)) else {})}
+			**({"mail": n} if (n := mailbox.badge(user)) else {}), **complaints.badge(user)}
 	except Exception:
 		frappe.log_error("SK App badges")
 		return {}
@@ -1059,3 +1059,41 @@ def view_suggest(member, text, view=None, photo=None):
 @frappe.whitelist()
 def dash_page(key="overview", month=None, segment=None):
 	return dashboards.page(_me().user, key, month, segment)
+
+
+# point 5: customer complaints
+@frappe.whitelist()
+def complaints_list(tab="mine"):
+	return complaints.listing(_me().user, tab)
+
+
+@frappe.whitelist()
+def complaint_orders(customer):
+	return complaints.orders(_me().user, customer)
+
+
+@frappe.whitelist()
+def complaint_detail(name):
+	return complaints.detail(_me().user, name)
+
+
+@frappe.whitelist(methods=["POST"])
+def complaint_new(customer, text, ctype, sales_order=None, files=None):
+	if isinstance(files, str):
+		files = json.loads(files or "[]")
+	return complaints.register(_me().user, customer, text, ctype, sales_order, files)
+
+
+@frappe.whitelist(methods=["POST"])
+def complaint_accept(name, fix_by=None, note=None):
+	return complaints.accept(_me().user, name, fix_by, note)
+
+
+@frappe.whitelist(methods=["POST"])
+def complaint_fixed(name, note=None, photo=None, cost=None):
+	return complaints.fixed(_me().user, name, note, photo, cost)
+
+
+@frappe.whitelist(methods=["POST"])
+def complaint_customer(name, ok, note=None, photo=None):
+	return complaints.customer_answer(_me().user, name, ok, note, photo)

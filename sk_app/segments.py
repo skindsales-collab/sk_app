@@ -132,7 +132,8 @@ def _order_totals(names: list[str]) -> dict:
 
 
 def customers(user: str, tab: str = "mine", q: str | None = None, segment: str | None = None) -> dict:
-	"""Customers of the person's segment. tab "not_set": customers with no segment yet, to tag them."""
+	"""Customers of the person's segment. tab "not_set": customers with no segment yet, to tag them. tab "pick": a
+	search for a form (complaints): the person's segment plus customers not tagged yet, so old customers can be picked."""
 	main = user_main(user)
 	tagger = can_tag(user)
 	filters = {"disabled": 0}
@@ -140,6 +141,12 @@ def customers(user: str, tab: str = "mine", q: str | None = None, segment: str |
 		if not tagger:
 			frappe.throw(_("Only Management, the sales manager and Aditya tag customers"), frappe.PermissionError)
 		filters["customer_group"] = ["not in", all_groups()]
+	elif tab == "pick":
+		if not (q or "").strip():
+			return {"main": main, "tree": TREE, "rows": [], "not_set": 0, "can_tag": tagger}
+		if main != BOTH:
+			other = groups_of(NON_CABIN if main == CABIN else CABIN)
+			filters["customer_group"] = ["not in", other]
 	elif main == BOTH:
 		filters["customer_group"] = ["in", groups_of(segment) if segment in TREE else all_groups()]
 	else:

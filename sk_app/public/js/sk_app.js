@@ -744,6 +744,23 @@
 		live_dash: "📊 लाईव्ह डॅशबोर्ड (ERPNext)", vs_last: "मागील महिना", dash_open: "यादीसाठी आकड्यावर टॅप करा, पूर्ण माहितीसाठी ओळीवर.",
 		swipe_hint: "पुढील पानासाठी डावीकडे / उजवीकडे सरकवा", open_desk: "ERPNext मध्ये उघडा",
 	});
+	// change list point 5: customer complaints
+	Object.assign(T.English, {
+		complaints: "Complaints", new_complaint: "＋ New complaint", cp_mine: "My complaints", cp_to_fix: "To fix", cp_all: "All",
+		cp_customer: "Customer (type a few letters)", cp_order: "Order / delivery", cp_type: "Complaint type", cp_what: "What is wrong (speak or write)",
+		cp_files: "Photo / video / file", cp_sent: "Complaint sent to", cp_accept: "Accept", cp_fix_by: "Fix by", cp_fixed: "Fixed",
+		cp_after: "After-fix photo", cp_done_what: "What was done", cp_ok: "Customer OK", cp_not_ok: "Customer NOT OK", cp_wa: "WhatsApp update to customer",
+		cp_late: "late", st_Registered: "Registered", st_Accepted: "Accepted", st_Fixed: "Fixed", st_Closed: "Closed", "st_Not OK": "Not OK",
+		cp_pick_customer: "Please pick the customer from the list", cp_note: "Customer says (speak or write)",
+	});
+	Object.assign(T.Marathi, {
+		complaints: "तक्रारी", new_complaint: "＋ नवीन तक्रार", cp_mine: "माझ्या तक्रारी", cp_to_fix: "दुरुस्त करायच्या", cp_all: "सर्व",
+		cp_customer: "ग्राहक (काही अक्षरे लिहा)", cp_order: "ऑर्डर / डिलिव्हरी", cp_type: "तक्रारीचा प्रकार", cp_what: "काय चुकले (बोला किंवा लिहा)",
+		cp_files: "फोटो / व्हिडिओ / फाईल", cp_sent: "तक्रार पाठवली:", cp_accept: "स्वीकारा", cp_fix_by: "दुरुस्ती तारीख", cp_fixed: "दुरुस्त झाले",
+		cp_after: "दुरुस्तीनंतरचा फोटो", cp_done_what: "काय केले", cp_ok: "ग्राहक समाधानी", cp_not_ok: "ग्राहक समाधानी नाही", cp_wa: "ग्राहकाला WhatsApp अपडेट",
+		cp_late: "उशीर", st_Registered: "नोंदवली", st_Accepted: "स्वीकारली", st_Fixed: "दुरुस्त", st_Closed: "बंद", "st_Not OK": "समाधानी नाही",
+		cp_pick_customer: "कृपया यादीतून ग्राहक निवडा", cp_note: "ग्राहक काय म्हणाला (बोला किंवा लिहा)",
+	});
 	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";
 	T.Marathi.mic_blocked = "माईक / कॅमेरा बंद आहे. Chrome → ⋮ → Settings → Site settings → Microphone (किंवा Camera) → ही साईट → Allow. मग परत येऊन 🎤 दाबा.";
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
@@ -759,7 +776,7 @@
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
-		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", view_member: "👀",
+		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", view_member: "👀", complaints: "🛠️",
 		dash_overview: "🏁", dash_daily_review: "🗓️", dash_sales: "💼", dash_marketing: "📣", dash_machine_shifting: "🏗️", dash_job_work: "⚙️", dash_cr100: "🎯", dash_finance: "💰", dash_manufacturing: "🏭", dash_purchase: "🛒", dash_store: "📦", dash_quality: "✅", dash_hr: "👥", dash_ai: "🤖",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
@@ -1897,6 +1914,54 @@
 		go("dash_" + next);
 	}, { passive: true });
 
+	// Customer complaints (point 5): register with photo / voice; the concerned person accepts, fixes, the customer confirms
+	let cpTab = "mine";
+	const cpChip = (r) => `<span class="chip2 ${r.late ? "red" : r.sk_stage === "Closed" ? "green" : r.sk_stage === "Fixed" ? "navy" : "yel"}">${t("st_" + r.sk_stage)}${r.late ? " · " + t("cp_late") : ""}</span>`;
+	async function renderComplaints() {
+		const d = await call("complaints_list", { tab: cpTab });
+		S.cp = d.rows;
+		const fns = state.home.functions || [];
+		const tab = (k, label) => `<button class="${cpTab === k ? "on" : ""}" data-cptab="${k}">${label}</button>`;
+		root.innerHTML = header(t("complaints")) + `<main>
+			<div class="cal-tabs">${tab("mine", t("cp_mine"))}${tab("to_fix", `${t("cp_to_fix")}${d.to_fix ? ` (${d.to_fix})` : ""}`)}${fns.includes("Management") ? tab("all", t("cp_all")) : ""}</div>
+			<button class="sk-btn ok wide" data-act="cp-new">${t("new_complaint")}</button>
+			<ul class="sk-list sk-gap">${d.rows.map((r, i) => `<li class="sk-item ${r.late ? "k-red" : ""}"><button class="sk-fu-main" data-cp="${esc(r.name)}">
+				<div class="sk-item-title">${esc(r.customer_name || r.customer || "")}: ${esc(r.issue_type || "")}</div>
+				<div class="sk-item-meta">${cpChip(r)} · ${esc(r.concerned_name || r.sk_concerned_function || "")} · ${t("cp_fix_by")} ${esc(r.sk_fix_by)}</div>
+				<div class="sk-item-meta">${esc(String(r.description || "").replace(/<[^>]*>/g, "").slice(0, 120))}</div></button></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+	}
+	async function renderNewComplaint() {
+		const types = (await call("complaints_list", { tab: "mine" })).types;
+		state.view = "complaints";
+		root.innerHTML = header(t("new_complaint")) + `<main class="sk-form">
+			<label class="sk-field"><span>${t("cp_customer")}</span><div class="sk-input-row"><input id="cp-cust" list="cp-cust-dl" autocomplete="off">${micBox("cp-cust")}</div><datalist id="cp-cust-dl"></datalist></label>
+			<label class="sk-field"><span>${t("cp_order")}</span><select id="cp-order" class="sk-select"><option value=""></option></select></label>
+			${pick("cp-type", t("cp_type"), types)}
+			${formField("cp-text", t("cp_what"), true)}
+			${photoField("cp-f1", "📷 " + t("cp_files"), true)}${photoField("cp-f2", "📷 " + t("cp_files"), true)}
+			<button class="sk-btn ok wide" data-act="cp-save">${t("save")}</button></main>`;
+	}
+	async function complaintSheet(name) {
+		const d = await call("complaint_detail", { name });
+		const wa = d.mobile ? `https://wa.me/${waNumber(d.mobile)}?text=${encodeURIComponent(`${d.customer_name}: your complaint ${d.name} is now "${d.sk_stage}"${d.sk_fix_by ? `, fix by ${d.sk_fix_by}` : ""}. SK Ind Tech Solutions`)}` : "";
+		const open = ["Registered", "Accepted", "Not OK"].includes(d.sk_stage);
+		sheet(`<h3 class="sk-h">🛠️ ${esc(d.customer_name || d.customer)}</h3>
+			<p class="sk-item-meta">${cpChip(d)} · ${esc(d.issue_type || "")} · ${esc(d.sk_sales_order || "")}</p>
+			<div class="sk-libtext">${esc(String(d.description || "").replace(/<[^>]*>/g, ""))}</div>
+			<p class="sk-item-meta">${t("cp_sent")} ${esc(d.concerned_name || "")} · ${t("cp_fix_by")} ${esc(d.sk_fix_by)}</p>
+			${d.files.map((f) => `<a class="sk-chip" href="${esc(f.file_url)}" target="_blank">📎 ${esc(f.file_name)}</a>`).join("")}
+			<ul class="sk-list">${d.steps.map((x) => `<li class="sk-item"><div><div class="sk-item-meta">${esc(x.when)}</div><div>${esc(x.text)}</div></div></li>`).join("")}</ul>
+			${d.is_fixer && open ? `<label class="sk-field"><span>${t("cp_fix_by")}</span><input id="cp-date" type="date" value="${esc(d.sk_fix_by)}"></label>
+				<button class="sk-btn go wide" data-act="cp-accept" data-name="${esc(d.name)}">✋ ${t("cp_accept")}</button>
+				${formField("cp-done", t("cp_done_what"), true)}${photoField("cp-after", "📷 " + t("cp_after"))}
+				<button class="sk-btn ok wide" data-act="cp-fixed" data-name="${esc(d.name)}">✅ ${t("cp_fixed")}</button>` : ""}
+			${d.sk_stage === "Fixed" && !d.is_fixer ? `${formField("cp-note", t("cp_note"), true)}${photoField("cp-proof", "📷 WhatsApp / voice")}
+				<button class="sk-btn ok wide" data-act="cp-ok" data-ok="1" data-name="${esc(d.name)}">👍 ${t("cp_ok")}</button>
+				<button class="sk-btn wide" data-act="cp-ok" data-ok="0" data-name="${esc(d.name)}">👎 ${t("cp_not_ok")}</button>` : ""}
+			${wa ? `<a class="sk-btn wide" href="${wa}" target="_blank">💬 ${t("cp_wa")}</a>` : ""}
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+
 	// View Member App (point 3): all members by function, last active; tap one to open their app as they see it
 	let vmQuery = "";
 	async function renderViewMember() {
@@ -2054,6 +2119,22 @@
 	let fuTimer = null;
 	root.addEventListener("input", (ev) => {
 		const el = ev.target;
+		if (el.id === "cp-cust") {
+			clearTimeout(fuTimer);
+			fuTimer = setTimeout(async () => {
+				const dl = document.getElementById("cp-cust-dl");
+				const hit = dl && [...dl.options].find((x) => x.value === el.value);
+				if (hit) {
+					const o = await call("complaint_orders", { customer: el.value });
+					const sel = document.getElementById("cp-order");
+					if (sel) sel.innerHTML = o.orders.map((r) => `<option value="${esc(r.name)}">${esc(r.name)} · ${esc(r.items)} · ${esc(r.transaction_date)}</option>`).join("") + `<option value=""></option>`;
+					return;
+				}
+				const d = await call("customers", { tab: "pick", q: el.value });
+				if (dl) dl.innerHTML = d.rows.map((r) => `<option value="${esc(r.name)}">${esc(r.customer_name)}${r.segment ? " · " + esc(r.segment) : ""}</option>`).join("");
+			}, 300);
+			return;
+		}
 		if (el.id === "vm-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { vmQuery = el.value; renderViewMember().then(() => { const i = document.getElementById("vm-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 300); return; }
 		if (el.id === "cust-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { custQuery = el.value; renderCustomers().then(() => { const i = document.getElementById("cust-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
 		if (el.id === "fu-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { fuQuery = el.value; renderFollowUp().then(() => { const i = document.getElementById("fu-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
@@ -2954,7 +3035,7 @@
 		expenses: () => finScreen("expenses", renderExpenses), dir_expenses: () => finScreen("dir_expenses"),
 		segment_pnl: renderSegmentWise, month_close: renderMonthWise,
 		improvement_inbox: renderInbox, dept_visits: renderVisit, erp_gaps: renderGaps, app_users: renderAppUsers, change_list: renderChangeList,
-		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources, customers: renderCustomers, view_member: renderViewMember };
+		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources, customers: renderCustomers, view_member: renderViewMember, complaints: renderComplaints };
 	["overview", "daily_review", "sales", "marketing", "machine_shifting", "job_work", "cr100", "finance", "manufacturing", "purchase",
 		"store", "quality", "hr", "ai"].forEach((k) => { LIVE_VIEWS["dash_" + k] = () => renderDash(k); });
 
@@ -3070,6 +3151,8 @@
 				dashMonth = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-01`;
 				return go(state.view);
 			}
+			if (el.dataset.cptab) { cpTab = el.dataset.cptab; return go("complaints"); }
+			if (el.dataset.cp) return complaintSheet(el.dataset.cp);
 			if (el.dataset.custtab) { custTab = el.dataset.custtab; return go("customers"); }
 			if (el.dataset.custseg !== undefined) { custSeg = el.dataset.custseg; return go("customers"); }
 			if (el.dataset.tmail !== undefined) return teamMailSheet(Number(el.dataset.tmail));
@@ -3216,6 +3299,31 @@
 				closeSheet();
 				toast(t("saved"));
 				return go("mail");
+			}
+			if (act === "cp-new") return renderNewComplaint();
+			if (act === "cp-save") {
+				const cust = val("cp-cust");
+				const o = [...document.querySelectorAll("#cp-cust-dl option")].find((x) => x.value === cust);
+				if (!o) { toast(t("cp_pick_customer"), true); return; }
+				el.disabled = true;
+				try {
+					const files = [await photoUrl("cp-f1"), await photoUrl("cp-f2")].filter(Boolean);
+					const r = await call("complaint_new", { customer: cust, text: val("cp-text"), ctype: val("cp-type"), sales_order: val("cp-order"), files: JSON.stringify(files) }, true);
+					clearDraft();
+					toast(`${t("cp_sent")} ${r.person || r.function}`);
+				} finally { el.disabled = false; }
+				cpTab = "mine";
+				return go("complaints");
+			}
+			if (act === "cp-accept") { await call("complaint_accept", { name: el.dataset.name, fix_by: val("cp-date") }, true); toast(t("saved")); return complaintSheet(el.dataset.name); }
+			if (act === "cp-fixed") {
+				el.disabled = true;
+				try { await call("complaint_fixed", { name: el.dataset.name, note: val("cp-done"), photo: await photoUrl("cp-after") }, true); } finally { el.disabled = false; }
+				closeSheet(); toast(t("saved")); return go("complaints");
+			}
+			if (act === "cp-ok") {
+				await call("complaint_customer", { name: el.dataset.name, ok: el.dataset.ok, note: val("cp-note"), photo: await photoUrl("cp-proof") }, true);
+				closeSheet(); toast(t("saved")); return go("complaints");
 			}
 			if (act === "view-enter") return enterView(el.dataset.user, el.dataset.uname);
 			if (act === "view-exit") return exitView();
