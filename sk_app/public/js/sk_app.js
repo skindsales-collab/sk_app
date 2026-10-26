@@ -124,12 +124,35 @@
 			lessons_done: "धडे पूर्ण", photo_reading: "फोनवर कार्ड वाचत आहे… (पहिल्यांदा एक मिनिट लागेल)",
 		},
 	};
+	// mobile-number logins and Home for people in several functions (SK, 26-Oct-2026)
+	Object.assign(T.English, {
+		logins: "Logins", for_everyone: "For everyone", set_pin: "Set your own PIN", set_pin_why: "HR gave you a first PIN. Make your own PIN now (4 to 8 digits). Do not tell anyone.",
+		old_pin: "PIN from HR", new_pin: "New PIN", new_pin2: "New PIN again", pin_mismatch: "The two new PINs are not the same",
+		pin_saved: "PIN saved", no_login: "No login yet", has_login: "Have login", closed_login: "Login closed",
+		make_login: "Make login", new_login: "New login", name: "Name", functions_pick: "Function(s)", reports_to: "Reports to",
+		language: "Language", workstation: "Workstation", login_ready: "Login ready", first_pin: "First PIN",
+		pin_note: "Give the PIN by hand or WhatsApp. The person makes their own PIN at the first login.",
+		reset_pin: "Reset PIN", close_login: "Close login", close_q: "Close this login? All past work stays in ERPNext.",
+		edit_login: "Change functions", login_link: "Your SK App login", people_n: "people", without_login: "without login",
+		pin_set_pending: "PIN not set yet",
+	});
+	Object.assign(T.Marathi, {
+		logins: "लॉगिन", for_everyone: "सर्वांसाठी", set_pin: "तुमचा स्वतःचा पिन ठेवा", set_pin_why: "HR ने पहिला पिन दिला आहे. आता तुमचा स्वतःचा पिन ठेवा (4 ते 8 अंक). कोणालाही सांगू नका.",
+		old_pin: "HR ने दिलेला पिन", new_pin: "नवीन पिन", new_pin2: "नवीन पिन पुन्हा", pin_mismatch: "दोन्ही नवीन पिन सारखे नाहीत",
+		pin_saved: "पिन सेव्ह झाला", no_login: "अजून लॉगिन नाही", has_login: "लॉगिन आहे", closed_login: "लॉगिन बंद",
+		make_login: "लॉगिन बनवा", new_login: "नवीन लॉगिन", name: "नाव", functions_pick: "काम (फंक्शन)", reports_to: "कोणाला रिपोर्ट",
+		language: "भाषा", workstation: "वर्कस्टेशन", login_ready: "लॉगिन तयार", first_pin: "पहिला पिन",
+		pin_note: "पिन हाताने किंवा WhatsApp ने द्या. पहिल्या लॉगिनला ती व्यक्ती स्वतःचा पिन ठेवेल.",
+		reset_pin: "पिन रीसेट", close_login: "लॉगिन बंद करा", close_q: "हे लॉगिन बंद करायचे? आधीचे सर्व काम ERPNext मध्ये राहील.",
+		edit_login: "काम बदला", login_link: "तुमचे SK App लॉगिन", people_n: "लोक", without_login: "लॉगिनशिवाय",
+		pin_set_pending: "पिन अजून ठेवला नाही",
+	});
 	const ICON = {
 		my_day: "☀️", my_leads: "📞", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
 		job_cards: "🛠️", inspections: "✅", stock_alerts: "📦", material_requests: "🧾", invoice_photo: "📷",
 		collections: "💰", team_scorecards: "👥", site_checklist: "📋", ceo_view: "📊",
 		calendar: "📅", follow_up: "🔔", new_lead: "➕", training: "🎓", day_report: "📝", team_reports: "🗂️",
-		calls: "📞", whatsapp: "💬", mail: "✉️", reminders: "⏰", library: "🏢",
+		calls: "📞", whatsapp: "💬", mail: "✉️", reminders: "⏰", library: "🏢", logins: "🔑",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
 	const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -288,8 +311,86 @@
 			reminders: dueNow().length,
 			day_report: !h.day_report_sent && new Date().getHours() >= 17 ? "!" : 0,
 		};
-		const tiles = fn.tiles.map((k) => `<button class="sk-tile" data-go="${k}"><span class="sk-tile-icon">${ICON[k] || "•"}</span><span>${t(k)}</span>${badge[k] ? `<b class="sk-dot">${esc(badge[k])}</b>` : ""}</button>`).join("");
-		root.innerHTML = header("SK App") + `<main><div class="sk-tiles small">${tiles}</div></main>`;
+		if (h.must_set_pin) return renderSetPin();
+		const tile = (k) => `<button class="sk-tile" data-go="${k}"><span class="sk-tile-icon">${ICON[k] || "•"}</span><span>${t(k)}</span>${badge[k] ? `<b class="sk-dot">${esc(badge[k])}</b>` : ""}</button>`;
+		const tiles = (keys) => `<div class="sk-tiles small">${keys.map(tile).join("")}</div>`;
+		if (!h.sections) { root.innerHTML = header("SK App") + `<main>${tiles(fn.tiles)}</main>`; return; }
+		// a person in several functions: one labelled row per function, then the tiles everyone has (SK, 26-Oct)
+		const label = (l) => (l && (l[state.lang] || l.English)) || "";
+		const rows = h.sections.sections.filter((x) => x.tiles.length).map((x) => `<h3 class="sk-h sk-fn-row">${esc(label(x.label))}</h3>${tiles(x.tiles)}`).join("");
+		root.innerHTML = header("SK App") + `<main>${rows}<h3 class="sk-h sk-fn-row">${t("for_everyone")}</h3>${tiles(h.sections.shared)}</main>`;
+	}
+
+	function renderSetPin() {
+		state.view = "home";
+		root.innerHTML = header(t("set_pin")) + `<main class="sk-form">
+			<p class="sk-note">🔑 ${t("set_pin_why")}</p>
+			<label class="sk-field"><span>${t("old_pin")}</span><input id="p-old" type="password" inputmode="numeric" autocomplete="current-password"></label>
+			<label class="sk-field"><span>${t("new_pin")}</span><input id="p-new" type="password" inputmode="numeric" autocomplete="new-password" maxlength="8"></label>
+			<label class="sk-field"><span>${t("new_pin2")}</span><input id="p-new2" type="password" inputmode="numeric" autocomplete="new-password" maxlength="8"></label>
+			<button class="sk-btn ok wide" data-act="pin-save">${t("save")}</button></main>`;
+	}
+
+	// HR: every login is made from the person's mobile number; the app gives a first PIN (SK, 26-Oct)
+	let loginOpts = null;
+	async function renderLogins() {
+		const people = await call("hr_people");
+		root._people = people;
+		const none = people.filter((p) => p.state === "none");
+		const fnLabel = (f) => { const o = loginOpts && loginOpts.functions.find((x) => x.name === f); return o ? (o.label[state.lang] || o.label.English || f) : f; };
+		const row = (p, i) => {
+			const sub = [p.designation, p.mobile, p.functions.map(fnLabel).join(" + ")].filter(Boolean).join(" · ");
+			const warn = p.state === "active" && p.must_set_pin ? ` <span class="sk-due">${t("pin_set_pending")}</span>` : "";
+			const btn = p.state === "none" ? `<button class="sk-chip on" data-act="login-new" data-i="${i}">+ ${t("make_login")}</button>`
+				: p.state === "closed" ? `<button class="sk-chip" data-act="login-new" data-i="${i}">↺ ${t("make_login")}</button>`
+				: `<button class="sk-chip" data-act="login-new" data-i="${i}">✏️ ${t("edit_login")}</button>
+					<button class="sk-chip" data-act="login-reset" data-i="${i}">🔑 ${t("reset_pin")}</button>
+					<button class="sk-chip bad" data-act="login-close" data-i="${i}">✕ ${t("close_login")}</button>`;
+			return `<li class="sk-item sk-person"><div><b>${esc(p.name)}</b>${warn}<div class="sk-item-meta">${esc(sub)}</div></div><div class="sk-row sk-wrap">${btn}</div></li>`;
+		};
+		const group = (title, st) => {
+			const rows = people.map((p, i) => (p.state === st ? row(p, i) : "")).join("");
+			return rows ? `<h3 class="sk-h">${title}</h3><ul class="sk-list">${rows}</ul>` : "";
+		};
+		root.innerHTML = header(t("logins")) + `<main>
+			<p class="sk-note">${people.length} ${t("people_n")} · ${none.length} ${t("without_login")}</p>
+			<button class="sk-btn go wide" data-act="login-new">➕ ${t("new_login")}</button>
+			${group(t("no_login"), "none")}${group(t("has_login"), "active")}${group(t("closed_login"), "closed")}</main>`;
+		if (!loginOpts) loginOpts = await call("hr_login_options").catch(() => null);
+	}
+
+	async function loginSheet(p) {
+		if (!loginOpts) loginOpts = await call("hr_login_options");
+		p = p || { functions: [] };
+		const have = new Set(p.functions.length ? p.functions : (p.home ? [p.home] : []));
+		const fns = loginOpts.functions.map((f) => `<button class="sk-chip ${have.has(f.name) ? "on" : ""}" data-fnpick="${esc(f.name)}">${esc(f.label[state.lang] || f.label.English || f.name)}</button>`).join("");
+		const mgr = `<option value="">-</option>` + loginOpts.managers.map((m) => `<option value="${esc(m.user)}" ${m.user === p.manager ? "selected" : ""}>${esc(m.full_name || m.user)}</option>`).join("");
+		const ws = `<option value="">-</option>` + loginOpts.workstations.map((w) => `<option ${w === p.workstation ? "selected" : ""}>${esc(w)}</option>`).join("");
+		sheet(`<h3 class="sk-h">🔑 ${p.name ? esc(p.name) : t("new_login")}</h3>
+			<label class="sk-field"><span>${t("name")}</span><input id="g-name" value="${esc(p.name || "")}" ${p.employee ? "readonly" : ""}></label>
+			<label class="sk-field"><span>${t("mobile")}</span><input id="g-mobile" type="tel" inputmode="numeric" value="${esc(p.mobile || "")}" placeholder="98XXXXXXXX"></label>
+			<div class="sk-field"><span>${t("functions_pick")}</span><div class="sk-row sk-wrap" id="g-fns">${fns}</div></div>
+			<label class="sk-field" id="g-ws-row"><span>${t("workstation")}</span><select id="g-ws" class="sk-select">${ws}</select></label>
+			<label class="sk-field"><span>${t("reports_to")}</span><select id="g-mgr" class="sk-select">${mgr}</select></label>
+			<label class="sk-field"><span>${t("language")}</span><select id="g-lang" class="sk-select"><option>English</option><option value="Marathi" ${state.lang === "Marathi" ? "selected" : ""}>मराठी</option></select></label>
+			<button class="sk-btn ok wide" data-act="login-make" data-emp="${esc(p.employee || "")}">${t("make_login")}</button>
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+		showWorkstation();
+	}
+	function showWorkstation() {
+		const on = !!root.querySelector('[data-fnpick="Subcontractor"].on');
+		const r = document.getElementById("g-ws-row");
+		if (r) r.style.display = on ? "" : "none";
+	}
+
+	function pinSheet(r) {
+		const msg = `${t("login_link")}: ${location.origin}/sk\n${t("mobile")}: ${r.mobile}\n${t("first_pin")}: ${r.pin}`;
+		root._pinMsg = { mobile: r.mobile, text: msg };
+		sheet(`<h3 class="sk-h">✅ ${t("login_ready")}</h3>
+			<p class="sk-big">${t("mobile")}: <b>${esc(r.mobile || "")}</b><br>${t("first_pin")}: <b>${esc(r.pin)}</b></p>
+			<p class="sk-note">${t("pin_note")}</p>
+			<button class="sk-btn ok wide" data-act="login-wa">💬 ${t("send")} WhatsApp</button>
+			<button class="sk-btn wide" data-act="close-sheet">${t("done")}</button>`);
 	}
 
 	function itemRow(i) {
@@ -897,7 +998,8 @@
 		my_kpi: renderKpi, dsi: renderDsi, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
 		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name),
-		reminders: renderReminders, calls: renderCalls, whatsapp: renderWhatsApp, mail: renderMail, library: renderLibrary };
+		reminders: renderReminders, calls: renderCalls, whatsapp: renderWhatsApp, mail: renderMail, library: renderLibrary,
+		logins: renderLogins };
 
 	async function go(view) {
 		state.view = view;
@@ -981,7 +1083,39 @@
 				toast(t("saved"));
 				return el.dataset.resp === "Problem" ? go("problem") : go(state.view);
 			}
+			if (el.dataset.fnpick) { el.classList.toggle("on"); return showWorkstation(); }
 			const act = el.dataset.act;
+			if (act === "pin-save") {
+				if (val("p-new") !== val("p-new2")) return toast(t("pin_mismatch"), true);
+				el.disabled = true;
+				await call("set_pin", { old_pin: val("p-old"), new_pin: val("p-new") }, true);
+				state.home.must_set_pin = false;
+				toast(t("pin_saved"));
+				return go("home");
+			}
+			if (act === "login-new") return loginSheet(el.dataset.i !== undefined ? root._people[Number(el.dataset.i)] : null);
+			if (act === "login-make") {
+				el.disabled = true;
+				const functions = [...root.querySelectorAll("[data-fnpick].on")].map((c) => c.dataset.fnpick);
+				const r = await call("hr_make_login", { mobile: val("g-mobile"), functions: JSON.stringify(functions), employee: el.dataset.emp || null,
+					full_name: val("g-name"), manager: val("g-mgr") || null, language: val("g-lang"), workstation: functions.includes("Subcontractor") ? val("g-ws") || null : null }, true);
+				await renderLogins();
+				return pinSheet(r);
+			}
+			if (act === "login-reset") {
+				const r = await call("hr_reset_pin", { user: root._people[Number(el.dataset.i)].user }, true);
+				return pinSheet(r);
+			}
+			if (act === "login-close") {
+				const p = root._people[Number(el.dataset.i)];
+				if (!window.confirm(`${p.name}: ${t("close_q")}`)) return;
+				await call("hr_close_login", { user: p.user }, true);
+				toast(t("saved"));
+				return renderLogins();
+			}
+			if (act === "login-wa" && root._pinMsg) {
+				return window.open("https://wa.me/" + waNumber(root._pinMsg.mobile) + "?text=" + encodeURIComponent(root._pinMsg.text), "_blank");
+			}
 			if (act === "newcard") { state.card = await call("next_card", { force: 1 }, true); return go(state.view); }
 			if (act === "read" && state.card) return readAloud(state.card.card_text);
 			if (act === "lang") {

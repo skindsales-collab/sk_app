@@ -9,15 +9,17 @@ no_cache = 1
 
 
 def get_context(context):
-	if frappe.session.user == "Guest":
-		frappe.local.flags.redirect_location = "/login?redirect-to=/sk"
-		raise frappe.Redirect
 	context.no_header = 1
+	context.v = asset_version()
+	# SK: everyone logs in with their mobile number and PIN on the app's own screen; email login stays as an option
+	context.guest = frappe.session.user == "Guest"
+	if context.guest:
+		context.title = _("SK App")
+		return context
 	context.no_breadcrumbs = 1
 	context.title = _("SK App")
 	context.csrf_token = frappe.sessions.get_csrf_token()
 	context.user = frappe.session.user
-	context.v = asset_version()
 	return context
 
 

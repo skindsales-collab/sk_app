@@ -29,6 +29,19 @@ Purchase, Accounts, HR, Machine Shifting, Design, IT / ERP and Management alread
 Work Book, DSI, Report Problem and My Score. Their own tiles (job cards, inspections, stock alerts ...) open ERPNext
 until they are built in later phases. Each person has a separate login: their ERPNext user, with their own roles.
 
+### Logins by mobile number
+
+Everyone logs in at `/sk` with their **mobile number and PIN** (email login stays as an option). HR opens the
+🔑 **Logins** tile, picks the person (or a new one, e.g. a subcontractor), types the mobile number and taps the
+functions; the app makes the ERPNext User (hidden ID `<mobile>@staff.skind.local` when the person has no email),
+gives the roles of those functions, links the Employee and shows a first PIN to hand over or send on WhatsApp.
+The person sets their own PIN at the first login. HR can reset a PIN or close a login (history stays).
+Subcontractors (`Subcontractor` function) get the small `SK Subcontractor` role, no ERPNext desk, and a workstation.
+`after_migrate` turns on *System Settings → Allow Login using Mobile Number* (`sk_app/logins.py`).
+
+A person in several functions (SK App User: Main Function + Other Functions) sees one Home with a labelled row of
+icons per function and one "For everyone" row; no switching.
+
 ## KPI counting
 
 `SK KPI Target.kpi_code` says how ERPNext counts the actual every month (`sk_app/kpi.py`):

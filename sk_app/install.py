@@ -12,6 +12,9 @@ def after_install():
 
 
 def after_migrate():
+	from sk_app.logins import setup_site
+
+	setup_site()
 	ensure_crm_fields()
 	from sk_app.training import seed_lessons
 

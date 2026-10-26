@@ -5,7 +5,7 @@
  "custom": 0,
  "engine": "InnoDB",
  "creation": "2026-10-25 08:30:00.000000",
- "modified": "2026-10-25 08:30:00.000000",
+ "modified": "2026-10-26 06:00:00.000000",
  "owner": "Administrator",
  "modified_by": "Administrator",
  "naming_rule": "By fieldname",
@@ -17,8 +17,11 @@
   "full_name",
   "employee",
   "enabled",
+  "must_set_pin",
   "column_1",
   "home",
+  "functions",
+  "workstation",
   "language",
   "manager"
  ],
@@ -60,10 +63,11 @@
   {
    "fieldname": "home",
    "fieldtype": "Select",
-   "label": "Home Screen",
-   "options": "Sales\nMarketing\nProduction\nQuality\nStores\nPurchase\nAccounts\nHR\nMachine Shifting\nDesign\nIT / ERP\nManagement",
+   "label": "Main Function",
+   "options": "Sales\nMarketing\nProduction\nSubcontractor\nQuality\nStores\nPurchase\nAccounts\nHR\nMachine Shifting\nDesign\nAI\nIT / ERP\nManagement",
    "default": "Sales",
-   "in_list_view": 1
+   "in_list_view": 1,
+   "description": "First function on Home. Add more functions below: a person in several functions sees all of them on one Home."
   },
   {
    "fieldname": "language",
@@ -77,6 +81,28 @@
    "fieldtype": "Link",
    "label": "Manager (User)",
    "options": "User"
+  },
+  {
+   "fieldname": "functions",
+   "fieldtype": "Table",
+   "label": "Other Functions",
+   "options": "SK App User Function"
+  },
+  {
+   "fieldname": "workstation",
+   "fieldtype": "Link",
+   "label": "Workstation (subcontractor)",
+   "options": "Workstation",
+   "description": "For subcontractors: they see only Job Cards of this workstation.",
+   "depends_on": "eval:doc.home=='Subcontractor' || (doc.functions||[]).some(r => r.function=='Subcontractor')"
+  },
+  {
+   "fieldname": "must_set_pin",
+   "fieldtype": "Check",
+   "label": "Must Set Own PIN",
+   "default": "0",
+   "read_only": 1,
+   "description": "Set when HR makes or resets the login; cleared when the person sets their own PIN."
   }
  ],
  "permissions": [

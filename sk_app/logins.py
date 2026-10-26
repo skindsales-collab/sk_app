@@ -1,0 +1,215 @@
+"""Logins by mobile number (SK, 26-Oct-2026): HR makes every login from the person's mobile number and gives a PIN.
+
+ERPNext still needs an email as the user ID, so people without one get a hidden ID <mobile>@staff.skind.local that
+is never mailed. Email login keeps working as an option. The person sets their own PIN at the first login.
+"""
+
+import re
+import secrets
+
+import frappe
+from frappe import _
+from frappe.utils.password import check_password, update_password
+
+from sk_app.functions import FUNCTIONS
+
+HIDDEN_DOMAIN = "staff.skind.local"
+LOGIN_ROLES = {"HR Manager", "HR User", "System Manager"}
+# functions that give full admin rights: only an admin may hand them out, never HR alone
+ADMIN_FUNCTIONS = {f for f, spec in FUNCTIONS.items() if "System Manager" in spec["erpnext_roles"]}
+
+
+def clean_mobile(mobile) -> str:
+	"""10-digit Indian mobile from what people type: +91 98xxx xxxxx, 098xxxxxxxx, 98xxx-xxxxx."""
+	digits = re.sub(r"\D", "", str(mobile or ""))
+	if len(digits) == 12 and digits.startswith("91"):
+		digits = digits[2:]
+	elif len(digits) == 11 and digits.startswith("0"):
+		digits = digits[1:]
+	if not re.fullmatch(r"[6-9]\d{9}", digits):
+		frappe.throw(_("Please give a 10-digit mobile number"))
+	return digits
+
+
+def new_pin() -> str:
+	return f"{secrets.randbelow(10**6):06d}"
+
+
+def check_pin(pin) -> str:
+	pin = str(pin or "").strip()
+	if not re.fullmatch(r"\d{4,8}", pin):
+		frappe.throw(_("PIN must be 4 to 8 digits"))
+	return pin
+
+
+def _can_manage(user: str) -> bool:
+	return bool(LOGIN_ROLES & set(frappe.get_roles(user)))
+
+
+def _check_manager(user: str):
+	if not _can_manage(user):
+		frappe.throw(_("Only HR can make logins"), frappe.PermissionError)
+
+
+def profile_functions(user: str) -> list[str]:
+	from sk_app.functions import function_list
+
+	profile = frappe.db.get_value("SK App User", {"user": user}, ["name", "home"], as_dict=True)
+	if not profile:
+		return []
+	rows = frappe.get_all("SK App User Function", filters={"parent": profile.name, "parenttype": "SK App User"},
+		fields=["function"], order_by="idx asc")
+	return function_list({"home": profile.home, "functions": rows})
+
+
+def people(user: str) -> list[dict]:
+	"""Every active employee and every app user, with their login state, for the HR Logins screen."""
+	_check_manager(user)
+	emps = frappe.get_all("Employee", filters={"status": "Active"},
+		fields=["name", "employee_name", "designation", "department", "user_id", "cell_number"], order_by="employee_name asc")
+	app_users = {r.user: r for r in frappe.get_all("SK App User", fields=["name", "user", "full_name", "enabled", "home",
+		"employee", "manager", "workstation", "must_set_pin"])}
+	users = {u.name: u for u in frappe.get_all("User", filters={"name": ["in", list({e.user_id for e in emps if e.user_id} | set(app_users))]},
+		fields=["name", "enabled", "mobile_no", "full_name", "last_login"])} if (emps or app_users) else {}
+	out, seen = [], set()
+	for e in emps:
+		u = users.get(e.user_id) if e.user_id else None
+		a = app_users.get(e.user_id) if e.user_id else None
+		seen.add(e.user_id)
+		out.append(_row(e.employee_name, e.designation, e.name, u, a, e.cell_number))
+	for name, a in app_users.items():
+		if name not in seen:
+			out.append(_row(a.full_name or name, None, a.employee, users.get(name), a, None))
+	# people without a login first: that is HR's to-do
+	out.sort(key=lambda r: (r["state"] == "active", r["name"].lower()))
+	return out
+
+
+def _row(name, designation, employee, u, a, cell):
+	if not u:
+		state = "none"
+	elif not u.enabled or (a and not a.enabled):
+		state = "closed"
+	else:
+		state = "active"
+	return {"name": name, "designation": designation, "employee": employee, "user": u.name if u else None,
+		"mobile": (u.mobile_no if u else None) or cell, "state": state, "home": a.home if a else None,
+		"functions": profile_functions(u.name) if (u and a) else [], "manager": a.manager if a else None,
+		"workstation": a.workstation if a else None, "must_set_pin": bool(a and a.must_set_pin),
+		"last_login": str(u.last_login) if u and u.last_login else None,
+		"hidden_id": bool(u and u.name.endswith("@" + HIDDEN_DOMAIN))}
+
+
+def make_login(by: str, mobile, functions, employee=None, full_name=None, manager=None, language="English",
+		workstation=None) -> dict:
+	"""Create (or update) the person's login from their mobile number and give a first PIN."""
+	_check_manager(by)
+	mobile = clean_mobile(mobile)
+	functions = [f for f in (functions or []) if f in FUNCTIONS]
+	if not functions:
+		frappe.throw(_("Please pick at least one function"))
+	if ADMIN_FUNCTIONS & set(functions) and "System Manager" not in frappe.get_roles(by):
+		frappe.throw(_("Only the ERPNext admin can give the {0} function").format(", ".join(ADMIN_FUNCTIONS & set(functions))),
+			frappe.PermissionError)
+	if "Subcontractor" in functions and not workstation:
+		frappe.throw(_("Please pick the subcontractor's workstation"))
+	if language not in ("English", "Marathi"):
+		language = "English"
+
+	emp = frappe.db.get_value("Employee", employee, ["name", "employee_name", "user_id", "first_name"], as_dict=True) if employee else None
+	if employee and not emp:
+		frappe.throw(_("Employee {0} not found").format(employee))
+	full_name = (full_name or (emp and emp.employee_name) or "").strip()
+	if not full_name:
+		frappe.throw(_("Please give the person's name"))
+
+	user_id = emp.user_id if emp and emp.user_id else None
+	other = frappe.db.get_value("User", {"mobile_no": mobile, "name": ["!=", user_id or ""]}, "name")
+	if other:
+		frappe.throw(_("Mobile {0} is already the login of {1}").format(mobile, other))
+	if not user_id:
+		user_id = f"{mobile}@{HIDDEN_DOMAIN}"
+
+	roles = {r for f in functions for r in FUNCTIONS[f]["erpnext_roles"] if frappe.db.exists("Role", r)}
+	if frappe.db.exists("User", user_id):
+		user = frappe.get_doc("User", user_id)
+		user.enabled = 1
+	else:
+		first, _sp, last = full_name.partition(" ")
+		user = frappe.get_doc({"doctype": "User", "email": user_id, "first_name": first, "last_name": last or None,
+			"send_welcome_email": 0, "user_type": "System User"})
+	user.mobile_no = mobile
+	have = {r.role for r in user.get("roles")}
+	for r in sorted(roles):
+		if r not in have:
+			user.append("roles", {"role": r})
+	user.flags.no_welcome_mail = True
+	if user.is_new():
+		user.insert(ignore_permissions=True)
+	else:
+		user.save(ignore_permissions=True)
+	pin = new_pin()
+	update_password(user.name, pin)
+
+	if emp:
+		updates = {"cell_number": mobile}
+		if not emp.user_id:
+			updates["user_id"] = user.name
+		frappe.db.set_value("Employee", emp.name, updates)
+		# ERPNext keeps the Employee role only on a user linked to an Employee, so it is added after the link;
+		# subcontractors stay without it (no ERPNext desk)
+		if functions != ["Subcontractor"] and frappe.db.get_value("Employee", {"user_id": user.name}):
+			user.reload()
+			user.add_roles("Employee")
+
+	name = frappe.db.get_value("SK App User", {"user": user.name})
+	app = frappe.get_doc("SK App User", name) if name else frappe.get_doc({"doctype": "SK App User", "user": user.name})
+	app.update({"home": functions[0], "enabled": 1, "language": language, "manager": manager or app.get("manager"),
+		"workstation": workstation or None, "must_set_pin": 1, "employee": emp.name if emp else app.get("employee")})
+	app.set("functions", [{"function": f} for f in functions[1:]])
+	if name:
+		app.save(ignore_permissions=True)
+	else:
+		app.insert(ignore_permissions=True)
+	return {"user": user.name, "mobile": mobile, "pin": pin, "full_name": full_name, "functions": functions}
+
+
+def reset_pin(by: str, user: str) -> dict:
+	_check_manager(by)
+	if not frappe.db.exists("User", user) or user in ("Administrator", "Guest"):
+		frappe.throw(_("Login not found"))
+	if "System Manager" in frappe.get_roles(user) and "System Manager" not in frappe.get_roles(by):
+		frappe.throw(_("Only the ERPNext admin can reset an admin's PIN"), frappe.PermissionError)
+	pin = new_pin()
+	update_password(user, pin)
+	frappe.db.set_value("SK App User", {"user": user}, "must_set_pin", 1)
+	return {"user": user, "pin": pin, "mobile": frappe.db.get_value("User", user, "mobile_no")}
+
+
+def close_login(by: str, user: str) -> dict:
+	"""Person left: login off. All their past work stays in ERPNext under their name."""
+	_check_manager(by)
+	if user in ("Administrator", "Guest", by):
+		frappe.throw(_("This login cannot be closed here"))
+	if "System Manager" in frappe.get_roles(user) and "System Manager" not in frappe.get_roles(by):
+		frappe.throw(_("Only the ERPNext admin can close an admin's login"), frappe.PermissionError)
+	frappe.db.set_value("User", user, "enabled", 0)
+	frappe.db.set_value("SK App User", {"user": user}, "enabled", 0)
+	return {"user": user, "closed": True}
+
+
+def set_own_pin(user: str, old_pin, new_pin_value) -> dict:
+	"""The person changes the PIN HR gave them (first login) or any time later."""
+	new_pin_value = check_pin(new_pin_value)
+	check_password(user, str(old_pin or ""))  # throws on a wrong old PIN
+	update_password(user, new_pin_value)
+	frappe.db.set_value("SK App User", {"user": user}, "must_set_pin", 0)
+	return {"ok": True}
+
+
+def setup_site():
+	"""Run after every migrate: login with mobile number on, and the small subcontractor role."""
+	if not frappe.db.get_single_value("System Settings", "allow_login_using_mobile_number"):
+		frappe.db.set_single_value("System Settings", "allow_login_using_mobile_number", 1)
+	if not frappe.db.exists("Role", "SK Subcontractor"):
+		frappe.get_doc({"doctype": "Role", "role_name": "SK Subcontractor", "desk_access": 0}).insert(ignore_permissions=True)
