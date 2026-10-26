@@ -201,3 +201,9 @@ Score = actual / target (capped at 120%) x weight. Sources that are not live yet
   Company & Products → Products lists Cabin and Non-Cabin; Item Groups with no card yet show greyed so the list is
   complete. New Lead has "Product asked" (`sk_product` on CRM Lead / Deal), and the lead / deal page shows "Products for
   this customer" with one-tap WhatsApp share. Photos, sizes and brochures come from SK / Sales.
+- **Point 1, check before saving** (`photocheck.py`): on New Lead, New Supplier, supplier bill and Dispatch, a
+  "Check before saving" card shows each value with its ERPNext field: green ✓ fits, amber ⚠ suggestion, red ✗ needed.
+  It checks duplicate mobile (lead / customer), nearest customer / supplier, duplicate bill number, bill total against
+  open POs, GSTIN format with state and PAN, and the number plate format. GST certificate and bill photos are read on the
+  phone (free reader) to fill empty boxes. A picked suggestion is remembered in the new SK Photo Match list. Every photo
+  also shows which ERPNext record it goes to, with a warning if it is too dark or blurred.

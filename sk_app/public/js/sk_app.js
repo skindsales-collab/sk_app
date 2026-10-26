@@ -771,6 +771,11 @@
 		brochure: "Brochure" });
 	Object.assign(T.Marathi, { product_asked: "विचारलेले उत्पादन (ऐच्छिक)", products_for: "या ग्राहकासाठी उत्पादने", card_missing: "कार्ड अजून बनले नाही (फोटो, साईझ, ब्रोशर हवे)",
 		brochure: "ब्रोशर" });
+	// change list point 1: check before saving
+	Object.assign(T.English, { check_before: "Check before saving (as in ERPNext)", check_red: "✗ Red lines are needed by ERPNext: please fill or correct them, then Save.",
+		check_ok: "Looks right. Tap a suggestion to use it, then Save.", goes_to: "Goes to", photo_dark: "Photo is dark: retake in light?", photo_blur: "Photo looks blurred: retake?" });
+	Object.assign(T.Marathi, { check_before: "सेव्ह करण्यापूर्वी तपासा (ERPNext प्रमाणे)", check_red: "✗ लाल ओळी ERPNext ला हव्या आहेत: भरा किंवा दुरुस्त करा, मग सेव्ह करा.",
+		check_ok: "बरोबर दिसते. सूचना वापरायची असल्यास टॅप करा, मग सेव्ह करा.", goes_to: "कुठे जाईल", photo_dark: "फोटो अंधारात आहे: प्रकाशात पुन्हा घ्या?", photo_blur: "फोटो धूसर आहे: पुन्हा घ्या?" });
 	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";
 	T.Marathi.mic_blocked = "माईक / कॅमेरा बंद आहे. Chrome → ⋮ → Settings → Site settings → Microphone (किंवा Camera) → ही साईट → Allow. मग परत येऊन 🎤 दाबा.";
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
@@ -1269,7 +1274,7 @@
 			(e) => { note.textContent = "⚠ " + e.message; inp._up = null; throw e; });
 		inp._up.catch(() => {});
 	}
-	root.addEventListener("change", (ev) => { if (ev.target.classList && ev.target.classList.contains("sk-file")) photoPicked(ev.target); }, true);
+	root.addEventListener("change", (ev) => { if (ev.target.classList && ev.target.classList.contains("sk-file")) { photoPicked(ev.target); photoNote(ev.target); } }, true);
 
 	async function photoUrl(id) {
 		const f = document.getElementById(id || "f-photo");
@@ -1539,7 +1544,97 @@
 				if (!fill(d)) { toast(t("read_none"), true); return; }
 			}
 			toast(t("read_ok"));
+			runCheck();
 		} catch (e) { toast(t("read_none"), true); } finally { note.remove(); }
+	}
+
+	// Point 1: "Check before saving". Each value next to its ERPNext field: green ✓ fits, amber ⚠ suggestion, red ✗ needed.
+	// Suggestions come from ERPNext (nearest supplier / customer, duplicate mobile or bill, GSTIN / plate format);
+	// a picked suggestion is remembered for next time. The form's own Save still does the saving.
+	const CHECKS = [
+		{ anchor: "f-first", kind: "lead", ids: { first_name: "f-first", organization: "f-org", mobile_no: "f-mobile", email: "f-email", segment: "f-segment" },
+			learn: { organization: "customer" } },
+		{ anchor: "ns-name", kind: "supplier", ids: { supplier_name: "ns-name", gstin: "ns-gstin", mobile: "ns-mobile" }, learn: { supplier_name: "supplier" } },
+		{ anchor: "b-no", kind: "bill", ids: { supplier: "b-sup", bill_no: "b-no", amount: "b-amt" }, learn: { supplier: "supplier" } },
+		{ anchor: "d-vehicle", kind: "plate", ids: { vehicle_no: "d-vehicle" } },
+	];
+	const checkSpec = () => CHECKS.find((c) => document.getElementById(c.anchor));
+	let checkTimer = null;
+	async function runCheck() {
+		const spec = checkSpec();
+		if (!spec) return;
+		const values = {};
+		Object.entries(spec.ids).forEach(([k, id]) => { values[k] = val(id); });
+		if (!Object.values(values).some(Boolean)) return;
+		const d = await call("photo_check", { kind: spec.kind, values: JSON.stringify(values) }).catch(() => null);
+		if (!d || !checkSpec()) return;
+		let box = document.getElementById("chk-box");
+		if (!box) {
+			box = document.createElement("section");
+			box.id = "chk-box";
+			box.className = "sk-chkbox";
+			const save = root.querySelector("main .sk-btn.ok, main .sk-btn.go");
+			if (save) save.before(box); else root.querySelector("main").appendChild(box);
+		}
+		const icon = { green: "✓", amber: "⚠", red: "✗" };
+		box.innerHTML = `<h3 class="sk-h">🔍 ${t("check_before")}</h3>${d.rows.map((r) => `<div class="sk-chk ${r.state}">
+			<div class="sk-row"><b>${icon[r.state]}</b><span class="sk-grow">${esc(r.label)}: <b>${esc(r.value == null ? "" : r.value)}</b></span><small class="sk-muted">${esc(r.field)}</small></div>
+			${r.note ? `<div class="sk-item-meta">${esc(r.note)}</div>` : ""}
+			${(r.options || []).length ? `<div class="sk-row sk-wrap">${r.options.map((o) => `<button type="button" class="sk-chip" data-apply="${esc(spec.ids[r.field] || "")}" data-val="${esc(o)}" data-learn="${esc((spec.learn || {})[r.field] || "")}">${esc(o)}</button>`).join("")}</div>` : ""}
+			</div>`).join("")}${d.red ? `<p class="sk-note bad">${t("check_red")}</p>` : `<p class="sk-note">${t("check_ok")}</p>`}`;
+	}
+	root.addEventListener("change", (ev) => {
+		const spec = checkSpec();
+		if (spec && Object.values(spec.ids).includes(ev.target.id)) { clearTimeout(checkTimer); checkTimer = setTimeout(runCheck, 300); }
+	});
+	// Bill / GST certificate photo: read it on the phone and fill the empty boxes, then check (free reader)
+	async function readPaper(inp) {
+		const f = inp.files[0];
+		if (!f || !f.type.startsWith("image/")) return;
+		const map = { "ns-photo": (d) => ({ "ns-name": d.organization, "ns-gstin": d.invoice && d.invoice.gstin, "ns-mobile": d.mobile_no }),
+			"b-photo": (d) => ({ "b-no": d.invoice && d.invoice.number, "b-amt": d.invoice && d.invoice.total, "b-sup": d.organization }) };
+		if (!map[inp.id]) return;
+		try {
+			const d = await readOnPhone(f, () => {});
+			const gst = (d.invoice && d.invoice.gstin) || ((d.requirement || "").match(/\b\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]\b/) || [])[0];
+			if (gst) d.invoice = { ...(d.invoice || {}), gstin: gst };
+			Object.entries(map[inp.id](d)).forEach(([id, v]) => { const el = document.getElementById(id); if (el && v && !el.value) el.value = v; });
+			runCheck();
+		} catch (e) { /* reading is a help only; the person can type */ }
+	}
+	// Proof photos: where it goes, and a warning if it is too dark or blurred to read later
+	const RECORD_OF = { receive: "Purchase Receipt (draft)", issue: "Stock Entry", dispatch: "Delivery Note", stock_count: "Stock Reconciliation",
+		new_item: "Item", job_cards: "Job Card", my_jobs: "Job Card", progress_photos: "Work Order", non_conformance: "Non Conformance", my_fixes: "Non Conformance",
+		inspect: "Quality Inspection", final_check: "Quality Inspection", dsi: "SK DSI Entry", problem: "SK Work Log", day_report: "SK Day Report",
+		detail: "CRM note / file", new_lead: "CRM Lead", complaints: "Issue (complaint)", bills: "Purchase Invoice (draft)", suppliers: "Supplier",
+		to_collect: "Payment Entry (draft)", to_pay: "Payment Entry (draft)", expenses: "Journal Entry (draft)", my_day: "SK Work Log" };
+	async function photoQuality(file) {
+		const img = await createImageBitmap(file);
+		const c = document.createElement("canvas");
+		c.width = 64; c.height = Math.max(1, Math.round(64 * img.height / img.width));
+		const g = c.getContext("2d");
+		g.drawImage(img, 0, 0, c.width, c.height);
+		const px = g.getImageData(0, 0, c.width, c.height).data;
+		const lum = [];
+		for (let i = 0; i < px.length; i += 4) lum.push(0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]);
+		const mean = lum.reduce((a, b) => a + b, 0) / lum.length;
+		let edge = 0;
+		for (let i = 1; i < lum.length; i++) edge += Math.abs(lum[i] - lum[i - 1]);
+		edge /= lum.length;
+		return mean < 45 ? "dark" : edge < 4 ? "blur" : "";
+	}
+	async function photoNote(inp) {
+		const pv = document.getElementById(inp.id + "-pv");
+		const f = inp.files[0];
+		if (!pv || !f) return;
+		const to = RECORD_OF[state.view];
+		let warn = "";
+		if (f.type.startsWith("image/")) { try { warn = await photoQuality(f); } catch (e) { warn = ""; } }
+		const div = document.createElement("div");
+		div.className = "sk-item-meta";
+		div.innerHTML = [to ? `➜ ${t("goes_to")}: <b>${esc(to)}</b>` : "", warn ? `<span class="sk-amber">⚠ ${t("photo_" + warn)}</span>` : ""].filter(Boolean).join(" · ");
+		if (div.innerHTML) pv.appendChild(div);
+		readPaper(inp);
 	}
 
 	// Training: 1) My function (e.g. Sales Manual lessons) 2) App usage 3) customer FAQ; managers also see their team
@@ -3204,6 +3299,16 @@
 				d.setDate(1); d.setMonth(d.getMonth() + Number(el.dataset.dashmonth));
 				dashMonth = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-01`;
 				return go(state.view);
+			}
+			if (el.dataset.apply !== undefined) {
+				const inp = document.getElementById(el.dataset.apply);
+				if (inp) {
+					const before = inp.value;
+					inp.value = el.dataset.val;
+					if (el.dataset.learn) call("photo_learn", { kind: el.dataset.learn, read_text: before, chosen: el.dataset.val }, true).catch(() => {});
+					runCheck();
+				}
+				return;
 			}
 			if (el.dataset.cptab) { cpTab = el.dataset.cptab; return go("complaints"); }
 			if (el.dataset.cp) return complaintSheet(el.dataset.cp);

@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import ai_desk, calendar_view, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, kpi, lead_sources, ledger, logins, mailbox, production, products, purchase, quality, segments, store, training, view_member, work
+from sk_app import ai_desk, calendar_view, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, segments, store, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -1120,3 +1120,16 @@ def training_answer(todo, text, add_to_faq=1):
 def product_catalogue(main=None):
 	_me()
 	return products.catalogue(main=main)
+
+
+# point 1: check before saving
+@frappe.whitelist()
+def photo_check(kind, values=None):
+	if isinstance(values, str):
+		values = json.loads(values or "{}")
+	return photocheck.check(_me().user, kind, values or {})
+
+
+@frappe.whitelist(methods=["POST"])
+def photo_learn(kind, read_text, chosen):
+	return photocheck.learn(_me().user, kind, read_text, chosen)

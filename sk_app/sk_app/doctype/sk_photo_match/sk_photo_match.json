@@ -1,0 +1,76 @@
+{
+ "doctype": "DocType",
+ "name": "SK Photo Match",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-10-26 12:30:00.000000",
+ "modified": "2026-10-26 12:30:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "naming_rule": "Random",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "description": "Change list point 1: what the phone read from a photo and what the person chose, so the app suggests it next time.",
+ "field_order": [
+  "kind",
+  "read_text",
+  "chosen",
+  "user",
+  "times"
+ ],
+ "fields": [
+  {
+   "fieldname": "kind",
+   "fieldtype": "Data",
+   "label": "Kind",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "supplier, customer, item ..."
+  },
+  {
+   "fieldname": "read_text",
+   "fieldtype": "Data",
+   "label": "Read from photo",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "chosen",
+   "fieldtype": "Data",
+   "label": "Chosen in ERPNext",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Chosen by"
+  },
+  {
+   "fieldname": "times",
+   "fieldtype": "Int",
+   "label": "Times used",
+   "default": "1"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1
+  }
+ ],
+ "states": [],
+ "actions": [],
+ "index_web_pages_for_search": 0,
+ "autoname": "hash",
+ "title_field": "read_text",
+ "links": []
+}
