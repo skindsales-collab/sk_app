@@ -14,7 +14,9 @@ FUNCTIONS = {
 		"tiles": ["my_day", "calendar", "follow_up", "new_lead", *CONTACT_TILES, "my_leads", "my_deals", "reminders", "library",
 			"day_report", "my_kpi", "work_book", "dsi", "problem", "training"],
 		"live": True,
-		"erpnext_roles": ["Sales User", "Sales Manager"],
+		# not Sales Manager: in Frappe CRM that role shows every lead of the company (SK 26-Oct: each salesperson sees
+		# only their own; the sales manager sees his team on the Team Leads icon)
+		"erpnext_roles": ["Sales User"],
 		"desk": "/crm",
 	},
 	"Marketing": {

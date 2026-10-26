@@ -759,7 +759,7 @@ def team_follow_up(person=None):
 		frappe.throw(_("{0} is not in your team").format(person), frappe.PermissionError)
 	summary, rows = [], []
 	for p in people:
-		items = crm.follow_up(p["user"])
+		items = crm.follow_up(p["user"], for_manager=p["user"] != profile.user)
 		month = kpi.scorecard(p["user"])
 		summary.append({**p, "open": len(items), "overdue": sum(1 for r in items if r["overdue"]), "new": sum(1 for r in items if r["new"]),
 			"deal_value": sum(flt(r.get("value")) for r in items if r["doctype"] == "CRM Deal"), "score": month.get("score")})
