@@ -324,3 +324,55 @@ def remind():
 	for box, c in counts(list(team_boxes())).items():
 		if c["late"]:
 			_notify([p.user for p in people_of(box)], f"{c['late']} mail(s) waiting over 2 hours in {box}")
+
+
+# SK 27-Oct: "need to collect all relevant lead data & other & process": an enquiry mail to a sales box becomes a lead
+# by itself; vendor offers, bank mails, newsletters and spam stay in the box for a person to mark.
+LEAD_BOXES = ("sales@skind.tech", "cabin@skind.tech", "service@skind.tech")
+ENQUIRY_WORDS = ("enquiry", "inquiry", "quotation", "quote", "requirement", "required", "cabin", "container", "porta cabin", "portable",
+	"site office", "labour camp", "labor camp", "lgsf", "prefab", "modular", "toilet", "machine shifting", "shifting",
+	"rigging", "dismantl", "relocation", "job work", "machining", "price", "budget")
+NOT_LEAD_WORDS = ("invoice", "payment", "statement", "newsletter", "unsubscribe", "otp", "password", "offer for you",
+	"webinar", "receipt", "order confirmation", "job application", "resume", "cv ")
+NOT_LEAD_SENDERS = ("noreply", "no-reply", "donotreply", "mailer-daemon", "notification", "alerts@", "@skind.tech")
+
+
+def is_enquiry(sender: str | None, subject: str | None, text: str | None) -> bool:
+	s, body = (sender or "").lower(), f"{subject or ''}\n{(text or '')[:3000]}".lower()
+	if not s or any(w in s for w in NOT_LEAD_SENDERS) or any(w in body for w in NOT_LEAD_WORDS):
+		return False
+	return any(w in body for w in ENQUIRY_WORDS)
+
+
+def auto_leads() -> int:
+	"""Every 5 minutes, after link_known: enquiry mails from new senders to sales@ / cabin@ / service@ become CRM leads
+	with the usual owner (cabin → Rushi, digital → Pranali, non-cabin / service@ → Aditya)."""
+	from sk_app import lead_sources
+
+	if not frappe.db.exists("DocType", "CRM Lead"):
+		return 0
+	boxes = [b for b in LEAD_BOXES if b in team_boxes()]
+	if not boxes:
+		return 0
+	box_of, made = _account_boxes(), 0
+	for r in _received(boxes, since=add_days(now_datetime(), -2), fields=["sender", "sender_full_name", "subject", "text_content", "content"],
+			filters={"sk_mail_status": ["in", ["", None, "New"]]}):
+		if r.reference_doctype in ("CRM Lead", "CRM Deal") or lead_sources.source_of(r.sender, r.subject):
+			continue  # on a lead already, or a portal mail (lead_sources.scan)
+		text = r.text_content or strip_html(r.content or "")
+		if not is_enquiry(r.sender, r.subject, text):
+			continue
+		try:
+			data = lead_sources.parse_mail(r.subject, text, "Email")
+			data["email"] = data.get("email") or r.sender.strip()
+			data["first_name"] = r.sender_full_name or data["first_name"]
+			box = _box_of(r, boxes, box_of)
+			owner = None
+			if box == "service@skind.tech":
+				owner = frappe.get_cached_doc("SK App Settings").get("lead_owner_noncabin")
+			res = lead_sources.make_lead(data, "Email", owner=owner, note=f"From mail to {box}: {r.subject or ''}")
+			_set(r.name, reference_doctype="CRM Lead", reference_name=res["lead"], sk_mail_status="Lead made")
+			made += 1 if res["new"] else 0
+		except Exception:
+			frappe.log_error(f"SK App lead from mail {r.name}")
+	return made
