@@ -83,11 +83,6 @@ def sales(user: str, segment=None) -> list[dict]:
 	seg = dashboards._crm_seg(segment)
 	start = get_first_day(getdate())
 	stages = []
-	if _has("CRM Call Log"):
-		calls = frappe.get_all("CRM Call Log", filters={"creation": [">=", f"{add_days(nowdate(), -6)} 00:00:00"], **_in("owner", owners)},
-			fields=["name", "reference_docname", "type", "status", "duration", "owner", "creation"], order_by="creation desc", limit=0)
-		stages.append(_stage("calls", "Calls (7 days)", "📞", [_row(c.reference_docname or c.name, f"{c.type or ''} · {c.status or ''} · {_name(c.owner)}",
-			None, None, None) for c in calls], go="calls"))
 	# SK 27-Oct: arrows follow his steps New → Qualified → Drawing → Quotation → Negotiations (→ won = orders)
 	by = {step: [] for step in lead_status.STEPS}
 	if _has("CRM Lead"):
@@ -114,28 +109,28 @@ def sales(user: str, segment=None) -> list[dict]:
 			by[step].append(r)
 	icons = {"New": "🎯", "Qualified": "✅", "Drawing": "📐", "Quotation": "📄", "Negotiations": "🤝"}
 	go = {"New": "my_leads", "Qualified": "my_leads", "Drawing": "my_deals", "Quotation": "my_deals", "Negotiations": "my_deals"}
-	if _has("CRM Lead") or _has("CRM Deal"):
-		for step in lead_status.STEPS:
-			rows = by[step]
-			value = sum(flt(r["value"]) for r in rows if r.get("value"))
-			stages.append(_stage(step.lower(), step, icons[step], rows, value or None, go=go[step]))
-	sos = dashboards._orders(start, getdate(), segment if segment in segments.TREE else None)
-	if owners is not None:
-		from sk_app.kpi import user_sales_orders
-
-		mine = set()
-		for o in owners:
-			mine.update(user_sales_orders(o, start, getdate()))
-		sos = [s for s in sos if s.name in mine or frappe.db.get_value("Sales Order", s.name, "owner") in owners]
-	stages.append(_stage("orders", "Orders this month", "🧾", [_row(s.customer_name, f"{s.transaction_date}{' · draft' if s.docstatus == 0 else ''}",
-		s.base_net_total, "Sales Order", s.name) for s in sos], sum(flt(s.base_net_total) for s in sos), go="customers", kind="money"))
-	adv = frappe.get_all("Payment Entry", filters={"payment_type": "Receive", "docstatus": 1, "posting_date": [">=", start], "party_type": "Customer"},
-		fields=["name", "party_name", "paid_amount", "posting_date"], order_by="posting_date desc", limit=0)
-	if owners is not None:
-		adv = []  # money received is Accounts' / the CEO's view
-	else:
-		stages.append(_stage("advance", "Money received", "💰", [_row(p.party_name, str(p.posting_date), p.paid_amount, "Payment Entry", p.name)
-			for p in adv], sum(flt(p.paid_amount) for p in adv), go="cash_today", kind="money"))
+	# the 8 arrows always show, 0 when empty (SK 27-Oct: arrows missing looked like a fault)
+	for step in lead_status.STEPS:
+		rows = by[step]
+		value = sum(flt(r["value"]) for r in rows if r.get("value"))
+		stages.append(_stage(step.lower(), step, icons[step], rows, value or None, go=go[step]))
+	# SK 27-Oct "All status shows in flow chart": the three closing steps too, closed this month
+	done = {"Deal Won": [], "Junk Lead": [], "Deal Loss": []}
+	if _has("CRM Lead"):
+		for l in frappe.get_all("CRM Lead", filters={"status": ["in", list(done)], "modified": [">=", start], **seg, **_in("lead_owner", owners)},
+				fields=["name", "first_name", "organization", "status", "lead_owner", "modified"], limit=0):
+			done[l.status].append(_row(l.organization or l.first_name or l.name, f"{str(l.modified)[:10]} · {_name(l.lead_owner)}", None, "CRM Lead", l.name))
+	if _has("CRM Deal"):
+		kinds = {r.name: r.type for r in frappe.get_all("CRM Deal Status", fields=["name", "type"])}
+		closed_st = [k for k, v in kinds.items() if v in ("Won", "Lost")]
+		for d in frappe.get_all("CRM Deal", filters={"status": ["in", closed_st or [""]], "modified": [">=", start], **seg, **_in("deal_owner", owners)},
+				fields=["name", "organization", "status", "deal_value", "deal_owner", "modified", "sk_customer_name"], limit=0):
+			done["Deal Won" if kinds.get(d.status) == "Won" else "Deal Loss"].append(_row(d.get("sk_customer_name") or d.organization or d.name,
+				f"{str(d.modified)[:10]} · {_name(d.deal_owner)}", d.deal_value, "CRM Deal", d.name))
+	for key, icon in (("Deal Won", "🏆"), ("Junk Lead", "🗑️"), ("Deal Loss", "❌")):
+		rows = done[key]
+		value = sum(flt(r["value"]) for r in rows if r.get("value"))
+		stages.append(_stage(key.lower().replace(" ", "_"), f"{key} (month)", icon, rows, value or None, go="my_leads", late_rows=[]))
 	return stages
 
 
