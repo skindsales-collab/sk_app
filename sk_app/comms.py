@@ -24,11 +24,19 @@ def _period(start, end) -> list:
 def call_totals(user: str, start, end=None) -> dict:
 	"""Calls the user logged between two dates: count, answered, talk time (seconds), missed / not answered."""
 	if not crm.installed():
-		return {"calls": 0, "talked": 0, "talk_seconds": 0, "missed": 0}
+		return {"calls": 0, "talked": 0, "talk_seconds": 0, "missed": 0, "whatsapp": 0, "mails": 0}
 	rows = frappe.get_all("CRM Call Log", filters={"creation": _period(start, end or start)},
 		or_filters={"caller": user, "receiver": user}, fields=["status", "duration"])
+	period = _period(start, end or start)
+	# SK 27-Oct: every call, WhatsApp and mail goes through the app and is counted per login (free route: WhatsApp is
+	# the note saved after tapping 💬, mail is what was sent from the app)
+	whatsapp = frappe.db.count("FCRM Note", {"owner": user, "creation": period, "title": ["like", "WhatsApp%"]}) \
+		if frappe.db.exists("DocType", "FCRM Note") else 0
+	mails = frappe.db.count("Communication", {"owner": user, "creation": period, "communication_medium": "Email",
+		"sent_or_received": "Sent"})
 	return {"calls": len(rows), "talked": sum(1 for r in rows if r.status in TALKED),
-		"talk_seconds": int(sum(r.duration or 0 for r in rows)), "missed": sum(1 for r in rows if r.status in NOT_CONNECTED)}
+		"talk_seconds": int(sum(r.duration or 0 for r in rows)), "missed": sum(1 for r in rows if r.status in NOT_CONNECTED),
+		"whatsapp": whatsapp, "mails": mails}
 
 
 def my_calls(user: str, days: int = 7) -> dict:

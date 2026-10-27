@@ -156,17 +156,28 @@ def customers(user: str, tab: str = "mine", q: str | None = None, segment: str |
 		like = f"%{q.strip()}%"
 		or_filters = [["customer_name", "like", like], ["mobile_no", "like", like], ["name", "like", like]]
 	rows = frappe.get_all("Customer", filters=filters, or_filters=or_filters,
-		fields=["name", "customer_name", "customer_group", "mobile_no", "territory"], order_by="modified desc", limit=100)
+		fields=["name", "customer_name", "customer_group", "mobile_no", "email_id", "territory"], order_by="modified desc", limit=100)
 	totals = _order_totals([r.name for r in rows])
 	for r in rows:
 		r["segment"] = SEGMENT_OF_GROUP.get(r.customer_group) or (r.customer_group if r.customer_group in TREE else None)
 		r["main"] = main_of(r.customer_group)
 		r["orders"] = totals.get(r.name) or 0
+		r["deal"] = _deal_of(r)  # SK 27-Oct: call / WhatsApp / mail from the customer list is logged on the deal
 	not_set = frappe.db.count("Customer", {"disabled": 0, "customer_group": ["not in", all_groups()]}) if tagger else 0
 	from sk_app.logins import profile_functions
 
 	tally = len(tally_suggestions()) if tab == "not_set" and (user == "Administrator" or "Management" in profile_functions(user)) else 0
 	return {"main": main, "tree": TREE, "rows": rows, "not_set": not_set, "can_tag": tagger, "from_tally": tally}
+
+
+def _deal_of(r) -> str | None:
+	if not frappe.db.exists("DocType", "CRM Deal"):
+		return None
+	if frappe.get_meta("Customer").has_field("crm_deal"):
+		deal = frappe.db.get_value("Customer", r.name, "crm_deal")
+		if deal:
+			return deal
+	return frappe.db.get_value("CRM Deal", {"organization": r.customer_name}, "name", order_by="modified desc")
 
 
 def tag(user: str, customer: str, segment: str) -> dict:
