@@ -1186,6 +1186,8 @@ def fin_month_wise(year_start=None):
 # ---------- Team mailboxes and auto leads (point 14) ----------
 @frappe.whitelist()
 def team_mail(box=None, q=None, start=0, days=None):
+	# older phones sent empty values as the text "null"
+	box, q = [None if x in ("null", "undefined") else x for x in (box, q)]
 	return mailbox.inbox(_me().user, box, q, cint(start))
 
 
