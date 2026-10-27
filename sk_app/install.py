@@ -111,4 +111,6 @@ def ensure_mail_fields():
 			"options": "\nNew\nTaken\nReplied\nLead made\nNot a lead", "insert_after": "status", "read_only": 1},
 		{"fieldname": "sk_taken_by", "label": "Taken by (SK App)", "fieldtype": "Link", "options": "User",
 			"insert_after": "sk_mail_status", "read_only": 1},
+		# SK 27-Oct: a mail moved to another team's box (info@ → cabin@)
+		{"fieldname": "sk_box", "label": "Team mailbox (SK App)", "fieldtype": "Data", "insert_after": "sk_taken_by", "read_only": 1},
 	]}, update=True)
