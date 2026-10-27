@@ -1,5 +1,6 @@
 // Tally keys in ERPNext for the accounts team (SK 27-Oct-2026): F4 Contra, F5 Payment, F6 Receipt, F7 Journal,
-// F8 Sales, F9 Purchase, Ctrl+F8 Credit Note, Ctrl+F9 Debit Note, Alt+D Day Book, Alt+L Ledger, Alt+G Gateway,
+// F8 Sales, F9 Purchase, Ctrl+F8 Sales Order, Ctrl+F9 Purchase Order, Alt+F5 Debit Note, Alt+F6 Credit Note (SK 27-Oct
+// change), Alt+D Day Book, Alt+L Ledger, Alt+G Gateway,
 // Alt+C Create Ledger, Alt+A Alter Ledger,
 // Ctrl+A accept (save and post) on a voucher, Esc back to the Accounts Gateway from a voucher list.
 (function () {
@@ -11,14 +12,16 @@
 		F7: ["Journal Entry", {}],
 		F8: ["Sales Invoice", {}],
 		F9: ["Purchase Invoice", {}],
-		"Ctrl+F8": ["Sales Invoice", { is_return: 1 }],
-		"Ctrl+F9": ["Purchase Invoice", { is_return: 1 }],
+		"Ctrl+F8": ["Sales Order", {}],
+		"Ctrl+F9": ["Purchase Order", {}],
+		"Alt+F5": ["Purchase Invoice", { is_return: 1 }],
+		"Alt+F6": ["Sales Invoice", { is_return: 1 }],
 	};
 	const accounts = () => frappe.boot && frappe.user && (frappe.user.has_role("Accounts User") || frappe.user.has_role("Accounts Manager"));
 	document.addEventListener("keydown", (e) => {
 		if (!window.frappe || !frappe.get_route || !accounts()) return;
-		const name = (e.ctrlKey ? "Ctrl+" : "") + e.key;
-		if (KEYS[name] && !e.altKey && !e.shiftKey) {
+		const name = (e.ctrlKey ? "Ctrl+" : "") + (e.altKey ? "Alt+" : "") + e.key;
+		if (KEYS[name] && !e.shiftKey) {
 			e.preventDefault();
 			e.stopPropagation();
 			const [dt, values] = KEYS[name];

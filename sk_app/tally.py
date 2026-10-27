@@ -3,8 +3,8 @@ user friendly to them"). Mock-up Rev 0 approved by SK 27-Oct.
 
 - One "Accounts Gateway" menu, like Gateway of Tally, with the same four sections and Tally names, in ERPNext (desk page
   /app/accounts-gateway) and in the app (Shraddha's Accounts screen). Each line opens the ERPNext screen behind it.
-- Tally keys in ERPNext: F4 Contra, F5 Payment, F6 Receipt, F7 Journal, F8 Sales, F9 Purchase, Ctrl+F8 Credit Note,
-  Ctrl+F9 Debit Note, Alt+D Day Book, Alt+L Ledger, Ctrl+A accept (save and post), Esc back to the Gateway.
+- Tally keys in ERPNext: F4 Contra, F5 Payment, F6 Receipt, F7 Journal, F8 Sales, F9 Purchase, Ctrl+F8 Sales Order,
+  Ctrl+F9 Purchase Order, Alt+F5 Debit Note, Alt+F6 Credit Note, Alt+D Day Book, Alt+L Ledger, Ctrl+A accept (save and post), Esc back to the Gateway.
 - Day Book: every voucher of a day with Tally voucher types (Payment / Receipt / Contra / Journal / Sales / Purchase ...).
 - "Narration" on every voucher (ERPNext's remark field).
 """
@@ -28,8 +28,10 @@ GATEWAY = [
 	("Transactions", "journal", "Journal", "जर्नल", "📖", "F7", "/app/journal-entry/new", "expenses", "Journal Entry"),
 	("Transactions", "sales", "Sales", "विक्री", "🧾", "F8", "/app/sales-invoice/new", "invoices", "Sales Invoice"),
 	("Transactions", "purchase", "Purchase", "खरेदी", "🧾", "F9", "/app/purchase-invoice/new", "bills_to_post", "Purchase Invoice"),
-	("Transactions", "credit_note", "Credit Note", "क्रेडिट नोट", "↩️", "Ctrl+F8", "/app/sales-invoice/new?is_return=1", None, "Sales return"),
-	("Transactions", "debit_note", "Debit Note", "डेबिट नोट", "↪️", "Ctrl+F9", "/app/purchase-invoice/new?is_return=1", None, "Purchase return"),
+	("Transactions", "credit_note", "Credit Note", "क्रेडिट नोट", "↩️", "Alt+F6", "/app/sales-invoice/new?is_return=1", None, "Sales return"),
+	("Transactions", "debit_note", "Debit Note", "डेबिट नोट", "↪️", "Alt+F5", "/app/purchase-invoice/new?is_return=1", None, "Purchase return"),
+	("Transactions", "sales_order", "Sales Order", "विक्री ऑर्डर", "📝", "Ctrl+F8", "/app/sales-order/new", None, "Customer order"),
+	("Transactions", "purchase_order", "Purchase Order", "खरेदी ऑर्डर", "📝", "Ctrl+F9", "/app/purchase-order/new", None, "Order to supplier"),
 	("Transactions", "day_book", "Day Book", "डे बुक", "📅", "Alt+D", "/app/query-report/Day Book", "day_book", "All vouchers of a day"),
 	("Transactions", "expenses_cash", "Expenses (petty cash)", "खर्च (रोख)", "💸", "", "/app/journal-entry/new", "dir_expenses", "Direct / Indirect"),
 	("Utilities", "bank_reco", "Bank Reconciliation", "बँक जुळवणी", "🏦", "", "/app/bank-reconciliation-tool", None, ""),
