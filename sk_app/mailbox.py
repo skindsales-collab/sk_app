@@ -7,7 +7,7 @@ its box, with a status per mail so two people never answer the same one: New →
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, getdate, now_datetime, strip_html
+from frappe.utils import add_days, add_to_date, getdate, now_datetime, strip_html
 
 from sk_app.logic import parse_lines
 
@@ -50,45 +50,112 @@ def people_of(box: str) -> list[dict]:
 
 
 def _check(user: str, comm: str) -> frappe._dict:
-	row = frappe.db.get_value("Communication", comm, ["name", "recipients", "sender", "subject", "sk_mail_status", "sk_taken_by",
-		"reference_doctype", "reference_name", "sent_or_received", "email_account"], as_dict=True)
+	fields = ["name", "recipients", "sender", "subject", "sk_mail_status", "sk_taken_by", "reference_doctype", "reference_name",
+		"sent_or_received", "email_account"] + (["sk_box"] if _has_box_field() else [])
+	row = frappe.db.get_value("Communication", comm, fields, as_dict=True)
 	if not row:
 		frappe.throw(_("Mail not found"))
 	mine = boxes_for(user)
-	account_box = (frappe.db.get_value("Email Account", row.email_account, "email_id") or "").lower() if row.email_account else ""
-	box = next((b for b in mine if b in (row.recipients or "").lower()), None) or (account_box if account_box in mine else None)
-	if not box:
+	box = _box_of(row, mine, _account_boxes())
+	if box not in mine:
 		frappe.throw(_("This mail is not in your team mailbox"), frappe.PermissionError)
 	row["box"] = box
 	return row
 
 
-def inbox(user: str, days: int = 30) -> dict:
-	"""Mails received in the person's team mailboxes, newest first, with their status."""
+def _has_box_field() -> bool:
+	return frappe.get_meta("Communication").has_field("sk_box")
+
+
+def _account_boxes() -> dict:
+	return {a.name: a.email_id.lower() for a in frappe.get_all("Email Account", fields=["name", "email_id"]) if a.email_id}
+
+
+def _box_of(row, boxes: list[str], box_of_account: dict) -> str | None:
+	"""A mail moved to another team (sk_box) belongs there; else the team address it was sent to, else the account
+	that fetched it (a mail Bcc'd or forwarded to cabin@ has another address in its recipients)."""
+	if row.get("sk_box"):
+		return row.sk_box
+	return next((b for b in boxes if b in (row.recipients or "").lower()), None) or box_of_account.get(row.email_account)
+
+
+def _received(boxes: list[str], since=None, fields=None, filters=None, limit=0, start=0):
+	acc = _accounts(boxes)
+	or_filters = [["recipients", "like", f"%{b}%"] for b in boxes] + ([["email_account", "in", acc]] if acc else [])
+	if _has_box_field():
+		or_filters.append(["sk_box", "in", boxes])
+	f = {"communication_medium": "Email", "sent_or_received": "Received", **(filters or {})}
+	if since:
+		f["communication_date"] = [">=", since]
+	return frappe.get_all("Communication", filters=f, or_filters=or_filters, order_by="communication_date desc",
+		fields=["name", "recipients", "email_account", "sk_mail_status", "reference_doctype", "communication_date"]
+		+ (["sk_box"] if _has_box_field() else []) + (fields or []), limit=limit, start=start)
+
+
+def _status(r) -> str:
+	return r.sk_mail_status or ("Lead made" if r.reference_doctype in ("CRM Lead", "CRM Deal") else "New")
+
+
+def counts(boxes: list[str]) -> dict:
+	"""Per mailbox (SK 27-Oct): received today, leads made and replied today, waiting (New), waiting over 2 hours / 1 day."""
+	out = {b: {"box": b, "today": 0, "leads_today": 0, "replied_today": 0, "waiting": 0, "late": 0, "day_late": 0} for b in boxes}
+	if not boxes:
+		return out
+	today, now, box_of = getdate(), now_datetime(), _account_boxes()
+	for r in _received(boxes, since=add_days(today, -30)):
+		b = _box_of(r, boxes, box_of)
+		if b not in out:
+			continue
+		c, st = out[b], _status(r)
+		if getdate(r.communication_date) == today:
+			c["today"] += 1
+			c["leads_today"] += st == "Lead made"
+			c["replied_today"] += st == "Replied"
+		if st == "New":
+			c["waiting"] += 1
+			c["late"] += r.communication_date < add_to_date(now, hours=-2)
+			c["day_late"] += r.communication_date < add_to_date(now, days=-1)
+	return out
+
+
+def inbox(user: str, box: str | None = None, q: str | None = None, start: int = 0, limit: int = 100) -> dict:
+	"""All mails received in the person's team mailboxes (SK 27-Oct: "all mail need to show on respective app"),
+	newest first, with their status; Show more loads the next 100, search finds any."""
 	boxes = boxes_for(user)
 	if not boxes:
-		return {"boxes": [], "mails": []}
-	rows = frappe.get_all("Communication", filters={"communication_medium": "Email", "sent_or_received": "Received",
-		"communication_date": [">=", add_days(getdate(), -int(days))]},
-		or_filters=[["recipients", "like", f"%{b}%"] for b in boxes] + ([["email_account", "in", acc]] if (acc := _accounts(boxes)) else []),
-		fields=["name", "subject", "sender", "sender_full_name", "recipients", "communication_date", "text_content", "content",
-			"sk_mail_status", "sk_taken_by", "reference_doctype", "reference_name", "has_attachment", "email_account"],
-		order_by="communication_date desc", limit=150)
-	box_of = {a.name: a.email_id.lower() for a in frappe.get_all("Email Account", fields=["name", "email_id"]) if a.email_id}
-	names = {}
+		return {"boxes": [], "mails": [], "counts": []}
+	want = [box] if box in boxes else boxes
+	filters = {}
+	if (q or "").strip():
+		filters["subject"] = ["like", f"%{q.strip()}%"]
+	extra = ["subject", "sender", "sender_full_name", "text_content", "content", "sk_taken_by", "reference_name", "has_attachment"]
+	rows = _received(want, fields=extra, filters=filters, limit=int(limit) + 1, start=int(start))
+	if (q or "").strip() and len(rows) <= int(limit):  # also by sender
+		seen = {r.name for r in rows}
+		rows += [r for r in _received(want, fields=extra, filters={"sender": ["like", f"%{q.strip()}%"]}, limit=int(limit))
+			if r.name not in seen]
+	more = len(rows) > int(limit)
+	rows = rows[:int(limit)]
+	box_of, names, out = _account_boxes(), {}, []
+	from sk_app.lead_sources import source_of
+
 	for r in rows:
-		r["box"] = next((b for b in boxes if b in (r.recipients or "").lower()), None) or box_of.get(r.email_account) or boxes[0]
-		r["status"] = r.sk_mail_status or ("Lead made" if r.reference_doctype in ("CRM Lead", "CRM Deal") else "New")
+		r["box"] = _box_of(r, want, box_of)
+		if r["box"] not in want:  # moved to another team
+			continue
+		r["status"] = _status(r)
 		if r.sk_taken_by and r.sk_taken_by not in names:
 			names[r.sk_taken_by] = frappe.utils.get_fullname(r.sk_taken_by)
 		r["taken_by_name"] = names.get(r.sk_taken_by)
 		r["preview"] = (r.text_content or strip_html(r.content or ""))[:200]
 		r.pop("content", None)
 		r.pop("text_content", None)
-		from sk_app.lead_sources import source_of
-
 		r["source"] = source_of(r.sender, r.subject)
-	return {"boxes": boxes, "mails": rows, "new": sum(1 for r in rows if r["status"] == "New")}
+		out.append(r)
+	c = counts(boxes)
+	return {"boxes": boxes, "box": box if box in boxes else None, "mails": out, "more": more,
+		"new": sum(x["waiting"] for x in c.values()), "counts": list(c.values()),
+		"all_boxes": sorted(team_boxes())}
 
 
 def read(user: str, comm: str) -> dict:
@@ -97,7 +164,8 @@ def read(user: str, comm: str) -> dict:
 	files = frappe.get_all("File", filters={"attached_to_doctype": "Communication", "attached_to_name": comm},
 		fields=["file_name", "file_url"])
 	return {**row, "text": (doc.text_content or strip_html(doc.content or ""))[:6000], "date": str(doc.communication_date),
-		"from_name": doc.sender_full_name, "files": files, "people": people_of(row.box)}
+		"from_name": doc.sender_full_name, "files": files, "people": people_of(row.box),
+		"move_to": [b for b in sorted(team_boxes()) if b != row.box]}
 
 
 def _set(comm: str, **values):
@@ -175,13 +243,81 @@ def reply(user: str, comm: str, message: str) -> dict:
 	return {"name": res.get("name") if isinstance(res, dict) else res}
 
 
-def badge(user: str) -> int:
-	boxes = boxes_for(user)
+def badges(user: str) -> dict:
+	"""Mail icon: mails waiting (New); mail_late: still New after 1 day (Decide Now)."""
+	try:
+		c = counts(boxes_for(user)).values()
+	except Exception:
+		return {}
+	out = {"mail": sum(x["waiting"] for x in c), "mail_late": sum(x["day_late"] for x in c)}
+	return {k: v for k, v in out.items() if v}
+
+
+def move(user: str, comm: str, to_box: str) -> dict:
+	"""SK 27-Oct: a customer enquiry that came to info@ (or any box) is moved to the right team with one tap."""
+	row = _check(user, comm)
+	to_box = (to_box or "").strip().lower()
+	if to_box not in team_boxes() or to_box == row.box:
+		frappe.throw(_("Pick the team mailbox to move it to"))
+	if not _has_box_field():
+		frappe.throw(_("Please update the site first"))
+	_set(comm, sk_box=to_box, sk_mail_status="New", sk_taken_by=None)
+	frappe.get_doc({"doctype": "Comment", "comment_type": "Info", "reference_doctype": "Communication", "reference_name": comm,
+		"content": f"Moved from {row.box} to {to_box} by {frappe.utils.get_fullname(user)}"}).insert(ignore_permissions=True)
+	_notify([p.user for p in people_of(to_box)], f"Mail moved to {to_box}: {row.subject or ''}", "Communication", comm)
+	return {"box": to_box}
+
+
+def _notify(users, subject: str, doctype=None, name=None):
+	for u in set(users):
+		try:
+			frappe.get_doc({"doctype": "Notification Log", "for_user": u, "type": "Alert", "subject": subject[:140],
+				"document_type": doctype, "document_name": name}).insert(ignore_permissions=True)
+		except Exception:
+			frappe.log_error("SK App mail notification")
+
+
+def link_known():
+	"""Scheduler, every 5 minutes: a mail from a customer who is already a lead or deal goes onto that lead / deal and
+	to its owner (SK 27-Oct: ownership is kept, all communication through ERPNext and the app)."""
+	if not frappe.db.exists("DocType", "CRM Lead"):
+		return 0
+	boxes = list(team_boxes())
 	if not boxes:
 		return 0
-	try:
-		return frappe.db.count("Communication", filters={"communication_medium": "Email", "sent_or_received": "Received",
-			"communication_date": [">=", add_days(now_datetime(), -7)], "sk_mail_status": ["in", ["", None, "New"]],
-			"reference_doctype": ["not in", ["CRM Lead", "CRM Deal"]], "recipients": ["like", f"%{boxes[0]}%"]})
-	except Exception:
-		return 0
+	rows = _received(boxes, since=add_days(now_datetime(), -2), fields=["sender", "subject"],
+		filters={"sk_mail_status": ["in", ["", None, "New"]]})
+	linked = 0
+	for r in rows:
+		if r.reference_doctype in ("CRM Lead", "CRM Deal") or not r.sender or r.sender.lower() in boxes:
+			continue
+		ref = _known(r.sender.strip().lower())
+		if not ref:
+			continue
+		doctype, name, owner = ref
+		values = {"reference_doctype": doctype, "reference_name": name}
+		if owner:
+			values.update(sk_mail_status="Taken", sk_taken_by=owner)
+		_set(r.name, **values)
+		if owner:
+			from sk_app.store import _todo
+
+			_todo(owner, doctype, name, f"Customer mail: {r.subject or ''}"[:140])
+		linked += 1
+	return linked
+
+
+def _known(email: str):
+	if frappe.get_meta("CRM Deal").has_field("email"):
+		d = frappe.db.get_value("CRM Deal", {"email": email}, ["name", "deal_owner"], order_by="modified desc")
+		if d:
+			return ("CRM Deal", d[0], d[1])
+	d = frappe.db.get_value("CRM Lead", {"email": email, "converted": 0}, ["name", "lead_owner"], order_by="modified desc")
+	return ("CRM Lead", d[0], d[1]) if d else None
+
+
+def remind():
+	"""Hourly: a mail still New after 2 hours reminds its team (ERPNext bell + the app's Mail badge)."""
+	for box, c in counts(list(team_boxes())).items():
+		if c["late"]:
+			_notify([p.user for p in people_of(box)], f"{c['late']} mail(s) waiting over 2 hours in {box}")

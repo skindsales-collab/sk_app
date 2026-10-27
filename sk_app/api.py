@@ -101,7 +101,7 @@ def _badges(user, functions):
 	try:
 		return {**store.badges(user, functions), **purchase.badges(user, functions), **production.badges(user, functions),
 			**quality.badges(user, functions), **finance.badges(user, functions), **ai_desk.badges(user, functions),
-			**({"mail": n} if (n := mailbox.badge(user)) else {}), **complaints.badge(user), **hr.badges(user, functions)}
+			**mailbox.badges(user), **complaints.badge(user), **hr.badges(user, functions)}
 	except Exception:
 		frappe.log_error("SK App badges")
 		return {}
@@ -1185,8 +1185,13 @@ def fin_month_wise(year_start=None):
 
 # ---------- Team mailboxes and auto leads (point 14) ----------
 @frappe.whitelist()
-def team_mail(days=30):
-	return mailbox.inbox(_me().user, cint(days) or 30)
+def team_mail(box=None, q=None, start=0, days=None):
+	return mailbox.inbox(_me().user, box, q, cint(start))
+
+
+@frappe.whitelist(methods=["POST"])
+def team_mail_move(comm, to_box):
+	return mailbox.move(_me().user, comm, to_box)
 
 
 @frappe.whitelist()

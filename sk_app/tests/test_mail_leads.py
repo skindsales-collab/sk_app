@@ -89,3 +89,24 @@ class TestMailLeads(IntegrationTestCase):
 		self.assertRaises(frappe.PermissionError, lead_sources.upload, ACC, "/files/x.xlsx")
 		cols = lead_sources._map_header(["Sender Name", "Sender Mobile", "Sender Email", "Company Name", "City", "Query Message"])
 		self.assertEqual(cols, {"first_name": 0, "mobile_no": 1, "email": 2, "organization": 3, "city": 4, "requirement": 5})
+
+	def test_move_counts_and_known_sender(self):
+		HR_U = "sk_test_m_hr@example.com"
+		_app_user(HR_U, "HR", ["HR User"])
+		comm = frappe.get_doc({"doctype": "Communication", "communication_medium": "Email", "sent_or_received": "Received",
+			"subject": "Cabin enquiry to info", "sender": "newbuyer@example.com", "recipients": "info@skind.tech", "content": "Need a cabin",
+			"communication_date": now_datetime()}).insert(ignore_permissions=True).name
+		self.assertIn(comm, [m["name"] for m in mailbox.inbox(HR_U)["mails"]])
+		before = mailbox.counts(["cabin@skind.tech"])["cabin@skind.tech"]["waiting"]
+		mailbox.move(HR_U, comm, "cabin@skind.tech")  # SK 27-Oct: HR moves a customer enquiry to Sales
+		self.assertNotIn(comm, [m["name"] for m in mailbox.inbox(HR_U)["mails"]])
+		self.assertIn(comm, [m["name"] for m in mailbox.inbox(SALES1, "cabin@skind.tech")["mails"]])
+		self.assertEqual(mailbox.counts(["cabin@skind.tech"])["cabin@skind.tech"]["waiting"], before + 1)
+		self.assertTrue(mailbox.badges(SALES1).get("mail"))
+		if frappe.db.exists("DocType", "CRM Lead"):
+			lead = lead_sources.make_lead({"first_name": "Known", "email": "known.buyer@example.com"}, None, owner=SALES2)["lead"]
+			m2 = frappe.get_doc({"doctype": "Communication", "communication_medium": "Email", "sent_or_received": "Received",
+				"subject": "Re: quote", "sender": "known.buyer@example.com", "recipients": "cabin@skind.tech", "content": "ok",
+				"communication_date": now_datetime()}).insert(ignore_permissions=True).name
+			mailbox.link_known()
+			self.assertEqual(frappe.db.get_value("Communication", m2, ["reference_name", "sk_taken_by"]), (lead, SALES2))

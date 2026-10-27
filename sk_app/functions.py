@@ -89,7 +89,7 @@ FUNCTIONS = {
 	},
 	"Machine Shifting": {
 		"label": {"English": "Machine Shifting", "Marathi": "मशीन शिफ्टिंग"},
-		"tiles": COMMON_TILES + ["my_deals", "customers", "complaints", "site_checklist"],
+		"tiles": COMMON_TILES + ["my_deals", "customers", "complaints", "site_checklist", "mail"],
 		"live": False,
 		"erpnext_roles": ["Projects User", "Sales User"],
 		"desk": "/crm",
