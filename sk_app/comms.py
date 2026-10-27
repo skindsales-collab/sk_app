@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, add_to_date, cint, get_datetime, getdate, now_datetime, strip_html
 
-from sk_app import crm
+from sk_app import crm, marketing_list
 from sk_app.logic import WorkItem
 
 TALKED = ("Completed",)
@@ -32,6 +32,7 @@ def call_totals(user: str, start, end=None) -> dict:
 	# the note saved after tapping 💬, mail is what was sent from the app)
 	whatsapp = frappe.db.count("FCRM Note", {"owner": user, "creation": period, "title": ["like", "WhatsApp%"]}) \
 		if frappe.db.exists("DocType", "FCRM Note") else 0
+	whatsapp += marketing_list.sent_count(user, period)  # festival greetings to the Marketing list
 	mails = frappe.db.count("Communication", {"owner": user, "creation": period, "communication_medium": "Email",
 		"sent_or_received": "Sent"})
 	return {"calls": len(rows), "talked": sum(1 for r in rows if r.status in TALKED),

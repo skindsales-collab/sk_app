@@ -788,6 +788,34 @@ def cold_set(lead, cold):
 
 
 @frappe.whitelist()
+def marketing_list(q=None):
+	from sk_app import marketing_list as ml
+
+	return ml.people(_me().user, q)
+
+
+@frappe.whitelist(methods=["POST"])
+def marketing_add(name, mobile=None, company=None, city=None, email=None, photo=None):
+	from sk_app import marketing_list as ml
+
+	return ml.add(_me().user, name, mobile, company, city, email, photo)
+
+
+@frappe.whitelist(methods=["POST"])
+def marketing_greet(contact, festival, text=None):
+	from sk_app import marketing_list as ml
+
+	return ml.greet(_me().user, contact, festival, text)
+
+
+@frappe.whitelist(methods=["POST"])
+def marketing_lead_made(contact, lead):
+	from sk_app import marketing_list as ml
+
+	return ml.lead_made(_me().user, contact, lead)
+
+
+@frappe.whitelist()
 def store_receipts_to_post():
 	return store.receipts_to_post(_me().user)
 
