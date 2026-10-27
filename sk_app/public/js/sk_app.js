@@ -1222,9 +1222,16 @@
 		}
 		root.innerHTML = header("SK App") + `<main class="sk-l1 sk-home2"><div class="sk-kpibox">${kpiHtml()}</div>${middle}
 			<div class="sk-decide">${decideHtml()}</div>${row(S2.main_common || [], "sk-common")}${contact}${bottom}</main>`;
+		fitHome();
 		loadKpi();
 		loadFlows();
 	}
+	// SK 27-Oct: no empty space under the Home icons: Home fills the phone screen, the icons grow taller to fill it
+	function fitHome() {
+		const m = root.querySelector("main.sk-home2");
+		if (m) m.style.minHeight = Math.max(0, window.innerHeight - m.getBoundingClientRect().top - window.scrollY) + "px";
+	}
+	window.addEventListener("resize", fitHome);
 	const fnLabel = (l) => (l && (l[state.lang] || l.English)) || "";
 	const FN_ICON = { Sales: "💼", Marketing: "📣", Production: "🏭", Quality: "✅", Stores: "📦", Purchase: "🛒", Accounts: "💰", HR: "👥",
 		Subcontractor: "🔧", AI: "🤖", Management: "🏁", "Machine Shifting": "🏗️", Design: "📐", "IT / ERP": "💻" };
@@ -1417,7 +1424,9 @@
 		if (now && now.target) {
 			cells.push(`<button class="sk-dec ${now.gap ? "bad" : "ok"}" data-go="my_kpi"><b>${now.gap ? (now.money ? "₹" + kAmt(now.gap) : Math.round(now.gap * 10) / 10 + (now.unit || "")) : "✓"}</b><span>${now.gap ? t("d_gap") : t("k_on_track")}</span></button>`);
 		}
-		const ml = state.home && (state.home.badges || {}).mail_late;
+		// badges come back as {n, c} once coloured (point 15): show the number, never the object
+		const mlRaw = state.home && (state.home.badges || {}).mail_late;
+		const ml = mlRaw && typeof mlRaw === "object" ? Number(mlRaw.n) || 0 : Number(mlRaw) || 0;
 		if (ml) cells.push(`<button class="sk-dec bad" data-go="mail"><b>${ml}</b><span>${t("mb_late")}</span><small>&gt; 1 ${t("fl_days")}</small></button>`);
 		if (flowData) {
 			const late = [];
