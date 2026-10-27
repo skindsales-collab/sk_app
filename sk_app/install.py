@@ -49,6 +49,9 @@ def after_migrate():
 	customer_names()  # SK 27-Oct points 14 / 19: customers by name, not CUS- numbers
 	ensure_sales_persons()  # SK 27-Oct: no salesperson had an ERPNext Sales Person, so Tally sales counted for nobody
 	ensure_statuses()  # SK 27-Oct: New, Qualified, Drawing, Quotation, Negotiations, Deal Won, Junk Lead, Deal Loss
+	from sk_app.tally import ensure as tally_names
+
+	tally_names()  # SK 27-Oct: Tally words in ERPNext (Narration on every voucher)
 	from sk_app.training import seed_lessons
 
 	seed_lessons()
