@@ -123,3 +123,9 @@ class TestMailLeads(IntegrationTestCase):
 			"content": "Need a 20x10 ft cabin. Mobile 9822099887", "communication_date": now_datetime()}).insert(ignore_permissions=True).name
 		mailbox.auto_leads()
 		self.assertEqual(frappe.db.get_value("Communication", comm, "sk_mail_status"), "Lead made")
+		lead = frappe.db.get_value("Communication", comm, "reference_name")
+		again = frappe.get_doc({"doctype": "Communication", "communication_medium": "Email", "sent_or_received": "Received",
+			"subject": "Quotation reminder for cabin", "sender": "ravi@buildco.in", "recipients": "cabin@skind.tech",
+			"content": "Any update on price?", "communication_date": now_datetime()}).insert(ignore_permissions=True).name
+		mailbox.auto_leads()
+		self.assertEqual(frappe.db.get_value("Communication", again, "reference_name"), lead)  # not a second lead

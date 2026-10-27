@@ -370,7 +370,14 @@ def auto_leads() -> int:
 			owner = None
 			if box == "service@skind.tech":
 				owner = frappe.get_cached_doc("SK App Settings").get("lead_owner_noncabin")
-			res = lead_sources.make_lead(data, "Email", owner=owner, note=f"From mail to {box}: {r.subject or ''}")
+			# SK 27-Oct: "need to confirm that this is new lead": an existing lead / deal (any age) of the same e-mail gets
+			# the mail instead; a new one says it came by itself so the owner confirms it (else Junk Lead)
+			known = _known(data["email"].lower())
+			if known:
+				_set(r.name, reference_doctype=known[0], reference_name=known[1], sk_mail_status="Taken", sk_taken_by=known[2])
+				continue
+			res = lead_sources.make_lead(data, "Email", owner=owner, note=f"Auto lead from mail to {box}: {r.subject or ''}\n"
+				"Please confirm: call the customer; if it is not a real new enquiry, set status Junk Lead.")
 			_set(r.name, reference_doctype="CRM Lead", reference_name=res["lead"], sk_mail_status="Lead made")
 			made += 1 if res["new"] else 0
 		except Exception:
