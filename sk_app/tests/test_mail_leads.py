@@ -111,3 +111,33 @@ class TestMailLeads(IntegrationTestCase):
 				"communication_date": now_datetime()}).insert(ignore_permissions=True).name
 			mailbox.link_known()
 			self.assertEqual(frappe.db.get_value("Communication", m2, ["reference_name", "sk_taken_by"]), (lead, SALES2))
+
+	def test_enquiry_mail_becomes_lead(self):
+		self.assertTrue(mailbox.is_enquiry("ravi@buildco.in", "Requirement of site office cabin 20x10", "Please send quotation"))
+		self.assertFalse(mailbox.is_enquiry("billing@bank.com", "Your statement", "payment due"))
+		self.assertFalse(mailbox.is_enquiry("noreply@portal.com", "Cabin price", ""))
+		if not frappe.db.exists("DocType", "CRM Lead"):
+			return
+		comm = frappe.get_doc({"doctype": "Communication", "communication_medium": "Email", "sent_or_received": "Received",
+			"subject": "Enquiry for portable cabin", "sender": "ravi@buildco.in", "sender_full_name": "Ravi Shah", "recipients": "sales@skind.tech",
+			"content": "Need a 20x10 ft cabin. Mobile 9822099887", "communication_date": now_datetime()}).insert(ignore_permissions=True).name
+		mailbox.auto_leads()
+		self.assertEqual(frappe.db.get_value("Communication", comm, "sk_mail_status"), "Lead made")
+		lead = frappe.db.get_value("Communication", comm, "reference_name")
+		again = frappe.get_doc({"doctype": "Communication", "communication_medium": "Email", "sent_or_received": "Received",
+			"subject": "Quotation reminder for cabin", "sender": "ravi@buildco.in", "recipients": "cabin@skind.tech",
+			"content": "Any update on price?", "communication_date": now_datetime()}).insert(ignore_permissions=True).name
+		mailbox.auto_leads()
+		self.assertEqual(frappe.db.get_value("Communication", again, "reference_name"), lead)  # not a second lead
+
+	def test_complaint_and_supplier_mails_are_not_leads(self):
+		self.assertEqual(mailbox.mail_kind("ravi@buildco.in", "Roof leakage in cabin", "Water seepage since rain, please repair"), "complaint")
+		self.assertEqual(mailbox.mail_kind("ravi@buildco.in", "Need quotation for site office", "20x10 cabin"), "lead")
+		comm = frappe.get_doc({"doctype": "Communication", "communication_medium": "Email", "sent_or_received": "Received",
+			"subject": "Proforma invoice for GI sheets", "sender": "sales@steelmart.example.com", "recipients": "info@skind.tech",
+			"content": "Please find our proforma and price list", "communication_date": now_datetime()}).insert(ignore_permissions=True).name
+		mailbox.route_suppliers()
+		self.assertEqual(frappe.db.get_value("Communication", comm, "sk_box"), mailbox.PURCHASE_BOX)
+		BUY = "sk_test_m_buy@example.com"
+		_app_user(BUY, "Purchase", ["Purchase User"])
+		self.assertIn(comm, [m["name"] for m in mailbox.inbox(BUY)["mails"]])

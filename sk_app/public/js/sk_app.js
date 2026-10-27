@@ -688,7 +688,7 @@
 		drafts_n: "drafts", net: "Net", direct: "Direct", indirect: "Indirect", gross: "Gross", net_pl: "Net P&L",
 		common_cost: "Common (not split yet)", closing_list: "Closing checklist", month_pl: "Month-wise P&L", inv_n: "invoices",
 		team_box: "Team mailbox", my_customers: "My customers", st_New: "New", st_Taken: "Taken", st_Replied: "Replied",
-		"st_Lead made": "Lead made", "st_Not a lead": "Not a lead", take: "I'll answer", give_to: "Give to", make_lead_btn: "Make lead",
+		"st_Lead made": "Lead made", "st_Not a lead": "Not a lead", st_Complaint: "Complaint", mb_complaint_help: "A customer complaint by mail: register it in Complaints (customer, type, photo).",  take: "I'll answer", give_to: "Give to", make_lead_btn: "Make lead",
 		not_lead: "Not a lead", reply: "Reply", reply_q: "Your reply (speak or type)", by_word: "by", lead_sources: "Lead Sources",
 		upload_list: "Upload IndiaMART / JustDial list (Excel)", leads_made: "new leads", added_old: "added to earlier leads",
 		skipped_n: "rows without mobile / e-mail", last_check: "Last mail check", check_now: "Check mails now",
@@ -720,7 +720,7 @@
 		drafts_n: "ड्राफ्ट", net: "निव्वळ", direct: "प्रत्यक्ष", indirect: "अप्रत्यक्ष", gross: "एकूण नफा", net_pl: "निव्वळ नफा-तोटा",
 		common_cost: "सामायिक (विभागले नाही)", closing_list: "क्लोजिंग यादी", month_pl: "महिनावार नफा-तोटा", inv_n: "बिले",
 		team_box: "टीम मेलबॉक्स", my_customers: "माझे ग्राहक", st_New: "नवीन", st_Taken: "घेतले", st_Replied: "उत्तर दिले",
-		"st_Lead made": "लीड बनली", "st_Not a lead": "लीड नाही", take: "मी उत्तर देतो", give_to: "यांना द्या", make_lead_btn: "लीड बनवा",
+		"st_Lead made": "लीड बनली", "st_Not a lead": "लीड नाही", st_Complaint: "तक्रार", mb_complaint_help: "मेलने आलेली ग्राहक तक्रार: तक्रारी मध्ये नोंदवा (ग्राहक, प्रकार, फोटो).",  take: "मी उत्तर देतो", give_to: "यांना द्या", make_lead_btn: "लीड बनवा",
 		not_lead: "लीड नाही", reply: "उत्तर", reply_q: "तुमचे उत्तर (बोला किंवा लिहा)", by_word: "", lead_sources: "लीड स्रोत",
 		upload_list: "IndiaMART / JustDial यादी (Excel) अपलोड करा", leads_made: "नवीन लीड", added_old: "जुन्या लीडमध्ये जोडले",
 		skipped_n: "मोबाईल / ईमेल नसलेल्या ओळी", last_check: "शेवटची मेल तपासणी", check_now: "आता मेल तपासा",
@@ -2907,7 +2907,7 @@
 			<button class="${mailTab === "mine" ? "on" : ""}" data-mailtab="mine">👤 ${t("my_customers")}</button></div>` : "";
 		if (mailTab === "team") {
 			S.tmail = team.mails;
-			const chip = (m) => `<span class="chip2 ${m.status === "New" ? "red" : m.status === "Taken" ? "yel" : "green"}">${t("st_" + m.status)}${m.status === "Taken" && m.taken_by_name ? " · " + esc(m.taken_by_name) : ""}</span>`;
+			const chip = (m) => `<span class="chip2 ${m.status === "New" || m.status === "Complaint" ? "red" : m.status === "Taken" ? "yel" : "green"}">${t("st_" + m.status)}${m.status === "Taken" && m.taken_by_name ? " · " + esc(m.taken_by_name) : ""}</span>`;
 			const boxRow = (team.counts || []).map((c) => `<button class="sk-dec ${c.late ? "bad" : "ok"} ${mailBox === c.box ? "on" : ""}" data-act="mb-box" data-box="${esc(c.box)}">
 				<b>${c.waiting}</b><span>${esc(c.box.split("@")[0])}@</span><small>${t("mb_today")} ${c.today} · ${t("mb_leads")} ${c.leads_today} · ${t("mb_replied")} ${c.replied_today}</small></button>`).join("");
 			root.innerHTML = header(t("mail")) + `<main>${tabs}
@@ -2943,6 +2943,7 @@
 				${lead ? `<button class="sk-chip" data-open="${esc(d.reference_doctype)}" data-name="${esc(d.reference_name)}">📄 ${t("open_lead")}</button>`
 					: `<button class="sk-chip on" data-act="tm-lead" data-comm="${esc(d.name)}">➕ ${t("make_lead_btn")}</button><button class="sk-chip" data-act="tm-notlead" data-comm="${esc(d.name)}">✕ ${t("not_lead")}</button>`}
 			</div>
+			${d.sk_mail_status === "Complaint" ? `<p class="sk-note bad">⚠ ${t("mb_complaint_help")}</p><button class="sk-btn wide" data-go="complaints">🛠 ${t("complaints")}</button>` : ""}
 			${hasTeam() && d.people.length ? `<label class="sk-field"><span>${t("give_to")}</span><select id="tm-give" class="sk-select"><option value=""></option>${d.people.map((p) => `<option value="${esc(p.user)}">${esc(p.full_name || p.user)}</option>`).join("")}</select></label>
 				<button class="sk-btn wide" data-act="tm-give" data-comm="${esc(d.name)}">👉 ${t("give_to")}</button>` : ""}
 			${(d.move_to || []).length ? `<label class="sk-field"><span>${t("mb_move")}</span><select id="tm-move" class="sk-select"><option value=""></option>${d.move_to.map((b) => `<option>${esc(b)}</option>`).join("")}</select></label>

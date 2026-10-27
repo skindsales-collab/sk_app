@@ -11,11 +11,14 @@ from frappe.utils import add_days, add_to_date, getdate, now_datetime, strip_htm
 
 from sk_app.logic import parse_lines
 
-STATUSES = ("New", "Taken", "Replied", "Lead made", "Not a lead")
+STATUSES = ("New", "Taken", "Replied", "Lead made", "Not a lead", "Complaint")
 DEFAULT_MAP = ("cabin@skind.tech: Sales, Marketing\nservice@skind.tech: Machine Shifting, service@skind.tech\n"
 	"acc@skind.tech: Accounts\nsales@skind.tech: Management\ninfo@skind.tech: HR\n"
 	# SK 27-Oct: prod@ for Production (Babasaheb) and Store (Yogesh)
-	"prod@skind.tech: 9730517277@staff.skind.local, 9970960806@staff.skind.local")
+	"prod@skind.tech: 9730517277@staff.skind.local, 9970960806@staff.skind.local\n"
+	# SK 27-Oct: supplier mails (any box) go to Purchase; an app-only box until a real purchase@ mail ID is added
+	"purchase@skind.tech: Purchase")
+PURCHASE_BOX = "purchase@skind.tech"
 
 
 def team_boxes() -> dict:
@@ -228,7 +231,11 @@ def reply(user: str, comm: str, message: str) -> dict:
 	row = _check(user, comm)
 	if not (message or "").strip():
 		frappe.throw(_("Please write or speak the reply"))
-	if not frappe.db.exists("Email Account", {"email_id": row.box, "enable_outgoing": 1}):
+	sender = row.box
+	if not frappe.db.exists("Email Account", {"email_id": sender, "enable_outgoing": 1}):
+		# a mail moved to a team without its own mail ID (Purchase) is answered from the mailbox that received it
+		sender = frappe.db.get_value("Email Account", {"name": row.email_account, "enable_outgoing": 1}, "email_id") if row.email_account else None
+	if not sender:
 		frappe.throw(_("{0} cannot send mail yet. Please ask the admin to switch on sending for it in ERPNext.").format(row.box))
 	mobile = frappe.db.get_value("User", user, "mobile_no") or ""
 	sign = f"\n\n--\n{frappe.utils.get_fullname(user)}{(' · ' + mobile) if mobile else ''}\nSK Ind Tech Solutions Pvt Ltd"
@@ -236,7 +243,7 @@ def reply(user: str, comm: str, message: str) -> dict:
 	subject = row.subject or ""
 	if not subject.lower().startswith("re:"):
 		subject = "Re: " + subject
-	res = _make(doctype=row.reference_doctype, name=row.reference_name, content=html, subject=subject, sender=row.box,
+	res = _make(doctype=row.reference_doctype, name=row.reference_name, content=html, subject=subject, sender=sender,
 		sender_full_name=frappe.utils.get_fullname(user), recipients=row.sender, send_email=1, in_reply_to=comm)
 	_set(comm, sk_mail_status="Replied", sk_taken_by=user)
 	if row.reference_doctype in ("CRM Lead", "CRM Deal"):
@@ -324,3 +331,144 @@ def remind():
 	for box, c in counts(list(team_boxes())).items():
 		if c["late"]:
 			_notify([p.user for p in people_of(box)], f"{c['late']} mail(s) waiting over 2 hours in {box}")
+
+
+# SK 27-Oct: "need to collect all relevant lead data & other & process": an enquiry mail to a sales box becomes a lead
+# by itself; vendor offers, bank mails, newsletters and spam stay in the box for a person to mark.
+LEAD_BOXES = ("sales@skind.tech", "cabin@skind.tech", "service@skind.tech")
+ENQUIRY_WORDS = ("enquiry", "inquiry", "quotation", "quote", "requirement", "required", "cabin", "container", "porta cabin", "portable",
+	"site office", "labour camp", "labor camp", "lgsf", "prefab", "modular", "toilet", "machine shifting", "shifting",
+	"rigging", "dismantl", "relocation", "job work", "machining", "price", "budget")
+NOT_LEAD_WORDS = ("invoice", "payment", "statement", "newsletter", "unsubscribe", "otp", "password", "offer for you",
+	"webinar", "receipt", "order confirmation", "job application", "resume", "cv ")
+NOT_LEAD_SENDERS = ("noreply", "no-reply", "donotreply", "mailer-daemon", "notification", "alerts@", "@skind.tech")
+
+
+COMPLAINT_WORDS = ("complaint", "complain", "leak", "seepage", "damage", "broken", "not working", "defect", "rust", "crack",
+	"repair", "warranty", "poor quality", "not satisfied", "dissatisf", "replace", "problem with", "issue with", "delay in delivery",
+	"still not", "no response")
+
+
+def is_enquiry(sender: str | None, subject: str | None, text: str | None) -> bool:
+	return mail_kind(sender, subject, text) == "lead"
+
+
+def mail_kind(sender: str | None, subject: str | None, text: str | None) -> str:
+	"""SK 27-Oct: "any customer complaint will also go in lead, need to read by AI & decide this is lead or not".
+	Claude reads the mail when the company has added its key; until then free word rules: lead / complaint / other."""
+	s, body = (sender or "").lower(), f"{subject or ''}\n{(text or '')[:3000]}".lower()
+	if not s or any(w in s for w in NOT_LEAD_SENDERS):
+		return "other"
+	from sk_app import claude
+
+	kind = claude.mail_kind(subject or "", text or "")
+	if kind:
+		return kind
+	if any(w in body for w in COMPLAINT_WORDS):
+		return "complaint"
+	if any(w in body for w in NOT_LEAD_WORDS):
+		return "other"
+	return "lead" if any(w in body for w in ENQUIRY_WORDS) else "other"
+
+
+def _customer_of(email: str) -> str | None:
+	"""An ERPNext Customer whose contact has this e-mail: a customer already, never a new lead."""
+	contact = frappe.db.get_value("Contact Email", {"email_id": email, "parenttype": "Contact"}, "parent")
+	if not contact:
+		return None
+	return frappe.db.get_value("Dynamic Link", {"parenttype": "Contact", "parent": contact, "link_doctype": "Customer"}, "link_name")
+
+
+def auto_leads() -> int:
+	"""Every 5 minutes, after link_known: enquiry mails from new senders to sales@ / cabin@ / service@ become CRM leads
+	with the usual owner (cabin → Rushi, digital → Pranali, non-cabin / service@ → Aditya)."""
+	from sk_app import lead_sources
+
+	if not frappe.db.exists("DocType", "CRM Lead"):
+		return 0
+	boxes = [b for b in LEAD_BOXES if b in team_boxes()]
+	if not boxes:
+		return 0
+	box_of, made = _account_boxes(), 0
+	for r in _received(boxes, since=add_days(now_datetime(), -2), fields=["sender", "sender_full_name", "subject", "text_content", "content"],
+			filters={"sk_mail_status": ["in", ["", None, "New"]]}):
+		if r.reference_doctype in ("CRM Lead", "CRM Deal") or lead_sources.source_of(r.sender, r.subject) \
+				or _box_of(r, boxes, box_of) not in boxes:
+			continue  # on a lead already, a portal mail (lead_sources.scan), or moved to another team (supplier → Purchase)
+		text = r.text_content or strip_html(r.content or "")
+		kind = mail_kind(r.sender, r.subject, text)
+		if kind == "complaint" or (kind == "lead" and _customer_of(r.sender.strip().lower())):
+			# a complaint (or a mail from an existing customer) is never a lead: the team registers it in Complaints
+			_set(r.name, sk_mail_status="Complaint" if kind == "complaint" else "New")
+			if kind == "complaint":
+				box = _box_of(r, boxes, box_of)
+				_notify([p.user for p in people_of(box)], f"Customer complaint by mail ({box}): {r.subject or ''}", "Communication", r.name)
+			continue
+		if kind != "lead":
+			continue
+		try:
+			data = lead_sources.parse_mail(r.subject, text, "Email")
+			data["email"] = data.get("email") or r.sender.strip()
+			data["first_name"] = r.sender_full_name or data["first_name"]
+			box = _box_of(r, boxes, box_of)
+			owner = None
+			if box == "service@skind.tech":
+				owner = frappe.get_cached_doc("SK App Settings").get("lead_owner_noncabin")
+			# SK 27-Oct: "need to confirm that this is new lead": an existing lead / deal (any age) of the same e-mail gets
+			# the mail instead; a new one says it came by itself so the owner confirms it (else Junk Lead)
+			known = _known(data["email"].lower())
+			if known:
+				_set(r.name, reference_doctype=known[0], reference_name=known[1], sk_mail_status="Taken", sk_taken_by=known[2])
+				continue
+			res = lead_sources.make_lead(data, "Email", owner=owner, note=f"Auto lead from mail to {box}: {r.subject or ''}\n"
+				"Please confirm: call the customer; if it is not a real new enquiry, set status Junk Lead.")
+			_set(r.name, reference_doctype="CRM Lead", reference_name=res["lead"], sk_mail_status="Lead made")
+			made += 1 if res["new"] else 0
+		except Exception:
+			frappe.log_error(f"SK App lead from mail {r.name}")
+	return made
+
+
+SUPPLIER_WORDS = ("proforma", "pro forma", "our quotation", "our offer", "price list", "dispatched", "dispatch details", "e-way bill",
+	"eway bill", "delivery challan", "lorry receipt", "your purchase order", "your po", "against po", "po no", "material ready",
+	"tax invoice", "our invoice", "payment reminder", "outstanding", "ledger confirmation")
+BILL_WORDS = ("tax invoice", "our invoice", "payment reminder", "outstanding", "ledger confirmation")
+
+
+def _supplier_of(email: str) -> str | None:
+	if frappe.db.exists("Supplier", {"email_id": email}):
+		return frappe.db.get_value("Supplier", {"email_id": email}, "name")
+	contact = frappe.db.get_value("Contact Email", {"email_id": email, "parenttype": "Contact"}, "parent")
+	if not contact:
+		return None
+	return frappe.db.get_value("Dynamic Link", {"parenttype": "Contact", "parent": contact, "link_doctype": "Supplier"}, "link_name")
+
+
+def route_suppliers() -> int:
+	"""Every 5 minutes (SK 27-Oct: "if any supplier mail need to go respectively ... with purchase"): a mail from an ERPNext
+	supplier, or one that reads like a supplier's (quotation, dispatch, e-way bill, PO, invoice), moves to Purchase; a bill or
+	payment mail also alerts Accounts."""
+	boxes = [b for b in team_boxes() if b != PURCHASE_BOX]
+	if PURCHASE_BOX not in team_boxes() or not boxes or not _has_box_field():
+		return 0
+	box_of, moved = _account_boxes(), 0
+	for r in _received(boxes, since=add_days(now_datetime(), -2), fields=["sender", "subject", "text_content", "content"],
+			filters={"sk_mail_status": ["in", ["", None, "New"]], "sk_box": ["is", "not set"]}):
+		if r.reference_doctype in ("CRM Lead", "CRM Deal") or not r.sender:
+			continue
+		sender = r.sender.strip().lower()
+		if any(w in sender for w in NOT_LEAD_SENDERS):
+			continue
+		body = f"{r.subject or ''}\n{(r.text_content or strip_html(r.content or ''))[:3000]}".lower()
+		supplier = _supplier_of(sender)
+		if not supplier and not any(w in body for w in SUPPLIER_WORDS):
+			continue
+		_set(r.name, sk_box=PURCHASE_BOX, sk_mail_status="New", sk_taken_by=None)
+		if supplier and r.reference_doctype in (None, ""):
+			_set(r.name, reference_doctype="Supplier", reference_name=supplier)
+		_notify([p.user for p in people_of(PURCHASE_BOX)], f"Supplier mail{' from ' + supplier if supplier else ''}: {r.subject or ''}",
+			"Communication", r.name)
+		if any(w in body for w in BILL_WORDS):
+			_notify([p.user for p in people_of("acc@skind.tech")], f"Supplier bill / payment mail: {r.subject or ''}", "Communication", r.name)
+		moved += 1
+	return moved
