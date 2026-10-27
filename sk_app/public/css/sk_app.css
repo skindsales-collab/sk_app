@@ -485,3 +485,12 @@ a.sk-tile{text-decoration:none;color:inherit;position:relative}
 
 /* SK 27-Oct: ERPNext links shown as chips */
 a.sk-chip { text-decoration: none; }
+
+/* SK 27-Oct: Home fills the screen (min-height set by fitHome); spare height goes to the icons, not empty space below */
+.sk-home2 > * { flex: 0 0 auto; }
+.sk-home2 > .sk-own { flex: 2 1 auto; }
+.sk-home2 > .sk-decide, .sk-home2 > .sk-common, .sk-home2 > .sk-contact, .sk-home2 > .sk-bottom { flex: 1 1 auto; }
+.sk-home2 > .sk-decide { display: flex; flex-direction: column; }
+.sk-home2 .sk-decs { flex: 1 1 auto; grid-auto-rows: 1fr; }
+.sk-home2 .sk-tiles.small, .sk-home2 .sk-contact { grid-auto-rows: 1fr; align-content: stretch; }
+.sk-home2 .sk-tile, .sk-home2 .sk-dec { justify-content: center; }
