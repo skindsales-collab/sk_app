@@ -16,6 +16,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from sk_app.cabin_quote import hsn_fields
 from sk_app.store import _todo, _users_with_function, need
 
 WHO = ("Accounts", "Purchase", "Management")
@@ -170,7 +171,7 @@ def _variant(template: str, length, width, height) -> str:
 def _new_item(code: str, name: str, group: str | None) -> str:
 	it = frappe.new_doc("Item")
 	it.update({"item_code": code, "item_name": name, "item_group": group or frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
-		"stock_uom": "Nos", "is_stock_item": 1, "is_sales_item": 1, "is_purchase_item": 1, "description": name})
+		"stock_uom": "Nos", "is_stock_item": 1, "is_sales_item": 1, "is_purchase_item": 1, "description": name, **hsn_fields()})
 	it.flags.ignore_permissions = True
 	it.insert()
 	return it.name
