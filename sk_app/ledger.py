@@ -160,7 +160,7 @@ def entries(user: str, kind: str, ledger: str, month=None) -> dict:
 		and posting_date < %s and """ + ("party = %s and account in %s" if "party" in filters else "account = %s"),
 		(company, start, ledger, tuple(filters["account"][1])) if "party" in filters else (company, start, ledger))[0][0])
 	rows = frappe.get_all("GL Entry", filters=filters, fields=["posting_date", "voucher_type", "voucher_no", "debit", "credit",
-		"against", "remarks", "party"], order_by="posting_date asc, creation asc", limit=500)
+		"against", "remarks", "party"], order_by="posting_date asc, creation asc", limit=0)
 	bal = opening
 	for r in rows:
 		bal += flt(r.debit) - flt(r.credit)

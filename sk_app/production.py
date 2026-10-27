@@ -71,7 +71,9 @@ def wo_label(work_order: str | None, fallback: str = "") -> str:
 	"""SK 27-Oct: a job is known by its customer and product, not by its number: "Customer · Product"."""
 	if not work_order:
 		return fallback
-	cache = frappe.local.__dict__.setdefault("sk_wo_label", {})
+	cache = getattr(frappe.local, "sk_wo_label", None)
+	if cache is None:  # frappe.local has no __dict__ (27-Oct: that error blanked the factory arrows)
+		cache = frappe.local.sk_wo_label = {}
 	if work_order not in cache:
 		wo = frappe.db.get_value("Work Order", work_order, ["item_name", "production_item", "sales_order"], as_dict=True) or {}
 		customer = frappe.db.get_value("Sales Order", wo.get("sales_order"), "customer_name") if wo.get("sales_order") else None
@@ -99,7 +101,7 @@ def job_cards(user: str) -> list[dict]:
 			return []
 		filters["workstation"] = ws
 	rows = frappe.get_all("Job Card", filters=filters, fields=["name", "work_order", "operation", "workstation", "status", "for_quantity",
-		"production_item", "item_name", "expected_start_date", "sequence_id"], order_by="expected_start_date asc, creation asc", limit=100)
+		"production_item", "item_name", "expected_start_date", "sequence_id"], order_by="expected_start_date asc, creation asc", limit=0)
 	order = {"Work In Progress": 0, "Material Transferred": 1, "On Hold": 2}
 	for r in rows:
 		r["started"] = _open_log(r.name)
@@ -261,7 +263,7 @@ def el_jobs(user: str) -> dict:
 	"""Electrical job cards of the last 60 days, open ones first, with the points already entered; and this month's total."""
 	need(user, PRODUCTION, SUB, "Quality")
 	jobs = [j for j in frappe.get_all("Job Card", filters={"docstatus": ["<", 2], "modified": [">=", frappe.utils.add_days(nowdate(), -60)]},
-		fields=["name", "operation", "workstation", "status", "work_order", "item_name", "docstatus"], order_by="modified desc", limit=300)
+		fields=["name", "operation", "workstation", "status", "work_order", "item_name", "docstatus"], order_by="modified desc", limit=0)
 		if _is_electrical(j.operation) or _is_electrical(j.workstation)]
 	done = {}
 	for r in frappe.get_all("SK Electrical Points", filters={"job_card": ["in", [j.name for j in jobs] or [""]]},

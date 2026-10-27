@@ -40,6 +40,9 @@ def after_migrate():
 	from sk_app.crm import setup_deal_customer_column
 
 	setup_deal_customer_column()  # Swati item 8
+	from sk_app.lead_status import ensure_statuses
+
+	ensure_statuses()  # SK 27-Oct: New, Qualified, Drawing, Quotation, Negotiations, Deal Won, Junk Lead, Deal Loss
 	from sk_app.training import seed_lessons
 
 	seed_lessons()

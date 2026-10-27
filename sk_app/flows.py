@@ -14,12 +14,14 @@ function).
 import frappe
 from frappe.utils import add_days, date_diff, flt, get_first_day, getdate, now_datetime, nowdate
 
-from sk_app import dashboards, segments
+from sk_app import dashboards, lead_status, segments
 from sk_app.dashboards import _has, _name, _row, _safe
 from sk_app.production import wo_label
 
 ROWS = 60
 # SK's proposal (change list page 45): days a stage may take before it turns red
+# days a lead may stay in one of SK's steps without any update before it turns red
+STEP_DAYS = {"Qualified": 3, "Drawing": 2, "Quotation": 2, "Negotiations": 7}
 TARGET_DAYS = {"lead": 1, "quote": 2, "Fabrication": 5, "Electrical": 2, "Carpentry": 2, "Painting": 2, "Final inspection": 1}
 # factory stages in SK's order (26-Oct: carpentry after wiring); words found in the ERPNext operation names
 FACTORY = [("Fabrication", "🔩", ("fabric", "weld")), ("Electrical", "💡", ("electric", "wiring")),
@@ -33,15 +35,28 @@ def _stage(key, label, icon, rows, value=None, go=None, kind="count", late_rows=
 	c = "red" if late else "amber" if any(r.get("c") == "amber" for r in rows) else "green" if rows else None
 	return {"key": key, "label": label, "icon": icon, "count": len(rows), "value": value, "kind": kind,
 		"late": len(late), "oldest": max(days) if days else 0, "c": c, "go": go,
-		"rows": sorted(rows, key=lambda r: -(r.get("days") or 0))[:ROWS]}
+		"rows": sorted(rows, key=lambda r: (-(r.get("days") or 0), -(r.get("pending") or 0)))[:None if frappe.flags.sk_flow_all else ROWS]}
 
 
-def _late_row(title, meta, value, doctype, name, since, target, done=False) -> dict:
-	"""A row, red when it waited longer than the stage's target days (days = how long it waited)."""
+def _late_row(title, meta, value, doctype, name, since, target, done=False, opened=None) -> dict:
+	"""A row, red when it waited longer than the stage's target days (days = how long it waited).
+	target 0 = since is a due date (late = days past it). Every pending row says from how many days it is pending
+	(SK 27-Oct: "after open pending point, need to show from how many days it is pending"), counted from opened
+	(when the record was made) or else from since."""
 	days = date_diff(nowdate(), since) if since else 0
 	over = (not done) and target is not None and days > target
-	r = _row(title, f"{meta} · {days} days" if since else meta, value, doctype, name, "red" if over else None)
+	start = opened or (since if target != 0 else None)
+	age = max(date_diff(nowdate(), start), 0) if start else None
+	parts = [meta] if meta else []
+	if age is not None and not done:
+		parts.append(f"pending {age} days")
+	if target == 0 and since and not done:
+		parts.append(f"{days} days late" if days > 0 else "due today" if days == 0 else f"due in {-days} day{'s' if days < -1 else ''}")
+	elif opened and since and days != age and not done:
+		parts.append(f"no update {days} days")
+	r = _row(title, " · ".join(parts), value, doctype, name, "red" if over else None)
 	r["days"] = days if over else 0
+	r["pending"] = age
 	return r
 
 
@@ -70,29 +85,40 @@ def sales(user: str, segment=None) -> list[dict]:
 	stages = []
 	if _has("CRM Call Log"):
 		calls = frappe.get_all("CRM Call Log", filters={"creation": [">=", f"{add_days(nowdate(), -6)} 00:00:00"], **_in("owner", owners)},
-			fields=["name", "reference_docname", "type", "status", "duration", "owner", "creation"], order_by="creation desc", limit=300)
+			fields=["name", "reference_docname", "type", "status", "duration", "owner", "creation"], order_by="creation desc", limit=0)
 		stages.append(_stage("calls", "Calls (7 days)", "📞", [_row(c.reference_docname or c.name, f"{c.type or ''} · {c.status or ''} · {_name(c.owner)}",
 			None, None, None) for c in calls], go="calls"))
+	# SK 27-Oct: arrows follow his steps New → Qualified → Drawing → Quotation → Negotiations (→ won = orders)
+	by = {step: [] for step in lead_status.STEPS}
 	if _has("CRM Lead"):
 		closed = frappe.get_all("CRM Lead Status", filters={"type": ["in", ["Won", "Lost", "Junk"]]}, pluck="name")
 		leads = frappe.get_all("CRM Lead", filters={"converted": 0, "status": ["not in", closed or [""]], **seg, **_in("lead_owner", owners)},
-			fields=["name", "first_name", "organization", "status", "lead_owner", "creation", "first_responded_on", "sk_segment"],
-			order_by="creation asc", limit=500)
-		stages.append(_stage("leads", "Leads open", "🎯", [_late_row(l.organization or l.first_name or l.name,
-			f"{l.status} · {_name(l.lead_owner)}" + ("" if l.first_responded_on else " · not called"), None, "CRM Lead", l.name,
-			l.creation if not l.first_responded_on else None, TARGET_DAYS["lead"]) for l in leads], go="my_leads"))
+			fields=["name", "first_name", "organization", "status", "lead_owner", "creation", "modified", "first_responded_on", "sk_segment"],
+			order_by="creation asc", limit=0)
+		for l in leads:
+			step = lead_status.step_of(l.status)
+			not_called = step == "New" and not l.first_responded_on
+			by[step].append(_late_row(l.organization or l.first_name or l.name, f"{l.status} · {_name(l.lead_owner)}" + (" · not called" if not_called else ""),
+				None, "CRM Lead", l.name, l.creation if step == "New" else l.modified,
+				(TARGET_DAYS["lead"] if not_called else None) if step == "New" else STEP_DAYS[step], opened=l.creation))
+	deals = []
 	if _has("CRM Deal"):
 		open_st = dashboards._open_deal_statuses()
 		deals = frappe.get_all("CRM Deal", filters={"status": ["in", open_st or [""]], **seg, **_in("deal_owner", owners)},
 			fields=["name", "organization", "status", "deal_value", "deal_owner", "creation", "modified", "sk_customer_name"],
-			order_by="modified asc", limit=500)
-		nego = [d for d in deals if any(w in (d.status or "").lower() for w in ("negotiat", "proposal"))]
-		quote = [d for d in deals if d not in nego]
-		title = lambda d: d.get("sk_customer_name") or d.organization or d.name  # noqa: E731
-		stages.append(_stage("quote", "Drawing / quote", "📐", [_late_row(title(d), f"{d.status} · {_name(d.deal_owner)}", d.deal_value,
-			"CRM Deal", d.name, d.modified, TARGET_DAYS["quote"]) for d in quote], sum(flt(d.deal_value) for d in quote), go="my_deals"))
-		stages.append(_stage("negotiation", "Negotiation", "🤝", [_late_row(title(d), f"{d.status} · {_name(d.deal_owner)}", d.deal_value,
-			"CRM Deal", d.name, d.modified, 7) for d in nego], sum(flt(d.deal_value) for d in nego), go="my_deals"))
+			order_by="modified asc", limit=0)
+		for d in deals:
+			step = lead_status.step_of(d.status, deal=True)
+			r = _late_row(d.get("sk_customer_name") or d.organization or d.name, f"{d.status} · {_name(d.deal_owner)}", d.deal_value,
+				"CRM Deal", d.name, d.modified, STEP_DAYS.get(step), opened=d.creation)
+			by[step].append(r)
+	icons = {"New": "🎯", "Qualified": "✅", "Drawing": "📐", "Quotation": "📄", "Negotiations": "🤝"}
+	go = {"New": "my_leads", "Qualified": "my_leads", "Drawing": "my_deals", "Quotation": "my_deals", "Negotiations": "my_deals"}
+	if _has("CRM Lead") or _has("CRM Deal"):
+		for step in lead_status.STEPS:
+			rows = by[step]
+			value = sum(flt(r["value"]) for r in rows if r.get("value"))
+			stages.append(_stage(step.lower(), step, icons[step], rows, value or None, go=go[step]))
 	sos = dashboards._orders(start, getdate(), segment if segment in segments.TREE else None)
 	if owners is not None:
 		from sk_app.kpi import user_sales_orders
@@ -104,7 +130,7 @@ def sales(user: str, segment=None) -> list[dict]:
 	stages.append(_stage("orders", "Orders this month", "🧾", [_row(s.customer_name, f"{s.transaction_date}{' · draft' if s.docstatus == 0 else ''}",
 		s.base_net_total, "Sales Order", s.name) for s in sos], sum(flt(s.base_net_total) for s in sos), go="customers", kind="money"))
 	adv = frappe.get_all("Payment Entry", filters={"payment_type": "Receive", "docstatus": 1, "posting_date": [">=", start], "party_type": "Customer"},
-		fields=["name", "party_name", "paid_amount", "posting_date"], order_by="posting_date desc", limit=200)
+		fields=["name", "party_name", "paid_amount", "posting_date"], order_by="posting_date desc", limit=0)
 	if owners is not None:
 		adv = []  # money received is Accounts' / the CEO's view
 	else:
@@ -118,7 +144,7 @@ def _job_cards(workstation=None) -> list:
 	if workstation:
 		filters["workstation"] = workstation
 	return frappe.get_all("Job Card", filters=filters, fields=["name", "operation", "workstation", "status", "work_order",
-		"expected_end_date", "expected_start_date", "creation", "for_quantity"], order_by="creation asc", limit=500)
+		"expected_end_date", "expected_start_date", "creation", "for_quantity"], order_by="creation asc", limit=0)
 
 
 def _factory_stage(operation: str) -> str | None:
@@ -133,9 +159,9 @@ def factory(user: str, go="job_cards", workstation=None) -> list[dict]:
 		with_wo = set(frappe.get_all("Work Order", filters={"docstatus": ["<", 2], "sales_order": ["is", "set"]}, pluck="sales_order"))
 		waiting = [s for s in frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "per_delivered": ["<", 100],
 			"status": ["not in", ["Closed", "Completed", "On Hold"]]}, fields=["name", "customer_name", "delivery_date", "base_net_total",
-			"transaction_date", "docstatus"], order_by="delivery_date asc", limit=300) if s.name not in with_wo]
+			"transaction_date", "docstatus"], order_by="delivery_date asc", limit=0) if s.name not in with_wo]
 		stages.append(_stage("orders", "Orders to start", "🧾", [_late_row(s.customer_name, f"due {s.delivery_date or '?'}"
-			+ (" · draft order" if s.docstatus == 0 else ""), s.base_net_total, "Sales Order", s.name, s.delivery_date, 0)
+			+ (" · draft order" if s.docstatus == 0 else ""), s.base_net_total, "Sales Order", s.name, s.delivery_date, 0, opened=s.transaction_date)
 			for s in waiting], sum(flt(s.base_net_total) for s in waiting), go="order_board", kind="money"))
 	jobs = _job_cards(workstation)
 	by = {name: [] for name, _i, _w in FACTORY}
@@ -148,13 +174,13 @@ def factory(user: str, go="job_cards", workstation=None) -> list[dict]:
 		for j in by[name]:
 			since = j.expected_end_date or j.creation
 			r = _late_row(wo_label(j.work_order, j.name), f"{j.work_order or j.name} · {j.operation} · {j.status} · {j.workstation or ''}", None, "Job Card", j.name,
-				since, 0 if j.expected_end_date else TARGET_DAYS.get(name))
+				since, 0 if j.expected_end_date else TARGET_DAYS.get(name), opened=j.creation)
 			if j.status == "Work In Progress" and r["c"] != "red":
 				r["c"] = "amber"
 			rows.append(r)
 		stages.append(_stage(name.lower().replace(" ", "_"), name, icon, rows, go=go))
 	if not workstation:
-		done = frappe.get_all("Work Order", filters={"docstatus": 1, "status": "Completed"}, fields=["name", "item_name", "sales_order", "modified"], limit=300)
+		done = frappe.get_all("Work Order", filters={"docstatus": 1, "status": "Completed"}, fields=["name", "item_name", "sales_order", "modified"], limit=0)
 		delivered = set(frappe.get_all("Delivery Note Item", filters={"docstatus": 1, "against_sales_order": ["in", [w.sales_order for w in done if w.sales_order] or [""]]},
 			pluck="against_sales_order"))
 		ready = [w for w in done if not w.sales_order or w.sales_order not in delivered]
@@ -168,13 +194,13 @@ def subcontractor(user: str) -> list[dict]:
 	if not ws:
 		return []
 	jobs = frappe.get_all("Job Card", filters={"workstation": ws, "docstatus": ["<", 2]},
-		fields=["name", "operation", "status", "work_order", "expected_end_date", "creation", "modified", "docstatus"], order_by="creation asc", limit=300)
+		fields=["name", "operation", "status", "work_order", "expected_end_date", "creation", "modified", "docstatus"], order_by="creation asc", limit=0)
 	start = get_first_day(getdate())
 
 	def rows(items, target=None):
 		out = []
 		for j in items:
-			r = _late_row(wo_label(j.work_order, j.name), f"{j.work_order or j.name} · {j.operation or ''}", None, None, None, j.expected_end_date or j.creation, 0 if j.expected_end_date else target)
+			r = _late_row(wo_label(j.work_order, j.name), f"{j.work_order or j.name} · {j.operation or ''}", None, None, None, j.expected_end_date or j.creation, 0 if j.expected_end_date else target, opened=j.creation)
 			out.append(r)
 		return out
 
@@ -190,25 +216,25 @@ def stores(user: str) -> list[dict]:
 	from sk_app.store import low_stock
 
 	issue = frappe.get_all("Material Request", filters={"docstatus": 1, "material_request_type": "Material Issue", "status": ["in", ["Pending", "Partially Ordered"]]},
-		fields=["name", "schedule_date", "transaction_date", "owner"], order_by="schedule_date asc", limit=200)
+		fields=["name", "schedule_date", "transaction_date", "owner"], order_by="schedule_date asc", limit=0)
 	to_receive = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]]},
-		fields=["name", "supplier_name", "schedule_date", "grand_total"], order_by="schedule_date asc", limit=200)
+		fields=["name", "supplier_name", "schedule_date", "grand_total", "transaction_date"], order_by="schedule_date asc", limit=0)
 	moved = frappe.get_all("Stock Entry", filters={"posting_date": nowdate(), "docstatus": ["<", 2]}, fields=["name", "stock_entry_type", "total_outgoing_value"])
 	low = _safe(lambda: low_stock(user), []) or []
 	reorder = frappe.get_all("Material Request", filters={"docstatus": ["<", 2], "material_request_type": "Purchase", "status": ["in", ["Draft", "Pending", "Partially Ordered"]]},
-		fields=["name", "schedule_date", "transaction_date"], order_by="transaction_date asc", limit=200)
+		fields=["name", "schedule_date", "transaction_date"], order_by="transaction_date asc", limit=0)
 	dispatch = frappe.get_all("Sales Order", filters={"docstatus": 1, "status": ["in", ["To Deliver and Bill", "To Deliver"]]},
-		fields=["name", "customer_name", "delivery_date", "base_net_total"], order_by="delivery_date asc", limit=200)
+		fields=["name", "customer_name", "delivery_date", "base_net_total", "transaction_date"], order_by="delivery_date asc", limit=0)
 	return [
-		_stage("requests", "Requests to issue", "📋", [_late_row(m.name, _name(m.owner), None, "Material Request", m.name, m.schedule_date, 0) for m in issue], go="store_requests"),
-		_stage("receive", "To receive", "🚚", [_late_row(p.supplier_name, f"due {p.schedule_date}", p.grand_total, "Purchase Order", p.name, p.schedule_date, 0)
+		_stage("requests", "Requests to issue", "📋", [_late_row(m.name, _name(m.owner), None, "Material Request", m.name, m.schedule_date, 0, opened=m.transaction_date) for m in issue], go="store_requests"),
+		_stage("receive", "To receive", "🚚", [_late_row(p.supplier_name, f"due {p.schedule_date}", p.grand_total, "Purchase Order", p.name, p.schedule_date, 0, opened=p.transaction_date)
 			for p in to_receive], sum(flt(p.grand_total) for p in to_receive), go="receive"),
 		_stage("issued", "Issued / moved today", "📤", [_row(m.stock_entry_type, "", m.total_outgoing_value, "Stock Entry", m.name) for m in moved], go="issue"),
 		_stage("low", "Low stock", "⚠️", [_row(r["item_name"] or r["item_code"], f"{r['warehouse']} · have {r['qty']} / level {r['level']}", None,
 			"Item", r["item_code"], "red") for r in low], go="low_stock"),
 		_stage("reorder", "Sent to Purchase", "🛒", [_late_row(m.name, str(m.schedule_date or ""), None, "Material Request", m.name, m.transaction_date, 2)
 			for m in reorder], go="store_requests"),
-		_stage("dispatch", "To dispatch", "🚛", [_late_row(s.customer_name, f"due {s.delivery_date}", s.base_net_total, "Sales Order", s.name, s.delivery_date, 0)
+		_stage("dispatch", "To dispatch", "🚛", [_late_row(s.customer_name, f"due {s.delivery_date}", s.base_net_total, "Sales Order", s.name, s.delivery_date, 0, opened=s.transaction_date)
 			for s in dispatch], go="dispatch"),
 	]
 
@@ -218,15 +244,15 @@ def purchase(user: str) -> list[dict]:
 	from sk_app.purchase import po_limit
 
 	reqs = frappe.get_all("Material Request", filters={"docstatus": 1, "material_request_type": "Purchase", "status": ["in", ["Pending", "Partially Ordered"]]},
-		fields=["name", "schedule_date", "transaction_date"], order_by="transaction_date asc", limit=200)
+		fields=["name", "schedule_date", "transaction_date"], order_by="transaction_date asc", limit=0)
 	rfq = frappe.get_all("Supplier Quotation", filters={"docstatus": ["<", 2], "transaction_date": [">=", add_days(nowdate(), -30)]},
-		fields=["name", "supplier_name", "grand_total", "transaction_date", "status"], limit=200) if _has("Supplier Quotation") else []
-	draft = frappe.get_all("Purchase Order", filters={"docstatus": 0}, fields=["name", "supplier_name", "grand_total", "creation"], order_by="creation asc", limit=200)
+		fields=["name", "supplier_name", "grand_total", "transaction_date", "status"], limit=0) if _has("Supplier Quotation") else []
+	draft = frappe.get_all("Purchase Order", filters={"docstatus": 0}, fields=["name", "supplier_name", "grand_total", "creation"], order_by="creation asc", limit=0)
 	sent = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]]},
-		fields=["name", "supplier_name", "grand_total", "schedule_date"], order_by="schedule_date asc", limit=200)
+		fields=["name", "supplier_name", "grand_total", "schedule_date", "transaction_date"], order_by="schedule_date asc", limit=0)
 	got = frappe.get_all("Purchase Receipt", filters={"docstatus": ["<", 2], "posting_date": [">=", get_first_day(getdate())]},
-		fields=["name", "supplier_name", "grand_total", "posting_date", "per_billed"], limit=200)
-	bills = frappe.get_all("Purchase Invoice", filters={"docstatus": 0}, fields=["name", "supplier_name", "grand_total", "creation"], limit=200)
+		fields=["name", "supplier_name", "grand_total", "posting_date", "per_billed"], limit=0)
+	bills = frappe.get_all("Purchase Invoice", filters={"docstatus": 0}, fields=["name", "supplier_name", "grand_total", "creation"], limit=0)
 	limit = po_limit()
 	ceo = user == "Administrator" or "Management" in profile_functions(user)
 	return [
@@ -234,7 +260,7 @@ def purchase(user: str) -> list[dict]:
 		_stage("rates", "Rates (30 days)", "💬", [_row(q.supplier_name, f"{q.status} · {q.transaction_date}", q.grand_total, "Supplier Quotation", q.name) for q in rfq], go="compare"),
 		_stage("approval", "PO to approve", "✅", [_late_row(p.supplier_name, "needs CEO OK" if flt(p.grand_total) > limit else "draft", p.grand_total,
 			"Purchase Order", p.name, p.creation, 1) for p in draft], sum(flt(p.grand_total) for p in draft), go="po_approvals" if ceo else "po_follow_up", kind="money"),
-		_stage("sent", "PO sent, to come", "📦", [_late_row(p.supplier_name, f"due {p.schedule_date}", p.grand_total, "Purchase Order", p.name, p.schedule_date, 0)
+		_stage("sent", "PO sent, to come", "📦", [_late_row(p.supplier_name, f"due {p.schedule_date}", p.grand_total, "Purchase Order", p.name, p.schedule_date, 0, opened=p.transaction_date)
 			for p in sent], sum(flt(p.grand_total) for p in sent), go="po_follow_up", kind="money"),
 		_stage("received", "Received this month", "🚚", [_row(r.supplier_name, f"{r.posting_date} · billed {round(flt(r.per_billed))}%", r.grand_total,
 			"Purchase Receipt", r.name, None if flt(r.per_billed) >= 100 else "amber") for r in got], go="bills"),
@@ -245,12 +271,12 @@ def purchase(user: str) -> list[dict]:
 def quality(user: str) -> list[dict]:
 	inspect = [j for j in _job_cards() if _factory_stage(j.operation) == "Final inspection"]
 	stages = [_stage("inspect", "Inspection due", "🔍", [_late_row(wo_label(j.work_order, j.name), f"{j.work_order or j.name} · {j.status}", None, "Job Card", j.name,
-		j.expected_end_date or j.creation, 0 if j.expected_end_date else 1) for j in inspect], go="final_check")]
+		j.expected_end_date or j.creation, 0 if j.expected_end_date else 1, opened=j.creation) for j in inspect], go="final_check")]
 	if _has("Non Conformance"):
-		ncs = frappe.get_all("Non Conformance", filters={"status": "Open"}, fields=["name", "subject", "creation"], order_by="creation asc", limit=200)
+		ncs = frappe.get_all("Non Conformance", filters={"status": "Open"}, fields=["name", "subject", "creation"], order_by="creation asc", limit=0)
 		stages.append(_stage("nc", "Problems to fix", "❗", [_late_row(n.subject, "Non Conformance", None, "Non Conformance", n.name, n.creation, 7) for n in ncs], go="non_conformance"))
 	if _has("Issue"):
-		issues = frappe.get_all("Issue", filters={"status": ["in", ["Open", "Replied"]]}, fields=["name", "subject", "customer", "opening_date"], limit=200)
+		issues = frappe.get_all("Issue", filters={"status": ["in", ["Open", "Replied"]]}, fields=["name", "subject", "customer", "opening_date"], limit=0)
 		stages.append(_stage("complaints", "Customer complaints", "🛠️", [_late_row(i.subject, i.customer or "", None, "Issue", i.name, i.opening_date, 3) for i in issues], go="complaints"))
 	return stages
 
@@ -311,11 +337,11 @@ def ai(user: str) -> list[dict]:
 	from sk_app import ai_desk
 
 	box = _safe(lambda: ai_desk.inbox(user), None) or {"new": [], "working": []}
-	tasks = frappe.get_all("Task", filters={"status": ["not in", ["Cancelled"]], "project": ["is", "set"]}, fields=["name", "subject", "status", "exp_end_date", "modified"], limit=500)
+	tasks = frappe.get_all("Task", filters={"status": ["not in", ["Cancelled"]], "project": ["is", "set"]}, fields=["name", "subject", "status", "exp_end_date", "modified", "creation"], limit=0)
 	planned = [t for t in tasks if t.status in ("Open", "Template")]
 	working = [t for t in tasks if t.status in ("Working", "Pending Review", "Overdue")]
 	done = [t for t in tasks if t.status == "Completed" and getdate(t.modified) >= get_first_day(getdate())]
-	task_row = lambda t: _late_row(t.subject, t.status, None, "Task", t.name, t.exp_end_date, 0)  # noqa: E731
+	task_row = lambda t: _late_row(t.subject, t.status, None, "Task", t.name, t.exp_end_date, 0, opened=t.creation)  # noqa: E731
 	return [
 		_stage("ideas", "New ideas / problems", "📥", [_row(i["title"], i["by"], None, i["doctype"], i["name"], "amber") for i in box["new"]], go="improvement_inbox"),
 		_stage("sorted", "Being fixed", "🔧", [_row(i["title"], i.get("category") or "", None, i["doctype"], i["name"]) for i in box["working"]], go="improvement_inbox"),
@@ -335,10 +361,15 @@ def _flow(function: str, user: str, label=None) -> dict | None:
 	build = BUILDERS.get(function)
 	if not build:
 		return None
-	stages = _safe(lambda: build(user), []) or []
+	try:
+		stages = build(user) or []
+	except Exception as e:
+		# 27-Oct: an error used to leave the arrows blank; now the screen says so (and the log keeps it)
+		frappe.log_error(f"SK App flow {function}")
+		return {"function": function, "src": function, "label": label, "stages": [], "error": str(e)[:200]}
 	if not stages:
 		return None
-	return {"function": function, "label": label, "stages": stages}
+	return {"function": function, "src": function, "label": label, "stages": stages}
 
 
 def for_user(user: str, functions: list[str]) -> dict:
@@ -359,3 +390,16 @@ def for_user(user: str, functions: list[str]) -> dict:
 		if f:
 			out.append(f)
 	return {"flows": out, "at": str(now_datetime())[:16]}
+
+
+def stage_rows(user: str, functions: list[str], src: str, key: str) -> dict:
+	"""Every record of one box (Home sends only the first ROWS; SK 27-Oct: "total leads 260 but showing 60 only")."""
+	if src not in BUILDERS or not ("Management" in functions or src in functions or (src == "Marketing" and "Sales" in functions)):
+		frappe.throw("Not your flow", frappe.PermissionError)
+	frappe.flags.sk_flow_all = True
+	try:
+		stages = BUILDERS[src](user) or []
+	finally:
+		frappe.flags.sk_flow_all = False
+	st = next((s for s in stages if s["key"] == key), None)
+	return {"rows": st["rows"] if st else [], "count": st["count"] if st else 0}

@@ -43,7 +43,7 @@ CARD_FIELDS = ["name", "title", "title_marathi", "item_group", "product", "text"
 def catalogue(user: str | None = None, main: str | None = None) -> dict:
 	"""{Cabin: [cards], Non-Cabin: [cards]}: every product card, then Item Groups that have no card yet."""
 	cards = frappe.get_all("SK Library Item", filters={"enabled": 1, "category": "Product"}, fields=CARD_FIELDS,
-		order_by="sequence asc, title asc", limit=300)
+		order_by="sequence asc, title asc", limit=0)
 	photos = _photos([c.name for c in cards])
 	have = {c.item_group for c in cards if c.item_group}
 	out = {segments.CABIN: [], segments.NON_CABIN: []}

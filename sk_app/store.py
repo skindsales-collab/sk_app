@@ -118,7 +118,7 @@ def item_detail(user: str, item_code: str) -> dict:
 def open_purchase_orders(user: str) -> list[dict]:
 	need(user, STORE, "Purchase")
 	pos = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]]},
-		fields=["name", "supplier", "supplier_name", "schedule_date", "grand_total"], order_by="schedule_date asc", limit=200)
+		fields=["name", "supplier", "supplier_name", "schedule_date", "grand_total"], order_by="schedule_date asc", limit=0)
 	for po in pos:
 		po["items"] = frappe.get_all("Purchase Order Item", filters={"parent": po.name},
 			fields=["name", "item_code", "item_name", "qty", "received_qty", "uom", "warehouse"], order_by="idx asc")
@@ -177,7 +177,7 @@ def open_work_orders(user: str) -> list[dict]:
 	need(user, STORE, "Production")
 	wos = frappe.get_all("Work Order", filters={"docstatus": 1, "status": ["not in", ["Completed", "Stopped", "Closed", "Cancelled"]]},
 		fields=["name", "production_item", "item_name", "qty", "wip_warehouse", "sales_order", "expected_delivery_date"],
-		order_by="expected_delivery_date asc, creation asc", limit=200)
+		order_by="expected_delivery_date asc, creation asc", limit=0)
 	for wo in wos:
 		wo["items"] = frappe.get_all("Work Order Item", filters={"parent": wo.name},
 			fields=["item_code", "item_name", "required_qty", "transferred_qty", "source_warehouse"], order_by="idx asc")
@@ -232,7 +232,7 @@ def material_requests(user: str, kind: str = "store") -> list[dict]:
 	mrs = frappe.get_all("Material Request", filters={"docstatus": 1, "material_request_type": ["in", types],
 		"status": ["not in", ["Stopped", "Cancelled", "Transferred", "Issued", "Ordered", "Received"]]},
 		fields=["name", "material_request_type", "schedule_date", "owner", "transaction_date", "creation", "work_order"],
-		order_by="schedule_date asc, creation asc", limit=100)
+		order_by="schedule_date asc, creation asc", limit=0)
 	out = []
 	for mr in mrs:
 		rows = frappe.get_all("Material Request Item", filters={"parent": mr.name},
@@ -328,7 +328,7 @@ def order_low(user: str, item_codes: list[str] | None = None) -> dict:
 def orders_to_dispatch(user: str) -> list[dict]:
 	need(user, STORE, "Production")
 	return frappe.get_all("Sales Order", filters={"docstatus": 1, "status": ["in", ["To Deliver and Bill", "To Deliver"]]},
-		fields=["name", "customer", "customer_name", "delivery_date", "grand_total", "per_delivered"], order_by="delivery_date asc", limit=200)
+		fields=["name", "customer", "customer_name", "delivery_date", "grand_total", "per_delivered"], order_by="delivery_date asc", limit=0)
 
 
 def dispatch(user: str, sales_order: str, vehicle_no=None, driver_mobile=None, cabin_photo=None, plate_photo=None, note=None) -> dict:

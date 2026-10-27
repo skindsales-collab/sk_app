@@ -195,7 +195,7 @@ def listing(user: str, tab: str = "mine") -> dict:
 		filters, or_filters = base, None
 	else:
 		filters, or_filters = {**base, "sk_registered_by": ["in", mine_users]}, None
-	rows = frappe.get_all("Issue", filters=filters, or_filters=or_filters, fields=FIELDS, order_by="modified desc", limit=200)
+	rows = frappe.get_all("Issue", filters=filters, or_filters=or_filters, fields=FIELDS, order_by="modified desc", limit=0)
 	names = {}
 	for r in rows:
 		r["late"] = _late(r)
@@ -301,4 +301,4 @@ def late_for_management() -> list:
 	if not frappe.db.exists("DocType", "Issue") or not frappe.db.has_column("Issue", "sk_stage"):
 		return []
 	return frappe.get_all("Issue", filters={"sk_fix_by": ["<", nowdate()], "sk_stage": ["in", ["Registered", "Accepted", "Not OK"]]},
-		fields=["name", "subject", "sk_concerned_function", "sk_fix_by"], order_by="sk_fix_by asc", limit=100)
+		fields=["name", "subject", "sk_concerned_function", "sk_fix_by"], order_by="sk_fix_by asc", limit=0)

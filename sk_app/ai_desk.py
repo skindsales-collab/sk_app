@@ -55,7 +55,7 @@ def _names() -> dict:
 def _sorted() -> dict:
 	"""{(doctype, name): todo} of inbox items already sorted."""
 	rows = frappe.get_all("ToDo", filters={"description": ["like", f"{TAG}%"], "reference_type": ["in", ["SK Work Log", "SK DSI Entry"]]},
-		fields=["name", "status", "description", "reference_type", "reference_name", "date", "allocated_to"], limit=500)
+		fields=["name", "status", "description", "reference_type", "reference_name", "date", "allocated_to"], limit=0)
 	return {(r.reference_type, r.reference_name): r for r in rows}
 
 
@@ -71,11 +71,11 @@ def inbox(user: str) -> dict:
 	since = add_days(getdate(), -60)
 	items = []
 	for r in frappe.get_all("SK Work Log", filters={"entry_type": "Problem", "date": [">=", since]},
-			fields=["name", "user", "date", "problem_type", "description", "status", "photo"], order_by="date asc", limit=300):
+			fields=["name", "user", "date", "problem_type", "description", "status", "photo"], order_by="date asc", limit=0):
 		items.append({"doctype": "SK Work Log", "name": r.name, "kind": "problem", "title": r.description, "type": r.problem_type,
 			"by": names.get(r.user, r.user), "date": str(r.date), "photo": r.photo, "closed": r.status == "Done"})
 	for r in frappe.get_all("SK DSI Entry", filters={"date": [">=", add_days(getdate(), -14)]},
-			fields=["name", "user", "date", "what_changed", "photo"], order_by="date asc", limit=300):
+			fields=["name", "user", "date", "what_changed", "photo"], order_by="date asc", limit=0):
 		items.append({"doctype": "SK DSI Entry", "name": r.name, "kind": "dsi", "title": r.what_changed, "type": "DSI",
 			"by": names.get(r.user, r.user), "date": str(r.date), "photo": r.photo, "closed": False})
 	new, working = [], []
@@ -247,7 +247,7 @@ def projects(user: str) -> list[dict]:
 		fields=["name", "project_name", "percent_complete", "expected_end_date"], order_by="modified desc", limit=30)
 	out = []
 	for p in rows:
-		tasks = frappe.get_all("Task", filters={"project": p.name}, fields=["status", "exp_end_date"], limit=500)
+		tasks = frappe.get_all("Task", filters={"project": p.name}, fields=["status", "exp_end_date"], limit=0)
 		late = [t for t in tasks if t.status not in ("Completed", "Cancelled") and t.exp_end_date and getdate(t.exp_end_date) < getdate()]
 		out.append({"name": p.name, "title": p.project_name, "percent": round(p.percent_complete or 0),
 			"open": sum(1 for t in tasks if t.status not in ("Completed", "Cancelled")), "late": len(late),

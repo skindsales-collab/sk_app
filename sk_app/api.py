@@ -304,8 +304,8 @@ def crm_detail(doctype, name):
 
 @frappe.whitelist(methods=["POST"])
 def new_lead(first_name, mobile_no=None, organization=None, email=None, source=None, segment=None,
-		requirement=None, photo=None, product=None):
-	return crm.new_lead(_me().user, first_name, mobile_no, organization, email, source, segment, requirement, photo, product)
+		requirement=None, photo=None, product=None, status=None):
+	return crm.new_lead(_me().user, first_name, mobile_no, organization, email, source, segment, requirement, photo, product, status)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -1175,6 +1175,18 @@ def my_flow():
 	"""Point 17: the live process flow of each of the person's functions (the CEO: one per function)."""
 	profile = _me()
 	return flows.for_user(profile.user, logins.profile_functions(profile.user) or [profile.home])
+
+
+@frappe.whitelist(methods=["POST"])
+def convert_lead(name):
+	return crm.convert_lead(_me().user, name)
+
+
+@frappe.whitelist()
+def flow_stage(src, key):
+	"""All records of one flow box, for the full list screen."""
+	profile = _me()
+	return flows.stage_rows(profile.user, logins.profile_functions(profile.user) or [profile.home], src, key)
 
 
 @frappe.whitelist()
