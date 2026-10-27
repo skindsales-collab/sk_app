@@ -190,6 +190,11 @@ def bills_to_post(user: str) -> dict:
 			"file_url", order_by="creation desc")
 		p["orders"] = frappe.get_all("Purchase Order", filters={"supplier": p.reference_name, "docstatus": 1, "per_billed": ["<", 100]},
 			fields=["name", "grand_total", "transaction_date"], order_by="creation desc", limit=10)
+		# SK 27-Oct (Yogesh): material came without a PO; the bill is made from the store's receipt instead
+		p["receipts"] = frappe.get_all("Purchase Receipt", filters={"supplier": p.reference_name, "docstatus": 1, "per_billed": ["<", 100],
+			"is_return": 0}, fields=["name", "grand_total", "posting_date", "supplier_delivery_note"], order_by="creation desc", limit=10)
+		for x in p["receipts"]:
+			x["posting_date"] = str(x.posting_date)
 		p["creation"] = str(p.creation)
 	drafts = frappe.get_all("Purchase Invoice", filters={"docstatus": 0, "company": _company()},
 		fields=["name", "supplier_name", "bill_no", "grand_total", "posting_date"], order_by="creation asc")
@@ -198,15 +203,36 @@ def bills_to_post(user: str) -> dict:
 	return {"photos": photos, "drafts": drafts}
 
 
-def make_bill(user: str, purchase_order: str, bill_no: str, bill_date=None, todo=None, photo=None) -> dict:
-	"""Purchase Invoice from the PO (ERPNext mapping), with the supplier's bill number; kept as draft to check."""
+def make_bill(user: str, purchase_order: str | None, bill_no: str, bill_date=None, todo=None, photo=None, purchase_receipt=None,
+		items=None, supplier=None) -> dict:
+	"""Purchase Invoice with the supplier's bill number, kept as draft to check: from the PO (ERPNext mapping), from the
+	store's receipt when material came without a PO, or (no PO, no receipt) from the items Accounts types (SK 27-Oct)."""
 	need(user, ACCOUNTS)
 	if not (bill_no or "").strip():
 		frappe.throw(_("Please give the supplier's bill number"))
-	from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
+	if purchase_order:
+		from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
 
-	# Accounts may not read Purchase Orders in ERPNext; the bill is still made from the PO under her login
-	pi = get_mapped_purchase_invoice(purchase_order, ignore_permissions=True)
+		# Accounts may not read Purchase Orders in ERPNext; the bill is still made from the PO under her login
+		pi = get_mapped_purchase_invoice(purchase_order, ignore_permissions=True)
+	elif purchase_receipt:
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+
+		pi = make_purchase_invoice(purchase_receipt)
+	else:
+		from sk_app.store import uom
+
+		supplier = supplier or (frappe.db.get_value("ToDo", todo, "reference_name") if todo else None)
+		rows = [i for i in items or [] if i.get("item_code") and flt(i.get("qty")) > 0]
+		if not supplier or not frappe.db.exists("Supplier", supplier):
+			frappe.throw(_("Please pick the supplier"))
+		if not rows:
+			frappe.throw(_("Please give the item, quantity and rate from the bill"))
+		pi = frappe.new_doc("Purchase Invoice")
+		pi.update({"supplier": supplier, "company": _company()})
+		for i in rows:
+			pi.append("items", {"item_code": i["item_code"], "qty": flt(i["qty"]), "rate": flt(i.get("rate")), **uom(i["item_code"])})
+		pi.set_missing_values()
 	pi.bill_no = bill_no.strip()
 	pi.bill_date = getdate(bill_date or nowdate())
 	pi.flags.ignore_permissions = True

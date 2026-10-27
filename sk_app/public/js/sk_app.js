@@ -577,7 +577,8 @@
 		supplier_bill_no: "Supplier's bill no.",
 		bill_date: "Bill date",
 		no_po_bill: "No open PO for this supplier: make this bill in ERPNext.",
-		pick_po: "Please pick the PO",
+		pick_po: "Please pick the PO, the received material or No PO",
+		bill_from: "Make the bill from", bill_no_po: "No PO, no receipt: type the items from the bill",
 		draft_made: "draft made, check and post",
 		voucher_photo: "Voucher / bill photo",
 		spent_on: "Spent on what? (speak)",
@@ -651,6 +652,7 @@
 		supplier_bill_no: "सप्लायरचा बिल नं.",
 		bill_date: "बिल तारीख",
 		no_po_bill: "या सप्लायरचा उघडा PO नाही: हे बिल ERPNext मध्ये बनवा.",
+		bill_from: "बिल कशावरून बनवायचे", bill_no_po: "PO नाही, पावती नाही: बिलातील वस्तू टाइप करा",
 		pick_po: "PO निवडा",
 		draft_made: "ड्राफ्ट बनला, तपासून पोस्ट करा",
 		voucher_photo: "व्हाउचर / बिल फोटो",
@@ -1873,6 +1875,12 @@
 		const row = document.getElementById("f-design-row");
 		const tree = (crmOpts && crmOpts.segment_tree) || {};
 		if (row) row.hidden = !((tree.Cabin || []).includes(ev.target.value));
+	});
+	// bill without PO (SK 27-Oct): the item rows show only for "No PO, no receipt"
+	document.addEventListener("change", (ev) => {
+		if (ev.target.id !== "fb-po") return;
+		const box = document.getElementById("fb-items");
+		if (box) box.hidden = ev.target.value !== "items";
 	});
 	root.addEventListener("change", (ev) => { if (ev.target.classList && ev.target.classList.contains("sk-file")) { photoPicked(ev.target); photoNote(ev.target); } }, true);
 
@@ -3415,7 +3423,7 @@
 		S.po = null;
 		root.innerHTML = header(t("without_po")) + `<main class="sk-form">${finder("r-sup", t("supplier"), "supplier")}${finder("r-item", t("item"), "item")}
 			<label class="sk-field"><span>${t("qty")}</span>${qtyBox("r-qty")}</label>${formField("r-reason", t("why_no_po"), true)}
-			${photoField("r-challan", "📷 " + t("challan_photo"))}<button class="sk-btn go wide" data-act="st-receive">${t("save_receipt")}</button></main>`;
+			${formField("r-billno", t("bill_no_q"))}${photoField("r-challan", "📷 " + t("challan_photo"))}<button class="sk-btn go wide" data-act="st-receive">${t("save_receipt")}</button></main>`;
 	}
 
 	async function renderIssue() {
@@ -3427,8 +3435,8 @@
 	function issueForm(i) {
 		const w = S.wos[i];
 		S.wo = w;
-		root.innerHTML = header(t("issue")) + `<main class="sk-form"><h3 class="sk-h">${esc(w.item_name || w.production_item)} · ${esc(w.name)}</h3>
-			${pick("i-jc", t("job_card"), (w.job_cards || []).map((j) => ({ value: j.name, label: `${j.name} · ${j.operation || ""} · ${j.workstation || ""}` })))}
+		root.innerHTML = header(t("issue")) + `<main class="sk-form"><h3 class="sk-h">${w.customer ? esc(w.customer) + " · " : ""}${esc(w.size || w.item_name || w.production_item)} · ${esc(w.name)}</h3>
+			${pick("i-jc", t("job_card"), (w.job_cards || []).map((j) => ({ value: j.name, label: `${w.customer ? w.customer + " · " : ""}${w.size || w.item_name || ""} · ${j.operation || ""} · ${j.name}` })))}
 			<ul class="sk-list">${w.items.map((r, k) => li(esc(r.item_name || r.item_code), `${t("needed")} ${num(r.required_qty)} · ${t("given")} ${num(r.transferred_qty)} · ${esc(r.source_warehouse || "")}`,
 				qtyBox("i-q" + k, "", r.item_name))).join("")}</ul>
 			${finder("i-extra", t("other_item"), "item")}<label class="sk-field"><span>${t("qty")}</span>${qtyBox("i-extra-q")}</label>
@@ -4203,14 +4211,22 @@
 			}
 			case "fin-bill": S.photo = S.fb.photos[i];
 				return sheet(`<h3 class="sk-h">🧾 ${esc(S.photo.supplier_name || "")}</h3><p class="sk-note">${esc(S.photo.description)}</p>
-					${pick("fb-po", t("against_po"), S.photo.orders.map((o) => ({ value: o.name, label: `${o.name} · ${money(o.grand_total)} · ${o.transaction_date}` })))}
+					${pick("fb-po", t("bill_from"), [...S.photo.orders.map((o) => ({ value: "po:" + o.name, label: `PO ${o.name} · ${money(o.grand_total)} · ${o.transaction_date}` })),
+						...(S.photo.receipts || []).map((o) => ({ value: "pr:" + o.name, label: `${t("received")} ${o.name}${o.supplier_delivery_note ? " · " + o.supplier_delivery_note : ""} · ${money(o.grand_total)} · ${o.posting_date}` })),
+						{ value: "items", label: t("bill_no_po") }])}
+					<div id="fb-items" hidden>${[0, 1, 2].map((k) => `${finder("fb-it" + k, `${t("item")} ${k + 1}`, "item")}<div class="sk-row"><label class="sk-field"><span>${t("qty")}</span>${qtyBox("fb-q" + k)}</label><label class="sk-field"><span>${t("rate")}</span>${qtyBox("fb-r" + k)}</label></div>`).join("")}</div>
 					${formField("fb-no", t("supplier_bill_no"))}<label class="sk-field"><span>${t("bill_date")}</span><input id="fb-date" type="date" class="sk-select" value="${new Date().toISOString().slice(0, 10)}"></label>
 					<button class="sk-btn ok wide" data-act="fin-bill-save">${t("make_bill")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>
-					${S.photo.orders.length ? "" : `<p class="sk-note">⚠ ${t("no_po_bill")}</p>`}`);
+					`);
 			case "fin-bill-save": {
-				if (!val("fb-po")) return toast(t("pick_po"), true);
+				const src = val("fb-po");
+				if (!src) return toast(t("pick_po"), true);
+				const args = { bill_no: val("fb-no"), bill_date: val("fb-date"), todo: S.photo.name };
+				if (src.startsWith("po:")) args.purchase_order = src.slice(3);
+				else if (src.startsWith("pr:")) args.purchase_receipt = src.slice(3);
+				else args.items = JSON.stringify([0, 1, 2].map((k) => ({ item_code: val("fb-it" + k), qty: val("fb-q" + k), rate: val("fb-r" + k) })).filter((x) => x.item_code && Number(x.qty) > 0));
 				el.disabled = true;
-				const r = await call("fin_make_bill", { purchase_order: val("fb-po"), bill_no: val("fb-no"), bill_date: val("fb-date"), todo: S.photo.name }, true);
+				const r = await call("fin_make_bill", args, true);
 				closeSheet(); toast(`${r.name}: ${t("draft_made")}`); return go("bills_to_post");
 			}
 			case "fin-bill-done": await call("fin_bill_photo_done", { todo: S.fb.photos[i].name }, true); return go("bills_to_post");

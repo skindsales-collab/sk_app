@@ -679,8 +679,9 @@ def fin_bills():
 
 
 @frappe.whitelist(methods=["POST"])
-def fin_make_bill(purchase_order, bill_no, bill_date=None, todo=None, photo=None):
-	return finance.make_bill(_me().user, purchase_order, bill_no, bill_date, todo, photo)
+def fin_make_bill(bill_no, purchase_order=None, bill_date=None, todo=None, photo=None, purchase_receipt=None, items=None, supplier=None):
+	return finance.make_bill(_me().user, purchase_order or None, bill_no, bill_date, todo, photo, purchase_receipt or None,
+		json.loads(items) if isinstance(items, str) else items, supplier or None)
 
 
 @frappe.whitelist(methods=["POST"])
