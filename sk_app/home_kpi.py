@@ -210,10 +210,10 @@ def _invoiced(start, end):
 	return dashboards._invoiced(start, end)
 
 
-def sales(user: str, segment=None, fn="Sales") -> dict:
+def sales(user: str, segment=None, fn="Sales", only_self=False) -> dict:
 	from sk_app.flows import _owners
 
-	owners = _owners(user)
+	owners = [user] if only_self else _owners(user)
 	if segment == segments.NON_CABIN:
 		owners = None  # Aditya handles every Non-Cabin order (SK 26-Oct)
 	title = "Non-Cabin sale" if segment == segments.NON_CABIN else "PO booking"
@@ -394,10 +394,13 @@ def open_actions(user: str) -> int:
 def actions(user: str, member=None) -> dict:
 	member = member or user
 	_check(user, member)
+	from sk_app.ai_actions import refresh_if_stale, split
+
+	refresh_if_stale(member)  # SK 27-Oct: the AI's actions for the day, made on the first look if the morning run missed
 	rows = frappe.get_all("ToDo", filters={"allocated_to": member, "description": ["like", ACTION_MARK + "%"], "status": ["in", ["Open", "Closed"]],
 		"modified": [">=", add_days(nowdate(), -30)]}, fields=["name", "description", "priority", "date", "status", "assigned_by", "modified"], limit=200)
 	today = getdate()
-	out = [{"name": r.name, "text": r.description[len(ACTION_MARK):], "priority": r.priority or "Medium", "date": str(r.date or ""),
+	out = [{"name": r.name, **split(r.description[len(ACTION_MARK):]), "priority": r.priority or "Medium", "date": str(r.date or ""),
 		"done": r.status == "Closed", "late": r.status == "Open" and bool(r.date) and getdate(r.date) < today,
 		"by": frappe.db.get_value("User", r.assigned_by, "full_name") or r.assigned_by or ""} for r in rows]
 	out.sort(key=lambda a: (a["done"], not a["late"], PRIORITY.get(a["priority"], 1), a["date"] or "9999"))

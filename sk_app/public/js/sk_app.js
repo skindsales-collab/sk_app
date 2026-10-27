@@ -720,13 +720,13 @@
 	});
 	// change list point 2: Cabin / Non-Cabin customers
 	Object.assign(T.English, {
-		customers: "Customers", new_joiner: "New joiner", nj_why: "Photo the joining form and PAN / Aadhaar: the boxes fill by themselves. Check each box, correct it, then save. It becomes an ERPNext Employee.", nj_form_photo: "Joining form", nj_id_photo: "PAN / Aadhaar card", nj_name: "Full name", nj_gender: "Gender", nj_dob: "Date of birth", nj_join: "Joining date", nj_address: "Current address", nj_emname: "Emergency contact name", nj_emmob: "Emergency number", nj_no_bank: "Bank details are not taken in the app.", nj_saved: "Employee made", sales_owner: "Customer → salesperson", so_why: "Pick who sells to each customer. Their sale from Tally then shows on that person's graph. Biggest customers first.", so_done: "customers given a salesperson", so_this_year: "this year", so_no_customer: "not a customer in ERPNext yet", tag_tally: "Tag from Tally (Cabin / Non-Cabin sales)", seg_not_set: "Segment not set", seg_all: "All", seg_cabin: "Cabin", seg_noncabin: "Non-Cabin",
+		customers: "Customers", activities: "Today's activities", act_title: "Today's activities", act_auto: "from ERPNext", call_list: "Phone call list", call_list_why: "The app cannot read your phone's calls. Once a day, export the call history from your phone (CSV / Excel) and upload it here: every call to a lead or deal number is added to that lead.", call_list_up: "Upload call list", call_list_pick: "Pick the call list file first", call_list_done: "Calls added", call_list_already: "already there", call_list_other: "not a lead", new_joiner: "New joiner", nj_why: "Photo the joining form and PAN / Aadhaar: the boxes fill by themselves. Check each box, correct it, then save. It becomes an ERPNext Employee.", nj_form_photo: "Joining form", nj_id_photo: "PAN / Aadhaar card", nj_name: "Full name", nj_gender: "Gender", nj_dob: "Date of birth", nj_join: "Joining date", nj_address: "Current address", nj_emname: "Emergency contact name", nj_emmob: "Emergency number", nj_no_bank: "Bank details are not taken in the app.", nj_saved: "Employee made", sales_owner: "Customer → salesperson", so_why: "Pick who sells to each customer. Their sale from Tally then shows on that person's graph. Biggest customers first.", so_done: "customers given a salesperson", so_this_year: "this year", so_no_customer: "not a customer in ERPNext yet", tag_tally: "Tag from Tally (Cabin / Non-Cabin sales)", seg_not_set: "Segment not set", seg_all: "All", seg_cabin: "Cabin", seg_noncabin: "Non-Cabin",
 		pick_segment: "Please pick the segment (Cabin or Non-Cabin)", orders_word: "orders", tag_hint: "Tap the segment: the right team then sees this customer.",
 		seen_by_mgmt: "Customers without a segment are seen by Management only until tagged.",
 		"Cabin": "Cabin", "Non-Cabin": "Non-Cabin",
 	});
 	Object.assign(T.Marathi, {
-		customers: "ग्राहक", new_joiner: "नवीन कर्मचारी", nj_why: "जॉइनिंग फॉर्म व PAN / आधारचा फोटो घ्या: बॉक्स आपोआप भरतील. प्रत्येक बॉक्स तपासा, दुरुस्त करा, मग जतन करा. ERPNext मध्ये Employee बनेल.", nj_form_photo: "जॉइनिंग फॉर्म", nj_id_photo: "PAN / आधार कार्ड", nj_name: "पूर्ण नाव", nj_gender: "लिंग", nj_dob: "जन्मतारीख", nj_join: "रुजू तारीख", nj_address: "सध्याचा पत्ता", nj_emname: "आपत्कालीन संपर्क नाव", nj_emmob: "आपत्कालीन नंबर", nj_no_bank: "बँक तपशील ॲपमध्ये घेत नाही.", nj_saved: "कर्मचारी तयार", sales_owner: "ग्राहक → विक्रेता", so_why: "प्रत्येक ग्राहक कोण सांभाळतो ते निवडा. त्याची Tally विक्री त्या व्यक्तीच्या ग्राफवर दिसेल. मोठे ग्राहक आधी.", so_done: "ग्राहकांना विक्रेता दिला", so_this_year: "या वर्षी", so_no_customer: "ERPNext मध्ये ग्राहक नाही", tag_tally: "Tally प्रमाणे विभाग लावा", seg_not_set: "विभाग ठरवलेला नाही", seg_all: "सर्व", seg_cabin: "केबिन", seg_noncabin: "नॉन-केबिन",
+		customers: "ग्राहक", activities: "आजची कामे", act_title: "आजची कामे", act_auto: "ERPNext मधून", call_list: "फोनची कॉल यादी", call_list_why: "ॲप तुमच्या फोनचे कॉल वाचू शकत नाही. दिवसातून एकदा फोनमधून कॉल हिस्टरी (CSV / Excel) काढा व इथे अपलोड करा: लीडच्या नंबरवरील प्रत्येक कॉल त्या लीडवर जोडला जाईल.", call_list_up: "कॉल यादी अपलोड करा", call_list_pick: "आधी कॉल यादीची फाइल निवडा", call_list_done: "कॉल जोडले", call_list_already: "आधीच होते", call_list_other: "लीड नाही", new_joiner: "नवीन कर्मचारी", nj_why: "जॉइनिंग फॉर्म व PAN / आधारचा फोटो घ्या: बॉक्स आपोआप भरतील. प्रत्येक बॉक्स तपासा, दुरुस्त करा, मग जतन करा. ERPNext मध्ये Employee बनेल.", nj_form_photo: "जॉइनिंग फॉर्म", nj_id_photo: "PAN / आधार कार्ड", nj_name: "पूर्ण नाव", nj_gender: "लिंग", nj_dob: "जन्मतारीख", nj_join: "रुजू तारीख", nj_address: "सध्याचा पत्ता", nj_emname: "आपत्कालीन संपर्क नाव", nj_emmob: "आपत्कालीन नंबर", nj_no_bank: "बँक तपशील ॲपमध्ये घेत नाही.", nj_saved: "कर्मचारी तयार", sales_owner: "ग्राहक → विक्रेता", so_why: "प्रत्येक ग्राहक कोण सांभाळतो ते निवडा. त्याची Tally विक्री त्या व्यक्तीच्या ग्राफवर दिसेल. मोठे ग्राहक आधी.", so_done: "ग्राहकांना विक्रेता दिला", so_this_year: "या वर्षी", so_no_customer: "ERPNext मध्ये ग्राहक नाही", tag_tally: "Tally प्रमाणे विभाग लावा", seg_not_set: "विभाग ठरवलेला नाही", seg_all: "सर्व", seg_cabin: "केबिन", seg_noncabin: "नॉन-केबिन",
 		pick_segment: "कृपया विभाग निवडा (केबिन की नॉन-केबिन)", orders_word: "ऑर्डर", tag_hint: "विभागावर टॅप करा: योग्य टीमला हा ग्राहक दिसेल.",
 		seen_by_mgmt: "विभाग नसलेले ग्राहक टॅग होईपर्यंत फक्त व्यवस्थापनाला दिसतात.",
 		"Cabin": "केबिन", "Non-Cabin": "नॉन-केबिन",
@@ -848,9 +848,9 @@
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
 	T.Marathi.mic_network = "आवाजासाठी इंटरनेट हवे. मोबाईल डेटा तपासा, किंवा कीबोर्डवरील 🎤 वापरा.";
 	Object.assign(T.English, { fl_workflow: "work flow", fl_loading: "live figures loading", fl_days: "days", fl_oldest: "oldest",
-		fl_on_time: "all on time", fl_work: "Work on it", fl_first: "Showing the first", show_more: "Show more", loading: "Loading…", fl_error: "Work flow could not load, AI team informed", checked_submit: "Checked, submit", check_marked: "Read from the photo: check the coloured boxes (red = not sure), correct by typing or 🎤, then tap Checked, submit", convert_deal: "Convert to Deal", converted_ok: "Deal made ✓" });
+		fl_on_time: "all on time", fl_work: "Work on it", fl_first: "Showing the first", show_more: "Show more", loading: "Loading…", fl_error: "Work flow could not load, AI team informed", ka_reason: "Why", tm_not_called: "leads not called after 24 h", tm_quotes_wait: "quotations waiting over 7 days", tm_behind: "most behind target", tm_due_today: "due by today", tm_all_leads: "All leads and deals", checked_submit: "Checked, submit", check_marked: "Read from the photo: check the coloured boxes (red = not sure), correct by typing or 🎤, then tap Checked, submit", convert_deal: "Convert to Deal", converted_ok: "Deal made ✓" });
 	Object.assign(T.Marathi, { fl_workflow: "कामाचा क्रम", fl_loading: "आकडे येत आहेत", fl_days: "दिवस", fl_oldest: "सर्वात जुने",
-		fl_on_time: "सर्व वेळेवर", fl_work: "काम करा", fl_first: "पहिले दाखवले", show_more: "आणखी दाखवा", loading: "येत आहे…", fl_error: "कामाचा क्रम उघडला नाही, AI टीमला कळवले", checked_submit: "तपासले, सबमिट करा", check_marked: "फोटोवरून वाचले: रंगीत बॉक्स तपासा (लाल = खात्री नाही), टाइप किंवा 🎤 ने दुरुस्त करा, मग तपासले, सबमिट करा दाबा", convert_deal: "डील बनवा", converted_ok: "डील तयार ✓" });
+		fl_on_time: "सर्व वेळेवर", fl_work: "काम करा", fl_first: "पहिले दाखवले", show_more: "आणखी दाखवा", loading: "येत आहे…", fl_error: "कामाचा क्रम उघडला नाही, AI टीमला कळवले", ka_reason: "कारण", tm_not_called: "24 तासांनंतरही कॉल न केलेले लीड", tm_quotes_wait: "7 दिवसांपेक्षा जास्त थांबलेली कोटेशन", tm_behind: "लक्ष्यापासून सर्वात मागे", tm_due_today: "आजपर्यंत अपेक्षित", tm_all_leads: "सर्व लीड व डील", checked_submit: "तपासले, सबमिट करा", check_marked: "फोटोवरून वाचले: रंगीत बॉक्स तपासा (लाल = खात्री नाही), टाइप किंवा 🎤 ने दुरुस्त करा, मग तपासले, सबमिट करा दाबा", convert_deal: "डील बनवा", converted_ok: "डील तयार ✓" });
 	Object.assign(T.English, { lk_locked: "Locked", lk_touch: "Touch finger or look at the phone", lk_open_face: "Open with face / finger",
 		lk_ask_ceo: "Not working or new phone? Ask the CEO to reset it.", lk_pin: "Your PIN (the one you log in with)", lk_open: "Open", lk_relogin: "Forgot PIN? Log in again",
 		lk_cancelled: "Not checked. Tap the button and touch the finger sensor or look at the phone.",
@@ -896,7 +896,7 @@
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁", el_points: "🔌",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
-		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", sales_owner: "🧑‍💼", new_joiner: "🪪", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
+		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", sales_owner: "🧑‍💼", new_joiner: "🪪", activities: "🎯", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
 		dash_overview: "🏁", dash_daily_review: "🗓️", dash_sales: "💼", dash_marketing: "📣", dash_machine_shifting: "🏗️", dash_job_work: "⚙️", dash_cr100: "🎯", dash_finance: "💰", dash_manufacturing: "🏭", dash_purchase: "🛒", dash_store: "📦", dash_quality: "✅", dash_hr: "👥", dash_ai: "🤖",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
@@ -1395,8 +1395,9 @@
 		const mine = kaData.member === state.home.user;
 		root.innerHTML = header(`🎯 ${t("ka_title")}`) + `<main><p class="sk-note">${t("ka_why")}</p>${pick}
 			<ul class="sk-list">${kaData.actions.map((a, i) => `<li class="sk-item ${a.done ? "" : a.late ? "k-lead_new" : "k-deal"}"><div>
-				<div class="sk-item-title">${a.done ? "✅ " : a.late ? "🔴 " : a.priority === "High" ? "🟠 " : ""}${esc(a.text)}</div>
-				<div class="sk-item-meta">${t("ka_" + a.priority.toLowerCase())} · ${a.date ? `${t("ka_by_date")} ${esc(a.date)}` : ""} · ${t("ka_from")} ${esc(a.by)}</div></div>
+				<div class="sk-item-title">${a.done ? "✅ " : a.late ? "🔴 " : a.priority === "High" ? "🟠 " : ""}${a.ai ? `<span class="sk-badge">🤖 AI</span> ` : ""}${esc(a.text)}</div>
+				${a.why ? `<div class="sk-item-meta">📊 ${t("ka_reason")}: ${esc(a.why)}</div>` : ""}
+				<div class="sk-item-meta">${a.term ? `${esc(a.term)} · ` : ""}${t("ka_" + a.priority.toLowerCase())} · ${a.date ? `${t("ka_by_date")} ${esc(a.date)}` : ""} · ${t("ka_from")} ${esc(a.ai ? "AI" : a.by)}</div></div>
 				${!a.done && mine ? `<button class="sk-btn ok" data-kadone="${i}">✓</button>` : ""}</li>`).join("") || `<li class="sk-empty">${t("ka_none")}</li>`}</ul>
 			<div class="sk-form" id="ka-add">${formField("ka-text", t("ka_new"), true)}
 				<div class="sk-chips">${["High", "Medium", "Low"].map((p) => `<button class="sk-chip ${p === "High" ? "on" : ""}" data-q="${p}" data-kaprio="${p}">${t("ka_" + p.toLowerCase())}</button>`).join("")}</div>
@@ -2360,12 +2361,41 @@
 			<div><b>${c.dsi_done ? "✓" : "✗"}</b><span>${t("dsi_done")}</span></div><div><b>${esc(c.kpi_score || 0)}%</b><span>${t("kpi_score")}</span></div></div>`;
 	}
 
+	// SK 27-Oct point 11: the day's sales activities from SK's sheet, each against its daily target; counts ERPNext has
+	// fill by themselves (calls by lead step, quotations), the rest is one tap
+	const isSales = () => (state.home.functions || []).some((f) => f === "Sales" || f === "Marketing");
+	function activitiesHtml(a) {
+		if (!a) return "";
+		const mr = state.lang === "Marathi";
+		return `<h3 class="sk-h">🎯 ${t("act_title")} · <b class="${a.hit === a.total ? "sk-ok" : "sk-due"}">${a.hit}/${a.total}</b></h3>
+			<ul class="sk-list sk-acts">${a.rows.map((r) => `<li class="sk-item k-${r.c === "green" ? "g" : r.c === "amber" ? "a" : "r"}"><div class="sk-grow">
+				<div class="sk-item-title">${esc(mr ? r.label_mr : r.label)}</div>
+				<div class="sk-item-meta"><b>${r.done}</b> / ${r.target}${r.auto ? ` · ${r.auto} ${t("act_auto")}` : ""}</div></div>
+				<button class="sk-chip" data-acttap="${r.key}" data-step="-1" ${r.tap ? "" : "disabled"}>−</button><button class="sk-chip on" data-acttap="${r.key}" data-step="1">＋</button></li>`).join("")}</ul>`;
+	}
+	document.addEventListener("click", async (ev) => {
+		const b = ev.target.closest("[data-acttap]");
+		if (!b || !root.contains(b)) return;
+		ev.stopPropagation();
+		b.disabled = true;
+		const a = await call("activity_tap", { key: b.dataset.acttap, step: b.dataset.step }, true);
+		const box = root.querySelector(".sk-actbox");
+		if (box) box.innerHTML = activitiesHtml(a);
+	}, true);
+	async function renderActivities() {
+		const a = await call("activity_today");
+		root.innerHTML = header(t("activities")) + `<main><div class="sk-actbox">${activitiesHtml(a)}</div>
+			<h3 class="sk-h">📞 ${t("call_list")}</h3><p class="sk-note">${t("call_list_why")}</p>
+			<input id="cl-file" type="file" accept=".csv,.xlsx,.xls,text/csv" class="sk-file">
+			<button class="sk-btn go wide" data-act="call-list-up">⬆ ${t("call_list_up")}</button></main>`;
+	}
 	async function renderDayReport() {
-		const [d, hist] = await Promise.all([call("my_day_report"), call("my_day_reports", { days: 14 })]);
+		const [d, hist, acts] = await Promise.all([call("my_day_report"), call("my_day_reports", { days: 14 }), isSales() ? call("activity_today").catch(() => null) : null]);
 		const r = d.report || {};
 		const c = d.captured;
 		root.innerHTML = header(t("day_report")) + `<main class="sk-form">
 			${r.submitted_on ? `<div class="sk-answered">✓ ${t("report_sent")} · ${when(r.submitted_on)}</div>` : ""}
+			${acts ? `<div class="sk-actbox">${activitiesHtml(acts)}</div>` : ""}
 			<h3 class="sk-h">${t("captured")}</h3>${factChips(c)}
 			${c.auto_summary ? `<pre class="sk-pre">${esc(c.auto_summary)}</pre>` : ""}
 			${formField("f-done", t("report_q"), true)}${formField("f-prob", t("problems_q"), true)}${formField("f-plan", t("plan_q"), true)}${photoField()}
@@ -3986,21 +4016,53 @@
 
 	// Sales manager: the whole team's leads and deals with his own (SK, 26-Oct-2026)
 	let teamPerson = "";
+	// SK 27-Oct point 7: the team screen in the standard format: team graph, team arrows, Decide now, one card per
+	// person with their own arrows ("in arrow way"); the long list of leads only after a tap
+	let teamList = false;
 	async function renderTeamLeads() {
-		const d = await call("team_follow_up", teamPerson ? { person: teamPerson } : {});
-		const chip = (u, label) => `<button class="sk-chip ${teamPerson === u ? "on" : ""}" data-teamp="${esc(u)}">${esc(label)}</button>`;
-		const people = d.people.map((p) => `<li class="sk-item"><button class="sk-fu-main" data-teamp="${esc(p.user)}"><div class="sk-item-title">${esc(p.full_name)}</div>
-			<div class="sk-item-meta">${p.open} ${t("open_items")} · ${p.new} ${t("new_badge")} · <span class="${p.overdue ? "sk-due" : ""}">${p.overdue} ${t("overdue")}</span>${p.deal_value ? ` · ₹${Number(p.deal_value).toLocaleString("en-IN")}` : ""}</div></button>
-			${p.score != null ? `<b>${Math.round(p.score)}%</b>` : ""}${state.viewAs ? "" : `<button class="sk-chip" data-act="view-enter" data-user="${esc(p.user)}" data-uname="${esc(p.full_name)}" title="${t("view_member")}">👀</button>`}</li>`).join("");
+		const [d, kd, fd] = await Promise.all([call("team_follow_up", teamPerson ? { person: teamPerson } : {}),
+			state.viewAs ? Promise.resolve(null) : call("my_home_kpi", {}, false, true).catch(() => null), call("my_flow").catch(() => null)]);
+		if (kd) { kpiData = kd; kpiAt = Date.now(); kpiWho = whoKey(); }
+		if (fd) { flowData = fd; flowAt = Date.now(); flowWho = whoKey(); }
+		const dec = d.decide || {};
+		const cells = [
+			`<button class="sk-dec ${dec.not_called ? "bad" : "ok"}" data-tlist="1"><b>${dec.not_called || "✓"}</b><span>${t("tm_not_called")}</span></button>`,
+			`<button class="sk-dec ${dec.quotes_waiting ? "bad" : "ok"}" data-tlist="1"><b>${dec.quotes_waiting || "✓"}</b><span>${t("tm_quotes_wait")}</span></button>`,
+			dec.behind ? `<button class="sk-dec bad" data-teamp="${esc(dec.behind.user)}"><b>${dec.behind.pct}%</b><span>${esc(dec.behind.full_name)}</span><small>${t("tm_behind")}</small></button>` : ""];
+		const col = (c) => ({ red: "r", amber: "a", green: "g" }[c] || "b");
+		const people = Object.fromEntries(d.people.map((p) => [p.user, p]));
+		const cards = (d.members || []).map((m) => {
+			const p = people[m.user] || {};
+			const bar = m.target ? `<div class="sk-tbar"><i style="width:${Math.min(100, m.due ? m.actual * 100 / m.due : 0)}%" class="${m.pct != null && m.pct < 80 ? "bad" : "ok"}"></i></div>
+				<div class="sk-item-meta">₹${kAmt(m.actual)} / ₹${kAmt(m.due)} ${t("tm_due_today")} · ${t("k_target")} ₹${kAmt(m.target)}</div>` : `<div class="sk-item-meta">${t("k_no_target")}</div>`;
+			const arrows = m.steps.map((st) => `<span class="sk-mini3 ${col(st.c)}" title="${esc(st.label)}"><b>${st.count}</b><small>${esc(st.label.replace(" (month)", ""))}</small></span>`).join("");
+			return `<li class="sk-tcard"><div class="sk-row"><button class="sk-fu-main sk-grow" data-teamp="${esc(m.user)}"><div class="sk-item-title">${esc(m.full_name)}${m.pct != null ? ` · <b class="${m.pct < 80 ? "sk-due" : "sk-ok"}">${m.pct}%</b>` : ""}</div></button>
+				${state.viewAs ? "" : `<button class="sk-chip" data-act="view-enter" data-user="${esc(m.user)}" data-uname="${esc(m.full_name)}" title="${t("view_member")}">👀</button>`}</div>
+				${bar}<div class="sk-mini3row">${arrows}</div>
+				<div class="sk-item-meta">📞 ${m.calls_today} ${t("today")}${m.acts ? ` · 🎯 ${m.acts.hit}/${m.acts.total}` : ""} · <span class="${p.overdue ? "sk-due" : ""}">${p.overdue || 0} ${t("overdue")}</span> · ${p.open || 0} ${t("open_items")}</div></li>`;
+		}).join("");
 		const rows = d.rows.map((r) => `<li class="sk-fu ${r.overdue ? "late" : r.new ? "new" : ""}"><button class="sk-fu-main" data-open="${esc(r.doctype)}" data-name="${esc(r.name)}">
 			<div class="sk-item-title">${esc(r.title)} ${r.new ? `<span class="sk-badge">${t("new_badge")}</span>` : ""}${r.overdue ? `<span class="sk-badge bad">${t("overdue")}</span>` : ""}</div>
 			<div class="sk-item-meta">👤 ${esc(r.owner_name)} · ${esc(r.status || "")} · ${r.doctype === "CRM Deal" ? t("deals") : t("leads")}</div>
 			${r.next || r.due ? `<div class="sk-item-meta">${t("next")}: ${esc(r.next || "")} ${r.due ? "· " + when(r.due) : ""}</div>` : ""}
 			${r.last ? `<div class="sk-item-meta">${t("last")}: ${esc(r.last.text)} · ${when(r.last.on)}</div>` : ""}</button>${contactButtons(r)}</li>`).join("");
-		root.innerHTML = header(t("team_leads")) + `<main><ul class="sk-list">${people}</ul>
-			<div class="sk-row sk-wrap sk-gap">${chip("", t("all"))}${d.people.map((p) => chip(p.user, p.full_name)).join("")}</div>
-			<ul class="sk-list sk-gap">${rows || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+		const chip = (u, label) => `<button class="sk-chip ${teamPerson === u ? "on" : ""}" data-teamp="${esc(u)}">${esc(label)}</button>`;
+		const list = teamList || teamPerson ? `<div class="sk-row sk-wrap sk-gap">${chip("", t("all"))}${d.people.map((p) => chip(p.user, p.full_name)).join("")}</div>
+			<ul class="sk-list sk-gap">${rows || `<li class="sk-empty">${t("nothing")}</li>`}</ul>`
+			: `<button class="sk-btn wide sk-gap" data-tlist="1">📋 ${t("tm_all_leads")} (${d.rows.length})</button>`;
+		root.innerHTML = header(t("team_leads")) + `<main>
+			${kd && kd.chart ? `<div class="sk-kpibox">${kpiHtml()}</div>` : ""}
+			${fd ? `<div class="sk-flowbox">${flow3dHtml("Sales")}</div>` : ""}
+			<div class="sk-h sk-dech">⚡ ${t("d_title")}</div><div class="sk-decs">${cells.join("")}</div>
+			<ul class="sk-list sk-gap">${cards}</ul>${list}</main>`;
 	}
+	document.addEventListener("click", (ev) => {
+		const b = ev.target.closest("[data-tlist]");
+		if (!b || !root.contains(b)) return;
+		ev.stopPropagation();
+		teamList = true;
+		renderTeamLeads().then(() => { const l = root.querySelector(".sk-list.sk-gap:last-of-type"); if (l) l.scrollIntoView(); });
+	}, true);
 
 	// ---------- AI & ERP desk (Samir, points 9a / 9d / 9e) ----------
 	async function renderInbox() {
@@ -4094,7 +4156,7 @@
 		segment_pnl: renderSegmentWise, month_close: renderMonthWise,
 		improvement_inbox: renderInbox, dept_visits: renderVisit, erp_gaps: renderGaps, app_users: renderAppUsers, change_list: renderChangeList,
 		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources, customers: renderCustomers, view_member: renderViewMember, complaints: renderComplaints,
-		attendance: renderAttendance, leave_expense: renderLeaveExpense, sales_owner: renderSalesOwner, new_joiner: renderNewJoiner };
+		attendance: renderAttendance, leave_expense: renderLeaveExpense, sales_owner: renderSalesOwner, new_joiner: renderNewJoiner, activities: renderActivities };
 	["overview", "daily_review", "sales", "marketing", "machine_shifting", "job_work", "cr100", "finance", "manufacturing", "purchase",
 		"store", "quality", "hr", "ai"].forEach((k) => { LIVE_VIEWS["dash_" + k] = () => renderDash(k); });
 
@@ -4674,6 +4736,17 @@
 					toast(t("saved"));
 				}
 				return;
+			}
+			if (act === "call-list-up") {
+				const f = document.getElementById("cl-file").files[0];
+				if (!f) { toast(t("call_list_pick"), true); return; }
+				el.disabled = true;
+				try {
+					const url = await uploadRetry(f);
+					const r = await call("upload_call_list", { file_url: url }, true);
+					toast(`${t("call_list_done")}: ${r.made} · ${t("call_list_already")} ${r.already} · ${t("call_list_other")} ${r.not_customers}`);
+					return renderActivities();
+				} finally { el.disabled = false; }
 			}
 			if (act === "nj-save") {
 				el.disabled = true;

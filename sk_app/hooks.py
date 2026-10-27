@@ -12,9 +12,11 @@ website_route_rules = [
 ]
 
 scheduler_events = {
-	"hourly": ["sk_app.guide.hourly", "sk_app.day_report.auto_reports"],
+	"hourly": ["sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge"],
 	# IndiaMART / JustDial / GeM mails to the team mailboxes become CRM leads (free route, point 14)
-	"cron": {"*/5 * * * *": ["sk_app.lead_sources.scan"]},
+	"cron": {"*/5 * * * *": ["sk_app.lead_sources.scan"],
+		# SK 27-Oct: the AI's actions to lift each graph, every morning before work
+		"0 7 * * *": ["sk_app.ai_actions.morning"]},
 }
 
 doc_events = {
