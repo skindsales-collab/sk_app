@@ -802,6 +802,13 @@ def marketing_add(name, mobile=None, company=None, city=None, email=None, photo=
 
 
 @frappe.whitelist(methods=["POST"])
+def marketing_upload(file_url):
+	from sk_app import marketing_list as ml
+
+	return ml.upload(_me().user, file_url)
+
+
+@frappe.whitelist(methods=["POST"])
 def marketing_greet(contact, festival, text=None):
 	from sk_app import marketing_list as ml
 

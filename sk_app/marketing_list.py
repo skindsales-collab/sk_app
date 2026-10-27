@@ -180,3 +180,66 @@ def lead_made(user: str, contact: str, lead: str) -> dict:
 def sent_count(user: str, period) -> int:
 	return frappe.db.count("Comment", {"reference_doctype": "Contact", "comment_type": "Info", "owner": user,
 		"content": ["like", f"{SENT}%"], "creation": period})
+
+
+# SK 27-Oct: "import earlier all contact list in Excel" (Excel / CSV, also a Google Contacts or phone export)
+UPLOAD_KEYS = {
+	"name": ("name", "customer name", "contact name", "contact person", "full name", "person", "sender name"),
+	"first": ("first name", "given name"),
+	"last": ("last name", "family name", "surname"),
+	"mobile": ("mobile", "mobile no", "mobile number", "phone", "phone no", "phone number", "contact number", "whatsapp",
+		"phone 1 - value", "contact no"),
+	"email": ("email", "e-mail", "email id", "mail", "e-mail 1 - value", "email address"),
+	"company": ("company", "company name", "organization", "organisation", "organization name", "firm"),
+	"city": ("city", "location", "place", "address 1 - city"),
+}
+MAX_ROWS = 5000
+
+
+def _header(row) -> dict:
+	cols = {}
+	for i, cell in enumerate(row):
+		key = " ".join(str(cell or "").strip().lower().replace("_", " ").split())
+		for field, names in UPLOAD_KEYS.items():
+			if field not in cols and key in names:
+				cols[field] = i
+	return cols
+
+
+def upload(user: str, file_url: str) -> dict:
+	"""Every row with a name and a mobile or e-mail goes on the Marketing list; a mobile already in ERPNext is not made twice."""
+	_need(user)
+	from sk_app.lead_sources import _rows_from_file
+
+	rows = _rows_from_file(file_url)
+	head_at, cols = None, {}
+	for i, row in enumerate(rows[:15]):
+		cols = _header(row)
+		if "mobile" in cols or "email" in cols:
+			head_at = i
+			break
+	if head_at is None:
+		frappe.throw(_("No 'Mobile' or 'Email' column found in the file"))
+	body = rows[head_at + 1:]
+	if len(body) > MAX_ROWS:
+		frappe.throw(_("The file has {0} rows; please split it into files of {1} rows").format(len(body), MAX_ROWS))
+	made = existing = skipped = 0
+	for row in body:
+		get = lambda f: str(row[cols[f]]).strip() if f in cols and cols[f] < len(row) and row[cols[f]] not in (None, "") else ""
+		mobile, email = get("mobile"), get("email")
+		if mobile.endswith(".0"):  # Excel keeps numbers as 9822011223.0
+			mobile = mobile[:-2]
+		name = get("name") or " ".join(filter(None, [get("first"), get("last")])) or get("company")
+		if not name or (len(_digits(mobile)) < 10 and "@" not in email):
+			skipped += 1
+			continue
+		try:
+			r = add(user, name, mobile if len(_digits(mobile)) >= 10 else None, get("company"), get("city"), email if "@" in email else None)
+		except frappe.ValidationError:
+			skipped += 1
+			continue
+		if r["existing"]:
+			existing += 1
+		else:
+			made += 1
+	return {"made": made, "existing": existing, "skipped": skipped}
