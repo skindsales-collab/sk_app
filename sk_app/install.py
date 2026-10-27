@@ -108,7 +108,7 @@ def ensure_mail_fields():
 
 	create_custom_fields({"Communication": [
 		{"fieldname": "sk_mail_status", "label": "SK App mail status", "fieldtype": "Select",
-			"options": "\nNew\nTaken\nReplied\nLead made\nNot a lead", "insert_after": "status", "read_only": 1},
+			"options": "\nNew\nTaken\nReplied\nLead made\nNot a lead\nComplaint", "insert_after": "status", "read_only": 1},
 		{"fieldname": "sk_taken_by", "label": "Taken by (SK App)", "fieldtype": "Link", "options": "User",
 			"insert_after": "sk_mail_status", "read_only": 1},
 		# SK 27-Oct: a mail moved to another team's box (info@ → cabin@)

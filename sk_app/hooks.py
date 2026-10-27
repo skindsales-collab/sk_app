@@ -20,7 +20,7 @@ jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html"]}
 scheduler_events = {
 	"hourly": ["sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge", "sk_app.mailbox.remind"],
 	# IndiaMART / JustDial / GeM mails to the team mailboxes become CRM leads (free route, point 14)
-	"cron": {"*/5 * * * *": ["sk_app.lead_sources.scan", "sk_app.mailbox.link_known", "sk_app.mailbox.auto_leads"],
+	"cron": {"*/5 * * * *": ["sk_app.lead_sources.scan", "sk_app.mailbox.link_known", "sk_app.mailbox.route_suppliers", "sk_app.mailbox.auto_leads"],
 		# SK 27-Oct: the AI's actions to lift each graph, every morning before work
 		"0 7 * * *": ["sk_app.ai_actions.morning"]},
 }

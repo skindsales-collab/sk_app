@@ -60,7 +60,7 @@ FUNCTIONS = {
 	},
 	"Purchase": {
 		"label": {"English": "Purchase", "Marathi": "खरेदी"},
-		"tiles": ["my_day", "buy_requests", "get_rates", "compare", "po_follow_up", "suppliers", "bills", "last_rates", "stock_check", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "buy_requests", "get_rates", "compare", "po_follow_up", "suppliers", "bills", "last_rates", "stock_check", "mail", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Purchase User"],
 		"desk": "/app/buying",

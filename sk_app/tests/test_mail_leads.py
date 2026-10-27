@@ -129,3 +129,15 @@ class TestMailLeads(IntegrationTestCase):
 			"content": "Any update on price?", "communication_date": now_datetime()}).insert(ignore_permissions=True).name
 		mailbox.auto_leads()
 		self.assertEqual(frappe.db.get_value("Communication", again, "reference_name"), lead)  # not a second lead
+
+	def test_complaint_and_supplier_mails_are_not_leads(self):
+		self.assertEqual(mailbox.mail_kind("ravi@buildco.in", "Roof leakage in cabin", "Water seepage since rain, please repair"), "complaint")
+		self.assertEqual(mailbox.mail_kind("ravi@buildco.in", "Need quotation for site office", "20x10 cabin"), "lead")
+		comm = frappe.get_doc({"doctype": "Communication", "communication_medium": "Email", "sent_or_received": "Received",
+			"subject": "Proforma invoice for GI sheets", "sender": "sales@steelmart.example.com", "recipients": "info@skind.tech",
+			"content": "Please find our proforma and price list", "communication_date": now_datetime()}).insert(ignore_permissions=True).name
+		mailbox.route_suppliers()
+		self.assertEqual(frappe.db.get_value("Communication", comm, "sk_box"), mailbox.PURCHASE_BOX)
+		BUY = "sk_test_m_buy@example.com"
+		_app_user(BUY, "Purchase", ["Purchase User"])
+		self.assertIn(comm, [m["name"] for m in mailbox.inbox(BUY)["mails"]])
