@@ -165,7 +165,10 @@ def my_leads():
 	now = now_datetime()
 	leads = rank_items(work.open_leads(profile.user), now)
 	deals = rank_items(work.open_deals(profile.user), now)
-	return {"leads": [_item_dict(i) for i in leads], "deals": [_item_dict(i) for i in deals]}
+	from sk_app.cold_calls import FIELD, has_field
+
+	cold = frappe.db.count("CRM Lead", {"lead_owner": profile.user, "converted": 0, FIELD: 1}) if has_field() else 0
+	return {"leads": [_item_dict(i) for i in leads], "deals": [_item_dict(i) for i in deals], "cold": cold}
 
 
 @frappe.whitelist()
@@ -768,6 +771,48 @@ def store_item(item_code):
 @frappe.whitelist()
 def store_open_pos():
 	return store.open_purchase_orders(_me().user)
+
+
+@frappe.whitelist()
+def cold_calls(q=None):
+	from sk_app import cold_calls as cc
+
+	return cc.cold_list(_me().user, q)
+
+
+@frappe.whitelist(methods=["POST"])
+def cold_set(lead, cold):
+	from sk_app import cold_calls as cc
+
+	return cc.set_cold(_me().user, lead, cold)
+
+
+@frappe.whitelist()
+def marketing_list(q=None):
+	from sk_app import marketing_list as ml
+
+	return ml.people(_me().user, q)
+
+
+@frappe.whitelist(methods=["POST"])
+def marketing_add(name, mobile=None, company=None, city=None, email=None, photo=None):
+	from sk_app import marketing_list as ml
+
+	return ml.add(_me().user, name, mobile, company, city, email, photo)
+
+
+@frappe.whitelist(methods=["POST"])
+def marketing_greet(contact, festival, text=None):
+	from sk_app import marketing_list as ml
+
+	return ml.greet(_me().user, contact, festival, text)
+
+
+@frappe.whitelist(methods=["POST"])
+def marketing_lead_made(contact, lead):
+	from sk_app import marketing_list as ml
+
+	return ml.lead_made(_me().user, contact, lead)
 
 
 @frappe.whitelist()

@@ -122,7 +122,9 @@ def follow_up(user: str, for_manager: bool = False) -> list[dict]:
 	tasks = _open_tasks_by_doc(user)
 	rows = []
 	closed_leads = _closed("CRM Lead Status")
-	lead_filters = {"lead_owner": user, "converted": 0}
+	from sk_app.cold_calls import not_cold
+
+	lead_filters = {"lead_owner": user, "converted": 0, **not_cold()}
 	if closed_leads:
 		lead_filters["status"] = ["not in", closed_leads]
 	for r in get("CRM Lead", filters=lead_filters, limit_page_length=0, order_by="modified desc",
@@ -216,7 +218,7 @@ def _products(doctype: str, name: str) -> list:
 def detail(doctype: str, name: str) -> dict:
 	_check(doctype, name)
 	meta = frappe.get_meta(doctype)
-	fields = [f for f in DETAIL_FIELDS[doctype] + ["sk_segment", "sk_product"] if f == "name" or meta.has_field(f)]
+	fields = [f for f in DETAIL_FIELDS[doctype] + ["sk_segment", "sk_product", "sk_cold"] if f == "name" or meta.has_field(f)]
 	doc = frappe.db.get_value(doctype, name, fields, as_dict=True)
 	ref = {"reference_doctype": doctype, "reference_docname": name}
 	deal = None

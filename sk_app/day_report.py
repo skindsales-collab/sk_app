@@ -205,7 +205,9 @@ def team_screen(manager: str, people: list[dict]) -> dict:
 	decide = {"not_called": 0, "quotes_waiting": 0, "behind": None}
 	if _has("CRM Lead"):
 		closed = frappe.get_all("CRM Lead Status", filters={"type": ["in", ["Won", "Lost", "Junk"]]}, pluck="name")
-		decide["not_called"] = frappe.db.count("CRM Lead", {"lead_owner": ["in", users], "converted": 0, "first_responded_on": ["is", "not set"],
+		from sk_app.cold_calls import not_cold
+
+		decide["not_called"] = frappe.db.count("CRM Lead", {"lead_owner": ["in", users], "converted": 0, "first_responded_on": ["is", "not set"], **not_cold(),
 			"status": ["not in", closed or [""]], "creation": ["<", add_to_date(now_datetime(), hours=-24)]})
 		decide["quotes_waiting"] = frappe.db.count("CRM Lead", {"lead_owner": ["in", users], "status": "Quotation",
 			"modified": ["<", add_to_date(now_datetime(), days=-7)]})

@@ -3,6 +3,7 @@
 import frappe
 from frappe.utils import add_to_date, get_datetime, getdate
 
+from sk_app.cold_calls import not_cold
 from sk_app.logic import WorkItem
 
 OPEN_TASK_STATUSES = ["Open", "Working", "Overdue", "Pending Review"]
@@ -73,7 +74,7 @@ def open_leads(user: str) -> list[WorkItem]:
 	types = _lead_status_types()
 	rows = frappe.get_all(
 		"CRM Lead",
-		filters={"lead_owner": user, "converted": 0},
+		filters={"lead_owner": user, "converted": 0, **not_cold()},  # SK 27-Oct: cold-calling data has its own list
 		fields=["name", "lead_name", "organization", "status", "source", "response_by", "first_responded_on", "creation",
 			"mobile_no", "phone", "email"],
 		order_by="creation desc",

@@ -74,6 +74,12 @@ def after_migrate():
 	_safe(cabin_quote_setup, "cabin quotation")  # SK 27-Oct: one rate card, same cabin price from any salesperson, SK's quote print
 	_safe(ensure_job_card_cabin, "job card customer / size")  # SK 27-Oct (Yogesh): job card picker shows customer and cabin size
 	_safe(ensure_crm_search, "lead search")  # SK 27-Oct: lead search in ERPNext
+	from sk_app.cold_calls import ensure_field as cold_calling_field
+
+	_safe(cold_calling_field, "cold calling list")  # SK 27-Oct: cold-calling data out of My Leads
+	from sk_app.marketing_list import ensure_setup as marketing_list_setup
+
+	_safe(marketing_list_setup, "marketing list")  # SK 27-Oct: potential customers for greetings / promotions, not leads
 	from sk_app.training import seed_lessons
 
 	seed_lessons()
