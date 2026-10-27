@@ -678,7 +678,7 @@
 		camera: "Camera", gallery: "Gallery / screenshot", pdf_file: "PDF / file", retake: "Retake", remove: "Remove",
 		uploading: "Sending…", uploaded: "Sent ✓", upload_retry: "Network weak, trying again…",
 		open_chrome: "Mic / camera work best in Chrome. Tap here to open the SK App in Chrome.",
-		gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", new_product: "New product / vendor", photo_entry: "Photo entry", pe_help: "Bill, e-invoice, voucher or payment proof: take a photo (or pick the PDF) and submit. A supplier bill goes to Bills to Post (Make bill). Others wait here until you enter them in ERPNext.", pe_what: "What is it?", pe_supplier_bill: "Supplier bill / e-invoice", pe_expense: "Expense bill / petty cash voucher", pe_money_in: "Payment received (cheque / UTR)", pe_money_out: "Payment made (bank slip / UTR)", pe_other: "Other document", pe_photo: "Photo or PDF", pe_party: "Customer / party (optional)", pe_ref: "Bill / ref no (optional)", pe_submit: "Submit", pe_pending: "Photo entries to enter in ERPNext", pe_open: "Enter in ERPNext", pe_sent: "Submitted", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
+		gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", new_product: "New product / vendor", mails_n: "Mails", photo_entry: "Photo entry", pe_help: "Bill, e-invoice, voucher or payment proof: take a photo (or pick the PDF) and submit. A supplier bill goes to Bills to Post (Make bill). Others wait here until you enter them in ERPNext.", pe_what: "What is it?", pe_supplier_bill: "Supplier bill / e-invoice", pe_expense: "Expense bill / petty cash voucher", pe_money_in: "Payment received (cheque / UTR)", pe_money_out: "Payment made (bank slip / UTR)", pe_other: "Other document", pe_photo: "Photo or PDF", pe_party: "Customer / party (optional)", pe_ref: "Bill / ref no (optional)", pe_submit: "Submit", pe_pending: "Photo entries to enter in ERPNext", pe_open: "Enter in ERPNext", pe_sent: "Submitted", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
 		gw_masters: "Masters", gw_transactions: "Transactions", gw_utilities: "Utilities", gw_reports: "Reports", gw_more: "More reports",
 		gw_desk: "Opens in ERPNext", gw_pending: "waiting", db_particulars: "Particulars", db_none: "No vouchers on this day",
 		cash_today: "Cash / Bank", to_collect: "Receivables", to_pay: "Payables", bills_to_post: "Purchase Invoice and Debit Note",
@@ -710,7 +710,7 @@
 		camera: "कॅमेरा", gallery: "गॅलरी / स्क्रीनशॉट", pdf_file: "PDF / फाईल", retake: "पुन्हा घ्या", remove: "काढा",
 		uploading: "पाठवत आहे…", uploaded: "पाठवले ✓", upload_retry: "नेटवर्क कमी, पुन्हा प्रयत्न…",
 		open_chrome: "माईक / कॅमेरा Chrome मध्ये नीट चालतात. SK App Chrome मध्ये उघडण्यासाठी येथे दाबा.",
-		gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", new_product: "नवीन प्रॉडक्ट / व्हेंडर", photo_entry: "फोटो एंट्री", pe_help: "बिल, ई-इनव्हॉइस, व्हाउचर किंवा पेमेंट पुरावा: फोटो काढा (किंवा PDF निवडा) आणि सबमिट करा. सप्लायर बिल 'बिल पोस्ट करा' मध्ये जाते. बाकी ERPNext मध्ये एंट्री होईपर्यंत इथे राहतात.", pe_what: "हे काय आहे?", pe_supplier_bill: "सप्लायर बिल / ई-इनव्हॉइस", pe_expense: "खर्च बिल / पेटी कॅश व्हाउचर", pe_money_in: "पेमेंट मिळाले (चेक / UTR)", pe_money_out: "पेमेंट केले (बँक स्लिप / UTR)", pe_other: "इतर कागद", pe_photo: "फोटो किंवा PDF", pe_party: "ग्राहक / पार्टी (ऐच्छिक)", pe_ref: "बिल / रेफ नंबर (ऐच्छिक)", pe_submit: "सबमिट", pe_pending: "ERPNext मध्ये टाकायच्या फोटो एंट्री", pe_open: "ERPNext मध्ये टाका", pe_sent: "सबमिट झाले", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
+		gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", new_product: "नवीन प्रॉडक्ट / व्हेंडर", mails_n: "मेल", photo_entry: "फोटो एंट्री", pe_help: "बिल, ई-इनव्हॉइस, व्हाउचर किंवा पेमेंट पुरावा: फोटो काढा (किंवा PDF निवडा) आणि सबमिट करा. सप्लायर बिल 'बिल पोस्ट करा' मध्ये जाते. बाकी ERPNext मध्ये एंट्री होईपर्यंत इथे राहतात.", pe_what: "हे काय आहे?", pe_supplier_bill: "सप्लायर बिल / ई-इनव्हॉइस", pe_expense: "खर्च बिल / पेटी कॅश व्हाउचर", pe_money_in: "पेमेंट मिळाले (चेक / UTR)", pe_money_out: "पेमेंट केले (बँक स्लिप / UTR)", pe_other: "इतर कागद", pe_photo: "फोटो किंवा PDF", pe_party: "ग्राहक / पार्टी (ऐच्छिक)", pe_ref: "बिल / रेफ नंबर (ऐच्छिक)", pe_submit: "सबमिट", pe_pending: "ERPNext मध्ये टाकायच्या फोटो एंट्री", pe_open: "ERPNext मध्ये टाका", pe_sent: "सबमिट झाले", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
 		gw_masters: "मास्टर्स", gw_transactions: "व्यवहार", gw_utilities: "युटिलिटी", gw_reports: "अहवाल", gw_more: "आणखी अहवाल",
 		gw_desk: "ERPNext मध्ये उघडते", gw_pending: "बाकी", db_particulars: "तपशील", db_none: "या दिवशी व्हाउचर नाही",
 		cash_today: "कॅश / बँक", to_collect: "येणे (Receivables)", to_pay: "देणे (Payables)", bills_to_post: "खरेदी बिल आणि डेबिट नोट",
@@ -1711,7 +1711,7 @@
 		if (i.doctype && i.doctype.startsWith("CRM ") && i.name) open = `<button class="sk-open" data-open="${esc(i.doctype)}" data-name="${esc(i.name)}">›</button>`;
 		if (i.kind === "day_report") open = `<button class="sk-open" data-go="day_report">›</button>`;
 		if (i.kind === "send_file") open = `<button class="sk-open" data-open="${esc(i.ref_doctype)}" data-name="${esc(i.ref_name)}">›</button>`;
-		return `<li class="sk-item k-${esc(i.kind)}"><div><div class="sk-item-title">${esc(i.title)}</div><div class="sk-item-meta">${i.kind === "deal" && i.customer && i.customer !== i.title ? `👤 ${esc(i.customer)} · ` : ""}${(i.kind === "deal" || i.kind.startsWith("lead_")) && i.status ? esc(i.status) + " · " : ""}${esc(i.kind.replace("_", " "))} · ${esc(i.minutes)} ${t("min")} ${due}</div></div>${open}</li>`;
+		return `<li class="sk-item k-${esc(i.kind)}"><div><div class="sk-item-title">${esc(i.title)}</div><div class="sk-item-meta">${i.kind === "deal" && i.customer && i.customer !== i.title ? `👤 ${esc(i.customer)} · ` : ""}${(i.kind === "deal" || i.kind.startsWith("lead_")) && i.status ? esc(i.status) + " · " : ""}${esc(i.kind.replace("_", " "))} · ${esc(i.minutes)} ${t("min")} ${due}</div>${i.doctype && i.doctype.startsWith("CRM ") && (i.mobile || i.email) ? contactButtons(i) : ""}</div>${open}</li>`;
 	}
 
 	async function renderMyDay() {
@@ -2764,7 +2764,7 @@
 
 	// ---------- Calls: free (phone dialer + log with talk time); recording is Phase 2 ----------
 	function talkBox(label, x) {
-		return `<div><b>${x.calls}</b><span>${label}: ${t("calls_n")}</span></div><div><b>${x.talked}</b><span>${t("talked")}</span></div><div><b>${dur(x.talk_seconds)}</b><span>${t("talk_time")}</span></div><div><b>${x.missed || 0}</b><span>${t("missed")}</span></div>`;
+		return `<div><b>${x.calls}</b><span>${label}: ${t("calls_n")}</span></div><div><b>${x.talked}</b><span>${t("talked")}</span></div><div><b>${dur(x.talk_seconds)}</b><span>${t("talk_time")}</span></div><div><b>${x.missed || 0}</b><span>${t("missed")}</span></div><div><b>${x.whatsapp || 0}</b><span>💬 WhatsApp</span></div><div><b>${x.mails || 0}</b><span>✉️ ${t("mails_n")}</span></div>`;
 	}
 	async function renderCalls() {
 		const [d] = await Promise.all([call("my_calls"), myContacts()]);
@@ -2772,7 +2772,7 @@
 		if (hasTeam()) {
 			const tc = await call("team_calls");
 			team = `<h3 class="sk-h">👥 ${t("team_talk")}</h3><ul class="sk-list">${tc.people.map((p) => `<li class="sk-item"><div class="sk-grow"><div class="sk-item-title">${esc(p.full_name)}</div>
-				<div class="sk-item-meta">${t("today")}: ${p.day.calls} ${t("calls_n")} · ${dur(p.day.talk_seconds)} · ${p.day.missed || 0} ${t("missed")} · ${t("this_week")}: ${p.week.calls} · ${dur(p.week.talk_seconds)} · ${p.week.missed || 0} ${t("missed")}</div></div></li>`).join("") || `<li class="sk-empty">${t("none")}</li>`}</ul>`;
+				<div class="sk-item-meta">${t("today")}: ${p.day.calls} ${t("calls_n")} · ${dur(p.day.talk_seconds)} · ${p.day.missed || 0} ${t("missed")} · 💬 ${p.day.whatsapp || 0} · ✉️ ${p.day.mails || 0} · ${t("this_week")}: ${p.week.calls} · ${dur(p.week.talk_seconds)} · ${p.week.missed || 0} ${t("missed")}</div></div></li>`).join("") || `<li class="sk-empty">${t("none")}</li>`}</ul>`;
 		}
 		const rows = d.calls.map((c) => `<li class="sk-item"><button class="sk-fu-main" ${c.reference_doctype ? `data-open="${esc(c.reference_doctype)}" data-name="${esc(c.reference_docname)}"` : ""}>
 			<div class="sk-item-title">${c.type === "Incoming" ? "📥" : "📤"} ${esc(c.title)} · ${esc(c.status)}</div>
@@ -3240,7 +3240,7 @@
 				<div class="sk-item-meta">${[r.segment ? `<span class="chip2 ${r.main === "Cabin" ? "navy" : "yel"}">${esc(r.segment)}</span>` : esc(r.customer_group || ""),
 					r.mobile_no ? esc(r.mobile_no) : "", r.orders ? `${money(r.orders)} ${t("orders_word")}` : ""].filter(Boolean).join(" · ")}</div>
 				${custTab === "not_set" ? tagRow(r, i) : ""}</div>
-				${r.mobile_no ? `<a class="sk-chip" href="tel:${esc(r.mobile_no)}">📞</a>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+				${r.deal ? contactButtons({ doctype: "CRM Deal", name: r.deal, mobile: r.mobile_no, email: r.email_id }) : r.mobile_no ? `<a class="sk-chip" href="tel:${esc(r.mobile_no)}">📞</a>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
 	}
 
 	// Lead Sources (Samir / SK): IndiaMART, JustDial and GeM from mails (free), the Excel upload, mailboxes set up or not

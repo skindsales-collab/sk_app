@@ -61,6 +61,11 @@ def _label(doctype, name):
 	return label(doctype, name)
 
 
+def _reach(r) -> dict:
+	"""Mobile and mail for the one-tap Call / WhatsApp / Mail buttons on the lists (SK 27-Oct)."""
+	return {"mobile": r.get("mobile_no") or r.get("phone"), "email": r.get("email")}
+
+
 def open_leads(user: str) -> list[WorkItem]:
 	"""Frappe CRM leads owned by the user and not converted or closed."""
 	if not frappe.db.exists("DocType", "CRM Lead"):
@@ -69,7 +74,8 @@ def open_leads(user: str) -> list[WorkItem]:
 	rows = frappe.get_all(
 		"CRM Lead",
 		filters={"lead_owner": user, "converted": 0},
-		fields=["name", "lead_name", "organization", "status", "source", "response_by", "first_responded_on", "creation"],
+		fields=["name", "lead_name", "organization", "status", "source", "response_by", "first_responded_on", "creation",
+			"mobile_no", "phone", "email"],
 		order_by="creation desc",
 		limit=0,  # SK 27-Oct: all leads, not the first few
 	)
@@ -81,10 +87,10 @@ def open_leads(user: str) -> list[WorkItem]:
 		if not r.first_responded_on:
 			due = get_datetime(r.response_by) if r.response_by else add_to_date(r.creation, minutes=5)
 			items.append(WorkItem("lead_new", title, "CRM Lead", r.name, due=due, minutes=10, priority=1,
-				extra={"source": r.source, "status": r.status, "created": str(r.creation)}))
+				extra={"source": r.source, "status": r.status, "created": str(r.creation), **_reach(r)}))
 		else:
 			items.append(WorkItem("lead_followup", title, "CRM Lead", r.name, minutes=15, priority=2,
-				extra={"source": r.source, "status": r.status, "created": str(r.creation)}))
+				extra={"source": r.source, "status": r.status, "created": str(r.creation), **_reach(r)}))
 	return items
 
 
@@ -99,7 +105,7 @@ def open_deals(user: str) -> list[WorkItem]:
 	rows = frappe.get_all(
 		"CRM Deal",
 		filters=filters,
-		fields=["name", "organization", "lead_name", "status", "next_step", "expected_closure_date", "deal_value"]
+		fields=["name", "organization", "lead_name", "status", "next_step", "expected_closure_date", "deal_value", "mobile_no", "phone", "email"]
 			+ (["sk_customer_name"] if frappe.get_meta("CRM Deal").has_field("sk_customer_name") else []),
 		order_by="modified desc",
 		limit=0,
@@ -108,7 +114,7 @@ def open_deals(user: str) -> list[WorkItem]:
 		WorkItem("deal", _label("CRM Deal", r.name), "CRM Deal", r.name,
 			due=get_datetime(r.expected_closure_date) if r.expected_closure_date else None,
 			minutes=30, priority=2, extra={"status": r.status, "next_step": r.next_step, "value": r.deal_value,
-				"customer": r.get("sk_customer_name") or r.lead_name})
+				"customer": r.get("sk_customer_name") or r.lead_name, **_reach(r)})
 		for r in rows
 	]
 
