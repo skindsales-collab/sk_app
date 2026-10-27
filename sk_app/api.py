@@ -603,6 +603,32 @@ def face_unlock(credential):
 # ---------- Finance (SK draft F06) ----------
 
 @frappe.whitelist()
+def tally_gateway():
+	"""SK 27-Oct: the Accounts Gateway (Gateway of Tally sections and names) with today's Cash / Bank, Receivable, Payable."""
+	from sk_app import tally
+	from sk_app.store import need
+
+	user = _me().user
+	need(user, "Accounts", "Management")
+	out = tally.gateway(user)
+	cash = frappe._dict(finance.cash_today(user))
+	out["cash"] = cash.total
+	due = lambda dt: frappe.utils.flt(frappe.db.sql(f"select sum(outstanding_amount) from `tab{dt}` where docstatus = 1 and outstanding_amount > 0")[0][0])  # noqa: E731
+	out["receivable"], out["payable"] = due("Sales Invoice"), due("Purchase Invoice")
+	out["pending"] = len(tally.pending(user))
+	return out
+
+
+@frappe.whitelist()
+def tally_day_book(date=None):
+	from sk_app import tally
+	from sk_app.store import need
+
+	need(_me().user, "Accounts", "Management")
+	return {"date": str(frappe.utils.getdate(date or frappe.utils.nowdate())), "rows": tally.day_book(date, date)}
+
+
+@frappe.whitelist()
 def fin_cash():
 	return finance.cash_today(_me().user)
 

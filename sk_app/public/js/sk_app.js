@@ -674,6 +674,9 @@
 		camera: "Camera", gallery: "Gallery / screenshot", pdf_file: "PDF / file", retake: "Retake", remove: "Remove",
 		uploading: "Sending…", uploaded: "Sent ✓", upload_retry: "Network weak, trying again…",
 		open_chrome: "Mic / camera work best in Chrome. Tap here to open the SK App in Chrome.",
+		gateway: "Accounts Gateway", day_book: "Day Book", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
+		gw_masters: "Masters", gw_transactions: "Transactions", gw_utilities: "Utilities", gw_reports: "Reports", gw_more: "More reports",
+		gw_desk: "Opens in ERPNext", gw_pending: "waiting", db_particulars: "Particulars", db_none: "No vouchers on this day",
 		cash_today: "Cash / Bank", to_collect: "Receivables", to_pay: "Payables", bills_to_post: "Purchase Invoice and Debit Note",
 		invoices: "Sales Invoice and Credit Note", expenses: "Journal Voucher", dir_expenses: "Direct and Indirect Expenses",
 		segment_pnl: "Segment Wise P&L", month_close: "Month Wise Report", ledger_wise: "Ledger-wise", work_tab: "To do",
@@ -703,6 +706,9 @@
 		camera: "कॅमेरा", gallery: "गॅलरी / स्क्रीनशॉट", pdf_file: "PDF / फाईल", retake: "पुन्हा घ्या", remove: "काढा",
 		uploading: "पाठवत आहे…", uploaded: "पाठवले ✓", upload_retry: "नेटवर्क कमी, पुन्हा प्रयत्न…",
 		open_chrome: "माईक / कॅमेरा Chrome मध्ये नीट चालतात. SK App Chrome मध्ये उघडण्यासाठी येथे दाबा.",
+		gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
+		gw_masters: "मास्टर्स", gw_transactions: "व्यवहार", gw_utilities: "युटिलिटी", gw_reports: "अहवाल", gw_more: "आणखी अहवाल",
+		gw_desk: "ERPNext मध्ये उघडते", gw_pending: "बाकी", db_particulars: "तपशील", db_none: "या दिवशी व्हाउचर नाही",
 		cash_today: "कॅश / बँक", to_collect: "येणे (Receivables)", to_pay: "देणे (Payables)", bills_to_post: "खरेदी बिल आणि डेबिट नोट",
 		invoices: "विक्री बिल आणि क्रेडिट नोट", expenses: "जर्नल व्हाउचर", dir_expenses: "प्रत्यक्ष आणि अप्रत्यक्ष खर्च",
 		segment_pnl: "विभागवार नफा-तोटा", month_close: "महिनावार अहवाल", ledger_wise: "लेजरनुसार", work_tab: "करायचे",
@@ -898,6 +904,7 @@
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
 		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", sales_owner: "🧑‍💼", new_joiner: "🪪", activities: "🎯", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
 		dash_overview: "🏁", dash_daily_review: "🗓️", dash_sales: "💼", dash_marketing: "📣", dash_machine_shifting: "🏗️", dash_job_work: "⚙️", dash_cr100: "🎯", dash_finance: "💰", dash_manufacturing: "🏭", dash_purchase: "🛒", dash_store: "📦", dash_quality: "✅", dash_hr: "👥", dash_ai: "🤖",
+		gateway: "🏛️", day_book: "📅",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
@@ -1547,6 +1554,7 @@
 		if (!b || !root.contains(b)) return;
 		ev.stopPropagation();
 		if (b.dataset.more === "flow") { flowShown += PAGE; const [fi, si] = flowKey.split(":").map(Number); return renderFlowStage(fi, si); }
+		if (b.dataset.more === "daybook") { dbShown += PAGE; return renderDayBook(true); }
 		if (b.dataset.more === "wa") { waShown += PAGE; return renderWhatsApp(); }
 		if (b.dataset.more === "my_leads" || b.dataset.more === "my_deals") { leadShown += PAGE; return renderLeads(b.dataset.more, true); }
 		if (b.dataset.more === "so") { soShown += PAGE; return renderSalesOwner(true); }
@@ -3911,6 +3919,41 @@
 		root.innerHTML = header(short(r.title || r.ledger)) + `<main>${d.opening !== undefined ? `<p class="sk-note">${t("opening")} ${money(d.opening)} → <b>${t("closing")} ${money(d.closing)}</b></p>` : ""}
 			<ul class="sk-list">${rows || empty()}</ul><button class="sk-btn wide" data-go="${esc(S.ledger.view)}">‹ ${t("back")}</button></main>`;
 	}
+	// SK 27-Oct: the team knows Tally, so Accounts opens like Gateway of Tally: Masters, Transactions, Utilities, Reports
+	async function renderGateway() {
+		const g = await call("tally_gateway");
+		const mr = state.lang === "Marathi";
+		const item = (it) => {
+			const label = `${esc(mr ? it.label_mr : it.label)}${it.keys ? `<em class="sk-gw-key">${esc(it.keys)}</em>` : ""}`;
+			if (it.app) return `<button class="sk-tile" data-go="${esc(it.app)}"><span class="sk-tile-icon">${it.icon}</span><span>${label}</span></button>`;
+			return `<a class="sk-tile sk-gw-desk" href="${esc(it.url)}" target="_blank" rel="noopener" title="${esc(t("gw_desk"))}"><span class="sk-tile-icon">${it.icon}</span><span>${label}</span><b class="sk-gw-ext">↗</b></a>`;
+		};
+		const sec = (x) => `<h3 class="sk-h sk-fn-row">${t("gw_" + x.section.toLowerCase())}</h3><div class="sk-tiles small">${x.items.map(item).join("")}</div>`;
+		root.innerHTML = header(t("gateway")) + `<main><p class="sk-note">${esc(g.fy)}</p>
+			<div class="sk-gw-strip"><button data-go="cash_today"><small>${t("gw_cash")}</small><b>${money(g.cash) || "Rs 0"}</b></button>
+			<button data-go="to_collect"><small>${t("gw_recv")}</small><b>${money(g.receivable) || "Rs 0"}</b></button>
+			<button data-go="to_pay"><small>${t("gw_pay")}</small><b>${money(g.payable) || "Rs 0"}</b></button></div>
+			${g.sections.map(sec).join("")}
+			<h3 class="sk-h sk-fn-row">${t("gw_more")}</h3><div class="sk-tiles small">${g.more.map((m) => `<a class="sk-tile sk-gw-desk" href="${esc(m.url)}" target="_blank" rel="noopener"><span class="sk-tile-icon">📄</span><span>${esc(m.label)}</span><b class="sk-gw-ext">↗</b></a>`).join("")}</div></main>`;
+	}
+	let dayBookDate = null, dayBook = null, dbShown = PAGE, dbQ = "";
+	async function renderDayBook(again) {
+		if (!again || !dayBook) { dayBook = await call("tally_day_book", dayBookDate ? { date: dayBookDate } : {}); dbShown = PAGE; }
+		const d = dayBook;
+		dayBookDate = d.date;
+		const q = dbQ.toLowerCase();
+		const all = d.rows.filter((r) => !q || `${r.particulars} ${r.vch_type} ${r.vch_no} ${r.narration}`.toLowerCase().includes(q));
+		const label = new Date(d.date).toLocaleDateString(state.lang === "Marathi" ? "mr-IN" : "en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+		const dr = d.rows.reduce((n, r) => n + r.debit, 0), cr = d.rows.reduce((n, r) => n + r.credit, 0);
+		root.innerHTML = header(t("day_book")) + `<main><div class="sk-score sk-cal-head"><button class="sk-nav" data-dbday="-1">‹</button><div>${esc(label)}</div><button class="sk-nav" data-dbday="1">›</button></div>
+			${d.rows.length > 10 ? `<label class="sk-field"><span>🔍 ${t("search")}</span><input id="db-q" value="${esc(dbQ)}"></label>` : ""}
+			<ul class="sk-list">${all.slice(0, dbShown).map((r) => li(esc(r.particulars), `${esc(r.vch_type)} · ${esc(r.vch_no)}${r.narration ? "<br>" + esc(r.narration) : ""}`,
+				`<div class="sk-col"><b>${r.debit ? t("dr") + " " + money(r.debit) : t("cr") + " " + money(r.credit)}</b><a class="sk-chip" href="/app/${String(r.voucher_type).toLowerCase().replace(/ /g, "-")}/${encodeURIComponent(r.vch_no)}" target="_blank">›</a></div>`)).join("") || `<li class="sk-empty">${t("db_none")}</li>`}</ul>
+			${moreBtn(all.length, Math.min(dbShown, all.length), "daybook")}
+			${d.rows.length ? `<p class="sk-note"><b>${d.rows.length}</b> · ${t("dr")} ${money(dr) || 0} · ${t("cr")} ${money(cr) || 0}</p>` : ""}</main>`;
+		const inp = root.querySelector("#db-q");
+		if (inp) inp.addEventListener("input", debounceSearch(() => { dbQ = inp.value; dbShown = PAGE; renderDayBook(true); }, "#db-q"));
+	}
 	async function renderSegmentWise() {
 		const p = await call("fin_segment_wise", finMonth ? { month: finMonth } : {});
 		const name = (s) => (s === "Common" ? t("common_cost") : s);
@@ -4153,7 +4196,7 @@
 		to_pay: () => finScreen("to_pay", () => renderToPay("to_pay")), pay_approvals: () => renderToPay("pay_approvals"),
 		bills_to_post: () => finScreen("bills_to_post", renderBillsToPost), invoices: () => finScreen("invoices", renderInvoices),
 		expenses: () => finScreen("expenses", renderExpenses), dir_expenses: () => finScreen("dir_expenses"),
-		segment_pnl: renderSegmentWise, month_close: renderMonthWise,
+		segment_pnl: renderSegmentWise, month_close: renderMonthWise, gateway: renderGateway, day_book: renderDayBook,
 		improvement_inbox: renderInbox, dept_visits: renderVisit, erp_gaps: renderGaps, app_users: renderAppUsers, change_list: renderChangeList,
 		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources, customers: renderCustomers, view_member: renderViewMember, complaints: renderComplaints,
 		attendance: renderAttendance, leave_expense: renderLeaveExpense, sales_owner: renderSalesOwner, new_joiner: renderNewJoiner, activities: renderActivities };
@@ -4301,6 +4344,13 @@
 			if (el.dataset.tmail !== undefined) return teamMailSheet(Number(el.dataset.tmail));
 			if (el.dataset.fintab) { finTab[el.dataset.view] = el.dataset.fintab; return go(el.dataset.view); }
 			if (el.dataset.ledger !== undefined) return renderLedgerEntries(Number(el.dataset.ledger));
+			if (el.dataset.dbday) {
+				const d = new Date(dayBookDate || new Date());
+				d.setDate(d.getDate() + Number(el.dataset.dbday));
+				dayBookDate = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+				dbQ = "";
+				return renderDayBook();
+			}
 			if (el.dataset.finmonth) {
 				const d = finMonth ? new Date(finMonth) : new Date();
 				d.setDate(1); d.setMonth(d.getMonth() + Number(el.dataset.finmonth));

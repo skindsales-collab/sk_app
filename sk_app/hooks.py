@@ -11,6 +11,9 @@ website_route_rules = [
 	{"from_route": "/sk/<path:app_path>", "to_route": "sk"},
 ]
 
+# SK 27-Oct: Tally keys in ERPNext for the accounts team (F4-F9, Ctrl+A, Alt+D Day Book ...)
+app_include_js = "/assets/sk_app/js/sk_tally_keys.js"
+
 scheduler_events = {
 	"hourly": ["sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge"],
 	# IndiaMART / JustDial / GeM mails to the team mailboxes become CRM leads (free route, point 14)

@@ -69,12 +69,13 @@ FUNCTIONS = {
 		"label": {"English": "Accounts", "Marathi": "लेखा"},
 		# SK draft F06: My Day, the Finance icons, then calls / WhatsApp for collections and the common ones
 		# SK / Shraddha 26-Oct: ledger-wise screens; Expenses is the Journal Voucher list, plus Direct and Indirect Expenses
-		"tiles": ["my_day", "cash_today", "to_collect", "to_pay", "bills_to_post", "invoices", "expenses", "dir_expenses", "segment_pnl",
-			"month_close", "complaints",
+		# SK 27-Oct: the team knows Tally, so Accounts opens on the Accounts Gateway (Gateway of Tally sections and names)
+		"tiles": ["my_day", "gateway", "day_book", "cash_today", "to_collect", "to_pay", "bills_to_post", "invoices", "expenses", "dir_expenses",
+			"segment_pnl", "month_close", "complaints",
 			*CONTACT_TILES, *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Accounts User", "Accounts Manager"],
-		"desk": "/app/accounting",
+		"desk": "/app/accounts-gateway",
 	},
 	"HR": {
 		"label": {"English": "HR", "Marathi": "एचआर"},
@@ -192,7 +193,7 @@ MAIN_TILES = {
 	"Quality": ["inspect", "final_check", "non_conformance", "el_points"],
 	"Stores": ["store_requests", "receive", "issue", "stock_count"],
 	"Purchase": ["buy_requests", "get_rates", "po_follow_up", "bills"],
-	"Accounts": ["cash_today", "to_collect", "to_pay", "invoices"],
+	"Accounts": ["gateway", "to_collect", "to_pay", "day_book"],
 	# SK 26-Oct: attendance is not on the main screen (it is in More)
 	"HR": ["leave_expense", "team_scorecards"],
 	"Subcontractor": ["my_jobs", "el_points", "need_material", "my_fixes"],
