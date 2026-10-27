@@ -1561,3 +1561,26 @@ def building_quote_make(req, deal=None, lead=None, revise=None):
 	from sk_app import building_quote
 
 	return building_quote.make(_cabin_user(), json.loads(req) if isinstance(req, str) else req, deal or None, lead or None, revise=revise or None)
+
+
+# SK 27-Oct: new product + vendor from one spoken / typed line (Shraddha), checked, then added in ERPNext
+@frappe.whitelist()
+def product_read(line):
+	from sk_app import new_product
+
+	return new_product.read(_me().user, line)
+
+
+@frappe.whitelist()
+def product_preview(template=None, length=None, width=None, height=None, item_name=None):
+	from sk_app import new_product
+
+	new_product.need(_me().user, *new_product.WHO)
+	return new_product.preview(template or None, flt(length), flt(width), flt(height) or 8.6, item_name)
+
+
+@frappe.whitelist(methods=["POST"])
+def product_make(template=None, length=None, width=None, height=None, vendor=None, new_vendor=None, item_name=None, subcontracted=1):
+	from sk_app import new_product
+
+	return new_product.make(_me().user, template or None, length, width, height, vendor or None, new_vendor, item_name, cint(subcontracted))

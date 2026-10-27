@@ -676,7 +676,7 @@
 		camera: "Camera", gallery: "Gallery / screenshot", pdf_file: "PDF / file", retake: "Retake", remove: "Remove",
 		uploading: "Sending…", uploaded: "Sent ✓", upload_retry: "Network weak, trying again…",
 		open_chrome: "Mic / camera work best in Chrome. Tap here to open the SK App in Chrome.",
-		gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
+		gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", new_product: "New product / vendor", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
 		gw_masters: "Masters", gw_transactions: "Transactions", gw_utilities: "Utilities", gw_reports: "Reports", gw_more: "More reports",
 		gw_desk: "Opens in ERPNext", gw_pending: "waiting", db_particulars: "Particulars", db_none: "No vouchers on this day",
 		cash_today: "Cash / Bank", to_collect: "Receivables", to_pay: "Payables", bills_to_post: "Purchase Invoice and Debit Note",
@@ -708,7 +708,7 @@
 		camera: "कॅमेरा", gallery: "गॅलरी / स्क्रीनशॉट", pdf_file: "PDF / फाईल", retake: "पुन्हा घ्या", remove: "काढा",
 		uploading: "पाठवत आहे…", uploaded: "पाठवले ✓", upload_retry: "नेटवर्क कमी, पुन्हा प्रयत्न…",
 		open_chrome: "माईक / कॅमेरा Chrome मध्ये नीट चालतात. SK App Chrome मध्ये उघडण्यासाठी येथे दाबा.",
-		gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
+		gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", new_product: "नवीन प्रॉडक्ट / व्हेंडर", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
 		gw_masters: "मास्टर्स", gw_transactions: "व्यवहार", gw_utilities: "युटिलिटी", gw_reports: "अहवाल", gw_more: "आणखी अहवाल",
 		gw_desk: "ERPNext मध्ये उघडते", gw_pending: "बाकी", db_particulars: "तपशील", db_none: "या दिवशी व्हाउचर नाही",
 		cash_today: "कॅश / बँक", to_collect: "येणे (Receivables)", to_pay: "देणे (Payables)", bills_to_post: "खरेदी बिल आणि डेबिट नोट",
@@ -767,6 +767,10 @@
 		bq_rd: "Room depth (ft)", bq_rw: "Room width (ft)", bq_pp: "People per room", bq_ov: "Rate override Rs / sq ft (SK only)", bq_addons: "Add-on items",
 		bq_area: "Total area", bq_cap: "Capacity", bq_beds: "suggested double bunk beds", bq_margin: "Margin", bq_minrate: "lowest rate for target margin",
 		bq_ok: "OK to send", bq_need: "SK approval needed", bq_optional: "optional",
+		np_help: "Say or type it in one line, e.g. “Cabin 10 x 30 x 8.8 subcontracted to AI Portable Cabin”. Check what the app understood, then Add.",
+		np_line: "What to add", np_read: "Read", np_type: "Product", np_new_type: "New product (next number)", np_name: "Product name (new product only)",
+		np_vendor: "Vendor (in ERPNext)", np_new_vendor: "or new vendor name", np_sub: "Subcontracted: the vendor makes it", np_add: "Add in ERPNext",
+		np_will: "Will add", np_have: "Already in ERPNext", np_added: "Added",
 		cq_other: "Other quotation (non-cabin)", cq_rc: "Rate card", cq_disc_list: "Quotation discounts", cq_ok: "Approve", cq_no: "Reject",
 		fl_new_quote: "Make quotation", fl_quote_why: "Saved in ERPNext as a Quotation for this customer (the customer is made by itself). The PDF opens to send.",
 		fl_add_item: "Add item", fl_rate_blank: "blank = price list", fl_valid: "Valid for days", fl_desc: "Description (Enter = new line)", fl_terms: "Terms / note", fl_quote_saved: "Quotation saved",
@@ -795,6 +799,10 @@
 		bq_rd: "खोली खोली (फूट)", bq_rw: "खोली रुंदी (फूट)", bq_pp: "प्रति खोली लोक", bq_ov: "दर बदल रु / चौ फूट (फक्त SK)", bq_addons: "इतर वस्तू",
 		bq_area: "एकूण क्षेत्रफळ", bq_cap: "क्षमता", bq_beds: "सुचवलेले डबल बंक बेड", bq_margin: "मार्जिन", bq_minrate: "टार्गेट मार्जिनसाठी किमान दर",
 		bq_ok: "पाठवायला ठीक", bq_need: "SK ची मंजुरी लागेल", bq_optional: "ऐच्छिक",
+		np_help: "एका ओळीत बोला किंवा टाइप करा, उदा. “Cabin 10 x 30 x 8.8 subcontracted to AI Portable Cabin”. अ‍ॅपला काय समजले ते तपासा, मग जोडा.",
+		np_line: "काय जोडायचे", np_read: "वाचा", np_type: "प्रॉडक्ट", np_new_type: "नवीन प्रॉडक्ट (पुढचा नंबर)", np_name: "प्रॉडक्ट नाव (फक्त नवीन)",
+		np_vendor: "व्हेंडर (ERPNext मध्ये)", np_new_vendor: "किंवा नवीन व्हेंडर नाव", np_sub: "सबकॉन्ट्रॅक्ट: व्हेंडर बनवतो", np_add: "ERPNext मध्ये जोडा",
+		np_will: "जोडले जाईल", np_have: "आधीच ERPNext मध्ये", np_added: "जोडले",
 		cq_other: "इतर कोटेशन (नॉन-केबिन)", cq_rc: "रेट कार्ड", cq_disc_list: "कोटेशन सूट", cq_ok: "मंजूर", cq_no: "नाकारा",
 		fl_new_quote: "कोटेशन बनवा", fl_quote_why: "या ग्राहकासाठी ERPNext मध्ये कोटेशन म्हणून जतन होते (ग्राहक आपोआप बनतो). पाठवण्यासाठी PDF उघडते.",
 		fl_add_item: "आयटम जोडा", fl_rate_blank: "रिकामे = किंमत यादी", fl_valid: "किती दिवस वैध", fl_desc: "वर्णन (Enter = नवी ओळ)", fl_terms: "अटी / नोंद", fl_quote_saved: "कोटेशन जतन झाले",
@@ -936,7 +944,7 @@
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
 		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", sales_owner: "🧑‍💼", new_joiner: "🪪", activities: "🎯", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
 		dash_overview: "🏁", dash_daily_review: "🗓️", dash_sales: "💼", dash_marketing: "📣", dash_machine_shifting: "🏗️", dash_job_work: "⚙️", dash_cr100: "🎯", dash_finance: "💰", dash_manufacturing: "🏭", dash_purchase: "🛒", dash_store: "📦", dash_quality: "✅", dash_hr: "👥", dash_ai: "🤖",
-		gateway: "🏛️", day_book: "📅", cabin_discounts: "🏷️",
+		gateway: "🏛️", day_book: "📅", cabin_discounts: "🏷️", new_product: "🆕",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
@@ -2123,6 +2131,34 @@
 				${p.margin !== undefined ? `<p class="sk-note">${t("bq_margin")}: ${(p.margin * 100).toFixed(1)}% · ${t("bq_minrate")}: ${money(p.min_rate)}/sq ft</p>` : ""}
 				<p class="sk-note ${p.approval.length ? "sk-due" : ""}">${p.approval.length ? `${t("bq_need")}: ${esc(p.approval.join("; "))}` : `✅ ${t("bq_ok")}`}</p>`;
 		} catch (e) { box.innerHTML = `<div class="sk-card-text sk-due">${esc(e.message || "")}</div>`; }
+	}
+	// SK 27-Oct: new product + vendor from one line (Shraddha); the app reads it, she checks, then it goes into ERPNext
+	function renderNewProduct() {
+		root.innerHTML = header(t("new_product")) + `<main class="sk-form"><p class="sk-note">${t("np_help")}</p>${formField("np-line", t("np_line"), true)}
+			<button class="sk-btn go wide" data-act="np-read">🤖 ${t("np_read")}</button><div id="np-form"></div></main>`;
+	}
+	function newProductForm(d) {
+		S.np = d;
+		const box = document.getElementById("np-form");
+		box.innerHTML = `${pick("np-tpl", t("np_type"), [...d.templates.map((x) => ({ value: x.item_code, label: `${x.item_code} · ${x.item_name}` })), { value: "", label: t("np_new_type") }])}
+			<label class="sk-field"><span>${t("np_name")}</span><input id="np-name"></label>
+			<div class="sk-row"><label class="sk-field"><span>${t("cq_l")}</span>${qtyBox("np-l", d.length)}</label><label class="sk-field"><span>${t("cq_w")}</span>${qtyBox("np-w", d.width)}</label></div>
+			<label class="sk-field"><span>${t("cq_h")}</span>${qtyBox("np-h", d.height || 8.6)}</label>
+			${finder("np-vendor", t("np_vendor"), "supplier")}<label class="sk-field"><span>${t("np_new_vendor")}</span><input id="np-newv"></label>
+			<label class="sk-check"><input type="checkbox" id="np-sub" ${d.subcontracted ? "checked" : ""}> ${t("np_sub")}</label>
+			<div id="np-prev" class="sk-card"></div><button class="sk-btn ok wide" data-act="np-save">✓ ${t("np_add")}</button>`;
+		document.getElementById("np-tpl").value = d.template || "";
+		document.getElementById("np-vendor").value = d.vendor || "";
+		if (!d.vendor && d.vendor_text) document.getElementById("np-newv").value = d.vendor_text;
+		let tm;
+		box.querySelectorAll("input, select").forEach((el) => el.addEventListener("input", () => { clearTimeout(tm); tm = setTimeout(newProductPreview, 400); }));
+		box.querySelectorAll("select").forEach((el) => el.addEventListener("change", newProductPreview));
+		newProductPreview();
+	}
+	async function newProductPreview() {
+		const p = await call("product_preview", { template: val("np-tpl"), length: val("np-l"), width: val("np-w"), height: val("np-h"), item_name: val("np-name") }).catch(() => null);
+		const box = document.getElementById("np-prev");
+		if (box && p) box.innerHTML = `<div class="sk-card-label">${p.exists ? t("np_have") : t("np_will")}</div><div class="sk-card-text">${esc(p.item_code)}</div><p class="sk-note">${esc(p.item_name)}</p>`;
 	}
 	async function renderCabinDiscounts() {
 		const rows = await call("cabin_discounts");
@@ -3636,6 +3672,21 @@
 				} finally { el.disabled = false; }
 				return go("detail");
 			}
+			case "np-read": {
+				if (!val("np-line")) return toast(t("np_line"), true);
+				el.disabled = true;
+				try { newProductForm(await call("product_read", { line: val("np-line") })); } finally { el.disabled = false; }
+				return;
+			}
+			case "np-save": {
+				el.disabled = true;
+				try {
+					const r = await call("product_make", { template: val("np-tpl"), length: val("np-l"), width: val("np-w"), height: val("np-h"), vendor: val("np-vendor"),
+						new_vendor: val("np-newv"), item_name: val("np-name"), subcontracted: document.getElementById("np-sub").checked ? 1 : 0 }, true);
+					saved(`${t("np_added")}: ${r.item_code}${r.vendor ? " · " + r.vendor : ""}`);
+				} finally { el.disabled = false; }
+				return go("new_product");
+			}
 			case "fl-cqdisc": {
 				el.disabled = true;
 				await call("cabin_discount_decide", { quotation: el.dataset.name, ok: el.dataset.ok }, true);
@@ -4396,7 +4447,7 @@
 		to_pay: () => finScreen("to_pay", () => renderToPay("to_pay")), pay_approvals: () => renderToPay("pay_approvals"),
 		bills_to_post: () => finScreen("bills_to_post", renderBillsToPost), invoices: () => finScreen("invoices", renderInvoices),
 		expenses: () => finScreen("expenses", renderExpenses), dir_expenses: () => finScreen("dir_expenses"),
-		segment_pnl: renderSegmentWise, month_close: renderMonthWise, gateway: renderGateway, day_book: renderDayBook, cabin_discounts: renderCabinDiscounts,
+		segment_pnl: renderSegmentWise, month_close: renderMonthWise, gateway: renderGateway, day_book: renderDayBook, cabin_discounts: renderCabinDiscounts, new_product: renderNewProduct,
 		improvement_inbox: renderInbox, dept_visits: renderVisit, erp_gaps: renderGaps, app_users: renderAppUsers, change_list: renderChangeList,
 		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources, customers: renderCustomers, view_member: renderViewMember, complaints: renderComplaints,
 		attendance: renderAttendance, leave_expense: renderLeaveExpense, sales_owner: renderSalesOwner, new_joiner: renderNewJoiner, activities: renderActivities };
@@ -4597,7 +4648,7 @@
 			if (el.dataset.teamp !== undefined) { teamPerson = el.dataset.teamp; return go("team_leads"); }
 			if (el.dataset.fnpick) { el.classList.toggle("on"); return showWorkstation(); }
 			const act = el.dataset.act;
-			if (act && (act.startsWith("st-") || act.startsWith("pu-") || act.startsWith("fl-"))) return await storeAct(act, el);
+			if (act && (act.startsWith("st-") || act.startsWith("pu-") || act.startsWith("fl-") || act.startsWith("np-"))) return await storeAct(act, el);
 			if (act && (act.startsWith("pr-") || act.startsWith("qc-"))) return await prodAct(act, el);
 			if (act && act.startsWith("fin-")) return await finAct(act, el);
 			if (el.dataset.qok !== undefined) {
