@@ -678,7 +678,7 @@
 		camera: "Camera", gallery: "Gallery / screenshot", pdf_file: "PDF / file", retake: "Retake", remove: "Remove",
 		uploading: "Sending…", uploaded: "Sent ✓", upload_retry: "Network weak, trying again…",
 		open_chrome: "Mic / camera work best in Chrome. Tap here to open the SK App in Chrome.",
-		gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", new_product: "New product / vendor", mails_n: "Mails", photo_entry: "Photo entry", pe_help: "Bill, e-invoice, voucher or payment proof: take a photo (or pick the PDF) and submit. A supplier bill goes to Bills to Post (Make bill). Others wait here until you enter them in ERPNext.", pe_what: "What is it?", pe_supplier_bill: "Supplier bill / e-invoice", pe_expense: "Expense bill / petty cash voucher", pe_money_in: "Payment received (cheque / UTR)", pe_money_out: "Payment made (bank slip / UTR)", pe_other: "Other document", pe_photo: "Photo or PDF", pe_party: "Customer / party (optional)", pe_ref: "Bill / ref no (optional)", pe_submit: "Submit", pe_pending: "Photo entries to enter in ERPNext", pe_open: "Enter in ERPNext", pe_sent: "Submitted", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
+		gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", new_product: "New product / vendor", mails_n: "Mails", to_post: "Received: check and post", to_post_help: "Check the material, then tap Post. Stock goes up only after Post.", rate_missing: "rate missing", rate_bill: "Rate per unit (from the bill)", rate_need: "Give the rate from the supplier bill (needed to value the stock):", remove_dup: "Remove (saved twice)", tap_again: "Tap again to remove", photo_entry: "Photo entry", pe_help: "Bill, e-invoice, voucher or payment proof: take a photo (or pick the PDF) and submit. A supplier bill goes to Bills to Post (Make bill). Others wait here until you enter them in ERPNext.", pe_what: "What is it?", pe_supplier_bill: "Supplier bill / e-invoice", pe_expense: "Expense bill / petty cash voucher", pe_money_in: "Payment received (cheque / UTR)", pe_money_out: "Payment made (bank slip / UTR)", pe_other: "Other document", pe_photo: "Photo or PDF", pe_party: "Customer / party (optional)", pe_ref: "Bill / ref no (optional)", pe_submit: "Submit", pe_pending: "Photo entries to enter in ERPNext", pe_open: "Enter in ERPNext", pe_sent: "Submitted", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
 		gw_masters: "Masters", gw_transactions: "Transactions", gw_utilities: "Utilities", gw_reports: "Reports", gw_more: "More reports",
 		gw_desk: "Opens in ERPNext", gw_pending: "waiting", db_particulars: "Particulars", db_none: "No vouchers on this day",
 		cash_today: "Cash / Bank", to_collect: "Receivables", to_pay: "Payables", bills_to_post: "Purchase Invoice and Debit Note",
@@ -710,7 +710,7 @@
 		camera: "कॅमेरा", gallery: "गॅलरी / स्क्रीनशॉट", pdf_file: "PDF / फाईल", retake: "पुन्हा घ्या", remove: "काढा",
 		uploading: "पाठवत आहे…", uploaded: "पाठवले ✓", upload_retry: "नेटवर्क कमी, पुन्हा प्रयत्न…",
 		open_chrome: "माईक / कॅमेरा Chrome मध्ये नीट चालतात. SK App Chrome मध्ये उघडण्यासाठी येथे दाबा.",
-		gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", new_product: "नवीन प्रॉडक्ट / व्हेंडर", mails_n: "मेल", photo_entry: "फोटो एंट्री", pe_help: "बिल, ई-इनव्हॉइस, व्हाउचर किंवा पेमेंट पुरावा: फोटो काढा (किंवा PDF निवडा) आणि सबमिट करा. सप्लायर बिल 'बिल पोस्ट करा' मध्ये जाते. बाकी ERPNext मध्ये एंट्री होईपर्यंत इथे राहतात.", pe_what: "हे काय आहे?", pe_supplier_bill: "सप्लायर बिल / ई-इनव्हॉइस", pe_expense: "खर्च बिल / पेटी कॅश व्हाउचर", pe_money_in: "पेमेंट मिळाले (चेक / UTR)", pe_money_out: "पेमेंट केले (बँक स्लिप / UTR)", pe_other: "इतर कागद", pe_photo: "फोटो किंवा PDF", pe_party: "ग्राहक / पार्टी (ऐच्छिक)", pe_ref: "बिल / रेफ नंबर (ऐच्छिक)", pe_submit: "सबमिट", pe_pending: "ERPNext मध्ये टाकायच्या फोटो एंट्री", pe_open: "ERPNext मध्ये टाका", pe_sent: "सबमिट झाले", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
+		gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", new_product: "नवीन प्रॉडक्ट / व्हेंडर", mails_n: "मेल", to_post: "आलेला माल: तपासा आणि पोस्ट करा", to_post_help: "माल तपासा, मग पोस्ट दाबा. पोस्ट केल्यावरच स्टॉक वाढतो.", rate_missing: "दर नाही", rate_bill: "प्रति नग दर (बिलावरून)", rate_need: "सप्लायर बिलावरील दर द्या (स्टॉकची किंमत लागते):", remove_dup: "काढा (दोनदा सेव्ह)", tap_again: "काढण्यासाठी पुन्हा दाबा", photo_entry: "फोटो एंट्री", pe_help: "बिल, ई-इनव्हॉइस, व्हाउचर किंवा पेमेंट पुरावा: फोटो काढा (किंवा PDF निवडा) आणि सबमिट करा. सप्लायर बिल 'बिल पोस्ट करा' मध्ये जाते. बाकी ERPNext मध्ये एंट्री होईपर्यंत इथे राहतात.", pe_what: "हे काय आहे?", pe_supplier_bill: "सप्लायर बिल / ई-इनव्हॉइस", pe_expense: "खर्च बिल / पेटी कॅश व्हाउचर", pe_money_in: "पेमेंट मिळाले (चेक / UTR)", pe_money_out: "पेमेंट केले (बँक स्लिप / UTR)", pe_other: "इतर कागद", pe_photo: "फोटो किंवा PDF", pe_party: "ग्राहक / पार्टी (ऐच्छिक)", pe_ref: "बिल / रेफ नंबर (ऐच्छिक)", pe_submit: "सबमिट", pe_pending: "ERPNext मध्ये टाकायच्या फोटो एंट्री", pe_open: "ERPNext मध्ये टाका", pe_sent: "सबमिट झाले", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
 		gw_masters: "मास्टर्स", gw_transactions: "व्यवहार", gw_utilities: "युटिलिटी", gw_reports: "अहवाल", gw_more: "आणखी अहवाल",
 		gw_desk: "ERPNext मध्ये उघडते", gw_pending: "बाकी", db_particulars: "तपशील", db_none: "या दिवशी व्हाउचर नाही",
 		cash_today: "कॅश / बँक", to_collect: "येणे (Receivables)", to_pay: "देणे (Payables)", bills_to_post: "खरेदी बिल आणि डेबिट नोट",
@@ -3440,11 +3440,16 @@
 	}
 
 	async function renderReceive() {
-		S.pos = await call("store_open_pos");
+		[S.pos, S.prs] = await Promise.all([call("store_open_pos"), call("store_receipts_to_post").catch(() => [])]);
+		// SK 27-Oct: a saved receipt is a draft until Store checks the material and posts it; only then stock goes up
+		const toPost = S.prs.length ? `<h3 class="sk-h">✅ ${t("to_post")} (${S.prs.length})</h3><p class="sk-note">${t("to_post_help")}</p>
+			<ul class="sk-list">${S.prs.map((r, i) => li(esc(r.supplier_name || r.supplier), `${esc(r.name)} · ${esc(r.posting_date)} · ${esc(r.by || "")}<br>${r.items.map((x) =>
+				`${esc(x.item_name || x.item_code)} ${num(x.qty)} ${esc(x.uom || "")}${x.rate ? " @ " + money(x.rate) : ` · <span class="sk-due">${t("rate_missing")}</span>`}`).join("<br>")}${r.reason ? `<br><span class="sk-due">${esc(r.reason)}</span>` : ""}`,
+				`<div class="sk-col"><button class="sk-chip on" data-act="st-pr-post" data-i="${i}">✓ ${t("post")}</button><button class="sk-chip" data-act="st-pr-drop" data-i="${i}">🗑 ${t("remove_dup")}</button></div>`)).join("")}</ul>` : "";
 		root.innerHTML = header(t("receive")) + `<main><p class="sk-note">${t("receive_help")}</p><ul class="sk-list">${S.pos.map((p, i) => li(esc(p.supplier_name),
 			`${esc(p.name)} · ${t("due")} ${esc(p.schedule_date || "")} · ${p.items.length} ${t("open_items")}`,
 			`<button class="sk-chip on" data-act="st-po" data-i="${i}">${t("receive")}</button>`, p.late ? "k-lead_new" : "")).join("") || empty()}</ul>
-			<button class="sk-btn wide sk-gap" data-act="st-nopo">${t("without_po")}</button></main>`;
+			<button class="sk-btn wide sk-gap" data-act="st-nopo">${t("without_po")}</button>${toPost}</main>`;
 	}
 	function receiveForm(i) {
 		const p = S.pos[i];
@@ -3460,7 +3465,7 @@
 	function receiveNoPo() {
 		S.po = null;
 		root.innerHTML = header(t("without_po")) + `<main class="sk-form">${finder("r-sup", t("supplier"), "supplier")}${finder("r-item", t("item"), "item")}
-			<label class="sk-field"><span>${t("qty")}</span>${qtyBox("r-qty")}</label>${formField("r-reason", t("why_no_po"), true)}
+			<label class="sk-field"><span>${t("qty")}</span>${qtyBox("r-qty")}</label><label class="sk-field"><span>${t("rate_bill")}</span>${qtyBox("r-rate")}</label>${formField("r-reason", t("why_no_po"), true)}
 			${formField("r-billno", t("bill_no_q"))}${photoField("r-challan", "📷 " + t("challan_photo"))}<button class="sk-btn go wide" data-act="st-receive">${t("save_receipt")}</button></main>`;
 	}
 
@@ -3732,10 +3737,38 @@
 					args.purchase_order = S.po.name;
 					args.items = JSON.stringify(S.po.items.map((r, k) => ({ po_detail: r.name, qty: val("r-q" + k) })));
 				} else {
-					Object.assign(args, { supplier: val("r-sup"), reason: val("r-reason"), items: JSON.stringify([{ item_code: val("r-item"), qty: val("r-qty") }]) });
+					Object.assign(args, { supplier: val("r-sup"), reason: val("r-reason"), items: JSON.stringify([{ item_code: val("r-item"), qty: val("r-qty"), rate: val("r-rate") }]) });
 				}
 				const r = await call("store_receive", args, true);
 				saved(`${t("receipt_saved")}: ${r.name}`);
+				return go("receive");
+			}
+			case "st-pr-post": {
+				const r = S.prs[i];
+				const missing = r.items.filter((x) => !x.rate);
+				if (missing.length && !el.dataset.sheet) {
+					S.prPost = r;
+					return sheet(`<h3 class="sk-h">✓ ${esc(r.supplier_name || "")} · ${esc(r.name)}</h3><p class="sk-note">${t("rate_need")}</p>
+						${missing.map((x, k) => `<label class="sk-field"><span>${esc(x.item_name || x.item_code)} (${num(x.qty)} ${esc(x.uom || "")})</span>${qtyBox("pr-rate" + k)}</label>`).join("")}
+						<button class="sk-btn ok wide" data-act="st-pr-post2">✓ ${t("post")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+				}
+				S.prPost = r;
+			}
+			// falls through
+			case "st-pr-post2": {
+				const r = S.prPost;
+				const rates = {};
+				r.items.filter((x) => !x.rate).forEach((x, k) => { const v = val("pr-rate" + k); if (v) rates[x.item_code] = v; });
+				el.disabled = true;
+				const res = await call("store_post_receipt", { name: r.name, rates: JSON.stringify(rates) }, true);
+				closeSheet();
+				toast(res.posted ? `✓ ${res.name} ${t("posted")}` : `${res.name}: ${res.reason || t("kept_draft")}`, !res.posted);
+				return go("receive");
+			}
+			case "st-pr-drop": {
+				if (el.dataset.sure !== "1") { el.dataset.sure = "1"; el.textContent = "🗑 " + t("tap_again"); return; }
+				await call("store_drop_receipt", { name: S.prs[i].name }, true);
+				toast("🗑 " + S.prs[i].name);
 				return go("receive");
 			}
 			case "st-wo": return issueForm(i);
