@@ -16,6 +16,7 @@ from frappe.utils import add_days, date_diff, flt, get_first_day, getdate, now_d
 
 from sk_app import dashboards, segments
 from sk_app.dashboards import _has, _name, _row, _safe
+from sk_app.production import wo_label
 
 ROWS = 60
 # SK's proposal (change list page 45): days a stage may take before it turns red
@@ -146,7 +147,7 @@ def factory(user: str, go="job_cards", workstation=None) -> list[dict]:
 		rows = []
 		for j in by[name]:
 			since = j.expected_end_date or j.creation
-			r = _late_row(j.work_order or j.name, f"{j.operation} · {j.status} · {j.workstation or ''}", None, "Job Card", j.name,
+			r = _late_row(wo_label(j.work_order, j.name), f"{j.work_order or j.name} · {j.operation} · {j.status} · {j.workstation or ''}", None, "Job Card", j.name,
 				since, 0 if j.expected_end_date else TARGET_DAYS.get(name))
 			if j.status == "Work In Progress" and r["c"] != "red":
 				r["c"] = "amber"
@@ -157,7 +158,7 @@ def factory(user: str, go="job_cards", workstation=None) -> list[dict]:
 		delivered = set(frappe.get_all("Delivery Note Item", filters={"docstatus": 1, "against_sales_order": ["in", [w.sales_order for w in done if w.sales_order] or [""]]},
 			pluck="against_sales_order"))
 		ready = [w for w in done if not w.sales_order or w.sales_order not in delivered]
-		stages.append(_stage("dispatch", "Ready to dispatch", "🚚", [_late_row(w.item_name, w.sales_order or "", None, "Work Order", w.name,
+		stages.append(_stage("dispatch", "Ready to dispatch", "🚚", [_late_row(wo_label(w.name, w.item_name), f"{w.name} · {w.sales_order or ''}", None, "Work Order", w.name,
 			w.modified, 2) for w in ready], go="ready_dispatch"))
 	return stages
 
@@ -173,7 +174,7 @@ def subcontractor(user: str) -> list[dict]:
 	def rows(items, target=None):
 		out = []
 		for j in items:
-			r = _late_row(j.work_order or j.name, j.operation or "", None, None, None, j.expected_end_date or j.creation, 0 if j.expected_end_date else target)
+			r = _late_row(wo_label(j.work_order, j.name), f"{j.work_order or j.name} · {j.operation or ''}", None, None, None, j.expected_end_date or j.creation, 0 if j.expected_end_date else target)
 			out.append(r)
 		return out
 
@@ -182,7 +183,7 @@ def subcontractor(user: str) -> list[dict]:
 	done = [j for j in jobs if (j.docstatus == 1 or j.status == "Completed") and getdate(j.modified) >= start]
 	return [_stage("waiting", "My jobs waiting", "⏳", rows(waiting, 2), go="my_jobs"),
 		_stage("working", "In progress", "🛠️", rows(working, 3), go="my_jobs"),
-		_stage("done", "Done this month (photo)", "✅", [_row(j.work_order or j.name, j.operation or "") for j in done], go="my_jobs")]
+		_stage("done", "Done this month (photo)", "✅", [_row(wo_label(j.work_order, j.name), f"{j.work_order or j.name} · {j.operation or ''}") for j in done], go="my_jobs")]
 
 
 def stores(user: str) -> list[dict]:
@@ -243,7 +244,7 @@ def purchase(user: str) -> list[dict]:
 
 def quality(user: str) -> list[dict]:
 	inspect = [j for j in _job_cards() if _factory_stage(j.operation) == "Final inspection"]
-	stages = [_stage("inspect", "Inspection due", "🔍", [_late_row(j.work_order or j.name, j.status, None, "Job Card", j.name,
+	stages = [_stage("inspect", "Inspection due", "🔍", [_late_row(wo_label(j.work_order, j.name), f"{j.work_order or j.name} · {j.status}", None, "Job Card", j.name,
 		j.expected_end_date or j.creation, 0 if j.expected_end_date else 1) for j in inspect], go="final_check")]
 	if _has("Non Conformance"):
 		ncs = frappe.get_all("Non Conformance", filters={"status": "Open"}, fields=["name", "subject", "creation"], order_by="creation asc", limit=200)

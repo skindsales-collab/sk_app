@@ -183,6 +183,7 @@ def open_work_orders(user: str) -> list[dict]:
 			fields=["item_code", "item_name", "required_qty", "transferred_qty", "source_warehouse"], order_by="idx asc")
 		wo["job_cards"] = frappe.get_all("Job Card", filters={"work_order": wo.name, "docstatus": ["<", 2]},
 			fields=["name", "operation", "workstation"], order_by="sequence_id asc, creation asc")
+		wo["customer"] = frappe.db.get_value("Sales Order", wo.sales_order, "customer_name") if wo.sales_order else None
 	return wos
 
 

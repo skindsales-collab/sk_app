@@ -35,3 +35,16 @@ class TestTrainingFaq(IntegrationTestCase):
 		self.assertEqual(frappe.db.get_value("SK Library Item", item, "function"), "Subcontractor")
 		self.assertIn(item, [x["name"] for x in training.faq(WORKER, "Paint")["rows"]])
 		self.assertFalse(training.faq(BOSS)["to_answer"] and training.faq(BOSS)["to_answer"][-1]["name"] == todo["name"])
+
+	def test_hr_production_accounts_faq_seeded(self):
+		from sk_app.function_faq import FUNCTION_FAQ, seed_faq
+
+		seed_faq()
+		seed_faq()  # twice: no duplicates
+		titles = [r["title"] for r in training.faq(BOSS)["rows"]]
+		prod = [x[2] for x in FUNCTION_FAQ if x[0] == "Production"]
+		self.assertTrue(set(prod) <= set(titles))
+		self.assertFalse({x[2] for x in FUNCTION_FAQ if x[0] == "HR"} & set(titles))  # only own function
+		self.assertEqual(frappe.db.count("SK Library Item", {"title": prod[0], "category": "FAQ"}), 1)
+		for fn in ("HR", "Accounts"):
+			self.assertGreaterEqual(sum(1 for x in FUNCTION_FAQ if x[0] == fn), 8)

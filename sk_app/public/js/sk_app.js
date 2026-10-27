@@ -1280,6 +1280,7 @@
 		let sub = "";
 		if (c.kind === "money") {
 			sub = `₹${kAmt(now.actual)}${c.target ? ` ${t("k_of")} ₹${kAmt(c.target)}` : ` · ${t("k_no_target")}`}${now.gap ? ` · <b class="sk-due">${t("k_behind")} ₹${kAmt(now.gap)}</b>` : c.target ? ` · <b class="sk-ok">${t("k_on_track")}</b>` : ""}`;
+			if (!now.actual && c.need) sub += `<br><span class="sk-due">${esc(c.need)}</span>`;
 		} else if (now) {
 			sub = `${now.month}: ${now.actual}${c.unit} · ${t("k_target")} ${c.target}${c.unit}${now.gap ? ` · <b class="sk-due">${t("k_off")}</b>` : ` · <b class="sk-ok">${t("k_on_track")}</b>`}`;
 		} else sub = `<span class="sk-due">${esc(c.need || t("k_no_data"))}</span>`;
@@ -3063,7 +3064,7 @@
 
 	async function renderIssue() {
 		S.wos = await call("store_work_orders");
-		root.innerHTML = header(t("issue")) + `<main><p class="sk-note">${t("issue_help")}</p><ul class="sk-list">${S.wos.map((w, i) => li(esc(w.item_name || w.production_item),
+		root.innerHTML = header(t("issue")) + `<main><p class="sk-note">${t("issue_help")}</p><ul class="sk-list">${S.wos.map((w, i) => li(`${w.customer ? `${esc(w.customer)} · ` : ""}${esc(w.item_name || w.production_item)}`,
 			`${esc(w.name)} · ${num(w.qty)} · ${(w.job_cards || []).map((j) => esc(j.operation || "")).filter(Boolean).join(", ")}`,
 			`<button class="sk-chip on" data-act="st-wo" data-i="${i}">${t("issue")}</button>`)).join("") || empty()}</ul></main>`;
 	}
@@ -3416,7 +3417,7 @@
 		const sub = view === "my_jobs";
 		const card = (j, i) => `<section class="sk-card ${j.status === "Work In Progress" ? "sk-working" : ""}">
 			<div class="sk-card-label">${esc(j.operation || "")} · ${esc(j.workstation || "")} <button class="sk-icon" data-act="pr-read" data-i="${i}">🔊</button></div>
-			<div class="sk-card-text">${esc(j.item_name || j.production_item)}</div>
+			<div class="sk-card-text">${j.customer ? `${esc(j.customer)} · ` : ""}${esc(j.item_name || j.production_item)}</div>
 			<div class="sk-card-meta">${esc(j.name)} · ${esc(j.work_order || "")}${j.started ? ` · ${t("started")} ${esc(j.started.slice(11, 16))}` : ""} · 📷 ${j.photos}</div>
 			<div class="sk-card-actions">
 				${j.started ? "" : `<button class="sk-btn go" data-act="pr-start" data-i="${i}">▶ ${t("start")}</button>`}
@@ -3474,7 +3475,7 @@
 		const groups = view === "final_check" ? [["final", t("final")]] : [["incoming", t("incoming")], ["stage", t("stage")], ["final", t("final")]];
 		S.checks = [];
 		const rows = (key) => p[key].map((c) => { S.checks.push(c); const i = S.checks.length - 1;
-			return li(`${esc(c.item_name || c.item_code)}${c.operation ? " · " + esc(c.operation) : ""}`, `${esc(c.reference_name)} · ${esc(c.from || "")} · ${num(c.qty)} · ${when(c.since)}`,
+			return li(`${c.customer ? `${esc(c.customer)} · ` : ""}${esc(c.item_name || c.item_code)}${c.operation ? " · " + esc(c.operation) : ""}`, `${esc(c.reference_name)} · ${esc(c.from || "")} · ${num(c.qty)} · ${when(c.since)}`,
 				`<button class="sk-chip on" data-act="qc-open" data-i="${i}">${t("check_now")}</button>`); }).join("");
 		root.innerHTML = header(t(view)) + `<main>${groups.map(([k, label]) => `<h3 class="sk-h">${label} (${p[k].length})</h3><ul class="sk-list">${rows(k) || empty()}</ul>`).join("")}</main>`;
 	}
@@ -3822,7 +3823,7 @@
 		const chip = (u, label) => `<button class="sk-chip ${teamPerson === u ? "on" : ""}" data-teamp="${esc(u)}">${esc(label)}</button>`;
 		const people = d.people.map((p) => `<li class="sk-item"><button class="sk-fu-main" data-teamp="${esc(p.user)}"><div class="sk-item-title">${esc(p.full_name)}</div>
 			<div class="sk-item-meta">${p.open} ${t("open_items")} · ${p.new} ${t("new_badge")} · <span class="${p.overdue ? "sk-due" : ""}">${p.overdue} ${t("overdue")}</span>${p.deal_value ? ` · ₹${Number(p.deal_value).toLocaleString("en-IN")}` : ""}</div></button>
-			${p.score != null ? `<b>${Math.round(p.score)}%</b>` : ""}</li>`).join("");
+			${p.score != null ? `<b>${Math.round(p.score)}%</b>` : ""}${state.viewAs ? "" : `<button class="sk-chip" data-act="view-enter" data-user="${esc(p.user)}" data-uname="${esc(p.full_name)}" title="${t("view_member")}">👀</button>`}</li>`).join("");
 		const rows = d.rows.map((r) => `<li class="sk-fu ${r.overdue ? "late" : r.new ? "new" : ""}"><button class="sk-fu-main" data-open="${esc(r.doctype)}" data-name="${esc(r.name)}">
 			<div class="sk-item-title">${esc(r.title)} ${r.new ? `<span class="sk-badge">${t("new_badge")}</span>` : ""}${r.overdue ? `<span class="sk-badge bad">${t("overdue")}</span>` : ""}</div>
 			<div class="sk-item-meta">👤 ${esc(r.owner_name)} · ${esc(r.status || "")} · ${r.doctype === "CRM Deal" ? t("deals") : t("leads")}</div>

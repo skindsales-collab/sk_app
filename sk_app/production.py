@@ -67,6 +67,28 @@ def _stage(j) -> dict:
 	return {"name": j.name, "operation": j.operation, "workstation": j.workstation, "state": state}
 
 
+def wo_label(work_order: str | None, fallback: str = "") -> str:
+	"""SK 27-Oct: a job is known by its customer and product, not by its number: "Customer · Product"."""
+	if not work_order:
+		return fallback
+	cache = frappe.local.__dict__.setdefault("sk_wo_label", {})
+	if work_order not in cache:
+		wo = frappe.db.get_value("Work Order", work_order, ["item_name", "production_item", "sales_order"], as_dict=True) or {}
+		customer = frappe.db.get_value("Sales Order", wo.get("sales_order"), "customer_name") if wo.get("sales_order") else None
+		cache[work_order] = " · ".join(x for x in (customer, wo.get("item_name") or wo.get("production_item")) if x) or work_order
+	return cache[work_order]
+
+
+def wo_customer(work_order: str | None) -> str | None:
+	wo = frappe.db.get_value("Work Order", work_order, ["sales_order", "project"], as_dict=True) if work_order else None
+	if not wo:
+		return None
+	if wo.sales_order:
+		return frappe.db.get_value("Sales Order", wo.sales_order, "customer_name")
+	customer = frappe.db.get_value("Project", wo.project, "customer") if wo.project else None
+	return frappe.db.get_value("Customer", customer, "customer_name") if customer else None
+
+
 def job_cards(user: str) -> list[dict]:
 	"""Open Job Cards. A subcontractor sees only his workstation; the manager sees all, working ones first."""
 	need(user, PRODUCTION, SUB, "Quality")
@@ -83,6 +105,7 @@ def job_cards(user: str) -> list[dict]:
 		r["started"] = _open_log(r.name)
 		r["photos"] = frappe.db.count("File", {"attached_to_doctype": "Job Card", "attached_to_name": r.name})
 		r["drawing"] = _drawing(r.work_order)
+		r["customer"] = wo_customer(r.work_order)
 	rows.sort(key=lambda r: (order.get(r.status, 3), str(r.expected_start_date or "")))
 	return rows
 
