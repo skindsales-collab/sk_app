@@ -250,9 +250,10 @@ BUILDERS = {"Sales": sales, "Marketing": sales, "Machine Shifting": lambda u: sa
 
 
 def chart_for(user: str, functions: list[str]) -> dict | None:
-	"""The person's one KPI chart: the CEO's company chart first, else the first function that has one."""
-	order = ["Management"] + [f for f in functions if f != "Management"] if "Management" in functions else functions
-	for fn in order:
+	"""The person's one KPI chart. SK 27-Oct: people kept getting the Sales graph; a person with Sales plus their own
+	function (Aditya: Non-Cabin) gets their own function's graph, the CEO the company graph."""
+	rank = lambda fn: 0 if fn == "Management" else 2 if fn in ("Sales", "Marketing") else 1  # noqa: E731
+	for fn in sorted(functions, key=rank):
 		build = BUILDERS.get(fn)
 		if build:
 			return _safe(lambda: build(user), None)

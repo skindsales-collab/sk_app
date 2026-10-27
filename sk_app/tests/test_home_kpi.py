@@ -85,6 +85,9 @@ class TestHomeKpi(IntegrationTestCase):
 			if all(p["v"] is None for p in t["points"]):
 				self.assertTrue(t["need"])  # says what to enter in ERPNext
 		self.assertIsNone(run("Administrator", home_kpi.for_user, ["Nothing"])["chart"])
+		# SK 27-Oct: Sales as an extra function never hides the person's own graph
+		self.assertEqual(run("Administrator", home_kpi.for_user, ["Sales", "Machine Shifting"])["chart"]["title"], "Non-Cabin sale")
+		self.assertEqual(run("Administrator", home_kpi.for_user, ["Sales", "Production"])["chart"]["function"], "Production")
 
 	def test_actions_to_improve_graph(self):
 		"""SK 26-Oct: actions that lift the graph, added by AI / manager / CEO, shown first by priority, closed by the owner."""

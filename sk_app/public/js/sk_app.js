@@ -1137,6 +1137,9 @@
 		// point 15: red = late or must-do not done, amber = due today, blue = new, green ✓ = all done today
 		const badge = homeBadges();
 		if (h.must_set_pin && !state.viewAs) return renderSetPin();
+		// never draw the last person's chart or flow (View Member App)
+		if (kpiWho !== whoKey()) { kpiWho = whoKey(); kpiData = null; kpiLoading = false; }
+		if (flowWho !== whoKey()) { flowWho = whoKey(); flowData = null; flowLoading = false; }
 		const tile = (k) => tileBtn(k, badge);
 		const plain = (keys) => `<div class="sk-tiles small">${keys.map(tile).join("")}</div>`;
 		// point 13: the CEO's live dashboards sit in their own row on top
@@ -1233,11 +1236,19 @@
 	// ---------- main screen Rev 2 (SK 26-Oct): one KPI chart against target, 3D flow, "Decide now" ----------
 	let kpiData = null, kpiAt = 0, kpiLoading = false, kpiView = "week";
 	const kAmt = (v) => (Math.abs(v) >= 1e7 ? `${(v / 1e7).toFixed(1)} Cr` : Math.abs(v) >= 1e5 ? `${(v / 1e5).toFixed(1)} L` : Math.abs(v) >= 1e3 ? `${Math.round(v / 1e3)} K` : `${Math.round(v)}`);
+	// SK 27-Oct: everyone got the Sales graph in View Member App: the chart and the flow were kept from the person
+	// viewed before. They are kept per person now (the login, or the member being viewed).
+	let kpiWho = null;
+	const whoKey = () => (state.viewAs ? state.viewAs.user : "");
 	async function loadKpi(force) {
+		if (kpiWho !== whoKey()) { kpiWho = whoKey(); kpiData = null; kpiLoading = false; }
 		if (kpiLoading || (!force && kpiData && Date.now() - kpiAt < 5 * 60 * 1000)) return paintKpi();
 		kpiLoading = true;
-		try { kpiData = await call("my_home_kpi", {}, false, true); kpiAt = Date.now(); } catch (e) { kpiData = kpiData || { chart: null }; }
-		kpiLoading = false;
+		const who = kpiWho;
+		let d;
+		try { d = await call("my_home_kpi", {}, false, true); } catch (e) { d = { chart: null }; }
+		if (who !== whoKey()) return; // switched person while loading
+		kpiData = d; kpiAt = Date.now(); kpiLoading = false;
 		paintKpi();
 	}
 	function paintKpi() {
@@ -1466,11 +1477,16 @@
 				<b class="sk-flow-n">${st.count}</b>${st.value ? `<small>${shortMoneyF(st.value)}</small>` : ""}
 				${st.late ? `<small class="sk-flow-late">${st.late} ${t("late")} · ${st.oldest} ${t("fl_days")}</small>` : ""}</button>`).join("")}</div>`).join("");
 	}
+	let flowWho = null;
 	async function loadFlows(force) {
+		if (flowWho !== whoKey()) { flowWho = whoKey(); flowData = null; flowLoading = false; }
 		if (flowLoading || (!force && flowData && Date.now() - flowAt < 60 * 1000)) return paintFlows();
 		flowLoading = true;
-		try { flowData = await call("my_flow"); flowAt = Date.now(); } catch (e) { flowData = flowData || { flows: [] }; }
-		flowLoading = false;
+		const who = flowWho;
+		let d;
+		try { d = await call("my_flow"); } catch (e) { d = flowData || { flows: [] }; }
+		if (who !== whoKey()) return;
+		flowData = d; flowAt = Date.now(); flowLoading = false;
 		paintFlows();
 	}
 	function paintFlows() {
