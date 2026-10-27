@@ -482,3 +482,6 @@ a.sk-tile{text-decoration:none;color:inherit;position:relative}
 /* SK 27-Oct: cabin quotation option rows: tick on the left, qty on the right */
 .sk-cq-opt { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: nowrap; }
 .sk-cq-opt .sk-qty { width: 72px; flex: none; }
+
+/* SK 27-Oct: ERPNext links shown as chips */
+a.sk-chip { text-decoration: none; }

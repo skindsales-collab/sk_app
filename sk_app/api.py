@@ -645,7 +645,7 @@ def fin_promise(sales_invoice, text=None, promised_on=None):
 
 @frappe.whitelist(methods=["POST"])
 def fin_receive(reference_doctype, reference_name, amount, mode=None, reference_no=None, reference_date=None, photo=None):
-	return finance.receive_payment(_me().user, reference_doctype, reference_name, amount, mode, reference_no, reference_date, photo)
+	frappe.throw(_("SK 27-Oct: money in and out is entered by Accounts in ERPNext, not in the app"))
 
 
 @frappe.whitelist()
@@ -670,7 +670,7 @@ def fin_ask_approval(purchase_invoice):
 
 @frappe.whitelist(methods=["POST"])
 def fin_pay(purchase_invoice, amount=None, mode=None, reference_no=None, reference_date=None, photo=None):
-	return finance.pay(_me().user, purchase_invoice, amount, mode, reference_no, reference_date, photo)
+	frappe.throw(_("SK 27-Oct: money in and out is entered by Accounts in ERPNext, not in the app"))
 
 
 @frappe.whitelist()
@@ -711,7 +711,7 @@ def fin_expenses():
 
 @frappe.whitelist(methods=["POST"])
 def fin_pay_expense(expense_claim):
-	return finance.pay_expense(_me().user, expense_claim)
+	frappe.throw(_("SK 27-Oct: money in and out is entered by Accounts in ERPNext, not in the app"))
 
 
 @frappe.whitelist()
@@ -721,7 +721,7 @@ def fin_voucher_options():
 
 @frappe.whitelist(methods=["POST"])
 def fin_petty_cash(expense_account, amount, cash_account, cost_center=None, narration=None, photo=None):
-	return finance.petty_cash(_me().user, expense_account, amount, cash_account, cost_center, narration, photo)
+	frappe.throw(_("SK 27-Oct: money in and out is entered by Accounts in ERPNext, not in the app"))
 
 
 @frappe.whitelist()
