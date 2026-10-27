@@ -10,7 +10,7 @@ class TestPending26Oct(IntegrationTestCase):
 	def test_home_levels_short(self):
 		s = functions.sections_for(["Sales"])
 		x = s["sections"][0]
-		self.assertEqual(x["main"], ["new_lead", "my_leads", "follow_up", "my_deals"])
+		self.assertEqual(x["main"], ["new_lead", "my_leads", "cold_leads", "follow_up"])
 		self.assertEqual(set(x["main"]) | set(x["more"]), set(x["tiles"]))
 		# main screen Rev 2 (SK 26-Oct): My Day + DSI at the bottom, a common row and Call / WhatsApp / Mail
 		self.assertEqual(s["main_shared"], ["my_day", "dsi"])

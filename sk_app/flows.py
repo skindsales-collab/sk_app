@@ -14,7 +14,7 @@ function).
 import frappe
 from frappe.utils import add_days, date_diff, flt, get_first_day, getdate, now_datetime, nowdate
 
-from sk_app import dashboards, lead_status, segments
+from sk_app import cold_leads, dashboards, lead_status, segments
 from sk_app.dashboards import _has, _name, _row, _safe
 from sk_app.production import wo_label
 
@@ -86,12 +86,18 @@ def sales(user: str, segment=None, only_self=False) -> list[dict]:
 	stages = []
 	# SK 27-Oct: arrows follow his steps New → Qualified → Drawing → Quotation → Negotiations (→ won = orders)
 	by = {step: [] for step in lead_status.STEPS}
+	cold = []  # SK 27-Oct: cold-calling leads in their own first arrow, never red, not counted in New
 	if _has("CRM Lead"):
 		closed = frappe.get_all("CRM Lead Status", filters={"type": ["in", ["Won", "Lost", "Junk"]]}, pluck="name")
 		leads = frappe.get_all("CRM Lead", filters={"converted": 0, "status": ["not in", closed or [""]], **seg, **_in("lead_owner", owners)},
-			fields=["name", "first_name", "organization", "status", "lead_owner", "creation", "modified", "first_responded_on", "sk_segment"],
+			fields=["name", "first_name", "organization", "status", "lead_owner", "creation", "modified", "first_responded_on", "sk_segment", "source"],
 			order_by="creation asc", limit=0)
+		cold_sources = cold_leads.sources()
 		for l in leads:
+			if cold_leads.is_cold(l.source, l.status, cold_sources):
+				cold.append(_row(l.organization or l.first_name or l.name, f"{l.source} · {_name(l.lead_owner)}"
+					+ (" · called" if l.first_responded_on else " · not called"), None, "CRM Lead", l.name))
+				continue
 			step = lead_status.step_of(l.status)
 			not_called = step == "New" and not l.first_responded_on
 			by[step].append(_late_row(l.organization or l.first_name or l.name, f"{l.status} · {_name(l.lead_owner)}" + (" · not called" if not_called else ""),
@@ -110,6 +116,7 @@ def sales(user: str, segment=None, only_self=False) -> list[dict]:
 			by[step].append(r)
 	icons = {"New": "🎯", "Qualified": "✅", "Drawing": "📐", "Quotation": "📄", "Negotiations": "🤝"}
 	go = {"New": "my_leads", "Qualified": "my_leads", "Drawing": "my_deals", "Quotation": "my_deals", "Negotiations": "my_deals"}
+	stages.append(_stage("cold", "Cold", "❄️", cold, go="cold_leads", late_rows=[]))
 	# the 8 arrows always show, 0 when empty (SK 27-Oct: arrows missing looked like a fault)
 	for step in lead_status.STEPS:
 		rows = by[step]

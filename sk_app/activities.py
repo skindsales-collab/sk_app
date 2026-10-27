@@ -45,15 +45,24 @@ def targets() -> dict:
 
 
 def _calls_by_step(user: str, day) -> dict:
-	out = {k: 0 for k in CALL_STEPS}
+	"""Calls by the lead's step; calls on cold-calling leads (sk_app.cold_leads) count as cold calls (SK 27-Oct)."""
+	from sk_app import cold_leads
+
+	out = {k: 0 for k in (*CALL_STEPS, "cold_calls")}
 	if not crm.installed():
 		return out
+	cold_sources = cold_leads.sources()
 	rows = frappe.get_all("CRM Call Log", filters={"creation": ["between", [f"{day} 00:00:00", f"{day} 23:59:59"]]},
 		or_filters={"caller": user, "receiver": user}, fields=["reference_doctype", "reference_docname"], limit=0)
 	for r in rows:
 		if not r.reference_docname:
 			continue
-		status = frappe.db.get_value(r.reference_doctype, r.reference_docname, "status") if r.reference_doctype in crm.CRM_DOCTYPES else None
+		doc = frappe.db.get_value(r.reference_doctype, r.reference_docname, ["status", "source"], as_dict=True) or {} \
+			if r.reference_doctype in crm.CRM_DOCTYPES else {}
+		status = doc.get("status")
+		if r.reference_doctype == "CRM Lead" and cold_leads.is_cold(doc.get("source"), status, cold_sources):
+			out["cold_calls"] += 1
+			continue
 		step = lead_status.step_of(status, deal=r.reference_doctype == "CRM Deal")
 		for k, steps in CALL_STEPS.items():
 			if step in steps:

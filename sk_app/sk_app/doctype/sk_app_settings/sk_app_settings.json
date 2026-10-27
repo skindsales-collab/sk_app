@@ -5,7 +5,7 @@
  "custom": 0,
  "engine": "InnoDB",
  "creation": "2026-10-25 08:30:00.000000",
- "modified": "2026-10-26 15:00:00.000000",
+ "modified": "2026-10-27 18:30:00.000000",
  "owner": "Administrator",
  "modified_by": "Administrator",
  "naming_rule": "",
@@ -27,6 +27,7 @@
   "company_dates",
   "kpi_section",
   "digital_lead_sources",
+  "cold_lead_sources",
   "cabin_item_groups",
   "first_response_minutes",
   "column_kpi",
@@ -140,6 +141,13 @@
    "label": "Digital Lead Sources",
    "default": "Indiamart\nWebsite\nWeb Form\nFacebook\nLinkedIn\nWhat's App Marketing\nMail Marketing\nAdvertisement",
    "description": "One CRM Lead Source per line. Used for Pranali's digital leads and digital revenue KPIs."
+  },
+  {
+   "fieldname": "cold_lead_sources",
+   "fieldtype": "Small Text",
+   "label": "Cold Lead Sources",
+   "default": "Marketing call\nCold Calling",
+   "description": "One CRM Lead Source per line. Leads from these sources that are still New show on the Cold Calling list, not in My Leads; once moved to Qualified they become current leads."
   },
   {
    "fieldname": "cabin_item_groups",

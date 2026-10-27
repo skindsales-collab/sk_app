@@ -15,7 +15,7 @@
 
 	const T = {
 		English: {
-			my_day: "My Day", my_leads: "My Leads", my_deals: "My Deals", my_kpi: "My Score",
+			my_day: "My Day", my_leads: "My Leads", cold_leads: "Cold Calling", my_deals: "My Deals", my_kpi: "My Score",
 			work_book: "Work Book", dsi: "DSI", problem: "Report Problem", job_cards: "Job Cards",
 			inspections: "Inspections", stock_alerts: "Stock Alerts", material_requests: "Material Requests",
 			invoice_photo: "Invoice Photo", collections: "Collections", team_scorecards: "Team Scores",
@@ -74,7 +74,7 @@
 			lessons_done: "lessons done", photo_reading: "Reading the card on the phone… (first time takes a minute)",
 		},
 		Marathi: {
-			my_day: "माझा दिवस", my_leads: "माझे लीड", my_deals: "माझे डील", my_kpi: "माझा स्कोअर",
+			my_day: "माझा दिवस", my_leads: "माझे लीड", cold_leads: "कोल्ड कॉलिंग", my_deals: "माझे डील", my_kpi: "माझा स्कोअर",
 			work_book: "कामाची वही", dsi: "DSI", problem: "समस्या कळवा", job_cards: "जॉब कार्ड",
 			inspections: "तपासणी", stock_alerts: "स्टॉक सूचना", material_requests: "मटेरियल मागणी",
 			invoice_photo: "बिलाचा फोटो", collections: "वसुली", team_scorecards: "टीम स्कोअर",
@@ -673,7 +673,8 @@
 		never: "Never logged in", earlier: "Not today", first_pin_left: "first PIN", of_word: "of", made_word: "made",
 		people_n2: "people", lessons_n: "lessons", finished_n: "finished all", open_tasks: "open tasks", late_tasks: "late",
 		did_extra: "＋ I did extra work", to_do: "To do", move_to: "Move to", moved: "moved", load: "Load",
-		routine: "Weekly routine", new_today: "New today", to_call: "To call", lead_saved: "Lead saved in ERPNext CRM → Leads",
+		routine: "Weekly routine", new_today: "New today", to_call: "To call", not_called: "Not called", called: "Called",
+		cold_hint: "Marketing call list. When the customer is interested, open the lead and tap Qualified: it moves to My Leads.", lead_saved: "Lead saved in ERPNext CRM → Leads",
 		lead_no: "Lead no", owner: "Owner", call_now: "Call now", open_lead: "Open lead", another_lead: "Another lead",
 		camera: "Camera", gallery: "Gallery / screenshot", pdf_file: "PDF / file", retake: "Retake", remove: "Remove",
 		uploading: "Sending…", uploaded: "Sent ✓", upload_retry: "Network weak, trying again…",
@@ -705,7 +706,8 @@
 		never: "कधीच लॉगिन नाही", earlier: "आज नाही", first_pin_left: "पहिला PIN", of_word: "पैकी", made_word: "बनले",
 		people_n2: "लोक", lessons_n: "धडे", finished_n: "सर्व पूर्ण", open_tasks: "उघडी कामे", late_tasks: "उशीर",
 		did_extra: "＋ मी जादा काम केले", to_do: "करायचे", move_to: "या दिवशी हलवा", moved: "हलवले", load: "भार",
-		routine: "आठवड्याचे ठरलेले काम", new_today: "आजचे नवीन", to_call: "कॉल करायचे", lead_saved: "लीड ERPNext CRM → Leads मध्ये सेव्ह झाली",
+		routine: "आठवड्याचे ठरलेले काम", new_today: "आजचे नवीन", to_call: "कॉल करायचे", not_called: "कॉल न केलेले", called: "कॉल केलेले",
+		cold_hint: "मार्केटिंग कॉल यादी. ग्राहकाला रस असल्यास लीड उघडा आणि Qualified दाबा: ती माझे लीड मध्ये जाईल.", lead_saved: "लीड ERPNext CRM → Leads मध्ये सेव्ह झाली",
 		lead_no: "लीड नं.", owner: "मालक", call_now: "आता कॉल करा", open_lead: "लीड उघडा", another_lead: "दुसरी लीड",
 		camera: "कॅमेरा", gallery: "गॅलरी / स्क्रीनशॉट", pdf_file: "PDF / फाईल", retake: "पुन्हा घ्या", remove: "काढा",
 		uploading: "पाठवत आहे…", uploaded: "पाठवले ✓", upload_retry: "नेटवर्क कमी, पुन्हा प्रयत्न…",
@@ -934,7 +936,7 @@
 		el_socket_5a: "5A सॉकेट", el_socket_15a: "15A सॉकेट", el_ac_point: "AC पॉइंट", el_mcb_db: "MCB / DB", el_earthing: "अर्थिंग", el_other_points: "इतर पॉइंट" });
 	const ICON = {
 		more: "⋯", leadership: "🧭", to_plan: "🗓️",
-		my_day: "☀️", my_leads: "🎯", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
+		my_day: "☀️", my_leads: "🎯", cold_leads: "❄️", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
 		job_cards: "🛠️", inspections: "✅", stock_alerts: "📦", material_requests: "🧾", invoice_photo: "📷",
 		collections: "💰", team_scorecards: "👥", site_checklist: "📋", ceo_view: "📊",
 		calendar: "📅", follow_up: "🔔", new_lead: "➕", training: "🎓", day_report: "📝", team_reports: "🗂️",
@@ -1598,7 +1600,7 @@
 		if (b.dataset.more === "flow") { flowShown += PAGE; const [fi, si] = flowKey.split(":").map(Number); return renderFlowStage(fi, si); }
 		if (b.dataset.more === "daybook") { dbShown += PAGE; return renderDayBook(true); }
 		if (b.dataset.more === "wa") { waShown += PAGE; return renderWhatsApp(); }
-		if (b.dataset.more === "my_leads" || b.dataset.more === "my_deals") { leadShown += PAGE; return renderLeads(b.dataset.more, true); }
+		if (b.dataset.more === "my_leads" || b.dataset.more === "my_deals" || b.dataset.more === "cold_leads") { leadShown += PAGE; return renderLeads(b.dataset.more, true); }
 		if (b.dataset.more === "so") { soShown += PAGE; return renderSalesOwner(true); }
 		if (b.dataset.more === "dash") { dashShown += PAGE; return renderDashList(dashI); }
 	}, true);
@@ -1711,7 +1713,7 @@
 		if (i.doctype && i.doctype.startsWith("CRM ") && i.name) open = `<button class="sk-open" data-open="${esc(i.doctype)}" data-name="${esc(i.name)}">›</button>`;
 		if (i.kind === "day_report") open = `<button class="sk-open" data-go="day_report">›</button>`;
 		if (i.kind === "send_file") open = `<button class="sk-open" data-open="${esc(i.ref_doctype)}" data-name="${esc(i.ref_name)}">›</button>`;
-		return `<li class="sk-item k-${esc(i.kind)}"><div><div class="sk-item-title">${esc(i.title)}</div><div class="sk-item-meta">${i.kind === "deal" && i.customer && i.customer !== i.title ? `👤 ${esc(i.customer)} · ` : ""}${(i.kind === "deal" || i.kind.startsWith("lead_")) && i.status ? esc(i.status) + " · " : ""}${esc(i.kind.replace("_", " "))} · ${esc(i.minutes)} ${t("min")} ${due}</div>${i.doctype && i.doctype.startsWith("CRM ") && (i.mobile || i.email) ? contactButtons(i) : ""}</div>${open}</li>`;
+		return `<li class="sk-item k-${esc(i.kind)}"><div><div class="sk-item-title">${esc(i.title)}</div><div class="sk-item-meta">${i.kind === "deal" && i.customer && i.customer !== i.title ? `👤 ${esc(i.customer)} · ` : ""}${(i.kind === "deal" || i.kind.startsWith("lead_")) && i.status ? esc(i.status) + " · " : ""}${esc(i.kind === "lead_cold" ? i.source || "" : i.kind.replace("_", " "))} · ${esc(i.minutes)} ${t("min")} ${due}</div>${i.doctype && i.doctype.startsWith("CRM ") && (i.mobile || i.email) ? contactButtons(i) : ""}</div>${open}</li>`;
 	}
 
 	async function renderMyDay() {
@@ -1741,8 +1743,10 @@
 	}
 
 	// point 12: My Leads has tabs New today (the lead just made is on top, NEW) · To call · All
-	let leadTab = "new_today", leadQ = "", leadShown = 60, leadData = null;
+	// SK 27-Oct: Cold Calling has its own list (tabs Not called · Called · All); a lead moved to Qualified leaves it
+	let leadTab = "new_today", leadQ = "", leadShown = 60, leadData = null, coldTab = "not_called", coldData = null;
 	async function renderLeads(which, again) {
+		if (which === "cold_leads") return renderColdLeads(again);
 		const d = again && leadData ? leadData : (leadData = await call("my_leads"));
 		let rows = which === "my_deals" ? d.deals : d.leads;
 		let tabs = "";
@@ -1769,6 +1773,23 @@
 			<ul class="sk-list">${rows.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>${moreBtn(total, rows.length, which)}</main>`;
 		const inp = root.querySelector("#lead-q");
 		inp.addEventListener("input", debounceSearch(() => { leadQ = inp.value; leadShown = 60; renderLeads(which, true); }, "#lead-q"));
+	}
+
+	async function renderColdLeads(again) {
+		const d = again && coldData ? coldData : (coldData = await call("cold_leads_list"));
+		const groups = { not_called: d.leads.filter((r) => !r.called), called: d.leads.filter((r) => r.called), all: d.leads };
+		if (!again && !groups[coldTab].length) coldTab = "all";
+		const tabs = `<div class="cal-tabs">${Object.keys(groups).map((k) => `<button class="${coldTab === k ? "on" : ""}" data-ltab="${k}" data-lwhich="cold_leads">${t(k)} ${groups[k].length}</button>`).join("")}</div>`;
+		const q = leadQ.toLowerCase();
+		let rows = groups[coldTab];
+		if (q) rows = rows.filter((r) => [r.title, r.status, r.source, r.name].join(" ").toLowerCase().includes(q));
+		const total = rows.length;
+		rows = rows.slice(0, leadShown).map((r) => ({ ...r, title: (r.called ? "✓ " : "") + r.title }));
+		root.innerHTML = header(`${ICON.cold_leads} ${t("cold_leads")}`) + `<main>${tabs}<p class="sk-note">${t("cold_hint")}</p>
+			<div class="sk-input-row sk-gap"><input id="lead-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(leadQ)}"></div>
+			<ul class="sk-list">${rows.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>${moreBtn(total, rows.length, "cold_leads")}</main>`;
+		const inp = root.querySelector("#lead-q");
+		inp.addEventListener("input", debounceSearch(() => { leadQ = inp.value; leadShown = 60; renderColdLeads(true); }, "#lead-q"));
 	}
 
 	// point 12: after Save the person sees where the lead went, its number, and what to do next
@@ -4499,7 +4520,7 @@
 		document.body.prepend(a);
 	}
 
-	const LIVE_VIEWS = { fnpage: () => renderFnPage(), more: renderMore, leadership: renderLeadership, to_plan: renderToPlan, my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"),
+	const LIVE_VIEWS = { fnpage: () => renderFnPage(), more: renderMore, leadership: renderLeadership, to_plan: renderToPlan, my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"), cold_leads: () => renderLeads("cold_leads"),
 		my_kpi: renderKpi, dsi: renderDsi, el_points: renderElPoints, kpi_actions: renderKpiActions, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
 		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name),
@@ -4677,6 +4698,7 @@
 				return go(state.view);
 			}
 			if (el.dataset.unpick) { const inp = document.getElementById(el.dataset.unpick); inp.value = ""; return photoPicked(inp); }
+			if (el.dataset.ltab && el.dataset.lwhich === "cold_leads") { coldTab = el.dataset.ltab; leadShown = 60; return renderColdLeads(true); }
 			if (el.dataset.ltab) { leadTab = el.dataset.ltab; leadShown = 60; return renderLeads("my_leads", true); }
 			if (el.dataset.move) return moveSheet(el.dataset.move, el.dataset.title);
 			if (el.dataset.moveday !== undefined) {

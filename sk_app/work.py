@@ -66,11 +66,15 @@ def _reach(r) -> dict:
 	return {"mobile": r.get("mobile_no") or r.get("phone"), "email": r.get("email")}
 
 
-def open_leads(user: str) -> list[WorkItem]:
-	"""Frappe CRM leads owned by the user and not converted or closed."""
+def open_leads(user: str, cold: bool = False) -> list[WorkItem]:
+	"""Frappe CRM leads owned by the user and not converted or closed. Cold-calling leads (sk_app.cold_leads) are
+	kept apart: cold=False gives the current leads (My Leads, My Day), cold=True only the cold ones (SK 27-Oct)."""
 	if not frappe.db.exists("DocType", "CRM Lead"):
 		return []
+	from sk_app import cold_leads
+
 	types = _lead_status_types()
+	cold_sources = cold_leads.sources()
 	rows = frappe.get_all(
 		"CRM Lead",
 		filters={"lead_owner": user, "converted": 0},
@@ -83,8 +87,14 @@ def open_leads(user: str) -> list[WorkItem]:
 	for r in rows:
 		if types.get(r.status) in CLOSED_LEAD_TYPES:
 			continue
+		if cold_leads.is_cold(r.source, r.status, cold_sources) != cold:
+			continue
 		title = _label("CRM Lead", r.name)
-		if not r.first_responded_on:
+		if cold:  # no 5-minute rule and no due time: called from the list at the person's pace
+			items.append(WorkItem("lead_cold", title, "CRM Lead", r.name, minutes=5, priority=5,
+				extra={"source": r.source, "status": r.status, "created": str(r.creation), "called": bool(r.first_responded_on),
+					"last_call": str(r.first_responded_on) if r.first_responded_on else None, **_reach(r)}))
+		elif not r.first_responded_on:
 			due = get_datetime(r.response_by) if r.response_by else add_to_date(r.creation, minutes=5)
 			items.append(WorkItem("lead_new", title, "CRM Lead", r.name, due=due, minutes=10, priority=1,
 				extra={"source": r.source, "status": r.status, "created": str(r.creation), **_reach(r)}))
