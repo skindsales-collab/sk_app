@@ -678,7 +678,7 @@
 		camera: "Camera", gallery: "Gallery / screenshot", pdf_file: "PDF / file", retake: "Retake", remove: "Remove",
 		uploading: "Sending…", uploaded: "Sent ✓", upload_retry: "Network weak, trying again…",
 		open_chrome: "Mic / camera work best in Chrome. Tap here to open the SK App in Chrome.",
-		gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", new_product: "New product / vendor", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
+		gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", new_product: "New product / vendor", photo_entry: "Photo entry", pe_help: "Bill, e-invoice, voucher or payment proof: take a photo (or pick the PDF) and submit. A supplier bill goes to Bills to Post (Make bill). Others wait here until you enter them in ERPNext.", pe_what: "What is it?", pe_supplier_bill: "Supplier bill / e-invoice", pe_expense: "Expense bill / petty cash voucher", pe_money_in: "Payment received (cheque / UTR)", pe_money_out: "Payment made (bank slip / UTR)", pe_other: "Other document", pe_photo: "Photo or PDF", pe_party: "Customer / party (optional)", pe_ref: "Bill / ref no (optional)", pe_submit: "Submit", pe_pending: "Photo entries to enter in ERPNext", pe_open: "Enter in ERPNext", pe_sent: "Submitted", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
 		gw_masters: "Masters", gw_transactions: "Transactions", gw_utilities: "Utilities", gw_reports: "Reports", gw_more: "More reports",
 		gw_desk: "Opens in ERPNext", gw_pending: "waiting", db_particulars: "Particulars", db_none: "No vouchers on this day",
 		cash_today: "Cash / Bank", to_collect: "Receivables", to_pay: "Payables", bills_to_post: "Purchase Invoice and Debit Note",
@@ -710,7 +710,7 @@
 		camera: "कॅमेरा", gallery: "गॅलरी / स्क्रीनशॉट", pdf_file: "PDF / फाईल", retake: "पुन्हा घ्या", remove: "काढा",
 		uploading: "पाठवत आहे…", uploaded: "पाठवले ✓", upload_retry: "नेटवर्क कमी, पुन्हा प्रयत्न…",
 		open_chrome: "माईक / कॅमेरा Chrome मध्ये नीट चालतात. SK App Chrome मध्ये उघडण्यासाठी येथे दाबा.",
-		gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", new_product: "नवीन प्रॉडक्ट / व्हेंडर", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
+		gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", new_product: "नवीन प्रॉडक्ट / व्हेंडर", photo_entry: "फोटो एंट्री", pe_help: "बिल, ई-इनव्हॉइस, व्हाउचर किंवा पेमेंट पुरावा: फोटो काढा (किंवा PDF निवडा) आणि सबमिट करा. सप्लायर बिल 'बिल पोस्ट करा' मध्ये जाते. बाकी ERPNext मध्ये एंट्री होईपर्यंत इथे राहतात.", pe_what: "हे काय आहे?", pe_supplier_bill: "सप्लायर बिल / ई-इनव्हॉइस", pe_expense: "खर्च बिल / पेटी कॅश व्हाउचर", pe_money_in: "पेमेंट मिळाले (चेक / UTR)", pe_money_out: "पेमेंट केले (बँक स्लिप / UTR)", pe_other: "इतर कागद", pe_photo: "फोटो किंवा PDF", pe_party: "ग्राहक / पार्टी (ऐच्छिक)", pe_ref: "बिल / रेफ नंबर (ऐच्छिक)", pe_submit: "सबमिट", pe_pending: "ERPNext मध्ये टाकायच्या फोटो एंट्री", pe_open: "ERPNext मध्ये टाका", pe_sent: "सबमिट झाले", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
 		gw_masters: "मास्टर्स", gw_transactions: "व्यवहार", gw_utilities: "युटिलिटी", gw_reports: "अहवाल", gw_more: "आणखी अहवाल",
 		gw_desk: "ERPNext मध्ये उघडते", gw_pending: "बाकी", db_particulars: "तपशील", db_none: "या दिवशी व्हाउचर नाही",
 		cash_today: "कॅश / बँक", to_collect: "येणे (Receivables)", to_pay: "देणे (Payables)", bills_to_post: "खरेदी बिल आणि डेबिट नोट",
@@ -946,7 +946,7 @@
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
 		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", sales_owner: "🧑‍💼", new_joiner: "🪪", activities: "🎯", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
 		dash_overview: "🏁", dash_daily_review: "🗓️", dash_sales: "💼", dash_marketing: "📣", dash_machine_shifting: "🏗️", dash_job_work: "⚙️", dash_cr100: "🎯", dash_finance: "💰", dash_manufacturing: "🏭", dash_purchase: "🛒", dash_store: "📦", dash_quality: "✅", dash_hr: "👥", dash_ai: "🤖",
-		gateway: "🏛️", day_book: "📅", cabin_discounts: "🏷️", new_product: "🆕",
+		gateway: "🏛️", day_book: "📅", cabin_discounts: "🏷️", new_product: "🆕", photo_entry: "📷",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
@@ -4061,13 +4061,13 @@
 				`<div class="sk-col"><b>${money(r.outstanding_amount)}</b>${r.mobile ? `<a class="sk-chip" href="tel:${esc(r.mobile)}">📞</a><button class="sk-chip" data-act="fin-wa" data-i="${i}">💬</button>` : ""}
 				<button class="sk-chip" data-act="fin-promise" data-i="${i}">🤝 ${t("promise")}</button><a class="sk-chip on" target="_blank" href="/app/sales-invoice/${encodeURIComponent(r.name)}">₹ ${t("in_erp")}</a></div>`); };
 		const total = S.dues.reduce((s, r) => s + r.outstanding_amount, 0);
-		root.innerHTML = header(t("to_collect")) + `<main><p class="sk-note">${t("total_due")}: <b>${money(total)}</b> · ${S.dues.length} ${t("inv_n")}</p>
+		root.innerHTML = header(t("to_collect")) + `<main><button class="sk-btn go wide" data-go="photo_entry">📷 ${t("photo_entry")}</button><p class="sk-note">${t("total_due")}: <b>${money(total)}</b> · ${S.dues.length} ${t("inv_n")}</p>
 			${groups.map(([k, label]) => { const rows = S.dues.filter((r) => r.bucket === k); return rows.length ? `<h3 class="sk-h">${label} (${money(rows.reduce((s, r) => s + r.outstanding_amount, 0))})</h3><ul class="sk-list">${rows.map(row).join("")}</ul>` : ""; }).join("") || `<p class="sk-empty">${t("nothing")}</p>`}</main>`;
 	}
 	async function renderToPay(view) {
 		const boss = view === "pay_approvals";
 		S.bills = await call(boss ? "fin_pay_approvals" : "fin_to_pay");
-		root.innerHTML = header(t(view)) + `<main>${boss ? "" : `<p class="sk-note">${t("pay_rule")}</p>`}<ul class="sk-list">${S.bills.map((b, i) => li(esc(b.supplier_name),
+		root.innerHTML = header(t(view)) + `<main>${boss ? "" : `<button class="sk-btn go wide" data-go="photo_entry">📷 ${t("photo_entry")}</button><p class="sk-note">${t("pay_rule")}</p>`}<ul class="sk-list">${S.bills.map((b, i) => li(esc(b.supplier_name),
 			`${esc(b.name)}${b.bill_no ? " · " + t("bill") + " " + esc(b.bill_no) : ""} · ${t("due")} ${esc(b.due_date)}${b.days_late > 0 ? ` · <span class="sk-due">${b.days_late} ${t("days_late")}</span>` : ""}`,
 			`<div class="sk-col"><b>${money(b.outstanding_amount)}</b>${boss ? `<button class="sk-chip on" data-act="fin-approve" data-i="${i}">✓ ${t("approve")}</button>`
 				: b.needs_ok && !b.approved ? `<button class="sk-chip" data-act="fin-ask" data-i="${i}">🙋 ${t("ask_sk")}</button>`
@@ -4075,13 +4075,29 @@
 	}
 	async function renderBillsToPost() {
 		S.fb = await call("fin_bills");
-		root.innerHTML = header(t("bills_to_post")) + `<main><h3 class="sk-h">📷 ${t("bill_photos")} (${S.fb.photos.length})</h3>
+		root.innerHTML = header(t("bills_to_post")) + `<main><button class="sk-btn go wide" data-go="photo_entry">📷 ${t("photo_entry")}</button><h3 class="sk-h">📷 ${t("bill_photos")} (${S.fb.photos.length})</h3>
 			<ul class="sk-list">${S.fb.photos.map((p, i) => li(esc(p.supplier_name || p.reference_name), `${esc(p.description)}${p.photo ? ` · <a href="${esc(p.photo)}" target="_blank">📷 ${t("see_photo")}</a>` : ""}`,
 				`<div class="sk-col"><button class="sk-chip on" data-act="fin-bill" data-i="${i}">${t("make_bill")}</button><button class="sk-chip" data-act="fin-bill-done" data-i="${i}">✓ ${t("already_done")}</button></div>`)).join("") || empty()}</ul>
 			<h3 class="sk-h">📝 ${t("drafts_check")} (${S.fb.drafts.length})</h3>
 			<ul class="sk-list">${S.fb.drafts.map((d, i) => li(esc(d.supplier_name), `${esc(d.name)}${d.bill_no ? " · " + esc(d.bill_no) : ""} · ${esc(d.posting_date)}`,
 				`<div class="sk-col"><b>${money(d.grand_total)}</b><a class="sk-chip" href="/app/purchase-invoice/${encodeURIComponent(d.name)}">${t("check")}</a>
 				<button class="sk-chip on" data-act="fin-post-pi" data-i="${i}">✓ ${t("post")}</button></div>`)).join("") || empty()}</ul></main>`;
+	}
+	// SK 27-Oct: Shraddha takes a photo of every bill / e-invoice / voucher / payment proof and submits; the rest follows the earlier way
+	const PE_KINDS = ["supplier_bill", "expense", "money_in", "money_out", "other"];
+	async function renderPhotoEntry() {
+		S.pe = await call("fin_photo_entries");
+		const kind = S.peKind || "supplier_bill";
+		root.innerHTML = header(t("photo_entry")) + `<main class="sk-form"><p class="sk-note">${t("pe_help")}</p>
+			<div class="sk-field"><span>${t("pe_what")}</span><div class="sk-chips">${PE_KINDS.map((k) => `<button class="sk-chip ${k === kind ? "on" : ""}" data-act="fin-pe-kind" data-k="${k}">${t("pe_" + k)}</button>`).join("")}</div></div>
+			${photoField("b-photo", "📷 " + t("pe_photo"))}
+			<div id="pe-sup" ${kind === "supplier_bill" ? "" : "hidden"}>${finder("b-sup", t("supplier"), "supplier")}</div>
+			<div id="pe-party" ${kind === "supplier_bill" ? "hidden" : ""}>${formField("pe-pty", t("pe_party"))}</div>
+			${formField("b-no", t("pe_ref"))}<label class="sk-field"><span>${t("amount")}</span>${qtyBox("b-amt")}</label>${formField("pe-note", t("note"))}
+			<button class="sk-btn ok wide" data-act="fin-pe-save">✓ ${t("pe_submit")}</button>
+			<h3 class="sk-h">📷 ${t("pe_pending")} (${S.pe.length})</h3>
+			<ul class="sk-list">${S.pe.map((p, i) => li(esc(t("pe_" + p.kind)), `${esc(p.text)}${p.photo ? ` · <a href="${esc(p.photo)}" target="_blank">📷 ${t("see_photo")}</a>` : ""}`,
+				`<div class="sk-col"><a class="sk-chip on" target="_blank" href="${esc(p.erp_url)}">₹ ${t("pe_open")}</a><button class="sk-chip" data-act="fin-pe-done" data-i="${i}">✓ ${t("already_done")}</button></div>`)).join("") || empty()}</ul></main>`;
 	}
 	async function renderInvoices() {
 		S.fi = await call("fin_invoices");
@@ -4095,7 +4111,7 @@
 	}
 	async function renderExpenses() {
 		S.claims = await call("fin_expenses");
-		root.innerHTML = header(t("expenses")) + `<main><p class="sk-note">${t("money_in_erp")}</p><a class="sk-btn go wide" target="_blank" href="/app/journal-entry/new?voucher_type=Cash%20Entry">+ ${t("petty_cash")} (ERPNext)</a>
+		root.innerHTML = header(t("expenses")) + `<main><button class="sk-btn go wide" data-go="photo_entry">📷 ${t("photo_entry")}</button><p class="sk-note">${t("money_in_erp")}</p><a class="sk-btn go wide" target="_blank" href="/app/journal-entry/new?voucher_type=Cash%20Entry">+ ${t("petty_cash")} (ERPNext)</a>
 			<h3 class="sk-h">${t("claims_to_pay")}</h3><ul class="sk-list">${S.claims.map((c, i) => li(esc(c.employee_name), `${esc(c.name)} · ${esc(c.posting_date)}`,
 				`<div class="sk-col"><b>${money(c.total_sanctioned_amount || c.grand_total)}</b><a class="sk-chip on" target="_blank" href="/app/expense-claim/${encodeURIComponent(c.name)}">₹ ${t("pay_in_erp")}</a></div>`)).join("") || empty()}</ul></main>`;
 	}
@@ -4174,7 +4190,7 @@
 			return `<a class="sk-tile sk-gw-desk" href="${esc(it.url)}" target="_blank" rel="noopener" title="${esc(t("gw_desk"))}"><span class="sk-tile-icon">${it.icon}</span><span>${label}</span><b class="sk-gw-ext">↗</b></a>`;
 		};
 		const sec = (x) => `<h3 class="sk-h sk-fn-row">${t("gw_" + x.section.toLowerCase())}</h3><div class="sk-tiles small">${x.items.map(item).join("")}</div>`;
-		root.innerHTML = header(t("gateway")) + `<main><p class="sk-note">${esc(g.fy)}</p>
+		root.innerHTML = header(t("gateway")) + `<main><button class="sk-btn go wide" data-go="photo_entry">📷 ${t("photo_entry")}</button><p class="sk-note">${esc(g.fy)}</p>
 			<div class="sk-gw-strip"><button data-go="cash_today"><small>${t("gw_cash")}</small><b>${money(g.cash) || "Rs 0"}</b></button>
 			<button data-go="to_collect"><small>${t("gw_recv")}</small><b>${money(g.receivable) || "Rs 0"}</b></button>
 			<button data-go="to_pay"><small>${t("gw_pay")}</small><b>${money(g.payable) || "Rs 0"}</b></button></div>
@@ -4283,6 +4299,23 @@
 				closeSheet(); toast(`${r.name}: ${t("draft_made")}`); return go("bills_to_post");
 			}
 			case "fin-bill-done": await call("fin_bill_photo_done", { todo: S.fb.photos[i].name }, true); return go("bills_to_post");
+			case "fin-pe-kind": {
+				S.peKind = el.dataset.k;
+				root.querySelectorAll('[data-act="fin-pe-kind"]').forEach((b) => b.classList.toggle("on", b === el));
+				document.getElementById("pe-sup").hidden = S.peKind !== "supplier_bill";
+				document.getElementById("pe-party").hidden = S.peKind === "supplier_bill";
+				return;
+			}
+			case "fin-pe-save": {
+				const kind = S.peKind || "supplier_bill";
+				el.disabled = true;
+				try {
+					const r = await call("fin_photo_entry", { kind, photo: await photoUrl("b-photo"), supplier: kind === "supplier_bill" ? val("b-sup") : null,
+						party: kind === "supplier_bill" ? null : val("pe-pty"), amount: val("b-amt"), ref_no: val("b-no"), note: val("pe-note") }, true);
+					toast(`✓ ${t("pe_sent")}`); return go(r.go === "bills_to_post" ? "bills_to_post" : "photo_entry");
+				} finally { el.disabled = false; }
+			}
+			case "fin-pe-done": await call("fin_bill_photo_done", { todo: S.pe[i].name }, true); return go("photo_entry");
 			case "fin-post-pi": case "fin-post-si": {
 				el.disabled = true;
 				const d = act === "fin-post-pi" ? S.fb.drafts[i] : S.fi.drafts[i];
@@ -4449,7 +4482,7 @@
 		to_pay: () => finScreen("to_pay", () => renderToPay("to_pay")), pay_approvals: () => renderToPay("pay_approvals"),
 		bills_to_post: () => finScreen("bills_to_post", renderBillsToPost), invoices: () => finScreen("invoices", renderInvoices),
 		expenses: () => finScreen("expenses", renderExpenses), dir_expenses: () => finScreen("dir_expenses"),
-		segment_pnl: renderSegmentWise, month_close: renderMonthWise, gateway: renderGateway, day_book: renderDayBook, cabin_discounts: renderCabinDiscounts, new_product: renderNewProduct,
+		segment_pnl: renderSegmentWise, month_close: renderMonthWise, gateway: renderGateway, day_book: renderDayBook, photo_entry: renderPhotoEntry, cabin_discounts: renderCabinDiscounts, new_product: renderNewProduct,
 		improvement_inbox: renderInbox, dept_visits: renderVisit, erp_gaps: renderGaps, app_users: renderAppUsers, change_list: renderChangeList,
 		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources, customers: renderCustomers, view_member: renderViewMember, complaints: renderComplaints,
 		attendance: renderAttendance, leave_expense: renderLeaveExpense, sales_owner: renderSalesOwner, new_joiner: renderNewJoiner, activities: renderActivities };

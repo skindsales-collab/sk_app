@@ -679,6 +679,16 @@ def fin_bills():
 
 
 @frappe.whitelist(methods=["POST"])
+def fin_photo_entry(kind, photo, supplier=None, party=None, amount=None, ref_no=None, note=None):
+	return finance.photo_entry(_me().user, kind, photo, supplier or None, party or None, amount or None, ref_no or None, note or None)
+
+
+@frappe.whitelist()
+def fin_photo_entries():
+	return finance.photo_entries(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
 def fin_make_bill(bill_no, purchase_order=None, bill_date=None, todo=None, photo=None, purchase_receipt=None, items=None, supplier=None):
 	return finance.make_bill(_me().user, purchase_order or None, bill_no, bill_date, todo, photo, purchase_receipt or None,
 		json.loads(items) if isinstance(items, str) else items, supplier or None)

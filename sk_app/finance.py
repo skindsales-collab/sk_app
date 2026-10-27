@@ -273,6 +273,61 @@ def done_bill_photo(user: str, todo: str) -> dict:
 	return {"ok": True}
 
 
+# ---------- Photo entry (SK 27-Oct: "when she receives an e-invoice or bill she takes a photo and submits, then the
+# further process is captured the earlier way"; "same option she needs for all entries") ----------
+
+# kind -> (label, where Accounts finishes it in ERPNext). Money in / out stays a manual ERPNext entry (SK 27-Oct rule).
+PHOTO_KINDS = {
+	"supplier_bill": ("Supplier bill / e-invoice", None),
+	"expense": ("Expense bill / petty cash voucher", "/app/journal-entry/new?voucher_type=Cash%20Entry"),
+	"money_in": ("Payment received (cheque / UTR)", "/app/payment-entry/new?payment_type=Receive"),
+	"money_out": ("Payment made (bank slip / UTR)", "/app/payment-entry/new?payment_type=Pay"),
+	"other": ("Other document", None),
+}
+PHOTO_TAG = "Photo entry"
+
+
+def photo_entry(user: str, kind: str, photo: str, supplier=None, party=None, amount=None, ref_no=None, note=None) -> dict:
+	"""Shraddha's photo of a bill / e-invoice / voucher / payment proof. A supplier bill joins Bills to Post (Make bill ->
+	draft Purchase Invoice -> Post, as before); every other photo becomes her task with the ERPNext entry to make."""
+	need(user, ACCOUNTS)
+	if kind not in PHOTO_KINDS:
+		frappe.throw(_("Please pick what the photo is"))
+	if not photo:
+		frappe.throw(_("Please take a photo or pick the PDF"))
+	if kind == "supplier_bill":
+		from sk_app.purchase import send_bill
+
+		if not supplier or not frappe.db.exists("Supplier", supplier):
+			frappe.throw(_("Please pick the supplier"))
+		send_bill(user, supplier, photo, amount, ref_no, None, note)
+		return {"kind": kind, "go": "bills_to_post"}
+	label = PHOTO_KINDS[kind][0]
+	extra = [x for x in (party, amount and _("Rs {0}").format(fmt_money(flt(amount))), ref_no and _("Ref {0}").format(ref_no), note) if x]
+	text = f"{PHOTO_TAG} [{kind}]: {_(label)}" + (" · " + " · ".join(extra) if extra else "")
+	todo = frappe.get_doc({"doctype": "ToDo", "allocated_to": user, "description": text, "priority": "High", "date": nowdate()})
+	todo.insert(ignore_permissions=True)
+	attach(photo, "ToDo", todo.name, user)
+	return {"kind": kind, "todo": todo.name, "go": "photo_entries"}
+
+
+def photo_entries(user: str) -> list[dict]:
+	"""Open photo entries (not supplier bills) with the photo and the ERPNext entry to make."""
+	need(user, ACCOUNTS)
+	rows = frappe.get_all("ToDo", filters={"allocated_to": user, "status": "Open", "description": ["like", PHOTO_TAG + " [%"]},
+		fields=["name", "description", "creation"], order_by="creation asc")
+	import re
+
+	for r in rows:
+		m = re.match(re.escape(PHOTO_TAG) + r" \[(\w+)\]: (.*)", frappe.utils.strip_html(r.description or ""), re.S)
+		r["kind"] = m.group(1) if m else "other"
+		r["text"] = m.group(2) if m else r.description
+		r["erp_url"] = PHOTO_KINDS.get(r["kind"], (None, None))[1] or f"/app/todo/{r.name}"
+		r["photo"] = frappe.db.get_value("File", {"attached_to_doctype": "ToDo", "attached_to_name": r.name}, "file_url")
+		r["creation"] = str(r.creation)
+	return rows
+
+
 # ---------- Invoices ----------
 
 def invoices(user: str) -> dict:

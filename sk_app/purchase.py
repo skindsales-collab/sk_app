@@ -282,8 +282,8 @@ def new_supplier(user: str, supplier_name: str, gstin=None, mobile=None, group=N
 
 def send_bill(user: str, supplier: str, photo: str, amount=None, bill_no=None, against=None, note=None) -> dict:
 	"""Supplier bill photo goes to Accounts as a task on the supplier, with the photo; Accounts makes the Purchase
-	Invoice from it (the invoice-to-ERPNext draft is still waiting for SK's OK)."""
-	need(user, PURCHASE, "Stores")
+	Invoice from it. Accounts also sends her own photos of bills / e-invoices this way (SK 27-Oct)."""
+	need(user, PURCHASE, "Stores", "Accounts")
 	if not photo:
 		frappe.throw(_("Please take a photo of the bill"))
 	text = _("Supplier bill from {0}").format(frappe.db.get_value("Supplier", supplier, "supplier_name") or supplier)
