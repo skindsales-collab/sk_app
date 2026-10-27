@@ -2106,8 +2106,32 @@
 			// read line by line across the page: keeps invoice / spec table rows together (default mode splits columns)
 			await ocrWorker.setParameters({ tessedit_pageseg_mode: "4", preserve_interword_spaces: "1" });
 		}
-		const { data } = await ocrWorker.recognize(await shrink(file, 2000));
-		return { ...window.skParseCard(data.text), text: data.text };
+		const page = await shrink(file, 2000);
+		let best = await ocrWorker.recognize(page);
+		// SK 27-Oct test: 7 of 16 photos were taken sideways and read nothing. When little is read, the photo is turned
+		// a quarter at a time and the best reading kept.
+		const score = (d) => (d.text.match(/[A-Za-z]{3,}/g) || []).length * Math.max(d.confidence, 1);
+		if (score(best.data) < 40 * 60) {
+			for (const deg of [90, 270, 180]) {
+				progress("turning photo", deg / 360);
+				const r = await ocrWorker.recognize(turn(page, deg));
+				if (score(r.data) > score(best.data)) best = r;
+			}
+		}
+		const data = best.data;
+		const words = (data.words || []).map((w) => ({ text: w.text, conf: w.confidence }));
+		return { ...window.skParseCard(data.text, { gstins: state.home && state.home.own_gstins }), text: data.text, words };
+	}
+	function turn(canvas, deg) {
+		const c = document.createElement("canvas");
+		const side = deg % 180 !== 0;
+		c.width = side ? canvas.height : canvas.width;
+		c.height = side ? canvas.width : canvas.height;
+		const g = c.getContext("2d");
+		g.translate(c.width / 2, c.height / 2);
+		g.rotate(deg * Math.PI / 180);
+		g.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+		return c;
 	}
 	async function readCard(ev) {
 		const f = ev.target.files[0];

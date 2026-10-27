@@ -67,6 +67,8 @@ def home():
 
 	return {"user": profile.user, "full_name": profile.full_name, "language": profile.language, "v": asset_version(),
 		"mobile": me.get("mobile_no") or me.get("phone"),
+		# photo reading skips our own GSTIN on a supplier's bill (SK 27-Oct test)
+		"own_gstins": [g for g in frappe.get_all("Company", pluck="tax_id") if g],
 		"home": main, "functions": functions,
 		# SK: a person in several functions sees all of them on one Home, one labelled row each
 		"sections": sections,
