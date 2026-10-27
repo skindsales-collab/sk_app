@@ -34,6 +34,22 @@ def attach(file_url: str | None, doctype: str, name: str, user: str):
 		frappe.db.set_value("File", file_name, {"attached_to_doctype": doctype, "attached_to_name": name})
 
 
+def insert_for(doc, user: str):
+	"""Insert as the system, kept in the person's name. ERPNext fills the supplier's payable account while saving and
+	refuses when the person (Store) may not read accounts (SK 27-Oct, Yogesh: "User don't have permissions to
+	select/read this account")."""
+	current = frappe.session.user
+	frappe.set_user("Administrator")
+	try:
+		doc.flags.ignore_permissions = True
+		doc.insert()
+	finally:
+		frappe.set_user(current)
+	frappe.db.set_value(doc.doctype, doc.name, {"owner": user, "modified_by": user}, update_modified=False)
+	doc.owner = doc.modified_by = user
+	return doc
+
+
 def try_submit(doc) -> bool:
 	"""Post the document if ERPNext accepts it (stock available, accounts set); else keep the draft."""
 	frappe.db.savepoint("sk_submit")
@@ -164,8 +180,7 @@ def receive(user: str, purchase_order: str | None, items: list[dict], challan_ph
 	remarks = [x for x in (note, reason and _("Without PO: {0}").format(reason)) if x]
 	if remarks:
 		pr.remarks = "\n".join(remarks)
-	pr.flags.ignore_permissions = True
-	pr.insert()
+	insert_for(pr, user)
 	attach(challan_photo, "Purchase Receipt", pr.name, user)
 	attach(goods_photo, "Purchase Receipt", pr.name, user)
 	return {"name": pr.name, "items": len(pr.items)}
@@ -246,13 +261,18 @@ def issue(user: str, work_order: str, items: list[dict], taken_by=None, job_card
 	se.company = wo.company
 	se.from_bom = 0
 	se.to_warehouse = wo.wip_warehouse
-	if job_card:
+	# ERPNext 16 needs each row tied to the job card's material row (SK 27-Oct, Yogesh: "job card item reference is
+	# missing"); when an item is not on the job card, the issue stays against the job (work order) only
+	card_rows = {r.item_code: r.name for r in frappe.get_all("Job Card Item", filters={"parent": job_card, "parenttype": "Job Card"},
+		fields=["name", "item_code"])} if job_card else {}
+	use_card = bool(job_card) and all(i["item_code"] in card_rows for i in items)
+	if use_card:
 		se.job_card = job_card
 	for i in items:
 		from_wh = i.get("warehouse") or source.get(i["item_code"]) or wo.source_warehouse or _default_store(i["item_code"], wo.company)
 		se.append("items", {"item_code": i["item_code"], "qty": flt(i["qty"]), "s_warehouse": from_wh, "t_warehouse": wo.wip_warehouse,
-			**uom(i["item_code"])})
-	se.remarks = _("Issued from SK App to {0}").format(taken_by or "-")
+			**({"job_card_item": card_rows[i["item_code"]]} if use_card else {}), **uom(i["item_code"])})
+	se.remarks = _("Issued from SK App to {0}").format(taken_by or "-") + (f" · {_('Job card')} {job_card}" if job_card and not use_card else "")
 	se.flags.ignore_permissions = True
 	se.insert()
 	attach(photo, "Stock Entry", se.name, user)
