@@ -44,6 +44,9 @@ def after_migrate():
 
 	from sk_app.sales_owner import ensure_sales_persons
 
+	from sk_app.customer_names import ensure as customer_names
+
+	customer_names()  # SK 27-Oct points 14 / 19: customers by name, not CUS- numbers
 	ensure_sales_persons()  # SK 27-Oct: no salesperson had an ERPNext Sales Person, so Tally sales counted for nobody
 	ensure_statuses()  # SK 27-Oct: New, Qualified, Drawing, Quotation, Negotiations, Deal Won, Junk Lead, Deal Loss
 	from sk_app.training import seed_lessons
