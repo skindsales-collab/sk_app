@@ -1473,3 +1473,66 @@ def flow_make_work_order(sales_order, so_item):
 	from sk_app import erp_flow
 
 	return erp_flow.make_work_order(_me().user, sales_order, so_item)
+
+
+# ---------- standard cabin quotation (SK 27-Oct): price from SK's rate card only ----------
+
+def _cabin_user():
+	profile = _me()
+	if not {"Sales", "Marketing", "Management", "Machine Shifting"} & set(logins.profile_functions(profile.user) or [profile.home]):
+		frappe.throw(_("Only sales can make quotations"), frappe.PermissionError)
+	return profile.user
+
+
+@frappe.whitelist()
+def cabin_quote_options():
+	from sk_app import cabin_quote
+
+	return cabin_quote.options(_cabin_user())
+
+
+@frappe.whitelist()
+def cabin_quote_price(req):
+	from sk_app import cabin_quote
+
+	_cabin_user()
+	return cabin_quote.price(json.loads(req) if isinstance(req, str) else req)
+
+
+@frappe.whitelist()
+def cabin_quote_open(deal=None, lead=None):
+	from sk_app import cabin_quote, crm
+
+	_cabin_user()
+	if lead and not deal:
+		crm._check("CRM Lead", lead, "read")
+		deal = frappe.db.get_value("CRM Deal", {"lead": lead}, "name")
+	if not deal:
+		return []
+	crm._check("CRM Deal", deal, "read")
+	from sk_app.erp_flow import customer_of
+
+	customer = customer_of(deal)
+	return cabin_quote.open_quotes(customer) if customer else []
+
+
+@frappe.whitelist(methods=["POST"])
+def cabin_quote_make(req, deal=None, lead=None, discount_pct=0, revise=None):
+	from sk_app import cabin_quote
+
+	return cabin_quote.make(_cabin_user(), json.loads(req) if isinstance(req, str) else req, deal or None, lead or None,
+		discount_pct=discount_pct, revise=revise or None)
+
+
+@frappe.whitelist()
+def cabin_discounts():
+	from sk_app import cabin_quote
+
+	return cabin_quote.discount_requests(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def cabin_discount_decide(quotation, ok):
+	from sk_app import cabin_quote
+
+	return cabin_quote.decide_discount(_me().user, quotation, ok)

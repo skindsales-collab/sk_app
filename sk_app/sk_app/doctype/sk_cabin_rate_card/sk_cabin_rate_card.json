@@ -1,0 +1,24 @@
+{
+ "doctype": "DocType",
+ "name": "SK Cabin Rate Card",
+ "module": "SK App",
+ "custom": 0,
+ "issingle": 1,
+ "engine": "InnoDB",
+ "creation": "2026-10-27 13:00:00.000000",
+ "modified": "2026-10-27 13:00:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "description": "SK 27-Oct: one rate card for every standard cabin quotation, so the same requirement gets the same price from any salesperson. Only SK / System Manager changes it; every quotation keeps the version it used.",
+ "field_order": ["version", "rate_card", "note"],
+ "fields": [
+  {"fieldname": "version", "fieldtype": "Data", "label": "Version", "reqd": 1, "description": "Change the version whenever a rate changes, e.g. RC-2026-11-01-v2"},
+  {"fieldname": "rate_card", "fieldtype": "Code", "options": "JSON", "label": "Rate card (JSON)", "reqd": 1},
+  {"fieldname": "note", "fieldtype": "Small Text", "label": "Note"}
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1},
+  {"role": "Sales Manager", "read": 1},
+  {"role": "Sales User", "read": 1}
+ ]
+}

@@ -478,3 +478,7 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 .sk-gw-key{display:block;font-style:normal;font-size:10px;background:#4a5f82;color:#fff;border-radius:3px;margin:2px auto 0;padding:0 4px;width:max-content}
 a.sk-tile{text-decoration:none;color:inherit;position:relative}
 .sk-gw-ext{position:absolute;top:3px;right:6px;font-size:11px;color:#5b6577}
+
+/* SK 27-Oct: cabin quotation option rows: tick on the left, qty on the right */
+.sk-cq-opt { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: nowrap; }
+.sk-cq-opt .sk-qty { width: 72px; flex: none; }
