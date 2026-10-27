@@ -50,6 +50,20 @@ def insert_for(doc, user: str):
 	return doc
 
 
+def submit_for(doc, user: str) -> bool:
+	"""Post by the document's owner in the app (Store posts its receipt): ERPNext's own submit and checks, run by the
+	system because posting writes accounts the store login may not read (SK 27-Oct: receipt stuck in draft)."""
+	current = frappe.session.user
+	frappe.set_user("Administrator")
+	try:
+		posted = try_submit(doc)
+	finally:
+		frappe.set_user(current)
+	if posted:
+		frappe.db.set_value(doc.doctype, doc.name, "modified_by", user, update_modified=False)
+	return posted
+
+
 def try_submit(doc) -> bool:
 	"""Post the document if ERPNext accepts it (stock available, accounts set); else keep the draft."""
 	frappe.db.savepoint("sk_submit")
@@ -151,6 +165,7 @@ def receive(user: str, purchase_order: str | None, items: list[dict], challan_ph
 	challan photo. Quality / Store owner posts it after checking."""
 	need(user, STORE)
 	qty = {i.get("po_detail") or i.get("item_code"): flt(i.get("qty")) for i in items or []}
+	rate = {i.get("item_code"): flt(i.get("rate")) for i in items or [] if i.get("item_code")}
 	if purchase_order:
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
@@ -171,7 +186,7 @@ def receive(user: str, purchase_order: str | None, items: list[dict], challan_ph
 		pr.company = _company()
 		for code, q in qty.items():
 			if q > 0:
-				pr.append("items", {"item_code": code, "qty": q, "received_qty": q, **uom(code)})
+				pr.append("items", {"item_code": code, "qty": q, "received_qty": q, "rate": flt(rate.get(code)), **uom(code)})
 	if not pr.items:
 		frappe.throw(_("Please give the quantity received"))
 	pr.posting_date = nowdate()
@@ -184,6 +199,49 @@ def receive(user: str, purchase_order: str | None, items: list[dict], challan_ph
 	attach(challan_photo, "Purchase Receipt", pr.name, user)
 	attach(goods_photo, "Purchase Receipt", pr.name, user)
 	return {"name": pr.name, "items": len(pr.items)}
+
+
+def receipts_to_post(user: str) -> list[dict]:
+	"""Draft receipts waiting for the store's check and Post (stock goes up only when posted)."""
+	need(user, STORE)
+	rows = frappe.get_all("Purchase Receipt", filters={"docstatus": 0}, fields=["name", "supplier", "supplier_name", "posting_date",
+		"owner", "supplier_delivery_note", "grand_total", "remarks"], order_by="creation desc", limit=50)
+	for r in rows:
+		r["items"] = frappe.get_all("Purchase Receipt Item", filters={"parent": r.name}, fields=["item_code", "item_name", "qty", "uom", "rate"],
+			order_by="idx asc")
+		r["by"] = frappe.utils.get_fullname(r.owner)
+		r["posting_date"] = str(r.posting_date)
+		r["reason"] = frappe.db.get_value("Comment", {"reference_doctype": "Purchase Receipt", "reference_name": r.name,
+			"content": ["like", "Kept as draft%"]}, "content", order_by="creation desc")
+	return rows
+
+
+def post_receipt(user: str, name: str, rates: dict | None = None) -> dict:
+	"""Store checked the material: post the receipt (stock goes up). A rate missing on a receipt without PO is taken from
+	the supplier's bill, as ERPNext needs it to value the stock."""
+	need(user, STORE)
+	doc = frappe.get_doc("Purchase Receipt", name)
+	if doc.docstatus != 0:
+		frappe.throw(_("{0} is already posted").format(name))
+	if rates:
+		for row in doc.items:
+			if flt(rates.get(row.item_code)) > 0:
+				row.rate = flt(rates[row.item_code])
+		doc.flags.ignore_permissions = True
+		doc.save()
+	posted = submit_for(doc, user)
+	reason = None if posted else frappe.db.get_value("Comment", {"reference_doctype": "Purchase Receipt", "reference_name": name,
+		"content": ["like", "Kept as draft%"]}, "content", order_by="creation desc")
+	return {"name": name, "posted": posted, "reason": reason}
+
+
+def drop_receipt(user: str, name: str) -> dict:
+	"""A receipt saved twice by mistake: delete the extra draft (only drafts; a posted one is cancelled in ERPNext)."""
+	need(user, STORE)
+	if frappe.db.get_value("Purchase Receipt", name, "docstatus") != 0:
+		frappe.throw(_("Only a draft can be removed"))
+	frappe.delete_doc("Purchase Receipt", name, ignore_permissions=True)
+	return {"ok": True}
 
 
 # ---------- Issue to a job ----------

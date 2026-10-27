@@ -52,3 +52,17 @@ class TestBillNoPo(IntegrationTestCase):
 		self.assertEqual(store.cabin_size("Prod-0009-30ft x 10ft"), "30ft x 10ft")
 		self.assertEqual(store.cabin_size("Paint"), "Paint")
 		self.assertEqual(store.job_card_cabin(None), "")
+
+	def test_store_posts_its_receipt(self):
+		"""SK 27-Oct: Yogesh's receipt stayed a draft (no stock); Store checks and posts it in the app."""
+		pr = run(STORE_U, store.receive, None, [{"item_code": RAW, "qty": 2, "rate": 0}], supplier=SUPPLIER, reason="local buy")
+		self.assertIn(pr["name"], [r["name"] for r in run(STORE_U, store.receipts_to_post)])
+		r = run(STORE_U, store.post_receipt, pr["name"], {RAW: 150})
+		self.assertTrue(r["posted"], r.get("reason"))
+		doc = frappe.get_doc("Purchase Receipt", pr["name"])
+		self.assertEqual((doc.docstatus, doc.items[0].rate, doc.owner), (1, 150, STORE_U))
+		extra = run(STORE_U, store.receive, None, [{"item_code": RAW, "qty": 2, "rate": 150}], supplier=SUPPLIER, reason="saved twice")
+		run(STORE_U, store.drop_receipt, extra["name"])
+		self.assertFalse(frappe.db.exists("Purchase Receipt", extra["name"]))
+		with self.assertRaises(frappe.ValidationError):
+			run(STORE_U, store.drop_receipt, pr["name"])

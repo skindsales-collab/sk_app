@@ -770,6 +770,21 @@ def store_open_pos():
 	return store.open_purchase_orders(_me().user)
 
 
+@frappe.whitelist()
+def store_receipts_to_post():
+	return store.receipts_to_post(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def store_post_receipt(name, rates=None):
+	return store.post_receipt(_me().user, name, json.loads(rates) if isinstance(rates, str) else rates)
+
+
+@frappe.whitelist(methods=["POST"])
+def store_drop_receipt(name):
+	return store.drop_receipt(_me().user, name)
+
+
 @frappe.whitelist(methods=["POST"])
 def store_receive(items, purchase_order=None, challan_photo=None, goods_photo=None, note=None, supplier=None, reason=None, bill_no=None):
 	return store.receive(_me().user, purchase_order, _list(items), challan_photo, goods_photo, note, supplier, reason, bill_no)
