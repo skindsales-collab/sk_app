@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import activities, ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, sales_owner, segments, store, training, view_member, work
+from sk_app import activities, ai_desk, applock, calendar_view, flows, claude, cold_leads, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, sales_owner, segments, store, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -101,7 +101,8 @@ def _badges(user, functions):
 	try:
 		return {**store.badges(user, functions), **purchase.badges(user, functions), **production.badges(user, functions),
 			**quality.badges(user, functions), **finance.badges(user, functions), **ai_desk.badges(user, functions),
-			**({"mail": n} if (n := mailbox.badge(user)) else {}), **complaints.badge(user), **hr.badges(user, functions)}
+			**({"mail": n} if (n := mailbox.badge(user)) else {}), **complaints.badge(user), **hr.badges(user, functions),
+			**cold_leads.badge(user, functions)}
 	except Exception:
 		frappe.log_error("SK App badges")
 		return {}
@@ -166,6 +167,14 @@ def my_leads():
 	leads = rank_items(work.open_leads(profile.user), now)
 	deals = rank_items(work.open_deals(profile.user), now)
 	return {"leads": [_item_dict(i) for i in leads], "deals": [_item_dict(i) for i in deals]}
+
+
+@frappe.whitelist()
+def cold_leads_list():
+	"""SK 27-Oct: cold-calling leads on their own list, apart from My Leads; not called yet first, then the longest ago."""
+	profile = _me()
+	leads = sorted(work.open_leads(profile.user, cold=True), key=lambda i: (i.extra["called"], i.extra.get("last_call") or ""))
+	return {"leads": [_item_dict(i) for i in leads]}
 
 
 @frappe.whitelist()

@@ -17,7 +17,8 @@ FUNCTIONS = {
 	"Sales": {
 		"label": {"English": "Sales", "Marathi": "विक्री"},
 		# point 17 (SK's mock-up 26-Oct): own icons in work order New Lead → My Leads → My Deals → Customers → Follow-up → Complaints
-		"tiles": ["my_day", "new_lead", "my_leads", "my_deals", "customers", "follow_up", "complaints", *CONTACT_TILES, "activities", "reminders", "library",
+		# SK 27-Oct: Cold Calling (the marketing call list) on its own icon next to My Leads
+		"tiles": ["my_day", "new_lead", "my_leads", "cold_leads", "my_deals", "customers", "follow_up", "complaints", *CONTACT_TILES, "activities", "reminders", "library",
 			"day_report", "my_kpi", "dsi", "problem", "training"],
 		"live": True,
 		# not Sales Manager: in Frappe CRM that role shows every lead of the company (SK 26-Oct: each salesperson sees
@@ -27,7 +28,7 @@ FUNCTIONS = {
 	},
 	"Marketing": {
 		"label": {"English": "Marketing", "Marathi": "मार्केटिंग"},
-		"tiles": ["my_day", "new_lead", "my_leads", "follow_up", "complaints", *CONTACT_TILES, "activities", "reminders", "library", "day_report",
+		"tiles": ["my_day", "new_lead", "my_leads", "cold_leads", "follow_up", "complaints", *CONTACT_TILES, "activities", "reminders", "library", "day_report",
 			"my_kpi", "dsi", "problem", "training"],
 		"live": True,  # uses the same CRM lead screens as Sales
 		"erpnext_roles": ["Sales User"],
@@ -186,9 +187,10 @@ def function_list(profile) -> list[str]:
 # sequence; applicable on each screen". Level 1 = function icons (or, for one function, its flow + these few
 # icons), level 2 = the function page, level 3 = "More" with the rest in groups. Order = the order the work goes.
 MAIN_TILES = {
-	# main screen Rev 2 (SK 26-Oct): four own icons; a sales manager gets Team Leads in place of My Deals
-	"Sales": ["new_lead", "my_leads", "follow_up", "team_leads", "my_deals"],
-	"Marketing": ["new_lead", "my_leads", "follow_up", "my_deals"],
+	# main screen Rev 2 (SK 26-Oct): four own icons. SK 27-Oct: Cold Calling in place of My Deals (the Quotation /
+	# Negotiations arrows open My Deals); a sales manager gets Team Leads in place of Follow-up
+	"Sales": ["new_lead", "my_leads", "cold_leads", "team_leads", "follow_up", "my_deals"],
+	"Marketing": ["new_lead", "my_leads", "cold_leads", "follow_up", "my_deals"],
 	"Machine Shifting": ["my_deals", "customers", "site_checklist", "complaints"],
 	"Production": ["to_plan", "job_cards", "need_material", "order_board"],
 	"Quality": ["inspect", "final_check", "non_conformance", "el_points"],

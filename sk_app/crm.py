@@ -125,10 +125,16 @@ def follow_up(user: str, for_manager: bool = False) -> list[dict]:
 	lead_filters = {"lead_owner": user, "converted": 0}
 	if closed_leads:
 		lead_filters["status"] = ["not in", closed_leads]
+	from sk_app import cold_leads
+
+	cold_sources = cold_leads.sources()
 	for r in get("CRM Lead", filters=lead_filters, limit_page_length=0, order_by="modified desc",
 			fields=["name", "lead_name", "organization", "status", "mobile_no", "phone", "email", "source",
 				"response_by", "first_responded_on", "creation"]):
 		task = tasks.get(("CRM Lead", r.name))
+		# SK 27-Oct: cold-calling leads are on the Cold Calling list; here only when a call-back task is planned
+		if not task and cold_leads.is_cold(r.source, r.status, cold_sources):
+			continue
 		due, why = None, None
 		if task and task.due_date:
 			due, why = task.due_date, task.title
