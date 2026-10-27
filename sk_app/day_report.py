@@ -177,3 +177,43 @@ def review(manager: str, report: str, rating: str | None = None, comment: str | 
 def my_history(user: str, days: int = 14) -> list[dict]:
 	return frappe.get_all("SK Day Report", filters={"user": user, "date": [">=", add_to_date(getdate(), days=-cint(days))]},
 		fields=["name", "date", "work_done", "on_time", "manager_rating", "manager_comment"], order_by="date desc")
+
+
+def team_screen(manager: str, people: list[dict]) -> dict:
+	"""SK 27-Oct point 7: the sales manager's team screen in the standard format ("in arrow way"): each person's
+	arrows (New → ... → Negotiations), month-to-date sale against their target, calls today and overdue, and the
+	team's "Decide now": leads not called after 24 hours, quotations waiting over 7 days, the person most behind."""
+	from frappe.utils import add_to_date, now_datetime, nowdate
+
+	from sk_app import comms, flows, home_kpi, lead_status
+	from sk_app.dashboards import _has, _safe
+
+	members = []
+	for p in people:
+		steps = _safe(lambda p=p: flows.sales(p["user"], only_self=True), []) or []
+		card = _safe(lambda p=p: home_kpi.sales(p["user"], only_self=True), None)
+		actual = due = target = 0
+		if card:
+			pts = card["week"]["lines"][0]["points"]
+			actual, due, target = (pts[-1] if pts else 0), (card["week"]["target"][-1] if card["week"]["target"] else 0), card["target"]
+		members.append({"user": p["user"], "full_name": p["full_name"],
+			"steps": [{"key": s["key"], "label": s["label"], "count": s["count"], "late": s["late"], "c": s["c"]} for s in steps],
+			"actual": actual, "due": due, "target": target, "pct": round(actual * 100 / due) if due else None,
+			"calls_today": _safe(lambda p=p: comms.call_totals(p["user"], nowdate())["calls"], 0) or 0})
+	users = [p["user"] for p in people]
+	decide = {"not_called": 0, "quotes_waiting": 0, "behind": None}
+	if _has("CRM Lead"):
+		closed = frappe.get_all("CRM Lead Status", filters={"type": ["in", ["Won", "Lost", "Junk"]]}, pluck="name")
+		decide["not_called"] = frappe.db.count("CRM Lead", {"lead_owner": ["in", users], "converted": 0, "first_responded_on": ["is", "not set"],
+			"status": ["not in", closed or [""]], "creation": ["<", add_to_date(now_datetime(), hours=-24)]})
+		decide["quotes_waiting"] = frappe.db.count("CRM Lead", {"lead_owner": ["in", users], "status": "Quotation",
+			"modified": ["<", add_to_date(now_datetime(), days=-7)]})
+	if _has("CRM Deal"):
+		quote_st = [s for s in frappe.get_all("CRM Deal Status", pluck="name") if lead_status.step_of(s, deal=True) == "Quotation"]
+		if quote_st:
+			decide["quotes_waiting"] += frappe.db.count("CRM Deal", {"deal_owner": ["in", users], "status": ["in", quote_st],
+				"modified": ["<", add_to_date(now_datetime(), days=-7)]})
+	ranked = sorted([m for m in members if m["pct"] is not None and m["target"]], key=lambda m: m["pct"])
+	if ranked and ranked[0]["pct"] < 100:
+		decide["behind"] = {"user": ranked[0]["user"], "full_name": ranked[0]["full_name"], "pct": ranked[0]["pct"]}
+	return {"members": members, "decide": decide}

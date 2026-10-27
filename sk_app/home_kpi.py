@@ -210,10 +210,10 @@ def _invoiced(start, end):
 	return dashboards._invoiced(start, end)
 
 
-def sales(user: str, segment=None, fn="Sales") -> dict:
+def sales(user: str, segment=None, fn="Sales", only_self=False) -> dict:
 	from sk_app.flows import _owners
 
-	owners = _owners(user)
+	owners = [user] if only_self else _owners(user)
 	if segment == segments.NON_CABIN:
 		owners = None  # Aditya handles every Non-Cabin order (SK 26-Oct)
 	title = "Non-Cabin sale" if segment == segments.NON_CABIN else "PO booking"

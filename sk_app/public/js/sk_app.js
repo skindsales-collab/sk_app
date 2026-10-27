@@ -848,9 +848,9 @@
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
 	T.Marathi.mic_network = "आवाजासाठी इंटरनेट हवे. मोबाईल डेटा तपासा, किंवा कीबोर्डवरील 🎤 वापरा.";
 	Object.assign(T.English, { fl_workflow: "work flow", fl_loading: "live figures loading", fl_days: "days", fl_oldest: "oldest",
-		fl_on_time: "all on time", fl_work: "Work on it", fl_first: "Showing the first", show_more: "Show more", loading: "Loading…", fl_error: "Work flow could not load, AI team informed", checked_submit: "Checked, submit", check_marked: "Read from the photo: check the coloured boxes (red = not sure), correct by typing or 🎤, then tap Checked, submit", convert_deal: "Convert to Deal", converted_ok: "Deal made ✓" });
+		fl_on_time: "all on time", fl_work: "Work on it", fl_first: "Showing the first", show_more: "Show more", loading: "Loading…", fl_error: "Work flow could not load, AI team informed", tm_not_called: "leads not called after 24 h", tm_quotes_wait: "quotations waiting over 7 days", tm_behind: "most behind target", tm_due_today: "due by today", tm_all_leads: "All leads and deals", checked_submit: "Checked, submit", check_marked: "Read from the photo: check the coloured boxes (red = not sure), correct by typing or 🎤, then tap Checked, submit", convert_deal: "Convert to Deal", converted_ok: "Deal made ✓" });
 	Object.assign(T.Marathi, { fl_workflow: "कामाचा क्रम", fl_loading: "आकडे येत आहेत", fl_days: "दिवस", fl_oldest: "सर्वात जुने",
-		fl_on_time: "सर्व वेळेवर", fl_work: "काम करा", fl_first: "पहिले दाखवले", show_more: "आणखी दाखवा", loading: "येत आहे…", fl_error: "कामाचा क्रम उघडला नाही, AI टीमला कळवले", checked_submit: "तपासले, सबमिट करा", check_marked: "फोटोवरून वाचले: रंगीत बॉक्स तपासा (लाल = खात्री नाही), टाइप किंवा 🎤 ने दुरुस्त करा, मग तपासले, सबमिट करा दाबा", convert_deal: "डील बनवा", converted_ok: "डील तयार ✓" });
+		fl_on_time: "सर्व वेळेवर", fl_work: "काम करा", fl_first: "पहिले दाखवले", show_more: "आणखी दाखवा", loading: "येत आहे…", fl_error: "कामाचा क्रम उघडला नाही, AI टीमला कळवले", tm_not_called: "24 तासांनंतरही कॉल न केलेले लीड", tm_quotes_wait: "7 दिवसांपेक्षा जास्त थांबलेली कोटेशन", tm_behind: "लक्ष्यापासून सर्वात मागे", tm_due_today: "आजपर्यंत अपेक्षित", tm_all_leads: "सर्व लीड व डील", checked_submit: "तपासले, सबमिट करा", check_marked: "फोटोवरून वाचले: रंगीत बॉक्स तपासा (लाल = खात्री नाही), टाइप किंवा 🎤 ने दुरुस्त करा, मग तपासले, सबमिट करा दाबा", convert_deal: "डील बनवा", converted_ok: "डील तयार ✓" });
 	Object.assign(T.English, { lk_locked: "Locked", lk_touch: "Touch finger or look at the phone", lk_open_face: "Open with face / finger",
 		lk_ask_ceo: "Not working or new phone? Ask the CEO to reset it.", lk_pin: "Your PIN (the one you log in with)", lk_open: "Open", lk_relogin: "Forgot PIN? Log in again",
 		lk_cancelled: "Not checked. Tap the button and touch the finger sensor or look at the phone.",
@@ -3986,21 +3986,53 @@
 
 	// Sales manager: the whole team's leads and deals with his own (SK, 26-Oct-2026)
 	let teamPerson = "";
+	// SK 27-Oct point 7: the team screen in the standard format: team graph, team arrows, Decide now, one card per
+	// person with their own arrows ("in arrow way"); the long list of leads only after a tap
+	let teamList = false;
 	async function renderTeamLeads() {
-		const d = await call("team_follow_up", teamPerson ? { person: teamPerson } : {});
-		const chip = (u, label) => `<button class="sk-chip ${teamPerson === u ? "on" : ""}" data-teamp="${esc(u)}">${esc(label)}</button>`;
-		const people = d.people.map((p) => `<li class="sk-item"><button class="sk-fu-main" data-teamp="${esc(p.user)}"><div class="sk-item-title">${esc(p.full_name)}</div>
-			<div class="sk-item-meta">${p.open} ${t("open_items")} · ${p.new} ${t("new_badge")} · <span class="${p.overdue ? "sk-due" : ""}">${p.overdue} ${t("overdue")}</span>${p.deal_value ? ` · ₹${Number(p.deal_value).toLocaleString("en-IN")}` : ""}</div></button>
-			${p.score != null ? `<b>${Math.round(p.score)}%</b>` : ""}${state.viewAs ? "" : `<button class="sk-chip" data-act="view-enter" data-user="${esc(p.user)}" data-uname="${esc(p.full_name)}" title="${t("view_member")}">👀</button>`}</li>`).join("");
+		const [d, kd, fd] = await Promise.all([call("team_follow_up", teamPerson ? { person: teamPerson } : {}),
+			state.viewAs ? Promise.resolve(null) : call("my_home_kpi", {}, false, true).catch(() => null), call("my_flow").catch(() => null)]);
+		if (kd) { kpiData = kd; kpiAt = Date.now(); kpiWho = whoKey(); }
+		if (fd) { flowData = fd; flowAt = Date.now(); flowWho = whoKey(); }
+		const dec = d.decide || {};
+		const cells = [
+			`<button class="sk-dec ${dec.not_called ? "bad" : "ok"}" data-tlist="1"><b>${dec.not_called || "✓"}</b><span>${t("tm_not_called")}</span></button>`,
+			`<button class="sk-dec ${dec.quotes_waiting ? "bad" : "ok"}" data-tlist="1"><b>${dec.quotes_waiting || "✓"}</b><span>${t("tm_quotes_wait")}</span></button>`,
+			dec.behind ? `<button class="sk-dec bad" data-teamp="${esc(dec.behind.user)}"><b>${dec.behind.pct}%</b><span>${esc(dec.behind.full_name)}</span><small>${t("tm_behind")}</small></button>` : ""];
+		const col = (c) => ({ red: "r", amber: "a", green: "g" }[c] || "b");
+		const people = Object.fromEntries(d.people.map((p) => [p.user, p]));
+		const cards = (d.members || []).map((m) => {
+			const p = people[m.user] || {};
+			const bar = m.target ? `<div class="sk-tbar"><i style="width:${Math.min(100, m.due ? m.actual * 100 / m.due : 0)}%" class="${m.pct != null && m.pct < 80 ? "bad" : "ok"}"></i></div>
+				<div class="sk-item-meta">₹${kAmt(m.actual)} / ₹${kAmt(m.due)} ${t("tm_due_today")} · ${t("k_target")} ₹${kAmt(m.target)}</div>` : `<div class="sk-item-meta">${t("k_no_target")}</div>`;
+			const arrows = m.steps.map((st) => `<span class="sk-mini3 ${col(st.c)}" title="${esc(st.label)}"><b>${st.count}</b><small>${esc(st.label.replace(" (month)", ""))}</small></span>`).join("");
+			return `<li class="sk-tcard"><div class="sk-row"><button class="sk-fu-main sk-grow" data-teamp="${esc(m.user)}"><div class="sk-item-title">${esc(m.full_name)}${m.pct != null ? ` · <b class="${m.pct < 80 ? "sk-due" : "sk-ok"}">${m.pct}%</b>` : ""}</div></button>
+				${state.viewAs ? "" : `<button class="sk-chip" data-act="view-enter" data-user="${esc(m.user)}" data-uname="${esc(m.full_name)}" title="${t("view_member")}">👀</button>`}</div>
+				${bar}<div class="sk-mini3row">${arrows}</div>
+				<div class="sk-item-meta">📞 ${m.calls_today} ${t("today")} · <span class="${p.overdue ? "sk-due" : ""}">${p.overdue || 0} ${t("overdue")}</span> · ${p.open || 0} ${t("open_items")}</div></li>`;
+		}).join("");
 		const rows = d.rows.map((r) => `<li class="sk-fu ${r.overdue ? "late" : r.new ? "new" : ""}"><button class="sk-fu-main" data-open="${esc(r.doctype)}" data-name="${esc(r.name)}">
 			<div class="sk-item-title">${esc(r.title)} ${r.new ? `<span class="sk-badge">${t("new_badge")}</span>` : ""}${r.overdue ? `<span class="sk-badge bad">${t("overdue")}</span>` : ""}</div>
 			<div class="sk-item-meta">👤 ${esc(r.owner_name)} · ${esc(r.status || "")} · ${r.doctype === "CRM Deal" ? t("deals") : t("leads")}</div>
 			${r.next || r.due ? `<div class="sk-item-meta">${t("next")}: ${esc(r.next || "")} ${r.due ? "· " + when(r.due) : ""}</div>` : ""}
 			${r.last ? `<div class="sk-item-meta">${t("last")}: ${esc(r.last.text)} · ${when(r.last.on)}</div>` : ""}</button>${contactButtons(r)}</li>`).join("");
-		root.innerHTML = header(t("team_leads")) + `<main><ul class="sk-list">${people}</ul>
-			<div class="sk-row sk-wrap sk-gap">${chip("", t("all"))}${d.people.map((p) => chip(p.user, p.full_name)).join("")}</div>
-			<ul class="sk-list sk-gap">${rows || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+		const chip = (u, label) => `<button class="sk-chip ${teamPerson === u ? "on" : ""}" data-teamp="${esc(u)}">${esc(label)}</button>`;
+		const list = teamList || teamPerson ? `<div class="sk-row sk-wrap sk-gap">${chip("", t("all"))}${d.people.map((p) => chip(p.user, p.full_name)).join("")}</div>
+			<ul class="sk-list sk-gap">${rows || `<li class="sk-empty">${t("nothing")}</li>`}</ul>`
+			: `<button class="sk-btn wide sk-gap" data-tlist="1">📋 ${t("tm_all_leads")} (${d.rows.length})</button>`;
+		root.innerHTML = header(t("team_leads")) + `<main>
+			${kd && kd.chart ? `<div class="sk-kpibox">${kpiHtml()}</div>` : ""}
+			${fd ? `<div class="sk-flowbox">${flow3dHtml("Sales")}</div>` : ""}
+			<div class="sk-h sk-dech">⚡ ${t("d_title")}</div><div class="sk-decs">${cells.join("")}</div>
+			<ul class="sk-list sk-gap">${cards}</ul>${list}</main>`;
 	}
+	document.addEventListener("click", (ev) => {
+		const b = ev.target.closest("[data-tlist]");
+		if (!b || !root.contains(b)) return;
+		ev.stopPropagation();
+		teamList = true;
+		renderTeamLeads().then(() => { const l = root.querySelector(".sk-list.sk-gap:last-of-type"); if (l) l.scrollIntoView(); });
+	}, true);
 
 	// ---------- AI & ERP desk (Samir, points 9a / 9d / 9e) ----------
 	async function renderInbox() {

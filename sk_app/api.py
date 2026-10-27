@@ -918,7 +918,7 @@ def team_follow_up(person=None):
 		if not person or person == p["user"]:
 			rows += [{**r, "owner": p["user"], "owner_name": p["full_name"]} for r in items]
 	rows.sort(key=lambda r: (not r["overdue"], not r["new"]))
-	return {"people": summary, "rows": rows}
+	return {"people": summary, "rows": rows, **day_report.team_screen(profile.user, people)}
 
 # ---------- Production + subcontractors (SK draft F03) ----------
 

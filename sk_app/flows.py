@@ -78,8 +78,9 @@ def _in(field: str, owners) -> dict:
 
 # ---------- flows ----------
 
-def sales(user: str, segment=None) -> list[dict]:
-	owners = _owners(user)
+def sales(user: str, segment=None, only_self=False) -> list[dict]:
+	"""only_self: the person's own work only (one member's arrows on the sales manager's team screen)."""
+	owners = [user] if only_self else _owners(user)
 	seg = dashboards._crm_seg(segment)
 	start = get_first_day(getdate())
 	stages = []
