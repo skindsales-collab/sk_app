@@ -674,7 +674,7 @@
 		camera: "Camera", gallery: "Gallery / screenshot", pdf_file: "PDF / file", retake: "Retake", remove: "Remove",
 		uploading: "Sending…", uploaded: "Sent ✓", upload_retry: "Network weak, trying again…",
 		open_chrome: "Mic / camera work best in Chrome. Tap here to open the SK App in Chrome.",
-		gateway: "Accounts Gateway", day_book: "Day Book", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
+		gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
 		gw_masters: "Masters", gw_transactions: "Transactions", gw_utilities: "Utilities", gw_reports: "Reports", gw_more: "More reports",
 		gw_desk: "Opens in ERPNext", gw_pending: "waiting", db_particulars: "Particulars", db_none: "No vouchers on this day",
 		cash_today: "Cash / Bank", to_collect: "Receivables", to_pay: "Payables", bills_to_post: "Purchase Invoice and Debit Note",
@@ -706,7 +706,7 @@
 		camera: "कॅमेरा", gallery: "गॅलरी / स्क्रीनशॉट", pdf_file: "PDF / फाईल", retake: "पुन्हा घ्या", remove: "काढा",
 		uploading: "पाठवत आहे…", uploaded: "पाठवले ✓", upload_retry: "नेटवर्क कमी, पुन्हा प्रयत्न…",
 		open_chrome: "माईक / कॅमेरा Chrome मध्ये नीट चालतात. SK App Chrome मध्ये उघडण्यासाठी येथे दाबा.",
-		gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
+		gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
 		gw_masters: "मास्टर्स", gw_transactions: "व्यवहार", gw_utilities: "युटिलिटी", gw_reports: "अहवाल", gw_more: "आणखी अहवाल",
 		gw_desk: "ERPNext मध्ये उघडते", gw_pending: "बाकी", db_particulars: "तपशील", db_none: "या दिवशी व्हाउचर नाही",
 		cash_today: "कॅश / बँक", to_collect: "येणे (Receivables)", to_pay: "देणे (Payables)", bills_to_post: "खरेदी बिल आणि डेबिट नोट",
@@ -751,6 +751,12 @@
 	// SK 26-Oct: short main screen with levels, SAS, Leadership & Strategy, Target Action Plan, receipt bill check
 	Object.assign(T.English, {
 		co_flow: "Company flow", all_dash: "All dashboards", to_plan: "Orders to plan", fl_order_received: "Order received → Sales Order", fl_confirm: "Confirm order (factory can plan)",
+		cq_title: "Cabin quotation", cq_why: "Price from SK's rate card: the same cabin gets the same price from anyone. You cannot type the price.",
+		cq_type: "Cabin type", cq_design: "Other (LGSF, modular, container, bigger): send to design", cq_l: "Length (ft)", cq_w: "Width (ft)", cq_h: "Height (ft)",
+		cq_opts: "Options", cq_km: "Distance from Talegaon plant (km)", cq_crane: "Crane for unloading", cq_disc: "Discount %", cq_disc_max: "you can give up to",
+		cq_disc_sk: "above this SK approves", cq_price: "Price (excl. GST)", cq_revise: "Revise", cq_new: "New quotation", cq_saved: "Quotation saved",
+		cq_waiting: "Discount sent to SK for approval; the quote is saved without it", cq_design_go: "This cabin is priced by design. Use “Send to design”; the price comes from the design BOM.",
+		cq_other: "Other quotation (non-cabin)", cq_rc: "Rate card", cq_disc_list: "Quotation discounts", cq_ok: "Approve", cq_no: "Reject",
 		fl_new_quote: "Make quotation", fl_quote_why: "Saved in ERPNext as a Quotation for this customer (the customer is made by itself). The PDF opens to send.",
 		fl_add_item: "Add item", fl_rate_blank: "blank = price list", fl_valid: "Valid for days", fl_desc: "Description (Enter = new line)", fl_terms: "Terms / note", fl_quote_saved: "Quotation saved",
 		fl_order_why: "The quotation is submitted and a Sales Order is made from it.", fl_delivery: "Promised delivery date", fl_po_no: "Customer PO no (optional)",
@@ -764,6 +770,12 @@
 	});
 	Object.assign(T.Marathi, {
 		co_flow: "कंपनी फ्लो", all_dash: "सर्व डॅशबोर्ड", to_plan: "प्लॅन करायच्या ऑर्डर", fl_order_received: "ऑर्डर मिळाली → सेल्स ऑर्डर", fl_confirm: "ऑर्डर निश्चित करा (फॅक्टरी प्लॅन करू शकते)",
+		cq_title: "केबिन कोटेशन", cq_why: "SK च्या रेट कार्डनुसार किंमत: एकाच केबिनला कोणीही केले तरी एकच किंमत. किंमत टाइप करता येत नाही.",
+		cq_type: "केबिन प्रकार", cq_design: "इतर (LGSF, मॉड्युलर, कंटेनर, मोठे): डिझाइनला पाठवा", cq_l: "लांबी (फूट)", cq_w: "रुंदी (फूट)", cq_h: "उंची (फूट)",
+		cq_opts: "पर्याय", cq_km: "तळेगाव प्लांटपासून अंतर (किमी)", cq_crane: "उतरवण्यासाठी क्रेन", cq_disc: "सूट %", cq_disc_max: "तुम्ही देऊ शकता",
+		cq_disc_sk: "त्यापेक्षा जास्त SK मंजूर करतात", cq_price: "किंमत (GST वगळून)", cq_revise: "सुधारणा", cq_new: "नवीन कोटेशन", cq_saved: "कोटेशन जतन झाले",
+		cq_waiting: "सूट SK कडे मंजुरीसाठी पाठवली; कोटेशन सूटशिवाय जतन झाले", cq_design_go: "या केबिनची किंमत डिझाइनकडून येते. “डिझाइनला पाठवा” वापरा.",
+		cq_other: "इतर कोटेशन (नॉन-केबिन)", cq_rc: "रेट कार्ड", cq_disc_list: "कोटेशन सूट", cq_ok: "मंजूर", cq_no: "नाकारा",
 		fl_new_quote: "कोटेशन बनवा", fl_quote_why: "या ग्राहकासाठी ERPNext मध्ये कोटेशन म्हणून जतन होते (ग्राहक आपोआप बनतो). पाठवण्यासाठी PDF उघडते.",
 		fl_add_item: "आयटम जोडा", fl_rate_blank: "रिकामे = किंमत यादी", fl_valid: "किती दिवस वैध", fl_desc: "वर्णन (Enter = नवी ओळ)", fl_terms: "अटी / नोंद", fl_quote_saved: "कोटेशन जतन झाले",
 		fl_order_why: "कोटेशन सबमिट होते आणि त्यावरून सेल्स ऑर्डर बनते.", fl_delivery: "दिलेली डिलिव्हरी तारीख", fl_po_no: "ग्राहकाचा PO नंबर (ऐच्छिक)",
@@ -904,7 +916,7 @@
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
 		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", sales_owner: "🧑‍💼", new_joiner: "🪪", activities: "🎯", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
 		dash_overview: "🏁", dash_daily_review: "🗓️", dash_sales: "💼", dash_marketing: "📣", dash_machine_shifting: "🏗️", dash_job_work: "⚙️", dash_cr100: "🎯", dash_finance: "💰", dash_manufacturing: "🏭", dash_purchase: "🛒", dash_store: "📦", dash_quality: "✅", dash_hr: "👥", dash_ai: "🤖",
-		gateway: "🏛️", day_book: "📅",
+		gateway: "🏛️", day_book: "📅", cabin_discounts: "🏷️",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
@@ -1975,6 +1987,62 @@
 			<label class="sk-field"><span>${t("fl_valid")}</span>${qtyBox("ql-valid", 15)}</label>${formField("ql-note", t("fl_terms"), true)}
 			<button class="sk-btn ok wide" data-act="fl-quote-save">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
 	}
+	// SK 27-Oct: standard cabin quotation: price from the rate card only (same cabin = same price from anyone)
+	async function cabinQuoteSheet(doctype, name) {
+		const o = await call("cabin_quote_options");
+		const open = await call("cabin_quote_open", doctype === "CRM Lead" ? { lead: name } : { deal: name }).catch(() => []);
+		S.cq = { doctype, name, o };
+		const opt = (x) => {
+			const each = x.unit === "each" || x.unit === "running ft";
+			return `<div class="sk-row sk-cq-opt"><label class="sk-check"><input type="checkbox" id="cq-o-${x.key}" data-cq="1"> ${esc(x.label)}</label>
+				${each ? qtyBox("cq-n-" + x.key, 1, x.unit) : `<small>${esc(x.unit)}</small>`}</div>`;
+		};
+		sheet(`<h3 class="sk-h">📝 ${t("cq_title")}</h3><p class="sk-note">${t("cq_why")} · ${t("cq_rc")} ${esc(o.version)}</p>
+			${open.length ? pick("cq-rev", t("cq_revise"), [{ value: "", label: t("cq_new") }, ...open.map((q) => ({ value: q.name, label: `${q.sk_quote_ref} R${q.sk_rev || 0} · ${money(q.net_total)}` }))]) : ""}
+			${pick("cq-type", t("cq_type"), [...o.types.map((x) => ({ value: x.key, label: x.label + (x.sizes.length ? ` (${x.sizes.join(", ")})` : "") })), { value: "design", label: t("cq_design") }], 'data-cq="1"')}
+			<div class="sk-row"><label class="sk-field"><span>${t("cq_l")}</span>${qtyBox("cq-l", 20)}</label><label class="sk-field"><span>${t("cq_w")}</span>${qtyBox("cq-w", 10)}</label></div>
+			<div class="sk-row"><label class="sk-field"><span>${t("cq_h")}</span>${qtyBox("cq-h", o.height)}</label><label class="sk-field"><span>${t("qty")}</span>${qtyBox("cq-q", 1)}</label></div>
+			<h3 class="sk-h">${t("cq_opts")}</h3>${o.options.map(opt).join("")}
+			<div class="sk-row"><label class="sk-field"><span>${t("cq_km")}</span>${qtyBox("cq-km", 0)}</label>
+			<label class="sk-check"><input type="checkbox" id="cq-crane" data-cq="1"> ${t("cq_crane")}</label></div>
+			<label class="sk-field"><span>${t("cq_disc")} (${t("cq_disc_max")} ${o.max_discount}%, ${t("cq_disc_sk")})</span>${qtyBox("cq-disc", 0)}</label>
+			<div id="cq-price" class="sk-card"></div>
+			<button class="sk-btn ok wide" data-act="fl-cabinq-save">${t("save")} + PDF</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+		const box = document.querySelector(".sk-sheet") || document;
+		const rerun = debounceSearch(cabinPrice, "#cq-l-none");
+		box.querySelectorAll("input, select").forEach((el) => { el.addEventListener("input", rerun); el.addEventListener("change", rerun); });
+		cabinPrice();
+	}
+	function cabinReq() {
+		const options = {};
+		for (const x of S.cq.o.options) {
+			const on = document.getElementById("cq-o-" + x.key);
+			if (on && on.checked) { const n = document.getElementById("cq-n-" + x.key); options[x.key] = n ? Number(n.value || 1) : 1; }
+		}
+		return { type: val("cq-type"), length: Number(val("cq-l")), width: Number(val("cq-w")), height: Number(val("cq-h")) || S.cq.o.height,
+			qty: Number(val("cq-q")) || 1, options, km: Number(val("cq-km")) || 0, crane: document.getElementById("cq-crane").checked };
+	}
+	async function cabinPrice() {
+		const box = document.getElementById("cq-price");
+		if (!box) return;
+		const req = cabinReq();
+		if (req.type === "design") { box.innerHTML = `<div class="sk-card-text sk-due">${t("cq_design_go")}</div>`; return; }
+		if (!req.type) { box.innerHTML = ""; return; }
+		try {
+			const p = await call("cabin_quote_price", { req: JSON.stringify(req) });
+			const disc = Number(val("cq-disc")) || 0;
+			box.innerHTML = `<div class="sk-card-label">${t("cq_price")}</div><div class="sk-card-text">${money(p.total * (1 - Math.min(disc, S.cq.o.max_discount) / 100))}</div>
+				<ul class="sk-list">${p.lines.map((l) => `<li class="sk-item"><div><div class="sk-item-meta">${esc(l.desc)}</div></div><b>${l.qty} × ${money(l.rate)}</b></li>`).join("")}</ul>
+				${disc > S.cq.o.max_discount ? `<p class="sk-note sk-due">${t("cq_disc_sk")}</p>` : ""}`;
+		} catch (e) { box.innerHTML = `<div class="sk-card-text sk-due">${esc(e.message || "")}</div>`; }
+	}
+	async function renderCabinDiscounts() {
+		const rows = await call("cabin_discounts");
+		root.innerHTML = header(t("cq_disc_list")) + `<main><ul class="sk-list">${rows.map((q) => `<li class="sk-item"><div><div class="sk-item-title">${esc(q.sk_quote_ref)} · ${esc(q.customer_name)}</div>
+			<div class="sk-item-meta">${money(q.net_total)} · ${t("cq_disc")} ${q.sk_discount_pct}% · ${esc(q.owner)}</div>
+			<div class="sk-row"><button class="sk-btn ok" data-act="fl-cqdisc" data-name="${esc(q.name)}" data-ok="1">✅ ${t("cq_ok")}</button>
+			<button class="sk-btn" data-act="fl-cqdisc" data-name="${esc(q.name)}" data-ok="0">✖ ${t("cq_no")}</button></div></div></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+	}
 	async function renderToPlan() {
 		const rows = await call("flow_orders_to_plan");
 		S.toPlan = rows;
@@ -2011,7 +2079,8 @@
 				<button class="sk-btn ok wide" data-act="save-note">${t("add_note")}</button>
 				<button class="sk-btn wide sk-gap" data-act="reminder-new" data-doctype="${esc(doctype)}" data-name="${esc(name)}">⏰ + ${t("reminder")}</button></div>
 			${(d.products || []).length ? `<h3 class="sk-h">${t("products_for")}</h3>${productStrip(d.products)}` : ""}
-			${doctype === "CRM Deal" ? `<button class="sk-btn go wide" data-act="fl-quote" data-name="${esc(name)}">📝 ${t("fl_new_quote")}</button>` : ""}
+			${["CRM Deal", "CRM Lead"].includes(doctype) ? `<button class="sk-btn go wide" data-act="fl-cabinq" data-dt="${esc(doctype)}" data-name="${esc(name)}">📝 ${t("fl_new_quote")}: ${t("cq_title")}</button>` : ""}
+			${doctype === "CRM Deal" ? `<button class="sk-btn wide" data-act="fl-quote" data-name="${esc(name)}">📝 ${t("cq_other")}</button>` : ""}
 			${sec(t("quotations"), d.quotations.map((q) => erpDocRow("Quotation", q, mobile)).join(""))}
 			${sec(t("sales_orders"), d.sales_orders.map((q) => erpDocRow("Sales Order", q, mobile)).join(""))}
 			${sec(t("files"), files)}${sec(t("tasks"), tasks)}${sec(t("emails"), mails.map((m) => `<li class="sk-item"><div><div class="sk-item-title">${m.sent_or_received === "Received" ? "📥" : "📤"} ${esc(m.subject || "")}</div>
@@ -3449,6 +3518,26 @@
 			case "st-po": return receiveForm(i);
 			case "st-nopo": return receiveNoPo();
 			case "fl-quote": return quotationSheet(el.dataset.name);
+			case "fl-cabinq": return cabinQuoteSheet(el.dataset.dt, el.dataset.name);
+			case "fl-cabinq-save": {
+				const req = cabinReq();
+				if (!req.type || req.type === "design") return toast(t("cq_design_go"), true);
+				el.disabled = true;
+				try {
+					const args = { req: JSON.stringify(req), discount_pct: val("cq-disc") || 0, revise: val("cq-rev") || "" };
+					args[S.cq.doctype === "CRM Lead" ? "lead" : "deal"] = S.cq.name;
+					const r = await call("cabin_quote_make", args, true);
+					closeSheet(); saved(`${t("cq_saved")}: ${r.ref} R${r.rev}`);
+					if (r.discount_waiting) toast(t("cq_waiting"));
+					window.open(r.pdf, "_blank");
+				} finally { el.disabled = false; }
+				return go("detail");
+			}
+			case "fl-cqdisc": {
+				el.disabled = true;
+				await call("cabin_discount_decide", { quotation: el.dataset.name, ok: el.dataset.ok }, true);
+				return renderCabinDiscounts();
+			}
 			case "fl-addline": { document.getElementById("ql-box").insertAdjacentHTML("beforeend", quoteLine(S.qLines)); S.qLines += 1; return; }
 			case "fl-quote-save": {
 				el.disabled = true;
@@ -4196,7 +4285,7 @@
 		to_pay: () => finScreen("to_pay", () => renderToPay("to_pay")), pay_approvals: () => renderToPay("pay_approvals"),
 		bills_to_post: () => finScreen("bills_to_post", renderBillsToPost), invoices: () => finScreen("invoices", renderInvoices),
 		expenses: () => finScreen("expenses", renderExpenses), dir_expenses: () => finScreen("dir_expenses"),
-		segment_pnl: renderSegmentWise, month_close: renderMonthWise, gateway: renderGateway, day_book: renderDayBook,
+		segment_pnl: renderSegmentWise, month_close: renderMonthWise, gateway: renderGateway, day_book: renderDayBook, cabin_discounts: renderCabinDiscounts,
 		improvement_inbox: renderInbox, dept_visits: renderVisit, erp_gaps: renderGaps, app_users: renderAppUsers, change_list: renderChangeList,
 		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources, customers: renderCustomers, view_member: renderViewMember, complaints: renderComplaints,
 		attendance: renderAttendance, leave_expense: renderLeaveExpense, sales_owner: renderSalesOwner, new_joiner: renderNewJoiner, activities: renderActivities };

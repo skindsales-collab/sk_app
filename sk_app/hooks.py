@@ -14,6 +14,9 @@ website_route_rules = [
 # SK 27-Oct: Tally keys in ERPNext for the accounts team (F4-F9, Ctrl+A, Alt+D Day Book ...)
 app_include_js = "/assets/sk_app/js/sk_tally_keys.js"
 
+# SK 27-Oct: standard cabin quotation print (SK's quote template), {{ sk_cabin_quote_html(doc) }}
+jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html"]}
+
 scheduler_events = {
 	"hourly": ["sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge"],
 	# IndiaMART / JustDial / GeM mails to the team mailboxes become CRM leads (free route, point 14)

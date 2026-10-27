@@ -1,0 +1,31 @@
+{
+  "version": "RC-2026-10-27-v1",
+  "note": "Rate card v1 built by Claude from SK's past Sales Orders (SO-00011..15) and SK's own BOM rates (80x30 Kharadi, LGSF skill). Ex-GST selling prices. SK can change any number; each quote stores this version.",
+  "standard_height_ft": 8.5,
+  "extra_height_per_ft_per_sqft": 80,
+  "round_to": 1000,
+  "types": {
+    "office":   {"label": "GI Portable Office Cabin", "items": ["Prod-0009", "Prod-0015", "Prod-0004"], "slabs": [[150, 1100], [400, 1300], [99999, 1000]], "basis": "SO-00012 12x10 Rs1,083/sqft; SO-00011 30x10 Rs1,321/sqft; SO-00015 25x22 Rs909/sqft"},
+    "security": {"label": "GI Portable Security Cabin", "items": ["Prod-0013"], "slabs": [[99999, 950]], "min": 60000, "basis": "SO-00015 20x8 Rs938/sqft"},
+    "storage":  {"label": "GI Portable Storage Cabin", "items": ["Prod-0014"], "slabs": [[99999, 950]], "min": 60000, "basis": "same build as security cabin"},
+    "toilet":   {"label": "Portable Toilet Cabin", "items": ["Prod-0016"], "slabs": [[99999, 2000]], "basis": "SO-00015 12'8\"x9'10\" Rs2,000/sqft"},
+    "frp_security": {"label": "FRP Security Cabin", "items": ["Prod-0012"], "fixed": {"6x4": 33600}, "basis": "SO-00014 6x4 Rs33,600; other sizes design price"}
+  },
+  "design_price_types": ["LGSF cabin", "Modular / G+1 labour camp", "Office container / MS container", "Bunk bed cabin", "Kiosk", "any size over 40 ft long or 12 ft wide in one module", "ACP / premium interior"],
+  "options": {
+    "window":      {"label": "Extra window 3' x 3' aluminium sliding with grill, mesh and curtain", "unit": "each", "rate": 4500},
+    "door":        {"label": "Extra door, MS frame clad in corrugated sheet, L-drop handle + SS aldrop", "unit": "each", "rate": 12000},
+    "ac_point":    {"label": "AC point: wiring, MCB and outdoor bracket (AC unit by customer)", "unit": "each", "rate": 3500},
+    "partition":   {"label": "Internal partition, MDF on GI frame, full height", "unit": "running ft", "rate": 1000},
+    "ceiling":     {"label": "False ceiling 2' x 2' PVC laminated gypsum", "unit": "sq ft", "rate": 110},
+    "insulation":  {"label": "Glass wool insulation 25 mm, walls and roof", "unit": "sq ft floor", "rate": 90},
+    "vinyl":       {"label": "Vinyl flooring 1 mm", "unit": "sq ft", "rate": 70},
+    "toilet_unit": {"label": "Attached toilet: WC, wash basin, plumbing, exhaust fan", "unit": "each", "rate": 45000},
+    "workstation": {"label": "Workstation table 4' x 2'", "unit": "each", "rate": 22000},
+    "chair":       {"label": "Revolving chair", "unit": "each", "rate": 5600},
+    "manager_table": {"label": "L-shape manager table with overhead file cabinet", "unit": "each", "rate": 25000}
+  },
+  "transport": {"from": "Talegaon Dhamdhere plant", "free_km": 60, "upto_20ft": 15000, "upto_40ft": 25000, "extra_per_km_per_cabin": 90, "crane_per_trip": 8500, "joining_per_module": 8500},
+  "discount": {"salesperson_pct": 0, "sales_manager_pct": 5, "above": "SK only"},
+  "terms": {"payment": "50% advance along with PO, balance 50% before dispatch", "delivery": "3 weeks from advance and drawing approval (single cabin up to 40 ft)", "validity_days": 15, "gst_pct": 18}
+}

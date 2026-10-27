@@ -52,6 +52,9 @@ def after_migrate():
 	from sk_app.tally import ensure as tally_names
 
 	tally_names()  # SK 27-Oct: Tally words in ERPNext (Narration on every voucher)
+	from sk_app.cabin_quote import ensure_setup as cabin_quote_setup
+
+	cabin_quote_setup()  # SK 27-Oct: one rate card, same cabin price from any salesperson, SK's quote print
 	from sk_app.training import seed_lessons
 
 	seed_lessons()
