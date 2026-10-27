@@ -185,7 +185,7 @@ def team_screen(manager: str, people: list[dict]) -> dict:
 	team's "Decide now": leads not called after 24 hours, quotations waiting over 7 days, the person most behind."""
 	from frappe.utils import add_to_date, now_datetime, nowdate
 
-	from sk_app import comms, flows, home_kpi, lead_status
+	from sk_app import activities, comms, flows, home_kpi, lead_status
 	from sk_app.dashboards import _has, _safe
 
 	members = []
@@ -199,7 +199,8 @@ def team_screen(manager: str, people: list[dict]) -> dict:
 		members.append({"user": p["user"], "full_name": p["full_name"],
 			"steps": [{"key": s["key"], "label": s["label"], "count": s["count"], "late": s["late"], "c": s["c"]} for s in steps],
 			"actual": actual, "due": due, "target": target, "pct": round(actual * 100 / due) if due else None,
-			"calls_today": _safe(lambda p=p: comms.call_totals(p["user"], nowdate())["calls"], 0) or 0})
+			"calls_today": _safe(lambda p=p: comms.call_totals(p["user"], nowdate())["calls"], 0) or 0,
+			"acts": _safe(lambda p=p: {k: v for k, v in activities.today(p["user"]).items() if k in ("hit", "total")}, None)})
 	users = [p["user"] for p in people]
 	decide = {"not_called": 0, "quotes_waiting": 0, "behind": None}
 	if _has("CRM Lead"):

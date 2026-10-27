@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, sales_owner, segments, store, training, view_member, work
+from sk_app import activities, ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, sales_owner, segments, store, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -1177,6 +1177,27 @@ def my_flow():
 	"""Point 17: the live process flow of each of the person's functions (the CEO: one per function)."""
 	profile = _me()
 	return flows.for_user(profile.user, logins.profile_functions(profile.user) or [profile.home])
+
+
+@frappe.whitelist()
+def activity_today(member=None):
+	"""SK 27-Oct point 11: the salesperson's daily activity counters (a manager may read a team member's)."""
+	user = _me().user
+	if member and member != user:
+		if member not in {p.user for p in day_report._team(user)}:
+			frappe.throw(_("{0} is not in your team").format(member), frappe.PermissionError)
+		user = member
+	return activities.today(user)
+
+
+@frappe.whitelist(methods=["POST"])
+def activity_tap(key, step=1):
+	return activities.today(_me().user) if not key else activities.tap(_me().user, key, cint(step))
+
+
+@frappe.whitelist(methods=["POST"])
+def upload_call_list(file_url):
+	return activities.upload_calls(_me().user, file_url)
 
 
 @frappe.whitelist(methods=["POST"])
