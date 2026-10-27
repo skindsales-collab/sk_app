@@ -162,7 +162,7 @@ def ensure_setup():
 	for code, name in ITEMS.items():
 		if not frappe.db.exists("Item", code) and group:
 			frappe.get_doc({"doctype": "Item", "item_code": code, "item_name": name, "item_group": group, "is_stock_item": 0,
-				"include_item_in_manufacturing": 0, "stock_uom": uom if code == BUILDING_ITEM else "Nos", "description": name}).insert(ignore_permissions=True)
+				"include_item_in_manufacturing": 0, "stock_uom": uom if code == BUILDING_ITEM else "Nos", "description": name, **cq.hsn_fields()}).insert(ignore_permissions=True)
 
 
 def make(user: str, req: dict, deal=None, lead=None, customer=None, revise=None, contact=None) -> dict:

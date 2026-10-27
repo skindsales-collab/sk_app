@@ -20,6 +20,19 @@ def settings_defaults():
 			frappe.db.set_single_value("SK App Settings", df.fieldname, df.default)
 
 
+def _safe(step, label: str):
+	"""Run one setup step; if it fails, undo it, log it and go on with the update."""
+	frappe.db.savepoint("sk_setup")
+	try:
+		step()
+	except Exception:
+		try:
+			frappe.db.rollback(save_point="sk_setup")
+		except Exception:
+			pass
+		frappe.log_error(title=f"SK App setup step failed: {label}")
+
+
 def after_migrate():
 	from sk_app.logins import setup_site
 
@@ -53,14 +66,14 @@ def after_migrate():
 
 	tally_names()  # SK 27-Oct: Tally words in ERPNext (Narration on every voucher)
 	from sk_app.cabin_quote import ensure_setup as cabin_quote_setup
-
-	cabin_quote_setup()  # SK 27-Oct: one rate card, same cabin price from any salesperson, SK's quote print
+	from sk_app.permissions import ensure_crm_search
 	from sk_app.store import ensure_job_card_cabin
 
-	ensure_job_card_cabin()  # SK 27-Oct (Yogesh): job card picker shows customer and cabin size
-	from sk_app.permissions import ensure_crm_search
-
-	ensure_crm_search()  # SK 27-Oct: lead search in ERPNext
+	# 27-Oct: two sk-dev updates were rolled back; one setup step that ERPNext refuses on the live data (a master it
+	# needs, a mandatory field) is now logged in Error Log for the AI team and no longer stops the whole update
+	_safe(cabin_quote_setup, "cabin quotation")  # SK 27-Oct: one rate card, same cabin price from any salesperson, SK's quote print
+	_safe(ensure_job_card_cabin, "job card customer / size")  # SK 27-Oct (Yogesh): job card picker shows customer and cabin size
+	_safe(ensure_crm_search, "lead search")  # SK 27-Oct: lead search in ERPNext
 	from sk_app.training import seed_lessons
 
 	seed_lessons()

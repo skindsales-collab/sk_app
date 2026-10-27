@@ -148,6 +148,16 @@ def max_discount(user: str) -> float:
 
 # ---------- the quotation ----------
 
+def hsn_fields(like: str | None = None) -> dict:
+	"""India Compliance makes the HSN / SAC code mandatory on items: use the one SK's cabins already carry."""
+	if not frappe.get_meta("Item").has_field("gst_hsn_code"):
+		return {}
+	hsn = (like and frappe.db.get_value("Item", like, "gst_hsn_code")) \
+		or frappe.db.get_value("Item", {"item_code": ["like", "Prod-%"], "gst_hsn_code": ["is", "set"]}, "gst_hsn_code") \
+		or frappe.db.get_value("Item", {"gst_hsn_code": ["is", "set"]}, "gst_hsn_code")
+	return {"gst_hsn_code": hsn} if hsn else {}
+
+
 def ensure_setup():
 	"""Rate card, custom fields on Quotation, service items and the print format (on migrate)."""
 	if not frappe.db.exists("DocType", "Quotation"):
@@ -181,7 +191,7 @@ def ensure_setup():
 	for code, name in SERVICE_ITEMS.items():
 		if not frappe.db.exists("Item", code) and group:
 			frappe.get_doc({"doctype": "Item", "item_code": code, "item_name": name, "item_group": group, "is_stock_item": 0,
-				"include_item_in_manufacturing": 0, "stock_uom": "Nos", "description": name}).insert(ignore_permissions=True)
+				"include_item_in_manufacturing": 0, "stock_uom": "Nos", "description": name, **hsn_fields()}).insert(ignore_permissions=True)
 	if not frappe.db.exists("Print Format", PRINT_FORMAT):
 		frappe.get_doc({"doctype": "Print Format", "name": PRINT_FORMAT, "doc_type": "Quotation", "module": "SK App", "custom_format": 1,
 			"print_format_type": "Jinja", "standard": "No", "html": "{{ sk_cabin_quote_html(doc) }}", "margin_top": 0, "margin_left": 0,
