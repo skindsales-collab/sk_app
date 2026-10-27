@@ -13,14 +13,17 @@ from sk_app.logic import parse_lines
 
 STATUSES = ("New", "Taken", "Replied", "Lead made", "Not a lead")
 DEFAULT_MAP = ("cabin@skind.tech: Sales, Marketing\nservice@skind.tech: Machine Shifting, service@skind.tech\n"
-	"acc@skind.tech: Accounts\nsales@skind.tech: Management\ninfo@skind.tech: HR")
+	"acc@skind.tech: Accounts\nsales@skind.tech: Management\ninfo@skind.tech: HR\n"
+	# SK 27-Oct: prod@ for Production (Babasaheb) and Store (Yogesh)
+	"prod@skind.tech: 9730517277@staff.skind.local, 9970960806@staff.skind.local")
 
 
 def team_boxes() -> dict:
 	"""{mailbox: [functions or logins]} from SK App Settings."""
-	text = frappe.get_cached_doc("SK App Settings").get("mailbox_map") or DEFAULT_MAP
+	text = frappe.get_cached_doc("SK App Settings").get("mailbox_map") or ""
 	out = {}
-	for line in parse_lines(text):
+	# a box set in SK App Settings wins; a box only in the default list (added later, e.g. prod@) still shows
+	for line in parse_lines(DEFAULT_MAP) + parse_lines(text):
 		box, sep, who = line.partition(":")
 		if sep and "@" in box:
 			out[box.strip().lower()] = [w.strip() for w in who.split(",") if w.strip()]

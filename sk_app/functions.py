@@ -36,7 +36,7 @@ FUNCTIONS = {
 	"Production": {
 		"label": {"English": "Production", "Marathi": "उत्पादन"},
 		# point 17 (SK's mock-up): Need Material → Job Cards → Order Board → Progress Photos → Ready to Dispatch → Non-Conformance
-		"tiles": ["my_day", "to_plan", "need_material", "job_cards", "order_board", "progress_photos", "ready_dispatch", "non_conformance", "complaints", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "to_plan", "need_material", "job_cards", "order_board", "progress_photos", "ready_dispatch", "non_conformance", "complaints", "mail", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Manufacturing User", "Manufacturing Manager"],
 		"desk": "/app/manufacturing",
@@ -52,7 +52,7 @@ FUNCTIONS = {
 		"label": {"English": "Stores", "Marathi": "स्टोअर"},
 		# SK draft F01: My Day first, then the Store icons, then the common ones
 		# point 17 (SK's mock-up): Requests → Stock Check → Receive → Issue → Stock Count → New Item → Low Stock → Dispatch
-		"tiles": ["my_day", "store_requests", "stock_check", "receive", "issue", "stock_count", "new_item", "low_stock", "dispatch", "complaints", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "store_requests", "stock_check", "receive", "issue", "stock_count", "new_item", "low_stock", "dispatch", "complaints", "mail", *COMMON_TILES[1:]],
 		"live": True,
 		# Stock Manager: needed to make stock count drafts and to pick accounts on receipts / delivery notes
 		"erpnext_roles": ["Stock User", "Stock Manager"],
