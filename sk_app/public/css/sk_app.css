@@ -364,7 +364,7 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 /* main screen Rev 2 (SK 26-Oct): the whole phone screen, decision data first */
 .sk-home2 { display: flex; flex-direction: column; gap: 8px; min-height: calc(100vh - 86px); padding-bottom: 8px; }
 .sk-home2 .sk-tiles.small { margin-bottom: 0; }
-.sk-home2 .sk-bottom { margin-top: auto; grid-template-columns: repeat(3, 1fr); }
+.sk-home2 .sk-bottom { grid-template-columns: repeat(3, 1fr); }
 .sk-home2 .sk-bottom .sk-tile { padding: 14px 2px; font-size: 14px; }
 .sk-kcard { background: var(--card); border-radius: 14px; padding: 10px 12px 6px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .sk-khead { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 15px; }
@@ -429,7 +429,7 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 .sk-home2 .sk-bottom .sk-tile { flex-direction: row; justify-content: center; padding: 8px 2px; font-size: 13px; gap: 6px; }
 .sk-home2 .sk-bottom .sk-tile-icon { font-size: 20px; }
 .sk-home2 .sk-bottom .sk-dot { top: -6px; right: -2px; }
-.sk-home2 { gap: 6px; min-height: calc(100vh - 80px); }
+.sk-home2 { gap: 6px; }
 .sk-home2 .sk-cbig { padding: 11px 4px; }
 .sk-ksvg { max-height: 24vh; }
 @media (max-height: 760px) {

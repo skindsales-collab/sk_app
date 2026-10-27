@@ -126,7 +126,7 @@ def orders_to_plan(user: str) -> list[dict]:
 	need(user, "Production", "Management")
 	out = []
 	for so in frappe.get_all("Sales Order", filters={"docstatus": 1, "status": ["not in", ["Closed", "Completed", "On Hold"]]},
-			fields=["name", "customer_name", "delivery_date", "base_net_total"], order_by="delivery_date asc", limit=100):
+			fields=["name", "customer_name", "delivery_date", "base_net_total"], order_by="delivery_date asc", limit=0):
 		for it in frappe.get_all("Sales Order Item", filters={"parent": so.name}, fields=["name", "item_code", "item_name", "qty", "delivery_date"]):
 			made = flt(frappe.db.sql("""select sum(qty) from `tabWork Order` where sales_order=%s and sales_order_item=%s and docstatus<2""",
 				(so.name, it.name))[0][0])

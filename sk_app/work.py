@@ -71,7 +71,7 @@ def open_leads(user: str) -> list[WorkItem]:
 		filters={"lead_owner": user, "converted": 0},
 		fields=["name", "lead_name", "organization", "status", "source", "response_by", "first_responded_on", "creation"],
 		order_by="creation desc",
-		limit=50,
+		limit=0,  # SK 27-Oct: all leads, not the first few
 	)
 	items = []
 	for r in rows:
@@ -102,7 +102,7 @@ def open_deals(user: str) -> list[WorkItem]:
 		fields=["name", "organization", "lead_name", "status", "next_step", "expected_closure_date", "deal_value"]
 			+ (["sk_customer_name"] if frappe.get_meta("CRM Deal").has_field("sk_customer_name") else []),
 		order_by="modified desc",
-		limit=30,
+		limit=0,
 	)
 	return [
 		WorkItem("deal", _label("CRM Deal", r.name), "CRM Deal", r.name,

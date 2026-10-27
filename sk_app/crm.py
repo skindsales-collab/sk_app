@@ -10,6 +10,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, get_datetime, now_datetime, strip_html, time_diff_in_seconds
 
+from sk_app import lead_status
 from sk_app.segments import SUB_SEGMENTS as SEGMENTS
 from sk_app.segments import TREE as SEGMENT_TREE
 from sk_app.segments import CABIN, main_of, sub_of
@@ -48,7 +49,7 @@ def options() -> dict:
 		return {"crm": False}
 	return {
 		"crm": True,
-		"lead_statuses": frappe.get_all("CRM Lead Status", fields=["name", "type"], order_by="position asc"),
+		"lead_statuses": lead_status.app_statuses(),  # SK 27-Oct: his 8 steps
 		"deal_statuses": frappe.get_all("CRM Deal Status", fields=["name", "type"], order_by="position asc"),
 		"sources": frappe.get_all("CRM Lead Source", pluck="name", order_by="name asc"),
 		"segments": SEGMENTS,
@@ -124,7 +125,7 @@ def follow_up(user: str, for_manager: bool = False) -> list[dict]:
 	lead_filters = {"lead_owner": user, "converted": 0}
 	if closed_leads:
 		lead_filters["status"] = ["not in", closed_leads]
-	for r in get("CRM Lead", filters=lead_filters, limit_page_length=200, order_by="modified desc",
+	for r in get("CRM Lead", filters=lead_filters, limit_page_length=0, order_by="modified desc",
 			fields=["name", "lead_name", "organization", "status", "mobile_no", "phone", "email", "source",
 				"response_by", "first_responded_on", "creation"]):
 		task = tasks.get(("CRM Lead", r.name))
@@ -140,7 +141,7 @@ def follow_up(user: str, for_manager: bool = False) -> list[dict]:
 	deal_filters = {"deal_owner": user}
 	if closed_deals:
 		deal_filters["status"] = ["not in", closed_deals]
-	for r in [] if not frappe.has_permission("CRM Deal", "read", user=user) else get("CRM Deal", filters=deal_filters, limit_page_length=200, order_by="modified desc",
+	for r in [] if not frappe.has_permission("CRM Deal", "read", user=user) else get("CRM Deal", filters=deal_filters, limit_page_length=0, order_by="modified desc",
 			fields=["name", "organization", "lead_name", "status", "mobile_no", "phone", "email", "next_step",
 				"expected_closure_date", "deal_value"]):
 		task = tasks.get(("CRM Deal", r.name))
@@ -270,7 +271,7 @@ def _attach(file_url: str | None, doctype: str, name: str, user: str):
 
 def new_lead(user: str, first_name: str, mobile_no: str | None = None, organization: str | None = None,
 		email: str | None = None, source: str | None = None, segment: str | None = None,
-		requirement: str | None = None, photo: str | None = None, product: str | None = None) -> str:
+		requirement: str | None = None, photo: str | None = None, product: str | None = None, status: str | None = None) -> str:
 	if not installed():
 		frappe.throw(_("Frappe CRM is not installed"))
 	if not (first_name or "").strip():
@@ -279,7 +280,8 @@ def new_lead(user: str, first_name: str, mobile_no: str | None = None, organizat
 	segment = sub_of(segment)
 	if not segment:
 		frappe.throw(_("Please pick the segment (Cabin or Non-Cabin)"))
-	status = frappe.get_all("CRM Lead Status", order_by="position asc", pluck="name", limit=1)
+	# SK 27-Oct: the status is picked on the form (New by default)
+	status = [status] if status and frappe.db.exists("CRM Lead Status", status) else frappe.get_all("CRM Lead Status", order_by="position asc", pluck="name", limit=1)
 	doc = frappe.get_doc({
 		"doctype": "CRM Lead", "first_name": first_name.strip(), "mobile_no": (mobile_no or "").strip() or None,
 		"organization": (organization or "").strip() or None, "email": (email or "").strip() or None,
@@ -438,6 +440,43 @@ SENT_STATUS = "Sent to Design"
 CONVERT = "crm.fcrm.doctype.crm_lead.crm_lead.convert_to_deal"
 
 
+def _to_deal(user: str, lead: str, seg=None) -> tuple[str | None, str | None]:
+	"""Frappe CRM's own Convert (deal.lead links back), owned by the salesperson, with the lead's segment."""
+	deal = frappe.db.get_value("CRM Deal", {"lead": lead})
+	if not deal:
+		frappe.db.savepoint("sk_to_deal")
+		try:
+			deal = frappe.get_attr(CONVERT)(lead)
+		except Exception as e:
+			frappe.db.rollback(save_point="sk_to_deal")
+			frappe.clear_messages()
+			frappe.log_error("SK App convert to deal")
+			return None, re.sub(r"<[^>]*>", "", str(e))[:200] or _("Could not make the deal")
+		deal = deal if isinstance(deal, str) else frappe.db.get_value("CRM Deal", {"lead": lead})
+	doc = frappe.get_doc("CRM Deal", deal)
+	changed = False
+	if doc.meta.has_field("deal_owner") and not doc.get("deal_owner"):
+		doc.deal_owner, changed = user, True
+	if seg and doc.meta.has_field("sk_segment") and not doc.get("sk_segment"):
+		doc.sk_segment, changed = seg, True
+	if changed:
+		doc.flags.ignore_permissions = True
+		doc.save()
+	return deal, None
+
+
+def convert_lead(user: str, lead: str) -> dict:
+	"""SK 27-Oct: "Convert to Deal option not showing" in the app: the same Convert as the CRM screen."""
+	_check("CRM Lead", lead, "write")
+	seg = frappe.db.get_value("CRM Lead", lead, "sk_segment") if frappe.get_meta("CRM Lead").has_field("sk_segment") else None
+	deal, reason = _to_deal(user, lead, seg)
+	if not deal:
+		frappe.throw(reason)
+	for f in frappe.get_all("File", filters={"attached_to_doctype": "CRM Lead", "attached_to_name": lead}, pluck="file_url"):
+		_attach(f, "CRM Deal", deal, user)
+	return {"deal": deal}
+
+
 def send_to_design(user: str, lead: str) -> dict:
 	"""New Lead "Send to design" switch (SK OK 26-Oct): the AI design pickup reads CRM Deals only, so the lead becomes a
 	deal with Frappe CRM's own conversion (deal.lead links back), owned by the salesperson, Design Status "Sent to
@@ -446,22 +485,10 @@ def send_to_design(user: str, lead: str) -> dict:
 	seg = frappe.db.get_value("CRM Lead", lead, "sk_segment") if frappe.get_meta("CRM Lead").has_field("sk_segment") else None
 	if seg and main_of(seg) != CABIN:
 		return {"sent": False, "reason": _("Only Cabin enquiries go to design")}
-	deal = frappe.db.get_value("CRM Deal", {"lead": lead})
+	deal, reason = _to_deal(user, lead, seg)
 	if not deal:
-		frappe.db.savepoint("sk_to_design")
-		try:
-			deal = frappe.get_attr(CONVERT)(lead)
-		except Exception as e:
-			frappe.db.rollback(save_point="sk_to_design")
-			frappe.clear_messages()
-			frappe.log_error("SK App send to design")
-			return {"sent": False, "reason": re.sub(r"<[^>]*>", "", str(e))[:200] or _("Could not make the deal")}
-		deal = deal if isinstance(deal, str) else frappe.db.get_value("CRM Deal", {"lead": lead})
+		return {"sent": False, "reason": reason}
 	doc = frappe.get_doc("CRM Deal", deal)
-	if doc.meta.has_field("deal_owner") and not doc.get("deal_owner"):
-		doc.deal_owner = user
-	if seg and doc.meta.has_field("sk_segment") and not doc.get("sk_segment"):
-		doc.sk_segment = seg
 	field = _design_status_field("CRM Deal")
 	status_set = bool(field and SENT_STATUS in (doc.meta.get_field(field).options or "").split("\n"))
 	if status_set:

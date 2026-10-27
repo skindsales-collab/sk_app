@@ -76,3 +76,45 @@ class TestFlows(IntegrationTestCase):
 				self.assertEqual(routine_today(REP, day.date(), datetime(2026, 10, 26, 16, 0)), [])
 			finally:
 				cv._routine = orig
+
+	def test_pending_days_and_full_list(self):
+		"""SK 27-Oct: every pending row says from how many days; a box opens with all its records, not the first 60."""
+		from frappe.utils import add_days, nowdate
+
+		r = flows._late_row("A", "draft", None, "Sales Order", "x", add_days(nowdate(), -2), 0, opened=add_days(nowdate(), -9))
+		self.assertEqual(r["pending"], 9)
+		self.assertIn("pending 9 days", r["meta"])
+		self.assertIn("2 days late", r["meta"])
+		self.assertEqual(r["c"], "red")
+		r = flows._late_row("B", "New", None, "CRM Lead", "y", add_days(nowdate(), -4), None)
+		self.assertIn("pending 4 days", r["meta"])
+		self.assertIsNone(r["c"])
+		rows = [flows._late_row(str(i), "", None, "Task", str(i), add_days(nowdate(), -i), 1) for i in range(150)]
+		self.assertEqual(len(flows._stage("k", "K", "", rows)["rows"]), flows.ROWS)
+		orig = flows.BUILDERS["Sales"]
+		flows.BUILDERS["Sales"] = lambda u: [flows._stage("new", "New", "", rows)]
+		try:
+			out = flows.stage_rows(REP, ["Sales"], "Sales", "new")
+			self.assertEqual((out["count"], len(out["rows"])), (150, 150))
+			self.assertEqual(out["rows"][0]["pending"], 149)  # most late first
+			with self.assertRaises(frappe.PermissionError):
+				flows.stage_rows(REP, ["Sales"], "Accounts", "dues")
+		finally:
+			flows.BUILDERS["Sales"] = orig
+
+	def test_sk_lead_steps(self):
+		from sk_app import lead_status
+
+		self.assertEqual(lead_status.NAMES, ["New", "Qualified", "Drawing", "Quotation", "Negotiations", "Deal Won", "Junk Lead", "Deal Loss"])
+		self.assertEqual(lead_status.step_of("Contacted"), "New")
+		self.assertEqual(lead_status.step_of("Nurture"), "Qualified")
+		self.assertEqual(lead_status.step_of("Proposal/Quotation", deal=True), "Quotation")
+		self.assertEqual(lead_status.step_of("Negotiation", deal=True), "Negotiations")
+		self.assertEqual(lead_status.step_of("Qualification", deal=True), "Qualified")
+
+	def test_job_label_works_in_a_request(self):
+		"""27-Oct: wo_label raised on frappe.local, so the Production flow (and its arrows) came back empty."""
+		from sk_app.production import wo_label
+
+		self.assertEqual(wo_label("WO-NOT-THERE", "x"), "WO-NOT-THERE")
+		self.assertEqual(wo_label(None, "JC-1"), "JC-1")

@@ -192,7 +192,7 @@ def faq(user: str, q: str | None = None) -> dict:
 	from sk_app.library import LIST_FIELDS
 
 	rows = frappe.get_all("SK Library Item", filters=filters, or_filters=or_filters, fields=LIST_FIELDS,
-		order_by="function asc, sequence asc, title asc", limit=300)
+		order_by="function asc, sequence asc, title asc", limit=0)
 	for r in rows:
 		r["kind"] = "file" if r.file else "link" if r.link else "text"
 		r["open_url"] = r.file or r.link

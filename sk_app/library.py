@@ -21,7 +21,7 @@ def items(function: str, category: str | None = None) -> list[dict]:
 	if category:
 		filters["category"] = category
 	rows = frappe.get_all("SK Library Item", filters=filters, fields=LIST_FIELDS, order_by="category asc, sequence asc, title asc",
-		limit=500)
+		limit=0)
 	for r in rows:
 		r["kind"] = "pages" if r.page_from else "file" if r.file else "link" if r.link else "text"
 		r["open_url"] = (f"/api/method/sk_app.api.library_pdf?item={r.name}" if r.kind == "pages"

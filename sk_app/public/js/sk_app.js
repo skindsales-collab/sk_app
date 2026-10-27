@@ -848,9 +848,9 @@
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
 	T.Marathi.mic_network = "आवाजासाठी इंटरनेट हवे. मोबाईल डेटा तपासा, किंवा कीबोर्डवरील 🎤 वापरा.";
 	Object.assign(T.English, { fl_workflow: "work flow", fl_loading: "live figures loading", fl_days: "days", fl_oldest: "oldest",
-		fl_on_time: "all on time", fl_work: "Work on it", fl_first: "Showing the first" });
+		fl_on_time: "all on time", fl_work: "Work on it", fl_first: "Showing the first", show_more: "Show more", loading: "Loading…", fl_error: "Work flow could not load, AI team informed", convert_deal: "Convert to Deal", converted_ok: "Deal made ✓" });
 	Object.assign(T.Marathi, { fl_workflow: "कामाचा क्रम", fl_loading: "आकडे येत आहेत", fl_days: "दिवस", fl_oldest: "सर्वात जुने",
-		fl_on_time: "सर्व वेळेवर", fl_work: "काम करा", fl_first: "पहिले दाखवले" });
+		fl_on_time: "सर्व वेळेवर", fl_work: "काम करा", fl_first: "पहिले दाखवले", show_more: "आणखी दाखवा", loading: "येत आहे…", fl_error: "कामाचा क्रम उघडला नाही, AI टीमला कळवले", convert_deal: "डील बनवा", converted_ok: "डील तयार ✓" });
 	Object.assign(T.English, { lk_locked: "Locked", lk_touch: "Touch finger or look at the phone", lk_open_face: "Open with face / finger",
 		lk_ask_ceo: "Not working or new phone? Ask the CEO to reset it.", lk_pin: "Your PIN (the one you log in with)", lk_open: "Open", lk_relogin: "Forgot PIN? Log in again",
 		lk_cancelled: "Not checked. Tap the button and touch the finger sensor or look at the phone.",
@@ -1349,6 +1349,7 @@
 			});
 		} else {
 			const [f, fi] = flows[0];
+			if (f.error) return `<p class="sk-note">⚠️ ${t("fl_error")}: ${esc(f.error)}</p>`;
 			arrows = f.stages.map((st, si) => `<button class="sk-ar3 ${col(st.c)}" data-flow="${fi}:${si}"><b>${st.count}</b><span>${esc(st.label)}</span></button>`);
 		}
 		return `<div class="sk-flow3d">${arrows.join("")}</div>`;
@@ -1496,20 +1497,53 @@
 		const d = root.querySelector(".sk-decide");
 		if (d) d.innerHTML = decideHtml();
 	}
-	function renderFlowStage(fi, si) {
+	// SK 27-Oct: "total leads 260 but showing 60 only" — every list shows all, 60 at a time, with search
+	const PAGE = 60;
+	let flowShown = PAGE, flowQ = "", flowKey = "";
+	async function renderFlowStage(fi, si) {
 		const f = flowData.flows[fi], st = f.stages[si];
+		const key = `${fi}:${si}`;
+		if (flowKey !== key) { flowKey = key; flowShown = PAGE; flowQ = ""; }
 		state.view = "flow";
-		root._flowRows = st.rows;
+		if (st.count > st.rows.length && !st.all) {
+			root.innerHTML = header(`${st.icon} ${st.label}`) + `<main><p class="sk-note">${t("loading")}</p></main>`;
+			try { const d = await call("flow_stage", { src: f.src || f.function, key: st.key }); st.rows = d.rows; st.all = true; } catch (e) { st.all = true; }
+			if (state.view !== "flow" || flowKey !== key) return;
+		}
+		const q = flowQ.toLowerCase();
+		const all = st.rows.filter((r) => !q || `${r.title} ${r.meta || ""}`.toLowerCase().includes(q));
+		root._flowRows = all;
+		const rows = all.slice(0, flowShown);
 		root.innerHTML = header(`${st.icon} ${st.label}`) + `<main>
 			<p class="sk-note">${st.count} · ${st.value ? shortMoneyF(st.value) + " · " : ""}${st.late ? `<span class="sk-due">${st.late} ${t("late")}, ${t("fl_oldest")} ${st.oldest} ${t("fl_days")}</span>` : t("fl_on_time")}</p>
 			${st.go && ICON[st.go] ? `<button class="sk-btn go wide" data-go="${esc(st.go)}">${ICON[st.go]} ${t("fl_work")}: ${t(st.go)}</button>` : ""}
-			<ul class="sk-list">${st.rows.map((r, j) => `<li class="sk-item ${r.c ? "k-" + r.c : ""}"><button class="sk-fu-main" data-flowrow="${j}">
+			${st.rows.length > 10 ? `<label class="sk-field"><span>🔍 ${t("search")}</span><input id="flow-q" value="${esc(flowQ)}"></label>` : ""}
+			<ul class="sk-list">${rows.map((r, j) => `<li class="sk-item ${r.c ? "k-" + r.c : ""}"><button class="sk-fu-main" data-flowrow="${j}">
 				<div class="sk-item-title">${r.c === "red" ? "🔴 " : r.c === "amber" ? "🟠 " : ""}${esc(r.title)}</div>
 				<div class="sk-item-meta">${esc(r.meta || "")}</div></button>
 				${r.value != null && r.value !== 0 ? `<b>${typeof r.value === "number" ? shortMoneyF(r.value) : esc(r.value)}</b>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
-			${st.count > st.rows.length ? `<p class="sk-note">${t("fl_first")} ${st.rows.length}</p>` : ""}
+			${moreBtn(all.length, rows.length, "flow")}
 			<button class="sk-btn wide" data-go="home">‹ ${t("back")}</button></main>`;
+		const inp = root.querySelector("#flow-q");
+		if (inp) inp.addEventListener("input", debounceSearch(() => { flowQ = inp.value; flowShown = PAGE; renderFlowStage(fi, si); }, "#flow-q"));
 	}
+	function moreBtn(total, shown, kind) {
+		return total > shown ? `<p class="sk-note">${shown} / ${total}</p><button class="sk-btn wide" data-more="${kind}">⬇ ${t("show_more")} (${total - shown})</button>` : "";
+	}
+	// keep the cursor in the search box after the list re-draws
+	function debounceSearch(fn, sel) {
+		let tm;
+		return () => { clearTimeout(tm); tm = setTimeout(() => { fn(); const el = root.querySelector(sel); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 250); };
+	}
+	document.addEventListener("click", (ev) => {
+		const b = ev.target.closest("[data-more]");
+		if (!b || !root.contains(b)) return;
+		ev.stopPropagation();
+		if (b.dataset.more === "flow") { flowShown += PAGE; const [fi, si] = flowKey.split(":").map(Number); return renderFlowStage(fi, si); }
+		if (b.dataset.more === "wa") { waShown += PAGE; return renderWhatsApp(); }
+		if (b.dataset.more === "my_leads" || b.dataset.more === "my_deals") { leadShown += PAGE; return renderLeads(b.dataset.more, true); }
+		if (b.dataset.more === "dash") { dashShown += PAGE; return renderDashList(dashI); }
+	}, true);
 	document.addEventListener("click", (ev) => {
 		const b = ev.target.closest("[data-flow],[data-flowrow]");
 		if (!b || !root.contains(b)) return;
@@ -1619,7 +1653,7 @@
 		if (i.doctype && i.doctype.startsWith("CRM ") && i.name) open = `<button class="sk-open" data-open="${esc(i.doctype)}" data-name="${esc(i.name)}">›</button>`;
 		if (i.kind === "day_report") open = `<button class="sk-open" data-go="day_report">›</button>`;
 		if (i.kind === "send_file") open = `<button class="sk-open" data-open="${esc(i.ref_doctype)}" data-name="${esc(i.ref_name)}">›</button>`;
-		return `<li class="sk-item k-${esc(i.kind)}"><div><div class="sk-item-title">${esc(i.title)}</div><div class="sk-item-meta">${i.kind === "deal" && i.customer && i.customer !== i.title ? `👤 ${esc(i.customer)} · ` : ""}${i.kind === "deal" && i.status ? esc(i.status) + " · " : ""}${esc(i.kind.replace("_", " "))} · ${esc(i.minutes)} ${t("min")} ${due}</div></div>${open}</li>`;
+		return `<li class="sk-item k-${esc(i.kind)}"><div><div class="sk-item-title">${esc(i.title)}</div><div class="sk-item-meta">${i.kind === "deal" && i.customer && i.customer !== i.title ? `👤 ${esc(i.customer)} · ` : ""}${(i.kind === "deal" || i.kind.startsWith("lead_")) && i.status ? esc(i.status) + " · " : ""}${esc(i.kind.replace("_", " "))} · ${esc(i.minutes)} ${t("min")} ${due}</div></div>${open}</li>`;
 	}
 
 	async function renderMyDay() {
@@ -1649,9 +1683,9 @@
 	}
 
 	// point 12: My Leads has tabs New today (the lead just made is on top, NEW) · To call · All
-	let leadTab = "new_today";
-	async function renderLeads(which) {
-		const d = await call("my_leads");
+	let leadTab = "new_today", leadQ = "", leadShown = 60, leadData = null;
+	async function renderLeads(which, again) {
+		const d = again && leadData ? leadData : (leadData = await call("my_leads"));
 		let rows = which === "my_deals" ? d.deals : d.leads;
 		let tabs = "";
 		if (which === "my_leads") {
@@ -1667,7 +1701,16 @@
 			tabs = `<div class="cal-tabs">${Object.keys(groups).map((k) => `<button class="${leadTab === k ? "on" : ""}" data-ltab="${k}">${t(k)} ${groups[k].length}</button>`).join("")}</div>`;
 			rows = groups[leadTab].map((r) => ({ ...r, title: (local(r) === day ? "🆕 " : "") + r.title }));
 		}
-		root.innerHTML = header(t(which)) + `<main>${tabs}<ul class="sk-list">${rows.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+		// SK 27-Oct: search by name, company, status or lead number; all leads, 60 at a time
+		const q = leadQ.toLowerCase();
+		if (q) rows = rows.filter((r) => [r.title, r.status, r.customer, r.source, r.name].join(" ").toLowerCase().includes(q));
+		const total = rows.length;
+		rows = rows.slice(0, leadShown);
+		root.innerHTML = header(t(which)) + `<main>${tabs}
+			<div class="sk-input-row sk-gap"><input id="lead-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(leadQ)}"></div>
+			<ul class="sk-list">${rows.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>${moreBtn(total, rows.length, which)}</main>`;
+		const inp = root.querySelector("#lead-q");
+		inp.addEventListener("input", debounceSearch(() => { leadQ = inp.value; leadShown = 60; renderLeads(which, true); }, "#lead-q"));
 	}
 
 	// point 12: after Save the person sees where the lead went, its number, and what to do next
@@ -1872,7 +1915,7 @@
 		const end = new Date(); end.setHours(23, 59, 59);
 		if (fuCalls) rows = rows.filter((r) => r.mobile && (r.new || r.overdue || (r.due && new Date(String(r.due).replace(" ", "T")) <= end)));
 		const q = fuQuery.toLowerCase();
-		if (q) rows = rows.filter((r) => [r.title, r.person, r.mobile, r.name].join(" ").toLowerCase().includes(q));
+		if (q) rows = rows.filter((r) => [r.title, r.person, r.mobile, r.name, r.status, r.email].join(" ").toLowerCase().includes(q));
 		const li = rows.map((r) => `<li class="sk-fu ${r.overdue ? "late" : r.new ? "new" : ""}">
 			<button class="sk-fu-main" data-open="${esc(r.doctype)}" data-name="${esc(r.name)}">
 				<div class="sk-item-title">${esc(r.title)} ${r.new ? `<span class="sk-badge">${t("new_badge")}</span>` : ""}${r.overdue ? `<span class="sk-badge bad">${t("overdue")}</span>` : ""}</div>
@@ -1946,6 +1989,7 @@
 				${doc.design_status ? `<div class="sk-item-meta">📐 ${t("design_status")}: <b>${esc(doc.design_status)}</b></div>` : ""}
 				${contactButtons({ doctype, name, mobile, email: doc.email })}</div>
 			<h3 class="sk-h">${t("status")}</h3><div class="sk-chips">${chips}</div>
+			${doctype === "CRM Lead" && !doc.converted ? `<button class="sk-btn go wide sk-gap" data-act="convert-deal">🤝 ${t("convert_deal")}</button>` : ""}
 			<div class="sk-form">${formField("f-note", t("note_q"), true)}${photoField("f-photo", t("attach"), true)}
 				<button class="sk-btn ok wide" data-act="save-note">${t("add_note")}</button>
 				<button class="sk-btn wide sk-gap" data-act="reminder-new" data-doctype="${esc(doctype)}" data-name="${esc(name)}">⏰ + ${t("reminder")}</button></div>
@@ -2021,6 +2065,7 @@
 			<label class="sk-field"><span>${t("mobile")}</span><div class="sk-input-row"><input id="f-mobile" type="tel"></div></label>
 			<label class="sk-field"><span>${t("email")}</span><div class="sk-input-row"><input id="f-email" type="email"></div></label>
 			${sel("f-source", t("source"), o.sources)}${segmentSelect("f-segment", o.segment_tree, o.segments)}${(o.products || []).length ? sel("f-product", t("product_asked"), o.products) : ""}
+			<label class="sk-field"><span>${t("status")}</span><select id="f-status" class="sk-select">${(o.lead_statuses || []).filter((s) => s.type !== "Won" && s.type !== "Lost").map((s) => `<option>${esc(s.name)}</option>`).join("")}</select></label>
 			<label class="sk-check" id="f-design-row" hidden><input id="f-design" type="checkbox" checked> ✏️ ${t("send_design")}</label>
 			${formField("f-req", t("requirement"), true)}
 			<button class="sk-btn ok wide" data-act="save-lead">${t("save")}</button>
@@ -2453,16 +2498,19 @@
 	}
 
 	// ---------- WhatsApp: free (opens WhatsApp); inbox inside the app is Phase 2 ----------
-	let waFilter = "";
+	let waFilter = "", waShown = 60;
 	async function renderWhatsApp() {
 		const [rows, tpl] = await Promise.all([myContacts(), call("library", { category: "Message Template" })]);
 		const q = waFilter.toLowerCase();
-		const list = rows.filter((r) => r.mobile && (!q || (r.title + " " + (r.person || "")).toLowerCase().includes(q))).slice(0, 60);
+		const list = rows.filter((r) => r.mobile && (!q || (r.title + " " + (r.person || "")).toLowerCase().includes(q)));
+		const waAll = list.length;
+		list.splice(waShown);
 		root.innerHTML = header(t("whatsapp")) + `<main>
 			<label class="sk-field"><span>🔍 ${t("search")}</span><input id="f-wasearch" value="${esc(waFilter)}"></label>
 			<ul class="sk-list">${list.map((r) => `<li class="sk-item"><button class="sk-fu-main" data-open="${esc(r.doctype)}" data-name="${esc(r.name)}">
 				<div class="sk-item-title">${esc(r.title)}</div><div class="sk-item-meta">${esc(r.person || "")} · ${esc(r.mobile)}</div></button>
 				<button class="sk-cbtn" data-contact="WhatsApp" data-doctype="${esc(r.doctype)}" data-name="${esc(r.name)}" data-mobile="${esc(r.mobile)}">💬</button></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
+			${moreBtn(waAll, list.length, "wa")}
 			<h3 class="sk-h">${t("any_number")}</h3>
 			<label class="sk-field"><span>${t("mobile")}</span><div class="sk-input-row"><input id="f-wanum" type="tel"></div></label>
 			${formField("f-wamsg", t("message"), true)}
@@ -2471,7 +2519,7 @@
 			${lockedRow(t("wa_locked"))}</main>`;
 		root._tpl = tpl;
 		const box = document.getElementById("f-wasearch");
-		box.addEventListener("input", () => { waFilter = box.value; clearTimeout(box._t); box._t = setTimeout(() => go("whatsapp").then(() => { const b = document.getElementById("f-wasearch"); b.focus(); b.setSelectionRange(b.value.length, b.value.length); }), 400); });
+		box.addEventListener("input", () => { waFilter = box.value; waShown = 60; clearTimeout(box._t); box._t = setTimeout(() => go("whatsapp").then(() => { const b = document.getElementById("f-wasearch"); b.focus(); b.setSelectionRange(b.value.length, b.value.length); }), 400); });
 	}
 
 	// ---------- Mail: free once the company Email Account is connected in ERPNext ----------
@@ -2583,14 +2631,21 @@
 			}).join("")}</div>
 			<p class="sk-note">${t("dash_open")} ${t("swipe_hint")} · ${esc(d.refreshed_at)}</p></main>`;
 	}
+	let dashShown = 60, dashQ = "", dashI = -1;
 	function renderDashList(i) {
 		const c = dashData.cards[i];
-		const rows = c.rows || [];
+		if (dashI !== i) { dashI = i; dashShown = 60; dashQ = ""; }
+		const q = dashQ.toLowerCase();
+		const all = (c.rows || []).map((r, j) => [r, j]).filter(([r]) => !q || `${r.title} ${r.meta || ""}`.toLowerCase().includes(q));
+		const rows = all.slice(0, dashShown);
 		root.innerHTML = header(c.label) + `<main><button class="sk-btn wide" data-go="${esc(state.view)}">‹ ${esc(dashData.title[state.lang] || dashData.title.English)}</button>
-			<ul class="sk-list">${rows.map((r, j) => `<li class="sk-item ${r.c ? "k-" + r.c : ""}"><button class="sk-fu-main" data-drow="${j}" data-dcardi="${i}">
+			${(c.rows || []).length > 10 ? `<label class="sk-field"><span>🔍 ${t("search")}</span><input id="dash-q" value="${esc(dashQ)}"></label>` : ""}
+			<ul class="sk-list">${rows.map(([r, j]) => `<li class="sk-item ${r.c ? "k-" + r.c : ""}"><button class="sk-fu-main" data-drow="${j}" data-dcardi="${i}">
 				<div class="sk-item-title">${r.c === "red" ? "🔴 " : r.c === "amber" ? "🟠 " : r.c === "green" ? "🟢 " : ""}${esc(r.title)}</div>
 				<div class="sk-item-meta">${esc(r.meta || "")}</div></button>
-				${r.value != null && r.value !== 0 ? `<b>${typeof r.value === "number" && Math.abs(r.value) > 9999 ? shortMoney(r.value) : esc(r.value)}</b>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
+				${r.value != null && r.value !== 0 ? `<b>${typeof r.value === "number" && Math.abs(r.value) > 9999 ? shortMoney(r.value) : esc(r.value)}</b>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>${moreBtn(all.length, rows.length, "dash")}</main>`;
+		const inp = root.querySelector("#dash-q");
+		if (inp) inp.addEventListener("input", debounceSearch(() => { dashQ = inp.value; dashShown = 60; renderDashList(i); }, "#dash-q"));
 	}
 	function openDashRow(i, j) {
 		const r = dashData.cards[i].rows[j];
@@ -4078,7 +4133,7 @@
 				return go(state.view);
 			}
 			if (el.dataset.unpick) { const inp = document.getElementById(el.dataset.unpick); inp.value = ""; return photoPicked(inp); }
-			if (el.dataset.ltab) { leadTab = el.dataset.ltab; return go("my_leads"); }
+			if (el.dataset.ltab) { leadTab = el.dataset.ltab; leadShown = 60; return renderLeads("my_leads", true); }
 			if (el.dataset.move) return moveSheet(el.dataset.move, el.dataset.title);
 			if (el.dataset.moveday !== undefined) {
 				await call("cal_move", { key: el.dataset.key, day: el.dataset.moveday || null }, true);
@@ -4507,11 +4562,18 @@
 				}
 				return;
 			}
+			if (act === "convert-deal") {
+				el.disabled = true;
+				const r = await call("convert_lead", { name: current.name }, true);
+				toast(t("converted_ok"));
+				current = { doctype: "CRM Deal", name: r.deal };
+				return go("detail");
+			}
 			if (act === "save-lead") {
 				if (!val("f-segment")) { toast(t("pick_segment")); document.getElementById("f-segment").focus(); return; }
 				el.disabled = true;
 				const name = await call("new_lead", { first_name: val("f-first"), organization: val("f-org"), mobile_no: val("f-mobile"),
-					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl, product: val("f-product") }, true);
+					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl, product: val("f-product"), status: val("f-status") }, true);
 				const dz = document.getElementById("f-design");
 				if (dz && dz.checked && !document.getElementById("f-design-row").hidden) {
 					const r = await call("lead_to_design", { name }, true).catch((e) => ({ sent: false, reason: e.message }));
