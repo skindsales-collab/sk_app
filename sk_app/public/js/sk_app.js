@@ -865,7 +865,7 @@
 		lk_reset: "चेहरा / बोट रीसेट", lk_reset_q: "चेहरा / बोट रीसेट करायचे? ती व्यक्ती एकदा पिनने उघडून परत सुरू करेल.", lk_reset_done: "चेहरा / बोट रीसेट झाले" });
 	// main screen Rev 2 (SK 26-Oct)
 	Object.assign(T.English, { k_of: "of", k_no_target: "target not set", k_behind: "behind by", k_on_track: "on track", k_target: "target", k_off: "off target",
-		k_no_data: "No data yet", k_week: "Week", k_month: "Month", kl_Orders: "Orders", kl_Invoices: "Invoices",
+		k_no_data: "No data yet", k_day: "Day", k_per_day: "per day", k_week: "Week", k_month: "Month", kl_Orders: "Orders", kl_Invoices: "Invoices",
 		ka_short: "Actions", ka_title: "Actions to improve the graph", ka_why: "Do these first: they lift your graph. Added by AI, your manager or the CEO, or by you.",
 		ka_high: "High", ka_medium: "Medium", ka_low: "Low", ka_by_date: "by", ka_from: "from", ka_none: "No actions yet. Add the first one below.",
 		ka_new: "New action (what will lift the graph?)", ka_add: "Add action", ka_what_done: "What did you do?", ka_proof: "Proof photo",
@@ -873,7 +873,7 @@
 		el_points: "Electrical points", el_month: "Points this month", el_pts: "points", el_light: "Light points", el_fan: "Fan points",
 		el_socket_5a: "5A sockets", el_socket_15a: "15A sockets", el_ac_point: "AC points", el_mcb_db: "MCB / DB", el_earthing: "Earthing", el_other_points: "Other points" });
 	Object.assign(T.Marathi, { k_of: "पैकी", k_no_target: "टार्गेट ठरलेले नाही", k_behind: "मागे", k_on_track: "बरोबर चालू", k_target: "टार्गेट", k_off: "टार्गेटपेक्षा कमी",
-		k_no_data: "अजून डेटा नाही", k_week: "आठवडा", k_month: "महिना", kl_Orders: "ऑर्डर", kl_Invoices: "इनव्हॉइस",
+		k_no_data: "अजून डेटा नाही", k_day: "दिवस", k_per_day: "रोज", k_week: "आठवडा", k_month: "महिना", kl_Orders: "ऑर्डर", kl_Invoices: "इनव्हॉइस",
 		"kt_PO booking": "PO बुकिंग", "kt_Team PO booking": "टीम PO बुकिंग", "kt_Non-Cabin sale": "नॉन-केबिन विक्री", "kt_Order booking & invoices": "ऑर्डर बुकिंग व इनव्हॉइस",
 		"kt_Days to build 100 sq ft": "100 चौ.फूट बनवायला दिवस", "kt_Projects with correct P&L": "बरोबर नफा-तोटा असलेले प्रोजेक्ट", "kt_Days to recruit": "भरतीसाठी दिवस",
 		"kt_Stock accuracy": "स्टॉक अचूकता", "kt_QC first-time pass": "QC पहिल्यांदा पास", "kt_POs received on time": "वेळेवर आलेले PO",
@@ -1280,11 +1280,13 @@
 		let sub = "";
 		if (c.kind === "money") {
 			sub = `₹${kAmt(now.actual)}${c.target ? ` ${t("k_of")} ₹${kAmt(c.target)}` : ` · ${t("k_no_target")}`}${now.gap ? ` · <b class="sk-due">${t("k_behind")} ₹${kAmt(now.gap)}</b>` : c.target ? ` · <b class="sk-ok">${t("k_on_track")}</b>` : ""}`;
+			if (c.daily_target && kpiView === "day") sub += ` · ${t("k_per_day")} ₹${kAmt(c.daily_target)}`;
 			if (!now.actual && c.need) sub += `<br><span class="sk-due">${esc(c.need)}</span>`;
 		} else if (now) {
 			sub = `${now.month}: ${now.actual}${c.unit} · ${t("k_target")} ${c.target}${c.unit}${now.gap ? ` · <b class="sk-due">${t("k_off")}</b>` : ` · <b class="sk-ok">${t("k_on_track")}</b>`}`;
 		} else sub = `<span class="sk-due">${esc(c.need || t("k_no_data"))}</span>`;
-		const tabs = c.kind === "money" ? `<span class="sk-ktabs">${["week", "month"].map((v) => `<button class="sk-chip ${kpiView === v ? "on" : ""}" data-kview="${v}">${t("k_" + v)}</button>`).join("")}</span>` : "";
+		// SK 27-Oct: Day / Week / Month on everyone's graph, the target split by working days
+		const tabs = c.kind === "money" || c.day ? `<span class="sk-ktabs">${["day", "week", "month"].map((v) => `<button class="sk-chip ${kpiView === v ? "on" : ""}" data-kview="${v}">${t("k_" + v)}</button>`).join("")}</span>` : "";
 		// SK 26-Oct: the actions that lift this graph, from AI, the manager or the CEO, one tap away
 		const n = kpiData.actions || 0;
 		const act = `<button class="sk-kact ${n ? "on" : ""}" data-go="kpi_actions">🎯 ${t("ka_short")}${n ? ` <b>${n}</b>` : ""}</button>`;
@@ -1294,7 +1296,7 @@
 	}
 	// amount up the side, weeks (running total this month) or months along the bottom (SK 26-Oct)
 	function moneySvg(c) {
-		const v = kpiView === "month" ? c.month : c.week;
+		const v = c[kpiView] || c.week;
 		const W = 320, H = 150, L = 34, B = 18, T = 12;
 		const tgt = kpiView === "month" ? v.labels.map(() => c.target) : v.target;
 		const all = [...v.lines.flatMap((l) => l.points), ...(c.target ? tgt : [])];
@@ -1316,19 +1318,23 @@
 	// month by month against target: green dot = on target, red = not (SK 26-Oct: "trend monitoring")
 	function trendSvg(c) {
 		const W = 320, H = 150, L = 30, B = 18, T = 20;
-		const vals = c.points.map((p) => p.v).filter((x) => x != null);
-		const lo = Math.min(c.target, ...vals) * 0.85, n = c.points.length;
-		let hi = Math.max(c.target, ...vals, lo + 1) * 1.08;
-		if (c.unit === "%") hi = Math.max(Math.min(hi, 100), c.target + 1);
+		const points = (kpiView !== "month" && c[kpiView]) || c.points;
+		const tg = (p) => (p.t != null ? p.t : c.target);
+		const vals = points.map((p) => p.v).filter((x) => x != null);
+		const tgts = points.map(tg);
+		const lo = Math.min(...tgts, ...vals) * 0.85, n = points.length;
+		let hi = Math.max(...tgts, ...vals, lo + 1) * 1.08;
+		if (c.unit === "%") hi = Math.max(Math.min(hi, 100), Math.max(...tgts) + 1);
 		const X = (i) => L + i * (W - L - 14) / (n - 1), Y = (v) => H - B - ((v - lo) / (hi - lo)) * (H - B - T);
-		let g = `<line x1="${L}" x2="${W - 4}" y1="${Y(c.target)}" y2="${Y(c.target)}" class="sk-tline"/><text x="${W - 6}" y="${Y(c.target) - 4}" text-anchor="end" class="sk-tlabel">${t("k_target")} ${c.target}${c.unit}</text>`;
+		const lastT = tgts[n - 1];
+		let g = `<polyline points="${tgts.map((v, i) => `${X(i)},${Y(v)}`).join(" ")}" class="sk-tline"/><text x="${W - 6}" y="${Y(lastT) - 4}" text-anchor="end" class="sk-tlabel">${t("k_target")} ${lastT}${c.unit}</text>`;
 		[lo, hi].forEach((v) => { g += `<text x="2" y="${Y(v) + 3}" class="sk-ax">${Math.round(v)}</text>`; });
-		const pts = c.points.map((p, i) => (p.v == null ? null : `${X(i)},${Y(p.v)}`)).filter(Boolean);
+		const pts = points.map((p, i) => (p.v == null ? null : `${X(i)},${Y(p.v)}`)).filter(Boolean);
 		if (pts.length > 1) g += `<polyline points="${pts.join(" ")}" class="sk-kline k-o"/>`;
-		c.points.forEach((p, i) => {
+		points.forEach((p, i) => {
 			g += `<text x="${X(i)}" y="${H - 4}" text-anchor="middle" class="sk-ax">${p.m}</text>`;
 			if (p.v == null) return;
-			const ok = c.good_low ? p.v <= c.target : p.v >= c.target;
+			const ok = c.good_low ? p.v <= tg(p) : p.v >= tg(p);
 			g += `<circle cx="${X(i)}" cy="${Y(p.v)}" r="4.5" class="sk-kdot ${ok ? "ok" : "bad"}"/><text x="${X(i)}" y="${Y(p.v) - 8}" text-anchor="middle" class="sk-kval">${p.v}</text>`;
 			// Accounts: "12/20" projects right of those finished (SK 26-Oct)
 			if (p.note) g += `<text x="${X(i)}" y="${Y(p.v) + 14}" text-anchor="middle" class="sk-ax">${esc(p.note)}</text>`;
