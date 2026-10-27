@@ -15,15 +15,28 @@ NEVER = {"view_as", "view_members", "view_suggest", "login_methods", "my_pin", "
 	"face_setup", "face_unlock", "reset_face"}
 
 
-def can_view(user: str) -> bool:
+def _is_ceo(user: str) -> bool:
 	from sk_app.logins import profile_functions
 
 	return user == "Administrator" or "Management" in profile_functions(user)
 
 
-def _check(user: str):
+def _team_users(user: str) -> set[str]:
+	from sk_app.day_report import _team
+
+	return {p.user for p in _team(user)}
+
+
+def can_view(user: str) -> bool:
+	"""The CEO opens everyone; a manager (Rushi, SK 26-Oct) opens only the people under him."""
+	return _is_ceo(user) or bool(frappe.db.exists("SK App User", {"manager": user, "enabled": 1}))
+
+
+def _check(user: str, member: str | None = None):
 	if not can_view(user):
-		frappe.throw(_("Only the CEO can open another member's app"), frappe.PermissionError)
+		frappe.throw(_("Only the CEO or a team manager can open another member's app"), frappe.PermissionError)
+	if member and not _is_ceo(user) and member not in _team_users(user):
+		frappe.throw(_("You can open only your own team members' app"), frappe.PermissionError)
 
 
 def members(user: str) -> dict:
@@ -32,8 +45,10 @@ def members(user: str) -> dict:
 	from sk_app.functions import FUNCTIONS
 	from sk_app.logins import profile_functions
 
-	rows = frappe.get_all("SK App User", filters={"enabled": 1, "user": ["!=", user]}, fields=["user", "full_name", "home"],
-		order_by="full_name asc")
+	filters = {"enabled": 1, "user": ["!=", user]}
+	if not _is_ceo(user):
+		filters["user"] = ["in", list(_team_users(user)) or [""]]
+	rows = frappe.get_all("SK App User", filters=filters, fields=["user", "full_name", "home"], order_by="full_name asc")
 	last = {u.name: u.last_active for u in frappe.get_all("User", filters={"name": ["in", [r.user for r in rows] or [""]]},
 		fields=["name", "last_active"])}
 	groups = {}
@@ -69,8 +84,8 @@ def _log(viewer: str, member: str, view: str | None):
 
 
 def view_as(viewer: str, member: str, method: str, args: dict | None = None, view: str | None = None):
-	"""Run one reading screen of the app as the member, then switch straight back to the CEO."""
-	_check(viewer)
+	"""Run one reading screen of the app as the member, then switch straight back to the CEO / manager."""
+	_check(viewer, member)
 	if member == viewer or not frappe.db.exists("SK App User", {"user": member, "enabled": 1}):
 		frappe.throw(_("Pick a member"))
 	fn = _allowed(method)
@@ -97,9 +112,10 @@ def view_as(viewer: str, member: str, method: str, args: dict | None = None, vie
 
 def suggest(viewer: str, member: str, view: str | None, text: str, photo: str | None = None) -> str:
 	"""💡 on a member's page: the CEO's idea goes to the AI & ERP Improvement Inbox (Samir), with whose page it was."""
-	_check(viewer)
+	_check(viewer, member)
 	if not (text or "").strip():
 		frappe.throw(_("Please speak or type the idea"))
-	desc = f"💡 CEO idea on {frappe.utils.get_fullname(member)}'s app, page '{view or 'Home'}': {strip_html(text.strip())[:400]}"
+	who = "CEO" if _is_ceo(viewer) else frappe.utils.get_fullname(viewer)
+	desc = f"💡 {who} idea on {frappe.utils.get_fullname(member)}'s app, page '{view or 'Home'}': {strip_html(text.strip())[:400]}"
 	return frappe.get_doc({"doctype": "SK Work Log", "user": viewer, "date": getdate(), "entry_type": "Problem",
 		"problem_type": "IT / app", "description": desc, "photo": photo or None}).insert(ignore_permissions=True).name

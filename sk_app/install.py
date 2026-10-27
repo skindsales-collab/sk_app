@@ -43,6 +43,9 @@ def after_migrate():
 	from sk_app.training import seed_lessons
 
 	seed_lessons()
+	from sk_app.function_faq import seed_faq
+
+	seed_faq()  # SK 27-Oct: HR, Production and Accounts FAQ in Training
 	from sk_app.hr import ensure_holiday_setup
 
 	ensure_holiday_setup()  # trial 26-Oct: leave needs a company holiday list

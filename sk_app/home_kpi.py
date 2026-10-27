@@ -115,9 +115,20 @@ def _orders_value(owners, segment=None):
 			for o in owners:
 				mine.update(user_sales_orders(o, start, end))
 			drafts = set(frappe.get_all("Sales Order", filters={"docstatus": 0, "owner": ["in", owners], "transaction_date": ["between", [start, end]]}, pluck="name"))
+			# draft orders are real orders too (DEC-013): credit them by their Sales Team row like posted ones
+			persons = [p for o in owners for p in _sales_persons(o)]
+			if persons:
+				drafts.update(frappe.get_all("Sales Team", filters={"parenttype": "Sales Order", "sales_person": ["in", persons],
+					"parent": ["in", [s.name for s in orders] or [""]]}, pluck="parent"))
 			orders = [s for s in orders if s.name in mine or s.name in drafts]
 		return sum(flt(s.base_net_total) for s in orders)
 	return amount
+
+
+def _sales_persons(user):
+	from sk_app.kpi import _sales_persons as persons
+
+	return persons(user)
 
 
 def _invoiced(start, end):
@@ -133,9 +144,21 @@ def sales(user: str, segment=None, fn="Sales") -> dict:
 	title = "Non-Cabin sale" if segment == segments.NON_CABIN else "PO booking"
 	# SK 26-Oct: for a sales manager (Rushi) the team total counts: the team's orders against all their targets together
 	target = _sales_target([user] if owners is None else owners)
-	if owners is not None and len(owners) > 1:
+	lines = [("Orders", "o", _orders_value(owners, segment))]
+	# SK 27-Oct "data in graph is not came for Aditya": the invoiced sale (Tally and ERPNext invoices) is the data the
+	# company has for every month, so Non-Cabin and the sales manager's team also see it as a second line
+	if segment == segments.NON_CABIN:
+		lines.append(("Invoices", "g", lambda s, e: dashboards._invoiced(s, e, segments.NON_CABIN)))
+	elif owners is not None and len(owners) > 1:
 		title = "Team PO booking"
-	return _money_card(fn, title, [("Orders", "o", _orders_value(owners, segment))], target)
+		lines.append(("Invoices", "g", lambda s, e: dashboards._invoiced(s, e, segments.CABIN)))
+	card = _money_card(fn, title, lines, target)
+	if owners is not None and not any(card["month"]["lines"][0]["points"]):
+		# nothing credited to this person: say how an order becomes theirs
+		card["need"] = "No orders in your name yet. In ERPNext, put your name in the order's Sales Team (Sales Person) so it counts for you."
+	if not target:
+		card["need_target"] = "Monthly target not set: SK App Settings → SK KPI Target (orders value)."
+	return card
 
 
 def company(user: str) -> dict:

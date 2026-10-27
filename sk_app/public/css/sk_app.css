@@ -425,3 +425,32 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 .sk-khead > b { flex: 1; min-width: 0; }
 .sk-kplot { position: relative; }
 .sk-kplot .sk-kact { position: absolute; top: 8px; left: 40px; z-index: 1; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+/* SK 27-Oct: My Day / DSI / More as a slim row so Call / WhatsApp / Mail show without scrolling on every phone */
+.sk-home2 .sk-bottom .sk-tile { flex-direction: row; justify-content: center; padding: 8px 2px; font-size: 13px; gap: 6px; }
+.sk-home2 .sk-bottom .sk-tile-icon { font-size: 20px; }
+.sk-home2 .sk-bottom .sk-dot { top: -6px; right: -2px; }
+.sk-home2 { gap: 6px; min-height: calc(100vh - 80px); }
+.sk-home2 .sk-cbig { padding: 11px 4px; }
+.sk-ksvg { max-height: 24vh; }
+@media (max-height: 760px) {
+	.sk-home2 .sk-own .sk-tile { padding: 8px 2px; }
+	.sk-home2 .sk-own .sk-tile-icon { font-size: 22px; }
+	.sk-home2 .sk-common .sk-tile { padding: 5px 2px; font-size: 11px; }
+	.sk-ar3 { height: 50px; }
+	.sk-dec { padding: 4px 2px; }
+	.sk-ksvg { max-height: 20vh; }
+}
+@media (max-height: 700px) {
+	.sk-home2 { gap: 4px; }
+	.sk-ksvg { max-height: 16vh; }
+	.sk-ar3 { height: 42px; }
+	.sk-ar3 b { font-size: 16px; }
+	.sk-dech { margin: 0; font-size: 13px; }
+	.sk-dec small { display: none; }
+	.sk-home2 .sk-own .sk-tile { padding: 5px 2px; }
+	.sk-home2 .sk-own .sk-tile-icon { font-size: 20px; }
+	.sk-home2 .sk-common .sk-tile-icon { display: none; }
+	.sk-home2 .sk-common .sk-tile { padding: 8px 2px; }
+	.sk-home2 .sk-cbig { padding: 9px 4px; font-size: 14px; }
+	.sk-kcard { padding: 6px 10px 4px; }
+}

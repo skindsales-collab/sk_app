@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cint, flt, nowdate
 
+from sk_app.production import wo_customer
 from sk_app.store import _todo, _users_with_function, attach, need, try_submit
 
 QUALITY = "Quality"
@@ -39,6 +40,7 @@ def pending(user: str) -> dict:
 			continue
 		row = {"reference_type": "Job Card", "reference_name": jc.name, "item_code": jc.production_item, "item_name": jc.item_name,
 			"qty": jc.for_quantity, "operation": jc.operation, "from": jc.workstation, "since": str(jc.modified), "work_order": jc.work_order,
+			"customer": wo_customer(jc.work_order),
 			"inspection_type": "In Process"}
 		(final if _is_final(jc.operation) else stage).append(row)
 	for r in final:

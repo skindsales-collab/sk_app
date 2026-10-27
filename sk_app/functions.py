@@ -149,6 +149,9 @@ def home_for(function: str | None, has_team: bool = False) -> dict:
 	if has_team and "my_leads" in home["tiles"] and "team_leads" not in home["tiles"]:
 		i = home["tiles"].index("my_leads")
 		home["tiles"] = home["tiles"][:i] + ["team_leads"] + home["tiles"][i:]
+	# a manager opens each team member's full app, as the CEO does for everyone (Rushi, SK 26-Oct-2026)
+	if has_team and "view_member" not in home["tiles"]:
+		home["tiles"] = home["tiles"] + ["view_member"]
 	# HR draft Rev 2: everyone applies for leave and claims expenses (managers approve there); not subcontractors
 	if (function or "") != "Subcontractor" and "leave_expense" not in home["tiles"]:
 		home["tiles"] = home["tiles"] + ["leave_expense"]

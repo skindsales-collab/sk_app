@@ -96,6 +96,25 @@ class TestViewMemberApp(IntegrationTestCase):
 			self.assertRaises(frappe.PermissionError, api.view_as, CEO, "home", "{}")
 		self.assertFalse(view_member.can_view(CABIN_REP))
 
+	def test_manager_sees_only_his_team(self):
+		from frappe.tests.classes.context_managers import set_user
+
+		from sk_app import api, view_member
+
+		_app_user(NONCABIN, "Sales", ["Sales User"])
+		frappe.db.set_value("SK App User", {"user": CABIN_REP}, "manager", NONCABIN)
+		frappe.db.set_value("SK App User", {"user": CEO}, "manager", None)
+		try:
+			self.assertTrue(view_member.can_view(NONCABIN))
+			with set_user(NONCABIN):
+				people = [p["user"] for g in api.view_members()["groups"] for p in g["people"]]
+				self.assertEqual(people, [CABIN_REP])
+				self.assertEqual(api.view_as(CABIN_REP, "home", "{}", "home")["user"], CABIN_REP)
+				self.assertRaises(frappe.PermissionError, api.view_as, CEO, "home", "{}")
+				self.assertIn("view_member", api.home()["sections"]["sections"][0]["tiles"])
+		finally:
+			frappe.db.set_value("SK App User", {"user": CABIN_REP}, "manager", None)
+
 
 class TestCeoDashboards(IntegrationTestCase):
 	"""Point 13: every live dashboard page opens for the CEO, with lists behind its numbers; nobody else opens them."""
