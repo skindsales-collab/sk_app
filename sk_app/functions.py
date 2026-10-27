@@ -71,7 +71,7 @@ FUNCTIONS = {
 		# SK / Shraddha 26-Oct: ledger-wise screens; Expenses is the Journal Voucher list, plus Direct and Indirect Expenses
 		# SK 27-Oct: the team knows Tally, so Accounts opens on the Accounts Gateway (Gateway of Tally sections and names)
 		"tiles": ["my_day", "gateway", "day_book", "cash_today", "to_collect", "to_pay", "bills_to_post", "invoices", "expenses", "dir_expenses",
-			"segment_pnl", "month_close", "complaints",
+			"segment_pnl", "month_close", "new_product", "complaints",
 			*CONTACT_TILES, *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Accounts User", "Accounts Manager"],

@@ -63,7 +63,7 @@ def _company():
 # ---------- Stock Check ----------
 
 def stock_search(user: str, q: str | None = None) -> list[dict]:
-	need(user, STORE, "Purchase", "Production", "Quality")
+	need(user, STORE, "Purchase", "Production", "Quality", "Accounts")  # Accounts: bill items without PO (27-Oct)
 	q = (q or "").strip()
 	filters = {"disabled": 0, "is_stock_item": 1}
 	or_filters = None
