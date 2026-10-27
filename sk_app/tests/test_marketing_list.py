@@ -42,6 +42,14 @@ class TestMarketingList(IntegrationTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			run(REP, ml.greet, r["name"], "promotion")
 
+	def test_excel_upload(self):
+		csv = "Name,Mobile,Company,City\nRavi Kale,9881100221.0,Kale Steel,Nashik\n,,,\nNo Phone,,X,\nRavi K,+91 98811 00221,,\n"
+		f = frappe.get_doc({"doctype": "File", "file_name": "mk-list.csv", "content": csv, "is_private": 1}).insert(ignore_permissions=True)
+		r = run(REP, ml.upload, f.file_url)
+		self.assertEqual((r["made"], r["existing"], r["skipped"]), (1, 1, 2))
+		c = ml._by_mobile("9881100221")
+		self.assertEqual(frappe.db.get_value("Contact", c, ml.CITY), "Nashik")
+
 	def test_only_sales_and_marketing(self):
 		with self.assertRaises(frappe.PermissionError):
 			run(STORE, ml.people)

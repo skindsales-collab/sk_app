@@ -75,6 +75,41 @@ APP_LESSONS = [
 		"<li>EN / मर under the mic picks English or Marathi. If it says no permission, allow the microphone for Chrome.</li></ol>",
 		"<ol><li>बॉक्सजवळील 🎤 दाबा. तो लाल होतो आणि <b>ऐकत आहे… आता बोला</b> दाखवतो.</li><li>बोला; शब्द लगेच दिसतात. थांबवण्यासाठी लाल माईक दाबा.</li>"
 		"<li>माईकखालील EN / मर ने इंग्रजी किंवा मराठी निवडा. परवानगी नाही असे आले तर Chrome ला माईकची परवानगी द्या.</li></ol>"),
+	# SK 27-Oct: "need to add this in app training"
+	("Marketing list: greetings and promotions", "मार्केटिंग यादी: शुभेच्छा आणि प्रमोशन", "Marketing", 13,
+		"<ol><li>The Marketing list is for <b>potential customers who are not leads</b>. We send them festival greetings and promotions to keep in touch.</li>"
+		"<li>Open <b>More</b>, then <b>📇 Marketing list</b>.</li>"
+		"<li><b>Add one person:</b> tap <b>➕ Add person</b>, then <b>📷 Camera</b> and photograph the visiting card. Name, company, mobile and email fill in by themselves. "
+		"Or tap 🎤 and speak. Check the boxes, add the City, then tap <b>Save</b> twice (first tap shows what to check, second tap saves).</li>"
+		"<li><b>Add an old list:</b> tap <b>📄 Upload Excel list</b> and pick the Excel or CSV file. It needs a <b>Name</b> and a <b>Mobile</b> column; Company, Email and City are used if present. "
+		"A phone or Google Contacts export also works. The same mobile is never added twice.</li>"
+		"<li><b>Send a greeting:</b> pick the festival (Diwali, New Year, Ganesh Chaturthi...) and tap <b>💬 Send on WhatsApp</b> next to each person. WhatsApp opens with the message ready; tap send. "
+		"People not greeted yet are at the top. Every send is counted for you.</li>"
+		"<li><b>Promotion:</b> pick <b>Promotion</b>, type the offer, then send on WhatsApp one by one. To mail everyone at once tap <b>📧 Promotion mail to all</b> (ERPNext Newsletter, group \"Marketing list\").</li>"
+		"<li><b>Interested?</b> Tap <b>🔥 Interested: make lead</b>. New Lead opens with the details filled in; pick the Segment and Save.</li>"
+		"<li>In ERPNext the list is in <b>Contact</b>, filter <b>Marketing list = Yes</b>.</li></ol>",
+		"<ol><li>मार्केटिंग यादी <b>लीड नसलेल्या संभाव्य ग्राहकांसाठी</b> आहे. संपर्क टिकवण्यासाठी त्यांना सणाच्या शुभेच्छा आणि प्रमोशन पाठवतो.</li>"
+		"<li><b>More</b> उघडा, मग <b>📇 मार्केटिंग यादी</b>.</li>"
+		"<li><b>एक व्यक्ती जोडा:</b> <b>➕ व्यक्ती जोडा</b> दाबा, मग <b>📷 कॅमेरा</b> दाबून व्हिजिटिंग कार्डचा फोटो काढा. नाव, कंपनी, मोबाईल आणि ईमेल आपोआप भरतात. "
+		"किंवा 🎤 दाबून बोला. बॉक्स तपासा, शहर टाका, मग <b>जतन करा</b> दोनदा दाबा (पहिल्यांदा काय तपासायचे ते दिसते, दुसऱ्यांदा जतन होते).</li>"
+		"<li><b>जुनी यादी जोडा:</b> <b>📄 एक्सेल यादी अपलोड करा</b> दाबा आणि एक्सेल किंवा CSV फाईल निवडा. त्यात <b>Name</b> आणि <b>Mobile</b> कॉलम हवा; Company, Email, City असल्यास तेही घेतले जातात. "
+		"फोन किंवा Google Contacts ची फाईलही चालते. एकच मोबाईल दोनदा जोडला जात नाही.</li>"
+		"<li><b>शुभेच्छा पाठवा:</b> सण निवडा (दिवाळी, नवीन वर्ष, गणेश चतुर्थी...) आणि प्रत्येक व्यक्तीजवळ <b>💬 WhatsApp वर पाठवा</b> दाबा. मेसेजसह WhatsApp उघडते; पाठवा दाबा. "
+		"अजून शुभेच्छा न दिलेले वर दिसतात. प्रत्येक पाठवलेला मेसेज तुमच्या नावाने मोजला जातो.</li>"
+		"<li><b>प्रमोशन:</b> <b>प्रमोशन</b> निवडा, ऑफर लिहा, मग एक एक करून WhatsApp वर पाठवा. सर्वांना एकदम मेल करण्यासाठी <b>📧 सर्वांना प्रमोशन मेल</b> दाबा (ERPNext न्यूजलेटर, ग्रुप \"Marketing list\").</li>"
+		"<li><b>रस आहे?</b> <b>🔥 रस आहे: लीड बनवा</b> दाबा. माहिती भरलेले नवीन लीड उघडते; सेगमेंट निवडा आणि जतन करा.</li>"
+		"<li>ERPNext मध्ये ही यादी <b>Contact</b> मध्ये आहे, फिल्टर <b>Marketing list = Yes</b>.</li></ol>"),
+	("Cold Calling list", "कोल्ड कॉलिंग यादी", "Marketing", 14,
+		"<ol><li>Call-list data (old or bought lists, leads never called) is kept in <b>🧊 Cold Calling</b>, not in My Leads, so My Leads shows only real enquiries.</li>"
+		"<li>Open <b>My Leads</b>, then <b>🧊 Cold Calling</b> at the top. Not-called people are first; search by name or mobile.</li>"
+		"<li>Tap 📞 to call. When the customer is interested tap <b>🔥 Interested → My Leads</b>; the lead joins your normal follow-up.</li>"
+		"<li>A lead that is only data can be moved back with <b>🧊 Move to Cold Calling</b> on the lead page.</li>"
+		"<li>Uploading an Excel with source <b>Cold calling</b> puts the whole list here.</li></ol>",
+		"<ol><li>कॉल-लिस्ट डेटा (जुनी किंवा विकत घेतलेली यादी, कधीही कॉल न केलेले लीड) <b>🧊 कोल्ड कॉलिंग</b> मध्ये ठेवला जातो, माझे लीड मध्ये नाही, त्यामुळे माझे लीड मध्ये फक्त खरी चौकशी दिसते.</li>"
+		"<li><b>माझे लीड</b> उघडा, मग वर <b>🧊 कोल्ड कॉलिंग</b>. कॉल न केलेले आधी दिसतात; नाव किंवा मोबाईलने शोधा.</li>"
+		"<li>📞 दाबून कॉल करा. ग्राहकाला रस असल्यास <b>🔥 रस आहे → माझे लीड</b> दाबा; लीड तुमच्या नेहमीच्या फॉलो-अप मध्ये जातो.</li>"
+		"<li>फक्त डेटा असलेला लीड लीड पानावरील <b>🧊 कोल्ड कॉलिंगमध्ये हलवा</b> ने परत हलवता येतो.</li>"
+		"<li>सोर्स <b>Cold calling</b> निवडून एक्सेल अपलोड केल्यास पूर्ण यादी इथे येते.</li></ol>"),
 ]
 
 
