@@ -2012,6 +2012,22 @@
 	// ---------- CRM on the phone ----------
 	let crmOpts = null;
 	let pending = null; // contact the person just started (call / WhatsApp / email), to log on return
+	// kept on the phone too: Android often reloads the app during a long call, and the lock screen can come first
+	function setPending(p) {
+		pending = p;
+		try { if (p) localStorage.setItem("sk_pending", JSON.stringify(p)); else localStorage.removeItem("sk_pending"); } catch (e) { /* private mode */ }
+	}
+	function askPending() {
+		if (!pending) {
+			try {
+				const p = JSON.parse(localStorage.getItem("sk_pending") || "null");
+				if (p && Date.now() - p.at < 6 * 60 * 60 * 1000) pending = p; else localStorage.removeItem("sk_pending");
+			} catch (e) { /* private mode */ }
+		}
+		if (!pending || state.viewAs || document.getElementById("sk-lock") || root.querySelector(".sk-sheet-wrap") || Date.now() - pending.at < 1500) return;
+		if (!pending.back) pending.back = Date.now();
+		outcomeSheet(pending);
+	}
 	let current = null; // lead or deal open on the detail screen
 
 	async function options() {
@@ -4667,11 +4683,11 @@
 			}
 			if (el.dataset.contact) {
 				const ch = el.dataset.contact;
-				pending = { channel: ch, doctype: el.dataset.doctype, name: el.dataset.name, at: Date.now() };
+				setPending({ channel: ch, doctype: el.dataset.doctype, name: el.dataset.name, at: Date.now() });
 				options().catch(() => null);
 				if (ch === "Call") window.location.href = "tel:" + el.dataset.mobile;
 				else if (ch === "WhatsApp") window.open("https://wa.me/" + waNumber(el.dataset.mobile), "_blank");
-				else { pending = null; return mailSheet(el.dataset.doctype, el.dataset.name, el.dataset.email); }
+				else { setPending(null); return mailSheet(el.dataset.doctype, el.dataset.name, el.dataset.email); }
 				return;
 			}
 			if (el.dataset.waPick !== undefined) {
@@ -4895,7 +4911,7 @@
 				clearDraft();
 				return go(el.dataset.kind === "Problem" ? "home" : "my_day");
 			}
-			if (act === "close-sheet") { pending = null; return closeSheet(); }
+			if (act === "close-sheet") { setPending(null); return closeSheet(); }
 			if (act && act.startsWith("tm-")) {
 				const comm = el.dataset.comm;
 				el.disabled = true;
@@ -5143,7 +5159,7 @@
 				await call("log_contact", { doctype: pending.doctype, name: pending.name, channel: pending.channel,
 					outcome: chip ? chip.dataset.ptype : null, text: val("f-out"), photo: await photoUrl("f-outphoto"),
 					duration: Math.round(Number(val("f-outmin") || 0) * 60) }, true);
-				pending = null;
+				setPending(null);
 				closeSheet();
 				toast(t("saved"));
 				return go(state.view);
@@ -5384,6 +5400,7 @@
 		else if (lockHit) go(state.view); // a screen that could not load while locked opens now (typed forms are left as they are)
 		lockHit = false;
 		if (!st.has_key && await canFace()) faceSetupSheet();
+		setTimeout(askPending, 800);
 	}
 	function faceSetupSheet() {
 		sheet(`<h3 class="sk-h">🙂 ${t("lk_setup")}</h3><p class="sk-note">${t("lk_setup_why")}</p>
@@ -5438,6 +5455,7 @@
 			renderHome();
 			inAppBrowserBanner();
 			restoreDraft().catch(() => {});
+			setTimeout(askPending, 800);
 			if (!state.card || Date.now() - new Date(state.card.slot_start.replace(" ", "T")).getTime() > 60 * 60 * 1000) {
 				state.card = await call("next_card", {}, true);
 				if (state.view === "home") renderHome();
@@ -5449,7 +5467,7 @@
 
 	// back from the phone's call / WhatsApp / email app: ask what happened and log it in CRM
 	document.addEventListener("visibilitychange", () => {
-		if (!document.hidden && pending && !root.querySelector(".sk-sheet-wrap") && Date.now() - pending.at > 1500) { pending.back = Date.now(); outcomeSheet(pending); }
+		if (!document.hidden) askPending();
 	});
 
 	function beep() {
