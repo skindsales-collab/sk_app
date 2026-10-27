@@ -746,7 +746,7 @@
 	Object.assign(T.English, {
 		co_flow: "Company flow", all_dash: "All dashboards", to_plan: "Orders to plan", fl_order_received: "Order received → Sales Order", fl_confirm: "Confirm order (factory can plan)",
 		fl_new_quote: "Make quotation", fl_quote_why: "Saved in ERPNext as a Quotation for this customer (the customer is made by itself). The PDF opens to send.",
-		fl_add_item: "Add item", fl_rate_blank: "blank = price list", fl_valid: "Valid for days", fl_terms: "Terms / note", fl_quote_saved: "Quotation saved",
+		fl_add_item: "Add item", fl_rate_blank: "blank = price list", fl_valid: "Valid for days", fl_desc: "Description (Enter = new line)", fl_terms: "Terms / note", fl_quote_saved: "Quotation saved",
 		fl_order_why: "The quotation is submitted and a Sales Order is made from it.", fl_delivery: "Promised delivery date", fl_po_no: "Customer PO no (optional)",
 		fl_so_saved: "Sales Order saved", fl_plan_why: "Confirmed orders without a Work Order. Make one per cabin; its stages become job cards.",
 		fl_no_bom: "No BOM yet: Design makes it first", fl_make_wo: "Make Work Order", fl_wo_saved: "Work Order saved",
@@ -759,7 +759,7 @@
 	Object.assign(T.Marathi, {
 		co_flow: "कंपनी फ्लो", all_dash: "सर्व डॅशबोर्ड", to_plan: "प्लॅन करायच्या ऑर्डर", fl_order_received: "ऑर्डर मिळाली → सेल्स ऑर्डर", fl_confirm: "ऑर्डर निश्चित करा (फॅक्टरी प्लॅन करू शकते)",
 		fl_new_quote: "कोटेशन बनवा", fl_quote_why: "या ग्राहकासाठी ERPNext मध्ये कोटेशन म्हणून जतन होते (ग्राहक आपोआप बनतो). पाठवण्यासाठी PDF उघडते.",
-		fl_add_item: "आयटम जोडा", fl_rate_blank: "रिकामे = किंमत यादी", fl_valid: "किती दिवस वैध", fl_terms: "अटी / नोंद", fl_quote_saved: "कोटेशन जतन झाले",
+		fl_add_item: "आयटम जोडा", fl_rate_blank: "रिकामे = किंमत यादी", fl_valid: "किती दिवस वैध", fl_desc: "वर्णन (Enter = नवी ओळ)", fl_terms: "अटी / नोंद", fl_quote_saved: "कोटेशन जतन झाले",
 		fl_order_why: "कोटेशन सबमिट होते आणि त्यावरून सेल्स ऑर्डर बनते.", fl_delivery: "दिलेली डिलिव्हरी तारीख", fl_po_no: "ग्राहकाचा PO नंबर (ऐच्छिक)",
 		fl_so_saved: "सेल्स ऑर्डर जतन झाली", fl_plan_why: "वर्क ऑर्डर नसलेल्या निश्चित ऑर्डर. प्रत्येक केबिनसाठी एक बनवा; त्याचे टप्पे जॉब कार्ड होतात.",
 		fl_no_bom: "BOM अजून नाही: आधी डिझाईन बनवेल", fl_make_wo: "वर्क ऑर्डर बनवा", fl_wo_saved: "वर्क ऑर्डर जतन झाली",
@@ -1633,7 +1633,7 @@
 	// many logins at once: HR pastes the staff list, one line per person
 	function bulkSheet() {
 		sheet(`<h3 class="sk-h">📋 ${t("bulk_logins")}</h3><p class="sk-note">${t("bulk_help")}</p>
-			<textarea id="g-bulk" class="sk-bulk" rows="10" placeholder="Yogesh B. | 9970960806 | Stores | HR-EMP-00009"></textarea>
+			<textarea id="g-bulk" enterkeyhint="enter" class="sk-bulk" rows="10" placeholder="Yogesh B. | 9970960806 | Stores | HR-EMP-00009"></textarea>
 			<button class="sk-btn ok wide" data-act="login-bulk">${t("make_logins")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
 	}
 	function bulkResult(rows) {
@@ -1762,7 +1762,7 @@
 
 	function formField(id, label, big) {
 		return `<label class="sk-field"><span>${esc(label)}</span><div class="sk-input-row">
-			${big ? `<textarea id="${id}" rows="3"></textarea>` : `<input id="${id}">`}
+			${big ? `<textarea id="${id}" enterkeyhint="enter" rows="3" enterkeyhint="enter"></textarea>` : `<input id="${id}">`}
 			${micBox(id)}</div></label>`;
 	}
 
@@ -1946,7 +1946,8 @@
 		return "";
 	}
 	function quoteLine(k) {
-		return `<div class="sk-qline" data-k="${k}">${finder("ql-item" + k, t("item"), "item")}
+		// SK 27-Oct: the description takes new lines (Enter), like WhatsApp: size, specs, scope one per line
+		return `<div class="sk-qline" data-k="${k}">${finder("ql-item" + k, t("item"), "item")}${formField("ql-desc" + k, t("fl_desc"), true)}
 			<div class="sk-row"><label class="sk-field"><span>${t("qty")}</span>${qtyBox("ql-qty" + k, 1)}</label>
 			<label class="sk-field"><span>${t("rate")} (${t("fl_rate_blank")})</span>${qtyBox("ql-rate" + k)}</label></div></div>`;
 	}
@@ -3002,7 +3003,7 @@
 				<button class="sk-chip ${mobile ? "on" : ""}" data-wa-pick="${esc(mobile)}">🧑‍💼 2) ${t("customer")}</button></div>
 			${contactSelect("f-wawho")}
 			<label class="sk-field"><span>${t("mobile")}</span><div class="sk-input-row"><input id="f-wa" type="tel" value="${esc(mobile)}"></div></label>
-			<label class="sk-field"><span>${t("message")}</span><textarea id="f-watext" rows="4">${esc(text)}</textarea></label>
+			<label class="sk-field"><span>${t("message")}</span><textarea id="f-watext" enterkeyhint="enter" rows="4">${esc(text)}</textarea></label>
 			<button class="sk-btn ok wide" data-act="wa-text">💬 ${t("send")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
 		const sel = document.getElementById("f-wawho");
 		sel.addEventListener("change", () => { const o = sel.selectedOptions[0]; if (o && o.dataset.mobile) document.getElementById("f-wa").value = o.dataset.mobile; });
@@ -3301,7 +3302,7 @@
 			case "fl-addline": { document.getElementById("ql-box").insertAdjacentHTML("beforeend", quoteLine(S.qLines)); S.qLines += 1; return; }
 			case "fl-quote-save": {
 				el.disabled = true;
-				const items = [...Array(S.qLines).keys()].map((k) => ({ item_code: val("ql-item" + k), qty: val("ql-qty" + k), rate: val("ql-rate" + k) })).filter((x) => x.item_code);
+				const items = [...Array(S.qLines).keys()].map((k) => ({ item_code: val("ql-item" + k), qty: val("ql-qty" + k), rate: val("ql-rate" + k), description: val("ql-desc" + k) })).filter((x) => x.item_code);
 				try {
 					const r = await call("flow_make_quotation", { deal: S.qDeal, items: JSON.stringify(items), valid_days: val("ql-valid"), note: val("ql-note") }, true);
 					closeSheet(); saved(`${t("fl_quote_saved")}: ${r.name}`); window.open(r.pdf, "_blank");
