@@ -78,7 +78,11 @@ def make_quotation(user: str, deal: str, items: list[dict], valid_days: int = 15
 		rate = flt(it.get("rate")) or _rate(code)
 		if rate <= 0:
 			frappe.throw(_("Please give the rate for {0}").format(code))
-		rows.append({"item_code": code, "qty": qty, "rate": rate})
+		row = {"item_code": code, "qty": qty, "rate": rate}
+		desc = (it.get("description") or "").strip()
+		if desc:
+			row["description"] = "<br>".join(frappe.utils.escape_html(x) for x in desc.splitlines())
+		rows.append(row)
 	if not rows:
 		frappe.throw(_("Please add at least one item"))
 	doc = frappe.get_doc({"doctype": "Quotation", "quotation_to": "Customer", "party_name": customer, "transaction_date": nowdate(),
