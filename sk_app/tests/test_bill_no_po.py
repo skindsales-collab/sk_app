@@ -26,6 +26,7 @@ class TestBillNoPo(IntegrationTestCase):
 		pr = run(STORE_U, store.receive, None, [{"item_code": RAW, "qty": 3}], supplier=SUPPLIER, reason="urgent local buy", bill_no="LB-9")
 		doc = frappe.get_doc("Purchase Receipt", pr["name"])
 		self.assertEqual(doc.supplier_delivery_note, "LB-9")
+		self.assertEqual((doc.owner, doc.modified_by), (STORE_U, STORE_U))  # saved by the system, kept in Yogesh's name
 		doc.items[0].rate = 120
 		doc.flags.ignore_permissions = True
 		doc.save()
