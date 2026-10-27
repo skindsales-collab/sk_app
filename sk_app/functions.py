@@ -125,7 +125,7 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": [*DASH_TILES, "leadership", "view_member", "attendance", "lead_sources", "customers", "complaints", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "reminders", "day_report", "my_kpi", "dsi", "problem",
+		"tiles": [*DASH_TILES, "leadership", "view_member", "attendance", "lead_sources", "customers", "sales_owner", "complaints", "po_approvals", "pay_approvals", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "reminders", "day_report", "my_kpi", "dsi", "problem",
 			"library", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager", "Purchase Manager", "Purchase User"],  # SK approves big POs
@@ -149,6 +149,9 @@ def home_for(function: str | None, has_team: bool = False) -> dict:
 	if has_team and "my_leads" in home["tiles"] and "team_leads" not in home["tiles"]:
 		i = home["tiles"].index("my_leads")
 		home["tiles"] = home["tiles"][:i] + ["team_leads"] + home["tiles"][i:]
+	# SK 27-Oct: the sales manager says who sells to each customer (Tally sale on each graph)
+	if has_team and "my_leads" in home["tiles"] and "sales_owner" not in home["tiles"]:
+		home["tiles"] = home["tiles"] + ["sales_owner"]
 	# a manager opens each team member's full app, as the CEO does for everyone (Rushi, SK 26-Oct-2026)
 	if has_team and "view_member" not in home["tiles"]:
 		home["tiles"] = home["tiles"] + ["view_member"]

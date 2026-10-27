@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, segments, store, training, view_member, work
+from sk_app import ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, sales_owner, segments, store, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -1175,6 +1175,16 @@ def my_flow():
 	"""Point 17: the live process flow of each of the person's functions (the CEO: one per function)."""
 	profile = _me()
 	return flows.for_user(profile.user, logins.profile_functions(profile.user) or [profile.home])
+
+
+@frappe.whitelist()
+def sales_assign_list(q=None):
+	return sales_owner.assign_list(_me().user, q)
+
+
+@frappe.whitelist(methods=["POST"])
+def sales_assign(customer, sales_person=None):
+	return sales_owner.assign(_me().user, customer, sales_person)
 
 
 @frappe.whitelist(methods=["POST"])

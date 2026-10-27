@@ -227,10 +227,17 @@ def sales(user: str, segment=None, fn="Sales") -> dict:
 	elif owners is not None and len(owners) > 1:
 		title = "Team PO booking"
 		lines.append(("Invoices", "g", lambda s, e: dashboards._invoiced(s, e, segments.CABIN)))
+	elif owners is not None:
+		# SK 27-Oct point 5: the person's customers' invoiced sale (Tally + invoices), once the CEO / sales manager
+		# has said who sells to each customer
+		from sk_app.sales_owner import invoiced_for
+
+		persons = _sales_persons(user)
+		lines.append(("Invoices", "g", lambda s, e: invoiced_for(persons, s, e)))
 	card = _money_card(fn, title, lines, target)
-	if owners is not None and not any(card["month"]["lines"][0]["points"]):
+	if owners is not None and not any(p for line in card["month"]["lines"] for p in line["points"]):
 		# nothing credited to this person: say how an order becomes theirs
-		card["need"] = "No orders in your name yet. In ERPNext, put your name in the order's Sales Team (Sales Person) so it counts for you."
+		card["need"] = "No sale in your name yet. The CEO / sales manager ticks your customers on Customer → salesperson; then their Tally sale shows here."
 	if not target:
 		card["need_target"] = "Monthly target not set: SK App Settings → SK KPI Target (orders value)."
 	return card

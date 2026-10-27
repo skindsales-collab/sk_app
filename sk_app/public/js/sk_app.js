@@ -720,13 +720,13 @@
 	});
 	// change list point 2: Cabin / Non-Cabin customers
 	Object.assign(T.English, {
-		customers: "Customers", tag_tally: "Tag from Tally (Cabin / Non-Cabin sales)", seg_not_set: "Segment not set", seg_all: "All", seg_cabin: "Cabin", seg_noncabin: "Non-Cabin",
+		customers: "Customers", sales_owner: "Customer → salesperson", so_why: "Pick who sells to each customer. Their sale from Tally then shows on that person's graph. Biggest customers first.", so_done: "customers given a salesperson", so_this_year: "this year", so_no_customer: "not a customer in ERPNext yet", tag_tally: "Tag from Tally (Cabin / Non-Cabin sales)", seg_not_set: "Segment not set", seg_all: "All", seg_cabin: "Cabin", seg_noncabin: "Non-Cabin",
 		pick_segment: "Please pick the segment (Cabin or Non-Cabin)", orders_word: "orders", tag_hint: "Tap the segment: the right team then sees this customer.",
 		seen_by_mgmt: "Customers without a segment are seen by Management only until tagged.",
 		"Cabin": "Cabin", "Non-Cabin": "Non-Cabin",
 	});
 	Object.assign(T.Marathi, {
-		customers: "ग्राहक", tag_tally: "Tally प्रमाणे विभाग लावा", seg_not_set: "विभाग ठरवलेला नाही", seg_all: "सर्व", seg_cabin: "केबिन", seg_noncabin: "नॉन-केबिन",
+		customers: "ग्राहक", sales_owner: "ग्राहक → विक्रेता", so_why: "प्रत्येक ग्राहक कोण सांभाळतो ते निवडा. त्याची Tally विक्री त्या व्यक्तीच्या ग्राफवर दिसेल. मोठे ग्राहक आधी.", so_done: "ग्राहकांना विक्रेता दिला", so_this_year: "या वर्षी", so_no_customer: "ERPNext मध्ये ग्राहक नाही", tag_tally: "Tally प्रमाणे विभाग लावा", seg_not_set: "विभाग ठरवलेला नाही", seg_all: "सर्व", seg_cabin: "केबिन", seg_noncabin: "नॉन-केबिन",
 		pick_segment: "कृपया विभाग निवडा (केबिन की नॉन-केबिन)", orders_word: "ऑर्डर", tag_hint: "विभागावर टॅप करा: योग्य टीमला हा ग्राहक दिसेल.",
 		seen_by_mgmt: "विभाग नसलेले ग्राहक टॅग होईपर्यंत फक्त व्यवस्थापनाला दिसतात.",
 		"Cabin": "केबिन", "Non-Cabin": "नॉन-केबिन",
@@ -896,7 +896,7 @@
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁", el_points: "🔌",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
-		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
+		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", sales_owner: "🧑‍💼", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
 		dash_overview: "🏁", dash_daily_review: "🗓️", dash_sales: "💼", dash_marketing: "📣", dash_machine_shifting: "🏗️", dash_job_work: "⚙️", dash_cr100: "🎯", dash_finance: "💰", dash_manufacturing: "🏭", dash_purchase: "🛒", dash_store: "📦", dash_quality: "✅", dash_hr: "👥", dash_ai: "🤖",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
@@ -1548,6 +1548,7 @@
 		if (b.dataset.more === "flow") { flowShown += PAGE; const [fi, si] = flowKey.split(":").map(Number); return renderFlowStage(fi, si); }
 		if (b.dataset.more === "wa") { waShown += PAGE; return renderWhatsApp(); }
 		if (b.dataset.more === "my_leads" || b.dataset.more === "my_deals") { leadShown += PAGE; return renderLeads(b.dataset.more, true); }
+		if (b.dataset.more === "so") { soShown += PAGE; return renderSalesOwner(true); }
 		if (b.dataset.more === "dash") { dashShown += PAGE; return renderDashList(dashI); }
 	}, true);
 	document.addEventListener("click", (ev) => {
@@ -2881,6 +2882,33 @@
 	// Customers by segment (point 2): the cabin team sees Cabin customers, Aditya Non-Cabin, Management both.
 	// "Segment not set": Management, Rushi and Aditya tag old customers with one tap.
 	let custTab = "mine", custSeg = "", custQuery = "";
+	// SK 27-Oct point 5: who sells to each customer, so the Tally sale shows on each salesperson's graph
+	let soQ = "", soShown = 60, soData = null;
+	async function renderSalesOwner(again) {
+		if (!again || !soData) soData = await call("sales_assign_list");
+		const d = soData, q = soQ.toLowerCase();
+		const all = d.rows.filter((r) => !q || r.title.toLowerCase().includes(q));
+		const rows = all.slice(0, soShown);
+		const opts = (r) => `<option value=""></option>${d.persons.map((p) => `<option ${r.persons.includes(p) ? "selected" : ""}>${esc(p)}</option>`).join("")}`;
+		root.innerHTML = header(t("sales_owner")) + `<main><p class="sk-note">${t("so_why")}</p>
+			<p class="sk-note"><b>${d.done} / ${d.total}</b> ${t("so_done")}</p>
+			<div class="sk-input-row sk-gap"><input id="so-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(soQ)}"></div>
+			<ul class="sk-list">${rows.map((r) => `<li class="sk-item ${r.persons.length ? "" : "k-amber"}"><div class="sk-grow">
+				<div class="sk-item-title">${esc(r.title)}</div><div class="sk-item-meta">₹${kAmt(r.sale)} ${t("so_this_year")}${r.customer ? "" : ` · <span class="sk-due">${t("so_no_customer")}</span>`}</div>
+				${r.customer ? `<select class="sk-select" data-so="${esc(r.customer)}">${opts(r)}</select>` : ""}</div></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
+			${moreBtn(all.length, rows.length, "so")}</main>`;
+		const inp = root.querySelector("#so-q");
+		inp.addEventListener("input", debounceSearch(() => { soQ = inp.value; soShown = 60; renderSalesOwner(true); }, "#so-q"));
+	}
+	root.addEventListener("change", async (ev) => {
+		const el = ev.target.closest("[data-so]");
+		if (!el) return;
+		const r = await call("sales_assign", { customer: el.dataset.so, sales_person: el.value }, true);
+		const row = soData && soData.rows.find((x) => x.customer === r.customer);
+		if (row) { if (!row.persons.length && r.persons.length) soData.done += 1; if (row.persons.length && !r.persons.length) soData.done -= 1; row.persons = r.persons; }
+		el.closest(".sk-item").classList.toggle("k-amber", !r.persons.length);
+		toast(t("saved"));
+	});
 	async function renderCustomers() {
 		const d = await call("customers", { tab: custTab, q: custQuery, segment: custSeg });
 		S.cust = d.rows;
@@ -3988,7 +4016,7 @@
 		segment_pnl: renderSegmentWise, month_close: renderMonthWise,
 		improvement_inbox: renderInbox, dept_visits: renderVisit, erp_gaps: renderGaps, app_users: renderAppUsers, change_list: renderChangeList,
 		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources, customers: renderCustomers, view_member: renderViewMember, complaints: renderComplaints,
-		attendance: renderAttendance, leave_expense: renderLeaveExpense };
+		attendance: renderAttendance, leave_expense: renderLeaveExpense, sales_owner: renderSalesOwner };
 	["overview", "daily_review", "sales", "marketing", "machine_shifting", "job_work", "cr100", "finance", "manufacturing", "purchase",
 		"store", "quality", "hr", "ai"].forEach((k) => { LIVE_VIEWS["dash_" + k] = () => renderDash(k); });
 

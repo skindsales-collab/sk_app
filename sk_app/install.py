@@ -42,6 +42,9 @@ def after_migrate():
 	setup_deal_customer_column()  # Swati item 8
 	from sk_app.lead_status import ensure_statuses
 
+	from sk_app.sales_owner import ensure_sales_persons
+
+	ensure_sales_persons()  # SK 27-Oct: no salesperson had an ERPNext Sales Person, so Tally sales counted for nobody
 	ensure_statuses()  # SK 27-Oct: New, Qualified, Drawing, Quotation, Negotiations, Deal Won, Junk Lead, Deal Loss
 	from sk_app.training import seed_lessons
 

@@ -49,7 +49,7 @@ class TestHomeKpi(IntegrationTestCase):
 		self.assertEqual(c["target"], 1500000)
 		self.assertEqual(len(c["month"]["labels"]), home_kpi.MONTHS)
 		self.assertEqual(len(c["week"]["labels"]), len(c["week"]["target"]))
-		self.assertEqual([l["label"] for l in c["week"]["lines"]], ["Orders"])
+		self.assertEqual([l["label"] for l in c["week"]["lines"]], ["Orders", "Invoices"])  # SK 27-Oct: own customers' Tally sale too
 		pts = c["week"]["lines"][0]["points"]
 		self.assertEqual(pts, sorted(pts))  # running total never goes down
 		self.assertLessEqual(c["week"]["target"][-1], 1500000)
