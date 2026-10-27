@@ -756,6 +756,15 @@
 		cq_opts: "Options", cq_km: "Distance from Talegaon plant (km)", cq_crane: "Crane for unloading", cq_disc: "Discount %", cq_disc_max: "you can give up to",
 		cq_disc_sk: "above this SK approves", cq_price: "Price (excl. GST)", cq_revise: "Revise", cq_new: "New quotation", cq_saved: "Quotation saved",
 		cq_waiting: "Discount sent to SK for approval; the quote is saved without it", cq_design_go: "This cabin is priced by design. Use “Send to design”; the price comes from the design BOM.",
+		bq_type: "Building: PUF / EPS labour camp or site office (G+0 to G+2)", bq_title: "Building quotation (PUF / EPS)",
+		bq_why: "Same method and rates as SK's Quotation Calculator: area x rate card. You cannot type the price.",
+		bq_panel: "Panel", bq_elec: "Electrical work in SK scope", bq_trans: "Transport in SK scope", bq_zone: "Delivery zone", bq_delivery: "Delivery time",
+		bq_payment: "Payment terms", bq_disc: "Special discount Rs / sq ft", bq_block: "Building", bq_name: "Name (e.g. Labour room)", bq_code: "Structure code (drawing)",
+		bq_l: "Length L (m)", bq_w: "Width W (m)", bq_h: "Height (m)", bq_floors: "Floors", bq_nos: "No. of same buildings", bq_cw: "Canopy / walkway width (m)",
+		bq_cs: "Canopy sides (0 / 1 front / 2 both)", bq_sw: "Staircase width (m)", bq_sl: "Staircase length (m)", bq_sn: "No. of staircases",
+		bq_rd: "Room depth (ft)", bq_rw: "Room width (ft)", bq_pp: "People per room", bq_ov: "Rate override Rs / sq ft (SK only)", bq_addons: "Add-on items",
+		bq_area: "Total area", bq_cap: "Capacity", bq_beds: "suggested double bunk beds", bq_margin: "Margin", bq_minrate: "lowest rate for target margin",
+		bq_ok: "OK to send", bq_need: "SK approval needed", bq_optional: "optional",
 		cq_other: "Other quotation (non-cabin)", cq_rc: "Rate card", cq_disc_list: "Quotation discounts", cq_ok: "Approve", cq_no: "Reject",
 		fl_new_quote: "Make quotation", fl_quote_why: "Saved in ERPNext as a Quotation for this customer (the customer is made by itself). The PDF opens to send.",
 		fl_add_item: "Add item", fl_rate_blank: "blank = price list", fl_valid: "Valid for days", fl_desc: "Description (Enter = new line)", fl_terms: "Terms / note", fl_quote_saved: "Quotation saved",
@@ -775,6 +784,15 @@
 		cq_opts: "पर्याय", cq_km: "तळेगाव प्लांटपासून अंतर (किमी)", cq_crane: "उतरवण्यासाठी क्रेन", cq_disc: "सूट %", cq_disc_max: "तुम्ही देऊ शकता",
 		cq_disc_sk: "त्यापेक्षा जास्त SK मंजूर करतात", cq_price: "किंमत (GST वगळून)", cq_revise: "सुधारणा", cq_new: "नवीन कोटेशन", cq_saved: "कोटेशन जतन झाले",
 		cq_waiting: "सूट SK कडे मंजुरीसाठी पाठवली; कोटेशन सूटशिवाय जतन झाले", cq_design_go: "या केबिनची किंमत डिझाइनकडून येते. “डिझाइनला पाठवा” वापरा.",
+		bq_type: "बिल्डिंग: PUF / EPS लेबर कॅम्प किंवा साइट ऑफिस (G+0 ते G+2)", bq_title: "बिल्डिंग कोटेशन (PUF / EPS)",
+		bq_why: "SK च्या Quotation Calculator सारखीच पद्धत व दर: क्षेत्रफळ x रेट कार्ड. किंमत टाइप करता येत नाही.",
+		bq_panel: "पॅनल", bq_elec: "इलेक्ट्रिकल काम SK कडे", bq_trans: "वाहतूक SK कडे", bq_zone: "डिलिव्हरी झोन", bq_delivery: "डिलिव्हरी वेळ",
+		bq_payment: "पेमेंट अटी", bq_disc: "विशेष सूट रु / चौ फूट", bq_block: "बिल्डिंग", bq_name: "नाव (उदा. लेबर रूम)", bq_code: "स्ट्रक्चर कोड (ड्रॉइंग)",
+		bq_l: "लांबी L (मी)", bq_w: "रुंदी W (मी)", bq_h: "उंची (मी)", bq_floors: "मजले", bq_nos: "अशा बिल्डिंग किती", bq_cw: "कॅनोपी / वॉकवे रुंदी (मी)",
+		bq_cs: "कॅनोपी बाजू (0 / 1 समोर / 2 दोन्ही)", bq_sw: "जिना रुंदी (मी)", bq_sl: "जिना लांबी (मी)", bq_sn: "जिने किती",
+		bq_rd: "खोली खोली (फूट)", bq_rw: "खोली रुंदी (फूट)", bq_pp: "प्रति खोली लोक", bq_ov: "दर बदल रु / चौ फूट (फक्त SK)", bq_addons: "इतर वस्तू",
+		bq_area: "एकूण क्षेत्रफळ", bq_cap: "क्षमता", bq_beds: "सुचवलेले डबल बंक बेड", bq_margin: "मार्जिन", bq_minrate: "टार्गेट मार्जिनसाठी किमान दर",
+		bq_ok: "पाठवायला ठीक", bq_need: "SK ची मंजुरी लागेल", bq_optional: "ऐच्छिक",
 		cq_other: "इतर कोटेशन (नॉन-केबिन)", cq_rc: "रेट कार्ड", cq_disc_list: "कोटेशन सूट", cq_ok: "मंजूर", cq_no: "नाकारा",
 		fl_new_quote: "कोटेशन बनवा", fl_quote_why: "या ग्राहकासाठी ERPNext मध्ये कोटेशन म्हणून जतन होते (ग्राहक आपोआप बनतो). पाठवण्यासाठी PDF उघडते.",
 		fl_add_item: "आयटम जोडा", fl_rate_blank: "रिकामे = किंमत यादी", fl_valid: "किती दिवस वैध", fl_desc: "वर्णन (Enter = नवी ओळ)", fl_terms: "अटी / नोंद", fl_quote_saved: "कोटेशन जतन झाले",
@@ -1999,7 +2017,7 @@
 		};
 		sheet(`<h3 class="sk-h">📝 ${t("cq_title")}</h3><p class="sk-note">${t("cq_why")} · ${t("cq_rc")} ${esc(o.version)}</p>
 			${open.length ? pick("cq-rev", t("cq_revise"), [{ value: "", label: t("cq_new") }, ...open.map((q) => ({ value: q.name, label: `${q.sk_quote_ref} R${q.sk_rev || 0} · ${money(q.net_total)}` }))]) : ""}
-			${pick("cq-type", t("cq_type"), [...o.types.map((x) => ({ value: x.key, label: x.label + (x.sizes.length ? ` (${x.sizes.join(", ")})` : "") })), { value: "design", label: t("cq_design") }], 'data-cq="1"')}
+			${pick("cq-type", t("cq_type"), [...o.types.map((x) => ({ value: x.key, label: x.label + (x.sizes.length ? ` (${x.sizes.join(", ")})` : "") })), { value: "building", label: t("bq_type") }, { value: "design", label: t("cq_design") }], 'data-cq="1"')}
 			<div class="sk-row"><label class="sk-field"><span>${t("cq_l")}</span>${qtyBox("cq-l", 20)}</label><label class="sk-field"><span>${t("cq_w")}</span>${qtyBox("cq-w", 10)}</label></div>
 			<div class="sk-row"><label class="sk-field"><span>${t("cq_h")}</span>${qtyBox("cq-h", o.height)}</label><label class="sk-field"><span>${t("qty")}</span>${qtyBox("cq-q", 1)}</label></div>
 			<h3 class="sk-h">${t("cq_opts")}</h3>${o.options.map(opt).join("")}
@@ -2026,6 +2044,7 @@
 		const box = document.getElementById("cq-price");
 		if (!box) return;
 		const req = cabinReq();
+		if (req.type === "building") return buildingQuoteSheet(S.cq.doctype, S.cq.name);
 		if (req.type === "design") { box.innerHTML = `<div class="sk-card-text sk-due">${t("cq_design_go")}</div>`; return; }
 		if (!req.type) { box.innerHTML = ""; return; }
 		try {
@@ -2036,10 +2055,72 @@
 				${disc > S.cq.o.max_discount ? `<p class="sk-note sk-due">${t("cq_disc_sk")}</p>` : ""}`;
 		} catch (e) { box.innerHTML = `<div class="sk-card-text sk-due">${esc(e.message || "")}</div>`; }
 	}
+	// SK 27-Oct: PUF / EPS buildings, same method as SK's Quotation Calculator Excel
+	async function buildingQuoteSheet(doctype, name) {
+		const o = await call("building_quote_options");
+		const open = await call("cabin_quote_open", doctype === "CRM Lead" ? { lead: name } : { deal: name }).catch(() => []);
+		S.bq = { doctype, name, o };
+		const num = (id, label, v) => `<label class="sk-field"><span>${label}</span>${qtyBox(id, v)}</label>`;
+		const txt = (id, label) => `<label class="sk-field"><span>${label}</span><input id="${id}"></label>`;
+		const block = (k) => `${txt(`bq-name-${k}`, t("bq_name"))}${txt(`bq-code-${k}`, t("bq_code"))}
+			<div class="sk-row">${num(`bq-l-${k}`, t("bq_l"))}${num(`bq-w-${k}`, t("bq_w"))}</div>
+			<div class="sk-row">${pick(`bq-f-${k}`, t("bq_floors"), o.floors)}${num(`bq-h-${k}`, t("bq_h"))}</div>
+			<div class="sk-row">${num(`bq-nos-${k}`, t("bq_nos"), 1)}${num(`bq-pp-${k}`, t("bq_pp"))}</div>
+			<div class="sk-row">${num(`bq-rd-${k}`, t("bq_rd"))}${num(`bq-rw-${k}`, t("bq_rw"))}</div>
+			<div class="sk-row">${num(`bq-cw-${k}`, t("bq_cw"), 0)}${pick(`bq-cs-${k}`, t("bq_cs"), ["0", "1", "2"])}</div>
+			<div class="sk-row">${num(`bq-sw-${k}`, t("bq_sw"), 0)}${num(`bq-sl-${k}`, t("bq_sl"), 0)}</div>
+			${num(`bq-sn-${k}`, t("bq_sn"), 0)}${o.may_override ? num(`bq-ov-${k}`, t("bq_ov")) : ""}`;
+		sheet(`<h3 class="sk-h">🏗️ ${t("bq_title")}</h3><p class="sk-note">${t("bq_why")} · ${t("cq_rc")} ${esc(o.version)}</p>
+			${open.length ? pick("bq-rev", t("cq_revise"), [{ value: "", label: t("cq_new") }, ...open.map((q) => ({ value: q.name, label: `${q.sk_quote_ref} R${q.sk_rev || 0} · ${money(q.net_total)}` }))]) : ""}
+			<div class="sk-row">${pick("bq-panel", t("bq_panel"), o.panels)}${pick("bq-zone", t("bq_zone"), o.zones)}</div>
+			<label class="sk-check"><input type="checkbox" id="bq-elec" checked> ${t("bq_elec")}</label>
+			<label class="sk-check"><input type="checkbox" id="bq-trans" checked> ${t("bq_trans")}</label>
+			${pick("bq-del", t("bq_delivery"), o.delivery)}${pick("bq-pay", t("bq_payment"), o.payment)}
+			<h3 class="sk-h">${t("bq_block")} 1</h3>${block(1)}
+			<details class="sk-gap"><summary>${t("bq_block")} 2 (${t("bq_optional")})</summary>${block(2)}</details>
+			<details class="sk-gap"><summary>${t("bq_block")} 3 (${t("bq_optional")})</summary>${block(3)}</details>
+			<h3 class="sk-h">${t("bq_addons")}</h3>${o.addons.map((a, i) => `<div class="sk-row sk-cq-opt"><span>${esc(a.item)} <small>${esc(a.size)} · ${money(a.rate)}</small></span>${qtyBox("bq-a-" + i, 0)}</div>`).join("")}
+			${num("bq-disc", `${t("bq_disc")} (${t("cq_disc_max")} ${o.max_disc_sqft}, ${t("cq_disc_sk")})`, 0)}
+			<div id="bq-sum" class="sk-card"></div>
+			<button class="sk-btn ok wide" data-act="fl-bq-save">${t("save")} + PDF</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+		const box = document.querySelector(".sk-sheet") || document;
+		["bq-panel", "bq-zone", "bq-del", "bq-pay"].forEach((id, i) => { const el = document.getElementById(id); if (el) el.value = [o.panels, o.zones, o.delivery, o.payment][i][0]; });
+		[1, 2, 3].forEach((k) => { const f = document.getElementById(`bq-f-${k}`); if (f) f.value = "G+1"; const c = document.getElementById(`bq-cs-${k}`); if (c) c.value = "1"; });
+		let tm;
+		const rerun = () => { clearTimeout(tm); tm = setTimeout(buildingPrice, 400); };
+		box.querySelectorAll("input, select").forEach((el) => { el.addEventListener("input", rerun); el.addEventListener("change", rerun); });
+	}
+	function buildingReq() {
+		const n = (id) => Number(val(id)) || 0;
+		const blocks = [1, 2, 3].map((k) => ({ name: val(`bq-name-${k}`), code: val(`bq-code-${k}`), length: n(`bq-l-${k}`), width: n(`bq-w-${k}`),
+			height: n(`bq-h-${k}`), floors: val(`bq-f-${k}`), nos: n(`bq-nos-${k}`) || 1, people: n(`bq-pp-${k}`), room_depth: n(`bq-rd-${k}`),
+			room_width: n(`bq-rw-${k}`), canopy_width: n(`bq-cw-${k}`), canopy_sides: n(`bq-cs-${k}`), stair_width: n(`bq-sw-${k}`),
+			stair_length: n(`bq-sl-${k}`), stairs: n(`bq-sn-${k}`), rate_override: n(`bq-ov-${k}`) })).filter((b) => b.length > 0 && b.width > 0);
+		const addons = {};
+		S.bq.o.addons.forEach((a, i) => { const q = n("bq-a-" + i); if (q > 0) addons[a.item] = q; });
+		return { panel: val("bq-panel"), zone: val("bq-zone"), electrical: document.getElementById("bq-elec").checked, transport: document.getElementById("bq-trans").checked,
+			delivery: val("bq-del"), payment: val("bq-pay"), special_discount: n("bq-disc"), blocks, addons };
+	}
+	async function buildingPrice() {
+		const box = document.getElementById("bq-sum");
+		if (!box) return;
+		const req = buildingReq();
+		if (!req.blocks.length) { box.innerHTML = ""; return; }
+		try {
+			const p = await call("building_quote_price", { req: JSON.stringify(req) });
+			box.innerHTML = `<div class="sk-card-label">${t("cq_price")}</div><div class="sk-card-text">${money(p.total)}</div>
+				<ul class="sk-list">${p.blocks.map((b) => `<li class="sk-item"><div><div class="sk-item-meta">${esc(b.name || t("bq_block"))} · ${b.floors_label} · ${Math.round(b.area)} sq ft</div></div><b>${money(b.total_rate)}/sq ft</b></li>`).join("")}
+				${p.addons.map((a) => `<li class="sk-item"><div><div class="sk-item-meta">${esc(a.item)}</div></div><b>${a.qty} × ${money(a.rate)}</b></li>`).join("")}</ul>
+				<p class="sk-note">${t("bq_area")}: ${Math.round(p.total_area)} sq ft · ${t("bq_cap")}: ${p.rooms} rooms / ${p.people} people · ${p.beds} ${t("bq_beds")}</p>
+				${p.margin !== undefined ? `<p class="sk-note">${t("bq_margin")}: ${(p.margin * 100).toFixed(1)}% · ${t("bq_minrate")}: ${money(p.min_rate)}/sq ft</p>` : ""}
+				<p class="sk-note ${p.approval.length ? "sk-due" : ""}">${p.approval.length ? `${t("bq_need")}: ${esc(p.approval.join("; "))}` : `✅ ${t("bq_ok")}`}</p>`;
+		} catch (e) { box.innerHTML = `<div class="sk-card-text sk-due">${esc(e.message || "")}</div>`; }
+	}
 	async function renderCabinDiscounts() {
 		const rows = await call("cabin_discounts");
 		root.innerHTML = header(t("cq_disc_list")) + `<main><ul class="sk-list">${rows.map((q) => `<li class="sk-item"><div><div class="sk-item-title">${esc(q.sk_quote_ref)} · ${esc(q.customer_name)}</div>
-			<div class="sk-item-meta">${money(q.net_total)} · ${t("cq_disc")} ${q.sk_discount_pct}% · ${esc(q.owner)}</div>
+			<div class="sk-item-meta">${money(q.net_total)} · ${q.sk_discount_pct ? `${t("cq_disc")} ${q.sk_discount_pct}% · ` : ""}${esc(q.owner)}</div>
+			${q.why ? `<div class="sk-item-meta">${esc(q.why)}</div>` : ""}
 			<div class="sk-row"><button class="sk-btn ok" data-act="fl-cqdisc" data-name="${esc(q.name)}" data-ok="1">✅ ${t("cq_ok")}</button>
 			<button class="sk-btn" data-act="fl-cqdisc" data-name="${esc(q.name)}" data-ok="0">✖ ${t("cq_no")}</button></div></div></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></main>`;
 	}
@@ -3529,6 +3610,20 @@
 					const r = await call("cabin_quote_make", args, true);
 					closeSheet(); saved(`${t("cq_saved")}: ${r.ref} R${r.rev}`);
 					if (r.discount_waiting) toast(t("cq_waiting"));
+					window.open(r.pdf, "_blank");
+				} finally { el.disabled = false; }
+				return go("detail");
+			}
+			case "fl-bq-save": {
+				const req = buildingReq();
+				if (!req.blocks.length) return toast(t("bq_l"), true);
+				el.disabled = true;
+				try {
+					const args = { req: JSON.stringify(req), revise: val("bq-rev") || "" };
+					args[S.bq.doctype === "CRM Lead" ? "lead" : "deal"] = S.bq.name;
+					const r = await call("building_quote_make", args, true);
+					closeSheet(); saved(`${t("cq_saved")}: ${r.ref} R${r.rev}`);
+					if (r.discount_waiting) toast(`${t("bq_need")}: ${r.approval.join("; ")}`);
 					window.open(r.pdf, "_blank");
 				} finally { el.disabled = false; }
 				return go("detail");

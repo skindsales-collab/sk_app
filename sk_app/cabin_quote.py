@@ -33,7 +33,9 @@ TENS = "_ _ Twenty Thirty Forty Fifty Sixty Seventy Eighty Ninety".split()
 def rate_card() -> dict:
 	raw = frappe.db.get_single_value(RATE_CARD, "rate_card") if frappe.db.exists("DocType", RATE_CARD) else None
 	if raw:
-		return json.loads(raw)
+		rc = json.loads(raw)
+		rc.setdefault("building", _bundled()["building"])  # card saved before the building section came (27-Oct)
+		return rc
 	return _bundled()
 
 
@@ -156,6 +158,13 @@ def ensure_setup():
 		doc.version, doc.rate_card, doc.note = rc["version"], json.dumps(rc, indent=1, ensure_ascii=False), rc.get("note")
 		doc.flags.ignore_permissions = True
 		doc.save()
+	elif frappe.db.exists("DocType", RATE_CARD) and "building" not in json.loads(frappe.db.get_single_value(RATE_CARD, "rate_card")):
+		doc = frappe.get_single(RATE_CARD)  # SK's PUF/EPS building calculator (27-Oct) joins the same card, so SK edits one place
+		rc = json.loads(doc.rate_card)
+		rc["building"] = _bundled()["building"]
+		doc.rate_card = json.dumps(rc, indent=1, ensure_ascii=False)
+		doc.flags.ignore_permissions = True
+		doc.save()
 	from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 	create_custom_fields({"Quotation": [
@@ -180,6 +189,9 @@ def ensure_setup():
 	from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 	make_property_setter("Quotation", None, "default_print_format", PRINT_FORMAT, "Data", validate_fields_for_doctype=False)
+	from sk_app import building_quote
+
+	building_quote.ensure_setup()
 
 
 def _cabin_item(rc: dict, typ: str, L: float, W: float) -> str:
@@ -203,8 +215,8 @@ def _fy() -> str:
 	return f"{str(y)[2:]}-{str(y + 1)[2:]}"
 
 
-def _new_ref(customer: str) -> str:
-	base = f"SK/CAB/{_fy()}/{_cust_code(customer)}-"
+def _new_ref(customer: str, kind: str = "CAB") -> str:
+	base = f"SK/{kind}/{_fy()}/{_cust_code(customer)}-"
 	n = frappe.db.count("Quotation", {"sk_quote_ref": ["like", base + "%"]}) + 1
 	ref = f"{base}{n:03d}"
 	while frappe.db.exists("Quotation", {"sk_quote_ref": ref}):
@@ -317,17 +329,21 @@ def _bosses() -> list[str]:
 	return [u for u in frappe.get_all("SK App User", filters={"enabled": 1}, pluck="user") if "Management" in profile_functions(u)]
 
 
-def _ask_discount(user: str, doc, disc: float):
+def _ask_discount(user: str, doc, disc: float | None, why: str | None = None):
+	what = f"Discount {disc:g}% asked on {doc.sk_quote_ref} ({doc.customer_name}, {inr(doc.net_total)} before discount)" if disc is not None \
+		else f"Approval needed on {doc.sk_quote_ref} ({doc.customer_name}, {inr(doc.net_total)}): {why}"
 	for boss in _bosses():
 		frappe.get_doc({"doctype": "ToDo", "allocated_to": boss, "assigned_by": user, "reference_type": "Quotation", "reference_name": doc.name,
-			"priority": "High", "date": nowdate(), "description": f"Discount {disc:g}% asked on {doc.sk_quote_ref} ({doc.customer_name}, "
-			f"{inr(doc.net_total)} before discount). Approve or reject in the app: Quotation discounts."}).insert(ignore_permissions=True)
+			"priority": "High", "date": nowdate(), "description": f"{what}. Approve or reject in the app: Quote discounts."}).insert(ignore_permissions=True)
 
 
 def discount_requests(user: str) -> list[dict]:
 	_boss_only(user)
-	return frappe.get_all("Quotation", filters={"sk_discount_status": "Requested", "docstatus": 0},
+	rows = frappe.get_all("Quotation", filters={"sk_discount_status": "Requested", "docstatus": 0},
 		fields=["name", "sk_quote_ref", "customer_name", "net_total", "sk_discount_pct", "owner", "transaction_date"], order_by="creation desc")
+	for r in rows:  # building quotes: why SK must look (margin / discount per sq ft)
+		r["why"] = frappe.db.get_value("ToDo", {"reference_type": "Quotation", "reference_name": r.name, "status": "Open"}, "description") or ""
+	return rows
 
 
 def decide_discount(user: str, quotation: str, ok: int) -> dict:
@@ -336,8 +352,9 @@ def decide_discount(user: str, quotation: str, ok: int) -> dict:
 	if doc.sk_discount_status != "Requested" or doc.docstatus != 0:
 		frappe.throw(_("No discount is waiting on this quotation"))
 	if cint(ok):
-		doc.additional_discount_percentage = flt(doc.sk_discount_pct)
-		doc.apply_discount_on = "Net Total"
+		if flt(doc.sk_discount_pct):
+			doc.additional_discount_percentage = flt(doc.sk_discount_pct)
+			doc.apply_discount_on = "Net Total"
 		doc.sk_discount_status = "Approved"
 	else:
 		doc.sk_discount_status = "Rejected"
@@ -410,6 +427,10 @@ def _esc(x) -> str:
 def quote_html(doc) -> str:
 	"""Jinja print format body: {{ sk_cabin_quote_html(doc) }}."""
 	req = json.loads(doc.get("sk_cabin_request") or "null") or {}
+	if req.get("kind") == "building":
+		from sk_app import building_quote
+
+		return building_quote.quote_html(doc, req)
 	cabin = bool(req)
 	ref = doc.get("sk_quote_ref") or doc.name
 	rev = f"R{cint(doc.get('sk_rev'))}"

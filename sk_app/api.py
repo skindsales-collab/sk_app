@@ -1536,3 +1536,27 @@ def cabin_discount_decide(quotation, ok):
 	from sk_app import cabin_quote
 
 	return cabin_quote.decide_discount(_me().user, quotation, ok)
+
+
+# PUF / EPS building quotation (SK's Quotation Calculator Excel, 27-Oct)
+@frappe.whitelist()
+def building_quote_options():
+	from sk_app import building_quote
+
+	return building_quote.options(_cabin_user())
+
+
+@frappe.whitelist()
+def building_quote_price(req):
+	from sk_app import building_quote, cabin_quote
+
+	user = _cabin_user()
+	p = building_quote.price(json.loads(req) if isinstance(req, str) else req, may_override=cabin_quote.max_discount(user) >= 100)
+	return building_quote.public(p, user)
+
+
+@frappe.whitelist(methods=["POST"])
+def building_quote_make(req, deal=None, lead=None, revise=None):
+	from sk_app import building_quote
+
+	return building_quote.make(_cabin_user(), json.loads(req) if isinstance(req, str) else req, deal or None, lead or None, revise=revise or None)
