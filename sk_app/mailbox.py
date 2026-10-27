@@ -31,7 +31,14 @@ def boxes_for(user: str) -> list[str]:
 	from sk_app.logins import profile_functions
 
 	mine = set(profile_functions(user)) | {user}
+	if user == "Administrator" or "Management" in mine:  # SK 27-Oct: the CEO checks every team mailbox
+		return list(team_boxes())
 	return [box for box, who in team_boxes().items() if mine & set(who)]
+
+
+def _accounts(boxes: list[str]) -> list[str]:
+	"""ERPNext Email Accounts of the boxes: a mail forwarded or Bcc'd to cabin@ has another address in its recipients."""
+	return frappe.get_all("Email Account", filters={"email_id": ["in", boxes]}, pluck="name") if boxes else []
 
 
 def people_of(box: str) -> list[dict]:
@@ -47,7 +54,9 @@ def _check(user: str, comm: str) -> frappe._dict:
 		"reference_doctype", "reference_name", "sent_or_received", "email_account"], as_dict=True)
 	if not row:
 		frappe.throw(_("Mail not found"))
-	box = next((b for b in boxes_for(user) if b in (row.recipients or "").lower()), None)
+	mine = boxes_for(user)
+	account_box = (frappe.db.get_value("Email Account", row.email_account, "email_id") or "").lower() if row.email_account else ""
+	box = next((b for b in mine if b in (row.recipients or "").lower()), None) or (account_box if account_box in mine else None)
 	if not box:
 		frappe.throw(_("This mail is not in your team mailbox"), frappe.PermissionError)
 	row["box"] = box
@@ -61,13 +70,14 @@ def inbox(user: str, days: int = 30) -> dict:
 		return {"boxes": [], "mails": []}
 	rows = frappe.get_all("Communication", filters={"communication_medium": "Email", "sent_or_received": "Received",
 		"communication_date": [">=", add_days(getdate(), -int(days))]},
-		or_filters=[["recipients", "like", f"%{b}%"] for b in boxes],
+		or_filters=[["recipients", "like", f"%{b}%"] for b in boxes] + ([["email_account", "in", acc]] if (acc := _accounts(boxes)) else []),
 		fields=["name", "subject", "sender", "sender_full_name", "recipients", "communication_date", "text_content", "content",
-			"sk_mail_status", "sk_taken_by", "reference_doctype", "reference_name", "has_attachment"],
+			"sk_mail_status", "sk_taken_by", "reference_doctype", "reference_name", "has_attachment", "email_account"],
 		order_by="communication_date desc", limit=150)
+	box_of = {a.name: a.email_id.lower() for a in frappe.get_all("Email Account", fields=["name", "email_id"]) if a.email_id}
 	names = {}
 	for r in rows:
-		r["box"] = next((b for b in boxes if b in (r.recipients or "").lower()), boxes[0])
+		r["box"] = next((b for b in boxes if b in (r.recipients or "").lower()), None) or box_of.get(r.email_account) or boxes[0]
 		r["status"] = r.sk_mail_status or ("Lead made" if r.reference_doctype in ("CRM Lead", "CRM Deal") else "New")
 		if r.sk_taken_by and r.sk_taken_by not in names:
 			names[r.sk_taken_by] = frappe.utils.get_fullname(r.sk_taken_by)

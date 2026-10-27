@@ -69,6 +69,7 @@ class TestMailLeads(IntegrationTestCase):
 	def test_team_mailbox_take_once_and_only_its_people(self):
 		self.assertIn("cabin@skind.tech", mailbox.boxes_for(SALES1))
 		self.assertEqual(mailbox.boxes_for(ACC), ["acc@skind.tech"])
+		self.assertIn("cabin@skind.tech", mailbox.boxes_for("Administrator"))  # SK 27-Oct: the CEO sees every team box
 		comm = self._mail()
 		box = mailbox.inbox(SALES1)
 		row = next(m for m in box["mails"] if m["name"] == comm)
