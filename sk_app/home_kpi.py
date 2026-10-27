@@ -47,10 +47,79 @@ def _months():
 	return out
 
 
-def _trend(fn, title, unit, target, value_of, good_low=False, need=""):
-	points = [{"m": m, "v": _safe(lambda s=s, e=e: value_of(s, e), None)} for m, s, e in _months()]
+# ---------- Day / Week / Month (SK 27-Oct: "along with weekly / month, pl add daily & split target accordingly",
+# "this will do for everyone"): the month target is split over the working days, Monday to Saturday less the
+# company's festival holidays (e.g. Rs 99.2 L / 26 days = Rs 3.8 L a day); a week's target = daily × its working days.
+
+DAYS_SHOWN = 10  # working days on the Day view
+WEEKS_SHOWN = 6
+
+
+def _holidays(start, end) -> set:
+	"""Festival holidays (any holiday list; Sundays are off anyway), read once per request."""
+	every = getattr(frappe.local, "sk_festivals", None)
+	if every is None:
+		every = frappe.local.sk_festivals = {getdate(d) for d in frappe.get_all("Holiday", filters={"weekly_off": 0}, pluck="holiday_date")} \
+			if frappe.db.exists("DocType", "Holiday") else set()
+	start, end = getdate(start), getdate(end)
+	return {d for d in every if start <= d <= end}
+
+
+def working_days(start, end, off=None) -> int:
+	"""Mon-Sat days from start to end (both included), less festival holidays."""
+	start, end = getdate(start), getdate(end)
+	off = _holidays(start, end) if off is None else off
+	n, d = 0, start
+	while d <= end:
+		if d.weekday() < 6 and d not in off:
+			n += 1
+		d = add_days(d, 1)
+	return n
+
+
+def _month_days(day) -> int:
+	first = get_first_day(day)
+	return working_days(first, get_last_day(first)) or 1
+
+
+def _days_back(today=None):
+	"""The last DAYS_SHOWN working days up to today, oldest first: (label, day, day)."""
+	today = getdate(today or nowdate())
+	off = _holidays(add_days(today, -40), today)
+	out, d = [], today
+	while len(out) < DAYS_SHOWN:
+		if d.weekday() < 6 and d not in off:
+			out.append((d.strftime("%d"), d, d))
+		d = add_days(d, -1)
+	return out[::-1]
+
+
+def _weeks_back(today=None):
+	"""The last WEEKS_SHOWN weeks (Monday to Sunday) up to today, oldest first: (label, Monday, Sunday or today)."""
+	today = getdate(today or nowdate())
+	monday = add_days(today, -today.weekday())
+	out = []
+	for i in range(WEEKS_SHOWN - 1, -1, -1):
+		s = add_days(monday, -7 * i)
+		out.append((s.strftime("%d/%m"), s, min(add_days(s, 6), today)))
+	return out
+
+
+def split_target(target, start, end) -> float:
+	"""The share of a monthly target for these days: daily (target / working days of the month) × working days."""
+	return flt(target) * working_days(start, end) / _month_days(start)
+
+
+def _trend(fn, title, unit, target, value_of, good_low=False, need="", count=False):
+	"""count: a number per period (jobs, tasks), so the Day / Week target is the month target split; otherwise a rate
+	(days, %), whose target is the same for a day, a week and a month."""
+	def pts(periods, per_period_target):
+		return [{"m": m, "v": _safe(lambda s=s, e=e: value_of(s, e), None),
+			"t": round(split_target(target, s, e), 1) if per_period_target else target} for m, s, e in periods]
+	points = pts(_months(), False)
 	return {"kind": "trend", "function": fn, "title": title, "unit": unit, "target": target, "good_low": good_low,
-		"points": points, "need": "" if any(p["v"] is not None for p in points) else need}
+		"points": points, "day": pts(_days_back(), count), "week": pts(_weeks_back(), count),
+		"need": "" if any(p["v"] is not None for p in points) else need}
 
 
 def sq_ft(name: str | None) -> float:
@@ -82,7 +151,6 @@ def _weeks(start, today):
 def _money_card(fn, title, line_specs, target):
 	"""line_specs: [(label, colour, amount_of(start, end))]. Both views are built for the same lines."""
 	today, start = getdate(), get_first_day(getdate())
-	month_days = get_last_day(start).day
 	weeks = _weeks(start, today)
 	week_lines, month_lines = [], []
 	for label, c, amount_of in line_specs:
@@ -92,8 +160,15 @@ def _money_card(fn, title, line_specs, target):
 			pts.append(round(run))
 		week_lines.append({"label": label, "c": c, "points": pts})
 		month_lines.append({"label": label, "c": c, "points": [round(flt(_safe(lambda s=s, e=e: amount_of(s, e), 0))) for _m, s, e in _months()]})
+	days = _days_back()
+	day_lines = [{"label": label, "c": c, "points": [round(flt(_safe(lambda s=s, e=e: amount_of(s, e), 0))) for _d, s, e in days]}
+		for label, c, amount_of in line_specs]
+	wd_month = _month_days(start)
 	return {"kind": "money", "function": fn, "title": title, "unit": "Rs", "target": target,
-		"week": {"labels": [w[0] for w in weeks], "target": [round(target * min(e.day, month_days) / month_days) for _w, _s, e in weeks], "lines": week_lines},
+		"daily_target": round(flt(target) / wd_month),
+		# running total this month against the target split over the working days so far
+		"week": {"labels": [w[0] for w in weeks], "target": [round(split_target(target, start, e)) for _w, _s, e in weeks], "lines": week_lines},
+		"day": {"labels": [d[0] for d in days], "target": [round(split_target(target, s, e)) for _d, s, e in days], "lines": day_lines},
 		"month": {"labels": [m[0] for m in _months()], "lines": month_lines}}
 
 
@@ -152,10 +227,17 @@ def sales(user: str, segment=None, fn="Sales") -> dict:
 	elif owners is not None and len(owners) > 1:
 		title = "Team PO booking"
 		lines.append(("Invoices", "g", lambda s, e: dashboards._invoiced(s, e, segments.CABIN)))
+	elif owners is not None:
+		# SK 27-Oct point 5: the person's customers' invoiced sale (Tally + invoices), once the CEO / sales manager
+		# has said who sells to each customer
+		from sk_app.sales_owner import invoiced_for
+
+		persons = _sales_persons(user)
+		lines.append(("Invoices", "g", lambda s, e: invoiced_for(persons, s, e)))
 	card = _money_card(fn, title, lines, target)
-	if owners is not None and not any(card["month"]["lines"][0]["points"]):
+	if owners is not None and not any(p for line in card["month"]["lines"] for p in line["points"]):
 		# nothing credited to this person: say how an order becomes theirs
-		card["need"] = "No orders in your name yet. In ERPNext, put your name in the order's Sales Team (Sales Person) so it counts for you."
+		card["need"] = "No sale in your name yet. The CEO / sales manager ticks your customers on Customer → salesperson; then their Tally sale shows here."
 	if not target:
 		card["need_target"] = "Monthly target not set: SK App Settings → SK KPI Target (orders value)."
 	return card
@@ -254,7 +336,7 @@ def purchase(user: str) -> dict:
 def ai(user: str) -> dict:
 	def value(start, end):
 		return frappe.db.count("Task", {"status": "Completed", "project": ["is", "set"], "completed_on": ["between", [start, end]]}) or None
-	return _trend("AI", "ERP tasks finished", "", TARGETS["AI"], value, need="Close ERP project tasks in ERPNext.")
+	return _trend("AI", "ERP tasks finished", "", TARGETS["AI"], value, need="Close ERP project tasks in ERPNext.", count=True)
 
 
 def subcontractor(user: str) -> dict:
@@ -264,7 +346,7 @@ def subcontractor(user: str) -> dict:
 		if not ws:
 			return None
 		return frappe.db.count("Job Card", {"workstation": ws, "status": "Completed", "modified": ["between", [f"{start} 00:00:00", f"{end} 23:59:59"]]}) or None
-	return _trend("Subcontractor", "Jobs finished", "", TARGETS["Subcontractor"], value, need="Mark your jobs done with a photo.")
+	return _trend("Subcontractor", "Jobs finished", "", TARGETS["Subcontractor"], value, need="Mark your jobs done with a photo.", count=True)
 
 
 BUILDERS = {"Sales": sales, "Marketing": sales, "Machine Shifting": lambda u: sales(u, segments.NON_CABIN, "Machine Shifting"),

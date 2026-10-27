@@ -137,3 +137,28 @@ class TestHr(IntegrationTestCase):
 		n = frappe.db.count("Holiday List")
 		hr.ensure_holiday_setup()
 		self.assertEqual(frappe.db.count("Holiday List"), n)
+
+
+class TestNewJoiner(IntegrationTestCase):
+	def test_new_joiner_from_checked_photo(self):
+		"""SK 27-Oct point 10: HR saves a checked new joiner as an Employee; no bank details anywhere."""
+		from sk_app import hr
+		from sk_app.tests.test_change_list_a import _app_user
+		from sk_app.tests.test_store_purchase import run
+
+		hr.ensure_joiner_fields()
+		_app_user("sk_test_nj_hr@example.com", "HR", ["HR User", "HR Manager", "Employee"])
+		_app_user("sk_test_nj_rep@example.com", "Sales", ["Sales User"])
+		data = {"name": "Testjoin Kumar Patil", "gender": "Male", "dob": "25/04/1994", "joining": "2026-10-27", "mobile": "98765 43219",
+			"pan": "abcde1234f", "aadhaar": "2542 7866 0585", "address": "Bhosari, Pune", "emergency_name": "Yogita", "emergency_mobile": "8080524991"}
+		with self.assertRaises(frappe.PermissionError):
+			run("sk_test_nj_rep@example.com", hr.new_joiner, data)
+		frappe.db.delete("Employee", {"cell_number": "9876543219"})
+		r = run("sk_test_nj_hr@example.com", hr.new_joiner, data)
+		e = frappe.get_doc("Employee", r["name"])
+		self.assertEqual((e.first_name, e.last_name, str(e.date_of_birth), e.cell_number), ("Testjoin", "Kumar Patil", "1994-04-25", "9876543219"))
+		self.assertEqual((e.sk_aadhaar, e.get("pan_number") or "ABCDE1234F"), ("254278660585", "ABCDE1234F"))
+		with self.assertRaises(frappe.ValidationError):
+			run("sk_test_nj_hr@example.com", hr.new_joiner, {**data, "aadhaar": "1234"})
+		with self.assertRaises(frappe.ValidationError):
+			run("sk_test_nj_hr@example.com", hr.new_joiner, data)  # same mobile twice

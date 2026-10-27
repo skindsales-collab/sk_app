@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, segments, store, training, view_member, work
+from sk_app import ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, sales_owner, segments, store, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -67,6 +67,8 @@ def home():
 
 	return {"user": profile.user, "full_name": profile.full_name, "language": profile.language, "v": asset_version(),
 		"mobile": me.get("mobile_no") or me.get("phone"),
+		# photo reading skips our own GSTIN on a supplier's bill (SK 27-Oct test)
+		"own_gstins": [g for g in frappe.get_all("Company", pluck="tax_id") if g],
 		"home": main, "functions": functions,
 		# SK: a person in several functions sees all of them on one Home, one labelled row each
 		"sections": sections,
@@ -1175,6 +1177,23 @@ def my_flow():
 	"""Point 17: the live process flow of each of the person's functions (the CEO: one per function)."""
 	profile = _me()
 	return flows.for_user(profile.user, logins.profile_functions(profile.user) or [profile.home])
+
+
+@frappe.whitelist(methods=["POST"])
+def new_joiner(data, photos=None):
+	data = json.loads(data) if isinstance(data, str) else data
+	photos = json.loads(photos) if isinstance(photos, str) else photos
+	return hr.new_joiner(_me().user, data or {}, photos or [])
+
+
+@frappe.whitelist()
+def sales_assign_list(q=None):
+	return sales_owner.assign_list(_me().user, q)
+
+
+@frappe.whitelist(methods=["POST"])
+def sales_assign(customer, sales_person=None):
+	return sales_owner.assign(_me().user, customer, sales_person)
 
 
 @frappe.whitelist(methods=["POST"])

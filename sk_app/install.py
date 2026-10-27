@@ -42,6 +42,12 @@ def after_migrate():
 	setup_deal_customer_column()  # Swati item 8
 	from sk_app.lead_status import ensure_statuses
 
+	from sk_app.sales_owner import ensure_sales_persons
+
+	from sk_app.customer_names import ensure as customer_names
+
+	customer_names()  # SK 27-Oct points 14 / 19: customers by name, not CUS- numbers
+	ensure_sales_persons()  # SK 27-Oct: no salesperson had an ERPNext Sales Person, so Tally sales counted for nobody
 	ensure_statuses()  # SK 27-Oct: New, Qualified, Drawing, Quotation, Negotiations, Deal Won, Junk Lead, Deal Loss
 	from sk_app.training import seed_lessons
 
@@ -51,7 +57,10 @@ def after_migrate():
 	seed_faq()  # SK 27-Oct: HR, Production and Accounts FAQ in Training
 	from sk_app.hr import ensure_holiday_setup
 
-	ensure_holiday_setup()  # trial 26-Oct: leave needs a company holiday list
+	ensure_holiday_setup()
+	from sk_app.hr import ensure_joiner_fields
+
+	ensure_joiner_fields()  # SK 27-Oct: Aadhaar on the Employee for the New joiner photo form  # trial 26-Oct: leave needs a company holiday list
 
 
 def ensure_crm_fields():

@@ -49,7 +49,7 @@ class TestHomeKpi(IntegrationTestCase):
 		self.assertEqual(c["target"], 1500000)
 		self.assertEqual(len(c["month"]["labels"]), home_kpi.MONTHS)
 		self.assertEqual(len(c["week"]["labels"]), len(c["week"]["target"]))
-		self.assertEqual([l["label"] for l in c["week"]["lines"]], ["Orders"])
+		self.assertEqual([l["label"] for l in c["week"]["lines"]], ["Orders", "Invoices"])  # SK 27-Oct: own customers' Tally sale too
 		pts = c["week"]["lines"][0]["points"]
 		self.assertEqual(pts, sorted(pts))  # running total never goes down
 		self.assertLessEqual(c["week"]["target"][-1], 1500000)
@@ -105,3 +105,33 @@ class TestHomeKpi(IntegrationTestCase):
 			run(MGR, home_kpi.finish_action, first["name"])  # only the person who has it closes it
 		run(REP, home_kpi.finish_action, first["name"], "Called 10, 2 quotes asked")
 		self.assertTrue(next(a for a in run(REP, home_kpi.actions)["actions"] if a["name"] == first["name"])["done"])
+
+
+class TestDayWeekMonth(IntegrationTestCase):
+	def test_target_split_by_working_days(self):
+		"""SK 27-Oct: Day / Week / Month on every graph; the month target split over Mon-Sat working days."""
+		from frappe.utils import getdate
+
+		frappe.local.sk_festivals = set()
+		try:
+			self.assertEqual(home_kpi.working_days("2026-10-26", "2026-11-01"), 6)  # Mon-Sat, Sunday off
+			self.assertEqual(home_kpi.working_days("2026-10-01", "2026-10-31"), 27)
+			self.assertAlmostEqual(home_kpi.split_target(2700000, "2026-10-26", "2026-10-26"), 100000)
+			self.assertAlmostEqual(home_kpi.split_target(2700000, "2026-10-26", "2026-10-31"), 600000)
+			frappe.local.sk_festivals = {getdate("2026-10-27")}
+			self.assertEqual(home_kpi.working_days("2026-10-26", "2026-11-01"), 5)
+			days = home_kpi._days_back("2026-10-27")
+			self.assertEqual(len(days), home_kpi.DAYS_SHOWN)
+			self.assertTrue(all(d.weekday() < 6 and str(d) != "2026-10-27" for _l, d, _e in days))
+			self.assertEqual(len(home_kpi._weeks_back("2026-10-27")), home_kpi.WEEKS_SHOWN)
+		finally:
+			del frappe.local.sk_festivals
+
+	def test_every_chart_has_day_and_week(self):
+		for fn in ("Sales", "Management", "Production", "AI"):
+			c = run("Administrator", home_kpi.for_user, [fn])["chart"]
+			self.assertEqual(len(c["day"]["labels"] if c["kind"] == "money" else c["day"]), home_kpi.DAYS_SHOWN, fn)
+		ai = run("Administrator", home_kpi.for_user, ["AI"])["chart"]
+		self.assertLess(ai["day"][-1]["t"], ai["target"])  # a count: the day's share of the month target
+		prod = run("Administrator", home_kpi.for_user, ["Production"])["chart"]
+		self.assertEqual(prod["day"][-1]["t"], prod["target"])  # a rate: same target every day

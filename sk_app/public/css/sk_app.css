@@ -454,3 +454,7 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 	.sk-home2 .sk-cbig { padding: 9px 4px; font-size: 14px; }
 	.sk-kcard { padding: 6px 10px 4px; }
 }
+
+/* SK 27-Oct point 12: boxes filled from a photo must be checked before submit */
+.sk-fromphoto { border: 2px solid #f59e0b !important; background: #fffbeb; }
+.sk-fromphoto.sk-lowconf { border-color: var(--red) !important; background: #fef2f2; }
