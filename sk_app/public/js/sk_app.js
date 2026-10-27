@@ -1276,8 +1276,9 @@
 		// SK 26-Oct: the actions that lift this graph, from AI, the manager or the CEO, one tap away
 		const n = kpiData.actions || 0;
 		const act = `<button class="sk-kact ${n ? "on" : ""}" data-go="kpi_actions">🎯 ${t("ka_short")}${n ? ` <b>${n}</b>` : ""}</button>`;
-		return `<div class="sk-kcard"><div class="sk-khead"><b>${esc(t("kt_" + c.title) !== "kt_" + c.title ? t("kt_" + c.title) : c.title)}</b>${tabs}${act}</div><small>${sub}</small>
-			${c.kind === "money" ? moneySvg(c) : trendSvg(c)}</div>`;
+		// SK 27-Oct: the Actions button sits inside the graph, in its open top-left corner
+		return `<div class="sk-kcard"><div class="sk-khead"><b>${esc(t("kt_" + c.title) !== "kt_" + c.title ? t("kt_" + c.title) : c.title)}</b>${tabs}</div><small>${sub}</small>
+			<div class="sk-kplot">${act}${c.kind === "money" ? moneySvg(c) : trendSvg(c)}</div></div>`;
 	}
 	// amount up the side, weeks (running total this month) or months along the bottom (SK 26-Oct)
 	function moneySvg(c) {
