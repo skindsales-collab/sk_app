@@ -58,6 +58,9 @@ def after_migrate():
 	from sk_app.store import ensure_job_card_cabin
 
 	ensure_job_card_cabin()  # SK 27-Oct (Yogesh): job card picker shows customer and cabin size
+	from sk_app.permissions import ensure_crm_search
+
+	ensure_crm_search()  # SK 27-Oct: lead search in ERPNext
 	from sk_app.training import seed_lessons
 
 	seed_lessons()

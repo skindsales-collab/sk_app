@@ -42,6 +42,14 @@ has_permission = {
 	"SK DSI Entry": "sk_app.permissions.own_or_manager",
 	"SK Work Log": "sk_app.permissions.own_or_manager",
 	"SK Day Report": "sk_app.permissions.own_or_manager",
+	"CRM Lead": "sk_app.permissions.crm_record",
+	"CRM Deal": "sk_app.permissions.crm_record",
+}
+
+# SK 27-Oct: in ERPNext / CRM too, a salesperson sees only their own leads and deals; Rushi sees his team's
+permission_query_conditions = {
+	"CRM Lead": "sk_app.permissions.crm_lead_query",
+	"CRM Deal": "sk_app.permissions.crm_deal_query",
 }
 
 after_install = "sk_app.install.after_install"
