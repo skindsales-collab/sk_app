@@ -80,7 +80,7 @@ FUNCTIONS = {
 		"label": {"English": "HR", "Marathi": "एचआर"},
 		# point 16 + HR draft Rev 2: Attendance (Optick file upload, today, month, fixes); leave and expense approvals
 		# point 20 (SK 26-Oct): Logins / Reset PIN are the CEO's only, so HR has no Logins icon any more
-		"tiles": COMMON_TILES[:1] + ["attendance"] + COMMON_TILES[1:] + ["team_scorecards", "mail"],
+		"tiles": COMMON_TILES[:1] + ["attendance", "new_joiner"] + COMMON_TILES[1:] + ["team_scorecards", "mail"],
 		"live": True,
 		"erpnext_roles": ["HR User", "HR Manager"],
 		"desk": "/app/hr",

@@ -725,3 +725,68 @@ def badges(user: str, functions: list[str]) -> dict:
 	except Exception:
 		frappe.log_error("SK App HR badges")
 	return out
+
+
+# ---------- New joiner from a photo of the joining form / PAN / Aadhaar (SK 27-Oct improvement list point 10) ----------
+# HR photographs the papers, the phone reads them, HR checks every box and saves: an ERPNext Employee. Bank details are
+# never read or kept in the app (confidential); pay is not in the app at all.
+
+def ensure_joiner_fields():
+	"""Aadhaar has no standard Employee field: one Custom Field (HR may photograph Aadhaar, SK 26-Oct)."""
+	if not frappe.db.exists("DocType", "Employee") or frappe.get_meta("Employee").has_field("sk_aadhaar"):
+		return
+	from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+
+	create_custom_field("Employee", {"fieldname": "sk_aadhaar", "label": "Aadhaar No", "fieldtype": "Data", "length": 12,
+		"insert_after": "pan_number" if frappe.get_meta("Employee").has_field("pan_number") else "date_of_birth"})
+
+
+def _date(value):
+	if not value:
+		return None
+	v = str(value).strip()
+	m = re.match(r"^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2}|\d{4})$", v)
+	if m:
+		d, mth, y = m.groups()
+		y = int(y) + (2000 if int(y) < 50 else 1900) if len(y) == 2 else int(y)
+		return getdate(f"{y}-{int(mth):02d}-{int(d):02d}")
+	return getdate(v)
+
+
+def new_joiner(user: str, data: dict, photos: list | None = None) -> dict:
+	_need_hr(user)
+	name = " ".join((data.get("name") or "").split())
+	if not name:
+		frappe.throw(_("Please give the name"))
+	gender = data.get("gender") or ""
+	if gender not in ("Male", "Female"):
+		frappe.throw(_("Please pick Male or Female"))
+	dob, joined = _date(data.get("dob")), _date(data.get("joining")) or getdate()
+	if not dob:
+		frappe.throw(_("Please give the date of birth"))
+	aadhaar = re.sub(r"\D", "", data.get("aadhaar") or "")
+	if aadhaar and len(aadhaar) != 12:
+		frappe.throw(_("Aadhaar must have 12 digits"))
+	pan = (data.get("pan") or "").strip().upper()
+	if pan and not re.match(r"^[A-Z]{5}\d{4}[A-Z]$", pan):
+		frappe.throw(_("PAN looks wrong: 5 letters, 4 digits, 1 letter"))
+	mobile = re.sub(r"\D", "", data.get("mobile") or "")[-10:]
+	if mobile and frappe.db.exists("Employee", {"cell_number": mobile, "status": "Active"}):
+		frappe.throw(_("An employee with mobile {0} already exists").format(mobile))
+	first, _sp, last = name.partition(" ")
+	doc = frappe.get_doc({"doctype": "Employee", "first_name": first, "last_name": last or None, "gender": gender,
+		"date_of_birth": dob, "date_of_joining": joined, "company": _company(), "status": "Active",
+		"cell_number": mobile or None, "personal_email": (data.get("email") or "").strip() or None,
+		"current_address": (data.get("address") or "").strip() or None,
+		"person_to_be_contacted": (data.get("emergency_name") or "").strip() or None,
+		"emergency_phone_number": re.sub(r"\D", "", data.get("emergency_mobile") or "")[-10:] or None})
+	if pan and doc.meta.has_field("pan_number"):
+		doc.pan_number = pan
+	if aadhaar and doc.meta.has_field("sk_aadhaar"):
+		doc.sk_aadhaar = aadhaar
+	if data.get("designation") and frappe.db.exists("Designation", data["designation"]):
+		doc.designation = data["designation"]
+	doc.insert()
+	for p in photos or []:
+		attach(p, "Employee", doc.name, user)
+	return {"name": doc.name, "employee_name": doc.employee_name}

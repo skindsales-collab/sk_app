@@ -720,13 +720,13 @@
 	});
 	// change list point 2: Cabin / Non-Cabin customers
 	Object.assign(T.English, {
-		customers: "Customers", sales_owner: "Customer → salesperson", so_why: "Pick who sells to each customer. Their sale from Tally then shows on that person's graph. Biggest customers first.", so_done: "customers given a salesperson", so_this_year: "this year", so_no_customer: "not a customer in ERPNext yet", tag_tally: "Tag from Tally (Cabin / Non-Cabin sales)", seg_not_set: "Segment not set", seg_all: "All", seg_cabin: "Cabin", seg_noncabin: "Non-Cabin",
+		customers: "Customers", new_joiner: "New joiner", nj_why: "Photo the joining form and PAN / Aadhaar: the boxes fill by themselves. Check each box, correct it, then save. It becomes an ERPNext Employee.", nj_form_photo: "Joining form", nj_id_photo: "PAN / Aadhaar card", nj_name: "Full name", nj_gender: "Gender", nj_dob: "Date of birth", nj_join: "Joining date", nj_address: "Current address", nj_emname: "Emergency contact name", nj_emmob: "Emergency number", nj_no_bank: "Bank details are not taken in the app.", nj_saved: "Employee made", sales_owner: "Customer → salesperson", so_why: "Pick who sells to each customer. Their sale from Tally then shows on that person's graph. Biggest customers first.", so_done: "customers given a salesperson", so_this_year: "this year", so_no_customer: "not a customer in ERPNext yet", tag_tally: "Tag from Tally (Cabin / Non-Cabin sales)", seg_not_set: "Segment not set", seg_all: "All", seg_cabin: "Cabin", seg_noncabin: "Non-Cabin",
 		pick_segment: "Please pick the segment (Cabin or Non-Cabin)", orders_word: "orders", tag_hint: "Tap the segment: the right team then sees this customer.",
 		seen_by_mgmt: "Customers without a segment are seen by Management only until tagged.",
 		"Cabin": "Cabin", "Non-Cabin": "Non-Cabin",
 	});
 	Object.assign(T.Marathi, {
-		customers: "ग्राहक", sales_owner: "ग्राहक → विक्रेता", so_why: "प्रत्येक ग्राहक कोण सांभाळतो ते निवडा. त्याची Tally विक्री त्या व्यक्तीच्या ग्राफवर दिसेल. मोठे ग्राहक आधी.", so_done: "ग्राहकांना विक्रेता दिला", so_this_year: "या वर्षी", so_no_customer: "ERPNext मध्ये ग्राहक नाही", tag_tally: "Tally प्रमाणे विभाग लावा", seg_not_set: "विभाग ठरवलेला नाही", seg_all: "सर्व", seg_cabin: "केबिन", seg_noncabin: "नॉन-केबिन",
+		customers: "ग्राहक", new_joiner: "नवीन कर्मचारी", nj_why: "जॉइनिंग फॉर्म व PAN / आधारचा फोटो घ्या: बॉक्स आपोआप भरतील. प्रत्येक बॉक्स तपासा, दुरुस्त करा, मग जतन करा. ERPNext मध्ये Employee बनेल.", nj_form_photo: "जॉइनिंग फॉर्म", nj_id_photo: "PAN / आधार कार्ड", nj_name: "पूर्ण नाव", nj_gender: "लिंग", nj_dob: "जन्मतारीख", nj_join: "रुजू तारीख", nj_address: "सध्याचा पत्ता", nj_emname: "आपत्कालीन संपर्क नाव", nj_emmob: "आपत्कालीन नंबर", nj_no_bank: "बँक तपशील ॲपमध्ये घेत नाही.", nj_saved: "कर्मचारी तयार", sales_owner: "ग्राहक → विक्रेता", so_why: "प्रत्येक ग्राहक कोण सांभाळतो ते निवडा. त्याची Tally विक्री त्या व्यक्तीच्या ग्राफवर दिसेल. मोठे ग्राहक आधी.", so_done: "ग्राहकांना विक्रेता दिला", so_this_year: "या वर्षी", so_no_customer: "ERPNext मध्ये ग्राहक नाही", tag_tally: "Tally प्रमाणे विभाग लावा", seg_not_set: "विभाग ठरवलेला नाही", seg_all: "सर्व", seg_cabin: "केबिन", seg_noncabin: "नॉन-केबिन",
 		pick_segment: "कृपया विभाग निवडा (केबिन की नॉन-केबिन)", orders_word: "ऑर्डर", tag_hint: "विभागावर टॅप करा: योग्य टीमला हा ग्राहक दिसेल.",
 		seen_by_mgmt: "विभाग नसलेले ग्राहक टॅग होईपर्यंत फक्त व्यवस्थापनाला दिसतात.",
 		"Cabin": "केबिन", "Non-Cabin": "नॉन-केबिन",
@@ -848,9 +848,9 @@
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
 	T.Marathi.mic_network = "आवाजासाठी इंटरनेट हवे. मोबाईल डेटा तपासा, किंवा कीबोर्डवरील 🎤 वापरा.";
 	Object.assign(T.English, { fl_workflow: "work flow", fl_loading: "live figures loading", fl_days: "days", fl_oldest: "oldest",
-		fl_on_time: "all on time", fl_work: "Work on it", fl_first: "Showing the first", show_more: "Show more", loading: "Loading…", fl_error: "Work flow could not load, AI team informed", convert_deal: "Convert to Deal", converted_ok: "Deal made ✓" });
+		fl_on_time: "all on time", fl_work: "Work on it", fl_first: "Showing the first", show_more: "Show more", loading: "Loading…", fl_error: "Work flow could not load, AI team informed", checked_submit: "Checked, submit", check_marked: "Read from the photo: check the coloured boxes (red = not sure), correct by typing or 🎤, then tap Checked, submit", convert_deal: "Convert to Deal", converted_ok: "Deal made ✓" });
 	Object.assign(T.Marathi, { fl_workflow: "कामाचा क्रम", fl_loading: "आकडे येत आहेत", fl_days: "दिवस", fl_oldest: "सर्वात जुने",
-		fl_on_time: "सर्व वेळेवर", fl_work: "काम करा", fl_first: "पहिले दाखवले", show_more: "आणखी दाखवा", loading: "येत आहे…", fl_error: "कामाचा क्रम उघडला नाही, AI टीमला कळवले", convert_deal: "डील बनवा", converted_ok: "डील तयार ✓" });
+		fl_on_time: "सर्व वेळेवर", fl_work: "काम करा", fl_first: "पहिले दाखवले", show_more: "आणखी दाखवा", loading: "येत आहे…", fl_error: "कामाचा क्रम उघडला नाही, AI टीमला कळवले", checked_submit: "तपासले, सबमिट करा", check_marked: "फोटोवरून वाचले: रंगीत बॉक्स तपासा (लाल = खात्री नाही), टाइप किंवा 🎤 ने दुरुस्त करा, मग तपासले, सबमिट करा दाबा", convert_deal: "डील बनवा", converted_ok: "डील तयार ✓" });
 	Object.assign(T.English, { lk_locked: "Locked", lk_touch: "Touch finger or look at the phone", lk_open_face: "Open with face / finger",
 		lk_ask_ceo: "Not working or new phone? Ask the CEO to reset it.", lk_pin: "Your PIN (the one you log in with)", lk_open: "Open", lk_relogin: "Forgot PIN? Log in again",
 		lk_cancelled: "Not checked. Tap the button and touch the finger sensor or look at the phone.",
@@ -896,7 +896,7 @@
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁", el_points: "🔌",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
-		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", sales_owner: "🧑‍💼", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
+		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", sales_owner: "🧑‍💼", new_joiner: "🪪", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
 		dash_overview: "🏁", dash_daily_review: "🗓️", dash_sales: "💼", dash_marketing: "📣", dash_machine_shifting: "🏗️", dash_job_work: "⚙️", dash_cr100: "🎯", dash_finance: "💰", dash_manufacturing: "🏭", dash_purchase: "🛒", dash_store: "📦", dash_quality: "✅", dash_hr: "👥", dash_ai: "🤖",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
@@ -2137,7 +2137,7 @@
 		const f = ev.target.files[0];
 		if (!f) return;
 		const fill = (d) => {
-			const set = (id, v) => { const el = document.getElementById(id); if (el && v && !el.value) el.value = v; };
+			const set = (id, v) => { const el = document.getElementById(id); if (el && v && !el.value) { el.value = v; markRead(el, v, d.words); } };
 			set("f-first", d.first_name); set("f-org", d.organization); set("f-mobile", d.mobile_no); set("f-email", d.email); set("f-req", d.requirement);
 			// source / segment: pick the list entry whose name contains the word found (IndiaMART, Cabin, Machine Shifting...)
 			const pick = (id, word) => {
@@ -2224,16 +2224,48 @@
 			"ex-photo": (d) => ({ "ex-amt": d.invoice && d.invoice.total, "ex-date": d.invoice && /^\d{4}-\d{2}-\d{2}$/.test(d.invoice.date || "") ? d.invoice.date : null }),
 			"pv-photo": (d) => ({ "pv-amt": d.invoice && d.invoice.total, "pv-text": d.organization }),
 			"q-photo": (d) => ({ "q-sup": d.organization }),
+			"nj-photo1": joinerFill, "nj-photo2": joinerFill,
 			"r-challan": (d) => { root._ocrText = d.text || ""; return { "r-sup": d.organization, "r-billno": d.invoice && d.invoice.number }; } };
 		if (!map[inp.id]) return;
 		try {
 			const d = await readOnPhone(f, () => {});
 			const gst = (d.invoice && d.invoice.gstin) || ((d.requirement || "").match(/\b\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]\b/) || [])[0];
 			if (gst) d.invoice = { ...(d.invoice || {}), gstin: gst };
-			Object.entries(map[inp.id](d)).forEach(([id, v]) => { const el = document.getElementById(id); if (el && v && !el.value) el.value = v; });
+			Object.entries(map[inp.id](d)).forEach(([id, v]) => { const el = document.getElementById(id); if (el && v && !el.value) { el.value = v; markRead(el, v, d.words); } });
 			runCheck();
 		} catch (e) { /* reading is a help only; the person can type */ }
 	}
+	// SK 27-Oct point 12: "handwriting can be poor, hence show the user before submitting, with a correction option;
+	// after validation submit". Every box filled from a photo is marked (amber = check it, red = the phone was unsure);
+	// the first tap on the form's green button only shows what to check, the second ("Checked, submit") saves.
+	function markRead(el, value, words) {
+		const toks = String(value).toLowerCase().split(/\s+/).filter(Boolean);
+		const confs = (words || []).filter((w) => toks.includes(String(w.text).toLowerCase().replace(/[^\w@.\-\/]/g, ""))).map((w) => w.conf);
+		const low = !confs.length || Math.min(...confs) < 70;
+		el.classList.add("sk-fromphoto");
+		el.classList.toggle("sk-lowconf", low);
+		el.dataset.read = "1";
+	}
+	root.addEventListener("input", (ev) => {
+		const el = ev.target;
+		if (el.dataset && el.dataset.read) el.classList.remove("sk-fromphoto", "sk-lowconf");  // corrected by hand
+	});
+	document.addEventListener("click", (ev) => {
+		const btn = ev.target.closest(".sk-btn.ok, .sk-btn.go");
+		if (!btn || !root.contains(btn) || btn.dataset.checked || btn.dataset.go) return;
+		const form = btn.closest("main, .sk-sheet, .sk-form") || root;
+		const marked = [...form.querySelectorAll("[data-read]")];
+		if (!marked.length) return;
+		ev.preventDefault(); ev.stopImmediatePropagation();
+		btn.dataset.checked = "1";
+		btn.dataset.label = btn.innerHTML;
+		btn.innerHTML = `✔ ${t("checked_submit")}`;
+		marked.forEach((el) => el.removeAttribute("data-read"));
+		const first = form.querySelector(".sk-lowconf") || form.querySelector(".sk-fromphoto");
+		if (first) { first.scrollIntoView({ block: "center" }); first.focus(); }
+		toast(t("check_marked"), true);
+	}, true);
+
 	// Proof photos: where it goes, and a warning if it is too dark or blurred to read later
 	const RECORD_OF = { receive: "Purchase Receipt (draft)", issue: "Stock Entry", dispatch: "Delivery Note", stock_count: "Stock Reconciliation",
 		new_item: "Item", job_cards: "Job Card", my_jobs: "Job Card", progress_photos: "Work Order", non_conformance: "Non Conformance", my_fixes: "Non Conformance",
@@ -2906,6 +2938,28 @@
 	// Customers by segment (point 2): the cabin team sees Cabin customers, Aditya Non-Cabin, Management both.
 	// "Segment not set": Management, Rushi and Aditya tag old customers with one tap.
 	let custTab = "mine", custSeg = "", custQuery = "";
+	// SK 27-Oct point 10: HR adds a new joiner from photos of the joining form, PAN and Aadhaar; every box is checked
+	// before saving (point 12). Bank details are not asked or read (confidential).
+	const toIso = (v) => { const m = String(v || "").match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2}|\d{4})$/); if (!m) return ""; const y = m[3].length === 2 ? (+m[3] < 50 ? "20" : "19") + m[3] : m[3]; return `${y}-${pad2(+m[2])}-${pad2(+m[1])}`; };
+	function joinerFill(d) {
+		const p = d.person || {};
+		return { "nj-name": p.name || d.first_name, "nj-mobile": d.mobile_no, "nj-email": d.email, "nj-dob": toIso(p.dob), "nj-join": toIso(p.joining),
+			"nj-gender": p.gender, "nj-pan": p.pan, "nj-aadhaar": p.aadhaar, "nj-address": p.address, "nj-emname": p.emergency_name, "nj-emmob": p.emergency_mobile };
+	}
+	function renderNewJoiner() {
+		root.innerHTML = header(t("new_joiner")) + `<main class="sk-form"><p class="sk-note">${t("nj_why")}</p>
+			${photoField("nj-photo1", "📷 " + t("nj_form_photo"))}${photoField("nj-photo2", "📷 " + t("nj_id_photo"))}
+			${formField("nj-name", t("nj_name"))}
+			<label class="sk-field"><span>${t("nj_gender")}</span><select id="nj-gender" class="sk-select"><option value=""></option><option>Male</option><option>Female</option></select></label>
+			<label class="sk-field"><span>${t("nj_dob")}</span><input id="nj-dob" type="date"></label>
+			<label class="sk-field"><span>${t("nj_join")}</span><input id="nj-join" type="date"></label>
+			<label class="sk-field"><span>${t("mobile")}</span><div class="sk-input-row"><input id="nj-mobile" type="tel"></div></label>
+			<label class="sk-field"><span>${t("email")}</span><div class="sk-input-row"><input id="nj-email" type="email"></div></label>
+			${formField("nj-pan", "PAN")}${formField("nj-aadhaar", "Aadhaar")}${formField("nj-address", t("nj_address"), true)}
+			${formField("nj-emname", t("nj_emname"))}<label class="sk-field"><span>${t("nj_emmob")}</span><div class="sk-input-row"><input id="nj-emmob" type="tel"></div></label>
+			<p class="sk-note">🔒 ${t("nj_no_bank")}</p>
+			<button class="sk-btn ok wide" data-act="nj-save">${t("save")}</button></main>`;
+	}
 	// SK 27-Oct point 5: who sells to each customer, so the Tally sale shows on each salesperson's graph
 	let soQ = "", soShown = 60, soData = null;
 	async function renderSalesOwner(again) {
@@ -4040,7 +4094,7 @@
 		segment_pnl: renderSegmentWise, month_close: renderMonthWise,
 		improvement_inbox: renderInbox, dept_visits: renderVisit, erp_gaps: renderGaps, app_users: renderAppUsers, change_list: renderChangeList,
 		projects: renderProjects, training_progress: renderTrainingProgress, lead_sources: renderLeadSources, customers: renderCustomers, view_member: renderViewMember, complaints: renderComplaints,
-		attendance: renderAttendance, leave_expense: renderLeaveExpense, sales_owner: renderSalesOwner };
+		attendance: renderAttendance, leave_expense: renderLeaveExpense, sales_owner: renderSalesOwner, new_joiner: renderNewJoiner };
 	["overview", "daily_review", "sales", "marketing", "machine_shifting", "job_work", "cr100", "finance", "manufacturing", "purchase",
 		"store", "quality", "hr", "ai"].forEach((k) => { LIVE_VIEWS["dash_" + k] = () => renderDash(k); });
 
@@ -4620,6 +4674,18 @@
 					toast(t("saved"));
 				}
 				return;
+			}
+			if (act === "nj-save") {
+				el.disabled = true;
+				try {
+					const photos = [];
+					for (const id of ["nj-photo1", "nj-photo2"]) { const inp = document.getElementById(id); if (inp && inp._up) photos.push(await inp._up); }
+					const r = await call("new_joiner", { data: JSON.stringify({ name: val("nj-name"), gender: val("nj-gender"), dob: val("nj-dob"), joining: val("nj-join"),
+						mobile: val("nj-mobile"), email: val("nj-email"), pan: val("nj-pan"), aadhaar: val("nj-aadhaar"), address: val("nj-address"),
+						emergency_name: val("nj-emname"), emergency_mobile: val("nj-emmob") }), photos: JSON.stringify(photos) }, true);
+					toast(`${t("nj_saved")}: ${r.employee_name} (${r.name})`);
+					return go("home");
+				} finally { el.disabled = false; }
 			}
 			if (act === "convert-deal") {
 				el.disabled = true;

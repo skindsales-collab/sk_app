@@ -1179,6 +1179,13 @@ def my_flow():
 	return flows.for_user(profile.user, logins.profile_functions(profile.user) or [profile.home])
 
 
+@frappe.whitelist(methods=["POST"])
+def new_joiner(data, photos=None):
+	data = json.loads(data) if isinstance(data, str) else data
+	photos = json.loads(photos) if isinstance(photos, str) else photos
+	return hr.new_joiner(_me().user, data or {}, photos or [])
+
+
 @frappe.whitelist()
 def sales_assign_list(q=None):
 	return sales_owner.assign_list(_me().user, q)

@@ -57,7 +57,10 @@ def after_migrate():
 	seed_faq()  # SK 27-Oct: HR, Production and Accounts FAQ in Training
 	from sk_app.hr import ensure_holiday_setup
 
-	ensure_holiday_setup()  # trial 26-Oct: leave needs a company holiday list
+	ensure_holiday_setup()
+	from sk_app.hr import ensure_joiner_fields
+
+	ensure_joiner_fields()  # SK 27-Oct: Aadhaar on the Employee for the New joiner photo form  # trial 26-Oct: leave needs a company holiday list
 
 
 def ensure_crm_fields():
