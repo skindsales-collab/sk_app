@@ -250,7 +250,9 @@ def upload(user: str, file_url: str, source: str = "IndiaMART") -> dict:
 
 	if not {"Sales", "Marketing", "Management", "AI"} & set(profile_functions(user)):
 		frappe.throw(_("Only Sales, Marketing, Management or AI & ERP can upload leads"), frappe.PermissionError)
-	if source not in SOURCES and source != "Other":
+	from sk_app.cold_calls import COLD_SOURCE, FIELD, has_field
+
+	if source not in SOURCES and source not in ("Other", COLD_SOURCE):
 		frappe.throw(_("Unknown source"))
 	rows = _rows_from_file(file_url)
 	head_at, cols = None, {}
@@ -270,7 +272,9 @@ def upload(user: str, file_url: str, source: str = "IndiaMART") -> dict:
 		if not data["mobile_no"] and not data["email"]:
 			skipped += 1
 			continue
-		res = make_lead(data, source)
+		res = make_lead(data, source, owner=user if source == COLD_SOURCE else None)
+		if source == COLD_SOURCE and res["new"] and has_field():  # SK 27-Oct: call-list data goes to the Cold Calling list
+			frappe.db.set_value("CRM Lead", res["lead"], FIELD, 1, update_modified=False)
 		leads.append(res["lead"])
 		if res["new"]:
 			made += 1

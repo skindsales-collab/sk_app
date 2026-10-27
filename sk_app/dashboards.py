@@ -269,8 +269,10 @@ def _not_contacted():
 	if not _has("CRM Lead"):
 		return []
 	closed = frappe.get_all("CRM Lead Status", filters={"type": ["in", ["Won", "Lost", "Junk"]]}, pluck="name")
+	from sk_app.cold_calls import not_cold
+
 	return frappe.get_all("CRM Lead", filters={"first_responded_on": ["is", "not set"], "status": ["not in", closed or [""]],
-		"creation": ["<", add_days(now_datetime(), -1)]}, fields=["name", "first_name", "organization", "lead_owner", "creation"],
+		"creation": ["<", add_days(now_datetime(), -1)], **not_cold()}, fields=["name", "first_name", "organization", "lead_owner", "creation"],
 		order_by="creation asc", limit=0)
 
 

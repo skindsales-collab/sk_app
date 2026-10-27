@@ -678,7 +678,7 @@
 		camera: "Camera", gallery: "Gallery / screenshot", pdf_file: "PDF / file", retake: "Retake", remove: "Remove",
 		uploading: "Sending…", uploaded: "Sent ✓", upload_retry: "Network weak, trying again…",
 		open_chrome: "Mic / camera work best in Chrome. Tap here to open the SK App in Chrome.",
-		gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", new_product: "New product / vendor", mails_n: "Mails", to_post: "Received: check and post", to_post_help: "Check the material, then tap Post. Stock goes up only after Post.", rate_missing: "rate missing", rate_bill: "Rate per unit (from the bill)", rate_need: "Give the rate from the supplier bill (needed to value the stock):", remove_dup: "Remove (saved twice)", tap_again: "Tap again to remove", photo_entry: "Photo entry", pe_help: "Bill, e-invoice, voucher or payment proof: take a photo (or pick the PDF) and submit. A supplier bill goes to Bills to Post (Make bill). Others wait here until you enter them in ERPNext.", pe_what: "What is it?", pe_supplier_bill: "Supplier bill / e-invoice", pe_expense: "Expense bill / petty cash voucher", pe_money_in: "Payment received (cheque / UTR)", pe_money_out: "Payment made (bank slip / UTR)", pe_other: "Other document", pe_photo: "Photo or PDF", pe_party: "Customer / party (optional)", pe_ref: "Bill / ref no (optional)", pe_submit: "Submit", pe_pending: "Photo entries to enter in ERPNext", pe_open: "Enter in ERPNext", pe_sent: "Submitted", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
+		gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", new_product: "New product / vendor", mails_n: "Mails", cold_calls: "Cold Calling", cold_help: "Call-list data, kept out of My Leads. Call one by one; when the customer is interested tap Interested → it moves to My Leads.", cold_total: "cold leads", cold_not_called: "not called yet", cold_never: "not called yet", cold_interested: "Interested → My Leads", cold_move: "Move to Cold Calling", cold_moved: "Moved", to_post: "Received: check and post", to_post_help: "Check the material, then tap Post. Stock goes up only after Post.", rate_missing: "rate missing", rate_bill: "Rate per unit (from the bill)", rate_need: "Give the rate from the supplier bill (needed to value the stock):", remove_dup: "Remove (saved twice)", tap_again: "Tap again to remove", photo_entry: "Photo entry", pe_help: "Bill, e-invoice, voucher or payment proof: take a photo (or pick the PDF) and submit. A supplier bill goes to Bills to Post (Make bill). Others wait here until you enter them in ERPNext.", pe_what: "What is it?", pe_supplier_bill: "Supplier bill / e-invoice", pe_expense: "Expense bill / petty cash voucher", pe_money_in: "Payment received (cheque / UTR)", pe_money_out: "Payment made (bank slip / UTR)", pe_other: "Other document", pe_photo: "Photo or PDF", pe_party: "Customer / party (optional)", pe_ref: "Bill / ref no (optional)", pe_submit: "Submit", pe_pending: "Photo entries to enter in ERPNext", pe_open: "Enter in ERPNext", pe_sent: "Submitted", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
 		gw_masters: "Masters", gw_transactions: "Transactions", gw_utilities: "Utilities", gw_reports: "Reports", gw_more: "More reports",
 		gw_desk: "Opens in ERPNext", gw_pending: "waiting", db_particulars: "Particulars", db_none: "No vouchers on this day",
 		cash_today: "Cash / Bank", to_collect: "Receivables", to_pay: "Payables", bills_to_post: "Purchase Invoice and Debit Note",
@@ -710,7 +710,7 @@
 		camera: "कॅमेरा", gallery: "गॅलरी / स्क्रीनशॉट", pdf_file: "PDF / फाईल", retake: "पुन्हा घ्या", remove: "काढा",
 		uploading: "पाठवत आहे…", uploaded: "पाठवले ✓", upload_retry: "नेटवर्क कमी, पुन्हा प्रयत्न…",
 		open_chrome: "माईक / कॅमेरा Chrome मध्ये नीट चालतात. SK App Chrome मध्ये उघडण्यासाठी येथे दाबा.",
-		gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", new_product: "नवीन प्रॉडक्ट / व्हेंडर", mails_n: "मेल", to_post: "आलेला माल: तपासा आणि पोस्ट करा", to_post_help: "माल तपासा, मग पोस्ट दाबा. पोस्ट केल्यावरच स्टॉक वाढतो.", rate_missing: "दर नाही", rate_bill: "प्रति नग दर (बिलावरून)", rate_need: "सप्लायर बिलावरील दर द्या (स्टॉकची किंमत लागते):", remove_dup: "काढा (दोनदा सेव्ह)", tap_again: "काढण्यासाठी पुन्हा दाबा", photo_entry: "फोटो एंट्री", pe_help: "बिल, ई-इनव्हॉइस, व्हाउचर किंवा पेमेंट पुरावा: फोटो काढा (किंवा PDF निवडा) आणि सबमिट करा. सप्लायर बिल 'बिल पोस्ट करा' मध्ये जाते. बाकी ERPNext मध्ये एंट्री होईपर्यंत इथे राहतात.", pe_what: "हे काय आहे?", pe_supplier_bill: "सप्लायर बिल / ई-इनव्हॉइस", pe_expense: "खर्च बिल / पेटी कॅश व्हाउचर", pe_money_in: "पेमेंट मिळाले (चेक / UTR)", pe_money_out: "पेमेंट केले (बँक स्लिप / UTR)", pe_other: "इतर कागद", pe_photo: "फोटो किंवा PDF", pe_party: "ग्राहक / पार्टी (ऐच्छिक)", pe_ref: "बिल / रेफ नंबर (ऐच्छिक)", pe_submit: "सबमिट", pe_pending: "ERPNext मध्ये टाकायच्या फोटो एंट्री", pe_open: "ERPNext मध्ये टाका", pe_sent: "सबमिट झाले", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
+		gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", new_product: "नवीन प्रॉडक्ट / व्हेंडर", mails_n: "मेल", cold_calls: "कोल्ड कॉलिंग", cold_help: "कॉल-लिस्ट डेटा, माझे लीड पासून वेगळा. एक एक कॉल करा; ग्राहकाला रस असल्यास 'रस आहे' दाबा → तो माझे लीड मध्ये जातो.", cold_total: "कोल्ड लीड", cold_not_called: "अजून कॉल नाही", cold_never: "अजून कॉल नाही", cold_interested: "रस आहे → माझे लीड", cold_move: "कोल्ड कॉलिंगमध्ये हलवा", cold_moved: "हलवले", to_post: "आलेला माल: तपासा आणि पोस्ट करा", to_post_help: "माल तपासा, मग पोस्ट दाबा. पोस्ट केल्यावरच स्टॉक वाढतो.", rate_missing: "दर नाही", rate_bill: "प्रति नग दर (बिलावरून)", rate_need: "सप्लायर बिलावरील दर द्या (स्टॉकची किंमत लागते):", remove_dup: "काढा (दोनदा सेव्ह)", tap_again: "काढण्यासाठी पुन्हा दाबा", photo_entry: "फोटो एंट्री", pe_help: "बिल, ई-इनव्हॉइस, व्हाउचर किंवा पेमेंट पुरावा: फोटो काढा (किंवा PDF निवडा) आणि सबमिट करा. सप्लायर बिल 'बिल पोस्ट करा' मध्ये जाते. बाकी ERPNext मध्ये एंट्री होईपर्यंत इथे राहतात.", pe_what: "हे काय आहे?", pe_supplier_bill: "सप्लायर बिल / ई-इनव्हॉइस", pe_expense: "खर्च बिल / पेटी कॅश व्हाउचर", pe_money_in: "पेमेंट मिळाले (चेक / UTR)", pe_money_out: "पेमेंट केले (बँक स्लिप / UTR)", pe_other: "इतर कागद", pe_photo: "फोटो किंवा PDF", pe_party: "ग्राहक / पार्टी (ऐच्छिक)", pe_ref: "बिल / रेफ नंबर (ऐच्छिक)", pe_submit: "सबमिट", pe_pending: "ERPNext मध्ये टाकायच्या फोटो एंट्री", pe_open: "ERPNext मध्ये टाका", pe_sent: "सबमिट झाले", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
 		gw_masters: "मास्टर्स", gw_transactions: "व्यवहार", gw_utilities: "युटिलिटी", gw_reports: "अहवाल", gw_more: "आणखी अहवाल",
 		gw_desk: "ERPNext मध्ये उघडते", gw_pending: "बाकी", db_particulars: "तपशील", db_none: "या दिवशी व्हाउचर नाही",
 		cash_today: "कॅश / बँक", to_collect: "येणे (Receivables)", to_pay: "देणे (Payables)", bills_to_post: "खरेदी बिल आणि डेबिट नोट",
@@ -946,7 +946,7 @@
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
 		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", sales_owner: "🧑‍💼", new_joiner: "🪪", activities: "🎯", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
 		dash_overview: "🏁", dash_daily_review: "🗓️", dash_sales: "💼", dash_marketing: "📣", dash_machine_shifting: "🏗️", dash_job_work: "⚙️", dash_cr100: "🎯", dash_finance: "💰", dash_manufacturing: "🏭", dash_purchase: "🛒", dash_store: "📦", dash_quality: "✅", dash_hr: "👥", dash_ai: "🤖",
-		gateway: "🏛️", day_book: "📅", cabin_discounts: "🏷️", new_product: "🆕", photo_entry: "📷",
+		gateway: "🏛️", day_book: "📅", cabin_discounts: "🏷️", new_product: "🆕", photo_entry: "📷", cold_calls: "🧊",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
@@ -1764,11 +1764,31 @@
 		if (q) rows = rows.filter((r) => [r.title, r.status, r.customer, r.source, r.name].join(" ").toLowerCase().includes(q));
 		const total = rows.length;
 		rows = rows.slice(0, leadShown);
-		root.innerHTML = header(t(which)) + `<main>${tabs}
+		root.innerHTML = header(t(which)) + `<main>${which === "my_leads" ? `<button class="sk-btn wide" data-go="cold_calls">🧊 ${t("cold_calls")}${d.cold ? ` (${d.cold})` : ""} ›</button>` : ""}${tabs}
 			<div class="sk-input-row sk-gap"><input id="lead-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(leadQ)}"></div>
 			<ul class="sk-list">${rows.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>${moreBtn(total, rows.length, which)}</main>`;
 		const inp = root.querySelector("#lead-q");
 		inp.addEventListener("input", debounceSearch(() => { leadQ = inp.value; leadShown = 60; renderLeads(which, true); }, "#lead-q"));
+	}
+
+	// SK 27-Oct (Pranali): call-list data in its own list, out of My Leads; tap Interested when a customer wants it
+	let coldQ = "", coldShown = 60;
+	async function renderColdCalls(again) {
+		if (!again) S.cold = await call("cold_calls");
+		const q = coldQ.toLowerCase();
+		let rows = q ? S.cold.filter((r) => [r.title, r.person, r.mobile, r.source].join(" ").toLowerCase().includes(q)) : S.cold;
+		const total = rows.length, fresh = S.cold.filter((r) => !r.calls).length;
+		rows = rows.slice(0, coldShown);
+		root.innerHTML = header(t("cold_calls")) + `<main><p class="sk-note">${t("cold_help")}</p>
+			<p class="sk-note"><b>${S.cold.length}</b> ${t("cold_total")} · <b>${fresh}</b> ${t("cold_not_called")}</p>
+			<div class="sk-input-row sk-gap"><input id="cold-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(coldQ)}"></div>
+			<ul class="sk-list">${rows.map((r) => `<li class="sk-item"><div class="sk-grow"><button class="sk-fu-main" data-open="CRM Lead" data-name="${esc(r.name)}">
+				<div class="sk-item-title">${esc(r.title)}${r.person && r.person !== r.title ? " · " + esc(r.person) : ""}</div>
+				<div class="sk-item-meta">${[r.source, r.calls ? `📞 ${r.calls} · ${t("last")} ${when(r.last)} · ${r.last_status || ""}` : t("cold_never")].filter(Boolean).map(esc).join(" · ")}</div></button>
+				${contactButtons(r)}<button class="sk-chip on sk-gap" data-act="cold-set" data-lead="${esc(r.name)}" data-cold="0">🔥 ${t("cold_interested")}</button></div></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
+			${total > rows.length ? `<button class="sk-btn wide" data-act="cold-more">${t("show_more")} (${total - rows.length})</button>` : ""}</main>`;
+		const inp = root.querySelector("#cold-q");
+		inp.addEventListener("input", debounceSearch(() => { coldQ = inp.value; coldShown = 60; renderColdCalls(true); }, "#cold-q"));
 	}
 
 	// point 12: after Save the person sees where the lead went, its number, and what to do next
@@ -2202,6 +2222,7 @@
 				${contactButtons({ doctype, name, mobile, email: doc.email })}</div>
 			<h3 class="sk-h">${t("status")}</h3><div class="sk-chips">${chips}</div>
 			${doctype === "CRM Lead" && !doc.converted ? `<button class="sk-btn go wide sk-gap" data-act="convert-deal">🤝 ${t("convert_deal")}</button>` : ""}
+			${doctype === "CRM Lead" && !doc.converted && doc.sk_cold !== undefined ? `<button class="sk-btn wide sk-gap" data-act="cold-set" data-lead="${esc(name)}" data-cold="${doc.sk_cold ? 0 : 1}">${doc.sk_cold ? "🔥 " + t("cold_interested") : "🧊 " + t("cold_move")}</button>` : ""}
 			<div class="sk-form">${formField("f-note", t("note_q"), true)}${photoField("f-photo", t("attach"), true)}
 				<button class="sk-btn ok wide" data-act="save-note">${t("add_note")}</button>
 				<button class="sk-btn wide sk-gap" data-act="reminder-new" data-doctype="${esc(doctype)}" data-name="${esc(name)}">⏰ + ${t("reminder")}</button></div>
@@ -3259,7 +3280,7 @@
 	}
 	function uploadBox() {
 		return `<div class="sk-form sk-gap">${photoField("ls-file", "📄 " + t("upload_list"), true)}
-			<label class="sk-field"><span>${t("source_word")}</span><select id="ls-src" class="sk-select"><option>IndiaMART</option><option>JustDial</option><option>GeM</option><option>Other</option></select></label>
+			<label class="sk-field"><span>${t("source_word")}</span><select id="ls-src" class="sk-select"><option>IndiaMART</option><option>JustDial</option><option>GeM</option><option>Cold calling</option><option>Other</option></select></label>
 			<button class="sk-btn ok wide" data-act="ls-upload">⬆ ${t("upload_list")}</button><div id="ls-result"></div></div>`;
 	}
 
@@ -4499,7 +4520,7 @@
 		document.body.prepend(a);
 	}
 
-	const LIVE_VIEWS = { fnpage: () => renderFnPage(), more: renderMore, leadership: renderLeadership, to_plan: renderToPlan, my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), my_deals: () => renderLeads("my_deals"),
+	const LIVE_VIEWS = { fnpage: () => renderFnPage(), more: renderMore, leadership: renderLeadership, to_plan: renderToPlan, my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), cold_calls: renderColdCalls, my_deals: () => renderLeads("my_deals"),
 		my_kpi: renderKpi, dsi: renderDsi, el_points: renderElPoints, kpi_actions: renderKpiActions, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
 		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name),
@@ -4958,6 +4979,14 @@
 				toast(t("saved"));
 				return go("customers");
 			}
+			if (act === "cold-set") {
+				el.disabled = true;
+				await call("cold_set", { lead: el.dataset.lead, cold: el.dataset.cold }, true);
+				toast(`✓ ${t("cold_moved")}`);
+				leadData = null;
+				return go(state.view === "cold_calls" ? "cold_calls" : "detail");
+			}
+			if (act === "cold-more") { coldShown += 60; return renderColdCalls(true); }
 			if (act === "ls-check") { const r = await call("lead_sources_check_now", {}, true); toast(`${r.made || 0} ${t("leads_made")}`); return go("lead_sources"); }
 			if (act === "ls-switch") { await call("lead_sources_switch", { setting: el.dataset.setting, on: el.dataset.on }, true); return go("lead_sources"); }
 			if (act === "ls-upload") {
