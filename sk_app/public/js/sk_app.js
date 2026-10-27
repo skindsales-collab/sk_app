@@ -538,7 +538,8 @@
 		promise: "Promise",
 		received: "Received",
 		total_due: "Total due",
-		pay_rule: "Above the PO limit, SK's OK is needed before paying.",
+		pay_rule: "Above the PO limit, SK's OK is needed before paying. Payments are made by Accounts in ERPNext: tap Pay to open the bill there (Create > Payment).",
+		in_erp: "Receipt in ERPNext", pay_in_erp: "Pay in ERPNext", money_in_erp: "SK 27-Oct: money in and out is entered by Accounts in ERPNext. The app shows what is due and opens ERPNext.",
 		bill: "Bill",
 		ask_sk: "Ask SK",
 		paid: "Paid",
@@ -613,7 +614,8 @@
 		promise: "वचन",
 		received: "मिळाले",
 		total_due: "एकूण येणे",
-		pay_rule: "PO मर्यादेपेक्षा जास्त रकमेसाठी पेमेंटआधी SK ची मंजुरी लागते.",
+		pay_rule: "PO मर्यादेपेक्षा जास्त रकमेसाठी पेमेंटआधी SK ची मंजुरी लागते. पेमेंट अकाउंट्स ERPNext मध्ये करतात: बिल उघडण्यासाठी Pay दाबा (Create > Payment).",
+		in_erp: "ERPNext मध्ये जमा", pay_in_erp: "ERPNext मध्ये पेमेंट", money_in_erp: "SK 27-Oct: पैसे येणे-देणे अकाउंट्स ERPNext मध्ये नोंदवतात. अ‍ॅप फक्त देय दाखवते व ERPNext उघडते.",
 		bill: "बिल",
 		ask_sk: "SK ला विचारा",
 		paid: "दिले",
@@ -4057,7 +4059,7 @@
 		const row = (r) => { const i = S.dues.indexOf(r);
 			return li(esc(r.customer_name), `${esc(r.name)} · ${t("due")} ${esc(r.due_date)}${r.days_late > 0 ? ` · <span class="sk-due">${r.days_late} ${t("days_late")}</span>` : ""}${r.promise ? `<br>🤝 ${esc(r.promise)}` : ""}`,
 				`<div class="sk-col"><b>${money(r.outstanding_amount)}</b>${r.mobile ? `<a class="sk-chip" href="tel:${esc(r.mobile)}">📞</a><button class="sk-chip" data-act="fin-wa" data-i="${i}">💬</button>` : ""}
-				<button class="sk-chip" data-act="fin-promise" data-i="${i}">🤝 ${t("promise")}</button><button class="sk-chip on" data-act="fin-recv" data-i="${i}">₹ ${t("received")}</button></div>`); };
+				<button class="sk-chip" data-act="fin-promise" data-i="${i}">🤝 ${t("promise")}</button><a class="sk-chip on" target="_blank" href="/app/sales-invoice/${encodeURIComponent(r.name)}">₹ ${t("in_erp")}</a></div>`); };
 		const total = S.dues.reduce((s, r) => s + r.outstanding_amount, 0);
 		root.innerHTML = header(t("to_collect")) + `<main><p class="sk-note">${t("total_due")}: <b>${money(total)}</b> · ${S.dues.length} ${t("inv_n")}</p>
 			${groups.map(([k, label]) => { const rows = S.dues.filter((r) => r.bucket === k); return rows.length ? `<h3 class="sk-h">${label} (${money(rows.reduce((s, r) => s + r.outstanding_amount, 0))})</h3><ul class="sk-list">${rows.map(row).join("")}</ul>` : ""; }).join("") || `<p class="sk-empty">${t("nothing")}</p>`}</main>`;
@@ -4069,7 +4071,7 @@
 			`${esc(b.name)}${b.bill_no ? " · " + t("bill") + " " + esc(b.bill_no) : ""} · ${t("due")} ${esc(b.due_date)}${b.days_late > 0 ? ` · <span class="sk-due">${b.days_late} ${t("days_late")}</span>` : ""}`,
 			`<div class="sk-col"><b>${money(b.outstanding_amount)}</b>${boss ? `<button class="sk-chip on" data-act="fin-approve" data-i="${i}">✓ ${t("approve")}</button>`
 				: b.needs_ok && !b.approved ? `<button class="sk-chip" data-act="fin-ask" data-i="${i}">🙋 ${t("ask_sk")}</button>`
-				: `<button class="sk-chip on" data-act="fin-pay" data-i="${i}">₹ ${t("paid")}</button>`}${b.approved ? `<span class="sk-chip on">SK ✓</span>` : ""}</div>`)).join("") || empty()}</ul></main>`;
+				: `<a class="sk-chip on" target="_blank" href="/app/purchase-invoice/${encodeURIComponent(b.name)}">₹ ${t("pay_in_erp")}</a>`}${b.approved ? `<span class="sk-chip on">SK ✓</span>` : ""}</div>`)).join("") || empty()}</ul></main>`;
 	}
 	async function renderBillsToPost() {
 		S.fb = await call("fin_bills");
@@ -4093,9 +4095,9 @@
 	}
 	async function renderExpenses() {
 		S.claims = await call("fin_expenses");
-		root.innerHTML = header(t("expenses")) + `<main><button class="sk-btn go wide" data-act="fin-voucher">📷 + ${t("petty_cash")}</button>
+		root.innerHTML = header(t("expenses")) + `<main><p class="sk-note">${t("money_in_erp")}</p><a class="sk-btn go wide" target="_blank" href="/app/journal-entry/new?voucher_type=Cash%20Entry">+ ${t("petty_cash")} (ERPNext)</a>
 			<h3 class="sk-h">${t("claims_to_pay")}</h3><ul class="sk-list">${S.claims.map((c, i) => li(esc(c.employee_name), `${esc(c.name)} · ${esc(c.posting_date)}`,
-				`<div class="sk-col"><b>${money(c.total_sanctioned_amount || c.grand_total)}</b><button class="sk-chip on" data-act="fin-pay-claim" data-i="${i}">₹ ${t("paid")}</button></div>`)).join("") || empty()}</ul></main>`;
+				`<div class="sk-col"><b>${money(c.total_sanctioned_amount || c.grand_total)}</b><a class="sk-chip on" target="_blank" href="/app/expense-claim/${encodeURIComponent(c.name)}">₹ ${t("pay_in_erp")}</a></div>`)).join("") || empty()}</ul></main>`;
 	}
 	async function renderSegmentPnl() {
 		const p = await call("fin_segment_pnl");
