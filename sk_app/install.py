@@ -55,6 +55,9 @@ def after_migrate():
 	from sk_app.cabin_quote import ensure_setup as cabin_quote_setup
 
 	cabin_quote_setup()  # SK 27-Oct: one rate card, same cabin price from any salesperson, SK's quote print
+	from sk_app.store import ensure_job_card_cabin
+
+	ensure_job_card_cabin()  # SK 27-Oct (Yogesh): job card picker shows customer and cabin size
 	from sk_app.training import seed_lessons
 
 	seed_lessons()

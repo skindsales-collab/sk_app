@@ -184,7 +184,49 @@ def open_work_orders(user: str) -> list[dict]:
 		wo["job_cards"] = frappe.get_all("Job Card", filters={"work_order": wo.name, "docstatus": ["<", 2]},
 			fields=["name", "operation", "workstation"], order_by="sequence_id asc, creation asc")
 		wo["customer"] = frappe.db.get_value("Sales Order", wo.sales_order, "customer_name") if wo.sales_order else None
+		wo["size"] = cabin_size(wo.item_name or wo.production_item)
 	return wos
+
+
+# ---------- job card names people know (SK 27-Oct, Yogesh: "job card has a number, need cabin customer name & size") ----------
+
+def cabin_size(item: str | None) -> str:
+	"""'Prod-0013-12ft x 10ft x 8.6ft' -> '12ft x 10ft x 8.6ft'."""
+	import re
+
+	m = re.search(r"\d+(\.\d+)?\s*ft\s*x\s*\d+(\.\d+)?\s*ft(\s*x\s*\d+(\.\d+)?\s*ft)?", item or "", re.I)
+	return m.group(0) if m else (item or "")
+
+
+def job_card_cabin(work_order: str | None) -> str:
+	if not work_order:
+		return ""
+	wo = frappe.db.get_value("Work Order", work_order, ["sales_order", "item_name", "production_item"], as_dict=True)
+	if not wo:
+		return ""
+	customer = frappe.db.get_value("Sales Order", wo.sales_order, "customer_name") if wo.sales_order else None
+	return " · ".join(x for x in (customer, cabin_size(wo.item_name or wo.production_item)) if x)[:140]
+
+
+def set_job_card_cabin(doc, method=None):
+	"""Job Card hook: 'Customer · 12ft x 10ft x 8.6ft', shown when picking a job card in ERPNext (Stock Entry etc.)."""
+	if doc.meta.has_field("sk_cabin"):
+		doc.sk_cabin = job_card_cabin(doc.work_order)
+
+
+def ensure_job_card_cabin():
+	if not frappe.db.exists("DocType", "Job Card"):
+		return
+	from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+	from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+	create_custom_fields({"Job Card": [{"fieldname": "sk_cabin", "label": "Customer / cabin", "fieldtype": "Data", "insert_after": "work_order",
+		"read_only": 1, "in_list_view": 1, "in_standard_filter": 1}]}, update=True)
+	make_property_setter("Job Card", None, "search_fields", "sk_cabin,operation,workstation", "Data", validate_fields_for_doctype=False)
+	for jc in frappe.get_all("Job Card", filters={"docstatus": ["<", 2], "sk_cabin": ["in", ["", None]]}, fields=["name", "work_order"], limit=0):
+		label = job_card_cabin(jc.work_order)
+		if label:
+			frappe.db.set_value("Job Card", jc.name, "sk_cabin", label, update_modified=False)
 
 
 def issue(user: str, work_order: str, items: list[dict], taken_by=None, job_card=None, photo=None) -> dict:

@@ -35,6 +35,7 @@ doc_events = {
 	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.crm.set_deal_customer"]},
 	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal"},
 	"SK App User": {"on_update": "sk_app.segments.on_app_user_update"},
+	"Job Card": {"validate": "sk_app.store.set_job_card_cabin"},  # SK 27-Oct: customer + cabin size, not just the number
 }
 
 has_permission = {
