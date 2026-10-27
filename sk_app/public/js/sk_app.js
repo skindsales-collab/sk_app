@@ -968,7 +968,8 @@
 			opts.headers["Content-Type"] = "application/json";
 			opts.body = JSON.stringify(args || {});
 		} else if (args) {
-			url += "?" + new URLSearchParams(args);
+			// a null / undefined value would go as the text "null" (the mail search then found nothing): leave it out
+			url += "?" + new URLSearchParams(Object.entries(args).filter(([, v]) => v !== null && v !== undefined));
 		}
 		const res = await fetch(url, opts);
 		const data = await res.json().catch(() => ({}));
