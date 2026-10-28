@@ -4881,15 +4881,24 @@
 	}
 	async function renderMonthWise() {
 		const tab = finTab.month_close || "ledger";
-		const tabs = `<div class="cal-tabs"><button class="${tab === "ledger" ? "on" : ""}" data-fintab="ledger" data-view="month_close">${t("month_pl")}</button>
+		let tabs = `<div class="cal-tabs"><button class="${tab === "ledger" ? "on" : ""}" data-fintab="ledger" data-view="month_close">${t("month_pl")}</button>
 			<button class="${tab === "work" ? "on" : ""}" data-fintab="work" data-view="month_close">${t("closing_list")}</button></div>`;
 		if (tab === "work") { await renderMonthClose(); root.querySelector("main").insertAdjacentHTML("afterbegin", tabs); return; }
 		const p = await call("fin_month_wise");
+		if (p.only) finTab.month_seg = p.only;
 		const mon = (m) => new Date(m + "-01").toLocaleDateString(state.lang === "Marathi" ? "mr-IN" : "en-IN", { month: "short", year: "2-digit" });
-		root.innerHTML = header(t("month_close")) + `<main>${tabs}<div class="sk-table-wrap"><table class="sk-table"><tr><th></th><th>${t("income")}</th><th>${t("direct")}</th><th>${t("indirect")}</th><th>${t("net")}</th></tr>
-			${p.rows.map((r) => `<tr><td>${esc(mon(r.month))}</td><td>${lakh(r.income)}</td><td>${lakh(r.direct)}</td><td>${lakh(r.indirect)}</td><td class="${r.net < 0 ? "sk-due" : ""}"><b>${lakh(r.net)}</b></td></tr>`).join("")}
-			<tr><th>Σ</th><th>${lakh(p.total.income)}</th><th>${lakh(p.total.direct)}</th><th>${lakh(p.total.indirect)}</th><th>${lakh(p.total.net)}</th></tr></table></div>
+		// segment P&L per month, like Tally (SK 28-Oct): All / Cabin / Non-Cabin / Common
+		const seg = finTab.month_seg || "All";
+		const segName = (s) => (s === "All" ? t("all") : s === "Common" ? t("common_cost") : s);
+		if (p.only) tabs = "";
+		const segTabs = p.only ? `<p class="sk-note"><b>${esc(p.only)}</b></p>` : `<div class="cal-tabs">${["All", "Cabin", "Non-Cabin", "Common"].map((s) => `<button class="${seg === s ? "on" : ""}" data-segtab="${s}">${esc(segName(s))}</button>`).join("")}</div>`;
+		const pick = (r) => (seg === "All" ? r : (r.segments || {})[seg] || {});
+		const tot = seg === "All" ? p.total : (p.segment_total || {})[seg] || {};
+		root.innerHTML = header(t("month_close")) + `<main>${tabs}${segTabs}<div class="sk-table-wrap"><table class="sk-table"><tr><th></th><th>${t("income")}</th><th>${t("direct")}</th><th>${t("gross")}</th><th>${t("indirect")}</th><th>${t("net")}</th></tr>
+			${p.rows.map((row) => { const r = pick(row); return `<tr><td>${esc(mon(row.month))}</td><td>${lakh(r.income)}</td><td>${lakh(r.direct)}</td><td>${lakh(r.gross)}</td><td>${lakh(r.indirect)}</td><td class="${r.net < 0 ? "sk-due" : ""}"><b>${lakh(r.net)}</b></td></tr>`; }).join("")}
+			<tr><th>Σ</th><th>${lakh(tot.income)}</th><th>${lakh(tot.direct)}</th><th>${lakh(tot.gross)}</th><th>${lakh(tot.indirect)}</th><th>${lakh(tot.net)}</th></tr></table></div>
 			<p class="sk-note">${t("pnl_note")}</p></main>`;
+		root.querySelectorAll("[data-segtab]").forEach((b) => b.addEventListener("click", () => { finTab.month_seg = b.dataset.segtab; renderMonthWise(); }));
 	}
 
 	async function renderMonthClose() {

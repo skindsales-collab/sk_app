@@ -12,6 +12,7 @@ from sk_app.store import _company, need
 
 ACCOUNTS = "Accounts"
 MANAGEMENT = "Management"
+MACHINE_SHIFTING = "Machine Shifting"
 KINDS = ("bank", "receivable", "payable", "purchase", "sales", "journal", "expenses")
 CABIN, NON_CABIN, COMMON = "Cabin", "Non-Cabin", "Common"
 # cost centres of each segment (SK: SGSF / LGSF and modular are Cabin; machine shifting and job work are Non-Cabin)
@@ -108,7 +109,10 @@ def _expense_groups() -> dict:
 	for a in frappe.get_all("Account", filters={"company": company, "root_type": "Expense", "is_group": 0}, fields=["name", "lft"]):
 		inside = [g.name for g in groups if g.lft < a.lft < g.rgt]
 		kind = "Indirect" if any("indirect" in g.lower() for g in inside) else "Direct"
-		out[a.name] = (kind, _segment_of_names([a.name] + inside))
+		seg = _segment_of_names([a.name] + inside)
+		if not seg and any(g.startswith("Purchase Accounts") for g in inside):
+			seg = CABIN  # SK 28-Oct "split all data as Cabin & Non-Cabin": a purchase not marked Non-Cabin is factory (cabin) material
+		out[a.name] = (kind, seg)
 	return out
 
 
@@ -221,28 +225,52 @@ def segment_wise(user: str, month=None) -> dict:
 
 
 def month_wise(user: str, year_start=None) -> dict:
-	"""All P&L, one row per month of the financial year (April to now): income, direct and indirect cost, net."""
-	need(user, ACCOUNTS, MANAGEMENT)
+	"""All P&L, one row per month of the financial year (April to now): income, direct and indirect cost, net.
+	Each row also carries the same figures per segment (Cabin / Non-Cabin / Common), as Tally's segment P&L per month."""
+	need(user, ACCOUNTS, MANAGEMENT, MACHINE_SHIFTING)
+	# SK 28-Oct "link Aditya to Non-Cabin": Machine Shifting (Aditya) sees the Non-Cabin segment only
+	only = None if _sees_all(user) else NON_CABIN
 	today = getdate()
 	fy = getdate(year_start) if year_start else getdate(f"{today.year if today.month >= 4 else today.year - 1}-04-01")
 	end = min(get_last_day(add_months(fy, 11)), get_last_day(today))
 	kinds = _expense_groups()
+	cc_parents = {c.name: c.parent_cost_center for c in frappe.get_all("Cost Center", fields=["name", "parent_cost_center"])}
+	blank = lambda: frappe._dict(income=0.0, direct=0.0, indirect=0.0)
 	months = {}
 	m = fy
 	while m <= end:
-		months[str(m)[:7]] = frappe._dict(month=str(m)[:7], income=0.0, direct=0.0, indirect=0.0)
+		months[str(m)[:7]] = frappe._dict(month=str(m)[:7], income=0.0, direct=0.0, indirect=0.0,
+			segments={s: blank() for s in (CABIN, NON_CABIN, COMMON)})
 		m = add_months(m, 1)
 	for r in _pnl_lines(fy, end):
 		row = months.get(r.month)
 		if not row:
 			continue
 		if r.root_type == "Income":
-			row.income += flt(r.income)
+			field, amount = "income", flt(r.income)
+			s = _segment_of(_segment_of_names([r.account]), r.cost_center, cc_parents)
 		else:
-			row["direct" if kinds.get(r.account, ("Direct",))[0] == "Direct" else "indirect"] += flt(r.cost)
+			kind, aseg = kinds.get(r.account, ("Direct", None))
+			field, amount = ("direct" if kind == "Direct" else "indirect"), flt(r.cost)
+			s = _segment_of(aseg, r.cost_center, cc_parents)
+		row[field] += amount
+		row.segments[s][field] += amount
 	rows = list(months.values())
 	for r in rows:
-		r["gross"] = r.income - r.direct
-		r["net"] = r.gross - r.indirect
-	return {"from": str(fy), "to": str(end), "rows": rows,
-		"total": {k: sum(flt(r[k]) for r in rows) for k in ("income", "direct", "indirect", "gross", "net")}}
+		for x in [r, *r.segments.values()]:
+			x["gross"] = x.income - x.direct
+			x["net"] = x.gross - x.indirect
+	keys = ("income", "direct", "indirect", "gross", "net")
+	if only:
+		rows = [frappe._dict(month=r.month, **r.segments[only], segments={only: r.segments[only]}) for r in rows]
+	segs = (only,) if only else (CABIN, NON_CABIN, COMMON)
+	return {"from": str(fy), "to": str(end), "rows": rows, "total": {k: sum(flt(r[k]) for r in rows) for k in keys},
+		"segment_total": {s: {k: sum(flt(r.segments[s][k]) for r in rows) for k in keys} for s in segs}, "only": only}
+
+
+def _sees_all(user: str) -> bool:
+	if "System Manager" in frappe.get_roles(user):
+		return True
+	from sk_app import logins
+
+	return bool({ACCOUNTS, MANAGEMENT} & set(logins.profile_functions(user)))

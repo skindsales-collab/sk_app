@@ -91,7 +91,8 @@ FUNCTIONS = {
 	},
 	"Machine Shifting": {
 		"label": {"English": "Machine Shifting", "Marathi": "मशीन शिफ्टिंग"},
-		"tiles": COMMON_TILES + ["my_deals", "customers", "complaints", "site_checklist", "mail"],
+		# SK 28-Oct: Aditya sees the Non-Cabin P&L month by month (Month Wise Report, Non-Cabin only)
+		"tiles": COMMON_TILES + ["my_deals", "customers", "complaints", "site_checklist", "mail", "month_close"],
 		"live": False,
 		"erpnext_roles": ["Projects User", "Sales User"],
 		"desk": "/crm",
