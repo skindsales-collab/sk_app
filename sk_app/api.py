@@ -1555,6 +1555,38 @@ def training_ask(question, function=None, photo=None):
 	return training.ask(_me().user, question, function, photo)
 
 
+# SK 28-Oct (Rev 1 points 17-18): SK Phone, the free Android helper that sends the phone's calls to CRM
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=20, seconds=60 * 60)
+def phone_link(mobile, pin, device=None, mode="company"):
+	from sk_app import phone_sync
+
+	return phone_sync.link(mobile, pin, device, mode)
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=120, seconds=60 * 60)
+def phone_numbers(token):
+	from sk_app import phone_sync
+
+	return phone_sync.numbers(token)
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=120, seconds=60 * 60)
+def phone_calls(token, calls):
+	from sk_app import phone_sync
+
+	return phone_sync.upload(token, calls)
+
+
+@frappe.whitelist(methods=["POST"])
+def phone_unlink(user):
+	from sk_app import phone_sync
+
+	return phone_sync.unlink(_me().user, user)
+
+
 # SK 28-Oct (Rev 1 point 6): the CEO's Questions screen
 @frappe.whitelist()
 def ceo_questions():

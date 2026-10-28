@@ -4,3 +4,6 @@ __pycache__/
 .pytest_cache/
 node_modules/
 dump.rdb
+android/sk-phone/.gradle/
+android/sk-phone/build/
+android/sk-phone/app/build/

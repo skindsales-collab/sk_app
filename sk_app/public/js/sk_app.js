@@ -923,13 +923,13 @@
 		lk_cancelled: "Not checked. Tap the button and touch the finger sensor or look at the phone.",
 		lk_setup: "Set up face / finger", lk_setup_why: "From now on you log in and open the app with your phone's fingerprint or face lock. Your PIN stays as the backup. Your finger and face stay on the phone; nothing is sent.",
 		lk_setup_now: "Set up now", lk_setup_done: "Face / finger set up. Next time tap Login with fingerprint / face. The PIN still works as backup.",
-		lk_reset: "Reset face / finger", lk_reset_q: "Reset face / finger? The person opens with the PIN once and sets it up again.", lk_reset_done: "Face / finger reset" });
+		lk_reset: "Reset face / finger", lk_reset_q: "Reset face / finger? The person opens with the PIN once and sets it up again.", lk_reset_done: "Face / finger reset", ph_unlink: "Unlink SK Phone", ph_unlink_q: "Unlink this person's SK Phone? Their phone stops sending calls until it is linked again.", ph_unlinked: "SK Phone unlinked" });
 	Object.assign(T.Marathi, { lk_locked: "लॉक आहे", lk_touch: "बोट लावा किंवा फोनकडे पहा", lk_open_face: "चेहरा / बोटाने उघडा",
 		lk_ask_ceo: "चालत नाही किंवा नवीन फोन? CEO ला रीसेट करायला सांगा.", lk_pin: "तुमचा पिन (लॉगिनचा)", lk_open: "उघडा", lk_relogin: "पिन विसरलात? पुन्हा लॉगिन करा", lk_use_pin: "पिनने उघडा", lk_no_key: "या फोनवर चेहरा / बोट चालले नाही: पिनने उघडा, मग परत सेट करा.",
 		lk_cancelled: "तपासले नाही. बटण दाबा आणि बोट लावा किंवा फोनकडे पहा.",
 		lk_setup: "चेहरा / बोट लॉक सुरू करा", lk_setup_why: "आता पासून फोनच्या बोट / चेहरा लॉकने लॉगिन करा आणि ॲप उघडा. पिन बॅकअप म्हणून राहतो. बोट आणि चेहरा फोनवरच राहतात; काहीही पाठवले जात नाही.",
 		lk_setup_now: "आत्ता सुरू करा", lk_setup_done: "चेहरा / बोट लॉक तयार. पुढच्या वेळी 'बोट / चेहरा वापरून लॉगिन' दाबा. पिन बॅकअप म्हणून चालतो.",
-		lk_reset: "चेहरा / बोट रीसेट", lk_reset_q: "चेहरा / बोट रीसेट करायचे? ती व्यक्ती एकदा पिनने उघडून परत सुरू करेल.", lk_reset_done: "चेहरा / बोट रीसेट झाले" });
+		lk_reset: "चेहरा / बोट रीसेट", lk_reset_q: "चेहरा / बोट रीसेट करायचे? ती व्यक्ती एकदा पिनने उघडून परत सुरू करेल.", lk_reset_done: "चेहरा / बोट रीसेट झाले", ph_unlink: "SK Phone काढा", ph_unlink_q: "या व्यक्तीचा SK Phone काढायचा? पुन्हा लिंक करेपर्यंत त्यांचा फोन कॉल पाठवणार नाही.", ph_unlinked: "SK Phone काढला" });
 	// main screen Rev 2 (SK 26-Oct)
 	Object.assign(T.English, { k_of: "of", k_no_target: "target not set", k_behind: "behind by", k_on_track: "on track", k_target: "target", k_off: "off target",
 		k_no_data: "No data yet", k_day: "Day", k_per_day: "per day", k_board: "Order board", k_board_open: "1st of month", k_board_now: "now", k_week: "Week", k_month: "Month", kl_Orders: "Orders", kl_Invoices: "Invoices",
@@ -1854,6 +1854,7 @@
 				: `<button class="sk-chip" data-act="login-new" data-i="${i}">✏️ ${t("edit_login")}</button>
 					<button class="sk-chip" data-act="login-reset" data-i="${i}">🔑 ${t("reset_pin")}</button>
 					<button class="sk-chip" data-act="login-face" data-i="${i}">🙂 ${t("lk_reset")}</button>
+					<button class="sk-chip" data-act="login-phone" data-i="${i}">📵 ${t("ph_unlink")}</button>
 					<button class="sk-chip bad" data-act="login-close" data-i="${i}">✕ ${t("close_login")}</button>`;
 			return `<li class="sk-item sk-person"><div><b>${esc(p.name)}</b>${warn}<div class="sk-item-meta">${esc(sub)}</div></div><div class="sk-row sk-wrap">${btn}</div></li>`;
 		};
@@ -5360,6 +5361,14 @@
 				if (!p || !confirm(`${p.name}: ${t("lk_reset_q")}`)) return;
 				const r = await call("reset_face", { user: p.user }, true);
 				toast(`✓ ${t("lk_reset_done")} (${r.reset})`);
+				return;
+			}
+			if (act === "login-phone") {
+				// SK 28-Oct: a phone lost or changed hands stops sending calls
+				const p = root._people && root._people[Number(el.dataset.i)];
+				if (!p || !confirm(`${p.name}: ${t("ph_unlink_q")}`)) return;
+				const r = await call("phone_unlink", { user: p.user }, true);
+				toast(`✓ ${t("ph_unlinked")} (${r.unlinked})`);
 				return;
 			}
 			if (act === "pin-save") {
