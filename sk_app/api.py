@@ -1586,8 +1586,8 @@ def leave_decide(name, ok, note=None):
 
 
 @frappe.whitelist(methods=["POST"])
-def expense_claim(expense_type, amount, expense_date=None, note=None, photo=None):
-	return hr.claim_expense(_me().user, expense_type, amount, expense_date, note, photo)
+def expense_claim(expense_type, amount, expense_date=None, note=None, photo=None, paid_to=None, cabin=None, no_bill=None):
+	return hr.claim_expense(_me().user, expense_type, amount, expense_date, note, photo, paid_to, cabin, no_bill)
 
 
 @frappe.whitelist(methods=["POST"])

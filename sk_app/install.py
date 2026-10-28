@@ -79,12 +79,13 @@ def after_migrate():
 	_safe(cold_calling_field, "cold calling list")  # SK 27-Oct: cold-calling data out of My Leads
 	from sk_app.marketing_list import ensure_setup as marketing_list_setup
 	from sk_app.requisition import ensure_setup as requisition_setup
-
 	from sk_app.quality import ensure_setup as self_check_setup
 
 	_safe(self_check_setup, "worker self-check")  # SK 28-Oct: worker check sheet before Aditya's quality check
+	from sk_app.hr import ensure_voucher_fields
 	from sk_app.sub_bills import ensure_setup as sub_bills_setup
 
+	_safe(ensure_voucher_fields, "cash vouchers")  # SK 28-Oct: paid to, project / cabin, no-bill reason; CEO approves all
 	_safe(sub_bills_setup, "subcontractor bills")  # SK 28-Oct: rate sheet → bill → Rushi → CEO → payable
 	_safe(requisition_setup, "purchase requisition")  # SK 27-Oct: requisition → CEO → PO → receipt
 	_safe(marketing_list_setup, "marketing list")  # SK 27-Oct: potential customers for greetings / promotions, not leads

@@ -12,6 +12,7 @@ from sk_app.tests.test_store_purchase import run
 HR_U = "sk_test_hr_aarti@example.com"
 STAFF = "sk_test_hr_ranjit@example.com"
 BOSS = "sk_test_hr_boss@example.com"
+CEO = "sk_test_hr_ceo@example.com"
 
 
 def employee(first, mobile=None, user=None, **kw):
@@ -31,10 +32,11 @@ class TestHr(IntegrationTestCase):
 		super().setUpClass()
 		if not frappe.db.get_value("Company", {}, "name"):
 			raise cls.skipTest(cls, "needs an ERPNext company")
-		for u, roles in ((HR_U, ["HR User", "HR Manager"]), (STAFF, ["Employee"]), (BOSS, ["Employee"])):
+		for u, roles in ((HR_U, ["HR User", "HR Manager"]), (STAFF, ["Employee"]), (BOSS, ["Employee"]), (CEO, ["Employee"])):
 			make_user(u, roles)
 		app_user(HR_U, "HR")
 		app_user(BOSS, "Production")
+		app_user(CEO, "Management")
 		app_user(STAFF, "Production", manager=BOSS)
 		cls.boss = employee("SKTestBoss", "9876511110", BOSS)
 		cls.staff = employee("SKTestRanjit", "9876511111", STAFF, reports_to=cls.boss)
@@ -123,11 +125,26 @@ class TestHr(IntegrationTestCase):
 		if not frappe.db.exists("Expense Claim Type", "SK Test Travel"):
 			frappe.get_doc({"doctype": "Expense Claim Type", "expense_type": "SK Test Travel",
 				"accounts": [{"company": company, "default_account": account}]}).insert(ignore_permissions=True)
-		c = run(STAFF, hr.claim_expense, "SK Test Travel", 450, nowdate(), "auto to site")
-		self.assertIn(c["name"], [x.name for x in run(BOSS, hr.listing)["claims_to_approve"]])
-		d = run(BOSS, hr.decide_expense, c["name"], 1)
+		# SK 28-Oct: cash voucher with its details; no bill photo needs a reason; every voucher goes to the CEO only
+		hr.ensure_voucher_fields()
+		self.assertRaises(frappe.ValidationError, run, STAFF, hr.claim_expense, "SK Test Travel", 450, nowdate(), "auto to site")
+		c = run(STAFF, hr.claim_expense, "SK Test Travel", 450, nowdate(), "auto to site", None, "Auto driver", "SO-TEST-1", "auto, no bill")
+		doc = frappe.get_doc("Expense Claim", c["name"])
+		self.assertEqual((doc.sk_paid_to, doc.sk_cabin, doc.sk_no_bill), ("Auto driver", "SO-TEST-1", "auto, no bill"))
+		self.assertTrue(frappe.db.exists("ToDo", {"allocated_to": CEO, "reference_name": c["name"], "status": "Open"}))
+		self.assertNotIn(c["name"], [x.name for x in run(BOSS, hr.listing)["claims_to_approve"]])
+		self.assertNotIn(c["name"], [x.name for x in run(HR_U, hr.listing)["claims_to_approve"]])
+		self.assertRaises(frappe.PermissionError, run, BOSS, hr.decide_expense, c["name"], 1)
+		self.assertRaises(frappe.PermissionError, run, HR_U, hr.decide_expense, c["name"], 1)
+		self.assertIn(c["name"], [x.name for x in run(CEO, hr.listing)["claims_to_approve"]])
+		mine = {x.name: x for x in run(STAFF, hr.listing)["my_claims"]}
+		self.assertEqual(mine[c["name"]]["stage"], "Waiting CEO")
+		self.assertRaises(frappe.ValidationError, run, CEO, hr.decide_expense, c["name"], 0)  # reject needs a reason
+		d = run(CEO, hr.decide_expense, c["name"], 1)
 		self.assertEqual(d["status"], "Approved")
 		self.assertEqual(frappe.db.get_value("Expense Claim", c["name"], "approval_status"), "Approved")
+		mine = {x.name: x for x in run(STAFF, hr.listing)["my_claims"]}
+		self.assertEqual(mine[c["name"]]["stage"], "Approved")
 
 	def test_company_holiday_list_made_once(self):
 		hr.ensure_holiday_setup()
