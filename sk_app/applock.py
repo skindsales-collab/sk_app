@@ -178,7 +178,7 @@ def options(user: str, purpose: str) -> dict:
 		out.update({"rp": {"id": _rp_id(), "name": "SK App"},
 			"user": {"id": _b64e(hashlib.sha256(user.encode()).digest()[:16]), "name": user, "displayName": frappe.utils.get_fullname(user)},
 			"pubKeyCredParams": [{"type": "public-key", "alg": -7}, {"type": "public-key", "alg": -257}],
-			"authenticatorSelection": {"authenticatorAttachment": "platform", "userVerification": "required", "residentKey": "discouraged"},
+			"authenticatorSelection": {"authenticatorAttachment": "platform", "userVerification": "required", "residentKey": "preferred", "requireResidentKey": False},
 			"attestation": "none", "excludeCredentials": [{"type": "public-key", "id": k.credential_id} for k in keys(user)]})
 	else:
 		have = keys(user)

@@ -518,3 +518,19 @@ a.sk-chip { text-decoration: none; }
 .sk-missing > span { color: #c62828; font-weight: 700; }
 .sk-chip.sk-locked { opacity: .55; border-style: dashed; }
 .sk-gate { border-left: 5px solid #e65100; }
+
+/* SK 28-Oct: photo count. Small numbered dots on every piece the AI counted; added ones are green */
+.sk-pc-dots span { min-width: 14px; height: 14px; border-radius: 7px; font-size: 8px; line-height: 14px; padding: 0 2px; opacity: .9; }
+.sk-pc-dots span.add { background: var(--green, #1b8a3a); }
+.sk-pc-conf { padding: 6px 10px; border-radius: 8px; margin: 8px 0; font-size: 13px; }
+.sk-pc-conf.high { background: #e6f4ea; color: #1b5e20; }
+.sk-pc-conf.medium { background: #fff4e0; color: #8a5300; }
+.sk-pc-conf.low { background: #fde8e8; color: #9b1c1c; }
+.sk-pcount { font-size: 18px; padding: 6px 10px; }
+
+/* SK 28-Oct: ❓ help on every screen (above any bottom bar, under pop-up sheets and the lock screen) */
+.sk-fab { position: fixed; right: 14px; bottom: calc(84px + env(safe-area-inset-bottom)); z-index: 4; width: 46px; height: 46px; border-radius: 23px;
+	border: 0; background: var(--navy); color: #fff; font-size: 22px; box-shadow: 0 3px 10px rgba(0,0,0,.25); opacity: .92; }
+.sk-fab:active { transform: scale(.95); }
+.sk-faq { border-bottom: 1px solid rgba(0,0,0,.08); padding: 6px 0; }
+.sk-faq summary { font-weight: 600; }

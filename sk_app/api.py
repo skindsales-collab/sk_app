@@ -932,6 +932,29 @@ def store_dispatch(sales_order, vehicle_no=None, driver_mobile=None, cabin_photo
 	return store.dispatch(_me().user, sales_order, vehicle_no, driver_mobile, cabin_photo, plate_photo, note)
 
 
+@frappe.whitelist(methods=["POST"])
+def photo_count(file_url, item_code=None, screen=None):
+	"""SK 28-Oct: count pieces from a photo (Store / Production / Quality). Only a suggestion until the person uses it."""
+	from sk_app import photo_count as pc
+
+	return pc.count(_me().user, file_url, item_code, screen)
+
+
+@frappe.whitelist(methods=["POST"])
+def photo_count_used(name, final_count, method="photo", kg=None, recounted=0):
+	from sk_app import photo_count as pc
+
+	return pc.used(_me().user, name, final_count, method, kg, recounted)
+
+
+@frappe.whitelist()
+def item_weight(item_code):
+	from sk_app import photo_count as pc
+
+	_me()
+	return pc.item_weight(item_code)
+
+
 @frappe.whitelist()
 def store_warehouses():
 	return store.warehouses(_me().user)
@@ -1571,8 +1594,17 @@ def training_faq(q=None):
 
 
 @frappe.whitelist(methods=["POST"])
-def training_ask(question, function=None, photo=None):
-	return training.ask(_me().user, question, function, photo)
+def training_ask(question, function=None, photo=None, screen=None):
+	return training.ask(_me().user, question, function, photo, screen)
+
+
+@frappe.whitelist(methods=["POST"])
+def ceo_question_redraft(todo):
+	"""CEO: ask Claude again for a draft answer (e.g. after adding a screenshot or when the first draft was not ready)."""
+	user = _me().user
+	training._check_ceo(user)
+	training.ai_draft(todo)
+	return training._draft_of(todo)
 
 
 # SK 28-Oct (Rev 1 points 17-18): SK Phone, the free Android helper that sends the phone's calls to CRM
