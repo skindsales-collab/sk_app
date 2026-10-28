@@ -410,6 +410,8 @@
 		workers_used: "Workers used",
 		anything_tell: "Anything to tell? (speak)",
 		job_done_qc: "Job done · send to Quality",
+		self_check: "My check sheet", self_check_help: "Check your own work. Tap Not OK and say what is wrong.", self_by: "Worker's check sheet",
+		no_self: "No worker check sheet", self_ok: "all OK", self_bad: "Not OK",
 		job_done_ok: "Job done. Quality is told.",
 		job_done_draft: "Job done and saved. Office will close it in ERPNext.",
 		say_material: "What do you need? (speak)",
@@ -464,6 +466,8 @@
 		workers_used: "किती कामगार",
 		anything_tell: "काही सांगायचे आहे? (बोला)",
 		job_done_qc: "काम झाले · क्वालिटीला पाठवा",
+		self_check: "माझी चेक शीट", self_check_help: "आपले काम स्वतः तपासा. चूक असल्यास बरोबर नाही दाबा व काय चुकले ते बोला.", self_by: "कामगाराची चेक शीट",
+		no_self: "कामगाराची चेक शीट नाही", self_ok: "सर्व ठीक", self_bad: "बरोबर नाही",
 		job_done_ok: "काम झाले. क्वालिटीला कळवले.",
 		job_done_draft: "काम झाले व सेव्ह झाले. ऑफिस ERPNext मध्ये बंद करेल.",
 		say_material: "काय हवे? (बोला)",
@@ -4169,10 +4173,13 @@
 		root.innerHTML = header(t(view)) + `<main>${sub ? `<p class="sk-note">🔊 ${S.jobs.length} ${t("jobs_today")}</p>` : ""}${S.jobs.map(card).join("") || `<p class="sk-empty">${t("nothing")}</p>`}</main>`;
 		if (sub && S.jobs.length) readAloud(`${S.jobs.length} ${t("jobs_today")}`);
 	}
-	function doneSheet(i) {
+	async function doneSheet(i) {
 		const j = S.jobs[i];
 		S.job = j;
+		const sh = await call("prod_self_sheet", { job_card: j.name });
+		S.points = sh.points;
 		sheet(`<h3 class="sk-h">✅ ${esc(j.operation || "")} · ${esc(j.item_name || "")}</h3>
+			<h3 class="sk-h">📝 ${t("self_check")}</h3><p class="sk-note">${t("self_check_help")}</p>${pointsHtml(S.points)}
 			${photoField("pd-1", "📷 " + t("photo_full"))}${photoField("pd-2", "📷 " + t("photo_detail"))}
 			<label class="sk-field"><span>${t("workers_used")}</span>${qtyBox("pd-workers")}</label>${formField("pd-remark", t("anything_tell"), true)}
 			<button class="sk-btn ok wide" data-act="pr-done-save">✅ ${t("job_done_qc")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
@@ -4215,7 +4222,9 @@
 		const groups = view === "final_check" ? [["final", t("final")]] : [["incoming", t("incoming")], ["stage", t("stage")], ["final", t("final")]];
 		S.checks = [];
 		const rows = (key) => p[key].map((c) => { S.checks.push(c); const i = S.checks.length - 1;
-			return li(`${c.customer ? `${esc(c.customer)} · ` : ""}${esc(c.item_name || c.item_code)}${c.operation ? " · " + esc(c.operation) : ""}`, `${esc(c.reference_name)} · ${esc(c.from || "")} · ${num(c.qty)} · ${when(c.since)}`,
+			const sc = c.reference_type !== "Job Card" ? "" : !c.self_check ? ` · ⚠ ${t("no_self")}`
+				: ` · 📝 ${c.self_check.status === "Accepted" ? t("self_ok") : t("self_bad") + ": " + c.self_check.points.filter((p) => p.status !== "Accepted").length}`;
+			return li(`${c.customer ? `${esc(c.customer)} · ` : ""}${esc(c.item_name || c.item_code)}${c.operation ? " · " + esc(c.operation) : ""}`, `${esc(c.reference_name)} · ${esc(c.from || "")} · ${num(c.qty)} · ${when(c.since)}${sc}`,
 				`<button class="sk-chip on" data-act="qc-open" data-i="${i}">${t("check_now")}</button>`); }).join("");
 		root.innerHTML = header(t(view)) + `<main>${groups.map(([k, label]) => `<h3 class="sk-h">${label} (${p[k].length})</h3><ul class="sk-list">${rows(k) || empty()}</ul>`).join("")}</main>`;
 	}
@@ -4225,6 +4234,7 @@
 		const o = await call("qc_templates", { reference_type: c.reference_type, operation: c.operation || "", item_code: c.item_code });
 		root.innerHTML = header(t("inspect")) + `<main class="sk-form"><h3 class="sk-h">${esc(c.item_name || c.item_code)}${c.operation ? " · " + esc(c.operation) : ""}</h3>
 			<p class="sk-note">${esc(c.reference_type)} ${esc(c.reference_name)} · ${esc(c.from || "")}</p>
+			${c.reference_type === "Job Card" ? selfHtml(c.self_check) : ""}
 			${pick("q-tpl", t("checklist"), o.templates)}<div id="q-points"></div>
 			${c.reference_type === "Purchase Receipt" ? `<label class="sk-field"><span>${t("accepted_qty")}</span>${qtyBox("q-acc", c.qty)}</label><label class="sk-field"><span>${t("rejected_qty")}</span>${qtyBox("q-rej", 0)}</label>` : ""}
 			<label class="sk-field"><span>${t("sample")}</span>${qtyBox("q-sample", 1)}</label>
@@ -4237,13 +4247,22 @@
 	}
 	// no template in ERPNext yet: a short standard list so a check is never blocked
 	const DEFAULT_POINTS = { "Purchase Receipt": ["qty_matches", "no_damage_rust", "size_as_ordered"], "Job Card": ["size_as_drawing", "weld_finish", "clean_safe"] };
+	const pointsHtml = (points) => points.map((p, k) => `<div class="sk-point"><div class="sk-item-title">${esc(p.specification)}${p.value ? ` <small>(${esc(p.value)})</small>` : ""}</div>
+			<div class="sk-row"><button class="sk-chip on" data-qok="${k}" data-v="1">✓ OK</button><button class="sk-chip" data-qok="${k}" data-v="0">✗ ${t("not_ok")}</button></div>
+			<div class="sk-qnote" id="q-note-wrap-${k}" hidden>${formField("q-note-" + k, t("what_wrong"))}</div></div>`).join("");
+	const pointsTicked = (points) => points.map((p, k) => {
+		const on = root.querySelector(`[data-qok="${k}"].on`);
+		return { specification: p.specification, value: p.value, ok: on ? Number(on.dataset.v) : 1, note: val("q-note-" + k) };
+	});
 	async function loadPoints(tpl) {
 		S.points = tpl ? await call("qc_checklist", { template: tpl })
 			: (DEFAULT_POINTS[S.check.reference_type] || DEFAULT_POINTS["Job Card"]).map((k) => ({ specification: t(k) }));
-		document.getElementById("q-points").innerHTML = S.points.map((p, k) => `<div class="sk-point"><div class="sk-item-title">${esc(p.specification)}${p.value ? ` <small>(${esc(p.value)})</small>` : ""}</div>
-			<div class="sk-row"><button class="sk-chip on" data-qok="${k}" data-v="1">✓ OK</button><button class="sk-chip" data-qok="${k}" data-v="0">✗ ${t("not_ok")}</button></div>
-			<div class="sk-qnote" id="q-note-wrap-${k}" hidden>${formField("q-note-" + k, t("what_wrong"))}</div></div>`).join("") || `<p class="sk-note">${t("pick_checklist")}</p>`;
+		document.getElementById("q-points").innerHTML = pointsHtml(S.points) || `<p class="sk-note">${t("pick_checklist")}</p>`;
 	}
+	// SK 28-Oct: the worker's own check sheet shown to Quality (Aditya) above his check
+	const selfHtml = (s) => !s ? `<p class="sk-note sk-due">⚠ ${t("no_self")}</p>` : `<section class="sk-card"><div class="sk-card-label">📝 ${t("self_by")} · ${esc(s.by || "")} · ${when(s.when)}</div>
+		<ul class="sk-list">${s.points.map((p) => li(`${p.status === "Accepted" ? "✓" : "✗"} ${esc(p.specification)}`, p.status === "Accepted" ? "" : esc(p.note || ""), "", p.status === "Accepted" ? "" : "k-lead_new")).join("")}</ul>
+		${(s.photos || []).map((u) => `<a class="sk-link" href="${esc(u)}" target="_blank">📷 ${t("photo")}</a>`).join(" ")}</section>`;
 
 	async function prodAct(act, el) {
 		const i = Number(el.dataset.i);
@@ -4260,7 +4279,9 @@
 			case "pr-done-save": {
 				el.disabled = true;
 				const photos = [await photoUrl("pd-1"), await photoUrl("pd-2")].filter(Boolean);
-				const r = await call("prod_done", { job_card: S.job.name, photos: JSON.stringify(photos), workers: val("pd-workers"), remark: val("pd-remark") }, true);
+				const checks = pointsTicked(S.points);
+				const r = await call("prod_done", { job_card: S.job.name, photos: JSON.stringify(photos), workers: val("pd-workers"), remark: val("pd-remark"),
+					checks: JSON.stringify(checks) }, true).catch((e) => { el.disabled = false; throw e; });
 				closeSheet();
 				toast(r.posted ? t("job_done_ok") : t("job_done_draft"));
 				return go(state.view);
@@ -4283,10 +4304,7 @@
 			}
 			case "qc-open": return inspectForm(i);
 			case "qc-save": {
-				const points = S.points.map((p, k) => {
-					const on = root.querySelector(`[data-qok="${k}"].on`);
-					return { specification: p.specification, value: p.value, ok: on ? Number(on.dataset.v) : 1, note: val("q-note-" + k) };
-				});
+				const points = pointsTicked(S.points);
 				el.disabled = true;
 				const photos = [await photoUrl("q-p1"), await photoUrl("q-p2")].filter(Boolean);
 				const c = S.check;

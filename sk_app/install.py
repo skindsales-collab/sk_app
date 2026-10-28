@@ -80,6 +80,9 @@ def after_migrate():
 	from sk_app.marketing_list import ensure_setup as marketing_list_setup
 	from sk_app.requisition import ensure_setup as requisition_setup
 
+	from sk_app.quality import ensure_setup as self_check_setup
+
+	_safe(self_check_setup, "worker self-check")  # SK 28-Oct: worker check sheet before Aditya's quality check
 	_safe(requisition_setup, "purchase requisition")  # SK 27-Oct: requisition → CEO → PO → receipt
 	_safe(marketing_list_setup, "marketing list")  # SK 27-Oct: potential customers for greetings / promotions, not leads
 	from sk_app.training import seed_lessons

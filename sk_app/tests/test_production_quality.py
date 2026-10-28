@@ -10,6 +10,7 @@ WS = "SK Test Fabrication - Ranjit"
 WS2 = "SK Test Painting - Babu"
 OPS = ("SK Fabrication", "SK Final Inspection")
 CABIN = "SK Test Office Cabin 20x10"
+OK = [{"specification": "Length x width", "ok": 1}, {"specification": "Weld visual", "ok": 1}]  # worker's own check sheet
 
 
 class TestProductionQuality(IntegrationTestCase):
@@ -46,6 +47,7 @@ class TestProductionQuality(IntegrationTestCase):
 					frappe.get_doc({"doctype": "Quality Inspection Parameter", "parameter": p}).insert()
 			frappe.get_doc({"doctype": "Quality Inspection Template", "quality_inspection_template_name": "QIT-OP-SK Fabrication",
 				"item_quality_inspection_parameter": [{"specification": "Length x width"}, {"specification": "Weld visual"}]}).insert()
+		quality.ensure_setup()
 		cls.wip, cls.fgw = f"Work In Progress - {abbr}", f"Finished Goods - {abbr}"
 		frappe.db.commit()
 
@@ -82,7 +84,7 @@ class TestProductionQuality(IntegrationTestCase):
 		self.assertRaises(frappe.PermissionError, run, self.babu, production.start, jcs[0])
 		run(self.ranjit, production.start, jcs[0])
 		self.assertEqual(frappe.db.get_value("Job Card", jcs[0], "status"), "Work In Progress")
-		r = run(self.ranjit, production.done, jcs[0], [], 4, "Roof ridge purlin one short")
+		r = run(self.ranjit, production.done, jcs[0], [], 4, "Roof ridge purlin one short", OK)
 		self.assertEqual(frappe.db.get_value("Job Card", jcs[0], "status"), "Completed")
 		self.assertTrue(frappe.db.exists("ToDo", {"allocated_to": QC, "reference_name": jcs[0]}))
 		self.assertTrue(frappe.db.exists("Comment", {"reference_name": jcs[0], "content": ["like", "%Workers used: 4%"]}))
@@ -102,7 +104,7 @@ class TestProductionQuality(IntegrationTestCase):
 
 	def test_stage_check_rejects_and_opens_non_conformance(self):
 		wo, jcs = self._work_order()
-		run(self.ranjit, production.done, jcs[0])
+		run(self.ranjit, production.done, jcs[0], checks=OK)
 		p = run(QC, quality.pending)
 		self.assertTrue(any(x["reference_name"] == jcs[0] for x in p["stage"]))
 		tpl = quality.guess_template("Job Card", OPS[0])
@@ -123,9 +125,30 @@ class TestProductionQuality(IntegrationTestCase):
 
 	def test_final_stage_goes_to_final_check(self):
 		wo, jcs = self._work_order()
-		run(self.ranjit, production.done, jcs[1])
+		run(self.ranjit, production.done, jcs[1], checks=OK)
 		p = run(QC, quality.pending)
 		self.assertTrue(any(x["reference_name"] == jcs[1] for x in p["final"]))
+
+	def test_worker_self_check_then_quality_check(self):
+		"""SK 28-Oct: no Done without the worker's check sheet; it is a draft on the Job Card, shown to Quality, never a pass."""
+		wo, jcs = self._work_order()
+		sheet = run(self.ranjit, production._card_for, jcs[0]) and quality.self_sheet(jcs[0])
+		self.assertEqual([p.specification for p in sheet["points"]], ["Length x width", "Weld visual"])
+		self.assertEqual(len(quality.self_sheet(jcs[1])["points"]), len(quality.SELF_POINTS))  # no template: standard list
+		self.assertRaises(frappe.ValidationError, run, self.ranjit, production.done, jcs[0])
+		self.assertRaises(frappe.ValidationError, run, self.ranjit, production.done, jcs[0], checks=[{"specification": "Weld visual", "ok": 0}])
+		self.assertNotEqual(frappe.db.get_value("Job Card", jcs[0], "status"), "Completed")
+		r = run(self.ranjit, production.done, jcs[0], checks=[OK[0], {"specification": "Weld visual", "ok": 0, "note": "one spatter left"}])
+		qi = frappe.get_doc("Quality Inspection", r["self_check"])
+		self.assertEqual((qi.sk_self_check, qi.docstatus, qi.status, qi.inspected_by), (1, 0, "Rejected", self.ranjit))
+		row = next(x for x in run(QC, quality.pending)["stage"] if x["reference_name"] == jcs[0])
+		self.assertEqual(row["self_check"]["name"], qi.name)
+		self.assertEqual([p.status for p in row["self_check"]["points"]], ["Accepted", "Rejected"])
+		self.assertTrue(frappe.db.exists("ToDo", {"allocated_to": QC, "reference_name": jcs[0], "description": ["like", "%1 Not OK%"]}))
+		r = run(QC, quality.save, "Job Card", jcs[0], CABIN, OK, "QIT-OP-SK Fabrication")
+		self.assertEqual(r["status"], "Accepted")
+		self.assertFalse(any(x["reference_name"] == jcs[0] for x in run(QC, quality.pending)["stage"]))
+		self.assertEqual(frappe.db.get_value("Quality Inspection", qi.name, "docstatus"), 0)
 
 	def test_others_cannot_use_production(self):
 		self.assertRaises(frappe.PermissionError, run, "sk_test_buyer@example.com", production.job_cards)
