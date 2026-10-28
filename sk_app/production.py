@@ -155,9 +155,13 @@ def add_photo(user: str, job_card: str, photo: str, note=None) -> dict:
 	return {"ok": True}
 
 
-def done(user: str, job_card: str, photos=None, workers=None, remark=None) -> dict:
-	"""Job finished: time log closed with the quantity, photos and spoken remark saved; Quality gets a check task."""
+def done(user: str, job_card: str, photos=None, workers=None, remark=None, checks=None) -> dict:
+	"""Job finished: the worker's own check sheet first (SK 28-Oct), then the time log closed with the quantity, photos
+	and spoken remark saved; Quality (Aditya) gets a check task with the self-check beside it."""
+	from sk_app import quality
+
 	jc = _card_for(user, job_card)
+	quality.check_points(checks)  # no check sheet, no Done
 	now = now_datetime()
 	open_rows = [r for r in jc.time_logs if r.from_time and not r.to_time]
 	if not open_rows:
@@ -176,10 +180,13 @@ def done(user: str, job_card: str, photos=None, workers=None, remark=None) -> di
 	notes = [x for x in (cint(workers) and _("Workers used: {0}").format(cint(workers)), remark) if x]
 	if notes:
 		jc.add_comment("Comment", "\n".join(notes))
+	self_check = quality.save_self(user, jc.name, checks, photos)
 	posted = try_submit(frappe.get_doc("Job Card", jc.name))
+	bad = sum(1 for c in checks if c.get("specification") and not cint(c.get("ok")))
 	for q in _users_with_function("Quality"):
-		_todo(q, "Job Card", jc.name, _("Stage done, please check: {0} · {1}").format(jc.operation, jc.item_name or jc.production_item))
-	return {"name": jc.name, "posted": posted}
+		_todo(q, "Job Card", jc.name, _("Stage done, self-checked ({0} Not OK), please check: {1} · {2}").format(bad, jc.operation,
+			jc.item_name or jc.production_item))
+	return {"name": jc.name, "posted": posted, "self_check": self_check}
 
 
 def need_material(user: str, items: list[dict], job_card=None, work_order=None, needed_by=None, spoken=None) -> dict:
@@ -241,7 +248,9 @@ def ready_to_dispatch(user: str) -> list[dict]:
 			continue
 		if w.sales_order and frappe.db.get_value("Sales Order", w.sales_order, "per_delivered") >= 100:
 			continue
-		final = frappe.get_all("Quality Inspection", filters={"reference_type": "Job Card", "docstatus": 1,
+		from sk_app.quality import qc_filter
+
+		final = frappe.get_all("Quality Inspection", filters={"reference_type": "Job Card", "docstatus": 1, **qc_filter(),
 			"reference_name": ["in", [s["name"] for s in stages] or [""]]}, fields=["status"], order_by="creation desc", limit=1)
 		out.append({**w, "expected_delivery_date": str(w.expected_delivery_date or ""), "qc": final[0].status if final else None,
 			"customer": frappe.db.get_value("Sales Order", w.sales_order, "customer_name") if w.sales_order else None})
@@ -249,7 +258,7 @@ def ready_to_dispatch(user: str) -> list[dict]:
 
 
 # ---------- Electrical points (SK 26-Oct, main screen Rev 2) ----------
-# Satish (electrician on the Electrical workstation, also the Quality owner) enters the points done in each cabin by
+# Satish (electrician on the Electrical workstation; Quality checks are Aditya's from 28-Oct) enters the points done in each cabin by
 # type with one photo; the count is kept per Job Card and adds up by month (planning and subcontract billing).
 EL_POINTS = ("light", "fan", "socket_5a", "socket_15a", "ac_point", "mcb_db", "earthing", "other_points")
 EL_WORDS = ("electric", "wiring")

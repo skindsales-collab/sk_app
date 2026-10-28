@@ -647,10 +647,12 @@ def _store(start, end, ps, pe, segment, user=None):
 
 
 def _quality(start, end, ps, pe, segment):
-	cards = [_safe(lambda: _count_chart("qi_chart", "Inspections", "Quality Inspection", "report_date", {"docstatus": ["<", 2]})),
+	from sk_app.quality import qc_filter
+
+	cards = [_safe(lambda: _count_chart("qi_chart", "Inspections", "Quality Inspection", "report_date", {"docstatus": ["<", 2], **qc_filter()})),
 		_safe(lambda: _count_chart("nc_chart", "Problems found (NC)", "Non Conformance", "creation"))]
 	if _has("Quality Inspection"):
-		qi = frappe.get_all("Quality Inspection", filters={"report_date": ["between", [start, end]], "docstatus": ["<", 2]},
+		qi = frappe.get_all("Quality Inspection", filters={"report_date": ["between", [start, end]], "docstatus": ["<", 2], **qc_filter()},
 			fields=["name", "item_name", "status", "reference_name", "report_date"], order_by="report_date desc", limit=0)
 		rejected = [q for q in qi if q.status == "Rejected"]
 		cards.append(_card("inspections", "Inspections this month", len(qi), "count", None,

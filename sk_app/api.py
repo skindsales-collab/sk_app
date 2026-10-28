@@ -1087,8 +1087,16 @@ def prod_photo(job_card, photo=None, note=None):
 
 
 @frappe.whitelist(methods=["POST"])
-def prod_done(job_card, photos=None, workers=None, remark=None):
-	return production.done(_me().user, job_card, _list(photos), workers, remark)
+def prod_done(job_card, photos=None, workers=None, remark=None, checks=None):
+	return production.done(_me().user, job_card, _list(photos), workers, remark, _list(checks))
+
+
+@frappe.whitelist()
+def prod_self_sheet(job_card):
+	"""SK 28-Oct: the worker's own check sheet for this stage."""
+	user = _me().user
+	production._card_for(user, job_card)
+	return quality.self_sheet(job_card)
 
 
 @frappe.whitelist(methods=["POST"])
