@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import activities, ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, sales_owner, segments, store, training, view_member, work
+from sk_app import activities, ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, requisition, sales_owner, segments, store, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -971,6 +971,46 @@ def buy_approvals():
 @frappe.whitelist(methods=["POST"])
 def buy_decide(purchase_order, approve, reason=None):
 	return purchase.decide(_me().user, purchase_order, bool(cint(approve)), reason)
+
+
+# ---------- purchase requisition (SK 27-Oct): requisition → CEO → PO → receipt, all in ERPNext ----------
+
+@frappe.whitelist()
+def req_item(item_code):
+	return requisition.item_info(_me().user, item_code)
+
+
+@frappe.whitelist()
+def req_cabins():
+	return requisition.cabins(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def req_raise(items, priority="Planned", need_by=None, cabin=None, note=None, photo=None, goods_photo=None, without_po=0,
+		supplier=None, bill_no=None):
+	return requisition.raise_request(_me().user, _list(items), priority, need_by, cabin, note, photo, goods_photo, cint(without_po),
+		supplier, bill_no)
+
+
+@frappe.whitelist()
+def req_track():
+	return requisition.track(_me().user)
+
+
+@frappe.whitelist()
+def req_to_approve():
+	return requisition.to_approve(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def req_decide(name, approve, note=None):
+	return requisition.decide(_me().user, name, cint(approve), note)
+
+
+@frappe.whitelist(methods=["POST"])
+def req_make_po(request, supplier=None, rates=None, schedule_date=None):
+	rates = frappe.parse_json(rates) if isinstance(rates, str) else rates
+	return requisition.po_from_request(_me().user, request, supplier, rates, schedule_date)
 
 
 @frappe.whitelist()

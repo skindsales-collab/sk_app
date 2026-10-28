@@ -161,11 +161,10 @@ def open_purchase_orders(user: str) -> list[dict]:
 
 def receive(user: str, purchase_order: str | None, items: list[dict], challan_photo=None, goods_photo=None, note=None,
 		supplier=None, reason=None, bill_no=None) -> dict:
-	"""Material at the gate: a draft Purchase Receipt from the PO (or without PO, with a spoken reason), with the
-	challan photo. Quality / Store owner posts it after checking."""
+	"""Material at the gate: a draft Purchase Receipt from the PO with the challan photo. Store posts it after checking.
+	Material without a PO is not received here: it goes through an urgent requisition first (SK 27-Oct)."""
 	need(user, STORE)
 	qty = {i.get("po_detail") or i.get("item_code"): flt(i.get("qty")) for i in items or []}
-	rate = {i.get("item_code"): flt(i.get("rate")) for i in items or [] if i.get("item_code")}
 	if purchase_order:
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
@@ -179,14 +178,8 @@ def receive(user: str, purchase_order: str | None, items: list[dict], challan_ph
 				keep.append(row)
 		pr.set("items", keep)
 	else:
-		if not supplier or not (reason or "").strip():
-			frappe.throw(_("Without a Purchase Order, please pick the supplier and speak the reason"))
-		pr = frappe.new_doc("Purchase Receipt")
-		pr.supplier = supplier
-		pr.company = _company()
-		for code, q in qty.items():
-			if q > 0:
-				pr.append("items", {"item_code": code, "qty": q, "received_qty": q, "rate": flt(rate.get(code)), **uom(code)})
+		# SK 27-Oct: no receipt without a PO; Store raises an urgent requisition (Receive → Came without PO)
+		frappe.throw(_("Material without PO: use Came without PO. It goes to the CEO, then a PO is made and you receive against it."))
 	if not pr.items:
 		frappe.throw(_("Please give the quantity received"))
 	pr.posting_date = nowdate()
@@ -386,27 +379,15 @@ def request_to_purchase(user: str, request: str) -> dict:
 	rows = [r for r in material_requests(user) if r["request"] == request and r["short"]]
 	if not rows:
 		frappe.throw(_("Nothing is short on {0}").format(request))
-	mr = _purchase_request(rows, _("Short for {0}").format(request))
+	mr = _purchase_request(user, rows, _("Short for {0}").format(request))
 	return {"name": mr.name}
 
 
-def _purchase_request(rows: list[dict], reason: str):
-	mr = frappe.new_doc("Material Request")
-	mr.material_request_type = "Purchase"
-	mr.company = _company()
-	mr.transaction_date = nowdate()
-	mr.schedule_date = max((getdate(r.get("needed_by")) for r in rows if r.get("needed_by")), default=getdate())
-	if mr.schedule_date < getdate():
-		mr.schedule_date = getdate()
-	for r in rows:
-		mr.append("items", {"item_code": r["item_code"], "qty": flt(r.get("short") or r.get("qty")),
-			"schedule_date": mr.schedule_date, "warehouse": r.get("warehouse") or _default_store(r["item_code"], mr.company),
-			**uom(r["item_code"])})
-	mr.flags.ignore_permissions = True
-	mr.insert()
-	mr.add_comment("Comment", reason)
-	try_submit(mr)
-	return mr
+def _purchase_request(user: str, rows: list[dict], reason: str):
+	"""SK 27-Oct: short / low stock goes the requisition route too (waits for the CEO's approval)."""
+	from sk_app.requisition import from_store_request
+
+	return from_store_request(user, rows, reason)
 
 
 # ---------- Low Stock ----------
@@ -439,7 +420,7 @@ def order_low(user: str, item_codes: list[str] | None = None) -> dict:
 	rows = [r for r in low_stock(user) if not item_codes or r["item_code"] in item_codes]
 	if not rows:
 		frappe.throw(_("Nothing is below the re-order level"))
-	mr = _purchase_request([{**r, "short": r["order"]} for r in rows], _("Low stock from SK App"))
+	mr = _purchase_request(user, [{**r, "short": r["order"]} for r in rows], _("Low stock from SK App"))
 	return {"name": mr.name, "items": len(rows)}
 
 

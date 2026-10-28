@@ -22,7 +22,10 @@ def requests(user: str) -> list[dict]:
 	need(user, PURCHASE)
 	rows = material_requests(user, "purchase")
 	for r in rows:
-		r["urgent"] = bool(r["needed_by"] and getdate(r["needed_by"]) <= getdate(add_days(nowdate(), 1))) or r["age_hours"] > 24
+		mr = frappe.db.get_value("Material Request", r["request"], ["sk_priority", "sk_supplier"], as_dict=True) or {}
+		r["supplier"] = mr.get("sk_supplier")  # material that came without PO: that supplier
+		r["urgent"] = mr.get("sk_priority") == "Urgent" \
+			or bool(r["needed_by"] and getdate(r["needed_by"]) <= getdate(add_days(nowdate(), 1))) or r["age_hours"] > 24
 		last = last_rate(r["item_code"])
 		r["last_rate"], r["last_supplier"] = (last["rate"], last["supplier"]) if last else (None, None)
 	return sorted(rows, key=lambda r: (not r["urgent"], r["needed_by"] or "9999"))
@@ -166,8 +169,8 @@ def compare(user: str, item_code: str) -> dict:
 
 
 def make_po(user: str, supplier_quotation: str, schedule_date=None, terms=None) -> dict:
-	"""Purchase Order from the chosen quote. Up to the limit it is placed at once; above the limit it waits as a draft
-	and SK (Management) gets an Approve task."""
+	"""Purchase Order from the chosen quote, linked to the CEO-approved requisition of each item (SK 27-Oct). It is
+	placed at once unless it is over 10% above the approved value; then it waits as a draft for the CEO."""
 	need(user, PURCHASE)
 	from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
 
@@ -181,24 +184,40 @@ def make_po(user: str, supplier_quotation: str, schedule_date=None, terms=None) 
 		i.schedule_date = po.schedule_date
 	if terms:
 		po.terms = terms
+	return place_po(po, user)
+
+
+def place_po(po, user: str) -> dict:
+	from sk_app import requisition
+
+	requisition.link_requests(po)
+	if any(not r.material_request for r in po.items) and not requisition._is_ceo(user):
+		frappe.throw(_("No CEO-approved purchase requisition for: {0}. Raise a requisition first.").format(
+			", ".join(sorted({r.item_code for r in po.items if not r.material_request}))))
 	po.flags.ignore_permissions = True
 	po.insert()
-	if flt(po.grand_total) > po_limit():
-		approvers = _users_with_function("Management") or [u for u in frappe.get_all("Has Role",
-			filters={"role": "System Manager", "parenttype": "User"}, pluck="parent") if u not in ("Administrator",)]
-		for a in approvers:
+	po.calculate_taxes_and_totals()
+	why = requisition.needs_ceo(po)
+	if why and not requisition._is_ceo(user):  # the CEO's own PO needs no second approval
+		po.db_set("sk_needs_ceo", 1)
+		po.add_comment("Comment", _("Waits for CEO: {0}").format(why))
+		for a in requisition._ceos():
 			if a != user:
-				_todo(a, "Purchase Order", po.name, _("Approve PO {0}: {1} for {2}").format(po.name, po.supplier_name,
-					fmt_money(po.grand_total, currency=po.currency)))
-		return {"name": po.name, "posted": False, "needs_approval": True, "grand_total": po.grand_total}
+				_todo(a, "Purchase Order", po.name, _("Approve PO {0}: {1} for {2} ({3})").format(po.name, po.supplier_name,
+					fmt_money(po.grand_total, currency=po.currency), why))
+		return {"name": po.name, "posted": False, "needs_approval": True, "grand_total": po.grand_total, "why": why}
 	return {"name": po.name, "posted": try_submit(po), "needs_approval": False, "grand_total": po.grand_total}
 
 
 def approvals(user: str) -> list[dict]:
-	"""Purchase Orders above the limit waiting for SK."""
+	"""Purchase Orders waiting for the CEO (over 10% above the approved requisition)."""
 	need(user, "Management")
-	return frappe.get_all("Purchase Order", filters={"docstatus": 0, "grand_total": [">", po_limit()]},
+	rows = frappe.get_all("Purchase Order", filters={"docstatus": 0, "sk_needs_ceo": 1},
 		fields=["name", "supplier_name", "grand_total", "schedule_date", "owner", "creation"], order_by="creation asc")
+	for r in rows:
+		r["why"] = frappe.db.get_value("Comment", {"reference_doctype": "Purchase Order", "reference_name": r.name,
+			"content": ["like", "Waits for CEO%"]}, "content", order_by="creation desc")
+	return rows
 
 
 def decide(user: str, purchase_order: str, approve: bool, reason=None) -> dict:
@@ -209,7 +228,12 @@ def decide(user: str, purchase_order: str, approve: bool, reason=None) -> dict:
 	frappe.db.set_value("ToDo", {"reference_type": "Purchase Order", "reference_name": po.name, "status": "Open"}, "status", "Closed")
 	if approve:
 		po.add_comment("Comment", _("Approved in SK App"))
-		return {"name": po.name, "posted": try_submit(po)}
+		po.flags.ignore_permissions = True
+		frappe.flags.sk_ceo_po = True
+		try:
+			return {"name": po.name, "posted": try_submit(po)}
+		finally:
+			frappe.flags.sk_ceo_po = False
 	po.add_comment("Comment", _("Rejected in SK App: {0}").format(reason or "-"))
 	_todo(po.owner, "Purchase Order", po.name, _("PO {0} rejected: {1}").format(po.name, reason or "-"))
 	return {"name": po.name, "rejected": True}
@@ -305,5 +329,8 @@ def badges(user: str, functions: list[str]) -> dict:
 		out["po_follow_up"] = frappe.db.count("Purchase Order", {"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]],
 			"schedule_date": ["<=", nowdate()]})
 	if "Management" in functions:
-		out["po_approvals"] = frappe.db.count("Purchase Order", {"docstatus": 0, "grand_total": [">", po_limit()]})
+		from sk_app.requisition import badges as req_badges
+
+		out["po_approvals"] = frappe.db.count("Purchase Order", {"docstatus": 0, "sk_needs_ceo": 1}) \
+			+ req_badges(user, functions).get("po_approvals", 0)
 	return {k: v for k, v in out.items() if v}
