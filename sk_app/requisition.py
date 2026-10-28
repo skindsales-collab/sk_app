@@ -15,6 +15,7 @@ from frappe.utils import add_days, cint, flt, getdate, now_datetime, nowdate
 from sk_app.store import STORE, _company, _default_store, _todo, _users_with_function, attach, need, uom
 
 MANAGEMENT = "Management"
+MAX_ITEMS = 20
 RAISERS = (STORE, "Purchase", MANAGEMENT, "HR")  # SK 28-Oct: Aarti (HR, acting purchase manager)
 WAITING, APPROVED, REJECTED = "Waiting CEO", "Approved", "Rejected"
 PRIORITIES = ("Planned", "Urgent")
@@ -116,6 +117,8 @@ def raise_request(user: str, items: list[dict], priority: str = "Planned", need_
 	rows = [i for i in items or [] if i.get("item_code") and flt(i.get("qty")) > 0]
 	if not rows:
 		frappe.throw(_("Please pick the item and quantity"))
+	if len(rows) > MAX_ITEMS:  # SK 28-Oct (Rev 1 point 12): up to 20 items on one requisition
+		frappe.throw(_("Up to {0} items on one requisition; please send the rest on a second one").format(MAX_ITEMS))
 	if cint(without_po):
 		priority = "Urgent"
 		if not supplier or not frappe.db.exists("Supplier", supplier):

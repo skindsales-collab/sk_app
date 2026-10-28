@@ -494,3 +494,21 @@ a.sk-chip { text-decoration: none; }
 .sk-home2 .sk-decs { flex: 1 1 auto; grid-auto-rows: 1fr; }
 .sk-home2 .sk-tiles.small, .sk-home2 .sk-contact { grid-auto-rows: 1fr; align-content: stretch; }
 .sk-home2 .sk-tile, .sk-home2 .sk-dec { justify-content: center; }
+/* SK 28-Oct (Rev 1 points 3, 13, 19): 📷 read text under every 🎤, suggestions under the box, tap-to-count */
+.sk-ocr { border: 1px solid var(--navy); background: var(--card); border-radius: 8px; font-size: 15px; padding: 2px 0; line-height: 1.2; }
+.sk-sugg { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.sk-sugg:empty { display: none; }
+.sk-sg { display: flex; align-items: center; gap: 10px; text-align: left; width: 100%; border: 1px solid #c5cfdb; border-radius: 10px; background: var(--card); color: var(--ink); padding: 8px 10px; font-size: 15px; }
+.sk-sg img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; flex: none; }
+.sk-sg span { display: flex; flex-direction: column; min-width: 0; }
+.sk-sg small { color: #5b6b7f; font-size: 12px; }
+.sk-sg:active { background: #e8eef6; }
+.sk-count { font-size: 18px; padding: 6px 10px; }
+.sk-tc { position: relative; touch-action: manipulation; user-select: none; }
+.sk-tc img { width: 100%; display: block; border-radius: 10px; }
+.sk-tc-dots { position: absolute; inset: 0; pointer-events: none; }
+.sk-tc-dots span { position: absolute; transform: translate(-50%, -50%); min-width: 22px; height: 22px; border-radius: 11px; background: var(--red); color: #fff;
+	font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; padding: 0 3px; }
+.sk-tc-n { font-size: 20px; text-align: center; margin: 10px 0; }
+.sk-micsub { display: flex; gap: 4px; }
+.sk-micsub > * { flex: 1; min-width: 34px; }

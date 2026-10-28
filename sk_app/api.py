@@ -990,6 +990,34 @@ def req_item(item_code):
 
 
 @frappe.whitelist()
+def item_find(q=None):
+	from sk_app import item_input
+
+	return item_input.search(_me().user, q)
+
+
+@frappe.whitelist(methods=["POST"])
+def item_parse(text):
+	from sk_app import item_input
+
+	return item_input.parse_list(_me().user, text)
+
+
+@frappe.whitelist(methods=["POST"])
+def item_photo_match(sig):
+	from sk_app import item_input
+
+	return item_input.match(_me().user, sig)
+
+
+@frappe.whitelist(methods=["POST"])
+def item_photo_save(item_code, sig, file_url=None):
+	from sk_app import item_input
+
+	return item_input.save_sample(_me().user, item_code, sig, file_url)
+
+
+@frappe.whitelist()
 def req_cabins():
 	return requisition.cabins(_me().user)
 
