@@ -35,8 +35,10 @@ def on_submit(doc, method=None):
 		return
 	for ref in refs(doc):
 		try:
+			frappe.db.savepoint("sk_won_deal")
 			won_from_order(ref, doc)
 		except Exception:
+			frappe.db.rollback(save_point="sk_won_deal")  # a half-made deal never stays behind; the order still submits
 			frappe.log_error(f"SK App won deal from {doc.name} ({ref})")
 
 
