@@ -1,11 +1,12 @@
 import frappe
 from frappe.tests import IntegrationTestCase
 
-from sk_app import logins, production, quality
-from sk_app.tests.test_store_purchase import FG, RAW, TestStorePurchase, app_user, run
+from sk_app import logins, production, quality, sub_bills
+from sk_app.tests.test_store_purchase import BOSS, FG, RAW, TestStorePurchase, app_user, run
 
 BOSS_P = "sk_test_babasaheb@example.com"
 QC = "sk_test_satish@example.com"
+RUSHI = "sk_test_rushi@example.com"
 WS = "SK Test Fabrication - Ranjit"
 WS2 = "SK Test Painting - Babu"
 OPS = ("SK Fabrication", "SK Final Inspection")
@@ -48,6 +49,9 @@ class TestProductionQuality(IntegrationTestCase):
 			frappe.get_doc({"doctype": "Quality Inspection Template", "quality_inspection_template_name": "QIT-OP-SK Fabrication",
 				"item_quality_inspection_parameter": [{"specification": "Length x width"}, {"specification": "Weld visual"}]}).insert()
 		quality.ensure_setup()
+		sub_bills.ensure_setup()
+		app_user(RUSHI, "Sales", ["Employee"])
+		frappe.db.set_single_value("SK App Settings", "sub_bill_checker", RUSHI)
 		cls.wip, cls.fgw = f"Work In Progress - {abbr}", f"Finished Goods - {abbr}"
 		frappe.db.commit()
 
@@ -173,3 +177,67 @@ class TestProductionQuality(IntegrationTestCase):
 		self.assertGreaterEqual(run(QC, production.el_jobs)["month_total"], 8)
 		with self.assertRaises(frappe.PermissionError):
 			run(self.ranjit, production.save_el_points, jcs[0], {"light": 1})
+
+	def _passed_job(self):
+		wo, jcs = self._work_order()
+		run(self.ranjit, production.done, jcs[0], checks=OK)
+		run(QC, quality.save, "Job Card", jcs[0], CABIN, OK, "QIT-OP-SK Fabrication")
+		return jcs[0]
+
+	def _rate(self, supplier, value):
+		item = sub_bills.service_item(OPS[0])
+		frappe.db.delete("Item Price", {"price_list": sub_bills.PRICE_LIST, "item_code": item})
+		frappe.get_doc({"doctype": "Item Price", "price_list": sub_bills.PRICE_LIST, "item_code": item, "supplier": supplier,
+			"price_list_rate": value}).insert()
+
+	def test_subcontractor_bill_rushi_then_ceo_then_payable(self):
+		"""SK 28-Oct: rate sheet x cabin sq ft after Quality passes; Rushi checks, CEO approves, then posted (payable)."""
+		sup = sub_bills.supplier_of(WS)
+		self.assertEqual(frappe.db.get_value("Supplier", sup, "supplier_name"), "Ranjit T")
+		self._rate(sup, 25)
+		jc = self._passed_job()
+		name = sub_bills.bill_of(jc)
+		self.assertTrue(name)
+		pi = frappe.get_doc("Purchase Invoice", name)
+		self.assertEqual((pi.docstatus, pi.sk_bill_stage, pi.supplier), (0, sub_bills.CHECKER, sup))
+		self.assertEqual((pi.items[0].qty, pi.items[0].rate), (200, 25))  # 20x10 cabin
+		self.assertEqual(sub_bills.make_bill(jc), name)  # once per job card
+		# not posted before approvals, even from ERPNext
+		self.assertRaises(frappe.ValidationError, run, self.ranjit, lambda u: sub_bills.check_submit(frappe.get_doc("Purchase Invoice", name)))
+		self.assertRaises(frappe.PermissionError, run, BOSS_P, sub_bills.to_approve)
+		self.assertIn(name, [b["name"] for b in run(RUSHI, sub_bills.to_approve)])
+		self.assertRaises(frappe.PermissionError, run, self.ranjit, sub_bills.decide, name, 1)
+		# discussion: the bill waits until the subcontractor answers
+		run(RUSHI, sub_bills.discuss, name, "Roof done twice?")
+		self.assertTrue(frappe.db.exists("ToDo", {"allocated_to": self.ranjit, "reference_name": name, "status": "Open"}))
+		mine = {b["name"]: b for b in run(self.ranjit, sub_bills.my_bills)}
+		self.assertEqual(mine[name]["question"], "Roof done twice?")
+		self.assertRaises(frappe.ValidationError, run, RUSHI, sub_bills.decide, name, 1)
+		run(self.ranjit, sub_bills.reply, name, "No, only once")
+		r = run(RUSHI, sub_bills.decide, name, 1)
+		self.assertEqual(r["stage"], sub_bills.CEO)
+		self.assertRaises(frappe.PermissionError, run, RUSHI, sub_bills.decide, name, 1)
+		self.assertTrue(run(BOSS, sub_bills.badges).get("sub_bills"))
+		r = run(BOSS, sub_bills.decide, name, 1)
+		self.assertEqual(r["stage"], sub_bills.APPROVED)
+		self.assertTrue(r["posted"], frappe.get_all("Comment", filters={"reference_name": name}, pluck="content"))
+		self.assertEqual(frappe.db.get_value("Purchase Invoice", name, "docstatus"), 1)
+		self.assertGreater(frappe.db.get_value("Purchase Invoice", name, "outstanding_amount"), 0)
+
+	def test_subcontractor_bill_reject_and_no_rate(self):
+		sup = sub_bills.supplier_of(WS)
+		self._rate(sup, 0)
+		jc = self._passed_job()
+		name = sub_bills.bill_of(jc)
+		self.assertRaises(frappe.ValidationError, run, RUSHI, sub_bills.decide, name, 1)  # no rate in the sheet
+		self.assertRaises(frappe.ValidationError, run, RUSHI, sub_bills.decide, name, 0)  # reject needs a reason
+		run(RUSHI, sub_bills.decide, name, 0, "Job not finished")
+		self.assertEqual(frappe.db.get_value("Purchase Invoice", name, "sk_bill_stage"), sub_bills.REJECTED)
+
+	def test_rejected_job_makes_no_bill_and_size_parse(self):
+		wo, jcs = self._work_order()
+		run(self.ranjit, production.done, jcs[0], checks=OK)
+		run(QC, quality.save, "Job Card", jcs[0], CABIN, [OK[0], {"specification": "Weld visual", "ok": 0, "note": "gap"}])
+		self.assertFalse(sub_bills.bill_of(jcs[0]))
+		self.assertEqual(sub_bills.sqft("ABC · 12ft x 10ft x 8.6ft"), 120)
+		self.assertEqual(sub_bills.sqft("no size"), 0)

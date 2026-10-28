@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import activities, ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, requisition, sales_owner, segments, store, training, view_member, work
+from sk_app import activities, ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, requisition, sales_owner, segments, store, sub_bills, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -57,6 +57,10 @@ def home():
 			main["tiles"] = main["tiles"][:1] + ["logins"] + main["tiles"][1:]
 		if sections and sections["sections"] and not any("logins" in x["tiles"] for x in sections["sections"]):
 			sections["sections"][0]["tiles"] = ["logins"] + sections["sections"][0]["tiles"]
+	# SK 28-Oct: Rushi checks subcontractor bills before the CEO, whatever his function
+	if sections and sections["sections"] and sub_bills.checker() == profile.user and not any("sub_bills" in x["tiles"] for x in sections["sections"]):
+		sections["sections"][0]["tiles"] = sections["sections"][0]["tiles"] + ["sub_bills"]
+		sections["sections"][0]["more"] = (sections["sections"][0].get("more") or []) + ["sub_bills"]
 	# Electrical points: only the electrician's workstation among the subcontractors (Quality / Production always)
 	if sections and "Subcontractor" in (functions or [profile.home]) and not production._is_electrical(production.my_workstation(profile.user)) \
 			and not {"Quality", "Production"} & set(functions or [profile.home]):
@@ -101,7 +105,7 @@ def _badges(user, functions):
 	try:
 		return {**store.badges(user, functions), **purchase.badges(user, functions), **production.badges(user, functions),
 			**quality.badges(user, functions), **finance.badges(user, functions), **ai_desk.badges(user, functions),
-			**mailbox.badges(user), **complaints.badge(user), **hr.badges(user, functions)}
+			**mailbox.badges(user), **complaints.badge(user), **hr.badges(user, functions), **sub_bills.badges(user)}
 	except Exception:
 		frappe.log_error("SK App badges")
 		return {}
@@ -1112,6 +1116,33 @@ def prod_progress_photo(work_order, photo, note=None):
 @frappe.whitelist()
 def prod_ready():
 	return production.ready_to_dispatch(_me().user)
+
+
+# ---------- Subcontractor bills (SK 28-Oct) ----------
+
+@frappe.whitelist()
+def sb_to_approve():
+	return sub_bills.to_approve(_me().user)
+
+
+@frappe.whitelist()
+def sb_mine():
+	return sub_bills.my_bills(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def sb_decide(name, approve, note=None, qty=None):
+	return sub_bills.decide(_me().user, name, approve, note, qty)
+
+
+@frappe.whitelist(methods=["POST"])
+def sb_discuss(name, text):
+	return sub_bills.discuss(_me().user, name, text)
+
+
+@frappe.whitelist(methods=["POST"])
+def sb_reply(name, text):
+	return sub_bills.reply(_me().user, name, text)
 
 
 # ---------- Quality (SK draft F04) ----------

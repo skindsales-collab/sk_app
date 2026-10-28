@@ -104,7 +104,7 @@ FUNCTIONS = {
 	"Subcontractor": {
 		"label": {"English": "Production (subcontractor)", "Marathi": "उत्पादन (कंत्राटदार)"},
 		# very simple screen (SK): own jobs only; job tiles come with the Production screens
-		"tiles": ["my_day", "my_jobs", "el_points", "need_material", "my_fixes", "problem", "training", "day_report", "dsi", "my_kpi"],
+		"tiles": ["my_day", "my_jobs", "el_points", "need_material", "my_fixes", "my_bills", "problem", "training", "day_report", "dsi", "my_kpi"],
 		"live": True,
 		"erpnext_roles": ["SK Subcontractor"],
 		"desk": "/sk",
@@ -127,7 +127,7 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": [*DASH_TILES, "leadership", "view_member", "attendance", "lead_sources", "customers", "sales_owner", "complaints", "po_approvals", "pay_approvals", "cabin_discounts", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "reminders", "day_report", "my_kpi", "dsi", "problem",
+		"tiles": [*DASH_TILES, "leadership", "view_member", "attendance", "lead_sources", "customers", "sales_owner", "complaints", "po_approvals", "sub_bills", "pay_approvals", "cabin_discounts", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "reminders", "day_report", "my_kpi", "dsi", "problem",
 			"library", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager", "Purchase Manager", "Purchase User"],  # SK approves big POs
