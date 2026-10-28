@@ -887,7 +887,9 @@
 		lv_leave: "Leave", lv_expense: "Expense", lv_to_approve: "To approve", lv_type: "Leave type", lv_from: "From", lv_to: "To",
 		lv_half: "Half day", lv_reason: "Reason (speak or write)", lv_apply: "Apply for leave", lv_sent: "Sent for approval to", lv_left: "left",
 		lv_mine: "My leave", ex_type: "Expense type", ex_amount: "Amount (Rs)", ex_date: "Date", ex_bill: "Bill photo", ex_note: "What for (speak or write)",
-		ex_claim: "Claim expense", ex_mine: "My expense claims", lv_approve: "✓ Approve", lv_reject: "✗ Reject", ex_posted: "Approved: Accounts pays it",
+		ex_claim: "Send cash voucher to CEO", ex_mine: "My cash vouchers", ex_paid_to: "Paid to (shop / person)", ex_cabin: "Project / cabin code",
+		ex_no_bill: "No bill? Say why", ex_help: "Every cash voucher goes to the CEO for approval. Then Accounts pays it.", ex_st_wait: "Waiting CEO", ex_st_ok: "Approved", ex_st_paid: "Paid", ex_st_no: "Rejected",
+		ex_no_bill_tag: "No bill", lv_approve: "✓ Approve", lv_reject: "✗ Reject", ex_posted: "Approved: Accounts pays it",
 		no_employee: "Your login is not linked to an ERPNext Employee yet. Please ask HR." });
 	Object.assign(T.Marathi, { attendance: "हजेरी", leave_expense: "रजा व खर्च", att_in: "आत", att_out: "बाहेर", att_no_in: "अजून हजेरी नाही",
 		att_wait_file: "हजेरी अजून आली नाही (HR ऑप्टिक फाईल अपलोड करते)", att_leave: "रजेवर", att_off: "सुट्टी", att_late: "उशीर",
@@ -901,7 +903,9 @@
 		lv_leave: "रजा", lv_expense: "खर्च", lv_to_approve: "मंजुरीसाठी", lv_type: "रजेचा प्रकार", lv_from: "पासून", lv_to: "पर्यंत",
 		lv_half: "अर्धा दिवस", lv_reason: "कारण (बोला किंवा लिहा)", lv_apply: "रजेचा अर्ज करा", lv_sent: "मंजुरीसाठी पाठवले:", lv_left: "शिल्लक",
 		lv_mine: "माझ्या रजा", ex_type: "खर्चाचा प्रकार", ex_amount: "रक्कम (रु)", ex_date: "तारीख", ex_bill: "बिलाचा फोटो", ex_note: "कशासाठी (बोला किंवा लिहा)",
-		ex_claim: "खर्च मागा", ex_mine: "माझे खर्च", lv_approve: "✓ मंजूर", lv_reject: "✗ नामंजूर", ex_posted: "मंजूर: अकाउंट्स पैसे देईल",
+		ex_claim: "कॅश व्हाउचर CEO कडे पाठवा", ex_mine: "माझी कॅश व्हाउचर", ex_paid_to: "कोणाला दिले (दुकान / व्यक्ती)", ex_cabin: "प्रोजेक्ट / केबिन कोड",
+		ex_no_bill: "बिल नाही? कारण सांगा", ex_help: "प्रत्येक कॅश व्हाउचर CEO कडे मंजुरीसाठी जाते. मग अकाउंट्स पैसे देते.", ex_st_wait: "CEO कडे बाकी", ex_st_ok: "मंजूर", ex_st_paid: "पैसे दिले", ex_st_no: "नामंजूर",
+		ex_no_bill_tag: "बिल नाही", lv_approve: "✓ मंजूर", lv_reject: "✗ नामंजूर", ex_posted: "मंजूर: अकाउंट्स पैसे देईल",
 		no_employee: "तुमचे लॉगिन अजून ERPNext कर्मचाऱ्याशी जोडलेले नाही. कृपया HR ला सांगा." });
 	Object.assign(T.English, { send_design: "Send to design (AI drawing)", design_sent: "Sent to design as deal", design_not_sent: "Not sent to design:" });
 	Object.assign(T.Marathi, { send_design: "डिझाईनला पाठवा (AI ड्रॉइंग)", design_sent: "डिझाईनला डील म्हणून पाठवले", design_not_sent: "डिझाईनला पाठवले नाही:" });
@@ -3239,6 +3243,7 @@
 
 	// Everyone: Leave & Expense; managers approve their team's here (HR / CEO see all waiting)
 	let lvTab = "leave";
+	const EX_STAGE = { "Waiting CEO": ["yel", "ex_st_wait"], Approved: ["navy", "ex_st_ok"], Paid: ["green", "ex_st_paid"], Rejected: ["red", "ex_st_no"] };
 	async function renderLeaveExpense() {
 		const d = await call("leave_expense");
 		S.lv = d;
@@ -3257,20 +3262,25 @@
 				<h3 class="sk-h">${t("lv_mine")}</h3><ul class="sk-list">${d.my_leave.map((l) => li(`${esc(l.leave_type)} · ${esc(l.from_date)}${l.to_date !== l.from_date ? " – " + esc(l.to_date) : ""}`,
 					`${l.total_leave_days || ""} · ${esc(l.description || "")}`, chip(l.status))).join("") || `<li class="sk-empty">—</li>`}</ul>`;
 		} else if (lvTab === "expense") {
-			body = `<div class="sk-form">${photoField("ex-photo", "📷 " + t("ex_bill"))}${pick("ex-type", t("ex_type"), d.expense_types)}
+			body = `<p class="sk-note">${t("ex_help")}</p><div class="sk-form">${photoField("ex-photo", "📷 " + t("ex_bill"))}${pick("ex-type", t("ex_type"), d.expense_types)}
 				<label class="sk-field"><span>${t("ex_amount")}</span><input id="ex-amt" type="number" inputmode="decimal" min="0"></label>
 				<label class="sk-field"><span>${t("ex_date")}</span><input id="ex-date" type="date" value="${new Date().toISOString().slice(0, 10)}"></label>
-				${formField("ex-note", t("ex_note"), true)}
+				${formField("ex-paid", t("ex_paid_to"))}
+				<label class="sk-field"><span>🏗️ ${t("ex_cabin")}</span><input id="ex-cabin" list="ex-cabin-dl" autocomplete="off">
+					<datalist id="ex-cabin-dl">${(d.cabins || []).map((c) => `<option value="${esc(c.code)}">${esc(c.label)}</option>`).join("")}</datalist></label>
+				${formField("ex-note", t("ex_note"), true)}${formField("ex-nobill", t("ex_no_bill"))}
 				<button class="sk-btn ok wide" data-act="ex-claim">${t("ex_claim")}</button></div>
-				<h3 class="sk-h">${t("ex_mine")}</h3><ul class="sk-list">${d.my_claims.map((c) => li(`${money(c.total_claimed_amount)} · ${esc(c.type || "")}`, `${esc(c.posting_date)} · ${esc(c.remark || "")}`,
-					chip(c.docstatus === 1 ? c.status : c.approval_status))).join("") || `<li class="sk-empty">—</li>`}</ul>`;
+				<h3 class="sk-h">${t("ex_mine")}</h3><ul class="sk-list">${d.my_claims.map((c) => li(`${money(c.total_claimed_amount)} · ${esc(c.type || "")}`, `${esc(c.posting_date)} · ${esc(c.remark || "")}${c.sk_cabin ? " · 🏗️ " + esc(c.sk_cabin) : ""}`,
+					`<span class="chip2 ${EX_STAGE[c.stage] ? EX_STAGE[c.stage][0] : "yel"}">${EX_STAGE[c.stage] ? t(EX_STAGE[c.stage][1]) : esc(c.stage || "")}</span>`)).join("") || `<li class="sk-empty">—</li>`}</ul>`;
 		} else {
 			const btns = (kind, name) => `<div class="sk-row"><button class="sk-chip ok" data-act="lv-decide" data-kind="${kind}" data-name="${esc(name)}" data-ok="1">${t("lv_approve")}</button>
 				<button class="sk-chip bad" data-act="lv-decide" data-kind="${kind}" data-name="${esc(name)}" data-ok="0">${t("lv_reject")}</button></div>`;
 			body = `<h3 class="sk-h">🌴 ${t("lv_leave")}</h3><ul class="sk-list">${d.leave_to_approve.map((l) => `<li class="sk-item"><div style="flex:1"><div class="sk-item-title">${esc(l.employee_name)}: ${esc(l.leave_type)}</div>
 					<div class="sk-item-meta">${esc(l.from_date)}${l.to_date !== l.from_date ? " – " + esc(l.to_date) : ""} · ${l.total_leave_days || ""} · ${esc(l.description || "")}</div>${btns("leave", l.name)}</div></li>`).join("") || `<li class="sk-empty">—</li>`}</ul>
-				<h3 class="sk-h">💸 ${t("lv_expense")}</h3><ul class="sk-list">${d.claims_to_approve.map((c) => `<li class="sk-item"><div style="flex:1"><div class="sk-item-title">${esc(c.employee_name)}: ${money(c.total_claimed_amount)}</div>
-					<div class="sk-item-meta">${esc(c.type || "")} · ${esc(c.posting_date)} · ${esc(c.remark || "")} <a href="/app/expense-claim/${encodeURIComponent(c.name)}">📎</a></div>${btns("expense", c.name)}</div></li>`).join("") || `<li class="sk-empty">—</li>`}</ul>`;
+				${d.is_ceo ? `<h3 class="sk-h">💸 ${t("lv_expense")}</h3><ul class="sk-list">${d.claims_to_approve.map((c) => `<li class="sk-item"><div style="flex:1"><div class="sk-item-title">${esc(c.employee_name)}: ${money(c.total_claimed_amount)}</div>
+					<div class="sk-item-meta">${esc(c.type || "")} · ${esc(c.posting_date)}${c.sk_paid_to ? ` · ${t("ex_paid_to")}: ${esc(c.sk_paid_to)}` : ""}${c.sk_cabin ? ` · 🏗️ ${esc(c.sk_cabin)}` : ""}</div>
+					<div class="sk-item-meta">📝 ${esc(c.remark || "")}${c.sk_no_bill ? `<br><span class="sk-due">⚠ ${t("ex_no_bill_tag")}: ${esc(c.sk_no_bill)}</span>` : ""}</div>
+					<div class="sk-row">${(c.photos || []).map((u) => `<a class="sk-chip" target="_blank" href="${esc(u)}">📷</a>`).join("")}<a class="sk-chip" href="/app/expense-claim/${encodeURIComponent(c.name)}">ERP</a></div>${btns("expense", c.name)}</div></li>`).join("") || `<li class="sk-empty">—</li>`}</ul>` : ""}`;
 		}
 		root.innerHTML = header(t("leave_expense")) + `<main><div class="cal-tabs">${tab("leave", "🌴 " + t("lv_leave"))}${tab("expense", "💸 " + t("lv_expense"))}${tab("approve", `✅ ${t("lv_to_approve")}${d.to_approve ? ` (${d.to_approve})` : ""}`)}</div>${body}</main>`;
 	}
@@ -5259,8 +5269,21 @@
 			if (act === "ex-claim") {
 				el.disabled = true;
 				try {
-					const r = await call("expense_claim", { expense_type: val("ex-type"), amount: val("ex-amt"), expense_date: val("ex-date"), note: val("ex-note"), photo: await photoUrl("ex-photo") }, true);
+					const r = await call("expense_claim", { expense_type: val("ex-type"), amount: val("ex-amt"), expense_date: val("ex-date"), note: val("ex-note"), photo: await photoUrl("ex-photo"),
+						paid_to: val("ex-paid"), cabin: val("ex-cabin"), no_bill: val("ex-nobill") }, true);
 					clearDraft(); toast(`${t("lv_sent")} ${r.approver || "HR"}`);
+				} finally { el.disabled = false; }
+				return go("leave_expense");
+			}
+			if (act === "lv-decide" && el.dataset.ok === "0" && el.dataset.kind === "expense") {
+				return sheet(`<h3 class="sk-h">✗ ${t("reject_why")}</h3>${formField("ex-why", t("reject_why"), true)}
+					<button class="sk-btn bad wide" data-act="ex-reject" data-name="${esc(el.dataset.name)}">${t("lv_reject")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+			}
+			if (act === "ex-reject") {
+				el.disabled = true;
+				try {
+					await call("expense_decide", { name: el.dataset.name, ok: 0, note: val("ex-why") }, true);
+					closeSheet(); toast(t("ex_st_no"));
 				} finally { el.disabled = false; }
 				return go("leave_expense");
 			}

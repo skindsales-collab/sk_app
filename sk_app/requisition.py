@@ -92,6 +92,10 @@ def item_info(user: str, item_code: str) -> dict:
 def cabins(user: str) -> list[dict]:
 	"""Project / cabin codes to pick: open cabin orders (Sales Order) and open Projects."""
 	need(user, *RAISERS)
+	return cabin_codes()
+
+
+def cabin_codes() -> list[dict]:
 	out = []
 	for so in frappe.get_all("Sales Order", filters={"docstatus": 1, "status": ["not in", ["Completed", "Closed", "Cancelled"]]},
 			fields=["name", "customer_name"], order_by="delivery_date asc", limit=60):
