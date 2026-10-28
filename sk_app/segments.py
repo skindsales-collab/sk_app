@@ -188,6 +188,10 @@ def tag(user: str, customer: str, segment: str) -> dict:
 	sub = sub_of(segment)
 	if not sub:
 		frappe.throw(_("Pick a segment"))
+	return _apply(customer, sub, f"in SK App by {frappe.utils.get_fullname(user)}")
+
+
+def _apply(customer: str, sub: str, why: str) -> dict:
 	ensure_customer_groups()
 	old = frappe.db.get_value("Customer", customer, ["customer_group", "customer_type"], as_dict=True)
 	if not old:
@@ -196,10 +200,34 @@ def tag(user: str, customer: str, segment: str) -> dict:
 	if old.customer_group in OLD_GROUPS:
 		values["customer_type"] = OLD_GROUPS[old.customer_group]
 	frappe.db.set_value("Customer", customer, values)
+	sync_documents(customer)
+	from sk_app.sales_owner import link_customer
+
+	link_customer(customer)  # a Non-Cabin customer goes to Aditya at once
 	frappe.get_doc({"doctype": "Comment", "comment_type": "Info", "reference_doctype": "Customer", "reference_name": customer,
-		"content": f"Segment set to {sub} in SK App by {frappe.utils.get_fullname(user)}"
+		"content": f"Segment set to {sub} {why}"
 		+ (f" (old group: {old.customer_group})" if old.customer_group else "")}).insert(ignore_permissions=True)
 	return {"customer": customer, "group": GROUP_OF[sub], "main": main_of(sub)}
+
+
+def sync_documents(customer: str):
+	"""SK 28-Oct (Rev 1 point 9): ERPNext copies the Customer Group into an order only when it is made, so Rothe Erde's
+	orders stayed without a segment and showed on the cabin factory board. Open orders and quotes follow the customer."""
+	group = frappe.db.get_value("Customer", customer, "customer_group")
+	for doctype, party in (("Sales Order", "customer"), ("Quotation", "party_name")):
+		if not frappe.db.exists("DocType", doctype):
+			continue
+		filters = {party: customer, "docstatus": ["<", 2], "customer_group": ["!=", group]}
+		if doctype == "Quotation":
+			filters["quotation_to"] = "Customer"
+		for name in frappe.get_all(doctype, filters=filters, pluck="name", limit=0):
+			frappe.db.set_value(doctype, name, "customer_group", group, update_modified=False)
+
+
+def on_customer_update(doc, method=None):
+	"""Customer on_update: a segment changed on the ERPNext desk reaches the open orders too."""
+	if doc.has_value_changed("customer_group"):
+		sync_documents(doc.name)
 
 
 TALLY_DEFAULT = {CABIN: "Standard Cabin (GI / ACP)", NON_CABIN: "Other"}
@@ -231,6 +259,35 @@ def tag_from_tally(user: str) -> dict:
 	for customer, main in tally_suggestions().items():
 		tag(user, customer, TALLY_DEFAULT[main])
 		done[main] += 1
+	return {"cabin": done[CABIN], "non_cabin": done[NON_CABIN]}
+
+
+def deal_suggestions() -> dict:
+	"""Customers not tagged yet whose CRM deal has a segment: {customer: sub-segment}."""
+	if not frappe.db.exists("DocType", "CRM Deal") or not frappe.get_meta("CRM Deal").has_field("sk_segment"):
+		return {}
+	out = {}
+	for c in frappe.get_all("Customer", filters={"disabled": 0, "customer_group": ["not in", all_groups()]}, fields=["name", "customer_name"], limit=0):
+		deal = _deal_of(c)
+		sub = sub_of(frappe.db.get_value("CRM Deal", deal, "sk_segment")) if deal else None
+		if sub:
+			out[c.name] = sub
+	return out
+
+
+def auto_tag() -> dict:
+	"""SK 28-Oct (Rev 1 point 9, approved): every customer tagged by itself, no tap needed: first from its Tally sales
+	vouchers (Sales = Cabin, Non Cabin Sales = Non-Cabin), then from its CRM deal. A customer in both Tally kinds, or
+	with neither, stays on "Segment not set" for Rushi / Aditya. Runs on deploy and every night."""
+	done = {CABIN: 0, NON_CABIN: 0}
+	for customer, main in tally_suggestions().items():
+		_apply(customer, TALLY_DEFAULT[main], "from its Tally sales vouchers")
+		done[main] += 1
+	for customer, sub in deal_suggestions().items():
+		_apply(customer, sub, "from its CRM deal")
+		done[main_of(sub)] += 1
+	for customer in frappe.get_all("Customer", filters={"customer_group": ["in", all_groups()]}, pluck="name", limit=0):
+		sync_documents(customer)
 	return {"cabin": done[CABIN], "non_cabin": done[NON_CABIN]}
 
 

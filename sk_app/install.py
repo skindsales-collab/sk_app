@@ -89,6 +89,13 @@ def after_migrate():
 	_safe(sub_bills_setup, "subcontractor bills")  # SK 28-Oct: rate sheet → bill → Rushi → CEO → payable
 	_safe(requisition_setup, "purchase requisition")  # SK 27-Oct: requisition → CEO → PO → receipt
 	_safe(marketing_list_setup, "marketing list")  # SK 27-Oct: potential customers for greetings / promotions, not leads
+	from sk_app.cold_calls import move_all_once
+	from sk_app.segments import auto_tag
+	from sk_app.sales_owner import auto_link
+
+	_safe(move_all_once, "cold calling → marketing list")  # SK 28-Oct: cold-calling data is not a lead
+	_safe(auto_tag, "customer segments")  # SK 28-Oct: Cabin / Non-Cabin from Tally vouchers and CRM deals
+	_safe(auto_link, "salesperson on customers and orders")  # SK 28-Oct: graphs had no order in anyone's name
 	from sk_app.training import seed_lessons
 
 	seed_lessons()

@@ -134,6 +134,14 @@ def sales(user: str, segment=None, only_self=False) -> list[dict]:
 		rows = done[key]
 		value = sum(flt(r["value"]) for r in rows if r.get("value"))
 		stages.append(_stage(key.lower().replace(" ", "_"), f"{key} (month)", icon, rows, value or None, go="my_leads", late_rows=[]))
+	if segment == segments.NON_CABIN:
+		# SK 28-Oct (Rev 1 point 9): the Non-Cabin jobs (Rothe Erde etc.) taken off the factory board are Aditya's to run
+		jobs = frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "per_delivered": ["<", 100], "status": ["not in", ["Closed", "Completed"]],
+			"customer_group": ["in", segments.groups_of(segments.NON_CABIN)]}, fields=["name", "customer_name", "delivery_date", "base_net_total",
+			"transaction_date", "docstatus"], order_by="delivery_date asc", limit=0)
+		stages.append(_stage("non_cabin_jobs", "Non-Cabin jobs open", "🛠️", [_late_row(s.customer_name, f"due {s.delivery_date or '?'}"
+			+ (" · draft order" if s.docstatus == 0 else ""), s.base_net_total, "Sales Order", s.name, s.delivery_date, 0, opened=s.transaction_date)
+			for s in jobs], sum(flt(s.base_net_total) for s in jobs), kind="money"))
 	return stages
 
 
@@ -154,10 +162,13 @@ def factory(user: str, go="job_cards", workstation=None) -> list[dict]:
 	"""Orders → Fabrication → Electrical → Carpentry → Painting → Final inspection → Dispatch (SK 26-Oct)."""
 	stages = []
 	if not workstation:
+		from sk_app.production import non_cabin_orders
+
+		non_cabin = non_cabin_orders()  # SK 28-Oct: the factory board shows cabins only; Non-Cabin jobs are on Aditya's arrows
 		with_wo = set(frappe.get_all("Work Order", filters={"docstatus": ["<", 2], "sales_order": ["is", "set"]}, pluck="sales_order"))
 		waiting = [s for s in frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "per_delivered": ["<", 100],
 			"status": ["not in", ["Closed", "Completed", "On Hold"]]}, fields=["name", "customer_name", "delivery_date", "base_net_total",
-			"transaction_date", "docstatus"], order_by="delivery_date asc", limit=0) if s.name not in with_wo]
+			"transaction_date", "docstatus"], order_by="delivery_date asc", limit=0) if s.name not in with_wo and s.name not in non_cabin]
 		stages.append(_stage("orders", "Orders to start", "🧾", [_late_row(s.customer_name, f"due {s.delivery_date or '?'}"
 			+ (" · draft order" if s.docstatus == 0 else ""), s.base_net_total, "Sales Order", s.name, s.delivery_date, 0, opened=s.transaction_date)
 			for s in waiting], sum(flt(s.base_net_total) for s in waiting), go="order_board", kind="money"))

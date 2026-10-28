@@ -37,12 +37,23 @@ def _card_for(user: str, job_card: str):
 	return jc
 
 
+def non_cabin_orders() -> set:
+	"""SK 28-Oct (Rev 1 point 9, Babasaheb): Rothe Erde showed on the factory board. Non-Cabin orders (machine shifting,
+	job work, ballscrews) are Aditya's jobs, not cabins."""
+	from sk_app import segments
+
+	return set(frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "customer_group": ["in", segments.groups_of(segments.NON_CABIN)]},
+		pluck="name", limit=0))
+
+
 def order_board(user: str) -> list[dict]:
 	"""Every cabin in production with its stages (Job Cards in route order) and whether it is late."""
 	need(user, PRODUCTION, "Quality", "Stores", "Management", "Sales")
 	wos = frappe.get_all("Work Order", filters={"docstatus": 1, "status": ["not in", ["Completed", "Stopped", "Closed", "Cancelled"]]},
 		fields=["name", "production_item", "item_name", "qty", "status", "sales_order", "expected_delivery_date", "planned_start_date"],
 		order_by="expected_delivery_date asc, planned_start_date asc")
+	skip = non_cabin_orders()
+	wos = [w for w in wos if not w.sales_order or w.sales_order not in skip]
 	for w in wos:
 		w["stages"] = [_stage(j) for j in frappe.get_all("Job Card", filters={"work_order": w.name, "docstatus": ["<", 2]},
 			fields=["name", "operation", "workstation", "status", "docstatus", "sequence_id", "total_completed_qty"], order_by="sequence_id asc, creation asc")]
