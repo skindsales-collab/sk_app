@@ -15,6 +15,9 @@ website_route_rules = [
 app_include_js = "/assets/sk_app/js/sk_tally_keys.js"
 
 # SK 27-Oct: standard cabin quotation print (SK's quote template), {{ sk_cabin_quote_html(doc) }}
+# SK 28-Oct: "Post Tally invoices" button for Accounts (sk_app.tally_invoices)
+doctype_list_js = {"Sales Invoice": "public/js/sales_invoice_list.js"}
+
 jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html"]}
 
 scheduler_events = {
