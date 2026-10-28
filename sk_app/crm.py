@@ -196,6 +196,18 @@ def _erp_docs(deal: dict | None) -> dict:
 	return out
 
 
+def _quote_pending(deal: dict | None) -> dict | None:
+	"""SK 28-Oct: a quote file on the deal that is not an ERPNext Quotation yet (the salesperson types its amount once)."""
+	if not deal:
+		return None
+	from sk_app import deal_quotes
+
+	try:
+		return deal_quotes.pending(deal["name"])
+	except Exception:
+		return None
+
+
 DETAIL_FIELDS = {
 	"CRM Lead": ["name", "lead_name", "first_name", "organization", "status", "mobile_no", "phone", "email", "source",
 		"industry", "job_title", "lead_owner", "converted", "first_responded_on", "response_by", "creation", "website"],
@@ -251,6 +263,7 @@ def detail(doctype: str, name: str) -> dict:
 		"deal": deal and deal["name"],
 		"products": _products(doctype, name),
 		**_erp_docs(deal),
+		"quote_pending": _quote_pending(deal),
 		"crm_url": f"/crm/{'leads' if doctype == 'CRM Lead' else 'deals'}/{name}",
 	}
 

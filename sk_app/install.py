@@ -105,6 +105,10 @@ def after_migrate():
 	_safe(move_all_once, "cold calling → marketing list")  # SK 28-Oct: cold-calling data is not a lead
 	_safe(auto_tag, "customer segments")  # SK 28-Oct: Cabin / Non-Cabin from Tally vouchers and CRM deals
 	_safe(auto_link, "salesperson on customers and orders")  # SK 28-Oct: graphs had no order in anyone's name
+	from sk_app.deal_quotes import ensure_setup as deal_quotes_setup, sync as deal_quotes_sync
+
+	_safe(deal_quotes_setup, "job / service item for quotations")
+	_safe(deal_quotes_sync, "quotes on deals → ERPNext Quotations")  # SK 28-Oct: every quote goes through ERPNext
 	from sk_app.training import seed_lessons
 
 	seed_lessons()

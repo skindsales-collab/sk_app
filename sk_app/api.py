@@ -1779,6 +1779,14 @@ def cabin_quote_open(deal=None, lead=None):
 
 
 @frappe.whitelist(methods=["POST"])
+def deal_quote_amount(deal, amount):
+	"""SK 28-Oct: a quote uploaded / mailed as a file becomes an ERPNext Quotation once its amount is typed."""
+	from sk_app import deal_quotes
+
+	return deal_quotes.enter_amount(_me().user, deal, amount)
+
+
+@frappe.whitelist(methods=["POST"])
 def cabin_quote_make(req, deal=None, lead=None, discount_pct=0, revise=None):
 	from sk_app import cabin_quote
 
