@@ -19,7 +19,8 @@ RULES = {
 	"Lead": ["Customer / company name (not 'Enquiry')", "Contact person", "Mobile number", "Segment (Cabin / Non-Cabin)",
 		"Source", "Salesperson"],
 	"Customer": ["Legal name", "GSTIN, or 'Unregistered' with the reason", "Billing address with state and PIN", "Mobile number"],
-	"Quotation": ["Customer complete (above)", "Items with qty and rate", "GST applied", "Valid-till date", "Submitted in ERPNext"],
+	"Quotation": ["Customer complete (above)", "Items with qty and rate", "GST rate stated (GST @ 18% extra)", "Valid-till date",
+		"Submitted in ERPNext"],
 	"Deal: Quotation step": ["A quotation made for the deal"],
 	"Deal: Negotiations step": ["The quotation submitted (sent to the customer)"],
 	"Deal Won": ["Order date", "Order value", "Customer PO number or PO copy", "Promised delivery date", "Items",
@@ -99,7 +100,8 @@ def customer_missing(d: dict) -> list[tuple[str, str]]:
 
 
 def quotation_missing(d: dict) -> list[tuple[str, str]]:
-	"""d: party_name, valid_till, items [{qty, rate}], taxes (count), total_taxes_and_charges."""
+	"""d: party_name, valid_till, items [{qty, rate}], taxes (count), total_taxes_and_charges, terms.
+	GST (SK 28-Oct): tax rows, or the terms stating the GST rate ("GST @ 18% extra"), as quotes show totals before GST."""
 	out = []
 	if blank(d.get("party_name")):
 		out.append(("party_name", "Customer"))
@@ -108,8 +110,8 @@ def quotation_missing(d: dict) -> list[tuple[str, str]]:
 		out.append(("items", "At least one item"))
 	elif any(not (float(i.get("qty") or 0) > 0 and float(i.get("rate") or 0) > 0) for i in items):
 		out.append(("items", "Qty and rate on every item"))
-	if not (d.get("taxes") or float(d.get("total_taxes_and_charges") or 0) > 0):
-		out.append(("taxes", "GST (pick the GST template)"))
+	if not (d.get("taxes") or float(d.get("total_taxes_and_charges") or 0) > 0 or "gst" in str(d.get("terms") or "").lower()):
+		out.append(("taxes", "GST rate in the terms (e.g. GST @ 18% extra)"))
 	if blank(d.get("valid_till")):
 		out.append(("valid_till", "Valid-till date"))
 	return out

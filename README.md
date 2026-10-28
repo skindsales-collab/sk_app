@@ -257,11 +257,15 @@ so the phone, the ERPNext desk and the API all stop at the same place. Every ref
 | New lead | Real customer name (not "Enquiry"), mobile (10 digits), source, segment; salesperson = the person |
 | Lead / deal status | Moving past New needs the lead data above. Quotation step needs a quotation; Negotiations a submitted quotation; Won a submitted Sales Order. Old "Enquiry" leads get a ⚠️ card on the detail screen to fill the gaps; locked status chips show 🔒 and why |
 | Customer (from the deal) | GSTIN (checked, 15 characters) or "unregistered" with the reason; billing address with state and PIN; mobile |
-| Quotation | Submitted only with a complete customer, items with qty and rate, GST (company default template applied) and valid-till date. The app submits it when complete; a draft shows "Submit quotation" |
+| Quotation | Submitted only with a complete customer, items with qty and rate, the GST rate stated (quotes show totals before GST; "GST @ 18% extra" is added to the terms) and valid-till date. The app submits it when complete; a draft shows "Submit quotation" |
 | Order received = Deal Won | Order date, promised delivery date (no default), customer PO number or PO copy. The Sales Order is made from the quotation and submitted; the deal (and its lead) turn Won with the order value. Without the right to submit, it waits for the manager's Confirm |
 | Sales Order (ERPNext too) | Delivery date, PO number or PO file, items with rate, value, complete customer |
 | Purchase request | Item and qty, required-by date, reason (ERPNext's own re-order run gets an automatic reason); CEO approval as before |
 | Stock count | Every line counted (0 if none), not only the differences |
+
+Home shows a **⚠️ Data missing** box first in "Decide now" (leads with data missing, quotations / sales orders not
+submitted, purchase requests waiting for the CEO; own work, the team's for a manager, all for the CEO). Tapping it lists
+the records: a lead opens its detail screen with the fill-first card, a draft opens in ERPNext.
 
 Junk / lost needs nothing. Background drafts (mail leads, design quote values) are still saved; the gate sits on the step
 that moves them on.
