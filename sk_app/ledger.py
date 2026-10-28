@@ -17,7 +17,11 @@ KINDS = ("bank", "receivable", "payable", "purchase", "sales", "journal", "expen
 CABIN, NON_CABIN, COMMON = "Cabin", "Non-Cabin", "Common"
 # cost centres of each segment (SK: SGSF / LGSF and modular are Cabin; machine shifting and job work are Non-Cabin)
 CABIN_CC = ("Portable Cabin",)
-NON_CABIN_CC = ("Machine Shifting", "Machine Maintenance")
+NON_CABIN_CC = ("Machine Shifting", "Machine Maintenance", "Job Work")
+# SK 28-Oct: Non-Cabin sub-groups from the cost centre group; entries before that have none and stay combined
+NON_CABIN_SUB_CC = {"Machine Shifting": "Machine Shifting", "Job Work": "Job Work", "Machine Maintenance": "Maintenance"}
+COMBINED = "Non-Cabin (combined)"
+NON_CABIN_SUBS = ("Machine Shifting", "Job Work", "Maintenance", COMBINED)
 
 
 def _month(month=None):
@@ -102,7 +106,7 @@ def ledgers(user: str, kind: str, month=None) -> dict:
 
 
 def _expense_groups() -> dict:
-	"""{account: (Direct / Indirect, Cabin / Non-Cabin / Common)} from the chart of accounts."""
+	"""{account: (Direct / Indirect, Cabin / Non-Cabin / None, segment if the cost centre gives none)} from the chart of accounts."""
 	company = _company()
 	groups = frappe.get_all("Account", filters={"company": company, "root_type": "Expense", "is_group": 1}, fields=["name", "lft", "rgt"])
 	out = {}
@@ -110,9 +114,10 @@ def _expense_groups() -> dict:
 		inside = [g.name for g in groups if g.lft < a.lft < g.rgt]
 		kind = "Indirect" if any("indirect" in g.lower() for g in inside) else "Direct"
 		seg = _segment_of_names([a.name] + inside)
-		if not seg and any(g.startswith("Purchase Accounts") for g in inside):
-			seg = CABIN  # SK 28-Oct "split all data as Cabin & Non-Cabin": a purchase not marked Non-Cabin is factory (cabin) material
-		out[a.name] = (kind, seg)
+		# SK 28-Oct "split all data as Cabin & Non-Cabin": a purchase not marked Non-Cabin is factory (cabin) material,
+		# unless its cost centre says Non-Cabin (a purchase for a machine shifting job)
+		fallback = CABIN if not seg and any(g.startswith("Purchase Accounts") for g in inside) else None
+		out[a.name] = (kind, seg, fallback)
 	return out
 
 
@@ -134,8 +139,8 @@ def _expense_rows(start, end) -> list[dict]:
 		amount = flt(r.debit) - flt(r.credit)
 		if not amount:
 			continue
-		kind, seg = kinds.get(r.ledger, ("Direct", None))
-		out.append(frappe._dict(ledger=r.ledger, group=kind, segment=seg or COMMON, amount=amount))
+		kind, seg, fallback = kinds.get(r.ledger, ("Direct", None, None))
+		out.append(frappe._dict(ledger=r.ledger, group=kind, segment=seg or fallback or COMMON, amount=amount))
 	out.sort(key=lambda r: (r.group, -r.amount))
 	return out
 
@@ -176,7 +181,7 @@ def entries(user: str, kind: str, ledger: str, month=None) -> dict:
 	return {"ledger": ledger, "opening": opening * sign, "closing": bal * sign, "rows": rows, "sign": sign}
 
 
-def _segment_of(account_segment: str | None, cost_center: str | None, cc_parents: dict) -> str:
+def _segment_of(account_segment: str | None, cost_center: str | None, cc_parents: dict, fallback: str | None = None) -> str:
 	if account_segment:
 		return account_segment
 	cc = cost_center
@@ -187,7 +192,17 @@ def _segment_of(account_segment: str | None, cost_center: str | None, cc_parents
 		if short in NON_CABIN_CC:
 			return NON_CABIN
 		cc = cc_parents.get(cc)
-	return COMMON
+	return fallback or COMMON
+
+
+def _non_cabin_sub(cost_center: str | None, cc_parents: dict) -> str:
+	cc = cost_center
+	while cc:
+		sub = NON_CABIN_SUB_CC.get(cc.rsplit(" - ", 1)[0])
+		if sub:
+			return sub
+		cc = cc_parents.get(cc)
+	return COMBINED
 
 
 def _pnl_lines(start, end) -> list[dict]:
@@ -212,8 +227,8 @@ def segment_wise(user: str, month=None) -> dict:
 			s = _segment_of(_segment_of_names([r.account]), r.cost_center, cc_parents)
 			seg[s].income += flt(r.income)
 		else:
-			kind, aseg = kinds.get(r.account, ("Direct", None))
-			s = _segment_of(aseg, r.cost_center, cc_parents)
+			kind, aseg, fallback = kinds.get(r.account, ("Direct", None, None))
+			s = _segment_of(aseg, r.cost_center, cc_parents, fallback)
 			seg[s]["direct" if kind == "Direct" else "indirect"] += flt(r.cost)
 	rows = list(seg.values())
 	for r in rows:
@@ -240,7 +255,7 @@ def month_wise(user: str, year_start=None) -> dict:
 	m = fy
 	while m <= end:
 		months[str(m)[:7]] = frappe._dict(month=str(m)[:7], income=0.0, direct=0.0, indirect=0.0,
-			segments={s: blank() for s in (CABIN, NON_CABIN, COMMON)})
+			segments={s: blank() for s in (CABIN, NON_CABIN, COMMON)}, subs={s: blank() for s in NON_CABIN_SUBS})
 		m = add_months(m, 1)
 	for r in _pnl_lines(fy, end):
 		row = months.get(r.month)
@@ -250,22 +265,26 @@ def month_wise(user: str, year_start=None) -> dict:
 			field, amount = "income", flt(r.income)
 			s = _segment_of(_segment_of_names([r.account]), r.cost_center, cc_parents)
 		else:
-			kind, aseg = kinds.get(r.account, ("Direct", None))
+			kind, aseg, fallback = kinds.get(r.account, ("Direct", None, None))
 			field, amount = ("direct" if kind == "Direct" else "indirect"), flt(r.cost)
-			s = _segment_of(aseg, r.cost_center, cc_parents)
+			s = _segment_of(aseg, r.cost_center, cc_parents, fallback)
 		row[field] += amount
 		row.segments[s][field] += amount
+		if s == NON_CABIN:
+			row.subs[_non_cabin_sub(r.cost_center, cc_parents)][field] += amount
 	rows = list(months.values())
 	for r in rows:
-		for x in [r, *r.segments.values()]:
+		for x in [r, *r.segments.values(), *r.subs.values()]:
 			x["gross"] = x.income - x.direct
 			x["net"] = x.gross - x.indirect
 	keys = ("income", "direct", "indirect", "gross", "net")
 	if only:
-		rows = [frappe._dict(month=r.month, **r.segments[only], segments={only: r.segments[only]}) for r in rows]
+		rows = [frappe._dict(month=r.month, **r.segments[only], segments={only: r.segments[only]}, subs=r.subs) for r in rows]
 	segs = (only,) if only else (CABIN, NON_CABIN, COMMON)
 	return {"from": str(fy), "to": str(end), "rows": rows, "total": {k: sum(flt(r[k]) for r in rows) for k in keys},
-		"segment_total": {s: {k: sum(flt(r.segments[s][k]) for r in rows) for k in keys} for s in segs}, "only": only}
+		"segment_total": {s: {k: sum(flt(r.segments[s][k]) for r in rows) for k in keys} for s in segs},
+		"subs": list(NON_CABIN_SUBS), "sub_total": {s: {k: sum(flt(r.subs[s][k]) for r in rows) for k in keys} for s in NON_CABIN_SUBS},
+		"only": only}
 
 
 def _sees_all(user: str) -> bool:

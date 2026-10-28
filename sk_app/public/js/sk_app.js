@@ -4892,13 +4892,17 @@
 		const segName = (s) => (s === "All" ? t("all") : s === "Common" ? t("common_cost") : s);
 		if (p.only) tabs = "";
 		const segTabs = p.only ? `<p class="sk-note"><b>${esc(p.only)}</b></p>` : `<div class="cal-tabs">${["All", "Cabin", "Non-Cabin", "Common"].map((s) => `<button class="${seg === s ? "on" : ""}" data-segtab="${s}">${esc(segName(s))}</button>`).join("")}</div>`;
-		const pick = (r) => (seg === "All" ? r : (r.segments || {})[seg] || {});
-		const tot = seg === "All" ? p.total : (p.segment_total || {})[seg] || {};
-		root.innerHTML = header(t("month_close")) + `<main>${tabs}${segTabs}<div class="sk-table-wrap"><table class="sk-table"><tr><th></th><th>${t("income")}</th><th>${t("direct")}</th><th>${t("gross")}</th><th>${t("indirect")}</th><th>${t("net")}</th></tr>
+		// Non-Cabin sub-groups (SK 28-Oct): Machine Shifting / Job Work / Maintenance; older entries show as combined
+		const sub = seg === "Non-Cabin" ? finTab.month_sub || "" : "";
+		const subTabs = seg === "Non-Cabin" && p.subs ? `<div class="cal-tabs">${["", ...p.subs].map((s) => `<button class="${sub === s ? "on" : ""}" data-subtab="${esc(s)}">${esc(s || t("all"))}</button>`).join("")}</div>` : "";
+		const pick = (r) => (sub ? (r.subs || {})[sub] || {} : seg === "All" ? r : (r.segments || {})[seg] || {});
+		const tot = sub ? (p.sub_total || {})[sub] || {} : seg === "All" ? p.total : (p.segment_total || {})[seg] || {};
+		root.innerHTML = header(t("month_close")) + `<main>${tabs}${segTabs}${subTabs}<div class="sk-table-wrap"><table class="sk-table"><tr><th></th><th>${t("income")}</th><th>${t("direct")}</th><th>${t("gross")}</th><th>${t("indirect")}</th><th>${t("net")}</th></tr>
 			${p.rows.map((row) => { const r = pick(row); return `<tr><td>${esc(mon(row.month))}</td><td>${lakh(r.income)}</td><td>${lakh(r.direct)}</td><td>${lakh(r.gross)}</td><td>${lakh(r.indirect)}</td><td class="${r.net < 0 ? "sk-due" : ""}"><b>${lakh(r.net)}</b></td></tr>`; }).join("")}
 			<tr><th>Σ</th><th>${lakh(tot.income)}</th><th>${lakh(tot.direct)}</th><th>${lakh(tot.gross)}</th><th>${lakh(tot.indirect)}</th><th>${lakh(tot.net)}</th></tr></table></div>
 			<p class="sk-note">${t("pnl_note")}</p></main>`;
-		root.querySelectorAll("[data-segtab]").forEach((b) => b.addEventListener("click", () => { finTab.month_seg = b.dataset.segtab; renderMonthWise(); }));
+		root.querySelectorAll("[data-segtab]").forEach((b) => b.addEventListener("click", () => { finTab.month_seg = b.dataset.segtab; finTab.month_sub = ""; renderMonthWise(); }));
+		root.querySelectorAll("[data-subtab]").forEach((b) => b.addEventListener("click", () => { finTab.month_sub = b.dataset.subtab; renderMonthWise(); }));
 	}
 
 	async function renderMonthClose() {

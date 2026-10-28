@@ -43,6 +43,9 @@ def after_migrate():
 	from sk_app import segments
 
 	segments.ensure_customer_groups()
+	from sk_app.segment_accounts import ensure_cost_centres
+
+	ensure_cost_centres()  # SK 28-Oct: Job Work next to Machine Shifting / Machine Maintenance
 	from sk_app.complaints import ensure_setup
 
 	ensure_setup()

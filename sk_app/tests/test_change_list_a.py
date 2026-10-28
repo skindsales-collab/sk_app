@@ -168,6 +168,11 @@ class TestLedgerScreens(IntegrationTestCase):
 		self.assertIsNone(mw["only"])
 		for r in mw["rows"]:
 			self.assertAlmostEqual(sum(r["segments"][s]["net"] for s in ("Cabin", "Non-Cabin", "Common")), r["net"], 2)
+			# Non-Cabin split into Machine Shifting / Job Work / Maintenance, older entries combined
+			self.assertAlmostEqual(sum(r["subs"][s]["net"] for s in ledger.NON_CABIN_SUBS), r["segments"]["Non-Cabin"]["net"], 2)
+		self.assertEqual(ledger._non_cabin_sub(None, {}), ledger.COMBINED)
+		self.assertEqual(ledger._non_cabin_sub("Site Expenses - X", {"Site Expenses - X": "Machine Shifting - X"}), "Machine Shifting")
+		self.assertEqual(ledger._segment_of(None, None, {}, "Cabin"), "Cabin")
 		# Aditya (Machine Shifting) sees the Non-Cabin P&L only
 		ms = "sk_test_a_ms@example.com"
 		_app_user(ms, "Machine Shifting", ["Sales User"])
