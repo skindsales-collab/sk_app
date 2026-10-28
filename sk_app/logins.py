@@ -260,6 +260,76 @@ def reset_pin(by: str, user: str) -> dict:
 	return {"user": user, "pin": pin, "mobile": frappe.db.get_value("User", user, "mobile_no")}
 
 
+# ---------- Forgot PIN / password (SK 28-Oct): the person asks, the CEO approves, a new temporary PIN is given ----------
+# The PIN is also the person's ERPNext password, so this covers "forgot password" for ERPNext too. The request never says
+# whether a mobile number has a login. The CEO gives the new PIN by WhatsApp / call; at the next login the person must
+# set their own PIN (must_set_pin), so the CEO never knows the PIN in use.
+PIN_TAG = "[PIN reset]"
+
+
+def _ceos() -> list[str]:
+	from sk_app.requisition import _ceos
+
+	return _ceos()
+
+
+def ask_new_pin(user: str, source: str = "login page") -> dict:
+	"""Request from a known login (login page by mobile, or the lock screen). One open request per person."""
+	if not user or user in ("Administrator", "Guest") or not frappe.db.get_value("User", user, "enabled"):
+		return {"sent": True}
+	if frappe.db.exists("ToDo", {"reference_type": "User", "reference_name": user, "status": "Open", "description": ["like", f"{PIN_TAG}%"]}):
+		return {"sent": True}
+	ceos = [c for c in _ceos() if c != user]
+	if not ceos:
+		return {"sent": True}
+	mobile = frappe.db.get_value("User", user, "mobile_no") or ""
+	frappe.get_doc({"doctype": "ToDo", "allocated_to": ceos[0], "assigned_by": "Administrator", "status": "Open", "priority": "High",
+		"reference_type": "User", "reference_name": user, "date": frappe.utils.nowdate(),
+		"description": f"{PIN_TAG} {frappe.utils.get_fullname(user)} ({mobile}) forgot the PIN. Asked from the {source}."}).insert(ignore_permissions=True)
+	return {"sent": True}
+
+
+def forgot_pin(mobile) -> dict:
+	"""Guest: from the login page. Same answer whether or not the number has a login."""
+	from sk_app.otp import _user_for
+
+	user = _user_for(clean_mobile(mobile))
+	return ask_new_pin(user, "login page") if user else {"sent": True}
+
+
+def pin_requests(by: str) -> list[dict]:
+	_check_manager(by)
+	rows = frappe.get_all("ToDo", filters={"status": "Open", "reference_type": "User", "description": ["like", f"{PIN_TAG}%"]},
+		fields=["name", "reference_name", "description", "creation"], order_by="creation asc", limit=0)
+	out = []
+	for r in rows:
+		out.append({"todo": r.name, "user": r.reference_name, "name": frappe.utils.get_fullname(r.reference_name),
+			"mobile": frappe.db.get_value("User", r.reference_name, "mobile_no") or "",
+			"function": frappe.db.get_value("SK App User", {"user": r.reference_name}, "home") or "",
+			"asked": str(r.creation)[:16], "where": "lock screen" if "lock screen" in (r.description or "") else "login page"})
+	return out
+
+
+def pin_request_count(user: str) -> int:
+	if not _can_manage(user):
+		return 0
+	return frappe.db.count("ToDo", {"status": "Open", "reference_type": "User", "description": ["like", f"{PIN_TAG}%"]})
+
+
+def pin_request_done(by: str, todo: str, approve) -> dict:
+	"""CEO: approve gives a new temporary PIN (shown once, to send by WhatsApp / call); reject just closes the request."""
+	_check_manager(by)
+	t = frappe.get_doc("ToDo", todo)
+	if t.reference_type != "User" or not (t.description or "").startswith(PIN_TAG):
+		frappe.throw(_("Not a PIN request"))
+	out = {"user": t.reference_name}
+	if str(approve) in ("1", "true", "True"):
+		out = reset_pin(by, t.reference_name)
+	t.db_set("status", "Closed")
+	t.add_comment("Comment", f"{'New PIN given' if str(approve) in ('1', 'true', 'True') else 'Not approved'} by {frappe.utils.get_fullname(by)}")
+	return out
+
+
 def close_login(by: str, user: str) -> dict:
 	"""Person left: login off. All their past work stays in ERPNext under their name."""
 	_check_manager(by)

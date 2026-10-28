@@ -1027,6 +1027,12 @@
 		hp_ai: "AI चे मसुदा उत्तर", hp_ai_wait: "AI उत्तर लिहित आहे… एक मिनिटाने पुन्हा उघडा", hp_ai_again: "AI ला पुन्हा विचारा", hp_screen_l: "विचारले",
 		hp_how_to: "फक्त उत्तर", hp_app_fix: "SK App मध्ये बदल हवा", hp_erp_setting: "ERPNext सेटिंग / रोल बदल हवा", hp_data_fix: "डेटा दुरुस्ती हवी", hp_need_info: "अधिक माहिती हवी",
 		hp_use_mr: "मराठी उत्तर वापरा", hp_use_en: "इंग्रजी उत्तर वापरा" });
+	Object.assign(T.English, { fp_btn: "Forgot PIN? Ask the CEO", fp_sent: "Request sent to the CEO. You will get a new PIN by WhatsApp or call.", fp_wait: "Too many tries. Please wait an hour.",
+		fp_fail: "Could not send. Please call the CEO.", fp_requests: "Forgot PIN requests", fp_from: "from", fp_lock: "lock screen", fp_login: "login page",
+		fp_check: "First make sure it is really this person (call them).", fp_give: "Give new PIN", fp_no: "Not approved", fp_no_q: "Close this request without a new PIN?" });
+	Object.assign(T.Marathi, { fp_btn: "पिन विसरलात? CEO ला विचारा", fp_sent: "विनंती CEO कडे गेली. नवीन पिन WhatsApp किंवा कॉलवर मिळेल.", fp_wait: "खूप प्रयत्न झाले. एक तास थांबा.",
+		fp_fail: "पाठवता आले नाही. CEO ना कॉल करा.", fp_requests: "पिन विसरल्याच्या विनंत्या", fp_from: "कुठून:", fp_lock: "लॉक स्क्रीन", fp_login: "लॉगिन पान",
+		fp_check: "आधी खरंच हीच व्यक्ती आहे याची खात्री करा (कॉल करा).", fp_give: "नवीन पिन द्या", fp_no: "मंजूर नाही", fp_no_q: "नवीन पिन न देता ही विनंती बंद करायची?" });
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
 	const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -2041,7 +2047,13 @@
 			const rows = people.map((p, i) => (p.state === st ? row(p, i) : "")).join("");
 			return rows ? `<h3 class="sk-h">${title}</h3><ul class="sk-list">${rows}</ul>` : "";
 		};
-		root.innerHTML = header(t("logins")) + `<main>
+		const reqs = root._pinReqs = await call("pin_requests").catch(() => []);
+		const reqHtml = reqs.length ? `<h3 class="sk-h">🔑 ${t("fp_requests")} (${reqs.length})</h3><ul class="sk-list">${reqs.map((r, i) =>
+			`<li class="sk-item k-lead_new"><div class="sk-grow"><div class="sk-item-title">${esc(r.name)}</div>
+			<div class="sk-item-meta">${esc(r.mobile)} · ${esc(r.function)} · ${esc(r.asked)} · ${t("fp_from")} ${esc(r.where === "lock screen" ? t("fp_lock") : t("fp_login"))}</div>
+			<p class="sk-note">${t("fp_check")}</p></div><div class="sk-col"><button class="sk-chip on" data-act="pin-req-ok" data-i="${i}">✓ ${t("fp_give")}</button>
+			<button class="sk-chip bad" data-act="pin-req-no" data-i="${i}">✕ ${t("fp_no")}</button></div></li>`).join("")}</ul>` : "";
+		root.innerHTML = header(t("logins")) + `<main>${reqHtml}
 			<p class="sk-note">${people.length} ${t("people_n")} · ${none.length} ${t("without_login")}</p>
 			<button class="sk-btn go wide" data-act="login-new">➕ ${t("new_login")}</button>
 			<button class="sk-btn wide" data-act="login-bulk-open">📋 ${t("bulk_logins")}</button>
@@ -5685,6 +5697,16 @@
 				await renderLogins();
 				return pinSheet(r);
 			}
+			if (act === "pin-req-ok" || act === "pin-req-no") {
+				const r = root._pinReqs[Number(el.dataset.i)];
+				if (act === "pin-req-no" && !window.confirm(`${r.name}: ${t("fp_no_q")}`)) return;
+				el.disabled = true;
+				const res = await call("pin_request_done", { todo: r.todo, approve: act === "pin-req-ok" ? 1 : 0 }, true);
+				await renderLogins();
+				if (act === "pin-req-ok") return pinSheet(res);
+				toast(t("saved"));
+				return;
+			}
 			if (act === "login-reset") {
 				const r = await call("hr_reset_pin", { user: root._people[Number(el.dataset.i)].user }, true);
 				return pinSheet(r);
@@ -6293,7 +6315,7 @@
 				<p class="sk-login-or">${t("lk_or_pin")}</p>` : ""}
 			<label class="sk-field"><span>${t("lk_pin")}</span><input id="lk-pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8"></label>
 			<button class="sk-btn ${phoneCan ? "" : "go "}wide" data-lock="pin">${t("lk_open")}</button>
-			<button class="sk-btn wide" data-lock="relogin">${t("lk_relogin")}</button><p class="sk-note">${t("lk_ask_ceo")}</p>
+			<button class="sk-btn wide" data-lock="forgot">🔑 ${t("fp_btn")}</button><button class="sk-btn wide" data-lock="relogin">${t("lk_relogin")}</button><p class="sk-note">${t("lk_ask_ceo")}</p>
 			<p class="sk-lock-msg" id="lk-msg"></p></div>`;
 		if (face && !lockInfo.usePin) setTimeout(() => el.querySelector("[data-lock=face]") && el.querySelector("[data-lock=face]").click(), 300);
 	}
@@ -6322,6 +6344,12 @@
 				return location.reload();
 			}
 			if (b.dataset.lock === "usepin") { lockInfo.usePin = true; return showLock(lockInfo); }
+			if (b.dataset.lock === "forgot") {
+				const r = await fetch("/api/method/sk_app.api.forgot_pin_me", { method: "POST", credentials: "same-origin", headers: { "X-Frappe-CSRF-Token": CSRF, Accept: "application/json" } });
+				if (msg) msg.textContent = r.ok ? t("fp_sent") : r.status === 429 ? t("fp_wait") : t("fp_fail");
+				b.disabled = false;
+				return;
+			}
 			if (b.dataset.lock === "noface") { if (msg) msg.textContent = t("lk_face_first_help"); const p = document.getElementById("lk-pin"); if (p) p.focus(); b.disabled = false; return; }
 			if (b.dataset.lock === "face") await afterUnlock(await faceUnlock());
 			else await afterUnlock(await call("unlock_pin", { pin: (document.getElementById("lk-pin") || {}).value || "" }, true));
