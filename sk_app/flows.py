@@ -294,7 +294,7 @@ def accounts(user: str) -> list[dict]:
 	start = get_first_day(getdate())
 	orders = dashboards._orders(start, getdate())
 	tally = dashboards._tally_sales(start, getdate())
-	sis = frappe.get_all("Sales Invoice", filters={"docstatus": 1, "is_return": 0, "posting_date": [">=", start]}, fields=["name", "customer_name", "base_net_total", "posting_date"])
+	sis = frappe.get_all("Sales Invoice", filters={"docstatus": 1, "is_return": 0, "is_opening": ["!=", "Yes"], "posting_date": [">=", start]}, fields=["name", "customer_name", "base_net_total", "posting_date"])
 	dues = dashboards._receivables()
 	old = [d for d in dues if d.ages["Over 60 days"] > 0.5]
 	got = frappe.get_all("Payment Entry", filters={"payment_type": "Receive", "docstatus": 1, "posting_date": [">=", start]}, fields=["name", "party_name", "paid_amount", "posting_date"])
@@ -304,7 +304,7 @@ def accounts(user: str) -> list[dict]:
 	invoiced = [_row(s.customer_name, str(s.posting_date), s.base_net_total, "Sales Invoice", s.name) for s in sis] + \
 		[_row(t.customer_name, f"{t.posting_date} · Tally {t.voucher}", t.amount, "Journal Entry", t.name) for t in tally]
 	return [
-		_stage("orders", "Orders this month", "🧾", [_row(o.customer_name, str(o.transaction_date), o.base_net_total, "Sales Order", o.name) for o in orders],
+		_stage("orders", "Orders this month", "🧾", [_row(o.customer_name, str(o.transaction_date), o.base_net_total, o.doctype, o.name) for o in orders],
 			sum(flt(o.base_net_total) for o in orders), go="invoices", kind="money"),
 		_stage("invoiced", "Invoiced this month", "🧮", invoiced, sum(flt(r["value"]) for r in invoiced), go="invoices", kind="money"),
 		_stage("dues", "Receivables", "📥", [_row(d.customer_name, f"oldest bill {d.late} days", d.outstanding_amount, "Customer", d.name,
