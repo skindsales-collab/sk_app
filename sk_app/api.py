@@ -131,7 +131,7 @@ def _badges(user, functions):
 		return {**store.badges(user, functions), **purchase.badges(user, functions), **production.badges(user, functions),
 			**quality.badges(user, functions), **finance.badges(user, functions), **ai_desk.badges(user, functions),
 			**mailbox.badges(user), **complaints.badge(user), **hr.badges(user, functions), **sub_bills.badges(user),
-			"questions": training.question_count(user)}
+			"questions": training.question_count(user), "logins": logins.pin_request_count(user)}
 	except Exception:
 		frappe.log_error("SK App badges")
 		return {}
@@ -586,6 +586,35 @@ def hr_bulk_logins(text):
 def hr_reset_pin(user):
 	_me()
 	return logins.reset_pin(frappe.session.user, user)
+
+
+# SK 28-Oct: forgot PIN / password → the CEO approves → new temporary PIN; the person sets their own at the next login
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=5, seconds=60 * 60)
+def forgot_pin(mobile):
+	return logins.forgot_pin(mobile)
+
+
+@frappe.whitelist(methods=["POST"])
+@rate_limit(limit=5, seconds=60 * 60)
+def forgot_pin_me():
+	"""From the lock screen: the person is logged in but the app is locked and the PIN is forgotten."""
+	user = frappe.session.user
+	if user in ("Guest", None):
+		frappe.throw(_("Please log in"), frappe.PermissionError)
+	return logins.ask_new_pin(user, "lock screen")
+
+
+@frappe.whitelist()
+def pin_requests():
+	_me()
+	return logins.pin_requests(frappe.session.user)
+
+
+@frappe.whitelist(methods=["POST"])
+def pin_request_done(todo, approve=1):
+	_me()
+	return logins.pin_request_done(frappe.session.user, todo, approve)
 
 
 @frappe.whitelist(methods=["POST"])
