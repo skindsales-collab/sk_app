@@ -487,7 +487,14 @@ def warehouses(user: str) -> list[str]:
 def stock_count(user: str, warehouse: str, counts: list[dict], photo=None) -> dict:
 	"""Counted quantities that differ from ERPNext go as a draft Stock Reconciliation for the owner / Finance OK."""
 	need(user, STORE)
+	from sk_app import gates
+
 	book = {r["item_code"]: r["qty"] for r in count_list(user, warehouse)}
+	# SK 28-Oct mandatory gate: every line of the store is counted (0 is a count), not only the differences
+	counted = {c.get("item_code"): c.get("qty") for c in counts or [] if c.get("item_code")}
+	missing = gates.R.count_missing(warehouse, list(book), counted)
+	if missing:
+		gates.stop(_("Stock count cannot be sent"), missing)
 	diffs = [c for c in counts or [] if c.get("item_code") and c.get("qty") not in (None, "")
 		and flt(c["qty"]) != flt(book.get(c["item_code"]))]
 	if not diffs:

@@ -117,6 +117,8 @@ def raise_request(user: str, items: list[dict], priority: str = "Planned", need_
 	rows = [i for i in items or [] if i.get("item_code") and flt(i.get("qty")) > 0]
 	if not rows:
 		frappe.throw(_("Please pick the item and quantity"))
+	if not (note or "").strip() and not (cint(without_po) and bill_no):
+		frappe.throw(_("Please say why it is needed (reason)"))  # SK 28-Oct mandatory gate
 	if len(rows) > MAX_ITEMS:  # SK 28-Oct (Rev 1 point 12): up to 20 items on one requisition
 		frappe.throw(_("Up to {0} items on one requisition; please send the rest on a second one").format(MAX_ITEMS))
 	if cint(without_po):
@@ -136,6 +138,8 @@ def raise_request(user: str, items: list[dict], priority: str = "Planned", need_
 	mr.update({"material_request_type": "Purchase", "company": _company(), "transaction_date": nowdate(), "schedule_date": need_by,
 		"sk_priority": priority, "sk_approval": WAITING, "sk_cabin": cabin or None, "sk_without_po": cint(without_po),
 		"sk_supplier": supplier if cint(without_po) else None})
+	if mr.meta.has_field("sk_reason"):
+		mr.sk_reason = (note or "").strip() or _("Material came without PO, bill / challan {0}").format(bill_no)
 	for i in rows:
 		rate = estimate_rate(i["item_code"])
 		mr.append("items", {"item_code": i["item_code"], "qty": flt(i["qty"]), "schedule_date": need_by,
@@ -170,7 +174,8 @@ def _value(mr) -> float:
 def from_store_request(user: str, rows: list[dict], reason: str, priority: str = "Planned"):
 	"""Short / low stock found by Store: the same requisition route (waits for the CEO)."""
 	r = raise_request(user, [{"item_code": x["item_code"], "qty": flt(x.get("short") or x.get("qty")), "warehouse": x.get("warehouse")}
-		for x in rows], priority, need_by=max((getdate(x["needed_by"]) for x in rows if x.get("needed_by")), default=None), note=reason)
+		for x in rows], priority, need_by=max((getdate(x["needed_by"]) for x in rows if x.get("needed_by")), default=None),
+		note=reason or _("Short in store"))
 	return frappe.get_doc("Material Request", r["name"])
 
 

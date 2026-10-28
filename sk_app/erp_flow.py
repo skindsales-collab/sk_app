@@ -32,12 +32,18 @@ def customer_of(deal: str) -> str | None:
 	return None
 
 
-def make_customer(user: str, deal: str) -> dict:
-	"""Step 1 (Sales): the deal's company becomes an ERPNext Customer (once); the segment hook picks the group."""
+def make_customer(user: str, deal: str, details: dict | None = None) -> dict:
+	"""Step 1 (Sales): the deal's company becomes an ERPNext Customer (once); the segment hook picks the group.
+	details (SK 28-Oct mandatory gate): GSTIN or unregistered + reason, billing address with state / PIN, mobile;
+	"missing" lists what the customer still needs before its quotation / order can be submitted."""
+	from sk_app import gates
+
 	d = _deal(deal)
 	have = customer_of(deal)
 	if have:
-		return {"name": have, "new": False}
+		if details:
+			gates.complete_customer(have, **details)
+		return {"name": have, "new": False, "missing": [t for _k, t in gates.customer_missing(have)]}
 	title = (d.get("organization") or d.get("sk_customer_name") or d.get("lead_name") or "").strip()
 	if not title:
 		frappe.throw(_("Please give the customer's company or name on the deal first"))
@@ -53,7 +59,23 @@ def make_customer(user: str, deal: str) -> dict:
 		name = doc.name
 	if frappe.get_meta("CRM Deal").has_field("erpnext_customer"):
 		frappe.db.set_value("CRM Deal", deal, "erpnext_customer", name)
-	return {"name": name, "new": not same}
+	if details:
+		gates.complete_customer(name, **details)
+	return {"name": name, "new": not same, "missing": [t for _k, t in gates.customer_missing(name)]}
+
+
+def default_gst(doc):
+	"""The company's default sales tax (GST) template on a quotation / order that has none (gate: GST applied)."""
+	if doc.get("taxes") or not doc.meta.has_field("taxes_and_charges"):
+		return
+	from erpnext.controllers.accounts_controller import get_taxes_and_charges
+
+	tpl = doc.get("taxes_and_charges") or frappe.db.get_value("Sales Taxes and Charges Template",
+		{"company": doc.company or frappe.defaults.get_user_default("Company"), "is_default": 1, "disabled": 0})
+	if tpl:
+		doc.taxes_and_charges = tpl
+		for row in get_taxes_and_charges("Sales Taxes and Charges Template", tpl) or []:
+			doc.append("taxes", row)
 
 
 def _rate(item_code: str) -> float:
@@ -91,35 +113,116 @@ def make_quotation(user: str, deal: str, items: list[dict], valid_days: int = 15
 		doc.crm_deal = deal
 	if note:
 		doc.terms = note
+	default_gst(doc)
 	doc.insert()
-	return {"name": doc.name, "grand_total": doc.grand_total, "pdf": crm._pdf("Quotation", doc.name)}
+	return {"name": doc.name, "grand_total": doc.grand_total, "pdf": crm._pdf("Quotation", doc.name), **submit_quotation(user, doc.name, quiet=True)}
 
 
-def order_received(user: str, quotation: str, delivery_date=None, po_no: str | None = None) -> dict:
-	"""Step 3 (Sales): the customer said yes. The quotation is submitted and a draft Sales Order is made from it with
-	the promised delivery date (the draft counts as a real order, DEC-013)."""
-	from erpnext.selling.doctype.quotation.quotation import make_sales_order
+def submit_quotation(user: str, quotation: str, quiet: bool = False) -> dict:
+	"""SK 28-Oct mandatory gate: the quotation is submitted (sent) only when customer, items, GST and valid-till are
+	all there. quiet: when it is just made, say what is missing instead of failing."""
+	from sk_app import gates
 
 	q = frappe.get_doc("Quotation", quotation)
-	q.check_permission("write")
-	if q.docstatus == 0:
+	if q.docstatus == 1:
+		return {"submitted": True, "missing": []}
+	if quiet and not frappe.has_permission("Quotation", "submit", q.name):
+		return {"submitted": False, "missing": [_("Sales manager to submit")]}
+	q.check_permission("submit")
+	if not q.get("taxes"):
+		default_gst(q)
+		q.save()
+	try:
 		q.submit()
+	except frappe.ValidationError:
+		if not quiet:
+			raise
+		frappe.clear_messages()
+		q.reload()
+		missing = gates.R.quotation_missing({"party_name": q.party_name, "valid_till": q.valid_till, "items": gates._rows(q),
+			"taxes": len(q.get("taxes") or []), "total_taxes_and_charges": q.total_taxes_and_charges})
+		missing += gates.customer_missing(q.party_name) if q.quotation_to == "Customer" else []
+		return {"submitted": False, "missing": [t for _k, t in missing]}
+	return {"submitted": True, "missing": []}
+
+
+def order_received(user: str, quotation: str, delivery_date=None, po_no: str | None = None, po_photo: str | None = None,
+		order_date=None, po_date=None) -> dict:
+	"""Step 3 (Sales): the customer said yes = Deal Won (SK 28-Oct). Mandatory gate: order date, promised delivery
+	date and the customer's PO number or PO copy; the quotation must be complete. The Sales Order is made from the
+	quotation and submitted; the deal then shows Won. When the person may not submit orders it waits for the
+	manager's Confirm, and the deal turns Won then."""
+	from erpnext.selling.doctype.quotation.quotation import make_sales_order
+
+	from sk_app import gates
+
+	missing = [m for m in gates.R.order_missing({"transaction_date": order_date or nowdate(), "delivery_date": delivery_date,
+		"po_no": po_no, "po_file": bool(po_photo), "items": [{"qty": 1, "rate": 1}], "grand_total": 1})]
+	if missing:
+		gates.stop(_("Order cannot be saved"), missing)
+	if getdate(delivery_date) < getdate(order_date or nowdate()):
+		frappe.throw(_("The delivery date is before the order date"))
+	q = frappe.get_doc("Quotation", quotation)
+	q.check_permission("write")
+	deal = q.get("crm_deal")
+	if deal and frappe.db.exists("CRM Deal", deal):  # the deal's own data first, so Won is not refused at the end
+		lead_gaps = gates.record_missing("CRM Deal", frappe.get_doc("CRM Deal", deal))
+		if lead_gaps:
+			gates.stop(_("Deal {0} cannot be Won").format(deal), lead_gaps)
+	if q.docstatus == 0:
+		submit_quotation(user, quotation)
 	so = make_sales_order(quotation)
-	so.delivery_date = getdate(delivery_date) if delivery_date else add_days(nowdate(), 21)
+	so.transaction_date = getdate(order_date or nowdate())
+	so.delivery_date = getdate(delivery_date)
 	for row in so.items:
 		row.delivery_date = so.delivery_date
-	if po_no:
-		so.po_no = po_no
+	so.po_no = (po_no or "").strip() or None
+	if po_date:
+		so.po_date = getdate(po_date)
+	default_gst(so)
 	so.insert()
-	return {"name": so.name, "grand_total": so.grand_total, "delivery_date": str(so.delivery_date)}
+	if po_photo:
+		_attach_po(po_photo, so.name, user)
+	out = {"name": so.name, "grand_total": so.grand_total, "delivery_date": str(so.delivery_date), "submitted": False}
+	if frappe.has_permission("Sales Order", "submit", so.name):
+		so.submit()
+		out["submitted"] = True
+		_won(deal, so)
+	return out
+
+
+def _attach_po(file_url: str, sales_order: str, user: str):
+	crm._attach(file_url, "Sales Order", sales_order, user)
+
+
+def _won(deal: str | None, so) -> None:
+	"""The submitted Sales Order makes the deal (and its lead) Won with the order value (SK: deal won = sales order)."""
+	if not deal or not frappe.db.exists("CRM Deal", deal):
+		return
+	won = frappe.get_all("CRM Deal Status", filters={"type": "Won"}, pluck="name", order_by="position asc", limit=1)
+	doc = frappe.get_doc("CRM Deal", deal)
+	if won and doc.status != won[0]:
+		doc.status = won[0]
+	if doc.meta.has_field("deal_value"):
+		doc.deal_value = so.base_grand_total or so.grand_total
+	if doc.meta.has_field("erpnext_customer") and not doc.get("erpnext_customer"):
+		doc.erpnext_customer = so.customer
+	doc.flags.ignore_permissions = True
+	doc.save()
+	if doc.get("lead") and frappe.db.exists("CRM Lead Status", "Deal Won"):
+		frappe.db.set_value("CRM Lead", doc.lead, "status", "Deal Won")
 
 
 def confirm_order(user: str, sales_order: str) -> dict:
-	"""Step 4 (Sales manager / CEO): submit the Sales Order so the factory can plan it."""
+	"""Step 4 (Sales manager / CEO): submit the Sales Order so the factory can plan it; the deal shows Won then."""
 	so = frappe.get_doc("Sales Order", sales_order)
 	so.check_permission("submit")
 	if so.docstatus == 0:
+		default_gst(so)
 		so.submit()
+	deals = {r.prevdoc_docname for r in so.items if r.get("prevdoc_docname")}
+	for q in deals:
+		_won(frappe.db.get_value("Quotation", q, "crm_deal") if frappe.get_meta("Quotation").has_field("crm_deal") else None, so)
 	return {"name": so.name, "status": so.status}
 
 
