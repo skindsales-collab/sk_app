@@ -190,7 +190,7 @@ def bills_to_post(user: str) -> dict:
 			"file_url", order_by="creation desc")
 		p["orders"] = frappe.get_all("Purchase Order", filters={"supplier": p.reference_name, "docstatus": 1, "per_billed": ["<", 100]},
 			fields=["name", "grand_total", "transaction_date"], order_by="creation desc", limit=10)
-		# SK 27-Oct (Yogesh): material came without a PO; the bill is made from the store's receipt instead
+		# the bill can also be made from the store's receipt (received against the PO)
 		p["receipts"] = frappe.get_all("Purchase Receipt", filters={"supplier": p.reference_name, "docstatus": 1, "per_billed": ["<", 100],
 			"is_return": 0}, fields=["name", "grand_total", "posting_date", "supplier_delivery_note"], order_by="creation desc", limit=10)
 		for x in p["receipts"]:
@@ -205,8 +205,8 @@ def bills_to_post(user: str) -> dict:
 
 def make_bill(user: str, purchase_order: str | None, bill_no: str, bill_date=None, todo=None, photo=None, purchase_receipt=None,
 		items=None, supplier=None) -> dict:
-	"""Purchase Invoice with the supplier's bill number, kept as draft to check: from the PO (ERPNext mapping), from the
-	store's receipt when material came without a PO, or (no PO, no receipt) from the items Accounts types (SK 27-Oct)."""
+	"""Purchase Invoice with the supplier's bill number, kept as draft to check: from the PO (ERPNext mapping) or from the
+	store's receipt against that PO. No bill without a PO (SK 27-Oct purchase flow)."""
 	need(user, ACCOUNTS)
 	if not (bill_no or "").strip():
 		frappe.throw(_("Please give the supplier's bill number"))
@@ -220,19 +220,8 @@ def make_bill(user: str, purchase_order: str | None, bill_no: str, bill_date=Non
 
 		pi = make_purchase_invoice(purchase_receipt)
 	else:
-		from sk_app.store import uom
-
-		supplier = supplier or (frappe.db.get_value("ToDo", todo, "reference_name") if todo else None)
-		rows = [i for i in items or [] if i.get("item_code") and flt(i.get("qty")) > 0]
-		if not supplier or not frappe.db.exists("Supplier", supplier):
-			frappe.throw(_("Please pick the supplier"))
-		if not rows:
-			frappe.throw(_("Please give the item, quantity and rate from the bill"))
-		pi = frappe.new_doc("Purchase Invoice")
-		pi.update({"supplier": supplier, "company": _company()})
-		for i in rows:
-			pi.append("items", {"item_code": i["item_code"], "qty": flt(i["qty"]), "rate": flt(i.get("rate")), **uom(i["item_code"])})
-		pi.set_missing_values()
+		# SK 27-Oct: no bill without a PO; material without a PO goes through an urgent requisition and its PO first
+		frappe.throw(_("Pick the Purchase Order or the store's receipt. Material without PO: Store raises an urgent requisition first."))
 	pi.bill_no = bill_no.strip()
 	pi.bill_date = getdate(bill_date or nowdate())
 	pi.flags.ignore_permissions = True

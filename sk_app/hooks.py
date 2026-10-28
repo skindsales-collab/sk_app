@@ -36,6 +36,10 @@ doc_events = {
 	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal"},
 	"SK App User": {"on_update": "sk_app.segments.on_app_user_update"},
 	"Job Card": {"validate": "sk_app.store.set_job_card_cabin"},  # SK 27-Oct: customer + cabin size, not just the number
+	# SK 27-Oct purchase flow: requisition → CEO approval → PO → receipt against the PO, in ERPNext too
+	"Material Request": {"before_submit": "sk_app.requisition.check_submit"},
+	"Purchase Order": {"before_submit": "sk_app.requisition.check_po"},
+	"Purchase Receipt": {"before_submit": "sk_app.requisition.check_receipt"},
 }
 
 has_permission = {

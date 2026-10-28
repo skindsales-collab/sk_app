@@ -52,7 +52,7 @@ FUNCTIONS = {
 		"label": {"English": "Stores", "Marathi": "स्टोअर"},
 		# SK draft F01: My Day first, then the Store icons, then the common ones
 		# point 17 (SK's mock-up): Requests → Stock Check → Receive → Issue → Stock Count → New Item → Low Stock → Dispatch
-		"tiles": ["my_day", "store_requests", "stock_check", "receive", "issue", "stock_count", "new_item", "low_stock", "dispatch", "complaints", "mail", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "requisition", "store_requests", "stock_check", "receive", "issue", "stock_count", "new_item", "low_stock", "dispatch", "complaints", "mail", *COMMON_TILES[1:]],
 		"live": True,
 		# Stock Manager: needed to make stock count drafts and to pick accounts on receipts / delivery notes
 		"erpnext_roles": ["Stock User", "Stock Manager"],
@@ -60,7 +60,7 @@ FUNCTIONS = {
 	},
 	"Purchase": {
 		"label": {"English": "Purchase", "Marathi": "खरेदी"},
-		"tiles": ["my_day", "buy_requests", "get_rates", "compare", "po_follow_up", "suppliers", "bills", "last_rates", "stock_check", "mail", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "requisition", "buy_requests", "get_rates", "compare", "po_follow_up", "suppliers", "bills", "last_rates", "stock_check", "mail", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Purchase User"],
 		"desk": "/app/buying",
@@ -192,8 +192,8 @@ MAIN_TILES = {
 	"Machine Shifting": ["my_deals", "customers", "site_checklist", "complaints"],
 	"Production": ["to_plan", "job_cards", "need_material", "order_board"],
 	"Quality": ["inspect", "final_check", "non_conformance", "el_points"],
-	"Stores": ["store_requests", "receive", "issue", "stock_count"],
-	"Purchase": ["buy_requests", "get_rates", "po_follow_up", "bills"],
+	"Stores": ["requisition", "store_requests", "receive", "issue"],
+	"Purchase": ["requisition", "buy_requests", "get_rates", "po_follow_up"],
 	"Accounts": ["gateway", "to_collect", "to_pay", "day_book"],
 	# SK 26-Oct: attendance is not on the main screen (it is in More)
 	"HR": ["leave_expense", "team_scorecards"],

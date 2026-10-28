@@ -1,9 +1,11 @@
+import unittest
+
 import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.tests.classes.context_managers import set_user
 from frappe.utils import add_days, flt, nowdate
 
-from sk_app import purchase, store
+from sk_app import purchase, requisition, store
 from sk_app.tests.test_sk_app_api import make_user
 
 STORE_U = "sk_test_store@example.com"
@@ -30,42 +32,47 @@ def run(user, fn, *args, **kw):
 		return fn(user, *args, **kw)
 
 
+def setup_data(cls):
+	"""Users, items, supplier, customer and stock shared by the Store / Purchase / requisition tests."""
+	cls.company = frappe.db.get_value("Company", {}, "name")
+	if not cls.company:
+		raise unittest.SkipTest("needs an ERPNext company (setup wizard done)")
+	abbr = frappe.db.get_value("Company", cls.company, "abbr")
+	cls.stores = f"Stores - {abbr}"
+	cls.wip = f"Work In Progress - {abbr}"
+	cls.fgw = f"Finished Goods - {abbr}"
+	frappe.db.set_single_value("Stock Settings", "default_warehouse", cls.stores)
+	app_user(STORE_U, "Stores", ["Stock User"])
+	app_user(BUY_U, "Purchase", ["Purchase User"])
+	app_user(BOSS, "Management", ["System Manager"])
+	for code, stock in ((RAW, 1), (FG, 1)):
+		if not frappe.db.exists("Item", code):
+			frappe.get_doc({"doctype": "Item", "item_code": code, "item_name": code, "item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"), "stock_uom": "Nos", "is_stock_item": stock,
+				"valuation_rate": 100, "item_defaults": [{"company": cls.company, "default_warehouse": cls.stores}]}).insert()
+	if not frappe.db.exists("Supplier", SUPPLIER):
+		frappe.get_doc({"doctype": "Supplier", "supplier_name": SUPPLIER, "supplier_group": frappe.db.get_value("Supplier Group", {"is_group": 0}, "name")}).insert()
+	if not frappe.db.exists("Customer", CUSTOMER):
+		frappe.get_doc({"doctype": "Customer", "customer_name": CUSTOMER, "customer_group": frappe.db.get_value("Customer Group", {"is_group": 0}, "name"),
+			"territory": frappe.db.get_value("Territory", {"is_group": 0}, "name")}).insert()
+	have = flt(frappe.db.get_value("Bin", {"item_code": RAW, "warehouse": cls.stores}, "actual_qty"))
+	if have < 50:
+		se = frappe.get_doc({"doctype": "Stock Entry", "stock_entry_type": "Material Receipt", "company": cls.company,
+			"items": [{"item_code": RAW, "qty": 50 - have, "t_warehouse": cls.stores, "basic_rate": 100}]})
+		se.insert()
+		se.submit()
+	if not frappe.db.exists("BOM", {"item": FG, "docstatus": 1}):
+		bom = frappe.get_doc({"doctype": "BOM", "item": FG, "company": cls.company, "quantity": 1,
+			"items": [{"item_code": RAW, "qty": 10, "rate": 100}]})
+		bom.insert()
+		bom.submit()
+	frappe.db.commit()
+
+
 class TestStorePurchase(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
-		cls.company = frappe.db.get_value("Company", {}, "name")
-		if not cls.company:
-			raise cls.skipTest(cls, "needs an ERPNext company (setup wizard done)")
-		abbr = frappe.db.get_value("Company", cls.company, "abbr")
-		cls.stores = f"Stores - {abbr}"
-		cls.wip = f"Work In Progress - {abbr}"
-		cls.fgw = f"Finished Goods - {abbr}"
-		frappe.db.set_single_value("Stock Settings", "default_warehouse", cls.stores)
-		app_user(STORE_U, "Stores", ["Stock User"])
-		app_user(BUY_U, "Purchase", ["Purchase User"])
-		app_user(BOSS, "Management", ["System Manager"])
-		for code, stock in ((RAW, 1), (FG, 1)):
-			if not frappe.db.exists("Item", code):
-				frappe.get_doc({"doctype": "Item", "item_code": code, "item_name": code, "item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"), "stock_uom": "Nos", "is_stock_item": stock,
-					"valuation_rate": 100, "item_defaults": [{"company": cls.company, "default_warehouse": cls.stores}]}).insert()
-		if not frappe.db.exists("Supplier", SUPPLIER):
-			frappe.get_doc({"doctype": "Supplier", "supplier_name": SUPPLIER, "supplier_group": frappe.db.get_value("Supplier Group", {"is_group": 0}, "name")}).insert()
-		if not frappe.db.exists("Customer", CUSTOMER):
-			frappe.get_doc({"doctype": "Customer", "customer_name": CUSTOMER, "customer_group": frappe.db.get_value("Customer Group", {"is_group": 0}, "name"),
-				"territory": frappe.db.get_value("Territory", {"is_group": 0}, "name")}).insert()
-		have = flt(frappe.db.get_value("Bin", {"item_code": RAW, "warehouse": cls.stores}, "actual_qty"))
-		if have < 50:
-			se = frappe.get_doc({"doctype": "Stock Entry", "stock_entry_type": "Material Receipt", "company": cls.company,
-				"items": [{"item_code": RAW, "qty": 50 - have, "t_warehouse": cls.stores, "basic_rate": 100}]})
-			se.insert()
-			se.submit()
-		if not frappe.db.exists("BOM", {"item": FG, "docstatus": 1}):
-			bom = frappe.get_doc({"doctype": "BOM", "item": FG, "company": cls.company, "quantity": 1,
-				"items": [{"item_code": RAW, "qty": 10, "rate": 100}]})
-			bom.insert()
-			bom.submit()
-		frappe.db.commit()
+		setup_data(cls)
 
 	def test_stock_check_shows_live_qty(self):
 		rows = run(STORE_U, store.stock_search, "Test Pipe")
@@ -88,7 +95,10 @@ class TestStorePurchase(IntegrationTestCase):
 			low = run(STORE_U, store.low_stock)
 			self.assertTrue(any(r["item_code"] == RAW for r in low))
 			r = run(STORE_U, store.order_low, [RAW])
-			self.assertEqual(frappe.db.get_value("Material Request", r["name"], "docstatus"), 1)
+			# SK 27-Oct: low stock is a requisition too: it waits for the CEO, Purchase sees it only after approval
+			self.assertEqual(frappe.db.get_value("Material Request", r["name"], ["docstatus", "sk_approval"]), (0, "Waiting CEO"))
+			self.assertFalse(any(x["request"] == r["name"] for x in run(BUY_U, purchase.requests)))
+			run(BOSS, requisition.decide, r["name"], 1)
 			reqs = run(BUY_U, purchase.requests)
 			self.assertTrue(any(x["request"] == r["name"] and x["item_code"] == RAW for x in reqs))
 		finally:
@@ -96,7 +106,13 @@ class TestStorePurchase(IntegrationTestCase):
 			item.set("reorder_levels", [])
 			item.save()
 
+	def _approved(self, qty=10):
+		r = run(STORE_U, requisition.raise_request, [{"item_code": RAW, "qty": qty}], "Planned")
+		run(BOSS, requisition.decide, r["name"], 1)
+		return r["name"]
+
 	def test_rates_quote_po_receive(self):
+		self._approved()
 		rfq = run(BUY_U, purchase.make_rfq, [{"item_code": RAW, "qty": 10}], [SUPPLIER], add_days(nowdate(), 3))
 		self.assertIn(RAW, rfq["text"])
 		self.assertEqual(frappe.db.get_value("Request for Quotation", rfq["name"], "docstatus"), 0)
@@ -114,6 +130,7 @@ class TestStorePurchase(IntegrationTestCase):
 		self.assertEqual(doc.items[0].qty, 4)
 
 	def test_big_po_waits_for_sk(self):
+		self._approved()
 		q = run(BUY_U, purchase.add_quote, SUPPLIER, RAW, 10, 100000)
 		po = run(BUY_U, purchase.make_po, q["name"])
 		self.assertTrue(po["needs_approval"])

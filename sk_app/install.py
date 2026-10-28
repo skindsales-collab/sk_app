@@ -78,7 +78,9 @@ def after_migrate():
 
 	_safe(cold_calling_field, "cold calling list")  # SK 27-Oct: cold-calling data out of My Leads
 	from sk_app.marketing_list import ensure_setup as marketing_list_setup
+	from sk_app.requisition import ensure_setup as requisition_setup
 
+	_safe(requisition_setup, "purchase requisition")  # SK 27-Oct: requisition → CEO → PO → receipt
 	_safe(marketing_list_setup, "marketing list")  # SK 27-Oct: potential customers for greetings / promotions, not leads
 	from sk_app.training import seed_lessons
 

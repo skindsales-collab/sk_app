@@ -932,6 +932,25 @@
 		d_title: "आता निर्णय घ्या", d_gap: "टार्गेटपासून फरक", d_none: "काहीही उशीर नाही. छान.",
 		el_points: "इलेक्ट्रिकल पॉइंट", el_month: "या महिन्याचे पॉइंट", el_pts: "पॉइंट", el_light: "लाइट पॉइंट", el_fan: "फॅन पॉइंट",
 		el_socket_5a: "5A सॉकेट", el_socket_15a: "15A सॉकेट", el_ac_point: "AC पॉइंट", el_mcb_db: "MCB / DB", el_earthing: "अर्थिंग", el_other_points: "इतर पॉइंट" });
+	// SK 27-Oct purchase requisition
+	Object.assign(T.English, { requisition: "Purchase requisition", rq_new: "New", rq_track: "Track", rq_planned: "Planned", rq_urgent: "Urgent",
+		rq_stock: "stock", rq_moq: "min order", rq_reorder: "re-order level", rq_asked: "already asked", rq_last_rate: "last rate",
+		rq_no_last: "no last rate", rq_quote: "quote", rq_no_quote: "no second quote yet", rq_cabin: "Project / cabin code",
+		rq_why: "Why needed? (speak)", rq_send: "Send to CEO for approval", rq_sent: "sent to CEO", rq_need_item: "Please pick the item and quantity",
+		rq_need_sup: "Please pick the supplier", rq_came_no_po: "Came without PO", rq_no_po_help: "Material came without a PO: it is not received yet. Give the supplier, items and challan photo; it goes to the CEO as an urgent requisition, then a PO is made and you receive against it.",
+		rq_title: "Purchase requisitions", rq_pos: "POs above the approved value", rq_pos_help: "A PO comes here only when it is more than 10% above the value you approved on the requisition.",
+		rq_track_help: "Every requisition and where it is: Waiting CEO → Approved → PO made → Material in.",
+		rq_st_waiting: "Waiting CEO", rq_st_approved: "Approved: PO to make", rq_st_po_draft: "PO draft", rq_st_po_ceo: "PO waiting CEO",
+		rq_st_po_made: "PO made", rq_st_in: "Material in", rq_st_rejected: "Rejected", rq_make_po: "Make PO", rq_po_to_ceo: "above the approved value, sent to CEO" });
+	Object.assign(T.Marathi, { requisition: "खरेदी मागणी", rq_new: "नवीन", rq_track: "स्थिती", rq_planned: "नियोजित", rq_urgent: "तातडीची",
+		rq_stock: "स्टॉक", rq_moq: "किमान ऑर्डर", rq_reorder: "री-ऑर्डर लेव्हल", rq_asked: "आधी मागितले", rq_last_rate: "मागील दर",
+		rq_no_last: "मागील दर नाही", rq_quote: "कोटेशन", rq_no_quote: "दुसरे कोटेशन अजून नाही", rq_cabin: "प्रोजेक्ट / केबिन कोड",
+		rq_why: "का पाहिजे? (बोला)", rq_send: "मंजुरीसाठी CEO कडे पाठवा", rq_sent: "CEO कडे पाठवले", rq_need_item: "कृपया वस्तू आणि नग निवडा",
+		rq_need_sup: "कृपया सप्लायर निवडा", rq_came_no_po: "PO शिवाय माल आला", rq_no_po_help: "PO शिवाय माल आला: तो अजून घेतलेला नाही. सप्लायर, वस्तू आणि चलनाचा फोटो द्या; तातडीची मागणी म्हणून CEO कडे जाईल, मग PO होईल आणि त्या PO वर माल घ्या.",
+		rq_title: "खरेदी मागण्या", rq_pos: "मंजूर रकमेपेक्षा जास्त PO", rq_pos_help: "मागणीवर मंजूर केलेल्या रकमेपेक्षा 10% पेक्षा जास्त असेल तरच PO इथे येतो.",
+		rq_track_help: "प्रत्येक मागणी कुठे आहे: CEO कडे → मंजूर → PO झाला → माल आला.",
+		rq_st_waiting: "CEO कडे", rq_st_approved: "मंजूर: PO करायचा", rq_st_po_draft: "PO ड्राफ्ट", rq_st_po_ceo: "PO CEO कडे",
+		rq_st_po_made: "PO झाला", rq_st_in: "माल आला", rq_st_rejected: "नाकारली", rq_make_po: "PO बनवा", rq_po_to_ceo: "मंजूर रकमेपेक्षा जास्त, CEO कडे पाठवला" });
 	const ICON = {
 		more: "⋯", leadership: "🧭", to_plan: "🗓️",
 		my_day: "☀️", my_leads: "🎯", my_deals: "🤝", my_kpi: "⭐", work_book: "📒", dsi: "💡", problem: "🚩",
@@ -940,7 +959,7 @@
 		calendar: "📅", follow_up: "🔔", new_lead: "➕", training: "🎓", day_report: "📝", team_reports: "🗂️",
 		calls: "📞", whatsapp: "💬", mail: "✉️", reminders: "⏰", library: "🏢", logins: "🔑", team_leads: "👥",
 		stock_check: "📦", receive: "🚚", issue: "📤", store_requests: "📋", dispatch: "🚛", low_stock: "⚠️", stock_count: "🔢", new_item: "🆕",
-		buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅",
+		requisition: "📝", buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅",
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁", el_points: "🔌",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
@@ -1956,12 +1975,6 @@
 		const row = document.getElementById("f-design-row");
 		const tree = (crmOpts && crmOpts.segment_tree) || {};
 		if (row) row.hidden = !((tree.Cabin || []).includes(ev.target.value));
-	});
-	// bill without PO (SK 27-Oct): the item rows show only for "No PO, no receipt"
-	document.addEventListener("change", (ev) => {
-		if (ev.target.id !== "fb-po") return;
-		const box = document.getElementById("fb-items");
-		if (box) box.hidden = ev.target.value !== "items";
 	});
 	root.addEventListener("change", (ev) => { if (ev.target.classList && ev.target.classList.contains("sk-file")) { photoPicked(ev.target); photoNote(ev.target); } }, true);
 
@@ -3562,7 +3575,7 @@
 		root.innerHTML = header(t("receive")) + `<main><p class="sk-note">${t("receive_help")}</p><ul class="sk-list">${S.pos.map((p, i) => li(esc(p.supplier_name),
 			`${esc(p.name)} · ${t("due")} ${esc(p.schedule_date || "")} · ${p.items.length} ${t("open_items")}`,
 			`<button class="sk-chip on" data-act="st-po" data-i="${i}">${t("receive")}</button>`, p.late ? "k-lead_new" : "")).join("") || empty()}</ul>
-			<button class="sk-btn wide sk-gap" data-act="st-nopo">${t("without_po")}</button>${toPost}</main>`;
+			<button class="sk-btn wide sk-gap" data-act="st-nopo">📝 ${t("rq_came_no_po")}</button>${toPost}</main>`;
 	}
 	function receiveForm(i) {
 		const p = S.pos[i];
@@ -3575,11 +3588,10 @@
 			${photoField("r-goods", "📷 " + t("goods_photo"))}${formField("r-note", t("note_q"))}
 			<button class="sk-btn go wide" data-act="st-receive">${t("save_receipt")}</button></main>`;
 	}
+	// SK 27-Oct: material that came without a PO is not received; Store raises an urgent requisition with the challan
 	function receiveNoPo() {
-		S.po = null;
-		root.innerHTML = header(t("without_po")) + `<main class="sk-form">${finder("r-sup", t("supplier"), "supplier")}${finder("r-item", t("item"), "item")}
-			<label class="sk-field"><span>${t("qty")}</span>${qtyBox("r-qty")}</label><label class="sk-field"><span>${t("rate_bill")}</span>${qtyBox("r-rate")}</label>${formField("r-reason", t("why_no_po"), true)}
-			${formField("r-billno", t("bill_no_q"))}${photoField("r-challan", "📷 " + t("challan_photo"))}<button class="sk-btn go wide" data-act="st-receive">${t("save_receipt")}</button></main>`;
+		RQ = { items: [], priority: "Urgent", noPo: true, tab: "new" };
+		return renderRequisition(true);
 	}
 
 	async function renderIssue() {
@@ -3658,7 +3670,7 @@
 		S.breqs = await call("buy_requests");
 		root.innerHTML = header(t("buy_requests")) + `<main><ul class="sk-list">${S.breqs.map((r, i) => li(`<label class="sk-check"><input type="checkbox" data-breq="${i}"> ${esc(r.item_name)} · ${num(r.qty)} ${esc(r.uom || "")}</label>`,
 			`${esc(r.by)} · ${esc(r.request)} · ${t("needed_by")} ${esc(r.needed_by)}${r.last_rate ? ` · ${t("last")} ${money(r.last_rate)} (${esc(r.last_supplier)})` : ""}`,
-			r.urgent ? `<span class="sk-due">${t("urgent")}</span>` : "", r.urgent ? "k-lead_new" : "")).join("") || empty()}</ul>
+			`<div class="sk-col">${r.urgent ? `<span class="sk-due">${t("urgent")}</span>` : ""}<button class="sk-chip on" data-act="pu-rq-po" data-i="${i}">📄 PO</button></div>`, r.urgent ? "k-lead_new" : "")).join("") || empty()}</ul>
 			${S.breqs.length ? `<button class="sk-btn go wide" data-act="pu-rates-selected">💬 ${t("get_rates_selected")}</button>` : ""}</main>`;
 	}
 
@@ -3747,14 +3759,145 @@
 	}
 
 	async function renderApprovals() {
-		S.appr = await call("buy_approvals");
-		root.innerHTML = header(t("po_approvals")) + `<main><ul class="sk-list">${S.appr.map((p, i) => li(esc(p.supplier_name), `${esc(p.name)} · ${t("due")} ${esc(p.schedule_date || "")}`,
+		[S.reqs, S.appr] = await Promise.all([call("req_to_approve").catch(() => []), call("buy_approvals")]);
+		const itemLine = (x, urgent) => `${esc(x.item_name || x.item_code)} · <b>${num(x.qty)} ${esc(x.uom || "")}</b> · ${t("rq_stock")} ${num(x.stock)}${x.min_order_qty ? ` · ${t("rq_moq")} ${num(x.min_order_qty)}` : ""}
+			${x.rate ? ` · ≈ ${money(x.amount)}` : ""}${x.last_rate ? `<br>${t("rq_last_rate")}: ${money(x.last_rate)}${x.last_supplier ? ` (${esc(x.last_supplier)})` : ""}` : urgent ? `<br>${t("rq_no_last")}` : ""}
+			${urgent ? (x.quotes || []).map((q, k) => `<br>${t("rq_quote")} ${k + 1}: ${money(q.rate)} · ${esc(q.supplier)}`).join("") || `<br>${t("rq_no_quote")}` : ""}`;
+		const reqs = S.reqs.map((r, i) => `<li class="sk-item ${r.sk_priority === "Urgent" ? "k-lead_new" : ""}"><div style="flex:1">
+			<div class="sk-item-title">${r.sk_priority === "Urgent" ? `<span class="chip2 red">🔴 ${t("rq_urgent")}</span>` : `<span class="chip2 green">🟢 ${t("rq_planned")}</span>`} ${esc(r.name)} · ${esc(r.by)}</div>
+			<div class="sk-item-meta">${r.sk_cabin ? `🏗️ ${esc(r.sk_cabin)} · ` : ""}${t("needed_by")} ${esc(r.schedule_date)}${r.age_days ? ` · ${r.age_days} ${t("fl_days")}` : ""}${r.sk_without_po ? `<br>⚠ ${t("rq_came_no_po")}: ${esc(r.supplier_name || "")}` : ""}</div>
+			${r.items.map((x) => `<div class="sk-item-meta">${itemLine(x, r.sk_priority === "Urgent")}</div>`).join("")}
+			${r.note ? `<div class="sk-item-meta">📝 ${esc(String(r.note).replace(/<[^>]*>/g, " "))}</div>` : ""}
+			${(r.photos || []).map((u) => `<a class="sk-chip" target="_blank" href="${esc(u)}">📷</a>`).join("")}
+			<div class="sk-row sk-gap"><b>${r.value ? "≈ " + money(r.value) : ""}</b>
+				<button class="sk-chip on" data-act="pu-rq-ok" data-i="${i}">✓ ${t("approve")}</button><button class="sk-chip bad" data-act="pu-rq-no" data-i="${i}">✗ ${t("reject")}</button></div></div></li>`).join("");
+		root.innerHTML = header(t("po_approvals")) + `<main><h3 class="sk-h">📝 ${t("rq_title")} (${S.reqs.length})</h3><ul class="sk-list">${reqs || empty()}</ul>
+			<h3 class="sk-h">📄 ${t("rq_pos")} (${S.appr.length})</h3><p class="sk-note">${t("rq_pos_help")}</p>
+			<ul class="sk-list">${S.appr.map((p, i) => li(esc(p.supplier_name), `${esc(p.name)} · ${t("due")} ${esc(p.schedule_date || "")}${p.why ? `<br>${esc(p.why)}` : ""}`,
 			`<div class="sk-col"><b>${money(p.grand_total)}</b><a class="sk-chip" href="/app/purchase-order/${encodeURIComponent(p.name)}">PDF</a>
 			<button class="sk-chip on" data-act="pu-approve" data-i="${i}">✓ ${t("approve")}</button><button class="sk-chip bad" data-act="pu-reject" data-i="${i}">✗ ${t("reject")}</button></div>`)).join("") || empty()}</ul></main>`;
 	}
 
+	// ---------- Purchase requisition (SK 27-Oct): one form, Planned / Urgent, project / cabin; CEO approves; PO; receipt ----------
+	let RQ = { items: [], priority: "Planned", noPo: false, tab: "new" };
+	const RQ_STAGE = { waiting_ceo: ["yel", "rq_st_waiting"], approved: ["navy", "rq_st_approved"], po_draft: ["navy", "rq_st_po_draft"],
+		po_waiting_ceo: ["yel", "rq_st_po_ceo"], po_made: ["navy", "rq_st_po_made"], material_in: ["green", "rq_st_in"], rejected: ["red", "rq_st_rejected"] };
+	async function renderRequisition(keep) {
+		if (!keep && !RQ.noPo) RQ = { ...RQ, items: RQ.items || [] };
+		const tabs = RQ.noPo ? "" : `<div class="cal-tabs"><button class="${RQ.tab === "new" ? "on" : ""}" data-act="pu-rq-tab" data-tab="new">➕ ${t("rq_new")}</button>
+			<button class="${RQ.tab === "track" ? "on" : ""}" data-act="pu-rq-tab" data-tab="track">📍 ${t("rq_track")}</button></div>`;
+		if (RQ.tab === "track" && !RQ.noPo) {
+			const rows = await call("req_track");
+			root.innerHTML = header(t("requisition")) + `<main>${tabs}<p class="sk-note">${t("rq_track_help")}</p><ul class="sk-list">${rows.map((r) => {
+				const [c, k] = RQ_STAGE[r.stage] || ["navy", r.stage];
+				return li(`${r.priority === "Urgent" ? "🔴" : "🟢"} ${esc(r.name)} <span class="chip2 ${c}">${t(k)}</span>`,
+					`${r.items.map((x) => `${esc(x.item_name)} ${num(x.qty)} ${esc(x.uom || "")}`).join(", ")}<br>${r.cabin ? `🏗️ ${esc(r.cabin)} · ` : ""}${esc(r.by)} · ${r.days} ${t("fl_days")}${r.without_po ? ` · ${t("rq_came_no_po")}` : ""}
+					${r.pos.length ? `<br>PO: ${r.pos.map((p) => `${esc(p.name)} (${esc(p.supplier || "")})`).join(", ")}` : ""}`,
+					`<a class="sk-chip" href="/app/material-request/${encodeURIComponent(r.name)}">ERP</a>`, r.stage === "rejected" || (r.days > 3 && r.stage !== "material_in") ? "k-lead_new" : "");
+			}).join("") || empty()}</ul></main>`;
+			return;
+		}
+		if (!RQ.cabins) RQ.cabins = await call("req_cabins").catch(() => []);
+		const today = new Date(); today.setDate(today.getDate() + (RQ.priority === "Urgent" ? 0 : 7));
+		const items = RQ.items.map((x, k) => li(`${esc(x.item_name)} · <b>${num(x.qty)} ${esc(x.uom || "")}</b>`,
+			`${t("rq_stock")} ${num(x.stock)}${x.min_order_qty ? ` · ${t("rq_moq")} ${num(x.min_order_qty)}` : ""}${x.last_rate ? ` · ${t("rq_last_rate")} ${money(x.last_rate)}` : ""}`,
+			`<button class="sk-chip" data-act="pu-rq-del" data-i="${k}">✕</button>`)).join("");
+		root.innerHTML = header(RQ.noPo ? t("rq_came_no_po") : t("requisition")) + `<main class="sk-form">${tabs}
+			${RQ.noPo ? `<p class="sk-note">${t("rq_no_po_help")}</p>${finder("rq-sup", t("supplier"), "supplier")}${photoField("rq-challan", "📷 " + t("challan_photo"))}${formField("rq-billno", t("bill_no_q"))}`
+				: `<div class="sk-contact sk-two"><button class="sk-chip ${RQ.priority === "Planned" ? "on" : ""}" data-act="pu-rq-prio" data-p="Planned">🟢 ${t("rq_planned")}</button>
+				<button class="sk-chip ${RQ.priority === "Urgent" ? "on bad" : ""}" data-act="pu-rq-prio" data-p="Urgent">🔴 ${t("rq_urgent")}</button></div>`}
+			<h3 class="sk-h">${t("items")}</h3><ul class="sk-list">${items || `<li class="sk-empty">${t("add_item_first")}</li>`}</ul>
+			${finder("rq-item", t("item") + " (ERP)", "item")}<div id="rq-info"></div>
+			<label class="sk-field"><span>${t("qty")}</span>${qtyBox("rq-qty")}</label>
+			<button class="sk-btn wide" data-act="pu-rq-add">+ ${t("add_item")}</button>
+			<label class="sk-field"><span>🏗️ ${t("rq_cabin")}</span><input id="rq-cabin" list="rq-cabin-dl" autocomplete="off" value="${esc(RQ.cabin || "")}">
+				<datalist id="rq-cabin-dl">${RQ.cabins.map((c) => `<option value="${esc(c.code)}">${esc(c.label)}</option>`).join("")}</datalist></label>
+			${RQ.noPo ? photoField("rq-goods", "📷 " + t("goods_photo")) : `<label class="sk-field"><span>${t("need_by")}</span><input id="rq-date" type="date" class="sk-select" value="${today.toISOString().slice(0, 10)}"></label>`}
+			${formField("rq-note", RQ.noPo ? t("why_no_po") : t("rq_why"), true)}
+			<button class="sk-btn go wide" data-act="pu-rq-send">📤 ${t("rq_send")}</button></main>`;
+		const inp = document.getElementById("rq-item");
+		inp.addEventListener("change", async () => {
+			const code = inp.value.trim();
+			if (!code) return;
+			try {
+				const d = await call("req_item", { item_code: code });
+				RQ.info = d;
+				document.getElementById("rq-info").innerHTML = `<p class="sk-note">📦 ${esc(d.item_name)}: ${t("rq_stock")} <b>${num(d.stock)} ${esc(d.uom || "")}</b>
+					· ${t("rq_moq")} <b>${num(d.min_order_qty)}</b> · ${t("rq_reorder")} ${num(d.reorder_level)}${d.already_asked ? ` · ${t("rq_asked")} ${num(d.already_asked)}` : ""}
+					${d.last_rate ? `<br>${t("rq_last_rate")}: ${money(d.last_rate)} (${esc(d.last_supplier || "")}, ${esc(d.last_date || "")})` : ""}</p>`;
+				const q = document.getElementById("rq-qty");
+				if (q && !q.value && d.min_order_qty) q.value = d.min_order_qty;
+			} catch (e) { RQ.info = null; }
+		});
+	}
+	async function requisitionAct(act, el) {
+		const i = Number(el.dataset.i);
+		switch (act) {
+			case "pu-rq-tab": RQ.tab = el.dataset.tab; RQ.noPo = false; return renderRequisition(true);
+			case "pu-rq-prio": RQ.priority = el.dataset.p; RQ.cabin = val("rq-cabin"); return renderRequisition(true);
+			case "pu-rq-del": RQ.items.splice(i, 1); RQ.cabin = val("rq-cabin"); return renderRequisition(true);
+			case "pu-rq-add": {
+				const code = val("rq-item"), qty = Number(val("rq-qty"));
+				if (!code || !(qty > 0)) return toast(t("rq_need_item"), true);
+				const d = RQ.info && RQ.info.item_code === code ? RQ.info : await call("req_item", { item_code: code });
+				if (d.min_order_qty && qty < d.min_order_qty) toast(`${t("rq_moq")} ${num(d.min_order_qty)}`, true);
+				RQ.items.push({ ...d, qty });
+				RQ.info = null; RQ.cabin = val("rq-cabin");
+				return renderRequisition(true);
+			}
+			case "pu-rq-send": {
+				const code = val("rq-item"), qty = Number(val("rq-qty"));
+				if (code && qty > 0) RQ.items.push({ item_code: code, qty });  // typed but not added yet
+				if (!RQ.items.length) return toast(t("rq_need_item"), true);
+				if (RQ.noPo && !val("rq-sup")) return toast(t("rq_need_sup"), true);
+				el.disabled = true;
+				const args = { items: JSON.stringify(RQ.items.map((x) => ({ item_code: x.item_code, qty: x.qty }))), priority: RQ.priority,
+					cabin: val("rq-cabin") || null, note: val("rq-note") || null };
+				if (RQ.noPo) Object.assign(args, { without_po: 1, supplier: val("rq-sup"), bill_no: val("rq-billno") || null,
+					photo: await photoUrl("rq-challan"), goods_photo: await photoUrl("rq-goods") });
+				else args.need_by = val("rq-date") || null;
+				try {
+					const r = await call("req_raise", args, true);
+					toast(`✓ ${r.name}: ${t("rq_sent")}`);
+					RQ = { items: [], priority: "Planned", noPo: false, tab: "track" };
+					return go("requisition");
+				} catch (e) { el.disabled = false; throw e; }
+			}
+			case "pu-rq-ok": {
+				el.disabled = true;
+				await call("req_decide", { name: S.reqs[i].name, approve: 1 }, true);
+				toast(`✓ ${t("approved")}`); return go("po_approvals");
+			}
+			case "pu-rq-no": {
+				const why = window.prompt(t("reject_why"));
+				if (!why) return;
+				await call("req_decide", { name: S.reqs[i].name, approve: 0, note: why }, true);
+				toast(t("rejected")); return go("po_approvals");
+			}
+			case "pu-rq-po": {
+				const r = S.breqs[i];
+				S.rqPo = r;
+				sheet(`<h3 class="sk-h">📄 PO · ${esc(r.request)}</h3><p class="sk-note">${esc(r.item_name)} · ${num(r.qty)} ${esc(r.uom || "")}${r.last_rate ? ` · ${t("rq_last_rate")} ${money(r.last_rate)}` : ""}</p>
+					${finder("rqp-sup", t("supplier"), "supplier")}<label class="sk-field"><span>${t("rate")}</span>${qtyBox("rqp-rate", r.last_rate || "")}</label>
+					<button class="sk-btn ok wide" data-act="pu-rq-po-save">📄 ${t("rq_make_po")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+				if (r.supplier) document.getElementById("rqp-sup").value = r.supplier;  // material came without PO: that supplier
+				return;
+			}
+			case "pu-rq-po-save": {
+				const r = S.rqPo;
+				el.disabled = true;
+				const res = await call("req_make_po", { request: r.request, supplier: val("rqp-sup") || null, rates: JSON.stringify({ [r.item_code]: val("rqp-rate") }) }, true);
+				closeSheet();
+				toast(res.needs_approval ? `${res.name}: ${t("rq_po_to_ceo")}` : `✓ ${res.name}`, res.needs_approval);
+				return go("buy_requests");
+			}
+		}
+		return false;
+	}
+
 	// taps on the Store / Purchase screens; returns true when handled
 	async function storeAct(act, el) {
+		if (act.startsWith("pu-rq-")) return requisitionAct(act, el);
 		const i = Number(el.dataset.i);
 		const saved = (msg) => toast(msg || t("saved"));
 		switch (act) {
@@ -4427,9 +4570,7 @@
 			case "fin-bill": S.photo = S.fb.photos[i];
 				return sheet(`<h3 class="sk-h">🧾 ${esc(S.photo.supplier_name || "")}</h3><p class="sk-note">${esc(S.photo.description)}</p>
 					${pick("fb-po", t("bill_from"), [...S.photo.orders.map((o) => ({ value: "po:" + o.name, label: `PO ${o.name} · ${money(o.grand_total)} · ${o.transaction_date}` })),
-						...(S.photo.receipts || []).map((o) => ({ value: "pr:" + o.name, label: `${t("received")} ${o.name}${o.supplier_delivery_note ? " · " + o.supplier_delivery_note : ""} · ${money(o.grand_total)} · ${o.posting_date}` })),
-						{ value: "items", label: t("bill_no_po") }])}
-					<div id="fb-items" hidden>${[0, 1, 2].map((k) => `${finder("fb-it" + k, `${t("item")} ${k + 1}`, "item")}<div class="sk-row"><label class="sk-field"><span>${t("qty")}</span>${qtyBox("fb-q" + k)}</label><label class="sk-field"><span>${t("rate")}</span>${qtyBox("fb-r" + k)}</label></div>`).join("")}</div>
+						...(S.photo.receipts || []).map((o) => ({ value: "pr:" + o.name, label: `${t("received")} ${o.name}${o.supplier_delivery_note ? " · " + o.supplier_delivery_note : ""} · ${money(o.grand_total)} · ${o.posting_date}` }))])}
 					${formField("fb-no", t("supplier_bill_no"))}<label class="sk-field"><span>${t("bill_date")}</span><input id="fb-date" type="date" class="sk-select" value="${new Date().toISOString().slice(0, 10)}"></label>
 					<button class="sk-btn ok wide" data-act="fin-bill-save">${t("make_bill")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>
 					`);
@@ -4439,7 +4580,6 @@
 				const args = { bill_no: val("fb-no"), bill_date: val("fb-date"), todo: S.photo.name };
 				if (src.startsWith("po:")) args.purchase_order = src.slice(3);
 				else if (src.startsWith("pr:")) args.purchase_receipt = src.slice(3);
-				else args.items = JSON.stringify([0, 1, 2].map((k) => ({ item_code: val("fb-it" + k), qty: val("fb-q" + k), rate: val("fb-r" + k) })).filter((x) => x.item_code && Number(x.qty) > 0));
 				el.disabled = true;
 				const r = await call("fin_make_bill", args, true);
 				closeSheet(); toast(`${r.name}: ${t("draft_made")}`); return go("bills_to_post");
@@ -4620,7 +4760,7 @@
 		logins: renderLogins, team_leads: renderTeamLeads, stock_check: renderStockCheck, receive: renderReceive, issue: renderIssue, store_requests: renderStoreRequests,
 		dispatch: renderDispatch, low_stock: renderLowStock, stock_count: renderStockCount, new_item: renderNewItem,
 		buy_requests: renderBuyRequests, get_rates: renderGetRates, compare: renderCompare, po_follow_up: renderFollowUpPo,
-		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals,
+		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals, requisition: () => renderRequisition(),
 		order_board: renderOrderBoard, job_cards: () => renderJobs("job_cards"), my_jobs: () => renderJobs("my_jobs"), need_material: renderNeedMaterial,
 		progress_photos: renderProgressPhotos, ready_dispatch: renderReadyDispatch, non_conformance: () => renderNcs("non_conformance"),
 		my_fixes: () => renderNcs("my_fixes"), inspect: () => renderInspect("inspect"), final_check: () => renderInspect("final_check"),
