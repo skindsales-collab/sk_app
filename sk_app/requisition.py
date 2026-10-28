@@ -15,7 +15,7 @@ from frappe.utils import add_days, cint, flt, getdate, now_datetime, nowdate
 from sk_app.store import STORE, _company, _default_store, _todo, _users_with_function, attach, need, uom
 
 MANAGEMENT = "Management"
-RAISERS = (STORE, "Purchase", MANAGEMENT)
+RAISERS = (STORE, "Purchase", MANAGEMENT, "HR")  # SK 28-Oct: Aarti (HR, acting purchase manager)
 WAITING, APPROVED, REJECTED = "Waiting CEO", "Approved", "Rejected"
 PRIORITIES = ("Planned", "Urgent")
 

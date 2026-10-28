@@ -61,6 +61,11 @@ def home():
 	if sections and sections["sections"] and sub_bills.checker() == profile.user and not any("sub_bills" in x["tiles"] for x in sections["sections"]):
 		sections["sections"][0]["tiles"] = sections["sections"][0]["tiles"] + ["sub_bills"]
 		sections["sections"][0]["more"] = (sections["sections"][0].get("more") or []) + ["sub_bills"]
+	# SK 28-Oct: a full-time employee on a workstation (Satish) gets no subcontractor bills
+	if sections and "Subcontractor" in (functions or [profile.home]) and frappe.db.exists("Employee", {"user_id": profile.user, "status": "Active"}):
+		for x in sections["sections"]:
+			for k in ("tiles", "main", "more"):
+				x[k] = [t for t in x.get(k) or [] if t != "my_bills"]
 	# Electrical points: only the electrician's workstation among the subcontractors (Quality / Production always)
 	if sections and "Subcontractor" in (functions or [profile.home]) and not production._is_electrical(production.my_workstation(profile.user)) \
 			and not {"Quality", "Production"} & set(functions or [profile.home]):

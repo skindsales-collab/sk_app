@@ -918,13 +918,14 @@
 	Object.assign(T.Marathi, { fl_workflow: "कामाचा क्रम", fl_loading: "आकडे येत आहेत", fl_days: "दिवस", fl_oldest: "सर्वात जुने",
 		fl_on_time: "सर्व वेळेवर", fl_work: "काम करा", fl_first: "पहिले दाखवले", show_more: "आणखी दाखवा", loading: "येत आहे…", fl_error: "कामाचा क्रम उघडला नाही, AI टीमला कळवले", ka_reason: "कारण", tm_not_called: "24 तासांनंतरही कॉल न केलेले लीड", tm_quotes_wait: "7 दिवसांपेक्षा जास्त थांबलेली कोटेशन", tm_behind: "लक्ष्यापासून सर्वात मागे", tm_due_today: "आजपर्यंत अपेक्षित", tm_all_leads: "सर्व लीड व डील", checked_submit: "तपासले, सबमिट करा", check_marked: "फोटोवरून वाचले: रंगीत बॉक्स तपासा (लाल = खात्री नाही), टाइप किंवा 🎤 ने दुरुस्त करा, मग तपासले, सबमिट करा दाबा", convert_deal: "डील बनवा", converted_ok: "डील तयार ✓" });
 	Object.assign(T.English, { lk_locked: "Locked", lk_touch: "Touch finger or look at the phone", lk_open_face: "Open with face / finger",
-		lk_ask_ceo: "Not working or new phone? Ask the CEO to reset it.", lk_pin: "Your PIN (the one you log in with)", lk_open: "Open", lk_relogin: "Forgot PIN? Log in again",
+		lk_ask_ceo: "Not working or new phone? Ask the CEO to reset it.", lk_pin: "Your PIN (the one you log in with)", lk_open: "Open", lk_relogin: "Forgot PIN? Log in again", lk_use_pin: "Use PIN instead",
+		lk_no_key: "Face / finger did not work on this phone: open with your PIN, then set it up again.",
 		lk_cancelled: "Not checked. Tap the button and touch the finger sensor or look at the phone.",
 		lk_setup: "Set up face / finger", lk_setup_why: "From now on the app opens only with your phone's fingerprint or face lock, no PIN. Your finger and face stay on the phone; nothing is sent.",
 		lk_setup_now: "Set up now", lk_setup_done: "Face / finger set up. The PIN is not needed any more.",
 		lk_reset: "Reset face / finger", lk_reset_q: "Reset face / finger? The person opens with the PIN once and sets it up again.", lk_reset_done: "Face / finger reset" });
 	Object.assign(T.Marathi, { lk_locked: "लॉक आहे", lk_touch: "बोट लावा किंवा फोनकडे पहा", lk_open_face: "चेहरा / बोटाने उघडा",
-		lk_ask_ceo: "चालत नाही किंवा नवीन फोन? CEO ला रीसेट करायला सांगा.", lk_pin: "तुमचा पिन (लॉगिनचा)", lk_open: "उघडा", lk_relogin: "पिन विसरलात? पुन्हा लॉगिन करा",
+		lk_ask_ceo: "चालत नाही किंवा नवीन फोन? CEO ला रीसेट करायला सांगा.", lk_pin: "तुमचा पिन (लॉगिनचा)", lk_open: "उघडा", lk_relogin: "पिन विसरलात? पुन्हा लॉगिन करा", lk_use_pin: "पिनने उघडा", lk_no_key: "या फोनवर चेहरा / बोट चालले नाही: पिनने उघडा, मग परत सेट करा.",
 		lk_cancelled: "तपासले नाही. बटण दाबा आणि बोट लावा किंवा फोनकडे पहा.",
 		lk_setup: "चेहरा / बोट लॉक सुरू करा", lk_setup_why: "आता पासून ॲप फक्त फोनच्या बोट / चेहरा लॉकने उघडेल, पिन नाही. बोट आणि चेहरा फोनवरच राहतात; काहीही पाठवले जात नाही.",
 		lk_setup_now: "आत्ता सुरू करा", lk_setup_done: "चेहरा / बोट लॉक तयार. आता पिन लागणार नाही.",
@@ -1011,12 +1012,22 @@
 		const res = await fetch(url, opts);
 		const data = await res.json().catch(() => ({}));
 		if (!res.ok) {
-			let msg = "Error";
-			try { msg = JSON.parse(JSON.parse(data._server_messages)[0]).message; } catch (e) { msg = data.exception || msg; }
+			let msg = serverError(data, "Error");
 			if (String(msg).includes("SK_LOCKED")) { if (!post && !background) lockHit = true; showLock(); throw new Error(t("lk_locked")); }
 			throw new Error(String(msg).replace(/<[^>]*>/g, "")); // ERPNext messages carry <strong> tags
 		}
 		return data.message;
+	}
+
+	// SK 28-Oct (Rushi's quote): ERPNext sends small notes ("Item Price added …") before the real error; show the error
+	function serverError(data, fallback) {
+		try {
+			const msgs = JSON.parse(data._server_messages || "[]").map((m) => JSON.parse(m));
+			const real = msgs.filter((m) => !m.alert);
+			const pick = (real.length ? real : msgs).slice(-1)[0];
+			if (pick && pick.message) return pick.message;
+		} catch (e) { /* fall through */ }
+		return data.exception ? String(data.exception).replace(/^[\w.]+(Error|Exception):\s*/, "") : fallback;
 	}
 
 	async function upload(file) {
@@ -1026,8 +1037,7 @@
 		const res = await fetch("/api/method/upload_file", { method: "POST", body: fd, headers: { "X-Frappe-CSRF-Token": CSRF }, credentials: "same-origin" });
 		const data = await res.json().catch(() => ({}));
 		if (!res.ok) {
-			let msg = "";
-			try { msg = JSON.parse(JSON.parse(data._server_messages)[0]).message; } catch (e) { msg = data.exception || ""; }
+			const msg = serverError(data, "");
 			throw new Error((t("upload_failed") + " " + String(msg).replace(/<[^>]*>/g, "")).trim());
 		}
 		return data.message.file_url;
@@ -5643,16 +5653,16 @@
 		const face = lockInfo.has_key;
 		el.innerHTML = `<div class="sk-lock-box"><div class="sk-lock-icon">🔒</div><h2>${t("lk_locked")}</h2>
 			<p class="sk-note">${esc(lockInfo.name || "")}</p>
-			${face ? `<p class="sk-big">👆 ${t("lk_touch")}</p><button class="sk-btn go wide" data-lock="face">🙂 ${t("lk_open_face")}</button>
-				<p class="sk-note">${t("lk_ask_ceo")}</p>`
+			${face && !lockInfo.usePin ? `<p class="sk-big">👆 ${t("lk_touch")}</p><button class="sk-btn go wide" data-lock="face">🙂 ${t("lk_open_face")}</button>
+				<button class="sk-btn wide" data-lock="usepin">🔢 ${t("lk_use_pin")}</button><p class="sk-note">${t("lk_ask_ceo")}</p>`
 			: `<label class="sk-field"><span>${t("lk_pin")}</span><input id="lk-pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8"></label>
 				<button class="sk-btn go wide" data-lock="pin">${t("lk_open")}</button>
 				<button class="sk-btn wide" data-lock="relogin">${t("lk_relogin")}</button>`}
 			<p class="sk-lock-msg" id="lk-msg"></p></div>`;
-		if (face) setTimeout(() => el.querySelector("[data-lock=face]") && el.querySelector("[data-lock=face]").click(), 300);
+		if (face && !lockInfo.usePin) setTimeout(() => el.querySelector("[data-lock=face]") && el.querySelector("[data-lock=face]").click(), 300);
 	}
 	async function afterUnlock(st) {
-		lockInfo = st;
+		lockInfo = { ...st, usePin: false };
 		hideLock();
 		if (!state.home) await start();
 		else if (lockHit) go(state.view); // a screen that could not load while locked opens now (typed forms are left as they are)
@@ -5674,10 +5684,13 @@
 				await fetch("/api/method/logout", { method: "POST", credentials: "same-origin", headers: { "X-Frappe-CSRF-Token": CSRF } }).catch(() => {});
 				return location.reload();
 			}
+			if (b.dataset.lock === "usepin") { lockInfo.usePin = true; return showLock(lockInfo); }
 			if (b.dataset.lock === "face") await afterUnlock(await faceUnlock());
 			else await afterUnlock(await call("unlock_pin", { pin: (document.getElementById("lk-pin") || {}).value || "" }, true));
 		} catch (e) {
 			if (msg) msg.textContent = e.name === "NotAllowedError" ? t("lk_cancelled") : e.message;
+			// SK 28-Oct (Swati): no key on this phone or the face check failed: the PIN box comes up by itself
+			if (b.dataset.lock === "face" && lockInfo) { lockInfo.usePin = true; showLock(lockInfo).then(() => { const m = document.getElementById("lk-msg"); if (m) m.textContent = t("lk_no_key"); }); }
 			if (/log in again/i.test(e.message)) setTimeout(() => location.reload(), 1500);
 		}
 		b.disabled = false;

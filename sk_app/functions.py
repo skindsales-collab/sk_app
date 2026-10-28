@@ -82,7 +82,8 @@ FUNCTIONS = {
 		"label": {"English": "HR", "Marathi": "एचआर"},
 		# point 16 + HR draft Rev 2: Attendance (Optick file upload, today, month, fixes); leave and expense approvals
 		# point 20 (SK 26-Oct): Logins / Reset PIN are the CEO's only, so HR has no Logins icon any more
-		"tiles": COMMON_TILES[:1] + ["attendance", "new_joiner"] + COMMON_TILES[1:] + ["team_scorecards", "mail"],
+		# SK 28-Oct (Aarti is acting purchase manager with HR): she raises purchase requisitions from HR too
+		"tiles": COMMON_TILES[:1] + ["attendance", "new_joiner", "requisition"] + COMMON_TILES[1:] + ["team_scorecards", "mail"],
 		"live": True,
 		"erpnext_roles": ["HR User", "HR Manager"],
 		"desk": "/app/hr",
@@ -102,7 +103,7 @@ FUNCTIONS = {
 		"desk": "/app/projects",
 	},
 	"Subcontractor": {
-		"label": {"English": "Production (subcontractor)", "Marathi": "उत्पादन (कंत्राटदार)"},
+		"label": {"English": "Production (job card worker)", "Marathi": "उत्पादन (जॉब कार्ड कामगार)"},
 		# very simple screen (SK): own jobs only; job tiles come with the Production screens
 		"tiles": ["my_day", "my_jobs", "el_points", "need_material", "my_fixes", "my_bills", "problem", "training", "day_report", "dsi", "my_kpi"],
 		"live": True,
@@ -196,7 +197,7 @@ MAIN_TILES = {
 	"Purchase": ["requisition", "buy_requests", "get_rates", "po_follow_up"],
 	"Accounts": ["gateway", "to_collect", "to_pay", "day_book"],
 	# SK 26-Oct: attendance is not on the main screen (it is in More)
-	"HR": ["leave_expense", "team_scorecards"],
+	"HR": ["leave_expense", "team_scorecards", "requisition"],
 	"Subcontractor": ["my_jobs", "el_points", "need_material", "my_fixes"],
 	"AI": ["improvement_inbox", "erp_gaps", "app_users", "dept_visits"],
 	# the CEO's first screen = overview, approvals, team; the other dashboards and Leadership are in More (SK 26-Oct)

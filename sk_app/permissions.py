@@ -26,6 +26,7 @@ def own_or_manager(doc, ptype=None, user=None):
 # ---------- CRM leads and deals per salesperson (SK 27-Oct: "lead is not yet segregated sales person wise") ----------
 
 CRM_OWNER = {"CRM Lead": "lead_owner", "CRM Deal": "deal_owner"}
+SALES_FUNCTIONS = {"Sales", "Marketing", "Machine Shifting"}
 
 
 def _crm_owners(user: str) -> list[str] | None:
@@ -36,7 +37,8 @@ def _crm_owners(user: str) -> list[str] | None:
 	if user == "Administrator" or "System Manager" in frappe.get_roles(user):
 		return None
 	functions = profile_functions(user)
-	if "Management" in functions or "Sales" not in functions:
+	# SK 28-Oct: Marketing (Pranali) and Machine Shifting (Aditya) logins without Sales saw every lead in the CRM
+	if "Management" in functions or not SALES_FUNCTIONS & set(functions):
 		return None
 	from sk_app.flows import _owners
 

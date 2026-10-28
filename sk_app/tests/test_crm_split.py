@@ -8,6 +8,7 @@ from sk_app import permissions
 from sk_app.tests.test_crm_day_report import app_user, make_user
 
 REP, BOSS, STRANGER = "sk_split_rep@example.com", "sk_split_mgr@example.com", "sk_split_other@example.com"
+MKT, NONCAB = "sk_split_mkt@example.com", "sk_split_noncab@example.com"
 
 
 class TestCrmSplit(IntegrationTestCase):
@@ -17,8 +18,10 @@ class TestCrmSplit(IntegrationTestCase):
 		from sk_app.install import after_install
 
 		after_install()
-		for u in (REP, BOSS, STRANGER):
+		for u in (REP, BOSS, STRANGER, MKT, NONCAB):
 			make_user(u, ["Sales User", "Employee"])
+		app_user(MKT, "Marketing")
+		app_user(NONCAB, "Machine Shifting")
 		app_user(BOSS, "Sales")
 		app_user(REP, "Sales", BOSS)
 		app_user(STRANGER, "Sales")
@@ -35,6 +38,13 @@ class TestCrmSplit(IntegrationTestCase):
 		self.assertIn("deal_owner", cond)
 		self.assertIn("ifnull", cond)
 		self.assertNotIn(STRANGER, cond)
+
+	def test_marketing_and_non_cabin_see_only_own(self):
+		"""SK 28-Oct: Pranali (Marketing) and Aditya (Machine Shifting) without Sales saw every lead."""
+		for u in (MKT, NONCAB):
+			cond = permissions.crm_lead_query(u)
+			self.assertIn(frappe.db.escape(u), cond)
+			self.assertNotIn(STRANGER, cond)
 
 	def test_admin_sees_all(self):
 		self.assertEqual(permissions.crm_lead_query("Administrator"), "")
