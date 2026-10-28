@@ -136,6 +136,8 @@ def supplier_of(workstation: str | None) -> str | None:
 	user = frappe.db.get_value("SK App User", {"workstation": workstation, "enabled": 1}, "user")
 	if not user:
 		return None
+	if frappe.db.exists("Employee", {"user_id": user, "status": "Active"}):
+		return None  # SK 28-Oct: a full-time employee on the workstation (Satish) is paid salary, never billed
 	name = get_fullname(user)
 	sup = frappe.db.get_value("Supplier", {"supplier_name": name})
 	if not sup:

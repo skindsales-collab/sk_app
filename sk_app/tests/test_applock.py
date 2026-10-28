@@ -100,9 +100,9 @@ class TestAppLock(IntegrationTestCase):
 		phone = Phone()
 		st = applock.register(PERSON, phone.create(applock.options(PERSON, "setup")), "Test Android")
 		self.assertTrue(st["has_key"])
-		self.assertFalse(st["pin_ok"])
-		# after set-up the PIN no longer opens the app (SK: "PIN option removed")
-		self.assertRaises(frappe.ValidationError, applock.unlock_pin, PERSON, "4321")
+		# SK 28-Oct (Rev 1 point 21, Swati "No passkeys available"): the PIN still opens when the phone loses its key
+		self.assertTrue(st["pin_ok"])
+		applock.unlock_pin(PERSON, "4321")
 		applock.verify(PERSON, phone.get(applock.options(PERSON, "unlock")))
 		self.assertTrue(frappe.db.exists("SK App Lock Log", {"user": PERSON, "event": "Unlock face / finger"}))
 		# a changed answer, an old challenge or another phone never opens it

@@ -124,18 +124,17 @@ def keys(user: str) -> list:
 def status(user: str) -> dict:
 	have = keys(user)
 	at = float(_state().get("at") or 0)
-	return {"locked": is_locked(), "minutes": minutes(), "has_key": bool(have), "pin_ok": not have,
+	return {"locked": is_locked(), "minutes": minutes(), "has_key": bool(have), "pin_ok": True,
 		"just_unlocked": bool(at) and time.time() - at < 90,
 		"phones": [k.device for k in have], "name": frappe.utils.get_fullname(user)}
 
 
-# ---------- PIN (only until face / finger is set up) ----------
+# ---------- PIN (always works; face / finger is the quick way once set up) ----------
 
 def unlock_pin(user: str, pin) -> dict:
 	from frappe.utils.password import check_password
 
-	if keys(user):
-		frappe.throw(_("Open with face / finger. New phone or not working? Ask the CEO to reset it."))
+	# SK 28-Oct (Swati: "No passkeys available"): the phone can lose its face / finger key, so the PIN always opens too
 	try:
 		check_password(user, str(pin or ""))
 	except frappe.AuthenticationError:
