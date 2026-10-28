@@ -6313,7 +6313,7 @@
 			<p class="sk-note">${esc(lockInfo.name || "")}</p>
 			${phoneCan ? `<button class="sk-btn go wide sk-face-btn" data-lock="${face ? "face" : "noface"}">👆 🙂 ${t(face ? "lk_open_face" : "lk_face_first")}</button>
 				<p class="sk-login-or">${t("lk_or_pin")}</p>` : ""}
-			<label class="sk-field"><span>${t("lk_pin")}</span><input id="lk-pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8"></label>
+			<label class="sk-field"><span>${t("lk_pin")}</span><input id="lk-pin" type="password" inputmode="numeric" autocomplete="current-password"></label>
 			<button class="sk-btn ${phoneCan ? "" : "go "}wide" data-lock="pin">${t("lk_open")}</button>
 			<button class="sk-btn wide" data-lock="forgot">🔑 ${t("fp_btn")}</button><button class="sk-btn wide" data-lock="relogin">${t("lk_relogin")}</button><p class="sk-note">${t("lk_ask_ceo")}</p>
 			<p class="sk-lock-msg" id="lk-msg"></p></div>`;
