@@ -23,3 +23,9 @@ class TestDealQuotes(IntegrationTestCase):
 	def test_job_item_for_non_cabin_quotes(self):
 		deal_quotes.ensure_setup()
 		self.assertTrue(frappe.db.exists("Item", deal_quotes.SERVICE_ITEM))
+
+	def test_won_deal_hook_is_safe_without_crm(self):
+		if frappe.db.exists("DocType", "CRM Deal"):
+			self.skipTest("CRM installed")
+		doc = frappe._dict(name="CRM-DEAL-X", status="Open", meta=frappe._dict(has_field=lambda f: False), get_doc_before_save=lambda: None)
+		deal_quotes.on_deal_update(doc)  # not won, no value: nothing happens, no error
