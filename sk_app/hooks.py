@@ -54,6 +54,9 @@ doc_events = {
 	"Item Price": {"validate": "sk_app.sub_bills.check_rate_edit"},
 }
 
+# SK Hub's activity log only records what was done; it must never stop a wrong draft from being deleted (28-Oct)
+ignore_links_on_delete = ["SK Hub Log"]
+
 has_permission = {
 	"SK DSI Entry": "sk_app.permissions.own_or_manager",
 	"SK Work Log": "sk_app.permissions.own_or_manager",
