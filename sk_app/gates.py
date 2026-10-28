@@ -266,3 +266,48 @@ def check_request(doc, method=None):
 		"schedule_date": doc.schedule_date, "reason": doc.get("sk_reason")})
 	if missing:
 		stop(_("Purchase request cannot be saved"), missing)
+
+
+# ---------- pending on the main screen ----------
+
+def pending(user: str, rows: bool = False) -> dict:
+	"""SK 28-Oct (main screen decision-first): records the person (manager: team, CEO: all) must still complete.
+	rows=False: counts only, for Home; rows=True: the records, for the Data missing screen."""
+	from sk_app.flows import _owners
+	from sk_app.logins import profile_functions
+
+	owners = _owners(user)
+	own = lambda field: {} if owners is None else {field: ["in", owners or [""]]}  # noqa: E731
+	groups = []
+
+	def add(key, label, items):
+		if items:
+			groups.append({"key": key, "label": label, "n": len(items), "rows": items if rows else []})
+
+	if frappe.db.exists("DocType", "CRM Lead"):
+		closed = frappe.get_all("CRM Lead Status", filters={"type": ["in", ["Lost", "Junk"]]}, pluck="name")
+		meta = frappe.get_meta("CRM Lead")
+		fields = [f for f in ("name", "first_name", "organization", "mobile_no", "phone", "sk_segment", "source", "lead_owner", "status")
+			if f == "name" or meta.has_field(f)]
+		filters = {"status": ["not in", closed or [""]], **own("lead_owner")}
+		if meta.has_field("sk_cold"):
+			filters["sk_cold"] = 0
+		items = []
+		for d in frappe.get_all("CRM Lead", filters=filters, fields=fields, order_by="modified desc", limit=0):
+			m = R.lead_missing(d)
+			if m:
+				items.append({"doctype": "CRM Lead", "name": d.name, "title": d.organization or d.first_name or d.name,
+					"meta": f"{d.status} · " + ", ".join(t for _k, t in m)})
+		add("leads", "Leads with data missing", items)
+	for doctype, label in (("Quotation", "Quotations not submitted"), ("Sales Order", "Sales Orders not submitted")):
+		title = "customer_name"
+		items = [{"doctype": doctype, "name": r.name, "title": r.get(title) or r.name, "meta": f"Draft · {r.transaction_date} · ₹{flt(r.grand_total):,.0f}"}
+			for r in frappe.get_all(doctype, filters={"docstatus": 0, **own("owner")}, fields=["name", title, "transaction_date", "grand_total"],
+				order_by="transaction_date asc", limit=0)]
+		add(doctype.lower().replace(" ", "_"), label, items)
+	if user == "Administrator" or "Management" in profile_functions(user):
+		items = [{"doctype": "Material Request", "name": r.name, "title": r.name, "meta": f"Waiting CEO · need by {r.schedule_date}"}
+			for r in frappe.get_all("Material Request", filters={"docstatus": 0, "material_request_type": "Purchase", "sk_approval": "Waiting CEO"},
+				fields=["name", "schedule_date"], limit=0)]
+		add("requests", "Purchase requests to approve", items)
+	return {"total": sum(g["n"] for g in groups), "groups": groups}

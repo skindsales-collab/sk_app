@@ -796,7 +796,7 @@
 		g_addr: "Billing address", g_city: "City", g_state: "State", g_pin: "PIN code", g_cmobile: "Customer mobile", g_cust_ok: "Customer complete ✓",
 		g_qsubmit: "Submit quotation (send to customer)", g_qsubmitted: "Quotation submitted ✓", g_order_date: "Order date", g_po_date: "PO date",
 		g_po_photo: "PO copy (photo / PDF)", g_po_or_photo: "Customer PO number or PO copy", g_won: "Deal Won ✓ Sales Order submitted", g_wait_confirm: "Saved. Waiting for the manager's Confirm; the deal turns Won then",
-		g_count_all: "Count every line (0 if none)", g_reason: "Reason",
+		g_count_all: "Count every line (0 if none)", g_reason: "Reason", g_data_missing: "Data missing",
 		fl_so_saved: "Sales Order saved", fl_plan_why: "Confirmed orders without a Work Order. Make one per cabin; its stages become job cards.",
 		fl_no_bom: "No BOM yet: Design makes it first", fl_make_wo: "Make Work Order", fl_wo_saved: "Work Order saved",
 		more: "More", grp_work: "My work", grp_me: "Me", grp_help: "Help", leadership: "Leadership & Strategy",
@@ -834,7 +834,7 @@
 		g_addr: "बिलिंग पत्ता", g_city: "शहर", g_state: "राज्य", g_pin: "पिन कोड", g_cmobile: "ग्राहकाचा मोबाईल", g_cust_ok: "ग्राहक माहिती पूर्ण ✓",
 		g_qsubmit: "कोटेशन सबमिट करा (ग्राहकाला पाठवा)", g_qsubmitted: "कोटेशन सबमिट झाले ✓", g_order_date: "ऑर्डर तारीख", g_po_date: "PO तारीख",
 		g_po_photo: "PO ची प्रत (फोटो / PDF)", g_po_or_photo: "ग्राहकाचा PO नंबर किंवा PO ची प्रत", g_won: "डील जिंकली ✓ सेल्स ऑर्डर सबमिट", g_wait_confirm: "सेव्ह झाले. मॅनेजरच्या Confirm ची वाट; मग डील जिंकली दिसेल",
-		g_count_all: "प्रत्येक ओळ मोजा (नसेल तर 0)", g_reason: "कारण",
+		g_count_all: "प्रत्येक ओळ मोजा (नसेल तर 0)", g_reason: "कारण", g_data_missing: "माहिती अपूर्ण",
 		fl_so_saved: "सेल्स ऑर्डर जतन झाली", fl_plan_why: "वर्क ऑर्डर नसलेल्या निश्चित ऑर्डर. प्रत्येक केबिनसाठी एक बनवा; त्याचे टप्पे जॉब कार्ड होतात.",
 		fl_no_bom: "BOM अजून नाही: आधी डिझाईन बनवेल", fl_make_wo: "वर्क ऑर्डर बनवा", fl_wo_saved: "वर्क ऑर्डर जतन झाली",
 		more: "अधिक", grp_work: "माझे काम", grp_me: "मी", grp_help: "मदत", leadership: "नेतृत्व व रणनीती",
@@ -1636,6 +1636,9 @@
 	// most delayed stages of the person's flows; each opens its list
 	function decideHtml() {
 		const cells = [];
+		// SK 28-Oct mandatory gate: records with data missing / drafts not submitted come first on the main screen
+		const gp = state.home && state.home.gate_pending;
+		if (gp && gp.total) cells.push(`<button class="sk-dec bad" data-go="data_missing"><b>${gp.total}</b><span>⚠️ ${t("g_data_missing")}</span><small>${gp.groups.map((g) => g.n).join(" · ")}</small></button>`);
 		const now = kpiNow();
 		if (now && now.target) {
 			cells.push(`<button class="sk-dec ${now.gap ? "bad" : "ok"}" data-go="my_kpi"><b>${now.gap ? (now.money ? "₹" + kAmt(now.gap) : Math.round(now.gap * 10) / 10 + (now.unit || "")) : "✓"}</b><span>${now.gap ? t("d_gap") : t("k_on_track")}</span></button>`);
@@ -2309,6 +2312,17 @@
 		if (doctype === "Sales Order" && d.docstatus === 0)
 			return `<button class="sk-btn go wide" data-act="fl-confirm" data-name="${esc(d.name)}">✔ ${t("fl_confirm")}</button>`;
 		return "";
+	}
+	// SK 28-Oct mandatory gate: everything the person (manager: team, CEO: all) must still complete or submit
+	async function renderDataMissing() {
+		const d = await call("data_missing");
+		const slug = (dt) => dt.toLowerCase().replace(/ /g, "-");
+		const row = (r) => r.doctype.startsWith("CRM ")
+			? `<li class="sk-item k-lead_new"><button class="sk-fu-main" data-open="${esc(r.doctype)}" data-name="${esc(r.name)}"><div class="sk-item-title">${esc(r.title)}</div><div class="sk-item-meta">${esc(r.meta)}</div></button></li>`
+			: `<li class="sk-item k-lead_new"><a class="sk-fu-main" href="/app/${slug(r.doctype)}/${encodeURIComponent(r.name)}"><div class="sk-item-title">${esc(r.title)} · ${esc(r.name)}</div><div class="sk-item-meta">${esc(r.meta)}</div></a></li>`;
+		root.innerHTML = header(`⚠️ ${t("g_data_missing")}`) + `<main><p class="sk-note">${t("g_missing")}</p>
+			${d.groups.map((g) => `<details class="sk-gap" ${d.groups.length === 1 ? "open" : ""}><summary class="sk-h">${esc(g.label)} (${g.n})</summary>
+				<ul class="sk-list">${g.rows.slice(0, 200).map(row).join("")}</ul></details>`).join("") || `<p class="sk-empty">${t("nothing")}</p>`}</main>`;
 	}
 	// SK 28-Oct mandatory gate: the lead's missing data, filled right here (old "Enquiry" leads too)
 	function gateCard(d, o) {
@@ -5205,7 +5219,7 @@
 		document.body.prepend(a);
 	}
 
-	const LIVE_VIEWS = { fnpage: () => renderFnPage(), more: renderMore, leadership: renderLeadership, to_plan: renderToPlan, my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), cold_calls: renderColdCalls, marketing_list: () => renderMarketing(), my_deals: () => renderLeads("my_deals"),
+	const LIVE_VIEWS = { data_missing: renderDataMissing, fnpage: () => renderFnPage(), more: renderMore, leadership: renderLeadership, to_plan: renderToPlan, my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), cold_calls: renderColdCalls, marketing_list: () => renderMarketing(), my_deals: () => renderLeads("my_deals"),
 		my_kpi: renderKpi, dsi: renderDsi, el_points: renderElPoints, kpi_actions: renderKpiActions, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
 		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name),

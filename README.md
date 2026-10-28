@@ -263,5 +263,9 @@ so the phone, the ERPNext desk and the API all stop at the same place. Every ref
 | Purchase request | Item and qty, required-by date, reason (ERPNext's own re-order run gets an automatic reason); CEO approval as before |
 | Stock count | Every line counted (0 if none), not only the differences |
 
+Home shows a **⚠️ Data missing** box first in "Decide now" (leads with data missing, quotations / sales orders not
+submitted, purchase requests waiting for the CEO; own work, the team's for a manager, all for the CEO). Tapping it lists
+the records: a lead opens its detail screen with the fill-first card, a draft opens in ERPNext.
+
 Junk / lost needs nothing. Background drafts (mail leads, design quote values) are still saved; the gate sits on the step
 that moves them on.

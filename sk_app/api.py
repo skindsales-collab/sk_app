@@ -85,7 +85,26 @@ def home():
 		"must_set_pin": bool(frappe.db.get_value("SK App User", profile.name, "must_set_pin")),
 		"card": _latest_card(profile.user),
 		"new_files": crm.files_to_send(profile.user), "day_report_sent": bool(day_report._find(profile.user, getdate())),
-		"due_reminders": comms.due_reminders(profile.user), "badges": _colours(profile, functions)}
+		"due_reminders": comms.due_reminders(profile.user), "badges": _colours(profile, functions), "gate_pending": _gate_pending(profile.user)}
+
+
+def _gate_pending(user):
+	"""SK 28-Oct: "Data missing" first on the main screen (mandatory gate); never breaks Home."""
+	from sk_app import gates
+
+	try:
+		return gates.pending(user)
+	except Exception:
+		frappe.log_error("SK App data missing count")
+		return None
+
+
+@frappe.whitelist()
+def data_missing():
+	"""The records behind the Home "Data missing" box: leads to complete, drafts to submit, requests to approve."""
+	from sk_app import gates
+
+	return gates.pending(_me().user, rows=True)
 
 
 def _colours(profile, functions):
