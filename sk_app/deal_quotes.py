@@ -207,6 +207,8 @@ def order_from_deal(deal: str) -> str | None:
 
 
 def on_deal_update(doc, method=None):
+	if frappe.flags.sk_won_from_order:  # Won because its Sales Order was submitted (sk_app.won_deals): no second order
+		return
 	before = doc.get_doc_before_save()
 	if doc.get("status") in _won_statuses() and (not before or before.get("status") != doc.get("status")):
 		try:

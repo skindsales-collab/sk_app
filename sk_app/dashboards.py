@@ -143,15 +143,16 @@ def won_deals(start, end, segment=None) -> list:
 		return []
 	won = frappe.get_all("CRM Deal Status", filters={"type": "Won"}, pluck="name") or ["Won"]
 	meta = frappe.get_meta("CRM Deal")
-	fields = ["name", "organization", "deal_value", "expected_deal_value", "closed_date", "expected_closure_date", "modified", "deal_owner"]
+	fields = ["name", "organization", "erpnext_customer", "deal_value", "expected_deal_value", "closed_date", "expected_closure_date", "modified", "deal_owner"]
 	fields = [f for f in fields if f in ("name", "modified") or meta.has_field(f)]
 	seg = _crm_seg(segment)
 	seg = {k: v for k, v in seg.items() if meta.has_field(k)}
-	ordered = {(n or "").strip().lower() for n in frappe.get_all("Sales Order", filters={"docstatus": ["<", 2]}, pluck="customer_name", limit=0)}
+	orders = frappe.get_all("Sales Order", filters={"docstatus": ["<", 2]}, fields=["customer", "customer_name"], limit=0)
+	ordered = {(n or "").strip().lower() for o in orders for n in (o.customer, o.customer_name)}
 	out = []
 	for d in frappe.get_all("CRM Deal", filters={"status": ["in", won], **seg}, fields=fields, limit=0):
 		day = getdate(d.get("closed_date") or d.get("expected_closure_date") or d.modified)
-		if not (getdate(start) <= day <= getdate(end)) or (d.get("organization") or "").strip().lower() in ordered:
+		if not (getdate(start) <= day <= getdate(end)) or {(d.get(f) or "").strip().lower() for f in ("organization", "erpnext_customer")} & ordered - {""}:
 			continue
 		out.append(frappe._dict(name=d.name, doctype="CRM Deal", customer_name=d.get("organization") or d.name, transaction_date=day,
 			base_net_total=flt(d.get("deal_value") or d.get("expected_deal_value")), customer_group=None, delivery_date=None, docstatus=0,
