@@ -93,14 +93,17 @@ def _company():
 # ---------- Stock Check ----------
 
 def stock_search(user: str, q: str | None = None) -> list[dict]:
-	need(user, STORE, "Purchase", "Production", "Quality", "Accounts")  # Accounts: bill items without PO (27-Oct)
+	# Accounts: bill items without PO (27-Oct); HR: Aarti's requisitions (SK 28-Oct)
+	need(user, STORE, "Purchase", "Production", "Quality", "Accounts", "HR", "Management")
 	q = (q or "").strip()
 	filters = {"disabled": 0, "is_stock_item": 1}
-	or_filters = None
 	if q:
-		like = f"%{q}%"
-		or_filters = [["item_name", "like", like], ["item_code", "like", like], ["description", "like", like]]
-	items = frappe.get_all("Item", filters=filters, or_filters=or_filters, fields=["item_code", "item_name", "item_group", "stock_uom"],
+		# SK 28-Oct (Rev 1 point 13): every word may be anywhere, so "c channel 100" finds "C-Channel 100x50"
+		from sk_app.item_input import find_items
+
+		codes = [r["item_code"] for r in find_items(q, 40)]
+		filters["item_code"] = ["in", codes or [""]]
+	items = frappe.get_all("Item", filters=filters, fields=["item_code", "item_name", "item_group", "stock_uom"],
 		order_by="item_name asc", limit=40 if q else 0)
 	codes = [i.item_code for i in items]
 	if not codes:

@@ -692,7 +692,7 @@
 		camera: "Camera", gallery: "Gallery / screenshot", pdf_file: "PDF / file", retake: "Retake", remove: "Remove",
 		uploading: "Sending…", uploaded: "Sent ✓", upload_retry: "Network weak, trying again…",
 		open_chrome: "Mic / camera work best in Chrome. Tap here to open the SK App in Chrome.",
-		mb_today: "today", mb_leads: "leads", mb_replied: "replied", mb_waiting_help: "Big number = mails waiting (New). Red = a mail waiting over 2 hours. Tap a box to see only its mails.", mb_move: "Move to another team mailbox", mb_moved: "Moved to", mb_late: "Mails not answered", marketing_list: "Marketing list", mk_help: "Potential customers (not leads): send festival greetings and promotions to keep in touch. When someone is interested tap Make lead.", mk_people: "people", mk_sent_today: "greetings sent by you today", mk_add: "Add person (visiting card photo or voice)", mk_city: "City", mk_greeting: "Greeting to send", mk_promo_text: "Type the promotion message", mk_mail_all: "Promotion mail to all (ERPNext Newsletter)", open_erpnext: "Open in ERPNext", mk_not_sent: "no greeting sent yet", mk_send: "Send on WhatsApp", mk_make_lead: "Interested: make lead", mk_need_name: "Please give the name", mk_need_mobile: "Please give mobile or e-mail", mk_added: "Added to Marketing list", mk_existing: "Already in ERPNext: put on the Marketing list", mk_upload: "Upload Excel list (earlier contacts)", mk_upload_help: "Excel or CSV with columns Name, Mobile (and Company, Email, City if you have them). A phone or Google Contacts export also works. The same mobile is not added twice.", mk_added_n: "added", mk_existing_n: "already in ERPNext", mkf_diwali: "Diwali", mkf_new_year: "New Year", mkf_sankranti: "Sankranti", mkf_republic: "Republic Day", mkf_holi: "Holi", mkf_gudi_padwa: "Gudi Padwa", mkf_independence: "Independence Day", mkf_ganesh: "Ganesh Chaturthi", mkf_dussehra: "Dussehra", mkf_promotion: "Promotion", gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", new_product: "New product / vendor", mails_n: "Mails", cold_calls: "Cold Calling", cold_help: "Call-list data, kept out of My Leads. Call one by one; when the customer is interested tap Interested → it moves to My Leads.", cold_total: "cold leads", cold_not_called: "not called yet", cold_never: "not called yet", cold_interested: "Interested → My Leads", cold_move: "Not a lead: move to Marketing list", cold_moved: "Moved", cold_to_mk: "Moved to Marketing list", to_post: "Received: check and post", to_post_help: "Check the material, then tap Post. Stock goes up only after Post.", rate_missing: "rate missing", rate_bill: "Rate per unit (from the bill)", rate_need: "Give the rate from the supplier bill (needed to value the stock):", remove_dup: "Remove (saved twice)", tap_again: "Tap again to remove", photo_entry: "Photo entry", pe_help: "Bill, e-invoice, voucher or payment proof: take a photo (or pick the PDF) and submit. A supplier bill goes to Bills to Post (Make bill). Others wait here until you enter them in ERPNext.", pe_what: "What is it?", pe_supplier_bill: "Supplier bill / e-invoice", pe_expense: "Expense bill / petty cash voucher", pe_money_in: "Payment received (cheque / UTR)", pe_money_out: "Payment made (bank slip / UTR)", pe_other: "Other document", pe_photo: "Photo or PDF", pe_party: "Customer / party (optional)", pe_ref: "Bill / ref no (optional)", pe_submit: "Submit", pe_pending: "Photo entries to enter in ERPNext", pe_open: "Enter in ERPNext", pe_sent: "Submitted", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
+		mb_today: "today", mb_leads: "leads", mb_replied: "replied", mb_waiting_help: "Big number = mails waiting (New). Red = a mail waiting over 2 hours. Tap a box to see only its mails.", mb_move: "Move to another team mailbox", mb_moved: "Moved to", mb_late: "Mails not answered", marketing_list: "Marketing list", mk_help: "Potential customers (not leads): send festival greetings and promotions to keep in touch. When someone is interested tap Make lead.", mk_people: "people", mk_sent_today: "greetings sent by you today", mk_add: "Add person (visiting card photo or voice)", mk_city: "City", mk_greeting: "Greeting to send", mk_promo_text: "Type the promotion message", mk_mail_all: "Promotion mail to all (ERPNext Newsletter)", open_erpnext: "Open in ERPNext", mk_not_sent: "no greeting sent yet", mk_send: "Send on WhatsApp", mk_make_lead: "Interested: make lead", mk_need_name: "Please give the name", mk_need_mobile: "Please give mobile or e-mail", mk_added: "Added to Marketing list", mk_existing: "Already in ERPNext: put on the Marketing list", mk_upload: "Upload Excel list (earlier contacts)", mk_upload_help: "Excel or CSV with columns Name, Mobile (and Company, Email, City if you have them). A phone or Google Contacts export also works. The same mobile is not added twice.", mk_added_n: "added", mk_existing_n: "already in ERPNext", mkf_diwali: "Diwali", mkf_new_year: "New Year", mkf_sankranti: "Sankranti", mkf_republic: "Republic Day", mkf_holi: "Holi", mkf_gudi_padwa: "Gudi Padwa", mkf_independence: "Independence Day", mkf_ganesh: "Ganesh Chaturthi", mkf_dussehra: "Dussehra", mkf_promotion: "Promotion", gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", new_product: "New product / vendor", mails_n: "Mails", cold_calls: "Cold Calling", cold_help: "Call-list data, kept out of My Leads. Call one by one; when the customer is interested tap Interested → it moves to My Leads.", cold_total: "cold leads", cold_not_called: "not called yet", cold_never: "not called yet", cold_interested: "Interested → My Leads", cold_move: "Not a lead: move to Marketing list", cold_moved: "Moved", cold_to_mk: "Moved to Marketing list", ocr_read: "Read text from a photo", ocr_nothing: "No text could be read from the photo. Take it again, straight and in good light.", ocr_done: "Text read from the photo: please check it", pm_find: "Find item from photo", pm_looking: "Matching the photo…", pm_pick: "Closest items: tap the right one (your photo is kept as its sample)", pm_first: "First time for this material: type and pick the item; your photo is kept, next time the photo suggests it", pm_saved: "Photo kept as the item sample", tc_title: "Count from photo", tc_help: "Tap once on every piece. Each tap is numbered; ↩ removes the last one.", tc_pieces: "pieces", tc_undo: "Undo", tc_use: "Use this count", rq_list: "Many items at once: type, speak or 📷 photo a list (e.g. C channel 20 nos, MS plate 5 kg)", rq_make_rows: "Make rows from the list", rq_rows_made: "rows made: please check each item", rq_max: "Up to 20 items on one requisition", rq_more_lines: "more lines not added (20 max)", rq_photo: "Photo of material or handwritten list", rq_check: "check", goods_photo_need: "Please take the quality photo of the material", to_post: "Received: check and post", to_post_help: "Check the material, then tap Post. Stock goes up only after Post.", rate_missing: "rate missing", rate_bill: "Rate per unit (from the bill)", rate_need: "Give the rate from the supplier bill (needed to value the stock):", remove_dup: "Remove (saved twice)", tap_again: "Tap again to remove", photo_entry: "Photo entry", pe_help: "Bill, e-invoice, voucher or payment proof: take a photo (or pick the PDF) and submit. A supplier bill goes to Bills to Post (Make bill). Others wait here until you enter them in ERPNext.", pe_what: "What is it?", pe_supplier_bill: "Supplier bill / e-invoice", pe_expense: "Expense bill / petty cash voucher", pe_money_in: "Payment received (cheque / UTR)", pe_money_out: "Payment made (bank slip / UTR)", pe_other: "Other document", pe_photo: "Photo or PDF", pe_party: "Customer / party (optional)", pe_ref: "Bill / ref no (optional)", pe_submit: "Submit", pe_pending: "Photo entries to enter in ERPNext", pe_open: "Enter in ERPNext", pe_sent: "Submitted", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
 		gw_masters: "Masters", gw_transactions: "Transactions", gw_utilities: "Utilities", gw_reports: "Reports", gw_more: "More reports",
 		gw_desk: "Opens in ERPNext", gw_pending: "waiting", db_particulars: "Particulars", db_none: "No vouchers on this day",
 		cash_today: "Cash / Bank", to_collect: "Receivables", to_pay: "Payables", bills_to_post: "Purchase Invoice and Debit Note",
@@ -724,7 +724,7 @@
 		camera: "कॅमेरा", gallery: "गॅलरी / स्क्रीनशॉट", pdf_file: "PDF / फाईल", retake: "पुन्हा घ्या", remove: "काढा",
 		uploading: "पाठवत आहे…", uploaded: "पाठवले ✓", upload_retry: "नेटवर्क कमी, पुन्हा प्रयत्न…",
 		open_chrome: "माईक / कॅमेरा Chrome मध्ये नीट चालतात. SK App Chrome मध्ये उघडण्यासाठी येथे दाबा.",
-		mb_today: "आज", mb_leads: "लीड", mb_replied: "उत्तर", mb_waiting_help: "मोठा आकडा = थांबलेले मेल (नवीन). लाल = 2 तासांपेक्षा जास्त थांबलेला मेल. फक्त त्या बॉक्सचे मेल पाहण्यासाठी बॉक्स दाबा.", mb_move: "दुसऱ्या टीम मेलबॉक्समध्ये हलवा", mb_moved: "हलवले:", mb_late: "उत्तर न दिलेले मेल", marketing_list: "मार्केटिंग यादी", mk_help: "संभाव्य ग्राहक (लीड नाही): संपर्क टिकवण्यासाठी सणाच्या शुभेच्छा आणि प्रमोशन पाठवा. कोणाला रस असल्यास 'लीड बनवा' दाबा.", mk_people: "व्यक्ती", mk_sent_today: "आज तुम्ही पाठवलेल्या शुभेच्छा", mk_add: "व्यक्ती जोडा (व्हिजिटिंग कार्ड फोटो किंवा आवाज)", mk_city: "शहर", mk_greeting: "पाठवायच्या शुभेच्छा", mk_promo_text: "प्रमोशन मेसेज लिहा", mk_mail_all: "सर्वांना प्रमोशन मेल (ERPNext न्यूजलेटर)", open_erpnext: "ERPNext मध्ये उघडा", mk_not_sent: "अजून शुभेच्छा पाठवल्या नाहीत", mk_send: "WhatsApp वर पाठवा", mk_make_lead: "रस आहे: लीड बनवा", mk_need_name: "कृपया नाव द्या", mk_need_mobile: "कृपया मोबाइल किंवा ई-मेल द्या", mk_added: "मार्केटिंग यादीत जोडले", mk_existing: "ERPNext मध्ये आधीच आहे: मार्केटिंग यादीत टाकले", mk_upload: "एक्सेल यादी अपलोड करा (आधीचे कॉन्टॅक्ट)", mk_upload_help: "Name, Mobile (असल्यास Company, Email, City) कॉलम असलेली एक्सेल किंवा CSV. फोन किंवा Google Contacts ची फाइलही चालते. एकच मोबाइल दोनदा जोडला जात नाही.", mk_added_n: "जोडले", mk_existing_n: "ERPNext मध्ये आधीच", mkf_diwali: "दिवाळी", mkf_new_year: "नवीन वर्ष", mkf_sankranti: "संक्रांत", mkf_republic: "प्रजासत्ताक दिन", mkf_holi: "होळी", mkf_gudi_padwa: "गुढी पाडवा", mkf_independence: "स्वातंत्र्य दिन", mkf_ganesh: "गणेश चतुर्थी", mkf_dussehra: "दसरा", mkf_promotion: "प्रमोशन", gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", new_product: "नवीन प्रॉडक्ट / व्हेंडर", mails_n: "मेल", cold_calls: "कोल्ड कॉलिंग", cold_help: "कॉल-लिस्ट डेटा, माझे लीड पासून वेगळा. एक एक कॉल करा; ग्राहकाला रस असल्यास 'रस आहे' दाबा → तो माझे लीड मध्ये जातो.", cold_total: "कोल्ड लीड", cold_not_called: "अजून कॉल नाही", cold_never: "अजून कॉल नाही", cold_interested: "रस आहे → माझे लीड", cold_move: "लीड नाही: मार्केटिंग यादीत हलवा", cold_moved: "हलवले", cold_to_mk: "मार्केटिंग यादीत हलवले", to_post: "आलेला माल: तपासा आणि पोस्ट करा", to_post_help: "माल तपासा, मग पोस्ट दाबा. पोस्ट केल्यावरच स्टॉक वाढतो.", rate_missing: "दर नाही", rate_bill: "प्रति नग दर (बिलावरून)", rate_need: "सप्लायर बिलावरील दर द्या (स्टॉकची किंमत लागते):", remove_dup: "काढा (दोनदा सेव्ह)", tap_again: "काढण्यासाठी पुन्हा दाबा", photo_entry: "फोटो एंट्री", pe_help: "बिल, ई-इनव्हॉइस, व्हाउचर किंवा पेमेंट पुरावा: फोटो काढा (किंवा PDF निवडा) आणि सबमिट करा. सप्लायर बिल 'बिल पोस्ट करा' मध्ये जाते. बाकी ERPNext मध्ये एंट्री होईपर्यंत इथे राहतात.", pe_what: "हे काय आहे?", pe_supplier_bill: "सप्लायर बिल / ई-इनव्हॉइस", pe_expense: "खर्च बिल / पेटी कॅश व्हाउचर", pe_money_in: "पेमेंट मिळाले (चेक / UTR)", pe_money_out: "पेमेंट केले (बँक स्लिप / UTR)", pe_other: "इतर कागद", pe_photo: "फोटो किंवा PDF", pe_party: "ग्राहक / पार्टी (ऐच्छिक)", pe_ref: "बिल / रेफ नंबर (ऐच्छिक)", pe_submit: "सबमिट", pe_pending: "ERPNext मध्ये टाकायच्या फोटो एंट्री", pe_open: "ERPNext मध्ये टाका", pe_sent: "सबमिट झाले", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
+		mb_today: "आज", mb_leads: "लीड", mb_replied: "उत्तर", mb_waiting_help: "मोठा आकडा = थांबलेले मेल (नवीन). लाल = 2 तासांपेक्षा जास्त थांबलेला मेल. फक्त त्या बॉक्सचे मेल पाहण्यासाठी बॉक्स दाबा.", mb_move: "दुसऱ्या टीम मेलबॉक्समध्ये हलवा", mb_moved: "हलवले:", mb_late: "उत्तर न दिलेले मेल", marketing_list: "मार्केटिंग यादी", mk_help: "संभाव्य ग्राहक (लीड नाही): संपर्क टिकवण्यासाठी सणाच्या शुभेच्छा आणि प्रमोशन पाठवा. कोणाला रस असल्यास 'लीड बनवा' दाबा.", mk_people: "व्यक्ती", mk_sent_today: "आज तुम्ही पाठवलेल्या शुभेच्छा", mk_add: "व्यक्ती जोडा (व्हिजिटिंग कार्ड फोटो किंवा आवाज)", mk_city: "शहर", mk_greeting: "पाठवायच्या शुभेच्छा", mk_promo_text: "प्रमोशन मेसेज लिहा", mk_mail_all: "सर्वांना प्रमोशन मेल (ERPNext न्यूजलेटर)", open_erpnext: "ERPNext मध्ये उघडा", mk_not_sent: "अजून शुभेच्छा पाठवल्या नाहीत", mk_send: "WhatsApp वर पाठवा", mk_make_lead: "रस आहे: लीड बनवा", mk_need_name: "कृपया नाव द्या", mk_need_mobile: "कृपया मोबाइल किंवा ई-मेल द्या", mk_added: "मार्केटिंग यादीत जोडले", mk_existing: "ERPNext मध्ये आधीच आहे: मार्केटिंग यादीत टाकले", mk_upload: "एक्सेल यादी अपलोड करा (आधीचे कॉन्टॅक्ट)", mk_upload_help: "Name, Mobile (असल्यास Company, Email, City) कॉलम असलेली एक्सेल किंवा CSV. फोन किंवा Google Contacts ची फाइलही चालते. एकच मोबाइल दोनदा जोडला जात नाही.", mk_added_n: "जोडले", mk_existing_n: "ERPNext मध्ये आधीच", mkf_diwali: "दिवाळी", mkf_new_year: "नवीन वर्ष", mkf_sankranti: "संक्रांत", mkf_republic: "प्रजासत्ताक दिन", mkf_holi: "होळी", mkf_gudi_padwa: "गुढी पाडवा", mkf_independence: "स्वातंत्र्य दिन", mkf_ganesh: "गणेश चतुर्थी", mkf_dussehra: "दसरा", mkf_promotion: "प्रमोशन", gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", new_product: "नवीन प्रॉडक्ट / व्हेंडर", mails_n: "मेल", cold_calls: "कोल्ड कॉलिंग", cold_help: "कॉल-लिस्ट डेटा, माझे लीड पासून वेगळा. एक एक कॉल करा; ग्राहकाला रस असल्यास 'रस आहे' दाबा → तो माझे लीड मध्ये जातो.", cold_total: "कोल्ड लीड", cold_not_called: "अजून कॉल नाही", cold_never: "अजून कॉल नाही", cold_interested: "रस आहे → माझे लीड", cold_move: "लीड नाही: मार्केटिंग यादीत हलवा", cold_moved: "हलवले", cold_to_mk: "मार्केटिंग यादीत हलवले", ocr_read: "फोटोवरून मजकूर वाचा", ocr_nothing: "फोटोवरून काही वाचता आले नाही. सरळ आणि चांगल्या प्रकाशात पुन्हा फोटो घ्या.", ocr_done: "फोटोवरून वाचले: कृपया तपासा", pm_find: "फोटोवरून आयटम शोधा", pm_looking: "फोटो जुळवत आहे…", pm_pick: "जवळचे आयटम: योग्य आयटम दाबा (तुमचा फोटो त्याचा नमुना म्हणून ठेवला जातो)", pm_first: "हा माल पहिल्यांदा: आयटम टाइप करून निवडा; तुमचा फोटो ठेवला जातो, पुढच्या वेळी फोटो तो सुचवेल", pm_saved: "फोटो आयटमचा नमुना म्हणून ठेवला", tc_title: "फोटोवरून मोजा", tc_help: "प्रत्येक नगावर एकदा टॅप करा. प्रत्येक टॅपला नंबर येतो; ↩ शेवटचा काढतो.", tc_pieces: "नग", tc_undo: "मागे", tc_use: "ही संख्या वापरा", rq_list: "एकदम अनेक आयटम: यादी लिहा, बोला किंवा 📷 फोटो घ्या (उदा. C channel 20 नग, MS plate 5 किलो)", rq_make_rows: "यादीतून ओळी बनवा", rq_rows_made: "ओळी बनल्या: प्रत्येक आयटम तपासा", rq_max: "एका मागणीत जास्तीत जास्त 20 आयटम", rq_more_lines: "ओळी जोडल्या नाहीत (जास्तीत जास्त 20)", rq_photo: "मालाचा किंवा हाताने लिहिलेल्या यादीचा फोटो", rq_check: "तपासा", goods_photo_need: "कृपया मालाचा क्वालिटी फोटो घ्या", to_post: "आलेला माल: तपासा आणि पोस्ट करा", to_post_help: "माल तपासा, मग पोस्ट दाबा. पोस्ट केल्यावरच स्टॉक वाढतो.", rate_missing: "दर नाही", rate_bill: "प्रति नग दर (बिलावरून)", rate_need: "सप्लायर बिलावरील दर द्या (स्टॉकची किंमत लागते):", remove_dup: "काढा (दोनदा सेव्ह)", tap_again: "काढण्यासाठी पुन्हा दाबा", photo_entry: "फोटो एंट्री", pe_help: "बिल, ई-इनव्हॉइस, व्हाउचर किंवा पेमेंट पुरावा: फोटो काढा (किंवा PDF निवडा) आणि सबमिट करा. सप्लायर बिल 'बिल पोस्ट करा' मध्ये जाते. बाकी ERPNext मध्ये एंट्री होईपर्यंत इथे राहतात.", pe_what: "हे काय आहे?", pe_supplier_bill: "सप्लायर बिल / ई-इनव्हॉइस", pe_expense: "खर्च बिल / पेटी कॅश व्हाउचर", pe_money_in: "पेमेंट मिळाले (चेक / UTR)", pe_money_out: "पेमेंट केले (बँक स्लिप / UTR)", pe_other: "इतर कागद", pe_photo: "फोटो किंवा PDF", pe_party: "ग्राहक / पार्टी (ऐच्छिक)", pe_ref: "बिल / रेफ नंबर (ऐच्छिक)", pe_submit: "सबमिट", pe_pending: "ERPNext मध्ये टाकायच्या फोटो एंट्री", pe_open: "ERPNext मध्ये टाका", pe_sent: "सबमिट झाले", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
 		gw_masters: "मास्टर्स", gw_transactions: "व्यवहार", gw_utilities: "युटिलिटी", gw_reports: "अहवाल", gw_more: "आणखी अहवाल",
 		gw_desk: "ERPNext मध्ये उघडते", gw_pending: "बाकी", db_particulars: "तपशील", db_none: "या दिवशी व्हाउचर नाही",
 		cash_today: "कॅश / बँक", to_collect: "येणे (Receivables)", to_pay: "देणे (Payables)", bills_to_post: "खरेदी बिल आणि डेबिट नोट",
@@ -1155,11 +1155,24 @@
 	function micBox(id, lang) {
 		if (lang && !micLang[id]) micLang[id] = lang;
 		return `<div class="sk-micbox"><button type="button" class="sk-mic" data-mic="${id}" title="${t("speak")}">🎤</button>
-			<button type="button" class="sk-miclang" data-miclang="${id}">${(micLang[id] || (state.lang === "Marathi" ? "mr" : "en")) === "en" ? "EN" : "मर"}</button></div>`;
+			<div class="sk-micsub"><button type="button" class="sk-miclang" data-miclang="${id}">${(micLang[id] || (state.lang === "Marathi" ? "mr" : "en")) === "en" ? "EN" : "मर"}</button>
+			<button type="button" class="sk-ocr" data-ocr="${id}" title="${t("ocr_read")}">📷</button></div></div>`;
 	}
 	// mobile, e-mail and WhatsApp boxes get a 🎤 too (point 4): added after each screen is drawn
+	// SK 28-Oct (Rev 1 point 3): every box in everyone's app: ✍ type · 🔽 pick (earlier entries and lists come up as you
+	// type) · 🎤 speak · 📷 photo (the text is read on the phone, free)
+	const BOXES = 'input[type="tel"], input[type="email"], main input:not([type]), main input[type="text"], main textarea, main input[type="number"]:not(.sk-qty)';
 	function addMics(scope) {
-		scope.querySelectorAll('input[type="tel"], input[type="email"]').forEach((inp) => {
+		scope.querySelectorAll(BOXES).forEach((inp) => {
+			if (inp.readOnly || inp.disabled || inp.closest(".sk-noenh, .sk-head, .sk-lock")) return;
+			if (inp.tagName === "INPUT" && inp.id && !inp.getAttribute("list") && !inp.dataset.find && inp.type !== "number" && !inp.dataset.hist) {
+				inp.dataset.hist = "1";
+				const past = pastEntries(inp.id);
+				if (past.length) {
+					inp.setAttribute("list", "skh-" + inp.id);
+					inp.insertAdjacentHTML("afterend", `<datalist id="skh-${esc(inp.id)}">${past.map((v) => `<option value="${esc(v)}">`).join("")}</datalist>`);
+				}
+			}
 			if (!inp.id || inp.dataset.mic === "1" || (inp.parentElement && inp.parentElement.querySelector(".sk-micbox"))) return;
 			inp.dataset.mic = "1";
 			inp.insertAdjacentHTML("afterend", micBox(inp.id, "en"));
@@ -1172,6 +1185,147 @@
 			}
 		});
 	}
+
+	// earlier entries of a box, newest first, kept on this phone only
+	function pastEntries(id) {
+		try { return JSON.parse(localStorage.getItem("skh:" + id) || "[]"); } catch (e) { return []; }
+	}
+	root.addEventListener("change", (ev) => {
+		const el = ev.target;
+		if (!el.dataset || el.dataset.hist !== "1" || !el.value.trim() || el.value.length > 120) return;
+		try {
+			const v = el.value.trim(), past = pastEntries(el.id).filter((x) => x !== v);
+			localStorage.setItem("skh:" + el.id, JSON.stringify([v, ...past].slice(0, 15)));
+		} catch (e) { /* private mode: no suggestions */ }
+	});
+
+	// one hidden camera input for 📷 read text, photo match and tap-to-count
+	let camInput = null;
+	function snap() {
+		return new Promise((ok) => {
+			if (!camInput) {
+				camInput = document.createElement("input");
+				Object.assign(camInput, { type: "file", accept: "image/*", hidden: true });
+				camInput.setAttribute("capture", "environment");
+				document.body.appendChild(camInput);
+			}
+			camInput.value = "";
+			camInput.onchange = () => ok(camInput.files[0] || null);
+			saveDraft();
+			camInput.click();
+		});
+	}
+	async function ocrInto(input) {
+		if (!input) return;
+		const f = await snap();
+		if (!f) return;
+		const hint = document.createElement("div");
+		hint.className = "sk-listening";
+		hint.textContent = "⏳ " + t("photo_reading");
+		(input.closest(".sk-field") || input.parentElement).appendChild(hint);
+		try {
+			const d = await readOnPhone(f, (st, pr) => { hint.textContent = `⏳ ${t("photo_reading")} ${Math.round(pr * 100)}%`; });
+			const txt = String(d.text || "").replace(/[ \t]+/g, " ").trim();
+			if (!txt) { toast(t("ocr_nothing"), true); return; }
+			if (input.type === "number") input.value = spokenNumber(txt);
+			else if (input.type === "tel") input.value = d.mobile_no || spokenDigits(txt).slice(0, 13);
+			else if (input.type === "email") input.value = d.email || input.value;
+			else if (input.tagName === "TEXTAREA") input.value = (input.value ? input.value.replace(/\s+$/, "") + "\n" : "") + txt;
+			else input.value = txt.replace(/\s*\n\s*/g, " ").slice(0, 140);
+			input.dispatchEvent(new Event("input", { bubbles: true }));
+			input.dispatchEvent(new Event("change", { bubbles: true }));
+			toast("✓ " + t("ocr_done"));
+		} catch (e) { toast(t("ocr_nothing"), true); }
+		finally { hint.remove(); }
+	}
+
+	// SK 28-Oct (Rev 1 point 19): a material photo → a small signature (shape + colour), made on the phone (free)
+	async function photoSig(file) {
+		const img = await createImageBitmap(file);
+		const c = document.createElement("canvas");
+		const g = c.getContext("2d", { willReadFrequently: true });
+		c.width = 9; c.height = 8;
+		g.drawImage(img, 0, 0, 9, 8);
+		const px = g.getImageData(0, 0, 9, 8).data, grey = (i) => px[i] * 0.3 + px[i + 1] * 0.59 + px[i + 2] * 0.11;
+		let bits = "";
+		for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) bits += grey((y * 9 + x) * 4) > grey((y * 9 + x + 1) * 4) ? "1" : "0";
+		let d = "";
+		for (let k = 0; k < 64; k += 4) d += parseInt(bits.slice(k, k + 4), 2).toString(16);
+		c.width = 32; c.height = 32;
+		g.drawImage(img, 0, 0, 32, 32);
+		const all = g.getImageData(0, 0, 32, 32).data, h = new Array(64).fill(0);
+		for (let i = 0; i < all.length; i += 4) h[(all[i] >> 6) * 16 + (all[i + 1] >> 6) * 4 + (all[i + 2] >> 6)] += 1;
+		return { d, h: h.map((v) => Math.round(v / 1024 * 10000) / 10000) };
+	}
+	const photoPending = {}; // finder id → { sig, url }: kept as the item's sample once the person picks the item
+	async function photoMatch(id) {
+		const f = await snap();
+		if (!f) return;
+		const sg = document.getElementById(id + "-sg");
+		if (sg) sg.innerHTML = `<p class="sk-note">⏳ ${t("pm_looking")}</p>`;
+		try {
+			const [sig, url] = await Promise.all([photoSig(f), uploadRetry(await smallPhoto(f))]);
+			photoPending[id] = { sig, url };
+			const r = await call("item_photo_match", { sig: JSON.stringify(sig) }, true);
+			if (sg) sg.innerHTML = (r.rows.length ? `<p class="sk-note">📷 ${t("pm_pick")}</p>` : `<p class="sk-note">📷 ${t("pm_first")}</p>`)
+				+ r.rows.map((x) => suggRow(id, x, x.score + "%")).join("");
+		} catch (e) { if (sg) sg.innerHTML = ""; toast(e.message, true); }
+	}
+	function suggRow(id, r, extra) {
+		return `<button type="button" class="sk-sg" data-sgfor="${esc(id)}" data-sgval="${esc(r.item_code)}">${r.photo ? `<img src="${esc(r.photo)}" alt="">` : ""}
+			<span><b>${esc(r.item_name)}</b><small>${esc(r.item_code)} · ${t("rq_stock")} ${num(r.stock != null ? r.stock : r.qty)} ${esc(r.uom || "")}${extra ? " · " + esc(extra) : ""}</small></span></button>`;
+	}
+	function pickSugg(id, value) {
+		const inp = document.getElementById(id);
+		if (!inp) return;
+		inp.value = value;
+		const sg = document.getElementById(id + "-sg");
+		if (sg) sg.innerHTML = "";
+		inp.dispatchEvent(new Event("change", { bubbles: true }));
+		const p = photoPending[id];
+		if (p) {
+			delete photoPending[id];
+			call("item_photo_save", { item_code: value, sig: JSON.stringify(p.sig), file_url: p.url }, true)
+				.then(() => toast("✓ " + t("pm_saved"))).catch(() => {});
+		}
+	}
+
+	// SK 28-Oct (Rev 1 point 19): count pieces on a photo: each tap marks one piece and the count fills the box
+	async function tapCount(id) {
+		const f = await snap();
+		if (!f) return;
+		const url = URL.createObjectURL(f);
+		const dots = [];
+		const el = sheet(`<h3 class="sk-h">👆 ${t("tc_title")}</h3><p class="sk-note">${t("tc_help")}</p>
+			<div class="sk-tc"><img src="${url}" alt=""><div class="sk-tc-dots"></div></div>
+			<p class="sk-tc-n"><b id="tc-n">0</b> ${t("tc_pieces")}</p>
+			<div class="sk-contact sk-two"><button type="button" class="sk-btn" data-tc="undo">↩ ${t("tc_undo")}</button>
+			<button type="button" class="sk-btn ok" data-tc="done">✓ ${t("tc_use")}</button></div>
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+		const box = el.querySelector(".sk-tc"), layer = el.querySelector(".sk-tc-dots");
+		const draw = () => {
+			layer.innerHTML = dots.map((p, k) => `<span style="left:${p.x}%;top:${p.y}%">${k + 1}</span>`).join("");
+			el.querySelector("#tc-n").textContent = dots.length;
+		};
+		box.addEventListener("click", (ev) => {
+			const r = box.getBoundingClientRect();
+			dots.push({ x: ((ev.clientX - r.left) / r.width) * 100, y: ((ev.clientY - r.top) / r.height) * 100 });
+			if (navigator.vibrate) navigator.vibrate(20);
+			draw();
+		});
+		el.addEventListener("click", (ev) => {
+			const b = ev.target.closest("[data-tc]");
+			if (!b) return;
+			ev.stopPropagation();
+			if (b.dataset.tc === "undo") { dots.pop(); return draw(); }
+			const inp = document.getElementById(id);
+			if (inp) { inp.value = dots.length; inp.dispatchEvent(new Event("change", { bubbles: true })); }
+			URL.revokeObjectURL(url);
+			closeSheet();
+		});
+	}
+	// a quantity box with 👆 count-from-photo next to it
+	const countBtn = (id) => `<button type="button" class="sk-chip sk-count" data-tcount="${id}" title="${t("tc_title")}">👆</button>`;
 
 	function readAloud(text) {
 		if (!window.speechSynthesis) return;
@@ -3531,9 +3685,12 @@
 		return `<label class="sk-field"><span>${esc(label)}</span><select id="${id}" class="sk-select" ${attr || ""}><option value=""></option>${(list || []).map((x) => typeof x === "string" ? `<option>${esc(x)}</option>` : `<option value="${esc(x.value)}">${esc(x.label)}</option>`).join("")}</select></label>`;
 	}
 	// type or speak a few letters, then pick from the list (suppliers / items from ERPNext)
+	// SK 28-Oct (Rev 1 point 13): suggestions show under the box as you type (name, code, stock); tap one to pick it.
+	// Item boxes also find the item from a photo (point 19).
 	function finder(id, label, kind) {
-		return `<label class="sk-field"><span>${esc(label)}</span><div class="sk-input-row"><input id="${id}" list="${id}-dl" data-find="${kind}" autocomplete="off">
-			${micBox(id)}</div><datalist id="${id}-dl"></datalist></label>`;
+		return `<div class="sk-field"><span>${esc(label)}</span><div class="sk-input-row"><input id="${id}" data-find="${kind}" autocomplete="off">
+			${micBox(id)}</div>${kind === "item" ? `<button type="button" class="sk-chip sk-gap" data-pmatch="${id}">📷 ${t("pm_find")}</button>` : ""}
+			<div class="sk-sugg" id="${id}-sg"></div></div>`;
 	}
 	// search boxes: Follow-up list and the customer list in Add call
 	let fuTimer = null;
@@ -3574,10 +3731,13 @@
 		if (!el.dataset || !el.dataset.find) return;
 		clearTimeout(findTimer);
 		findTimer = setTimeout(async () => {
+			const sg = document.getElementById(el.id + "-sg");
+			if (!el.value.trim()) { if (sg) sg.innerHTML = ""; return; }
 			const rows = el.dataset.find === "supplier" ? await call("buy_suppliers", { q: el.value }) : await call("store_search", { q: el.value });
-			const dl = document.getElementById(el.id + "-dl");
-			if (dl) dl.innerHTML = rows.map((r) => el.dataset.find === "supplier" ? `<option value="${esc(r.name)}">${esc(r.supplier_name)}</option>`
-				: `<option value="${esc(r.item_code)}">${esc(r.item_name)} · ${num(r.qty)} ${esc(r.uom || "")}</option>`).join("");
+			if (rows.some((r) => (r.item_code || r.name) === el.value)) { if (sg) sg.innerHTML = ""; return; } // already picked
+			if (sg) sg.innerHTML = rows.slice(0, 8).map((r) => el.dataset.find === "supplier"
+				? `<button type="button" class="sk-sg" data-sgfor="${esc(el.id)}" data-sgval="${esc(r.name)}"><span><b>${esc(r.supplier_name)}</b><small>${esc(r.name)}</small></span></button>`
+				: suggRow(el.id, r)).join("") || `<p class="sk-note">${t("nothing")}</p>`;
 		}, 300);
 	});
 
@@ -3620,8 +3780,8 @@
 		root.innerHTML = header(t("receive")) + `<main class="sk-form"><h3 class="sk-h">${esc(p.supplier_name)} · ${esc(p.name)}</h3>
 			${photoField("r-challan", "📷 " + t("challan_photo"))}${formField("r-billno", t("bill_no_q"))}
 			<ul class="sk-list">${p.items.map((r, k) => li(esc(r.item_name), `${t("ordered")} ${num(r.qty)} · ${t("pending")} ${num(r.pending)} ${esc(r.uom || "")}`,
-				qtyBox("r-q" + k, r.pending, r.item_name))).join("")}</ul>
-			${photoField("r-goods", "📷 " + t("goods_photo"))}${formField("r-note", t("note_q"))}
+				`<div class="sk-input-row sk-countbox">${qtyBox("r-q" + k, r.pending, r.item_name)}${countBtn("r-q" + k)}</div>`)).join("")}</ul>
+			${photoField("r-goods", "📷 " + t("goods_photo") + " *")}${formField("r-note", t("note_q"))}
 			<button class="sk-btn go wide" data-act="st-receive">${t("save_receipt")}</button></main>`;
 	}
 	// SK 27-Oct: material that came without a PO is not received; Store raises an urgent requisition with the challan
@@ -3642,8 +3802,8 @@
 		root.innerHTML = header(t("issue")) + `<main class="sk-form"><h3 class="sk-h">${w.customer ? esc(w.customer) + " · " : ""}${esc(w.size || w.item_name || w.production_item)} · ${esc(w.name)}</h3>
 			${pick("i-jc", t("job_card"), (w.job_cards || []).map((j) => ({ value: j.name, label: `${w.customer ? w.customer + " · " : ""}${w.size || w.item_name || ""} · ${j.operation || ""} · ${j.name}` })))}
 			<ul class="sk-list">${w.items.map((r, k) => li(esc(r.item_name || r.item_code), `${t("needed")} ${num(r.required_qty)} · ${t("given")} ${num(r.transferred_qty)} · ${esc(r.source_warehouse || "")}`,
-				qtyBox("i-q" + k, "", r.item_name))).join("")}</ul>
-			${finder("i-extra", t("other_item"), "item")}<label class="sk-field"><span>${t("qty")}</span>${qtyBox("i-extra-q")}</label>
+				`<div class="sk-input-row sk-countbox">${qtyBox("i-q" + k, "", r.item_name)}${countBtn("i-q" + k)}</div>`)).join("")}</ul>
+			${finder("i-extra", t("other_item"), "item")}<label class="sk-field"><span>${t("qty")}</span><div class="sk-input-row sk-countbox">${qtyBox("i-extra-q")}${countBtn("i-extra-q")}</div></label>
 			${formField("i-who", t("taken_by"))}${photoField("i-photo", "📷 " + t("taker_photo"))}
 			<button class="sk-btn ok wide" data-act="st-issue">✓ ${t("issue")}</button></main>`;
 	}
@@ -3686,7 +3846,7 @@
 		const wh = val("c-wh");
 		S.count = wh ? await call("store_count_list", { warehouse: wh }) : [];
 		document.getElementById("c-list").innerHTML = `<p class="sk-note">${t("count_help")}</p><ul class="sk-list">${S.count.map((r, k) => li(esc(r.item_name),
-			`${esc(r.item_code)} · ERPNext ${num(r.qty)}`, `<div class="sk-input-row sk-countbox">${qtyBox("c-q" + k, "", r.item_name)}${micBox("c-q" + k)}</div>`)).join("") || empty()}</ul>
+			`${esc(r.item_code)} · ERPNext ${num(r.qty)}`, `<div class="sk-input-row sk-countbox">${qtyBox("c-q" + k, "", r.item_name)}${countBtn("c-q" + k)}${micBox("c-q" + k)}</div>`)).join("") || empty()}</ul>
 			${photoField("c-photo", "📷 " + t("rack_photo"))}<button class="sk-btn go wide" data-act="st-count">${t("send_differences")}</button>`;
 	}
 
@@ -3835,23 +3995,38 @@
 		}
 		if (!RQ.cabins) RQ.cabins = await call("req_cabins").catch(() => []);
 		const today = new Date(); today.setDate(today.getDate() + (RQ.priority === "Urgent" ? 0 : 7));
-		const items = RQ.items.map((x, k) => li(`${esc(x.item_name)} · <b>${num(x.qty)} ${esc(x.uom || "")}</b>`,
-			`${t("rq_stock")} ${num(x.stock)}${x.min_order_qty ? ` · ${t("rq_moq")} ${num(x.min_order_qty)}` : ""}${x.last_rate ? ` · ${t("rq_last_rate")} ${money(x.last_rate)}` : ""}`,
-			`<button class="sk-chip" data-act="pu-rq-del" data-i="${k}">✕</button>`)).join("");
+		// SK 28-Oct (Rev 1 point 12): up to 20 rows on one screen, each quantity editable; rows made from a spoken or
+		// photographed list show what was said and let the person change the matched item
+		const items = RQ.items.map((x, k) => `<li class="sk-item ${x.item_code ? "" : "k-lead_new"}"><div class="sk-grow">
+			${x.choices && x.choices.length > 1 ? `<select class="sk-select" data-rqpick="${k}">${x.choices.map((c) => `<option value="${esc(c.item_code)}" ${c.item_code === x.item_code ? "selected" : ""}>${esc(c.item_name)} · ${num(c.stock)} ${esc(c.uom || "")}</option>`).join("")}</select>`
+				: `<div class="sk-item-title">${esc(x.item_name || x.said || x.item_code)}</div>`}
+			<div class="sk-item-meta">${x.said ? `“${esc(x.text || x.said)}” · ` : ""}${x.item_code ? `${t("rq_stock")} ${num(x.stock)} ${esc(x.uom || "")}` : `<button type="button" class="sk-chip bad" data-act="pu-rq-find" data-i="${k}">🔎 ${t("rq_check")}</button>`}${x.min_order_qty ? ` · ${t("rq_moq")} ${num(x.min_order_qty)}` : ""}${x.last_rate ? ` · ${t("rq_last_rate")} ${money(x.last_rate)}` : ""}</div></div>
+			<div class="sk-input-row sk-countbox">${qtyBox("rq-q" + k, x.qty, x.item_name)}</div>
+			<button class="sk-chip" data-act="pu-rq-del" data-i="${k}">✕</button></li>`).join("");
 		root.innerHTML = header(RQ.noPo ? t("rq_came_no_po") : t("requisition")) + `<main class="sk-form">${tabs}
 			${RQ.noPo ? `<p class="sk-note">${t("rq_no_po_help")}</p>${finder("rq-sup", t("supplier"), "supplier")}${photoField("rq-challan", "📷 " + t("challan_photo"))}${formField("rq-billno", t("bill_no_q"))}`
 				: `<div class="sk-contact sk-two"><button class="sk-chip ${RQ.priority === "Planned" ? "on" : ""}" data-act="pu-rq-prio" data-p="Planned">🟢 ${t("rq_planned")}</button>
 				<button class="sk-chip ${RQ.priority === "Urgent" ? "on bad" : ""}" data-act="pu-rq-prio" data-p="Urgent">🔴 ${t("rq_urgent")}</button></div>`}
-			<h3 class="sk-h">${t("items")}</h3><ul class="sk-list">${items || `<li class="sk-empty">${t("add_item_first")}</li>`}</ul>
-			${finder("rq-item", t("item") + " (ERP)", "item")}<div id="rq-info"></div>
-			<label class="sk-field"><span>${t("qty")}</span>${qtyBox("rq-qty")}</label>
+			<h3 class="sk-h">${t("items")} (${RQ.items.length}/20)</h3><ul class="sk-list">${items || `<li class="sk-empty">${t("add_item_first")}</li>`}</ul>
+			${RQ.items.length < 20 ? `${finder("rq-item", t("item") + " (ERP)", "item")}<div id="rq-info"></div>
+			<label class="sk-field"><span>${t("qty")}</span><div class="sk-input-row sk-countbox">${qtyBox("rq-qty")}${countBtn("rq-qty")}${micBox("rq-qty")}</div></label>
 			<button class="sk-btn wide" data-act="pu-rq-add">+ ${t("add_item")}</button>
+			<details class="sk-gap"><summary>📋 ${t("rq_list")}</summary>${formField("rq-list", t("rq_list"), true)}
+				<button class="sk-btn wide" data-act="pu-rq-rows">📋 ${t("rq_make_rows")}</button></details>` : `<p class="sk-note">${t("rq_max")}</p>`}
+			${RQ.noPo ? "" : photoField("rq-photo", "📷 " + t("rq_photo"))}
 			<label class="sk-field"><span>🏗️ ${t("rq_cabin")}</span><input id="rq-cabin" list="rq-cabin-dl" autocomplete="off" value="${esc(RQ.cabin || "")}">
 				<datalist id="rq-cabin-dl">${RQ.cabins.map((c) => `<option value="${esc(c.code)}">${esc(c.label)}</option>`).join("")}</datalist></label>
 			${RQ.noPo ? photoField("rq-goods", "📷 " + t("goods_photo")) : `<label class="sk-field"><span>${t("need_by")}</span><input id="rq-date" type="date" class="sk-select" value="${today.toISOString().slice(0, 10)}"></label>`}
 			${formField("rq-note", RQ.noPo ? t("why_no_po") : t("rq_why"), true)}
 			<button class="sk-btn go wide" data-act="pu-rq-send">📤 ${t("rq_send")}</button></main>`;
+		const note = document.getElementById("rq-note");
+		if (note && RQ.note) note.value = RQ.note;
+		root.querySelectorAll("[data-rqpick]").forEach((sel) => sel.addEventListener("change", () => {
+			const x = RQ.items[Number(sel.dataset.rqpick)], c = x.choices.find((o) => o.item_code === sel.value);
+			if (c) Object.assign(x, { item_code: c.item_code, item_name: c.item_name, uom: c.uom, stock: c.stock });
+		}));
 		const inp = document.getElementById("rq-item");
+		if (!inp) return;
 		inp.addEventListener("change", async () => {
 			const code = inp.value.trim();
 			if (!code) return;
@@ -3866,36 +4041,68 @@
 			} catch (e) { RQ.info = null; }
 		});
 	}
+	// keep what was typed on the form when it is drawn again (rows added / removed)
+	function rqSync() {
+		RQ.items.forEach((x, k) => { const q = document.getElementById("rq-q" + k); if (q && q.value !== "") x.qty = Number(q.value); });
+		if (document.getElementById("rq-cabin")) RQ.cabin = val("rq-cabin");
+		if (document.getElementById("rq-note")) RQ.note = val("rq-note");
+	}
 	async function requisitionAct(act, el) {
 		const i = Number(el.dataset.i);
 		switch (act) {
 			case "pu-rq-tab": RQ.tab = el.dataset.tab; RQ.noPo = false; return renderRequisition(true);
-			case "pu-rq-prio": RQ.priority = el.dataset.p; RQ.cabin = val("rq-cabin"); return renderRequisition(true);
-			case "pu-rq-del": RQ.items.splice(i, 1); RQ.cabin = val("rq-cabin"); return renderRequisition(true);
+			case "pu-rq-prio": rqSync(); RQ.priority = el.dataset.p; return renderRequisition(true);
+			case "pu-rq-del": rqSync(); RQ.items.splice(i, 1); return renderRequisition(true);
+			case "pu-rq-find": {
+				// a spoken / photographed line with no ERP item found: search it in the item box to pick the item
+				rqSync();
+				const [x] = RQ.items.splice(i, 1);
+				await renderRequisition(true);
+				const box = document.getElementById("rq-item"), q = document.getElementById("rq-qty");
+				if (q) q.value = x.qty || "";
+				if (box) { box.value = x.said || x.text || ""; box.focus(); box.dispatchEvent(new Event("input", { bubbles: true })); }
+				return;
+			}
+			case "pu-rq-rows": {
+				const text = val("rq-list");
+				if (!text) return toast(t("rq_list"), true);
+				rqSync();
+				el.disabled = true;
+				const r = await call("item_parse", { text }, true).finally(() => { el.disabled = false; });
+				const room = 20 - RQ.items.length;
+				RQ.items.push(...r.rows.slice(0, room));
+				const left = r.more + Math.max(0, r.rows.length - room);
+				toast(`✓ ${Math.min(room, r.rows.length)} ${t("rq_rows_made")}${left ? ` · ${left} ${t("rq_more_lines")}` : ""}`, !!left);
+				return renderRequisition(true);
+			}
 			case "pu-rq-add": {
 				const code = val("rq-item"), qty = Number(val("rq-qty"));
 				if (!code || !(qty > 0)) return toast(t("rq_need_item"), true);
 				const d = RQ.info && RQ.info.item_code === code ? RQ.info : await call("req_item", { item_code: code });
 				if (d.min_order_qty && qty < d.min_order_qty) toast(`${t("rq_moq")} ${num(d.min_order_qty)}`, true);
+				rqSync();
 				RQ.items.push({ ...d, qty });
-				RQ.info = null; RQ.cabin = val("rq-cabin");
+				RQ.info = null;
 				return renderRequisition(true);
 			}
 			case "pu-rq-send": {
+				rqSync();
 				const code = val("rq-item"), qty = Number(val("rq-qty"));
 				if (code && qty > 0) RQ.items.push({ item_code: code, qty });  // typed but not added yet
 				if (!RQ.items.length) return toast(t("rq_need_item"), true);
+				if (RQ.items.some((x) => !x.item_code)) return toast(t("rq_check") + ": " + t("rq_need_item"), true);
+				if (RQ.items.length > 20) return toast(t("rq_max"), true);
 				if (RQ.noPo && !val("rq-sup")) return toast(t("rq_need_sup"), true);
 				el.disabled = true;
 				const args = { items: JSON.stringify(RQ.items.map((x) => ({ item_code: x.item_code, qty: x.qty }))), priority: RQ.priority,
 					cabin: val("rq-cabin") || null, note: val("rq-note") || null };
 				if (RQ.noPo) Object.assign(args, { without_po: 1, supplier: val("rq-sup"), bill_no: val("rq-billno") || null,
 					photo: await photoUrl("rq-challan"), goods_photo: await photoUrl("rq-goods") });
-				else args.need_by = val("rq-date") || null;
+				else Object.assign(args, { need_by: val("rq-date") || null, photo: await photoUrl("rq-photo") });
 				try {
 					const r = await call("req_raise", args, true);
 					toast(`✓ ${r.name}: ${t("rq_sent")}`);
-					RQ = { items: [], priority: "Planned", noPo: false, tab: "track" };
+					RQ = { items: [], priority: "Planned", noPo: false, tab: "track", cabins: RQ.cabins };
 					return go("requisition");
 				} catch (e) { el.disabled = false; throw e; }
 			}
@@ -4023,6 +4230,8 @@
 				return go("to_plan");
 			}
 			case "st-receive": {
+				// SK 28-Oct (Rev 1 point 19): a quality photo of the material with every receipt
+				if (!document.getElementById("r-goods") || !document.getElementById("r-goods").files[0]) return toast(t("goods_photo_need"), true);
 				el.disabled = true;
 				const args = { challan_photo: await photoUrl("r-challan"), goods_photo: await photoUrl("r-goods"), note: val("r-note"), bill_no: val("r-billno") };
 				if (S.po) {
@@ -4986,6 +5195,10 @@
 				return;
 			}
 			if (el.dataset.mic) return speakInto(document.getElementById(el.dataset.mic), el);
+			if (el.dataset.ocr) return ocrInto(document.getElementById(el.dataset.ocr));
+			if (el.dataset.pmatch) return photoMatch(el.dataset.pmatch);
+			if (el.dataset.sgfor) return pickSugg(el.dataset.sgfor, el.dataset.sgval);
+			if (el.dataset.tcount) return tapCount(el.dataset.tcount);
 			if (el.dataset.pick) return pickFile(el.dataset.pick, el.dataset.how);
 			if (el.dataset.mailtab) { mailTab = el.dataset.mailtab; return go("mail"); }
 			if (el.dataset.dcard !== undefined) return renderDashList(Number(el.dataset.dcard));

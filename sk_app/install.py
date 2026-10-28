@@ -93,6 +93,9 @@ def after_migrate():
 	from sk_app.segments import auto_tag
 	from sk_app.sales_owner import auto_link
 
+	from sk_app.item_input import ensure_setup as item_photo_setup
+
+	_safe(item_photo_setup, "item photo samples")  # SK 28-Oct: material identified from a photo
 	_safe(move_all_once, "cold calling → marketing list")  # SK 28-Oct: cold-calling data is not a lead
 	_safe(auto_tag, "customer segments")  # SK 28-Oct: Cabin / Non-Cabin from Tally vouchers and CRM deals
 	_safe(auto_link, "salesperson on customers and orders")  # SK 28-Oct: graphs had no order in anyone's name
