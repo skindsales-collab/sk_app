@@ -174,6 +174,11 @@
 		bills: "Bills",
 		last_rates: "Last Rates",
 		po_approvals: "PO Approvals",
+		sub_bills: "Subcontractor bills", my_bills: "My bills", sb_help: "Bills made from the rate sheet after Quality passed the job. Rushi checks rate and job card, then the CEO approves; then it is payable.",
+		sb_my_help: "Your bills for finished jobs. Answer any question so the bill can move on.", sb_discuss: "Discuss", sb_question: "Question",
+		sb_answer: "Answer", sb_qty: "Sq ft / points", sb_rate: "Rate", sb_qc: "QC", sb_no_size: "Cabin size not found: please put the sq ft",
+		sb_st_rushi: "Waiting Rushi", sb_st_ceo: "Waiting CEO", sb_st_ok: "Approved · payable", sb_st_no: "Rejected", sb_st_paid: "Posted",
+		sb_waiting_other: "Waiting for Rushi first",
 		search_item: "Item (type or speak)",
 		low: "Low",
 		received: "Last received",
@@ -288,6 +293,11 @@
 		bills: "बिले",
 		last_rates: "मागील दर",
 		po_approvals: "PO मंजुरी",
+		sub_bills: "कंत्राटदार बिले", my_bills: "माझी बिले", sb_help: "क्वालिटी पास झाल्यावर रेट शीटवरून बिल तयार होते. रुषी रेट व जॉब कार्ड तपासतात, मग CEO मंजूर करतात; मग देय होते.",
+		sb_my_help: "पूर्ण झालेल्या कामांची तुमची बिले. प्रश्न असल्यास उत्तर द्या म्हणजे बिल पुढे जाईल.", sb_discuss: "चर्चा", sb_question: "प्रश्न",
+		sb_answer: "उत्तर", sb_qty: "चौ. फूट / पॉइंट", sb_rate: "रेट", sb_qc: "QC", sb_no_size: "केबिन साईज मिळाली नाही: चौ. फूट टाका",
+		sb_st_rushi: "रुषीकडे बाकी", sb_st_ceo: "CEO कडे बाकी", sb_st_ok: "मंजूर · देय", sb_st_no: "नामंजूर", sb_st_paid: "पोस्ट झाले",
+		sb_waiting_other: "आधी रुषी तपासतील",
 		search_item: "आयटम (टाइप करा किंवा बोला)",
 		low: "कमी",
 		received: "शेवटचा आलेला",
@@ -963,7 +973,7 @@
 		calendar: "📅", follow_up: "🔔", new_lead: "➕", training: "🎓", day_report: "📝", team_reports: "🗂️",
 		calls: "📞", whatsapp: "💬", mail: "✉️", reminders: "⏰", library: "🏢", logins: "🔑", team_leads: "👥",
 		stock_check: "📦", receive: "🚚", issue: "📤", store_requests: "📋", dispatch: "🚛", low_stock: "⚠️", stock_count: "🔢", new_item: "🆕",
-		requisition: "📝", buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅",
+		requisition: "📝", buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅", sub_bills: "🧾", my_bills: "🧾",
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁", el_points: "🔌",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
@@ -4209,6 +4219,62 @@
 			w.qc === "Accepted" ? `<span class="sk-chip on">QC ✓</span>` : `<span class="sk-chip">${w.qc === "Rejected" ? "QC ✗" : t("qc_pending")}</span>`)).join("") || empty()}</ul></main>`;
 	}
 
+	// ---------- Subcontractor bills (SK 28-Oct): rate sheet → bill → Rushi → CEO → payable ----------
+	const SB_STAGE = { "Waiting Rushi": ["yel", "sb_st_rushi"], "Waiting CEO": ["yel", "sb_st_ceo"], Approved: ["green", "sb_st_ok"], Rejected: ["red", "sb_st_no"] };
+	const sbCard = (b, i, mode) => {
+		const [c, k] = SB_STAGE[b.stage] || ["navy", b.stage];
+		const l = b.line || {};
+		return `<li class="sk-item ${b.question ? "k-lead_new" : ""}"><div style="flex:1">
+			<div class="sk-item-title">${esc(b.supplier)} · ${esc(b.job.operation || "")} <span class="chip2 ${c}">${t(k)}</span></div>
+			<div class="sk-item-meta">🏗️ ${esc(b.job.sk_cabin || "")} · ${esc(b.job.name || "")} · ${esc(b.date)}</div>
+			<div class="sk-item-meta">${num(l.qty)} ${esc(l.uom || "")} × ${money(l.rate)} = <b>${money(b.total)}</b>${!l.rate ? ` · <span class="sk-due">⚠ ${t("sb_rate")} 0</span>` : ""}</div>
+			${b.no_size ? `<div class="sk-item-meta sk-due">⚠ ${t("sb_no_size")}</div>` : ""}
+			<div class="sk-item-meta">${t("sb_qc")}: ${b.qc ? `${b.qc.status === "Accepted" ? "✓" : "✗"} ${esc(b.qc.name)}` : "—"}</div>
+			${(b.photos || []).slice(0, 4).map((u) => `<a class="sk-chip" target="_blank" href="${esc(u)}">📷</a>`).join("")}
+			${b.talk.map((m) => `<div class="sk-item-meta">💬 ${esc(m.text)}</div>`).join("")}
+			${b.question ? `<div class="sk-item-meta sk-due">❓ ${esc(b.question)}</div>` : ""}
+			${mode === "check" && b.mine ? `${b.stage === "Waiting Rushi" ? `<label class="sk-field"><span>${t("sb_qty")}</span>${qtyBox("sb-qty-" + i, l.qty)}</label>` : ""}
+				<div class="sk-row sk-gap"><button class="sk-chip on" data-act="sb-ok" data-i="${i}">✓ ${t("approve")}</button>
+				<button class="sk-chip" data-act="sb-ask" data-i="${i}">💬 ${t("sb_discuss")}</button>
+				<button class="sk-chip bad" data-act="sb-no" data-i="${i}">✗ ${t("reject")}</button></div>`
+			: mode === "check" ? `<div class="sk-item-meta">${t("sb_waiting_other")}</div>` : ""}
+			${mode === "mine" && b.question ? `<button class="sk-chip on" data-act="sb-reply" data-i="${i}">💬 ${t("sb_answer")}</button>` : ""}
+			</div></li>`;
+	};
+	async function renderSubBills(view) {
+		const mine = view === "my_bills";
+		S.sbills = await call(mine ? "sb_mine" : "sb_to_approve");
+		S.sbView = view;
+		root.innerHTML = header(t(view)) + `<main><p class="sk-note">${t(mine ? "sb_my_help" : "sb_help")}</p>
+			<ul class="sk-list">${S.sbills.map((b, i) => sbCard(b, i, mine ? "mine" : "check")).join("") || empty()}</ul></main>`;
+	}
+	async function subBillAct(act, el) {
+		const i = Number(el.dataset.i);
+		const b = S.sbills && S.sbills[i];
+		const ask = (id, label, action) => sheet(`<h3 class="sk-h">${esc(b.supplier)} · ${esc(b.job.operation || "")}</h3>${formField(id, label, true)}
+			<button class="sk-btn go wide" data-act="${action}" data-i="${i}">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+		switch (act) {
+			case "sb-ok": {
+				el.disabled = true;
+				const r = await call("sb_decide", { name: b.name, approve: 1, qty: val("sb-qty-" + i) || null }, true).catch((e) => { el.disabled = false; throw e; });
+				toast(t(SB_STAGE[r.stage] ? SB_STAGE[r.stage][1] : "saved"));
+				return renderSubBills(S.sbView);
+			}
+			case "sb-no": return ask("sb-text", t("reject_why"), "sb-no-save");
+			case "sb-ask": return ask("sb-text", t("sb_question"), "sb-ask-save");
+			case "sb-reply": return ask("sb-text", t("sb_answer"), "sb-reply-save");
+			case "sb-no-save": case "sb-ask-save": case "sb-reply-save": {
+				el.disabled = true;
+				const text = val("sb-text");
+				if (act === "sb-no-save") await call("sb_decide", { name: b.name, approve: 0, note: text }, true);
+				else await call(act === "sb-ask-save" ? "sb_discuss" : "sb_reply", { name: b.name, text }, true);
+				closeSheet();
+				toast(t("saved"));
+				return renderSubBills(S.sbView);
+			}
+		}
+	}
+
 	async function renderNcs(view) {
 		S.ncs = await call("qc_open_ncs");
 		const canNew = view === "non_conformance" && (state.home.functions || []).includes("Quality");
@@ -4778,7 +4844,7 @@
 		logins: renderLogins, team_leads: renderTeamLeads, stock_check: renderStockCheck, receive: renderReceive, issue: renderIssue, store_requests: renderStoreRequests,
 		dispatch: renderDispatch, low_stock: renderLowStock, stock_count: renderStockCount, new_item: renderNewItem,
 		buy_requests: renderBuyRequests, get_rates: renderGetRates, compare: renderCompare, po_follow_up: renderFollowUpPo,
-		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals, requisition: () => renderRequisition(),
+		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals, sub_bills: () => renderSubBills("sub_bills"), my_bills: () => renderSubBills("my_bills"), requisition: () => renderRequisition(),
 		order_board: renderOrderBoard, job_cards: () => renderJobs("job_cards"), my_jobs: () => renderJobs("my_jobs"), need_material: renderNeedMaterial,
 		progress_photos: renderProgressPhotos, ready_dispatch: renderReadyDispatch, non_conformance: () => renderNcs("non_conformance"),
 		my_fixes: () => renderNcs("my_fixes"), inspect: () => renderInspect("inspect"), final_check: () => renderInspect("final_check"),
@@ -4989,6 +5055,7 @@
 			const act = el.dataset.act;
 			if (act && (act.startsWith("st-") || act.startsWith("pu-") || act.startsWith("fl-") || act.startsWith("np-"))) return await storeAct(act, el);
 			if (act && (act.startsWith("pr-") || act.startsWith("qc-"))) return await prodAct(act, el);
+			if (act && act.startsWith("sb-")) return await subBillAct(act, el);
 			if (act && act.startsWith("fin-")) return await finAct(act, el);
 			if (el.dataset.qok !== undefined) {
 				const k = el.dataset.qok;

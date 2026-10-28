@@ -40,6 +40,9 @@ doc_events = {
 	"Material Request": {"before_submit": "sk_app.requisition.check_submit"},
 	"Purchase Order": {"before_submit": "sk_app.requisition.check_po"},
 	"Purchase Receipt": {"before_submit": "sk_app.requisition.check_receipt"},
+	# SK 28-Oct: subcontractor bills post only after Rushi + CEO; only CEO / Accounts change the rate sheet
+	"Purchase Invoice": {"before_submit": "sk_app.sub_bills.check_submit"},
+	"Item Price": {"validate": "sk_app.sub_bills.check_rate_edit"},
 }
 
 has_permission = {
