@@ -534,3 +534,69 @@ a.sk-chip { text-decoration: none; }
 .sk-fab:active { transform: scale(.95); }
 .sk-faq { border-bottom: 1px solid rgba(0,0,0,.08); padding: 6px 0; }
 .sk-faq summary { font-weight: 600; }
+
+/* SK 29-Oct: PC layout. Phones are unchanged; from 1024 px wide (office PC / laptop) the app uses the width:
+   wider page, Home in two columns (decide on the left, work icons on the right), lists in two columns,
+   pop-up sheets as a centred window, hover on everything you can click. */
+@media (min-width: 1024px) {
+	body { font-size: 16px; }
+	main { max-width: 1200px; padding: 20px 24px 48px; }
+	.sk-head { padding-left: max(24px, calc((100% - 1200px) / 2 + 24px)); padding-right: max(24px, calc((100% - 1200px) / 2 + 24px)); }
+
+	/* Home: two columns, no squeezing to phone height */
+	.sk-home2 { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); column-gap: 20px; row-gap: 12px; align-content: start;
+		grid-template-areas: "kpi own" "kpi common" "kpi contact" "flow bottom" "decide ."; }
+	.sk-home2 > .sk-kpibox { grid-area: kpi; }
+	.sk-home2 > .sk-flowbox { grid-area: flow; }
+	.sk-home2 > .sk-decide { grid-area: decide; }
+	.sk-home2 > .sk-own { grid-area: own; }
+	.sk-home2 > .sk-common { grid-area: common; }
+	.sk-home2 > .sk-contact { grid-area: contact; }
+	.sk-home2 > .sk-bottom { grid-area: bottom; position: static; }
+	.sk-home2 > * { align-self: start; }
+	.sk-home2 .sk-tiles.small, .sk-home2 .sk-contact, .sk-home2 .sk-decs { grid-auto-rows: auto; }
+	.sk-home2 .sk-own .sk-tile { padding: 18px 4px; font-size: 14px; }
+	.sk-home2 .sk-own .sk-tile-icon { font-size: 30px; }
+	.sk-ksvg { max-height: 34vh; }
+	.sk-dec span { font-size: 12px; }
+	.sk-dec b { font-size: 20px; }
+	.sk-ar3 { height: 64px; }
+
+	/* icons and cards use the width */
+	.sk-tiles { grid-template-columns: repeat(4, 1fr); }
+	.sk-tiles.small { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+	.sk-home2 .sk-tiles.small { grid-template-columns: repeat(4, 1fr); }
+	.sk-home2 .sk-bottom { grid-template-columns: repeat(3, 1fr); }
+	.sk-dash-cards { grid-template-columns: repeat(4, 1fr); }
+	.sk-facts { grid-template-columns: repeat(8, 1fr); }
+
+	/* lists side by side */
+	.sk-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 12px; align-items: start; }
+	.sk-list > .sk-item { margin-bottom: 10px; }
+
+	/* forms stay a comfortable width */
+	.sk-form { max-width: 760px; }
+
+	/* pop-up sheets become a centred window */
+	.sk-sheet-wrap { align-items: center; justify-content: center; padding: 24px; }
+	.sk-sheet { max-width: 760px; max-height: 86vh; border-radius: 16px; }
+
+	/* calendars and tables get room */
+	.cell { min-height: 92px; font-size: 12px; }
+	.dot { font-size: 11px; }
+	.sk-table { font-size: 14px; }
+	.sk-table th, .sk-table td { padding: 8px 10px; }
+
+	/* messages and help button sit in the corner, not across the screen */
+	.sk-toast { left: auto; right: 24px; width: 380px; }
+	.sk-fab { bottom: 24px; right: 24px; }
+	.sk-pstrip { flex-wrap: wrap; overflow: visible; }
+}
+/* mouse users: show what is clickable */
+@media (hover: hover) and (pointer: fine) {
+	button, .sk-tile, .sk-chip, .sk-btn, a.sk-chip, .sk-dec, .sk-cbig, .ev, .cell { cursor: pointer; }
+	.sk-tile:hover, .sk-dash-card:hover, .sk-dec:hover { box-shadow: 0 0 0 2px var(--navy), 0 2px 6px rgba(0,0,0,.12); }
+	.sk-btn:hover, .sk-chip:hover, .sk-cbig:hover { filter: brightness(.94); }
+	.sk-item:hover, .ev:hover { box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+	:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+}
