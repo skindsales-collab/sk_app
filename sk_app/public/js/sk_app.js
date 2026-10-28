@@ -1015,6 +1015,18 @@
 		pc_low: "कमी खात्री: हा फोटो मोजायला कठीण आहे. हाताने किंवा वजनाने मोजा.", pc_medium: "नीट तपासा: दोन AI मोजण्या जुळल्या नाहीत.", pc_high: "चांगला फोटो",
 		pc_weight: "वजनाने मोजा (पत्र्यासाठी उत्तम)", pc_kg: "काट्यावरील वजन (kg)", pc_per_piece: "प्रति नग", pc_no_weight: "या आयटमचे प्रति नग वजन ERPNext मध्ये नाही (Item → Weight Per Unit).",
 		pc_tip: "टीप: एका फोटोत एकच साईज, सर्व टोके कॅमेऱ्याकडे, समोरून सरळ फोटो, चांगला उजेड.", pc_second: "दुसरी मोजणी" });
+	Object.assign(T.English, { hp_btn: "Help / question", hp_title: "Ask about this screen", hp_screen: "Screen", hp_q: "What is the problem or question? (speak or type)",
+		hp_shot: "Screenshot or photo of the screen", hp_shot_tip: "Take a phone screenshot first (power + volume down), then pick it from the gallery.",
+		hp_similar: "Already answered (check first)", hp_send: "Send to CEO", hp_sent: "Sent. You will get the answer here and in My Day.",
+		hp_ai: "AI draft answer", hp_ai_wait: "AI draft is being written… open again in a minute", hp_ai_again: "Ask AI again", hp_screen_l: "Asked on",
+		hp_how_to: "Answer only", hp_app_fix: "Needs SK App change", hp_erp_setting: "Needs ERPNext setting / role", hp_data_fix: "Needs data correction", hp_need_info: "Needs more detail",
+		hp_use_mr: "Use Marathi answer", hp_use_en: "Use English answer" });
+	Object.assign(T.Marathi, { hp_btn: "मदत / प्रश्न", hp_title: "या स्क्रीनबद्दल विचारा", hp_screen: "स्क्रीन", hp_q: "अडचण किंवा प्रश्न काय आहे? (बोला किंवा लिहा)",
+		hp_shot: "स्क्रीनचा स्क्रीनशॉट किंवा फोटो", hp_shot_tip: "आधी फोनचा स्क्रीनशॉट घ्या (पॉवर + आवाज कमी), मग गॅलरीतून निवडा.",
+		hp_similar: "आधीच उत्तर दिलेले (आधी पाहा)", hp_send: "CEO ला पाठवा", hp_sent: "पाठवले. उत्तर इथे आणि माझा दिवस मध्ये मिळेल.",
+		hp_ai: "AI चे मसुदा उत्तर", hp_ai_wait: "AI उत्तर लिहित आहे… एक मिनिटाने पुन्हा उघडा", hp_ai_again: "AI ला पुन्हा विचारा", hp_screen_l: "विचारले",
+		hp_how_to: "फक्त उत्तर", hp_app_fix: "SK App मध्ये बदल हवा", hp_erp_setting: "ERPNext सेटिंग / रोल बदल हवा", hp_data_fix: "डेटा दुरुस्ती हवी", hp_need_info: "अधिक माहिती हवी",
+		hp_use_mr: "मराठी उत्तर वापरा", hp_use_en: "इंग्रजी उत्तर वापरा" });
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
 	const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -1403,6 +1415,54 @@
 			${weightHtml(rec.weight_per_unit ? rec : weight)}<p class="sk-note">${t("pc_tip")}</p>`;
 		if (rec.weight_per_unit) weight = rec;
 		draw();
+	}
+	// SK 28-Oct: ❓ on every screen. The question goes to the CEO with the screen's name and a screenshot; similar FAQ
+	// answers show while typing; Claude drafts the answer for the CEO, and the answer can go into the FAQ for everyone.
+	function helpButton() {
+		if (document.getElementById("sk-help-fab")) return;
+		const b = document.createElement("button");
+		b.id = "sk-help-fab";
+		b.className = "sk-fab";
+		b.type = "button";
+		b.title = t("hp_btn");
+		b.setAttribute("aria-label", t("hp_btn"));
+		b.textContent = "❓";
+		b.addEventListener("click", (ev) => { ev.stopPropagation(); helpSheet(); });
+		document.body.appendChild(b);
+	}
+	function screenName() {
+		const tt = root.querySelector(".sk-title");
+		const title = tt ? (tt.childNodes[0] && tt.childNodes[0].textContent || tt.textContent).trim() : "";
+		return [title, state.view].filter(Boolean).join(" · ").slice(0, 50);
+	}
+	function helpSheet() {
+		const screen = screenName();
+		const el = sheet(`<h3 class="sk-h">❓ ${t("hp_title")}</h3><p class="sk-note">${t("hp_screen")}: <b>${esc(screen)}</b></p>
+			${formField("hp-q", t("hp_q"), true)}<div id="hp-similar"></div>
+			${photoField("hp-shot", "📸 " + t("hp_shot"))}<p class="sk-note">${t("hp_shot_tip")}</p>
+			<button class="sk-btn ok wide" data-act="hp-send" data-screen="${esc(screen)}">✓ ${t("hp_send")}</button>
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+		let timer = null;
+		el.addEventListener("input", (ev) => {
+			if (ev.target.id !== "hp-q") return;
+			clearTimeout(timer);
+			timer = setTimeout(async () => {
+				const q = val("hp-q");
+				const box = el.querySelector("#hp-similar");
+				if (!box) return;
+				const words = (q || "").split(/\s+/).filter((w) => w.length > 3).slice(0, 3);
+				if (!words.length) { box.innerHTML = ""; return; }
+				const seen = new Map();
+				for (const w of words) {
+					const d = await call("training_faq", { q: w }).catch(() => null);
+					((d && d.rows) || []).forEach((r) => { if (!seen.has(r.name)) seen.set(r.name, r); });
+				}
+				const rows = [...seen.values()].slice(0, 3);
+				const mr = state.lang === "Marathi";
+				box.innerHTML = rows.length ? `<details class="sk-gap" open><summary>💡 ${t("hp_similar")} (${rows.length})</summary>${rows.map((r) =>
+					`<details class="sk-faq"><summary>${esc((mr && r.title_marathi) || r.title)}</summary><div class="sk-note">${esc(String((mr && r.text_marathi) || r.text || "").replace(/<[^>]*>/g, " "))}</div></details>`).join("")}</details>` : "";
+			}, 600);
+		});
 	}
 	async function tapCount(id) {
 		const f = await snap();
@@ -4673,7 +4733,10 @@
 	async function renderQuestions() {
 		const d = S.q = await call("ceo_questions");
 		const row = (r) => `<li class="sk-item k-amber"><div class="sk-grow"><div class="sk-item-title">${esc(r.question)}</div>
-			<div class="sk-item-meta">${esc(r.by)} · ${esc(r.date)}</div>
+			<div class="sk-item-meta">${esc(r.by)} · ${esc(r.date)}${r.screen ? ` · ${t("hp_screen_l")}: ${esc(r.screen)}` : ""}</div>
+			${r.ai ? `<div class="sk-pc-conf ${r.ai.action === "how_to" ? "high" : r.ai.action === "need_info" ? "medium" : "low"}">🤖 ${t("hp_" + r.ai.action)}${r.ai.action_note ? " · " + esc(r.ai.action_note) : ""}</div>
+				<details><summary>🤖 ${t("hp_ai")}</summary><div class="sk-note" style="white-space:pre-wrap">${esc(r.ai.answer)}</div></details>`
+				: `<p class="sk-note">⏳ ${t("hp_ai_wait")} <button class="sk-chip" data-act="q-redraft" data-todo="${esc(r.todo)}">🤖 ${t("hp_ai_again")}</button></p>`}
 			${r.photos.length ? `<div class="sk-row sk-wrap">${r.photos.map((u) => `<a href="${esc(u)}" target="_blank"><img class="sk-thumb" src="${esc(u)}" alt=""></a>`).join("")}</div>` : ""}
 			<div class="sk-row sk-wrap sk-gap"><button class="sk-chip on" data-act="q-answer" data-todo="${esc(r.todo)}">✍ ${t("q_answer")}</button>
 			<button class="sk-chip" data-act="q-dev" data-todo="${esc(r.todo)}">🛠 ${t("q_dev")}</button></div></div></li>`;
@@ -4687,10 +4750,19 @@
 		const find = (todo) => S.q.groups.flatMap((g) => g.rows).find((r) => r.todo === todo) || {};
 		if (act === "q-answer") {
 			const r = find(el.dataset.todo);
-			sheet(`<h3 class="sk-h">❓ ${esc(r.question)}</h3><p class="sk-item-meta">${esc(r.by)}</p>${formField("q-ans", t("faq_answer"), true)}
+			sheet(`<h3 class="sk-h">❓ ${esc(r.question)}</h3><p class="sk-item-meta">${esc(r.by)}${r.screen ? " · " + esc(r.screen) : ""}</p>${formField("q-ans", t("faq_answer"), true)}
+				${r.ai && r.ai.answer_marathi ? `<div class="sk-row sk-wrap"><button type="button" class="sk-chip" data-aitext="en">🇬🇧 ${t("hp_use_en")}</button><button type="button" class="sk-chip" data-aitext="mr">मराठी ${t("hp_use_mr")}</button></div>` : ""}
 				<label class="sk-row"><input type="checkbox" id="q-faq" checked> ${t("faq_add")}</label>
 				<button class="sk-btn ok wide" data-act="q-answer-send" data-todo="${esc(el.dataset.todo)}">${t("send")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+			const box = document.getElementById("q-ans");
+			if (box && r.ai) box.value = r.ai.answer || "";
+			root.querySelectorAll("[data-aitext]").forEach((b) => b.addEventListener("click", () => { box.value = b.dataset.aitext === "mr" ? r.ai.answer_marathi : r.ai.answer; }));
 			return;
+		}
+		if (act === "q-redraft") {
+			el.disabled = true;
+			await call("ceo_question_redraft", { todo: el.dataset.todo }, true).catch((e) => toast(e.message, true));
+			return renderQuestions();
 		}
 		if (act === "q-answer-send") {
 			el.disabled = true;
@@ -4701,6 +4773,8 @@
 			const r = find(el.dataset.todo);
 			sheet(`<h3 class="sk-h">🛠 ${esc(r.question)}</h3>${formField("q-note", t("q_dev_note"), true)}
 				<button class="sk-btn ok wide" data-act="q-dev-send" data-todo="${esc(el.dataset.todo)}">${t("q_dev")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+			const note = document.getElementById("q-note");
+			if (note && r.ai && r.ai.action_note) note.value = r.ai.action_note;
 			return;
 		}
 		if (act === "q-dev-send") {
@@ -5669,8 +5743,15 @@
 				return go("mail");
 			}
 			if (act === "faq-ask") {
-				sheet(`<h3 class="sk-h">❓ ${t("faq_ask")}</h3>${formField("faq-text", t("faq_q"), true)}${photoField("faq-photo", "📷 " + t("q_photo"))}
-					<button class="sk-btn ok wide" data-act="faq-ask-send">${t("send")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+				return helpSheet();
+			}
+			if (act === "hp-send") {
+				if (!val("hp-q").trim()) { toast(t("hp_q"), true); return; }
+				el.disabled = true;
+				try {
+					await call("training_ask", { question: val("hp-q"), photo: await photoUrl("hp-shot"), screen: el.dataset.screen || screenName() }, true);
+					closeSheet(); toast(t("hp_sent"));
+				} finally { el.disabled = false; }
 				return;
 			}
 			if (act === "faq-ask-send") {
@@ -6283,6 +6364,7 @@
 			state.card = state.home.card;
 			renderHome();
 			inAppBrowserBanner();
+			helpButton();
 			restoreDraft().catch(() => {});
 			setTimeout(askPending, 800);
 			if (!state.card || Date.now() - new Date(state.card.slot_start.replace(" ", "T")).getTime() > 60 * 60 * 1000) {

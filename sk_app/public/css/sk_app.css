@@ -527,3 +527,10 @@ a.sk-chip { text-decoration: none; }
 .sk-pc-conf.medium { background: #fff4e0; color: #8a5300; }
 .sk-pc-conf.low { background: #fde8e8; color: #9b1c1c; }
 .sk-pcount { font-size: 18px; padding: 6px 10px; }
+
+/* SK 28-Oct: ❓ help on every screen (above any bottom bar, under pop-up sheets and the lock screen) */
+.sk-fab { position: fixed; right: 14px; bottom: calc(84px + env(safe-area-inset-bottom)); z-index: 4; width: 46px; height: 46px; border-radius: 23px;
+	border: 0; background: var(--navy); color: #fff; font-size: 22px; box-shadow: 0 3px 10px rgba(0,0,0,.25); opacity: .92; }
+.sk-fab:active { transform: scale(.95); }
+.sk-faq { border-bottom: 1px solid rgba(0,0,0,.08); padding: 6px 0; }
+.sk-faq summary { font-weight: 600; }

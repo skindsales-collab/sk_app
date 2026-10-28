@@ -259,11 +259,27 @@ def _ceos() -> list[str]:
 	return _ceos()
 
 
-def ask(user: str, question: str, function: str | None = None, photo: str | None = None) -> dict:
-	"""SK 28-Oct (Rev 1 point 6): "My question" with a screenshot or photo goes to the CEO's Questions screen."""
+SCREEN_TAG = " ⟦screen: "
+
+
+def split_screen(question: str) -> tuple[str, str]:
+	"""The question text and the screen it was asked from (kept at the end of the ToDo text)."""
+	q = question or ""
+	if SCREEN_TAG in q and q.endswith("⟧"):
+		q, _sep, screen = q.rpartition(SCREEN_TAG)
+		return q.strip(), screen[:-1].strip()
+	return q.strip(), ""
+
+
+def ask(user: str, question: str, function: str | None = None, photo: str | None = None, screen: str | None = None) -> dict:
+	"""SK 28-Oct (Rev 1 point 6): "My question" with a screenshot or photo goes to the CEO's Questions screen.
+	SK 28-Oct (help on every screen): asked from the ❓ button of any SK App or ERPNext screen, with the screen's name;
+	Claude drafts the answer and the action in the background for the CEO to check."""
 	if not (question or "").strip():
 		frappe.throw(frappe._("Please speak or type the question"))
 	function = function or (_functions(user) or ["All"])[0]
+	if (screen or "").strip():
+		question = f"{question.strip()[:440]}{SCREEN_TAG}{str(screen).strip()[:50]}⟧"
 	ceos = [c for c in _ceos() if c != user]
 	owner = ceos[0] if ceos else _owner_of(user, function)
 	if not owner:
@@ -274,7 +290,65 @@ def ask(user: str, question: str, function: str | None = None, photo: str | None
 	from sk_app.store import attach
 
 	attach(photo, "ToDo", todo.name, user)
+	frappe.enqueue("sk_app.training.ai_draft", queue="short", todo=todo.name, enqueue_after_commit=True)
 	return {"owner": frappe.utils.get_fullname(owner), "todo": todo.name}
+
+
+# ---------- Claude's draft answer for the CEO (SK 28-Oct) ----------
+AI_TAG = "[AI draft]"
+ACTIONS = ("how_to", "app_fix", "erp_setting", "data_fix", "need_info")
+
+
+def _faq_context(function: str, limit: int = 60) -> str:
+	rows = frappe.get_all("SK Library Item", filters={"enabled": 1, "category": ["in", ["FAQ", "Customer FAQ"]],
+		"function": ["in", ["All", function]]}, fields=["title", "text"], order_by="sequence asc", limit=limit)
+	lessons = frappe.get_all("SK Training Lesson", filters={"published": 1, "function": ["in", ["All", function]]},
+		fields=["title", "content"], order_by="sequence asc", limit=40)
+	parts = [f"Q: {r.title}\nA: {frappe.utils.strip_html(r.text or '')[:400]}" for r in rows]
+	parts += [f"Lesson: {r.title}\n{frappe.utils.strip_html(r.content or '')[:500]}" for r in lessons]
+	return "\n\n".join(parts)[:24000]
+
+
+def ai_draft(todo: str):
+	"""Background job: Claude reads the question, the screenshot and the function's FAQ / lessons, and writes a draft
+	answer plus what to do (how-to answer, app fix, ERPNext setting, data correction). Kept as a comment on the
+	question; nothing is sent to the person until the CEO sends it."""
+	from sk_app import claude
+
+	if not claude.available():
+		return
+	t = frappe.get_doc("ToDo", todo)
+	function, question = _question_of(t)
+	question, screen = split_screen(question)
+	images = []
+	for url in _photos("ToDo", t.name)[:2]:
+		try:
+			f = frappe.get_doc("File", {"file_url": url})
+			ext = url.rsplit(".", 1)[-1].lower()
+			media = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "webp": "image/webp"}.get(ext)
+			content = f.get_content()
+			if media and len(content) < 4.5 * 1024 * 1024:
+				images.append((content, media))
+		except Exception:
+			continue
+	asker = frappe.utils.get_fullname(t.assigned_by) if t.assigned_by else ""
+	draft = claude.help_draft(question, function, screen, asker, _faq_context(function), images)
+	if draft:
+		t.add_comment("Comment", AI_TAG + " " + frappe.as_json(draft, indent=None))
+
+
+def _draft_of(todo: str) -> dict | None:
+	c = frappe.get_all("Comment", filters={"reference_doctype": "ToDo", "reference_name": todo, "comment_type": "Comment",
+		"content": ["like", f"{AI_TAG}%"]}, pluck="content", order_by="creation desc", limit=1)
+	if not c:
+		return None
+	try:
+		import json
+
+		d = json.loads(frappe.utils.strip_html(c[0])[len(AI_TAG):].strip())
+		return d if isinstance(d, dict) else None
+	except ValueError:
+		return None
 
 
 def _may_answer(user: str, t) -> bool:
@@ -292,6 +366,7 @@ def answer(user: str, todo: str, text: str, add_to_faq=1) -> dict:
 		frappe.throw(frappe._("Please speak or type the answer"))
 	body = frappe.utils.strip_html(t.description)[len(FAQ_TAG):].strip()
 	function, _sep, question = body.partition(": ")
+	question, _screen = split_screen(question)
 	item = None
 	if str(add_to_faq) in ("1", "true", "True"):
 		meta = frappe.get_meta("SK Library Item").get_field("function").options.split("\n")
@@ -347,7 +422,9 @@ def questions(user: str) -> dict:
 	rows = []
 	for t in todos:
 		function, question = _question_of(t)
-		rows.append({"todo": t.name, "function": function, "question": question, "by": frappe.utils.get_fullname(t.assigned_by) if t.assigned_by else "",
+		question, screen = split_screen(question)
+		rows.append({"todo": t.name, "function": function, "question": question, "screen": screen, "ai": _draft_of(t.name),
+			"by": frappe.utils.get_fullname(t.assigned_by) if t.assigned_by else "",
 			"date": str(t.creation)[:16], "photos": _photos("ToDo", t.name), "words": _keywords(question)})
 	# topic of a question = its word asked most often across all open questions of the same function
 	count = {}
@@ -381,14 +458,24 @@ def send_for_development(user: str, todo: str, note: str | None = None) -> dict:
 		frappe.throw(frappe._("Not a Training question"))
 	function, question = _question_of(t)
 	photos = _photos("ToDo", t.name)
-	text = f"{DEV_TAG} {function}: {question}" + (f" | CEO: {note.strip()}" if (note or "").strip() else "")
+	clean, where = split_screen(question)
+	text = f"{DEV_TAG} {function}: {clean}" + (f" | CEO: {note.strip()}" if (note or "").strip() else "") + (f" | Screen: {where}" if where else "")
 	log = frappe.get_doc({"doctype": "SK Work Log", "user": t.assigned_by or user, "date": frappe.utils.nowdate(), "entry_type": "Problem",
 		"problem_type": "IT / app", "description": text[:2000], "status": "Open", "photo": photos[0] if photos else None,
 		"reference_doctype": "ToDo", "reference_name": t.name}).insert(ignore_permissions=True)
 	t.db_set("status", "Closed")
+	handoff = None
+	if frappe.db.exists("DocType", "SK Hub Handoff"):
+		q, screen = split_screen(question)
+		handoff = frappe.get_doc({"doctype": "SK Hub Handoff", "from_user": user, "from_team": "Management", "from_project": "SK App ❓",
+			"to_team": "IT / ERP", "status": "Open", "subject": f"{function}: {q}"[:140],
+			"details": "\n".join(x for x in (f"Asked by {frappe.utils.get_fullname(t.assigned_by)}" if t.assigned_by else "",
+				f"Screen: {screen}" if screen else "", f"CEO: {note.strip()}" if (note or "").strip() else "",
+				f"Screenshot: {photos[0]}" if photos else "") if x),
+			"reference_doctype": "SK Work Log", "reference_name": log.name}).insert(ignore_permissions=True).name
 	if t.assigned_by:
-		_tell(t.assigned_by, user, f"Your question \"{question[:120]}\" was sent for development (AI & ERP desk).")
-	return {"work_log": log.name}
+		_tell(t.assigned_by, user, f"Your question \"{split_screen(question)[0][:120]}\" was sent for development (AI & ERP desk).")
+	return {"work_log": log.name, "handoff": handoff}
 
 
 def mark_deployed(user: str, work_log: str, where: str = "App") -> dict:
@@ -402,7 +489,7 @@ def mark_deployed(user: str, work_log: str, where: str = "App") -> dict:
 	log.add_comment("Comment", f"Deployed in {'the SK App' if where == 'App' else 'ERPNext'} (marked by {frappe.utils.get_fullname(user)})")
 	for todo in frappe.get_all("ToDo", filters={"reference_type": "SK Work Log", "reference_name": work_log, "status": "Open"}, pluck="name"):
 		frappe.db.set_value("ToDo", todo, "status", "Closed")  # the AI desk's item is finished too
-	question = (log.description or "")[len(DEV_TAG):].strip().split(" | CEO:", 1)[0]
+	question = (log.description or "")[len(DEV_TAG):].strip().split(" | CEO:", 1)[0].split(" | Screen:", 1)[0]
 	if log.user and log.user != user:
 		_tell(log.user, user, f"Done: \"{question[:120]}\" is now in {'the SK App' if where == 'App' else 'ERPNext'}.")
 	return {"work_log": work_log, "where": where}

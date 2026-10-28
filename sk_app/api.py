@@ -1594,8 +1594,17 @@ def training_faq(q=None):
 
 
 @frappe.whitelist(methods=["POST"])
-def training_ask(question, function=None, photo=None):
-	return training.ask(_me().user, question, function, photo)
+def training_ask(question, function=None, photo=None, screen=None):
+	return training.ask(_me().user, question, function, photo, screen)
+
+
+@frappe.whitelist(methods=["POST"])
+def ceo_question_redraft(todo):
+	"""CEO: ask Claude again for a draft answer (e.g. after adding a screenshot or when the first draft was not ready)."""
+	user = _me().user
+	training._check_ceo(user)
+	training.ai_draft(todo)
+	return training._draft_of(todo)
 
 
 # SK 28-Oct (Rev 1 points 17-18): SK Phone, the free Android helper that sends the phone's calls to CRM

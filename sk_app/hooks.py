@@ -12,7 +12,7 @@ website_route_rules = [
 ]
 
 # SK 27-Oct: Tally keys in ERPNext for the accounts team (F4-F9, Ctrl+A, Alt+D Day Book ...)
-app_include_js = "/assets/sk_app/js/sk_tally_keys.js"
+app_include_js = ["/assets/sk_app/js/sk_tally_keys.js", "/assets/sk_app/js/sk_help_desk.js"]  # SK 28-Oct: ❓ help on every ERPNext page
 
 # SK 27-Oct: standard cabin quotation print (SK's quote template), {{ sk_cabin_quote_html(doc) }}
 # SK 28-Oct: "Post Tally invoices" button for Accounts (sk_app.tally_invoices)
