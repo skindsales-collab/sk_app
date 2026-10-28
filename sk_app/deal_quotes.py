@@ -175,11 +175,51 @@ def on_file(doc, method=None):
 		frappe.log_error(f"SK App quotation from quote file {doc.file_name}")
 
 
+def _won_statuses() -> set:
+	if not frappe.db.exists("DocType", "CRM Deal Status"):
+		return {"Won"}
+	return set(frappe.get_all("CRM Deal Status", filters={"type": "Won"}, pluck="name")) or {"Won"}
+
+
+def order_from_deal(deal: str) -> str | None:
+	"""SK 28-Oct "won deal ... is sales order received" + "all input will need to make data entry in ERP": a deal set to
+	Won makes the draft Sales Order from its latest Quotation (made first from the deal value when it has none)."""
+	from sk_app import erp_flow
+
+	d = frappe.db.get_value("CRM Deal", deal, ["name", "deal_owner", "creation"] + (["deal_value"] if frappe.get_meta("CRM Deal").has_field("deal_value") else []),
+		as_dict=True)
+	customer = erp_flow.customer_of(deal)
+	if customer and frappe.db.exists("Sales Order", {"customer": customer, "docstatus": ["<", 2], "creation": [">=", d.creation]}):
+		return None
+	quotes = quotations_of(deal)
+	q = quotes[0] if quotes else make_for_deal(deal, flt(d.get("deal_value")) or None)
+	if not q:
+		return None
+	current = frappe.session.user
+	frappe.set_user("Administrator")
+	try:
+		so = erp_flow.order_received("Administrator", q)["name"]
+	finally:
+		frappe.set_user(current)
+	if d.deal_owner and frappe.db.exists("User", d.deal_owner):
+		frappe.db.set_value("Sales Order", so, "owner", d.deal_owner, update_modified=False)
+	return so
+
+
 def on_deal_update(doc, method=None):
+	before = doc.get_doc_before_save()
+	if doc.get("status") in _won_statuses() and (not before or before.get("status") != doc.get("status")):
+		try:
+			order_from_deal(doc.name)
+		except Exception:
+			frappe.log_error(f"SK App sales order from won deal {doc.name}")
+	_quote_from_value(doc, before)
+
+
+def _quote_from_value(doc, before):
 	fields = [f for f in VALUE_FIELDS if doc.meta.has_field(f) and flt(doc.get(f)) > 0]
 	if not fields:
 		return
-	before = doc.get_doc_before_save()
 	if before and all(flt(before.get(f)) == flt(doc.get(f)) for f in fields):
 		return
 	try:
