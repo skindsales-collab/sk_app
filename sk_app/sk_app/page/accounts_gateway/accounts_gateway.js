@@ -37,7 +37,7 @@ frappe.pages["accounts-gateway"].on_page_load = function (wrapper) {
 		const s = data.sections;
 		$body.html(`<div class="sk-gw-head"><span>SK IND TECH SOLUTIONS | ${__("Accounts Gateway")}</span><span>${data.fy}</span></div>
 			<div class="sk-gw-cols"><div>${sec(s[0])}${sec(s[1])}</div><div>${sec(s[2])}${sec(s[3])}</div></div>
-			<div class="sk-gw-help">↑ ↓ ${__("to move")}, Enter ${__("to open")} · F4 Contra · F5 Payment · F6 Receipt · F7 Journal · F8 Sales · F9 Purchase · Alt+D Day Book · Alt+L Ledger · Ctrl+A ${__("accept")} · Esc ${__("back here")}</div>`);
+			<div class="sk-gw-help">↑ ↓ ${__("to move")}, Enter ${__("to open")} · F4 Contra · F5 Payment · F6 Receipt · F7 Journal · F8 Sales · F9 Purchase · Ctrl+F8 Sales Order · Ctrl+F9 Purchase Order · Alt+F5 Debit Note · Alt+F6 Credit Note · Alt+D Day Book · Alt+L Ledger · Ctrl+A ${__("accept")} · Esc ${__("back here")}</div>`);
 		mark(0);
 		wrapper.sk_options();
 	});
