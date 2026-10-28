@@ -999,6 +999,22 @@
 		gateway: "🏛️", day_book: "📅", cabin_discounts: "🏷️", new_product: "🆕", photo_entry: "📷", cold_calls: "🧊", marketing_list: "📇",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
 	};
+	Object.assign(T.English, { lk_face_first: "Fingerprint / face (set up after PIN)", lk_or_pin: "or open with your PIN",
+		lk_face_first_help: "Fingerprint / face is not set up on this phone yet. Type your PIN once below; the app then asks to set it up and next time it opens with your finger or face.",
+		pc_btn: "Count from photo", pc_title: "Photo count", pc_counting: "Counting… this takes up to a minute", pc_ai: "Photo count",
+		pc_check: "Check the dots: tap the photo to add a missed piece, tap a dot to remove a wrong one.", pc_pieces: "pieces",
+		pc_use: "Use this number", pc_recount: "I counted by hand again (number differs by more than 5 %)", pc_recount_need: "Your number differs from the photo count by more than 5 %. Count by hand once more and tick the box.",
+		pc_low: "Low confidence: this photo is hard to count. Count by hand or by weight.", pc_medium: "Check carefully: the two AI counts did not agree.", pc_high: "Good photo",
+		pc_weight: "Count by weight (best for sheets)", pc_kg: "Weight on scale (kg)", pc_per_piece: "per piece", pc_no_weight: "This item has no weight per piece in ERPNext (Item → Weight Per Unit).",
+		pc_tip: "Tip: one size per photo, all ends facing the camera, photo straight from the front, good light.", pc_second: "second count" });
+	Object.assign(T.Marathi, { lk_face_first: "बोट / चेहरा (पिन नंतर सुरू करा)", lk_or_pin: "किंवा पिनने उघडा",
+		lk_face_first_help: "या फोनवर बोट / चेहरा अजून सुरू नाही. खाली एकदा पिन टाका; मग ॲप ते सुरू करायला विचारेल आणि पुढच्या वेळी बोट / चेहऱ्याने उघडेल.",
+		pc_btn: "फोटोवरून मोजा", pc_title: "फोटो मोजणी", pc_counting: "मोजत आहे… एक मिनिटापर्यंत लागू शकते", pc_ai: "फोटो मोजणी",
+		pc_check: "ठिपके तपासा: राहिलेला नग जोडण्यासाठी फोटोवर टॅप करा, चुकीचा ठिपका काढण्यासाठी त्यावर टॅप करा.", pc_pieces: "नग",
+		pc_use: "हा आकडा वापरा", pc_recount: "मी हाताने पुन्हा मोजले (आकडा ५ % पेक्षा जास्त वेगळा)", pc_recount_need: "तुमचा आकडा फोटो मोजणीपेक्षा ५ % पेक्षा जास्त वेगळा आहे. हाताने पुन्हा मोजा आणि बॉक्सवर टिक करा.",
+		pc_low: "कमी खात्री: हा फोटो मोजायला कठीण आहे. हाताने किंवा वजनाने मोजा.", pc_medium: "नीट तपासा: दोन AI मोजण्या जुळल्या नाहीत.", pc_high: "चांगला फोटो",
+		pc_weight: "वजनाने मोजा (पत्र्यासाठी उत्तम)", pc_kg: "काट्यावरील वजन (kg)", pc_per_piece: "प्रति नग", pc_no_weight: "या आयटमचे प्रति नग वजन ERPNext मध्ये नाही (Item → Weight Per Unit).",
+		pc_tip: "टीप: एका फोटोत एकच साईज, सर्व टोके कॅमेऱ्याकडे, समोरून सरळ फोटो, चांगला उजेड.", pc_second: "दुसरी मोजणी" });
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
 	const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -1303,6 +1319,91 @@
 	}
 
 	// SK 28-Oct (Rev 1 point 19): count pieces on a photo: each tap marks one piece and the count fills the box
+	async function photoCount(id, item, screen) {
+		if (item && item.startsWith("#")) item = val(item.slice(1)) || "";
+		const f = await snap();
+		if (!f) return;
+		const url = URL.createObjectURL(f);
+		let dots = [], ai = 0, rec = null, weight = null;
+		const el = sheet(`<h3 class="sk-h">📷 ${t("pc_title")}</h3>
+			<div class="sk-tc" id="pc-box"><img src="${url}" alt=""><div class="sk-tc-dots sk-pc-dots"></div></div>
+			<p class="sk-note" id="pc-msg">⏳ ${t("pc_counting")}</p><div id="pc-body"></div>
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+		const box = el.querySelector("#pc-box"), layer = el.querySelector(".sk-pc-dots"), msg = el.querySelector("#pc-msg"), body = el.querySelector("#pc-body");
+		const draw = () => {
+			layer.innerHTML = dots.map((p, k) => `<span class="${p.add ? "add" : ""}" style="left:${p.x}%;top:${p.y}%">${k + 1}</span>`).join("");
+			const n = el.querySelector("#pc-n");
+			if (n) n.value = dots.length;
+		};
+		const weightHtml = (w) => w && w.weight_per_unit > 0
+			? `<details class="sk-gap" ${rec && rec.kind === "sheet_stack" ? "open" : ""}><summary>⚖ ${t("pc_weight")}</summary>
+				<p class="sk-note">${num(w.weight_per_unit)} ${esc(w.weight_uom || "kg")} ${t("pc_per_piece")}</p>
+				<label class="sk-field"><span>${t("pc_kg")}</span>${qtyBox("pc-kg")}</label><p class="sk-tc-n" id="pc-kgn"></p>
+				<button type="button" class="sk-btn wide" data-pc="weight">✓ ${t("pc_use")}</button></details>`
+			: (w && item ? `<p class="sk-note">⚖ ${t("pc_no_weight")}</p>` : "");
+		const useNumber = async (final, method, kg) => {
+			const tick = el.querySelector("#pc-re");
+			const recounted = tick && tick.checked ? 1 : 0;
+			if (rec && method === "photo" && ai > 0 && Math.abs(final - ai) / ai > 0.05 && !recounted) {
+				el.querySelector("#pc-re-row").hidden = false;
+				msg.textContent = "⚠ " + t("pc_recount_need");
+				return;
+			}
+			if (rec) await call("photo_count_used", { name: rec.name, final_count: final, method, kg: kg || null, recounted }, true).catch(() => {});
+			const inp = document.getElementById(id);
+			if (inp) { inp.value = final; inp.dispatchEvent(new Event("change", { bubbles: true })); }
+			URL.revokeObjectURL(url);
+			closeSheet();
+		};
+		el.addEventListener("click", (ev) => {
+			const b = ev.target.closest("[data-pc]");
+			if (b) {
+				ev.stopPropagation();
+				if (b.dataset.pc === "use") return useNumber(Number(val("pc-n")) || 0, "photo");
+				if (b.dataset.pc === "weight") {
+					const kg = Number(val("pc-kg")) || 0;
+					return useNumber(Math.round(kg / weight.weight_per_unit), "weight", kg);
+				}
+			}
+		});
+		el.addEventListener("input", (ev) => {
+			if (ev.target.id === "pc-kg" && weight) el.querySelector("#pc-kgn").textContent = `${Math.round((Number(ev.target.value) || 0) / weight.weight_per_unit)} ${t("pc_pieces")}`;
+		});
+		box.addEventListener("click", (ev) => {
+			if (!rec) return;
+			const r = box.getBoundingClientRect();
+			const x = ((ev.clientX - r.left) / r.width) * 100, y = ((ev.clientY - r.top) / r.height) * 100;
+			// tap on a dot removes it (wrong piece); tap elsewhere adds a missed piece
+			let near = -1, best = 2.5;
+			dots.forEach((p, k) => { const d = Math.hypot((p.x - x) * r.width / 100, (p.y - y) * r.height / 100) / Math.min(r.width, r.height) * 100; if (d < best) { best = d; near = k; } });
+			if (near >= 0) dots.splice(near, 1); else dots.push({ x, y, add: true });
+			if (navigator.vibrate) navigator.vibrate(15);
+			draw();
+		});
+		try {
+			if (item) weight = await call("item_weight", { item_code: item }).catch(() => null);
+			const big = /^image\//.test(f.type) ? await shrink(f, 2400).then((c) => new Promise((ok) => c.toBlob(ok, "image/jpeg", 0.85))) : f;
+			const file = big instanceof File ? big : new File([big], "count.jpg", { type: "image/jpeg" });
+			const fileUrl = await uploadRetry(file, msg);
+			rec = await call("photo_count", { file_url: fileUrl, item_code: item || null, screen: screen || state.view }, true);
+		} catch (e) {
+			msg.textContent = "⚠ " + e.message;
+			body.innerHTML = weightHtml(weight);
+			return;
+		}
+		ai = rec.count;
+		dots = (rec.points || []).map((p) => ({ x: p[0], y: p[1] }));
+		msg.textContent = t("pc_check");
+		body.innerHTML = `<div class="sk-pc-conf ${esc(rec.confidence)}">${t("pc_" + rec.confidence)}${rec.material ? " · " + esc(rec.material) : ""}
+				· ${t("pc_ai")} ${ai}${rec.second_count ? ` (${t("pc_second")} ${rec.second_count})` : ""}</div>
+			${rec.advice ? `<p class="sk-note">💡 ${esc(rec.advice)}</p>` : ""}
+			<label class="sk-field"><span>${t("pc_pieces")}</span>${qtyBox("pc-n", ai)}</label>
+			<label class="sk-check" id="pc-re-row" hidden><input type="checkbox" id="pc-re"> ${t("pc_recount")}</label>
+			<button type="button" class="sk-btn ok wide" data-pc="use">✓ ${t("pc_use")}</button>
+			${weightHtml(rec.weight_per_unit ? rec : weight)}<p class="sk-note">${t("pc_tip")}</p>`;
+		if (rec.weight_per_unit) weight = rec;
+		draw();
+	}
 	async function tapCount(id) {
 		const f = await snap();
 		if (!f) return;
@@ -1338,6 +1439,9 @@
 	}
 	// a quantity box with 👆 count-from-photo next to it
 	const countBtn = (id) => `<button type="button" class="sk-chip sk-count" data-tcount="${id}" title="${t("tc_title")}">👆</button>`;
+	// SK 28-Oct: 📷 count from a photo (Store / Production / Quality). item = item code, or "#<input id>" to read it at tap time
+	const pcBtn = (id, item, screen) => `<button type="button" class="sk-chip sk-pcount" data-pcount="${id}" data-pcitem="${esc(item || "")}" data-pcscreen="${esc(screen || "")}" title="${t("pc_btn")}">📷</button>`;
+
 
 	function readAloud(text) {
 		if (!window.speechSynthesis) return;
@@ -3852,7 +3956,7 @@
 		root.innerHTML = header(t("receive")) + `<main class="sk-form"><h3 class="sk-h">${esc(p.supplier_name)} · ${esc(p.name)}</h3>
 			${photoField("r-challan", "📷 " + t("challan_photo"))}${formField("r-billno", t("bill_no_q"))}
 			<ul class="sk-list">${p.items.map((r, k) => li(esc(r.item_name), `${t("ordered")} ${num(r.qty)} · ${t("pending")} ${num(r.pending)} ${esc(r.uom || "")}`,
-				`<div class="sk-input-row sk-countbox">${qtyBox("r-q" + k, r.pending, r.item_name)}${countBtn("r-q" + k)}</div>`)).join("")}</ul>
+				`<div class="sk-input-row sk-countbox">${qtyBox("r-q" + k, r.pending, r.item_name)}${countBtn("r-q" + k)}${pcBtn("r-q" + k, r.item_code, "receive")}</div>`)).join("")}</ul>
 			${photoField("r-goods", "📷 " + t("goods_photo") + " *")}${formField("r-note", t("note_q"))}
 			<button class="sk-btn go wide" data-act="st-receive">${t("save_receipt")}</button></main>`;
 	}
@@ -3874,8 +3978,8 @@
 		root.innerHTML = header(t("issue")) + `<main class="sk-form"><h3 class="sk-h">${w.customer ? esc(w.customer) + " · " : ""}${esc(w.size || w.item_name || w.production_item)} · ${esc(w.name)}</h3>
 			${pick("i-jc", t("job_card"), (w.job_cards || []).map((j) => ({ value: j.name, label: `${w.customer ? w.customer + " · " : ""}${w.size || w.item_name || ""} · ${j.operation || ""} · ${j.name}` })))}
 			<ul class="sk-list">${w.items.map((r, k) => li(esc(r.item_name || r.item_code), `${t("needed")} ${num(r.required_qty)} · ${t("given")} ${num(r.transferred_qty)} · ${esc(r.source_warehouse || "")}`,
-				`<div class="sk-input-row sk-countbox">${qtyBox("i-q" + k, "", r.item_name)}${countBtn("i-q" + k)}</div>`)).join("")}</ul>
-			${finder("i-extra", t("other_item"), "item")}<label class="sk-field"><span>${t("qty")}</span><div class="sk-input-row sk-countbox">${qtyBox("i-extra-q")}${countBtn("i-extra-q")}</div></label>
+				`<div class="sk-input-row sk-countbox">${qtyBox("i-q" + k, "", r.item_name)}${countBtn("i-q" + k)}${pcBtn("i-q" + k, r.item_code, "issue")}</div>`)).join("")}</ul>
+			${finder("i-extra", t("other_item"), "item")}<label class="sk-field"><span>${t("qty")}</span><div class="sk-input-row sk-countbox">${qtyBox("i-extra-q")}${countBtn("i-extra-q")}${pcBtn("i-extra-q", "#i-extra", "issue")}</div></label>
 			${formField("i-who", t("taken_by"))}${photoField("i-photo", "📷 " + t("taker_photo"))}
 			<button class="sk-btn ok wide" data-act="st-issue">✓ ${t("issue")}</button></main>`;
 	}
@@ -3918,7 +4022,7 @@
 		const wh = val("c-wh");
 		S.count = wh ? await call("store_count_list", { warehouse: wh }) : [];
 		document.getElementById("c-list").innerHTML = `<p class="sk-note">${t("count_help")}</p><ul class="sk-list">${S.count.map((r, k) => li(esc(r.item_name),
-			`${esc(r.item_code)} · ERPNext ${num(r.qty)}`, `<div class="sk-input-row sk-countbox">${qtyBox("c-q" + k, "", r.item_name)}${countBtn("c-q" + k)}${micBox("c-q" + k)}</div>`)).join("") || empty()}</ul>
+			`${esc(r.item_code)} · ERPNext ${num(r.qty)}`, `<div class="sk-input-row sk-countbox">${qtyBox("c-q" + k, "", r.item_name)}${countBtn("c-q" + k)}${pcBtn("c-q" + k, r.item_code, "stock_count")}${micBox("c-q" + k)}</div>`)).join("") || empty()}</ul>
 			${photoField("c-photo", "📷 " + t("rack_photo"))}<button class="sk-btn go wide" data-act="st-count">${t("send_differences")}</button>`;
 	}
 
@@ -4073,7 +4177,7 @@
 			${x.choices && x.choices.length > 1 ? `<select class="sk-select" data-rqpick="${k}">${x.choices.map((c) => `<option value="${esc(c.item_code)}" ${c.item_code === x.item_code ? "selected" : ""}>${esc(c.item_name)} · ${num(c.stock)} ${esc(c.uom || "")}</option>`).join("")}</select>`
 				: `<div class="sk-item-title">${esc(x.item_name || x.said || x.item_code)}</div>`}
 			<div class="sk-item-meta">${x.said ? `“${esc(x.text || x.said)}” · ` : ""}${x.item_code ? `${t("rq_stock")} ${num(x.stock)} ${esc(x.uom || "")}` : `<button type="button" class="sk-chip bad" data-act="pu-rq-find" data-i="${k}">🔎 ${t("rq_check")}</button>`}${x.min_order_qty ? ` · ${t("rq_moq")} ${num(x.min_order_qty)}` : ""}${x.last_rate ? ` · ${t("rq_last_rate")} ${money(x.last_rate)}` : ""}</div></div>
-			<div class="sk-input-row sk-countbox">${qtyBox("rq-q" + k, x.qty, x.item_name)}</div>
+			<div class="sk-input-row sk-countbox">${qtyBox("rq-q" + k, x.qty, x.item_name)}${pcBtn("rq-q" + k, x.item_code, "requisition")}</div>
 			<button class="sk-chip" data-act="pu-rq-del" data-i="${k}">✕</button></li>`).join("");
 		root.innerHTML = header(RQ.noPo ? t("rq_came_no_po") : t("requisition")) + `<main class="sk-form">${tabs}
 			${RQ.noPo ? `<p class="sk-note">${t("rq_no_po_help")}</p>${finder("rq-sup", t("supplier"), "supplier")}${photoField("rq-challan", "📷 " + t("challan_photo"))}${formField("rq-billno", t("bill_no_q"))}`
@@ -4081,7 +4185,7 @@
 				<button class="sk-chip ${RQ.priority === "Urgent" ? "on bad" : ""}" data-act="pu-rq-prio" data-p="Urgent">🔴 ${t("rq_urgent")}</button></div>`}
 			<h3 class="sk-h">${t("items")} (${RQ.items.length}/20)</h3><ul class="sk-list">${items || `<li class="sk-empty">${t("add_item_first")}</li>`}</ul>
 			${RQ.items.length < 20 ? `${finder("rq-item", t("item") + " (ERP)", "item")}<div id="rq-info"></div>
-			<label class="sk-field"><span>${t("qty")}</span><div class="sk-input-row sk-countbox">${qtyBox("rq-qty")}${countBtn("rq-qty")}${micBox("rq-qty")}</div></label>
+			<label class="sk-field"><span>${t("qty")}</span><div class="sk-input-row sk-countbox">${qtyBox("rq-qty")}${countBtn("rq-qty")}${pcBtn("rq-qty", "#rq-item", "requisition")}${micBox("rq-qty")}</div></label>
 			<button class="sk-btn wide" data-act="pu-rq-add">+ ${t("add_item")}</button>
 			<details class="sk-gap"><summary>📋 ${t("rq_list")}</summary>${formField("rq-list", t("rq_list"), true)}
 				<button class="sk-btn wide" data-act="pu-rq-rows">📋 ${t("rq_make_rows")}</button></details>` : `<p class="sk-note">${t("rq_max")}</p>`}
@@ -4521,7 +4625,7 @@
 		S.job = j || null;
 		sheet(`<h3 class="sk-h">📦 ${t("need_material")}${j ? " · " + esc(j.operation || "") : ""}</h3>
 			${j ? "" : pick("pn-job", t("job_card"), (S.jobs || []).map((x) => ({ value: x.name, label: `${x.name} · ${x.operation || ""} · ${x.item_name || ""}` })))}
-			${formField("pn-spoken", t("say_material"), true)}${finder("pn-item", t("item"), "item")}<label class="sk-field"><span>${t("qty")}</span>${qtyBox("pn-qty")}</label>
+			${formField("pn-spoken", t("say_material"), true)}${finder("pn-item", t("item"), "item")}<label class="sk-field"><span>${t("qty")}</span><div class="sk-input-row sk-countbox">${qtyBox("pn-qty")}${countBtn("pn-qty")}${pcBtn("pn-qty", "#pn-item", "need_material")}</div></label>
 			<label class="sk-field"><span>${t("needed_by")}</span><input id="pn-date" type="date" class="sk-select" value="${new Date().toISOString().slice(0, 10)}"></label>
 			<button class="sk-btn go wide" data-act="pr-need-save">${t("send_store")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
 	}
@@ -4672,7 +4776,7 @@
 			<p class="sk-note">${esc(c.reference_type)} ${esc(c.reference_name)} · ${esc(c.from || "")}</p>
 			${c.reference_type === "Job Card" ? selfHtml(c.self_check) : ""}
 			${pick("q-tpl", t("checklist"), o.templates)}<div id="q-points"></div>
-			${c.reference_type === "Purchase Receipt" ? `<label class="sk-field"><span>${t("accepted_qty")}</span>${qtyBox("q-acc", c.qty)}</label><label class="sk-field"><span>${t("rejected_qty")}</span>${qtyBox("q-rej", 0)}</label>` : ""}
+			${c.reference_type === "Purchase Receipt" ? `<label class="sk-field"><span>${t("accepted_qty")}</span><div class="sk-input-row sk-countbox">${qtyBox("q-acc", c.qty)}${countBtn("q-acc")}${pcBtn("q-acc", c.item_code, "quality")}</div></label><label class="sk-field"><span>${t("rejected_qty")}</span><div class="sk-input-row sk-countbox">${qtyBox("q-rej", 0)}${countBtn("q-rej")}${pcBtn("q-rej", c.item_code, "quality")}</div></label>` : ""}
 			<label class="sk-field"><span>${t("sample")}</span>${qtyBox("q-sample", 1)}</label>
 			${photoField("q-p1", "📷 " + t("photo"))}${photoField("q-p2", "📷 " + t("photo"))}${formField("q-remark", t("note_q"))}
 			<div class="sk-row"><button class="sk-btn ok wide" data-act="qc-save">${t("save_check")}</button></div></main>`;
@@ -5351,6 +5455,7 @@
 			if (el.dataset.pmatch) return photoMatch(el.dataset.pmatch);
 			if (el.dataset.sgfor) return pickSugg(el.dataset.sgfor, el.dataset.sgval);
 			if (el.dataset.tcount) return tapCount(el.dataset.tcount);
+			if (el.dataset.pcount) return photoCount(el.dataset.pcount, el.dataset.pcitem, el.dataset.pcscreen);
 			if (el.dataset.pick) return pickFile(el.dataset.pick, el.dataset.how);
 			if (el.dataset.mailtab) { mailTab = el.dataset.mailtab; return go("mail"); }
 			if (el.dataset.dcard !== undefined) return renderDashList(Number(el.dataset.dcard));
@@ -6056,7 +6161,7 @@
 	const canFace = async () => {
 		try { return !!(window.PublicKeyCredential && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()); } catch (e) { return false; }
 	};
-	let lockInfo = null, lastTouch = Date.now(), lockHit = false;
+	let lockInfo = null, lastTouch = Date.now(), lockHit = false, faceFailedHere = false;
 	["touchstart", "click", "keydown", "scroll"].forEach((ev) => document.addEventListener(ev, () => { lastTouch = Date.now(); }, { passive: true, capture: true }));
 	async function faceUnlock() {
 		const o = await call("face_options", { purpose: "unlock" }, true);
@@ -6097,14 +6202,17 @@
 		if (!lockInfo) return;
 		let el = document.getElementById("sk-lock");
 		if (!el) { el = document.createElement("div"); el.id = "sk-lock"; el.className = "sk-lock"; document.body.appendChild(el); }
-		const face = lockInfo.has_key;
+		// SK 28-Oct: the fingerprint / face button is always shown when the phone has a fingerprint / face lock, with
+		// the PIN under it. Not set up yet: the button says so and the PIN opens the app once, then set-up follows.
+		const phoneCan = await canFace();
+		const face = phoneCan && lockInfo.has_key;
 		el.innerHTML = `<div class="sk-lock-box"><div class="sk-lock-icon">🔒</div><h2>${t("lk_locked")}</h2>
 			<p class="sk-note">${esc(lockInfo.name || "")}</p>
-			${face && !lockInfo.usePin ? `<p class="sk-big">👆 ${t("lk_touch")}</p><button class="sk-btn go wide" data-lock="face">🙂 ${t("lk_open_face")}</button>
-				<button class="sk-btn wide" data-lock="usepin">🔢 ${t("lk_use_pin")}</button><p class="sk-note">${t("lk_ask_ceo")}</p>`
-			: `<label class="sk-field"><span>${t("lk_pin")}</span><input id="lk-pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8"></label>
-				<button class="sk-btn go wide" data-lock="pin">${t("lk_open")}</button>
-				<button class="sk-btn wide" data-lock="relogin">${t("lk_relogin")}</button>`}
+			${phoneCan ? `<button class="sk-btn go wide sk-face-btn" data-lock="${face ? "face" : "noface"}">👆 🙂 ${t(face ? "lk_open_face" : "lk_face_first")}</button>
+				<p class="sk-login-or">${t("lk_or_pin")}</p>` : ""}
+			<label class="sk-field"><span>${t("lk_pin")}</span><input id="lk-pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8"></label>
+			<button class="sk-btn ${phoneCan ? "" : "go "}wide" data-lock="pin">${t("lk_open")}</button>
+			<button class="sk-btn wide" data-lock="relogin">${t("lk_relogin")}</button><p class="sk-note">${t("lk_ask_ceo")}</p>
 			<p class="sk-lock-msg" id="lk-msg"></p></div>`;
 		if (face && !lockInfo.usePin) setTimeout(() => el.querySelector("[data-lock=face]") && el.querySelector("[data-lock=face]").click(), 300);
 	}
@@ -6114,7 +6222,8 @@
 		if (!state.home) await start();
 		else if (lockHit) go(state.view); // a screen that could not load while locked opens now (typed forms are left as they are)
 		lockHit = false;
-		if (!st.has_key && await canFace()) faceSetupSheet();
+		if ((!st.has_key || faceFailedHere) && await canFace()) faceSetupSheet();
+		faceFailedHere = false;
 		setTimeout(askPending, 800);
 	}
 	function faceSetupSheet() {
@@ -6132,12 +6241,14 @@
 				return location.reload();
 			}
 			if (b.dataset.lock === "usepin") { lockInfo.usePin = true; return showLock(lockInfo); }
+			if (b.dataset.lock === "noface") { if (msg) msg.textContent = t("lk_face_first_help"); const p = document.getElementById("lk-pin"); if (p) p.focus(); b.disabled = false; return; }
 			if (b.dataset.lock === "face") await afterUnlock(await faceUnlock());
 			else await afterUnlock(await call("unlock_pin", { pin: (document.getElementById("lk-pin") || {}).value || "" }, true));
 		} catch (e) {
 			if (msg) msg.textContent = e.name === "NotAllowedError" ? t("lk_cancelled") : e.message;
 			// SK 28-Oct (Swati): no key on this phone or the face check failed: the PIN box comes up by itself
-			if (b.dataset.lock === "face" && lockInfo) { lockInfo.usePin = true; showLock(lockInfo).then(() => { const m = document.getElementById("lk-msg"); if (m) m.textContent = t("lk_no_key"); }); }
+			if (b.dataset.lock === "face") faceFailedHere = true;
+			if (b.dataset.lock === "face" && lockInfo && msg) msg.textContent = (e.name === "NotAllowedError" ? t("lk_cancelled") + " " : "") + t("lk_no_key");
 			if (/log in again/i.test(e.message)) setTimeout(() => location.reload(), 1500);
 		}
 		b.disabled = false;
