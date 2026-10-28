@@ -57,7 +57,9 @@ def deal_of(doctype: str, doc) -> str | None:
 def erp_docs(deal: str | None) -> tuple[list, list]:
 	if not deal:
 		return [], []
-	cache = frappe.local.__dict__.setdefault("sk_gate_docs", {})
+	cache = getattr(frappe.local, "sk_gate_docs", None)
+	if cache is None:  # frappe.local has no __dict__ (28-Oct: that error blocked every CRM Lead / Deal save)
+		cache = frappe.local.sk_gate_docs = {}
 	if deal in cache:
 		return cache[deal]
 	quotes = []
@@ -97,7 +99,7 @@ def check_crm(doc, method=None):
 	"""CRM Lead / CRM Deal validate: the status moves on only with the lead data and the step's ERPNext document."""
 	if _skip():
 		return
-	frappe.local.__dict__.pop("sk_gate_docs", None)
+	frappe.local.sk_gate_docs = None
 	before = doc.get_doc_before_save()
 	if before and before.get("status") == doc.get("status"):
 		return
