@@ -44,6 +44,8 @@ def test_quotation_needs_items_rate_gst_valid_till():
 	ok = {"party_name": "ABC", "valid_till": "2026-11-12", "items": [{"qty": 1, "rate": 250000}], "taxes": 2}
 	assert quotation_missing(ok) == []
 	assert keys(quotation_missing({**ok, "taxes": 0, "total_taxes_and_charges": 0})) == {"taxes"}
+	# SK 28-Oct: no GST rows, the terms say GST is extra
+	assert quotation_missing({**ok, "taxes": 0, "terms": "GST @ 18% extra as applicable."}) == []
 	assert keys(quotation_missing({**ok, "items": [{"qty": 1, "rate": 0}]})) == {"items"}
 	assert keys(quotation_missing({"items": []})) == {"party_name", "items", "taxes", "valid_till"}
 

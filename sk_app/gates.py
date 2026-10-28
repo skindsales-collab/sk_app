@@ -230,7 +230,7 @@ def check_quotation(doc, method=None):
 	if _skip():
 		return
 	missing = R.quotation_missing({"party_name": doc.party_name, "valid_till": doc.valid_till, "items": _rows(doc),
-		"taxes": len(doc.get("taxes") or []), "total_taxes_and_charges": doc.total_taxes_and_charges})
+		"taxes": len(doc.get("taxes") or []), "total_taxes_and_charges": doc.total_taxes_and_charges, "terms": doc.terms})
 	if doc.quotation_to == "Customer" and doc.party_name:
 		missing += [(k, _("Customer: {0}").format(t)) for k, t in customer_missing(doc.party_name)]
 	if missing:

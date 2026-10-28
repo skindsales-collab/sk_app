@@ -64,18 +64,13 @@ def make_customer(user: str, deal: str, details: dict | None = None) -> dict:
 	return {"name": name, "new": not same, "missing": [t for _k, t in gates.customer_missing(name)]}
 
 
-def default_gst(doc):
-	"""The company's default sales tax (GST) template on a quotation / order that has none (gate: GST applied)."""
-	if doc.get("taxes") or not doc.meta.has_field("taxes_and_charges"):
-		return
-	from erpnext.controllers.accounts_controller import get_taxes_and_charges
+GST_TERMS = "GST @ 18% extra as applicable."
 
-	tpl = doc.get("taxes_and_charges") or frappe.db.get_value("Sales Taxes and Charges Template",
-		{"company": doc.company or frappe.defaults.get_user_default("Company"), "is_default": 1, "disabled": 0})
-	if tpl:
-		doc.taxes_and_charges = tpl
-		for row in get_taxes_and_charges("Sales Taxes and Charges Template", tpl) or []:
-			doc.append("taxes", row)
+
+def gst_terms(terms: str | None) -> str:
+	"""SK 28-Oct: quotes show no GST amount, only the rate: totals stay before GST and the terms say GST is extra."""
+	terms = (terms or "").strip()
+	return terms if "gst" in terms.lower() else (terms + "<br>" if terms else "") + GST_TERMS
 
 
 def _rate(item_code: str) -> float:
@@ -111,9 +106,7 @@ def make_quotation(user: str, deal: str, items: list[dict], valid_days: int = 15
 		"valid_till": add_days(nowdate(), int(valid_days or 15)), "items": rows})
 	if doc.meta.has_field("crm_deal"):
 		doc.crm_deal = deal
-	if note:
-		doc.terms = note
-	default_gst(doc)
+	doc.terms = gst_terms(note)
 	doc.insert()
 	return {"name": doc.name, "grand_total": doc.grand_total, "pdf": crm._pdf("Quotation", doc.name), **submit_quotation(user, doc.name, quiet=True)}
 
@@ -129,8 +122,8 @@ def submit_quotation(user: str, quotation: str, quiet: bool = False) -> dict:
 	if quiet and not frappe.has_permission("Quotation", "submit", q.name):
 		return {"submitted": False, "missing": [_("Sales manager to submit")]}
 	q.check_permission("submit")
-	if not q.get("taxes"):
-		default_gst(q)
+	if not q.get("taxes") and "gst" not in (q.terms or "").lower():
+		q.terms = gst_terms(q.terms)
 		q.save()
 	try:
 		q.submit()
@@ -140,7 +133,7 @@ def submit_quotation(user: str, quotation: str, quiet: bool = False) -> dict:
 		frappe.clear_messages()
 		q.reload()
 		missing = gates.R.quotation_missing({"party_name": q.party_name, "valid_till": q.valid_till, "items": gates._rows(q),
-			"taxes": len(q.get("taxes") or []), "total_taxes_and_charges": q.total_taxes_and_charges})
+			"taxes": len(q.get("taxes") or []), "total_taxes_and_charges": q.total_taxes_and_charges, "terms": q.terms})
 		missing += gates.customer_missing(q.party_name) if q.quotation_to == "Customer" else []
 		return {"submitted": False, "missing": [t for _k, t in missing]}
 	return {"submitted": True, "missing": []}
@@ -179,7 +172,6 @@ def order_received(user: str, quotation: str, delivery_date=None, po_no: str | N
 	so.po_no = (po_no or "").strip() or None
 	if po_date:
 		so.po_date = getdate(po_date)
-	default_gst(so)
 	so.insert()
 	if po_photo:
 		_attach_po(po_photo, so.name, user)
@@ -218,7 +210,6 @@ def confirm_order(user: str, sales_order: str) -> dict:
 	so = frappe.get_doc("Sales Order", sales_order)
 	so.check_permission("submit")
 	if so.docstatus == 0:
-		default_gst(so)
 		so.submit()
 	deals = {r.prevdoc_docname for r in so.items if r.get("prevdoc_docname")}
 	for q in deals:
