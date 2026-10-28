@@ -4,6 +4,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.rate_limiter import rate_limit
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
 from sk_app import activities, ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, requisition, sales_owner, segments, store, sub_bills, training, view_member, work
@@ -110,7 +111,8 @@ def _badges(user, functions):
 	try:
 		return {**store.badges(user, functions), **purchase.badges(user, functions), **production.badges(user, functions),
 			**quality.badges(user, functions), **finance.badges(user, functions), **ai_desk.badges(user, functions),
-			**mailbox.badges(user), **complaints.badge(user), **hr.badges(user, functions), **sub_bills.badges(user)}
+			**mailbox.badges(user), **complaints.badge(user), **hr.badges(user, functions), **sub_bills.badges(user),
+			"questions": training.question_count(user)}
 	except Exception:
 		frappe.log_error("SK App badges")
 		return {}
@@ -610,6 +612,20 @@ def face_setup(credential, device=None):
 @frappe.whitelist(methods=["POST"])
 def face_unlock(credential):
 	return applock.verify(_me(unlocked=False).user, credential)
+
+
+# SK 28-Oct (Rev 1 point 1): log in with the fingerprint / face linked on this phone; mobile + PIN stays the backup
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=30, seconds=60 * 60)
+def face_login_options():
+	return applock.login_options()
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=30, seconds=60 * 60)
+def face_login(token, credential):
+	applock.login_verify(token, credential)
+	return {"ok": True}
 
 
 # ---------- Finance (SK draft F06) ----------
@@ -1535,8 +1551,24 @@ def training_faq(q=None):
 
 
 @frappe.whitelist(methods=["POST"])
-def training_ask(question, function=None):
-	return training.ask(_me().user, question, function)
+def training_ask(question, function=None, photo=None):
+	return training.ask(_me().user, question, function, photo)
+
+
+# SK 28-Oct (Rev 1 point 6): the CEO's Questions screen
+@frappe.whitelist()
+def ceo_questions():
+	return training.questions(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def ceo_question_dev(todo, note=None):
+	return training.send_for_development(_me().user, todo, note)
+
+
+@frappe.whitelist(methods=["POST"])
+def ceo_question_deployed(work_log, where="App"):
+	return training.mark_deployed(_me().user, work_log, where)
 
 
 @frappe.whitelist(methods=["POST"])

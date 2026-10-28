@@ -129,7 +129,7 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": [*DASH_TILES, "leadership", "view_member", "attendance", "lead_sources", "customers", "sales_owner", "complaints", "po_approvals", "sub_bills", "pay_approvals", "cabin_discounts", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "reminders", "day_report", "my_kpi", "dsi", "problem",
+		"tiles": [*DASH_TILES, "leadership", "questions", "view_member", "attendance", "lead_sources", "customers", "sales_owner", "complaints", "po_approvals", "sub_bills", "pay_approvals", "cabin_discounts", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "reminders", "day_report", "my_kpi", "dsi", "problem",
 			"library", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager", "Purchase Manager", "Purchase User"],  # SK approves big POs

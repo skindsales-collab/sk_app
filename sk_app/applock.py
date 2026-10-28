@@ -188,11 +188,12 @@ def options(user: str, purpose: str) -> dict:
 	return out
 
 
-def _client_data(raw_b64: str, kind: str, user: str, purpose: str) -> bytes:
+def _client_data(raw_b64: str, kind: str, user: str, purpose: str, cache_key: str | None = None) -> bytes:
 	raw = _b64d(raw_b64)
 	data = json.loads(raw)
-	want = frappe.cache.get_value(f"sk_webauthn:{user}:{purpose}")
-	frappe.cache.delete_value(f"sk_webauthn:{user}:{purpose}")
+	cache_key = cache_key or f"sk_webauthn:{user}:{purpose}"
+	want = frappe.cache.get_value(cache_key)
+	frappe.cache.delete_value(cache_key)
 	if data.get("type") != kind:
 		frappe.throw(_("Face / finger check failed (type)"))
 	if not want or not secrets.compare_digest(str(data.get("challenge") or ""), str(want)):
@@ -242,12 +243,18 @@ def register(user: str, credential: dict | str, device: str | None = None) -> di
 def verify(user: str, credential: dict | str) -> dict:
 	"""Unlock: the phone signed our challenge after checking the face / finger."""
 	cred = frappe.parse_json(credential) if isinstance(credential, str) else credential
-	resp = cred.get("response") or {}
 	cid = _b64e(_b64d(cred.get("rawId") or cred.get("id")))
 	key = next((k for k in keys(user) if k.credential_id == cid), None)
 	if not key:
 		frappe.throw(_("This phone's face / finger is not linked to your login. Ask the CEO to reset it, then set it up again."))
-	client = _client_data(resp.get("clientDataJSON"), "webauthn.get", user, "unlock")
+	_check_signature(key, cred, user, "unlock")
+	_unlock(user, "Unlock face / finger", key.device)
+	return status(user)
+
+
+def _check_signature(key, cred: dict, user: str, purpose: str, cache_key: str | None = None):
+	resp = cred.get("response") or {}
+	client = _client_data(resp.get("clientDataJSON"), "webauthn.get", user, purpose, cache_key)
 	auth_raw = _b64d(resp.get("authenticatorData"))
 	auth = _auth_data(auth_raw)
 	signed = auth_raw + hashlib.sha256(client).digest()
@@ -256,8 +263,38 @@ def verify(user: str, credential: dict | str) -> dict:
 	if auth["sign_count"] and key.sign_count and auth["sign_count"] <= key.sign_count:
 		frappe.throw(_("This face / finger key looks copied. Ask the CEO to reset it."))
 	frappe.db.set_value("SK App Unlock Key", key.name, {"sign_count": auth["sign_count"], "last_used": now_datetime()})
-	_unlock(user, "Unlock face / finger", key.device)
-	return status(user)
+
+
+# ---------- log in with face / finger (SK 28-Oct, Rev 1 point 1: "Fingerprint / Face ID login") ----------
+# The phone keeps which face / finger keys were linked on it; the login screen asks the phone to sign a fresh challenge
+# with one of them, and the key's owner is logged in. The mobile + PIN login stays as the backup.
+
+def login_options() -> dict:
+	token = secrets.token_urlsafe(18)
+	challenge = secrets.token_bytes(32)
+	frappe.cache.set_value(f"sk_webauthn_login:{token}", _b64e(challenge), expires_in_sec=CHALLENGE_SECONDS)
+	return {"token": token, "challenge": _b64e(challenge), "rpId": _rp_id(), "timeout": 60000, "userVerification": "required"}
+
+
+def login_verify(token: str, credential: dict | str) -> str:
+	cred = frappe.parse_json(credential) if isinstance(credential, str) else credential
+	failed = _("Face / finger login did not work. Please log in with your PIN.")
+	try:
+		cid = _b64e(_b64d(cred.get("rawId") or cred.get("id") or ""))
+	except Exception:
+		frappe.throw(failed, frappe.AuthenticationError)
+	key = frappe.db.get_value("SK App Unlock Key", {"credential_id": cid, "enabled": 1},
+		["name", "user", "credential_id", "public_key", "alg", "sign_count", "device"], as_dict=True)
+	if not key or not frappe.db.get_value("User", key.user, "enabled"):
+		frappe.throw(failed, frappe.AuthenticationError)
+	if frappe.db.exists("SK App User", {"user": key.user, "enabled": 0}):
+		frappe.throw(failed, frappe.AuthenticationError)
+	if not frappe.cache.get_value(f"sk_webauthn_login:{token}"):
+		frappe.throw(_("Face / finger check took too long. Please try again."), frappe.AuthenticationError)
+	_check_signature(key, cred, key.user, "login", f"sk_webauthn_login:{token}")
+	frappe.local.login_manager.login_as(key.user)
+	log(key.user, "Login face / finger", key.device)
+	return key.user
 
 
 def reset(by: str, user: str) -> dict:

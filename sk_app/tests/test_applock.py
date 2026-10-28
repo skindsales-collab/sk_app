@@ -131,3 +131,21 @@ class TestAppLock(IntegrationTestCase):
 			self.assertTrue(applock.is_locked())
 			applock.lock(PERSON)
 			self.assertTrue(applock.is_locked())
+
+	def test_login_with_face_or_finger(self):
+		"""SK 28-Oct (Rev 1 point 1): log in with the fingerprint / face linked on this phone; a stranger's key never does."""
+		from unittest.mock import MagicMock
+
+		phone = Phone()
+		applock.register(PERSON, phone.create(applock.options(PERSON, "setup")), "Test Android")
+		frappe.local.login_manager = MagicMock()
+		o = applock.login_options()
+		self.assertEqual(applock.login_verify(o["token"], phone.get(o)), PERSON)
+		frappe.local.login_manager.login_as.assert_called_once_with(PERSON)
+		self.assertTrue(frappe.db.exists("SK App Lock Log", {"user": PERSON, "event": "Login face / finger"}))
+		self.assertRaises(frappe.AuthenticationError, applock.login_verify, o["token"], phone.get(o))  # one challenge, one login
+		o = applock.login_options()
+		self.assertRaises(frappe.AuthenticationError, applock.login_verify, o["token"], Phone().get(o))
+		applock.reset(CEO, PERSON)
+		o = applock.login_options()
+		self.assertRaises(frappe.AuthenticationError, applock.login_verify, o["token"], phone.get(o))

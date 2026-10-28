@@ -253,23 +253,40 @@ def _owner_of(user: str, function: str) -> str | None:
 	return (heads or [p for p in _users_with_function("Management") if p != user] or [None])[0]
 
 
-def ask(user: str, question: str, function: str | None = None) -> dict:
+def _ceos() -> list[str]:
+	from sk_app.requisition import _ceos
+
+	return _ceos()
+
+
+def ask(user: str, question: str, function: str | None = None, photo: str | None = None) -> dict:
+	"""SK 28-Oct (Rev 1 point 6): "My question" with a screenshot or photo goes to the CEO's Questions screen."""
 	if not (question or "").strip():
 		frappe.throw(frappe._("Please speak or type the question"))
 	function = function or (_functions(user) or ["All"])[0]
-	owner = _owner_of(user, function)
+	ceos = [c for c in _ceos() if c != user]
+	owner = ceos[0] if ceos else _owner_of(user, function)
 	if not owner:
 		frappe.throw(frappe._("Nobody to answer yet. Please ask your manager."))
-	frappe.get_doc({"doctype": "ToDo", "allocated_to": owner, "assigned_by": user, "status": "Open", "priority": "Medium",
+	todo = frappe.get_doc({"doctype": "ToDo", "allocated_to": owner, "assigned_by": user, "status": "Open", "priority": "Medium",
 		"description": f"{FAQ_TAG} {function}: {question.strip()[:500]}", "date": frappe.utils.add_days(frappe.utils.nowdate(), 2)}
 		).insert(ignore_permissions=True)
-	return {"owner": frappe.utils.get_fullname(owner)}
+	from sk_app.store import attach
+
+	attach(photo, "ToDo", todo.name, user)
+	return {"owner": frappe.utils.get_fullname(owner), "todo": todo.name}
+
+
+def _may_answer(user: str, t) -> bool:
+	"""The person it was sent to; any CEO answers the questions sent to the CEO."""
+	ceos = _ceos()
+	return t.allocated_to == user or (user in ceos and t.allocated_to in ceos)
 
 
 def answer(user: str, todo: str, text: str, add_to_faq=1) -> dict:
 	"""The owner answers; the answer goes back to the person and, when useful, into the function's FAQ."""
 	t = frappe.get_doc("ToDo", todo)
-	if t.allocated_to != user or not (t.description or "").startswith(FAQ_TAG):
+	if not _may_answer(user, t) or not (t.description or "").startswith(FAQ_TAG):
 		frappe.throw(frappe._("This question is not for you"), frappe.PermissionError)
 	if not (text or "").strip():
 		frappe.throw(frappe._("Please speak or type the answer"))
@@ -286,3 +303,117 @@ def answer(user: str, todo: str, text: str, add_to_faq=1) -> dict:
 			"description": f"Answer to your question \"{question[:120]}\": {text.strip()[:400]}", "date": frappe.utils.nowdate()}
 			).insert(ignore_permissions=True)
 	return {"faq": item}
+
+
+# ---------- CEO Questions screen (SK 28-Oct, Rev 1 point 6) ----------
+# Questions from Training come to the CEO grouped by function and topic with a one-line summary (free word rules now;
+# a Claude summary once the Claude key is added). The CEO answers (typed or spoken), the answer goes to the person and
+# into the FAQ, or "Send for development" puts it in the AI & ERP improvement inbox; once built the CEO marks it
+# deployed in the app or in ERPNext and the person is told.
+
+DEV_TAG = "[Question]"
+STOP = set("""a an the is are was were be to of in on for and or but with how what why when where which who can could should would
+do does did i we you my our your it this that these those me us not no yes please sir madam app erp erpnext from by at as
+have has had will shall get got give show see use used using make made there their them they he she his her its then than
+so if into out up down about all any some one two need want करा कसे काय का आहे नाही मला आम्ही हे ते तो ती मध्ये आणि""".split())
+
+
+def _question_of(t) -> tuple[str, str]:
+	body = frappe.utils.strip_html(t.description or "")[len(FAQ_TAG):].strip()
+	function, _sep, question = body.partition(": ")
+	return function, question or body
+
+
+def _keywords(text: str) -> list[str]:
+	import re
+
+	return [w for w in re.findall(r"[\w\u0900-\u097F]+", (text or "").lower()) if len(w) > 2 and w not in STOP and not w.isdigit()]
+
+
+def _check_ceo(user: str):
+	if user != "Administrator" and user not in _ceos():
+		frappe.throw(frappe._("Only the CEO answers these questions"), frappe.PermissionError)
+
+
+def _photos(doctype: str, name: str) -> list[str]:
+	return frappe.get_all("File", filters={"attached_to_doctype": doctype, "attached_to_name": name}, pluck="file_url", order_by="creation asc")
+
+
+def questions(user: str) -> dict:
+	_check_ceo(user)
+	ceos = _ceos() or [user]
+	todos = frappe.get_all("ToDo", filters={"allocated_to": ["in", ceos], "status": "Open", "description": ["like", f"{FAQ_TAG}%"]},
+		fields=["name", "description", "assigned_by", "date", "creation"], order_by="creation asc", limit=0)
+	rows = []
+	for t in todos:
+		function, question = _question_of(t)
+		rows.append({"todo": t.name, "function": function, "question": question, "by": frappe.utils.get_fullname(t.assigned_by) if t.assigned_by else "",
+			"date": str(t.creation)[:16], "photos": _photos("ToDo", t.name), "words": _keywords(question)})
+	# topic of a question = its word asked most often across all open questions of the same function
+	count = {}
+	for r in rows:
+		for w in set(r["words"]):
+			count[(r["function"], w)] = count.get((r["function"], w), 0) + 1
+	groups = {}
+	for r in rows:
+		ranked = sorted(set(r["words"]), key=lambda w: (-count[(r["function"], w)], w))
+		topic = ranked[0] if ranked and count[(r["function"], ranked[0])] > 1 else "other"
+		groups.setdefault((r["function"], topic), []).append(r)
+	out = []
+	for (function, topic), items in sorted(groups.items(), key=lambda g: (-len(g[1]), g[0])):
+		people = sorted({i["by"] for i in items if i["by"]})
+		label = f"about “{topic}”" if topic != "other" else "on other topics"
+		out.append({"function": function, "topic": topic, "rows": [{k: v for k, v in i.items() if k != "words"} for i in items],
+			"summary": f"{len(items)} question{'s' if len(items) > 1 else ''} {label} from {', '.join(people) or 'the team'}"})
+	dev = frappe.get_all("SK Work Log", filters={"entry_type": "Problem", "description": ["like", f"{DEV_TAG}%"], "status": ["!=", "Done"]},
+		fields=["name", "user", "date", "description", "status", "photo"], order_by="date asc", limit=0)
+	for d in dev:
+		d["by"] = frappe.utils.get_fullname(d.user)
+		d["question"] = (d.description or "")[len(DEV_TAG):].strip()
+		d["date"] = str(d.date)
+	return {"groups": out, "open": len(rows), "dev": dev}
+
+
+def send_for_development(user: str, todo: str, note: str | None = None) -> dict:
+	_check_ceo(user)
+	t = frappe.get_doc("ToDo", todo)
+	if not (t.description or "").startswith(FAQ_TAG):
+		frappe.throw(frappe._("Not a Training question"))
+	function, question = _question_of(t)
+	photos = _photos("ToDo", t.name)
+	text = f"{DEV_TAG} {function}: {question}" + (f" | CEO: {note.strip()}" if (note or "").strip() else "")
+	log = frappe.get_doc({"doctype": "SK Work Log", "user": t.assigned_by or user, "date": frappe.utils.nowdate(), "entry_type": "Problem",
+		"problem_type": "IT / app", "description": text[:2000], "status": "Open", "photo": photos[0] if photos else None,
+		"reference_doctype": "ToDo", "reference_name": t.name}).insert(ignore_permissions=True)
+	t.db_set("status", "Closed")
+	if t.assigned_by:
+		_tell(t.assigned_by, user, f"Your question \"{question[:120]}\" was sent for development (AI & ERP desk).")
+	return {"work_log": log.name}
+
+
+def mark_deployed(user: str, work_log: str, where: str = "App") -> dict:
+	_check_ceo(user)
+	if where not in ("App", "ERPNext"):
+		frappe.throw(frappe._("Pick App or ERPNext"))
+	log = frappe.get_doc("SK Work Log", work_log)
+	if not (log.description or "").startswith(DEV_TAG):
+		frappe.throw(frappe._("Not a question sent for development"))
+	log.db_set("status", "Done")
+	log.add_comment("Comment", f"Deployed in {'the SK App' if where == 'App' else 'ERPNext'} (marked by {frappe.utils.get_fullname(user)})")
+	for todo in frappe.get_all("ToDo", filters={"reference_type": "SK Work Log", "reference_name": work_log, "status": "Open"}, pluck="name"):
+		frappe.db.set_value("ToDo", todo, "status", "Closed")  # the AI desk's item is finished too
+	question = (log.description or "")[len(DEV_TAG):].strip().split(" | CEO:", 1)[0]
+	if log.user and log.user != user:
+		_tell(log.user, user, f"Done: \"{question[:120]}\" is now in {'the SK App' if where == 'App' else 'ERPNext'}.")
+	return {"work_log": work_log, "where": where}
+
+
+def _tell(to: str, by: str, text: str):
+	frappe.get_doc({"doctype": "ToDo", "allocated_to": to, "assigned_by": by, "status": "Open", "priority": "Low",
+		"description": text[:500], "date": frappe.utils.nowdate()}).insert(ignore_permissions=True)
+
+
+def question_count(user: str) -> int:
+	if user not in _ceos():
+		return 0
+	return frappe.db.count("ToDo", {"allocated_to": ["in", _ceos()], "status": "Open", "description": ["like", f"{FAQ_TAG}%"]})
