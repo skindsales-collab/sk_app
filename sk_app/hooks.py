@@ -18,7 +18,7 @@ app_include_js = "/assets/sk_app/js/sk_tally_keys.js"
 jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html"]}
 
 scheduler_events = {
-	"hourly": ["sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge", "sk_app.mailbox.remind"],
+	"hourly": ["sk_app.deal_quotes.sync", "sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge", "sk_app.mailbox.remind"],
 	# IndiaMART / JustDial / GeM mails to the team mailboxes become CRM leads (free route, point 14)
 	"cron": {"*/5 * * * *": ["sk_app.lead_sources.scan", "sk_app.mailbox.link_known", "sk_app.mailbox.route_suppliers", "sk_app.mailbox.auto_leads"],
 		# SK 27-Oct: the AI's actions to lift each graph, every morning before work
@@ -31,10 +31,10 @@ doc_events = {
 	"SK DSI Entry": {"before_insert": "sk_app.permissions.stamp_user"},
 	"SK Work Log": {"before_insert": "sk_app.permissions.stamp_user"},
 	"SK Day Report": {"before_insert": "sk_app.permissions.stamp_user"},
-	"File": {"after_insert": "sk_app.crm.on_file_attached"},
+	"File": {"after_insert": ["sk_app.crm.on_file_attached", "sk_app.deal_quotes.on_file"]},  # SK 28-Oct: a quote file → Quotation
 	"SK Library Item": {"validate": "sk_app.library.make_public"},
 	"CRM Lead": {"validate": "sk_app.segments.set_main"},
-	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.crm.set_deal_customer"]},
+	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.crm.set_deal_customer"], "on_update": "sk_app.deal_quotes.on_deal_update"},
 	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal", "on_update": "sk_app.segments.on_customer_update"},
 	"Sales Order": {"validate": "sk_app.sales_owner.fill_order_team"},  # SK 28-Oct: every order has its salesperson
 	"SK App User": {"on_update": ["sk_app.segments.on_app_user_update", "sk_app.logins.set_company_default"]},

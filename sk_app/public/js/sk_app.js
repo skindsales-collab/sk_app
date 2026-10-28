@@ -788,7 +788,7 @@
 		np_vendor: "Vendor (in ERPNext)", np_new_vendor: "or new vendor name", np_sub: "Subcontracted: the vendor makes it", np_add: "Add in ERPNext",
 		np_will: "Will add", np_have: "Already in ERPNext", np_added: "Added",
 		cq_other: "Other quotation (non-cabin)", cq_rc: "Rate card", cq_disc_list: "Quotation discounts", cq_ok: "Approve", cq_no: "Reject",
-		fl_new_quote: "Make quotation", fl_quote_why: "Saved in ERPNext as a Quotation for this customer (the customer is made by itself). The PDF opens to send.",
+		fl_new_quote: "Make quotation", dq_title: "This quote is not in ERPNext yet", dq_amount: "Quote amount ₹ (before GST)", dq_make: "Make ERPNext quotation", dq_done: "Quotation saved in ERPNext ✓", fl_quote_why: "Saved in ERPNext as a Quotation for this customer (the customer is made by itself). The PDF opens to send.",
 		fl_add_item: "Add item", fl_rate_blank: "blank = price list", fl_valid: "Valid for days", fl_desc: "Description (Enter = new line)", fl_terms: "Terms / note", fl_quote_saved: "Quotation saved",
 		fl_order_why: "The quotation is submitted and a Sales Order is made from it.", fl_delivery: "Promised delivery date", fl_po_no: "Customer PO no (optional)",
 		fl_so_saved: "Sales Order saved", fl_plan_why: "Confirmed orders without a Work Order. Make one per cabin; its stages become job cards.",
@@ -820,7 +820,7 @@
 		np_vendor: "व्हेंडर (ERPNext मध्ये)", np_new_vendor: "किंवा नवीन व्हेंडर नाव", np_sub: "सबकॉन्ट्रॅक्ट: व्हेंडर बनवतो", np_add: "ERPNext मध्ये जोडा",
 		np_will: "जोडले जाईल", np_have: "आधीच ERPNext मध्ये", np_added: "जोडले",
 		cq_other: "इतर कोटेशन (नॉन-केबिन)", cq_rc: "रेट कार्ड", cq_disc_list: "कोटेशन सूट", cq_ok: "मंजूर", cq_no: "नाकारा",
-		fl_new_quote: "कोटेशन बनवा", fl_quote_why: "या ग्राहकासाठी ERPNext मध्ये कोटेशन म्हणून जतन होते (ग्राहक आपोआप बनतो). पाठवण्यासाठी PDF उघडते.",
+		fl_new_quote: "कोटेशन बनवा", dq_title: "हे कोटेशन अजून ERPNext मध्ये नाही", dq_amount: "कोटेशन रक्कम ₹ (GST आधी)", dq_make: "ERPNext कोटेशन बनवा", dq_done: "कोटेशन ERPNext मध्ये जतन ✓", fl_quote_why: "या ग्राहकासाठी ERPNext मध्ये कोटेशन म्हणून जतन होते (ग्राहक आपोआप बनतो). पाठवण्यासाठी PDF उघडते.",
 		fl_add_item: "आयटम जोडा", fl_rate_blank: "रिकामे = किंमत यादी", fl_valid: "किती दिवस वैध", fl_desc: "वर्णन (Enter = नवी ओळ)", fl_terms: "अटी / नोंद", fl_quote_saved: "कोटेशन जतन झाले",
 		fl_order_why: "कोटेशन सबमिट होते आणि त्यावरून सेल्स ऑर्डर बनते.", fl_delivery: "दिलेली डिलिव्हरी तारीख", fl_po_no: "ग्राहकाचा PO नंबर (ऐच्छिक)",
 		fl_so_saved: "सेल्स ऑर्डर जतन झाली", fl_plan_why: "वर्क ऑर्डर नसलेल्या निश्चित ऑर्डर. प्रत्येक केबिनसाठी एक बनवा; त्याचे टप्पे जॉब कार्ड होतात.",
@@ -2495,6 +2495,8 @@
 			${(d.products || []).length ? `<h3 class="sk-h">${t("products_for")}</h3>${productStrip(d.products)}` : ""}
 			${["CRM Deal", "CRM Lead"].includes(doctype) ? `<button class="sk-btn go wide" data-act="fl-cabinq" data-dt="${esc(doctype)}" data-name="${esc(name)}">📝 ${t("fl_new_quote")}: ${t("cq_title")}</button>` : ""}
 			${doctype === "CRM Deal" ? `<button class="sk-btn wide" data-act="fl-quote" data-name="${esc(name)}">📝 ${t("cq_other")}</button>` : ""}
+			${d.quote_pending ? `<div class="sk-card sk-gap"><div class="sk-item-title">📄 ${t("dq_title")}</div><div class="sk-item-meta">${esc(d.quote_pending.file)}</div>
+				<div class="sk-form">${formField("dq-amount", t("dq_amount"), false, "number")}<button class="sk-btn go wide" data-act="dq-make" data-name="${esc(name)}">${t("dq_make")}</button></div></div>` : ""}
 			${sec(t("quotations"), d.quotations.map((q) => erpDocRow("Quotation", q, mobile)).join(""))}
 			${sec(t("sales_orders"), d.sales_orders.map((q) => erpDocRow("Sales Order", q, mobile)).join(""))}
 			${sec(t("files"), files)}${sec(t("tasks"), tasks)}${sec(t("emails"), mails.map((m) => `<li class="sk-item"><div><div class="sk-item-title">${m.sent_or_received === "Received" ? "📥" : "📤"} ${esc(m.subject || "")}</div>
@@ -5842,6 +5844,14 @@
 					toast(`${t("nj_saved")}: ${r.employee_name} (${r.name})`);
 					return go("home");
 				} finally { el.disabled = false; }
+			}
+			if (act === "dq-make") {
+				if (!(Number(val("dq-amount")) > 0)) { toast(t("dq_amount")); return; }
+				el.disabled = true;
+				try { await call("deal_quote_amount", { deal: el.dataset.name, amount: val("dq-amount") }, true); }
+				finally { el.disabled = false; }
+				toast(t("dq_done"));
+				return go("detail");
 			}
 			if (act === "convert-deal") {
 				el.disabled = true;
