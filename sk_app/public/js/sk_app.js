@@ -174,7 +174,7 @@
 		bills: "Bills",
 		last_rates: "Last Rates",
 		po_approvals: "PO Approvals",
-		sub_bills: "Subcontractor bills", my_bills: "My bills", sb_help: "Bills made from the rate sheet after Quality passed the job. Rushi checks rate and job card, then the CEO approves; then it is payable.",
+		questions: "Questions", q_help: "Questions from Training, grouped by topic. Answer by typing or speaking: the person is told and the answer is saved in the FAQ. Or send it for development.", q_answer: "Answer", q_dev: "Send for development", q_dev_note: "Note for the AI & ERP desk (optional)", q_dev_sent: "Sent to the AI & ERP desk", q_in_dev: "In development: mark when deployed", q_dep_app: "Deployed in app", q_dep_erp: "Deployed in ERPNext", q_none: "No questions waiting", q_photo: "Screenshot or photo (optional)", sub_bills: "Subcontractor bills", my_bills: "My bills", sb_help: "Bills made from the rate sheet after Quality passed the job. Rushi checks rate and job card, then the CEO approves; then it is payable.",
 		sb_my_help: "Your bills for finished jobs. Answer any question so the bill can move on.", sb_discuss: "Discuss", sb_question: "Question",
 		sb_answer: "Answer", sb_qty: "Sq ft / points", sb_rate: "Rate", sb_qc: "QC", sb_no_size: "Cabin size not found: please put the sq ft",
 		sb_st_rushi: "Waiting Rushi", sb_st_ceo: "Waiting CEO", sb_st_ok: "Approved · payable", sb_st_no: "Rejected", sb_st_paid: "Posted",
@@ -293,7 +293,7 @@
 		bills: "बिले",
 		last_rates: "मागील दर",
 		po_approvals: "PO मंजुरी",
-		sub_bills: "कंत्राटदार बिले", my_bills: "माझी बिले", sb_help: "क्वालिटी पास झाल्यावर रेट शीटवरून बिल तयार होते. रुषी रेट व जॉब कार्ड तपासतात, मग CEO मंजूर करतात; मग देय होते.",
+		questions: "प्रश्न", q_help: "ट्रेनिंगमधील प्रश्न, विषयानुसार. लिहून किंवा बोलून उत्तर द्या: त्या व्यक्तीला कळवले जाते आणि उत्तर FAQ मध्ये जाते. किंवा डेव्हलपमेंटसाठी पाठवा.", q_answer: "उत्तर", q_dev: "डेव्हलपमेंटसाठी पाठवा", q_dev_note: "AI & ERP डेस्कसाठी टीप (ऐच्छिक)", q_dev_sent: "AI & ERP डेस्ककडे पाठवले", q_in_dev: "डेव्हलपमेंटमध्ये: डिप्लॉय झाल्यावर नोंदवा", q_dep_app: "ॲपमध्ये डिप्लॉय", q_dep_erp: "ERPNext मध्ये डिप्लॉय", q_none: "कोणतेही प्रश्न बाकी नाहीत", q_photo: "स्क्रीनशॉट किंवा फोटो (ऐच्छिक)", sub_bills: "कंत्राटदार बिले", my_bills: "माझी बिले", sb_help: "क्वालिटी पास झाल्यावर रेट शीटवरून बिल तयार होते. रुषी रेट व जॉब कार्ड तपासतात, मग CEO मंजूर करतात; मग देय होते.",
 		sb_my_help: "पूर्ण झालेल्या कामांची तुमची बिले. प्रश्न असल्यास उत्तर द्या म्हणजे बिल पुढे जाईल.", sb_discuss: "चर्चा", sb_question: "प्रश्न",
 		sb_answer: "उत्तर", sb_qty: "चौ. फूट / पॉइंट", sb_rate: "रेट", sb_qc: "QC", sb_no_size: "केबिन साईज मिळाली नाही: चौ. फूट टाका",
 		sb_st_rushi: "रुषीकडे बाकी", sb_st_ceo: "CEO कडे बाकी", sb_st_ok: "मंजूर · देय", sb_st_no: "नामंजूर", sb_st_paid: "पोस्ट झाले",
@@ -860,9 +860,9 @@
 		cp_pick_customer: "कृपया यादीतून ग्राहक निवडा", cp_note: "ग्राहक काय म्हणाला (बोला किंवा लिहा)",
 	});
 	// change list point 7: FAQ per function
-	Object.assign(T.English, { faq_ask: "Ask a question", faq_q: "Your question (speak or type)", faq_sent: "Question sent to", faq_to_answer: "Questions for you to answer",
+	Object.assign(T.English, { faq_ask: "My question", faq_q: "Your question (speak or type)", faq_sent: "Question sent to", faq_to_answer: "Questions for you to answer",
 		faq_answer: "Your answer (speak or type)", faq_add: "Add to the FAQ for everyone" });
-	Object.assign(T.Marathi, { faq_ask: "प्रश्न विचारा", faq_q: "तुमचा प्रश्न (बोला किंवा लिहा)", faq_sent: "प्रश्न पाठवला:", faq_to_answer: "तुम्ही उत्तर द्यायचे प्रश्न",
+	Object.assign(T.Marathi, { faq_ask: "माझा प्रश्न", faq_q: "तुमचा प्रश्न (बोला किंवा लिहा)", faq_sent: "प्रश्न पाठवला:", faq_to_answer: "तुम्ही उत्तर द्यायचे प्रश्न",
 		faq_answer: "तुमचे उत्तर (बोला किंवा लिहा)", faq_add: "सर्वांसाठी FAQ मध्ये जोडा" });
 	// change list point 8: product cards
 	Object.assign(T.English, { product_asked: "Product asked (optional)", products_for: "Products for this customer", card_missing: "Card not made yet (photos, sizes, brochure needed)",
@@ -921,14 +921,14 @@
 		lk_ask_ceo: "Not working or new phone? Ask the CEO to reset it.", lk_pin: "Your PIN (the one you log in with)", lk_open: "Open", lk_relogin: "Forgot PIN? Log in again", lk_use_pin: "Use PIN instead",
 		lk_no_key: "Face / finger did not work on this phone: open with your PIN, then set it up again.",
 		lk_cancelled: "Not checked. Tap the button and touch the finger sensor or look at the phone.",
-		lk_setup: "Set up face / finger", lk_setup_why: "From now on the app opens only with your phone's fingerprint or face lock, no PIN. Your finger and face stay on the phone; nothing is sent.",
-		lk_setup_now: "Set up now", lk_setup_done: "Face / finger set up. The PIN is not needed any more.",
+		lk_setup: "Set up face / finger", lk_setup_why: "From now on you log in and open the app with your phone's fingerprint or face lock. Your PIN stays as the backup. Your finger and face stay on the phone; nothing is sent.",
+		lk_setup_now: "Set up now", lk_setup_done: "Face / finger set up. Next time tap Login with fingerprint / face. The PIN still works as backup.",
 		lk_reset: "Reset face / finger", lk_reset_q: "Reset face / finger? The person opens with the PIN once and sets it up again.", lk_reset_done: "Face / finger reset" });
 	Object.assign(T.Marathi, { lk_locked: "लॉक आहे", lk_touch: "बोट लावा किंवा फोनकडे पहा", lk_open_face: "चेहरा / बोटाने उघडा",
 		lk_ask_ceo: "चालत नाही किंवा नवीन फोन? CEO ला रीसेट करायला सांगा.", lk_pin: "तुमचा पिन (लॉगिनचा)", lk_open: "उघडा", lk_relogin: "पिन विसरलात? पुन्हा लॉगिन करा", lk_use_pin: "पिनने उघडा", lk_no_key: "या फोनवर चेहरा / बोट चालले नाही: पिनने उघडा, मग परत सेट करा.",
 		lk_cancelled: "तपासले नाही. बटण दाबा आणि बोट लावा किंवा फोनकडे पहा.",
-		lk_setup: "चेहरा / बोट लॉक सुरू करा", lk_setup_why: "आता पासून ॲप फक्त फोनच्या बोट / चेहरा लॉकने उघडेल, पिन नाही. बोट आणि चेहरा फोनवरच राहतात; काहीही पाठवले जात नाही.",
-		lk_setup_now: "आत्ता सुरू करा", lk_setup_done: "चेहरा / बोट लॉक तयार. आता पिन लागणार नाही.",
+		lk_setup: "चेहरा / बोट लॉक सुरू करा", lk_setup_why: "आता पासून फोनच्या बोट / चेहरा लॉकने लॉगिन करा आणि ॲप उघडा. पिन बॅकअप म्हणून राहतो. बोट आणि चेहरा फोनवरच राहतात; काहीही पाठवले जात नाही.",
+		lk_setup_now: "आत्ता सुरू करा", lk_setup_done: "चेहरा / बोट लॉक तयार. पुढच्या वेळी 'बोट / चेहरा वापरून लॉगिन' दाबा. पिन बॅकअप म्हणून चालतो.",
 		lk_reset: "चेहरा / बोट रीसेट", lk_reset_q: "चेहरा / बोट रीसेट करायचे? ती व्यक्ती एकदा पिनने उघडून परत सुरू करेल.", lk_reset_done: "चेहरा / बोट रीसेट झाले" });
 	// main screen Rev 2 (SK 26-Oct)
 	Object.assign(T.English, { k_of: "of", k_no_target: "target not set", k_behind: "behind by", k_on_track: "on track", k_target: "target", k_off: "off target",
@@ -978,7 +978,7 @@
 		calendar: "📅", follow_up: "🔔", new_lead: "➕", training: "🎓", day_report: "📝", team_reports: "🗂️",
 		calls: "📞", whatsapp: "💬", mail: "✉️", reminders: "⏰", library: "🏢", logins: "🔑", team_leads: "👥",
 		stock_check: "📦", receive: "🚚", issue: "📤", store_requests: "📋", dispatch: "🚛", low_stock: "⚠️", stock_count: "🔢", new_item: "🆕",
-		requisition: "📝", buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅", sub_bills: "🧾", my_bills: "🧾",
+		requisition: "📝", buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅", questions: "❓", sub_bills: "🧾", my_bills: "🧾",
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁", el_points: "🔌",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
@@ -4472,6 +4472,53 @@
 			${mode === "mine" && b.question ? `<button class="sk-chip on" data-act="sb-reply" data-i="${i}">💬 ${t("sb_answer")}</button>` : ""}
 			</div></li>`;
 	};
+	// SK 28-Oct (Rev 1 point 6): questions from Training → CEO, grouped with a short summary → answer → FAQ, or
+	// → development (AI & ERP inbox) → deployed in the app / ERPNext → the person is told
+	async function renderQuestions() {
+		const d = S.q = await call("ceo_questions");
+		const row = (r) => `<li class="sk-item k-amber"><div class="sk-grow"><div class="sk-item-title">${esc(r.question)}</div>
+			<div class="sk-item-meta">${esc(r.by)} · ${esc(r.date)}</div>
+			${r.photos.length ? `<div class="sk-row sk-wrap">${r.photos.map((u) => `<a href="${esc(u)}" target="_blank"><img class="sk-thumb" src="${esc(u)}" alt=""></a>`).join("")}</div>` : ""}
+			<div class="sk-row sk-wrap sk-gap"><button class="sk-chip on" data-act="q-answer" data-todo="${esc(r.todo)}">✍ ${t("q_answer")}</button>
+			<button class="sk-chip" data-act="q-dev" data-todo="${esc(r.todo)}">🛠 ${t("q_dev")}</button></div></div></li>`;
+		root.innerHTML = header(t("questions")) + `<main><p class="sk-note">${t("q_help")}</p>
+			${d.groups.map((g) => `<h3 class="sk-h">${esc(g.function)} · ${esc(g.summary)}</h3><ul class="sk-list">${g.rows.map(row).join("")}</ul>`).join("") || `<p class="sk-empty">${t("q_none")}</p>`}
+			${d.dev.length ? `<h3 class="sk-h">🛠 ${t("q_in_dev")} (${d.dev.length})</h3><ul class="sk-list">${d.dev.map((w) => li(esc(w.question), `${esc(w.by)} · ${esc(w.date)} · ${esc(w.status)}`,
+				`<div class="sk-col"><button class="sk-chip on" data-act="q-dep" data-w="${esc(w.name)}" data-where="App">📱 ${t("q_dep_app")}</button>
+				<button class="sk-chip on" data-act="q-dep" data-w="${esc(w.name)}" data-where="ERPNext">🖥 ${t("q_dep_erp")}</button></div>`)).join("")}</ul>` : ""}</main>`;
+	}
+	async function questionAct(act, el) {
+		const find = (todo) => S.q.groups.flatMap((g) => g.rows).find((r) => r.todo === todo) || {};
+		if (act === "q-answer") {
+			const r = find(el.dataset.todo);
+			sheet(`<h3 class="sk-h">❓ ${esc(r.question)}</h3><p class="sk-item-meta">${esc(r.by)}</p>${formField("q-ans", t("faq_answer"), true)}
+				<label class="sk-row"><input type="checkbox" id="q-faq" checked> ${t("faq_add")}</label>
+				<button class="sk-btn ok wide" data-act="q-answer-send" data-todo="${esc(el.dataset.todo)}">${t("send")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+			return;
+		}
+		if (act === "q-answer-send") {
+			el.disabled = true;
+			await call("training_answer", { todo: el.dataset.todo, text: val("q-ans"), add_to_faq: document.getElementById("q-faq").checked ? 1 : 0 }, true);
+			closeSheet(); toast(t("saved")); return renderQuestions();
+		}
+		if (act === "q-dev") {
+			const r = find(el.dataset.todo);
+			sheet(`<h3 class="sk-h">🛠 ${esc(r.question)}</h3>${formField("q-note", t("q_dev_note"), true)}
+				<button class="sk-btn ok wide" data-act="q-dev-send" data-todo="${esc(el.dataset.todo)}">${t("q_dev")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+			return;
+		}
+		if (act === "q-dev-send") {
+			el.disabled = true;
+			await call("ceo_question_dev", { todo: el.dataset.todo, note: val("q-note") || null }, true);
+			closeSheet(); toast(`✓ ${t("q_dev_sent")}`); return renderQuestions();
+		}
+		if (act === "q-dep") {
+			el.disabled = true;
+			await call("ceo_question_deployed", { work_log: el.dataset.w, where: el.dataset.where }, true);
+			toast(`✓ ${t("saved")}`); return renderQuestions();
+		}
+	}
+
 	async function renderSubBills(view) {
 		const mine = view === "my_bills";
 		S.sbills = await call(mine ? "sb_mine" : "sb_to_approve");
@@ -5075,7 +5122,7 @@
 		logins: renderLogins, team_leads: renderTeamLeads, stock_check: renderStockCheck, receive: renderReceive, issue: renderIssue, store_requests: renderStoreRequests,
 		dispatch: renderDispatch, low_stock: renderLowStock, stock_count: renderStockCount, new_item: renderNewItem,
 		buy_requests: renderBuyRequests, get_rates: renderGetRates, compare: renderCompare, po_follow_up: renderFollowUpPo,
-		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals, sub_bills: () => renderSubBills("sub_bills"), my_bills: () => renderSubBills("my_bills"), requisition: () => renderRequisition(),
+		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals, questions: renderQuestions, sub_bills: () => renderSubBills("sub_bills"), my_bills: () => renderSubBills("my_bills"), requisition: () => renderRequisition(),
 		order_board: renderOrderBoard, job_cards: () => renderJobs("job_cards"), my_jobs: () => renderJobs("my_jobs"), need_material: renderNeedMaterial,
 		progress_photos: renderProgressPhotos, ready_dispatch: renderReadyDispatch, non_conformance: () => renderNcs("non_conformance"),
 		my_fixes: () => renderNcs("my_fixes"), inspect: () => renderInspect("inspect"), final_check: () => renderInspect("final_check"),
@@ -5291,6 +5338,7 @@
 			if (act && (act.startsWith("st-") || act.startsWith("pu-") || act.startsWith("fl-") || act.startsWith("np-"))) return await storeAct(act, el);
 			if (act && (act.startsWith("pr-") || act.startsWith("qc-"))) return await prodAct(act, el);
 			if (act && act.startsWith("sb-")) return await subBillAct(act, el);
+			if (act && act.startsWith("q-")) return await questionAct(act, el);
 			if (act && act.startsWith("fin-")) return await finAct(act, el);
 			if (el.dataset.qok !== undefined) {
 				const k = el.dataset.qok;
@@ -5401,11 +5449,18 @@
 				return go("mail");
 			}
 			if (act === "faq-ask") {
-				sheet(`<h3 class="sk-h">❓ ${t("faq_ask")}</h3>${formField("faq-text", t("faq_q"), true)}
+				sheet(`<h3 class="sk-h">❓ ${t("faq_ask")}</h3>${formField("faq-text", t("faq_q"), true)}${photoField("faq-photo", "📷 " + t("q_photo"))}
 					<button class="sk-btn ok wide" data-act="faq-ask-send">${t("send")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
 				return;
 			}
-			if (act === "faq-ask-send") { const r = await call("training_ask", { question: val("faq-text") }, true); closeSheet(); toast(`${t("faq_sent")} ${r.owner}`); return; }
+			if (act === "faq-ask-send") {
+				el.disabled = true;
+				try {
+					const r = await call("training_ask", { question: val("faq-text"), photo: await photoUrl("faq-photo") }, true);
+					closeSheet(); toast(`${t("faq_sent")} ${r.owner}`);
+				} finally { el.disabled = false; }
+				return;
+			}
 			if (act === "faq-answer") {
 				const a = S.faqAsk[Number(el.dataset.i)];
 				sheet(`<h3 class="sk-h">❓ ${esc(a.question)}</h3><p class="sk-item-meta">${esc(a.by)}</p>${formField("faq-ans", t("faq_answer"), true)}
@@ -5842,6 +5897,7 @@
 		const o = await call("face_options", { purpose: "unlock" }, true);
 		const cred = await navigator.credentials.get({ publicKey: { challenge: b64u.dec(o.challenge), rpId: o.rpId, timeout: o.timeout,
 			userVerification: "required", allowCredentials: o.allowCredentials.map((c) => ({ type: "public-key", id: b64u.dec(c.id) })) } });
+		rememberFace(b64u.enc(cred.rawId));
 		return call("face_unlock", { credential: { id: cred.id, rawId: b64u.enc(cred.rawId), type: cred.type, response: {
 			clientDataJSON: b64u.enc(cred.response.clientDataJSON), authenticatorData: b64u.enc(cred.response.authenticatorData),
 			signature: b64u.enc(cred.response.signature) } } }, true);
@@ -5850,8 +5906,18 @@
 		const o = await call("face_options", { purpose: "setup" }, true);
 		const cred = await navigator.credentials.create({ publicKey: { ...o, challenge: b64u.dec(o.challenge),
 			user: { ...o.user, id: b64u.dec(o.user.id) }, excludeCredentials: (o.excludeCredentials || []).map((c) => ({ type: "public-key", id: b64u.dec(c.id) })) } });
-		return call("face_setup", { credential: { id: cred.id, rawId: b64u.enc(cred.rawId), type: cred.type, response: {
+		const r = await call("face_setup", { credential: { id: cred.id, rawId: b64u.enc(cred.rawId), type: cred.type, response: {
 			clientDataJSON: b64u.enc(cred.response.clientDataJSON), attestationObject: b64u.enc(cred.response.attestationObject) } } }, true);
+		rememberFace(b64u.enc(cred.rawId));
+		return r;
+	}
+	// SK 28-Oct (Rev 1 point 1): the login screen offers "Login with fingerprint / face" for the keys linked on this phone
+	function rememberFace(id) {
+		try {
+			const f = JSON.parse(localStorage.getItem("sk_face") || "{}");
+			const ids = (f.ids || []).filter((x) => x !== id);
+			localStorage.setItem("sk_face", JSON.stringify({ ids: [id, ...ids].slice(0, 3), name: (state.home && state.home.full_name) || f.name || "" }));
+		} catch (e) { /* private mode */ }
 	}
 	function hideLock() {
 		const el = document.getElementById("sk-lock");

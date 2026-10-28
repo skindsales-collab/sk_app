@@ -5,7 +5,7 @@
  "custom": 0,
  "engine": "InnoDB",
  "creation": "2026-10-26 15:00:00.000000",
- "modified": "2026-10-26 15:00:00.000000",
+ "modified": "2026-10-28 12:00:00.000000",
  "owner": "Administrator",
  "modified_by": "Administrator",
  "naming_rule": "Random",
@@ -31,7 +31,7 @@
   {
    "fieldname": "event",
    "fieldtype": "Select",
-   "options": "Unlock face / finger\nUnlock PIN\nWrong PIN\nLocked\nSet up face / finger\nReset by CEO\nLogged out (wrong PINs)",
+   "options": "Unlock face / finger\nUnlock PIN\nWrong PIN\nLocked\nSet up face / finger\nReset by CEO\nLogged out (wrong PINs)\nLogin face / finger",
    "label": "Event",
    "reqd": 1,
    "in_list_view": 1,

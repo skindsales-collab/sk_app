@@ -512,3 +512,4 @@ a.sk-chip { text-decoration: none; }
 .sk-tc-n { font-size: 20px; text-align: center; margin: 10px 0; }
 .sk-micsub { display: flex; gap: 4px; }
 .sk-micsub > * { flex: 1; min-width: 34px; }
+.sk-thumb { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; border: 1px solid #c5cfdb; }
