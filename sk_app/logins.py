@@ -79,7 +79,7 @@ def people(user: str) -> list[dict]:
 	emps = frappe.get_all("Employee", filters={"status": "Active"},
 		fields=["name", "employee_name", "designation", "department", "user_id", "cell_number"], order_by="employee_name asc")
 	app_users = {r.user: r for r in frappe.get_all("SK App User", fields=["name", "user", "full_name", "enabled", "home",
-		"employee", "manager", "workstation", "must_set_pin"])}
+		"employee", "manager", "workstation", "must_set_pin", "company"])}
 	users = {u.name: u for u in frappe.get_all("User", filters={"name": ["in", list({e.user_id for e in emps if e.user_id} | set(app_users))]},
 		fields=["name", "enabled", "mobile_no", "full_name", "last_login"])} if (emps or app_users) else {}
 	out, seen = [], set()
@@ -106,7 +106,7 @@ def _row(name, designation, employee, u, a, cell):
 	return {"name": name, "designation": designation, "employee": employee, "user": u.name if u else None,
 		"mobile": (u.mobile_no if u else None) or cell, "state": state, "home": a.home if a else None,
 		"functions": profile_functions(u.name) if (u and a) else [], "manager": a.manager if a else None,
-		"workstation": a.workstation if a else None, "must_set_pin": bool(a and a.must_set_pin),
+		"workstation": a.workstation if a else None, "must_set_pin": bool(a and a.must_set_pin), "company": a.get("company") if a else None,
 		"last_login": str(u.last_login) if u and u.last_login else None,
 		"hidden_id": bool(u and u.name.endswith("@" + HIDDEN_DOMAIN)),
 		# SK 26-Oct: the person's ERPNext roles on the Logins screen, so a left-over admin / HR role is easy to see
@@ -115,7 +115,7 @@ def _row(name, designation, employee, u, a, cell):
 
 
 def make_login(by: str, mobile, functions, employee=None, full_name=None, manager=None, language="English",
-		workstation=None) -> dict:
+		workstation=None, company=None) -> dict:
 	"""Create (or update) the person's login from their mobile number and give a first PIN."""
 	_check_manager(by)
 	mobile = clean_mobile(mobile)
@@ -198,6 +198,8 @@ def make_login(by: str, mobile, functions, employee=None, full_name=None, manage
 	app.update({"home": functions[0], "enabled": 1, "language": language, "manager": manager or app.get("manager"),
 		"workstation": workstation or None, "must_set_pin": 0 if keep else 1, "employee": emp.name if emp else app.get("employee")})
 	app.set("functions", [{"function": f} for f in functions[1:]])
+	if company and frappe.db.exists("Company", company):
+		app.company = company  # SK 28-Oct (Rev 1 point 5): SK Ind Tech or SK Enterprises
 	if name:
 		app.save(ignore_permissions=True)
 	else:
@@ -294,3 +296,12 @@ def setup_site():
 		from frappe.permissions import add_permission
 
 		add_permission("Item", "SK Subcontractor", 0)
+
+
+def set_company_default(doc, method=None):
+	"""SK App User on_update (SK 28-Oct, Rev 1 point 5): the person's entries go to their company. ERPNext uses the
+	user default "Company" for new documents; the app does the same (store._company)."""
+	if doc.get("company") and doc.user:
+		frappe.defaults.set_user_default("Company", doc.company, doc.user)
+	elif doc.user and doc.has_value_changed("company"):
+		frappe.defaults.clear_user_default("Company", doc.user)

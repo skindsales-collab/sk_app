@@ -1,0 +1,47 @@
+# SK 28-Oct (review list Rev 1, points 17-18): builds the SK Phone Android helper and puts the APK on the
+# "sk-phone-latest" release, so SK can download and install it on the phones (not from the Play Store).
+name: SK Phone APK
+
+on:
+  push:
+    branches: [main]
+    paths: ["android/sk-phone/**", ".github/workflows/sk-phone.yml"]
+  pull_request:
+    paths: ["android/sk-phone/**", ".github/workflows/sk-phone.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+      - name: Build APK
+        working-directory: android/sk-phone
+        run: gradle --no-daemon assembleDebug
+      - run: cp android/sk-phone/app/build/outputs/apk/debug/app-debug.apk SK-Phone.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SK-Phone
+          path: SK-Phone.apk
+      - name: Release
+        if: github.event_name != 'pull_request'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: sk-phone-latest
+          name: SK Phone (Android helper)
+          body: |
+            SK Phone sends the phone's calls (number, time, length, in / out) to the SK App, matched to the lead or customer.
+            Install SK-Phone.apk on the phone (allow "install from this source" once), open it, link with mobile + PIN.
+            Company phone: all calls. Personal phone: only calls with numbers already in CRM.
+          files: SK-Phone.apk
+          make_latest: false

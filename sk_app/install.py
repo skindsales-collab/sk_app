@@ -96,6 +96,9 @@ def after_migrate():
 	from sk_app.item_input import ensure_setup as item_photo_setup
 
 	_safe(item_photo_setup, "item photo samples")  # SK 28-Oct: material identified from a photo
+	from sk_app.phone_sync import ensure_setup as phone_setup
+
+	_safe(phone_setup, "SK Phone helper")  # SK 28-Oct: calls from company / personal phones into CRM
 	_safe(move_all_once, "cold calling → marketing list")  # SK 28-Oct: cold-calling data is not a lead
 	_safe(auto_tag, "customer segments")  # SK 28-Oct: Cabin / Non-Cabin from Tally vouchers and CRM deals
 	_safe(auto_link, "salesperson on customers and orders")  # SK 28-Oct: graphs had no order in anyone's name

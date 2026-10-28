@@ -744,13 +744,13 @@
 	});
 	// change list point 2: Cabin / Non-Cabin customers
 	Object.assign(T.English, {
-		customers: "Customers", activities: "Today's activities", act_title: "Today's activities", act_auto: "from ERPNext", call_list: "Phone call list", call_list_why: "The app cannot read your phone's calls. Once a day, export the call history from your phone (CSV / Excel) and upload it here: every call to a lead or deal number is added to that lead.", call_list_up: "Upload call list", call_list_pick: "Pick the call list file first", call_list_done: "Calls added", call_list_already: "already there", call_list_other: "not a lead", new_joiner: "New joiner", nj_why: "Photo the joining form and PAN / Aadhaar: the boxes fill by themselves. Check each box, correct it, then save. It becomes an ERPNext Employee.", nj_form_photo: "Joining form", nj_id_photo: "PAN / Aadhaar card", nj_name: "Full name", nj_gender: "Gender", nj_dob: "Date of birth", nj_join: "Joining date", nj_address: "Current address", nj_emname: "Emergency contact name", nj_emmob: "Emergency number", nj_no_bank: "Bank details are not taken in the app.", nj_saved: "Employee made", sales_owner: "Customer → salesperson", so_why: "Pick who sells to each customer. Their sale from Tally then shows on that person's graph. Biggest customers first.", so_done: "customers given a salesperson", so_this_year: "this year", so_no_customer: "not a customer in ERPNext yet", tag_tally: "Tag from Tally (Cabin / Non-Cabin sales)", seg_not_set: "Segment not set", seg_all: "All", seg_cabin: "Cabin", seg_noncabin: "Non-Cabin",
+		customers: "Customers", activities: "Today's activities", act_title: "Today's activities", act_auto: "from ERPNext", call_list: "Phone call list", call_list_why: "The app cannot read your phone's calls. Once a day, export the call history from your phone (CSV / Excel) and upload it here: every call to a lead or deal number is added to that lead.", call_list_up: "Upload call list", call_list_pick: "Pick the call list file first", call_list_done: "Calls added", call_list_already: "already there", call_list_other: "not a lead", new_joiner: "New joiner", nj_why: "Photo the joining form and PAN / Aadhaar: the boxes fill by themselves. Check each box, correct it, then save. It becomes an ERPNext Employee.", nj_form_photo: "Joining form", nj_id_photo: "PAN / Aadhaar card", nj_name: "Full name", nj_gender: "Gender", nj_dob: "Date of birth", nj_join: "Joining date", nj_address: "Current address", nj_emname: "Emergency contact name", nj_emmob: "Emergency number", nj_no_bank: "Bank details are not taken in the app.", nj_saved: "Employee made", sales_owner: "Customer → salesperson", so_why: "Pick who sells to each customer. Their sale from Tally then shows on that person's graph. Biggest customers first.", so_done: "customers given a salesperson", so_this_year: "this year", so_no_customer: "not a customer in ERPNext yet", tag_tally: "Tag from Tally (Cabin / Non-Cabin sales)", seg_not_set: "Segment not set", co_both: "Both companies", seg_all: "All", seg_cabin: "Cabin", seg_noncabin: "Non-Cabin",
 		pick_segment: "Please pick the segment (Cabin or Non-Cabin)", orders_word: "orders", tag_hint: "Tap the segment: the right team then sees this customer.",
 		seen_by_mgmt: "Customers without a segment are seen by Management only until tagged.",
 		"Cabin": "Cabin", "Non-Cabin": "Non-Cabin",
 	});
 	Object.assign(T.Marathi, {
-		customers: "ग्राहक", activities: "आजची कामे", act_title: "आजची कामे", act_auto: "ERPNext मधून", call_list: "फोनची कॉल यादी", call_list_why: "ॲप तुमच्या फोनचे कॉल वाचू शकत नाही. दिवसातून एकदा फोनमधून कॉल हिस्टरी (CSV / Excel) काढा व इथे अपलोड करा: लीडच्या नंबरवरील प्रत्येक कॉल त्या लीडवर जोडला जाईल.", call_list_up: "कॉल यादी अपलोड करा", call_list_pick: "आधी कॉल यादीची फाइल निवडा", call_list_done: "कॉल जोडले", call_list_already: "आधीच होते", call_list_other: "लीड नाही", new_joiner: "नवीन कर्मचारी", nj_why: "जॉइनिंग फॉर्म व PAN / आधारचा फोटो घ्या: बॉक्स आपोआप भरतील. प्रत्येक बॉक्स तपासा, दुरुस्त करा, मग जतन करा. ERPNext मध्ये Employee बनेल.", nj_form_photo: "जॉइनिंग फॉर्म", nj_id_photo: "PAN / आधार कार्ड", nj_name: "पूर्ण नाव", nj_gender: "लिंग", nj_dob: "जन्मतारीख", nj_join: "रुजू तारीख", nj_address: "सध्याचा पत्ता", nj_emname: "आपत्कालीन संपर्क नाव", nj_emmob: "आपत्कालीन नंबर", nj_no_bank: "बँक तपशील ॲपमध्ये घेत नाही.", nj_saved: "कर्मचारी तयार", sales_owner: "ग्राहक → विक्रेता", so_why: "प्रत्येक ग्राहक कोण सांभाळतो ते निवडा. त्याची Tally विक्री त्या व्यक्तीच्या ग्राफवर दिसेल. मोठे ग्राहक आधी.", so_done: "ग्राहकांना विक्रेता दिला", so_this_year: "या वर्षी", so_no_customer: "ERPNext मध्ये ग्राहक नाही", tag_tally: "Tally प्रमाणे विभाग लावा", seg_not_set: "विभाग ठरवलेला नाही", seg_all: "सर्व", seg_cabin: "केबिन", seg_noncabin: "नॉन-केबिन",
+		customers: "ग्राहक", activities: "आजची कामे", act_title: "आजची कामे", act_auto: "ERPNext मधून", call_list: "फोनची कॉल यादी", call_list_why: "ॲप तुमच्या फोनचे कॉल वाचू शकत नाही. दिवसातून एकदा फोनमधून कॉल हिस्टरी (CSV / Excel) काढा व इथे अपलोड करा: लीडच्या नंबरवरील प्रत्येक कॉल त्या लीडवर जोडला जाईल.", call_list_up: "कॉल यादी अपलोड करा", call_list_pick: "आधी कॉल यादीची फाइल निवडा", call_list_done: "कॉल जोडले", call_list_already: "आधीच होते", call_list_other: "लीड नाही", new_joiner: "नवीन कर्मचारी", nj_why: "जॉइनिंग फॉर्म व PAN / आधारचा फोटो घ्या: बॉक्स आपोआप भरतील. प्रत्येक बॉक्स तपासा, दुरुस्त करा, मग जतन करा. ERPNext मध्ये Employee बनेल.", nj_form_photo: "जॉइनिंग फॉर्म", nj_id_photo: "PAN / आधार कार्ड", nj_name: "पूर्ण नाव", nj_gender: "लिंग", nj_dob: "जन्मतारीख", nj_join: "रुजू तारीख", nj_address: "सध्याचा पत्ता", nj_emname: "आपत्कालीन संपर्क नाव", nj_emmob: "आपत्कालीन नंबर", nj_no_bank: "बँक तपशील ॲपमध्ये घेत नाही.", nj_saved: "कर्मचारी तयार", sales_owner: "ग्राहक → विक्रेता", so_why: "प्रत्येक ग्राहक कोण सांभाळतो ते निवडा. त्याची Tally विक्री त्या व्यक्तीच्या ग्राफवर दिसेल. मोठे ग्राहक आधी.", so_done: "ग्राहकांना विक्रेता दिला", so_this_year: "या वर्षी", so_no_customer: "ERPNext मध्ये ग्राहक नाही", tag_tally: "Tally प्रमाणे विभाग लावा", seg_not_set: "विभाग ठरवलेला नाही", co_both: "दोन्ही कंपन्या", seg_all: "सर्व", seg_cabin: "केबिन", seg_noncabin: "नॉन-केबिन",
 		pick_segment: "कृपया विभाग निवडा (केबिन की नॉन-केबिन)", orders_word: "ऑर्डर", tag_hint: "विभागावर टॅप करा: योग्य टीमला हा ग्राहक दिसेल.",
 		seen_by_mgmt: "विभाग नसलेले ग्राहक टॅग होईपर्यंत फक्त व्यवस्थापनाला दिसतात.",
 		"Cabin": "केबिन", "Non-Cabin": "नॉन-केबिन",
@@ -923,13 +923,13 @@
 		lk_cancelled: "Not checked. Tap the button and touch the finger sensor or look at the phone.",
 		lk_setup: "Set up face / finger", lk_setup_why: "From now on you log in and open the app with your phone's fingerprint or face lock. Your PIN stays as the backup. Your finger and face stay on the phone; nothing is sent.",
 		lk_setup_now: "Set up now", lk_setup_done: "Face / finger set up. Next time tap Login with fingerprint / face. The PIN still works as backup.",
-		lk_reset: "Reset face / finger", lk_reset_q: "Reset face / finger? The person opens with the PIN once and sets it up again.", lk_reset_done: "Face / finger reset" });
+		lk_reset: "Reset face / finger", lk_reset_q: "Reset face / finger? The person opens with the PIN once and sets it up again.", lk_reset_done: "Face / finger reset", ph_unlink: "Unlink SK Phone", ph_unlink_q: "Unlink this person's SK Phone? Their phone stops sending calls until it is linked again.", ph_unlinked: "SK Phone unlinked" });
 	Object.assign(T.Marathi, { lk_locked: "लॉक आहे", lk_touch: "बोट लावा किंवा फोनकडे पहा", lk_open_face: "चेहरा / बोटाने उघडा",
 		lk_ask_ceo: "चालत नाही किंवा नवीन फोन? CEO ला रीसेट करायला सांगा.", lk_pin: "तुमचा पिन (लॉगिनचा)", lk_open: "उघडा", lk_relogin: "पिन विसरलात? पुन्हा लॉगिन करा", lk_use_pin: "पिनने उघडा", lk_no_key: "या फोनवर चेहरा / बोट चालले नाही: पिनने उघडा, मग परत सेट करा.",
 		lk_cancelled: "तपासले नाही. बटण दाबा आणि बोट लावा किंवा फोनकडे पहा.",
 		lk_setup: "चेहरा / बोट लॉक सुरू करा", lk_setup_why: "आता पासून फोनच्या बोट / चेहरा लॉकने लॉगिन करा आणि ॲप उघडा. पिन बॅकअप म्हणून राहतो. बोट आणि चेहरा फोनवरच राहतात; काहीही पाठवले जात नाही.",
 		lk_setup_now: "आत्ता सुरू करा", lk_setup_done: "चेहरा / बोट लॉक तयार. पुढच्या वेळी 'बोट / चेहरा वापरून लॉगिन' दाबा. पिन बॅकअप म्हणून चालतो.",
-		lk_reset: "चेहरा / बोट रीसेट", lk_reset_q: "चेहरा / बोट रीसेट करायचे? ती व्यक्ती एकदा पिनने उघडून परत सुरू करेल.", lk_reset_done: "चेहरा / बोट रीसेट झाले" });
+		lk_reset: "चेहरा / बोट रीसेट", lk_reset_q: "चेहरा / बोट रीसेट करायचे? ती व्यक्ती एकदा पिनने उघडून परत सुरू करेल.", lk_reset_done: "चेहरा / बोट रीसेट झाले", ph_unlink: "SK Phone काढा", ph_unlink_q: "या व्यक्तीचा SK Phone काढायचा? पुन्हा लिंक करेपर्यंत त्यांचा फोन कॉल पाठवणार नाही.", ph_unlinked: "SK Phone काढला" });
 	// main screen Rev 2 (SK 26-Oct)
 	Object.assign(T.English, { k_of: "of", k_no_target: "target not set", k_behind: "behind by", k_on_track: "on track", k_target: "target", k_off: "off target",
 		k_no_data: "No data yet", k_day: "Day", k_per_day: "per day", k_board: "Order board", k_board_open: "1st of month", k_board_now: "now", k_week: "Week", k_month: "Month", kl_Orders: "Orders", kl_Invoices: "Invoices",
@@ -1854,6 +1854,7 @@
 				: `<button class="sk-chip" data-act="login-new" data-i="${i}">✏️ ${t("edit_login")}</button>
 					<button class="sk-chip" data-act="login-reset" data-i="${i}">🔑 ${t("reset_pin")}</button>
 					<button class="sk-chip" data-act="login-face" data-i="${i}">🙂 ${t("lk_reset")}</button>
+					<button class="sk-chip" data-act="login-phone" data-i="${i}">📵 ${t("ph_unlink")}</button>
 					<button class="sk-chip bad" data-act="login-close" data-i="${i}">✕ ${t("close_login")}</button>`;
 			return `<li class="sk-item sk-person"><div><b>${esc(p.name)}</b>${warn}<div class="sk-item-meta">${esc(sub)}</div></div><div class="sk-row sk-wrap">${btn}</div></li>`;
 		};
@@ -1882,6 +1883,7 @@
 			<div class="sk-field"><span>${t("functions_pick")}</span><div class="sk-row sk-wrap" id="g-fns">${fns}</div></div>
 			<label class="sk-field" id="g-ws-row"><span>${t("workstation")}</span><select id="g-ws" class="sk-select">${ws}</select></label>
 			<label class="sk-field"><span>${t("reports_to")}</span><select id="g-mgr" class="sk-select">${mgr}</select></label>
+			${(loginOpts.companies || []).length > 1 ? `<label class="sk-field"><span>🏢 ${t("company")}</span><select id="g-co" class="sk-select"><option value="">-</option>${loginOpts.companies.map((c) => `<option ${c === p.company ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></label>` : ""}
 			<label class="sk-field"><span>${t("language")}</span><select id="g-lang" class="sk-select"><option>English</option><option value="Marathi" ${state.lang === "Marathi" ? "selected" : ""}>मराठी</option></select></label>
 			<button class="sk-btn ok wide" data-act="login-make" data-emp="${esc(p.employee || "")}">${t("make_login")}</button>
 			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
@@ -3177,7 +3179,7 @@
 	}
 
 	// CEO live dashboards (point 13): one page per function, live from ERPNext; number → its list → the full record
-	let dashMonth = null, dashSeg = "", dashData = null;
+	let dashMonth = null, dashSeg = "", dashCo = "", dashData = null;
 	const shortMoney = (x) => {
 		const v = Number(x || 0), a = Math.abs(v);
 		return a >= 1e7 ? `Rs ${(v / 1e7).toFixed(2)} Cr` : a >= 1e5 ? `Rs ${(v / 1e5).toFixed(1)} L` : money(v);
@@ -3219,14 +3221,17 @@
 		return `<svg viewBox="0 0 ${W} ${H}" class="sk-chart" role="img">${g}</svg><small class="sk-chart-leg">${legend}${c.unit === "L" ? " · ₹ L" : ""}</small>`;
 	}
 	async function renderDash(key) {
-		const d = await call("dash_page", { key, ...(dashMonth ? { month: dashMonth } : {}), ...(dashSeg ? { segment: dashSeg } : {}) });
+		const d = await call("dash_page", { key, ...(dashMonth ? { month: dashMonth } : {}), ...(dashSeg ? { segment: dashSeg } : {}), ...(dashCo ? { company: dashCo } : {}) });
 		if (state.view !== "dash_" + key) return;
 		dashData = d;
 		const title = d.title[state.lang] || d.title.English;
 		const m = new Date(d.month);
 		const segs = ["machine_shifting", "job_work"].includes(key) ? "" : `<div class="sk-row sk-wrap">${[["", t("seg_all")], ["Cabin", t("seg_cabin")], ["Non-Cabin", t("seg_noncabin")]]
 			.map(([k, label]) => `<button class="sk-chip ${dashSeg === k ? "on" : ""}" data-dashseg="${k}">${label}</button>`).join("")}</div>`;
-		root.innerHTML = header(title) + `<main class="sk-dash">
+		// SK 28-Oct (Rev 1 point 5): SK Ind Tech / SK Enterprises / Both, once the second company is in ERPNext
+		const cos = (d.companies || []).length > 1 ? `<div class="sk-row sk-wrap">${[["", t("co_both")], ...d.companies.map((c) => [c, c.replace(/ (Pvt|Private) .*$/i, "")])]
+			.map(([k, label]) => `<button class="sk-chip ${dashCo === k ? "on" : ""}" data-dashco="${esc(k)}">${esc(label)}</button>`).join("")}</div>` : "";
+		root.innerHTML = header(title) + `<main class="sk-dash">${cos}
 			<div class="sk-row"><button class="sk-chip" data-dashmonth="-1">‹</button><b style="flex:1;text-align:center">${m.toLocaleString(state.lang === "Marathi" ? "mr-IN" : "en-IN", { month: "long", year: "numeric" })}</b><button class="sk-chip" data-dashmonth="1">›</button></div>
 			${segs}
 			<div class="sk-dash-cards">${d.cards.map((c, i) => {
@@ -5251,6 +5256,7 @@
 			if (el.dataset.dcard !== undefined) return renderDashList(Number(el.dataset.dcard));
 			if (el.dataset.drow !== undefined) return openDashRow(Number(el.dataset.dcardi), Number(el.dataset.drow));
 			if (el.dataset.dashseg !== undefined) { dashSeg = el.dataset.dashseg; return go(state.view); }
+			if (el.dataset.dashco !== undefined) { dashCo = el.dataset.dashco; return go(state.view); }
 			if (el.dataset.dashmonth) {
 				const d = dashMonth ? new Date(dashMonth) : new Date();
 				d.setDate(1); d.setMonth(d.getMonth() + Number(el.dataset.dashmonth));
@@ -5362,6 +5368,14 @@
 				toast(`✓ ${t("lk_reset_done")} (${r.reset})`);
 				return;
 			}
+			if (act === "login-phone") {
+				// SK 28-Oct: a phone lost or changed hands stops sending calls
+				const p = root._people && root._people[Number(el.dataset.i)];
+				if (!p || !confirm(`${p.name}: ${t("ph_unlink_q")}`)) return;
+				const r = await call("phone_unlink", { user: p.user }, true);
+				toast(`✓ ${t("ph_unlinked")} (${r.unlinked})`);
+				return;
+			}
 			if (act === "pin-save") {
 				if (val("p-new") !== val("p-new2")) return toast(t("pin_mismatch"), true);
 				el.disabled = true;
@@ -5387,7 +5401,8 @@
 				el.disabled = true;
 				const functions = [...root.querySelectorAll("[data-fnpick].on")].map((c) => c.dataset.fnpick);
 				const r = await call("hr_make_login", { mobile: val("g-mobile"), functions: JSON.stringify(functions), employee: el.dataset.emp || null,
-					full_name: val("g-name"), manager: val("g-mgr") || null, language: val("g-lang"), workstation: functions.includes("Subcontractor") ? val("g-ws") || null : null }, true);
+					full_name: val("g-name"), manager: val("g-mgr") || null, language: val("g-lang"), workstation: functions.includes("Subcontractor") ? val("g-ws") || null : null,
+					company: document.getElementById("g-co") ? val("g-co") || null : null }, true);
 				await renderLogins();
 				return pinSheet(r);
 			}

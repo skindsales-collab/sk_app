@@ -37,7 +37,7 @@ doc_events = {
 	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.crm.set_deal_customer"]},
 	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal", "on_update": "sk_app.segments.on_customer_update"},
 	"Sales Order": {"validate": "sk_app.sales_owner.fill_order_team"},  # SK 28-Oct: every order has its salesperson
-	"SK App User": {"on_update": "sk_app.segments.on_app_user_update"},
+	"SK App User": {"on_update": ["sk_app.segments.on_app_user_update", "sk_app.logins.set_company_default"]},
 	"Job Card": {"validate": "sk_app.store.set_job_card_cabin"},  # SK 27-Oct: customer + cabin size, not just the number
 	# SK 27-Oct purchase flow: requisition → CEO approval → PO → receipt against the PO, in ERPNext too
 	"Material Request": {"before_submit": "sk_app.requisition.check_submit"},
