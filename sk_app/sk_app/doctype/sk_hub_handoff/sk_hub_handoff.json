@@ -1,0 +1,152 @@
+{
+ "doctype": "DocType",
+ "name": "SK Hub Handoff",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-10-28 18:00:00.000000",
+ "modified": "2026-10-28 18:00:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "naming_rule": "Expression",
+ "track_changes": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "field_order": [
+  "subject",
+  "to_team",
+  "status",
+  "details",
+  "column_1",
+  "from_user",
+  "from_team",
+  "from_project",
+  "reference_doctype",
+  "reference_name",
+  "closing_section",
+  "closed_by",
+  "closed_on",
+  "close_note"
+ ],
+ "fields": [
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "to_team",
+   "fieldtype": "Select",
+   "label": "To Team",
+   "options": "Sales\nMarketing\nProduction\nSubcontractor\nQuality\nStores\nPurchase\nAccounts\nHR\nMachine Shifting\nDesign\nAI\nIT / ERP\nManagement",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Open\nDone",
+   "default": "Open",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Small Text",
+   "label": "Details"
+  },
+  {
+   "fieldname": "column_1",
+   "fieldtype": "Column Break",
+   "label": "From"
+  },
+  {
+   "fieldname": "from_user",
+   "fieldtype": "Link",
+   "label": "From",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "from_team",
+   "fieldtype": "Select",
+   "label": "From Team",
+   "options": "\nSales\nMarketing\nProduction\nSubcontractor\nQuality\nStores\nPurchase\nAccounts\nHR\nMachine Shifting\nDesign\nAI\nIT / ERP\nManagement",
+   "read_only": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "from_project",
+   "fieldtype": "Data",
+   "label": "From Claude Project",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Reference Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference",
+   "options": "reference_doctype"
+  },
+  {
+   "fieldname": "closing_section",
+   "fieldtype": "Section Break",
+   "label": "Done"
+  },
+  {
+   "fieldname": "closed_by",
+   "fieldtype": "Link",
+   "label": "Closed By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "closed_on",
+   "fieldtype": "Datetime",
+   "label": "Closed On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "close_note",
+   "fieldtype": "Small Text",
+   "label": "What Was Done"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "Desk User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "report": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "report": 1,
+   "export": 1,
+   "email": 1,
+   "share": 1
+  }
+ ],
+ "states": [],
+ "links": [],
+ "actions": [],
+ "index_web_pages_for_search": 0,
+ "autoname": "format:HO-{YYYY}-{######}",
+ "title_field": "subject"
+}

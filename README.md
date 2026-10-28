@@ -222,3 +222,26 @@ Score = actual / target (capped at 120%) x weight. Sources that are not live yet
   default. On save the lead becomes a CRM Deal through Frappe CRM's own conversion (owner = salesperson), Design Status
   "Sent to Design" when that option exists, with the lead's photos and requirement notes copied to the deal, because the
   AI design pickup reads deals only.
+
+## SK Hub: one Claude connector for all Claude Projects (28-Oct-2026)
+
+Every Claude Project (Sales, Design Cabin, Store, Purchase, Manufacturing, Quality, Finance, HR, Machine Shifting ...)
+connects to ERPNext through **one** connector instead of its own API key and cloud environment.
+
+- **Address for Claude:** `https://<erpnext-site>/api/method/sk_app.hub.mcp` (`sk_app/hub.py`, MCP over HTTP).
+- **Login:** each person signs in with **their own ERPNext login** through Frappe's built-in OAuth (OAuth Settings:
+  dynamic client registration, auth-server and protected-resource metadata, all on by default in v16). No keys are
+  kept in Claude. Only desk (staff) users can connect; portal customers / suppliers cannot.
+- **Permissions:** every tool runs as that person, so their roles and the CRM own-leads rule apply as on the desk.
+- **Drafts only:** the hub creates and changes drafts; it never submits, cancels or deletes. Users, roles, permissions,
+  scripts, settings and OAuth records are never changed, and token / secret records are never read
+  (`NO_READ` / `NO_WRITE` in `sk_app/hub_tools.py`).
+- **Handoffs:** `SK Hub Handoff` passes work from one team's Project to another (team = SK App User home function).
+- **Shared log:** every write is in `SK Hub Log`, so each Project can see what the others changed before any bulk job.
+
+Tools: `hub_overview`, `describe_doctype`, `search_records`, `get_record`, `count_records`, `item_stock`, `create_draft`,
+`update_draft`, `add_comment`, `post_handoff`, `list_handoffs`, `close_handoff`, `recent_activity`.
+
+Set-up after deploy: check **OAuth Settings** (Enable Dynamic Client Registration, Show Auth Server Metadata and Show
+Protected Resource Metadata ticked, Skip Authorization off), then in Claude: Settings → Connectors → Add custom
+connector → the address above, Client ID / Secret empty → Connect → ERPNext login → Allow. Tests: `sk_app/tests/test_hub.py`.
