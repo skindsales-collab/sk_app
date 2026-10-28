@@ -27,7 +27,7 @@
 		}
 		if (e.altKey && !e.ctrlKey) {
 			const k = (e.key || "").toLowerCase();
-			const go = { d: "/app/query-report/Day Book", l: "/app/query-report/General Ledger", g: "/app/accounts-gateway",
+			const go = { d: "/app/query-report/Tally Day Book", l: "/app/query-report/Tally Ledger", g: "/app/accounts-gateway",
 				c: "/app/accounts-gateway?create=1", a: "/app/accounts-gateway?alter=1" }[k];
 			if (go) { e.preventDefault(); frappe.set_route(go); return; }
 		}

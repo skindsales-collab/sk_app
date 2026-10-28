@@ -49,19 +49,31 @@ GATEWAY = [
 ]
 SECTIONS = ("Masters", "Transactions", "Utilities", "Reports")
 # extra reports behind "Display More Reports" (Tally names → ERPNext report)
-MORE_REPORTS = [("Bills Receivable", "Accounts Receivable"), ("Bills Payable", "Accounts Payable"), ("Cash Flow", "Cash Flow"),
-	("Sales Register", "Sales Register"), ("Purchase Register", "Purchase Register"), ("Group Summary (Debtors)", "Customer Ledger Summary"),
-	("Group Summary (Creditors)", "Supplier Ledger Summary"), ("Gross Profit", "Gross Profit")]
+# (SK 28-Oct) the Tally-style query reports on the site come first: they also show the vouchers migrated from Tally as
+# Journal Entries, with Tally's Vch Type and Vch No; ERPNext's own report is the fallback where one is missing.
+MORE_REPORTS = [("Bills Receivable", ("Bills Receivable", "Accounts Receivable")), ("Bills Payable", ("Bills Payable", "Accounts Payable")),
+	("Cash Flow", ("Cash Flow",)), ("Sales Register", ("Tally Sales Register", "Sales Register")),
+	("Purchase Register", ("Tally Purchase Register", "Purchase Register")), ("Group Summary (Debtors)", ("Sundry Debtors", "Customer Ledger Summary")),
+	("Group Summary (Creditors)", ("Sundry Creditors", "Supplier Ledger Summary")), ("Payment Register", ("Payment Register",)),
+	("Receipt Register", ("Receipt Register",)), ("Contra Register", ("Contra Register",)), ("Journal Register", ("Journal Register",)),
+	("Debit Note Register", ("Debit Note Register",)), ("Credit Note Register", ("Credit Note Register",)), ("Gross Profit", ("Gross Profit",))]
+# Gateway lines that open the Tally-style report when the site has it
+TALLY_REPORTS = {"day_book": "Tally Day Book", "ledger": "Tally Ledger"}
 # Narration = ERPNext's remark field on every voucher
 NARRATION = {"Payment Entry": "remarks", "Journal Entry": "user_remark", "Sales Invoice": "remarks", "Purchase Invoice": "remarks"}
 
 
 def gateway(user: str | None = None) -> dict:
+	tally_url = {k: f"/app/query-report/{r}" for k, r in TALLY_REPORTS.items() if frappe.db.exists("Report", r)}
 	sections = []
 	for s in SECTIONS:
-		sections.append({"section": s, "items": [{"key": k, "label": en, "label_mr": mr, "icon": ic, "keys": kb, "url": url, "app": app, "note": note}
-			for sec, k, en, mr, ic, kb, url, app, note in GATEWAY if sec == s]})
-	more = [{"label": a, "url": f"/app/query-report/{b}"} for a, b in MORE_REPORTS if frappe.db.exists("Report", b)]
+		sections.append({"section": s, "items": [{"key": k, "label": en, "label_mr": mr, "icon": ic, "keys": kb, "url": tally_url.get(k, url),
+			"app": app, "note": note} for sec, k, en, mr, ic, kb, url, app, note in GATEWAY if sec == s]})
+	more = []
+	for label, reports in MORE_REPORTS:
+		found = next((r for r in reports if frappe.db.exists("Report", r)), None)
+		if found:
+			more.append({"label": label, "url": f"/app/query-report/{found}"})
 	return {"sections": sections, "more": more, "fy": _fy_label()}
 
 
