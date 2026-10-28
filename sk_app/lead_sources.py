@@ -250,7 +250,7 @@ def upload(user: str, file_url: str, source: str = "IndiaMART") -> dict:
 
 	if not {"Sales", "Marketing", "Management", "AI"} & set(profile_functions(user)):
 		frappe.throw(_("Only Sales, Marketing, Management or AI & ERP can upload leads"), frappe.PermissionError)
-	from sk_app.cold_calls import COLD_SOURCE, FIELD, has_field
+	from sk_app.cold_calls import COLD_SOURCE
 
 	if source not in SOURCES and source not in ("Other", COLD_SOURCE):
 		frappe.throw(_("Unknown source"))
@@ -272,9 +272,15 @@ def upload(user: str, file_url: str, source: str = "IndiaMART") -> dict:
 		if not data["mobile_no"] and not data["email"]:
 			skipped += 1
 			continue
-		res = make_lead(data, source, owner=user if source == COLD_SOURCE else None)
-		if source == COLD_SOURCE and res["new"] and has_field():  # SK 27-Oct: call-list data goes to the Cold Calling list
-			frappe.db.set_value("CRM Lead", res["lead"], FIELD, 1, update_modified=False)
+		if source == COLD_SOURCE:
+			# SK 28-Oct (Rev 1 point 7): call-list data is not a lead: it goes straight to the Marketing list
+			from sk_app.marketing_list import put_on_list
+
+			person = data.get("first_name") or data.get("organization") or data["mobile_no"] or data["email"]
+			res = put_on_list(user, person, data["mobile_no"], data.get("organization"), data.get("city"), data["email"])
+			res = {"lead": res["name"], "new": not res["existing"]}
+		else:
+			res = make_lead(data, source)
 		leads.append(res["lead"])
 		if res["new"]:
 			made += 1

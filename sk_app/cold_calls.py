@@ -4,6 +4,11 @@ separate option for Cold Calling Leads will make it easier to call cold leads wi
 A cold lead is a CRM Lead with sk_cold = 1. It stays a normal ERPNext / CRM lead (same owner, Call / WhatsApp / Mail
 logged and counted), but it is kept out of My Leads, the New count, the status arrows and Decide Now. When the customer
 shows interest the salesperson taps "Interested → My Leads" and it joins the normal lead flow.
+
+SK 28-Oct (Rev 1 point 7, Pranali, approved): "cold calling data must move to Marketing, it is not a lead". Every cold
+lead now moves to the Marketing list (an ERPNext Contact in the same person's name, its calls and notes moved with it)
+and the lead is removed. A call list uploaded as "Cold calling" goes straight to the Marketing list. When someone is
+interested, "Make lead" on the Marketing list makes the lead.
 """
 
 import frappe
@@ -80,5 +85,58 @@ def set_cold(user: str, lead: str, cold: int) -> dict:
 	from sk_app.crm import _check
 
 	_check("CRM Lead", lead, "write")
-	frappe.db.set_value("CRM Lead", lead, FIELD, 1 if int(cold) else 0)
-	return {"name": lead, "cold": 1 if int(cold) else 0}
+	if int(cold):
+		return {"name": lead, "cold": 1, "contact": move_to_marketing(lead)}
+	frappe.db.set_value("CRM Lead", lead, FIELD, 0)
+	return {"name": lead, "cold": 0}
+
+
+def move_to_marketing(lead: str) -> str | None:
+	"""One cold lead → the Marketing list. Its calls and notes move to the Contact; the lead is then removed."""
+	from sk_app.marketing_list import put_on_list
+
+	l = frappe.db.get_value("CRM Lead", lead, ["name", "first_name", "last_name", "lead_name", "organization", "mobile_no", "phone",
+		"email", "lead_owner", "owner", "source", "status"], as_dict=True)
+	if not l:
+		return None
+	person = l.lead_name or " ".join(filter(None, [l.first_name, l.last_name])) or l.organization or l.mobile_no or l.email or lead
+	mobile = l.mobile_no or l.phone
+	if not mobile and not l.email:
+		return None
+	contact = put_on_list(l.lead_owner or l.owner, person, mobile, l.organization, None, l.email)["name"]
+	calls = 0
+	for doctype in ("CRM Call Log", "FCRM Note", "Comment", "Communication"):
+		if not frappe.db.exists("DocType", doctype):
+			continue
+		ref, refname = ("reference_doctype", "reference_name") if doctype in ("Comment", "Communication") else ("reference_doctype", "reference_docname")
+		rows = frappe.get_all(doctype, filters={ref: "CRM Lead", refname: lead}, pluck="name", limit=0)
+		for n in rows:
+			frappe.db.set_value(doctype, n, {ref: "Contact", refname: contact}, update_modified=False)
+		if doctype == "CRM Call Log":
+			calls = len(rows)
+	frappe.get_doc({"doctype": "Comment", "comment_type": "Info", "reference_doctype": "Contact", "reference_name": contact,
+		"content": f"Moved from cold-calling lead {lead} ({l.source or 'no source'}, {l.status}, {calls} calls) by SK App"}).insert(ignore_permissions=True)
+	try:
+		frappe.delete_doc("CRM Lead", lead, ignore_permissions=True, force=True)
+	except Exception:
+		# a lead ERPNext will not remove (linked elsewhere) stays a cold lead, out of every lead list
+		frappe.log_error(f"SK App cold lead {lead} not removed")
+	return contact
+
+
+def move_all(user: str | None = None) -> int:
+	n = 0
+	if not has_field():
+		return n
+	for lead in frappe.get_all("CRM Lead", filters={FIELD: 1, "converted": 0}, pluck="name", limit=0):
+		if move_to_marketing(lead):
+			n += 1
+	return n
+
+
+def move_all_once():
+	"""On deploy: every cold lead, called or not (SK's default for point 7), moves to the Marketing list once."""
+	if frappe.db.get_default("sk_cold_to_marketing"):
+		return
+	move_all()
+	frappe.db.set_default("sk_cold_to_marketing", "1")

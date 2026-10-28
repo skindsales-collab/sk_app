@@ -206,6 +206,33 @@ def _sales_persons(user):
 	return persons(user)
 
 
+def board_value(day, segment=None, persons=None) -> float:
+	"""SK 28-Oct (Rev 1 point 4): the order board on a day: orders booked before it (drafts too, DEC-013) less what was
+	delivered or invoiced against them before it. persons: only orders credited to these Sales Persons."""
+	orders = frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "status": ["!=", "Closed"], "transaction_date": ["<", day],
+		**dashboards._seg_filter(segment)}, fields=["name", "base_net_total"], limit=0)
+	if persons is not None:
+		mine = set(frappe.get_all("Sales Team", filters={"parenttype": "Sales Order", "sales_person": ["in", persons or [""]]}, pluck="parent", limit=0))
+		orders = [o for o in orders if o.name in mine]
+	if not orders:
+		return 0.0
+	names = [o.name for o in orders]
+	done = {}
+	for doctype, link in (("Delivery Note", "against_sales_order"), ("Sales Invoice", "sales_order")):
+		rows = frappe.db.sql(f"""select i.{link} as so, sum(i.base_net_amount) as amount from `tab{doctype} Item` i
+			join `tab{doctype}` p on p.name = i.parent
+			where p.docstatus = 1 and p.posting_date < %(day)s and i.{link} in %(names)s group by i.{link}""", {"day": day, "names": names}, as_dict=True)
+		for r in rows:
+			done[r.so] = max(done.get(r.so, 0), flt(r.amount))
+	return sum(max(0.0, flt(o.base_net_total) - done.get(o.name, 0)) for o in orders)
+
+
+def _board(segment=None, persons=None) -> dict:
+	today = getdate()
+	return {"open": round(_safe(lambda: board_value(get_first_day(today), segment, persons), 0) or 0),
+		"now": round(_safe(lambda: board_value(add_days(today, 1), segment, persons), 0) or 0)}
+
+
 def _invoiced(start, end):
 	return dashboards._invoiced(start, end)
 
@@ -235,6 +262,10 @@ def sales(user: str, segment=None, fn="Sales", only_self=False) -> dict:
 		persons = _sales_persons(user)
 		lines.append(("Invoices", "g", lambda s, e: invoiced_for(persons, s, e)))
 	card = _money_card(fn, title, lines, target)
+	if segment == segments.NON_CABIN:
+		card["board"] = _board(segments.NON_CABIN)
+	elif owners is not None:
+		card["board"] = _board(None, [p for o in owners for p in _sales_persons(o)])
 	if owners is not None and not any(p for line in card["month"]["lines"] for p in line["points"]):
 		# nothing credited to this person: say how an order becomes theirs
 		card["need"] = "No sale in your name yet. The CEO / sales manager ticks your customers on Customer → salesperson; then their Tally sale shows here."
@@ -245,8 +276,10 @@ def sales(user: str, segment=None, fn="Sales", only_self=False) -> dict:
 
 def company(user: str) -> dict:
 	"""CEO (SK 26-Oct): two lines, order booking and invoicing, against the company target."""
-	return _money_card("Management", "Order booking & invoices", [("Orders", "o", _orders_value(None)), ("Invoices", "g", _invoiced)],
+	card = _money_card("Management", "Order booking & invoices", [("Orders", "o", _orders_value(None)), ("Invoices", "g", _invoiced)],
 		_sales_target(None) or COMPANY_TARGET)
+	card["board"] = _board()
+	return card
 
 
 # ---------- month by month (all other functions) ----------

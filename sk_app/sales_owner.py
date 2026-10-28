@@ -127,3 +127,111 @@ def assign(user: str, customer: str, sales_person: str | None) -> dict:
 	doc.flags.ignore_permissions = True
 	doc.save()
 	return {"customer": customer, "persons": [sales_person] if sales_person else []}
+
+
+# ---------- SK 28-Oct (Rev 1 point 8, approved): whose order / customer it is, filled by itself ----------
+
+def person_of(user: str | None) -> str | None:
+	persons = _sales_persons(user) if user else []
+	return persons[0] if persons else None
+
+
+def _sales_persons(user):
+	from sk_app.kpi import _sales_persons as persons
+
+	return persons(user)
+
+
+def non_cabin_person() -> str | None:
+	"""Aditya: the Sales Person of the login with Machine Shifting (SK 26-Oct: every Non-Cabin customer is his)."""
+	from sk_app.logins import profile_functions
+
+	for user in frappe.get_all("SK App User", filters={"enabled": 1}, pluck="user", order_by="creation asc"):
+		if "Machine Shifting" in profile_functions(user):
+			p = person_of(user)
+			if p:
+				return p
+	return None
+
+
+def deal_owner_of(customer: str) -> str | None:
+	from sk_app.segments import _deal_of
+
+	c = frappe.db.get_value("Customer", customer, ["name", "customer_name"], as_dict=True)
+	deal = _deal_of(c) if c else None
+	return frappe.db.get_value("CRM Deal", deal, "deal_owner") if deal else None
+
+
+def _team_of(doctype: str, name: str) -> list[str]:
+	return frappe.get_all("Sales Team", filters={"parenttype": doctype, "parent": name}, pluck="sales_person")
+
+
+def _add_team(doctype: str, name: str, person: str):
+	"""One Sales Team row straight in the table: the order or customer is not saved again (drafts with missing
+	dates, or a posted order, would refuse a save) and nothing else on it changes."""
+	frappe.get_doc({"doctype": "Sales Team", "parenttype": doctype, "parentfield": "sales_team", "parent": name, "idx": 1,
+		"sales_person": person, "allocated_percentage": 100}).db_insert()
+
+
+def customer_person(customer: str) -> str | None:
+	"""Who sells to a customer: Non-Cabin → Aditya; otherwise the owner of its CRM deal."""
+	from sk_app import segments
+
+	group = frappe.db.get_value("Customer", customer, "customer_group")
+	if segments.main_of(group) == segments.NON_CABIN:
+		return non_cabin_person()
+	return person_of(deal_owner_of(customer))
+
+
+def link_customer(customer: str) -> str | None:
+	"""A customer nobody was ticked for gets its salesperson. One ticked by the CEO / Rushi is never changed."""
+	if not frappe.db.exists("DocType", "Sales Person") or _team_of("Customer", customer):
+		return None
+	person = customer_person(customer)
+	if person:
+		_add_team("Customer", customer, person)
+		frappe.get_doc({"doctype": "Comment", "comment_type": "Info", "reference_doctype": "Customer", "reference_name": customer,
+			"content": f"Salesperson {person} set by SK App (from the segment / CRM deal)"}).insert(ignore_permissions=True)
+	return person
+
+
+def order_person(so) -> str | None:
+	"""The salesperson of an order: the customer's salesperson, else the order's maker when they sell, else the deal owner."""
+	team = _team_of("Customer", so.customer) if so.customer else []
+	return (team[0] if team else None) or person_of(so.owner) or (customer_person(so.customer) if so.customer else None)
+
+
+def fill_order_team(doc, method=None):
+	"""Sales Order validate: an order with no salesperson gets one, so it counts on that person's graph."""
+	if doc.get("sales_team") or not frappe.db.exists("DocType", "Sales Person"):
+		return
+	person = order_person(doc)
+	if person:
+		doc.append("sales_team", {"sales_person": person, "allocated_percentage": 100})
+
+
+def auto_link() -> dict:
+	"""Deploy and every night: customers first (segment, CRM deals), then every order still without a salesperson."""
+	customers = orders = 0
+	for c in frappe.get_all("Customer", filters={"disabled": 0}, pluck="name", limit=0):
+		if link_customer(c):
+			customers += 1
+	if frappe.db.exists("DocType", "Sales Person"):
+		with_team = set(frappe.get_all("Sales Team", filters={"parenttype": "Sales Order"}, pluck="parent", limit=0))
+		for so in frappe.get_all("Sales Order", filters={"docstatus": ["<", 2]}, fields=["name", "customer", "owner"], limit=0):
+			if so.name in with_team:
+				continue
+			person = order_person(so)
+			if person:
+				_add_team("Sales Order", so.name, person)
+				orders += 1
+	return {"customers": customers, "orders": orders}
+
+
+def nightly():
+	"""Customer segments from Tally / deals, then salespeople on customers and orders (SK 28-Oct, Rev 1 points 8 and 9)."""
+	from sk_app import segments
+
+	segments.auto_tag()
+	ensure_sales_persons()
+	auto_link()

@@ -22,7 +22,9 @@ scheduler_events = {
 	# IndiaMART / JustDial / GeM mails to the team mailboxes become CRM leads (free route, point 14)
 	"cron": {"*/5 * * * *": ["sk_app.lead_sources.scan", "sk_app.mailbox.link_known", "sk_app.mailbox.route_suppliers", "sk_app.mailbox.auto_leads"],
 		# SK 27-Oct: the AI's actions to lift each graph, every morning before work
-		"0 7 * * *": ["sk_app.ai_actions.morning"]},
+		"0 7 * * *": ["sk_app.ai_actions.morning"],
+		# SK 28-Oct: customers tagged Cabin / Non-Cabin and every order and customer given its salesperson
+		"30 1 * * *": ["sk_app.sales_owner.nightly"]},
 }
 
 doc_events = {
@@ -33,7 +35,8 @@ doc_events = {
 	"SK Library Item": {"validate": "sk_app.library.make_public"},
 	"CRM Lead": {"validate": "sk_app.segments.set_main"},
 	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.crm.set_deal_customer"]},
-	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal"},
+	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal", "on_update": "sk_app.segments.on_customer_update"},
+	"Sales Order": {"validate": "sk_app.sales_owner.fill_order_team"},  # SK 28-Oct: every order has its salesperson
 	"SK App User": {"on_update": "sk_app.segments.on_app_user_update"},
 	"Job Card": {"validate": "sk_app.store.set_job_card_cabin"},  # SK 27-Oct: customer + cabin size, not just the number
 	# SK 27-Oct purchase flow: requisition → CEO approval → PO → receipt against the PO, in ERPNext too

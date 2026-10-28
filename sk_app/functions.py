@@ -17,7 +17,8 @@ FUNCTIONS = {
 	"Sales": {
 		"label": {"English": "Sales", "Marathi": "विक्री"},
 		# point 17 (SK's mock-up 26-Oct): own icons in work order New Lead → My Leads → My Deals → Customers → Follow-up → Complaints
-		"tiles": ["my_day", "new_lead", "my_leads", "cold_calls", "marketing_list", "my_deals", "customers", "follow_up", "complaints", *CONTACT_TILES, "activities", "reminders", "library",
+		# SK 28-Oct (Rev 1 point 7): no Cold Calling icon; cold-calling data lives on the Marketing list
+		"tiles": ["my_day", "new_lead", "my_leads", "marketing_list", "my_deals", "customers", "follow_up", "complaints", *CONTACT_TILES, "activities", "reminders", "library",
 			"day_report", "my_kpi", "dsi", "problem", "training"],
 		"live": True,
 		# not Sales Manager: in Frappe CRM that role shows every lead of the company (SK 26-Oct: each salesperson sees
@@ -27,7 +28,7 @@ FUNCTIONS = {
 	},
 	"Marketing": {
 		"label": {"English": "Marketing", "Marathi": "मार्केटिंग"},
-		"tiles": ["my_day", "new_lead", "my_leads", "cold_calls", "marketing_list", "follow_up", "complaints", *CONTACT_TILES, "activities", "reminders", "library", "day_report",
+		"tiles": ["my_day", "new_lead", "my_leads", "marketing_list", "follow_up", "complaints", *CONTACT_TILES, "activities", "reminders", "library", "day_report",
 			"my_kpi", "dsi", "problem", "training"],
 		"live": True,  # uses the same CRM lead screens as Sales
 		"erpnext_roles": ["Sales User"],

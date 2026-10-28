@@ -83,6 +83,13 @@ def add(user: str, name: str, mobile: str | None = None, company: str | None = N
 		frappe.throw(_("Please give the person's name"))
 	if not mobile and not email:
 		frappe.throw(_("Please give a mobile number or e-mail"))
+	return put_on_list(user, name, mobile, company, city, email, photo)
+
+
+def put_on_list(user: str, name: str, mobile: str | None = None, company: str | None = None, city: str | None = None,
+		email: str | None = None, photo: str | None = None) -> dict:
+	"""The Contact on the list, kept in `user`'s name (also used when a cold-calling lead moves here)."""
+	mobile, email = (mobile or "").strip(), (email or "").strip()
 	old = _by_mobile(mobile)
 	if old:
 		values = {FIELD: 1}
