@@ -108,6 +108,9 @@ def after_migrate():
 	from sk_app.deal_quotes import ensure_setup as deal_quotes_setup, sync as deal_quotes_sync
 
 	_safe(deal_quotes_setup, "job / service item for quotations")
+	from sk_app.gates import ensure_setup as gates_setup
+
+	_safe(gates_setup, "mandatory gate fields")  # SK 28-Oct: no next step until the screen's data is filled
 	_safe(deal_quotes_sync, "quotes on deals → ERPNext Quotations")  # SK 28-Oct: every quote goes through ERPNext
 	from sk_app.training import seed_lessons
 

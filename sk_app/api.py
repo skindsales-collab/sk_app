@@ -1696,10 +1696,38 @@ def expense_decide(name, ok, note=None):
 # ---- ERP flow in the app (SK 26-Oct): Customer → Quotation → Sales Order → Work Order ----
 
 @frappe.whitelist(methods=["POST"])
-def flow_make_customer(deal):
+def flow_make_customer(deal, gstin=None, unregistered=0, gst_note=None, address=None, city=None, state=None, pincode=None, mobile=None):
+	"""SK 28-Oct mandatory gate: the customer with GSTIN (or unregistered + reason), billing address and mobile."""
 	from sk_app import erp_flow
 
-	return erp_flow.make_customer(_me().user, deal)
+	details = {"gstin": gstin, "unregistered": unregistered, "gst_note": gst_note, "address": address, "city": city, "state": state,
+		"pincode": pincode, "mobile": mobile}
+	return erp_flow.make_customer(_me().user, deal, details if any(v not in (None, "", 0, "0") for v in details.values()) else None)
+
+
+@frappe.whitelist()
+def gate_rules():
+	"""The mandatory fields of every screen (SK 28-Oct), for the help card."""
+	_me()
+	from sk_app.gate_rules import RULES
+
+	return RULES
+
+
+@frappe.whitelist(methods=["POST"])
+def complete_lead(doctype, name, values):
+	"""Fill a lead / deal's missing data (old "Enquiry" leads too) so it can move on."""
+	_me()
+	from sk_app import gates
+
+	return gates.complete_lead(doctype, name, frappe.parse_json(values) if isinstance(values, str) else values)
+
+
+@frappe.whitelist(methods=["POST"])
+def flow_submit_quotation(quotation):
+	from sk_app import erp_flow
+
+	return erp_flow.submit_quotation(_me().user, quotation)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -1710,10 +1738,10 @@ def flow_make_quotation(deal, items, valid_days=15, note=None):
 
 
 @frappe.whitelist(methods=["POST"])
-def flow_order_received(quotation, delivery_date=None, po_no=None):
+def flow_order_received(quotation, delivery_date=None, po_no=None, po_photo=None, order_date=None, po_date=None):
 	from sk_app import erp_flow
 
-	return erp_flow.order_received(_me().user, quotation, delivery_date, po_no)
+	return erp_flow.order_received(_me().user, quotation, delivery_date, po_no, po_photo, order_date, po_date)
 
 
 @frappe.whitelist(methods=["POST"])

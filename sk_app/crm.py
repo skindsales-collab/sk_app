@@ -251,7 +251,13 @@ def detail(doctype: str, name: str) -> dict:
 	field = _design_status_field(doctype)
 	if field:
 		doc["design_status"] = frappe.db.get_value(doctype, name, field)
+	from sk_app import erp_flow, gates
+
+	erp = _erp_docs(deal)
+	customer = erp_flow.customer_of(deal["name"]) if deal else None
 	return {
+		"gate": _gate(doctype, name),
+		"customer": customer and {"name": customer, "missing": [t for _k, t in gates.customer_missing(customer)]},
 		"doctype": doctype,
 		"doc": doc,
 		"notes": notes,
@@ -262,10 +268,21 @@ def detail(doctype: str, name: str) -> dict:
 		"files": _files(doctype, name) + (_files("CRM Deal", deal["name"]) if deal and doctype == "CRM Lead" else []),
 		"deal": deal and deal["name"],
 		"products": _products(doctype, name),
-		**_erp_docs(deal),
+		**erp,
 		"quote_pending": _quote_pending(deal),
 		"crm_url": f"/crm/{'leads' if doctype == 'CRM Lead' else 'deals'}/{name}",
 	}
+
+
+def _gate(doctype: str, name: str) -> dict | None:
+	"""SK 28-Oct mandatory gate on the detail screen: missing data and locked status chips (never breaks the screen)."""
+	from sk_app import gates
+
+	try:
+		return gates.gate_for(doctype, frappe.get_doc(doctype, name))
+	except Exception:
+		frappe.log_error("SK App mandatory gate")
+		return None
 
 
 def _attach(file_url: str | None, doctype: str, name: str, user: str):
@@ -289,12 +306,15 @@ def new_lead(user: str, first_name: str, mobile_no: str | None = None, organizat
 		requirement: str | None = None, photo: str | None = None, product: str | None = None, status: str | None = None) -> str:
 	if not installed():
 		frappe.throw(_("Frappe CRM is not installed"))
-	if not (first_name or "").strip():
-		frappe.throw(_("Please give the customer's name"))
-	# point 2: segment is required, so the right team (Cabin or Non-Cabin) gets the lead
+	# point 2 + SK 28-Oct mandatory gate: the lead is saved only with a real name, contact person, mobile, segment and
+	# source, so the right team gets it and nothing is named "Enquiry"
+	from sk_app import gates
+
 	segment = sub_of(segment)
-	if not segment:
-		frappe.throw(_("Please pick the segment (Cabin or Non-Cabin)"))
+	missing = gates.R.lead_missing({"first_name": first_name, "organization": organization, "mobile_no": mobile_no,
+		"sk_segment": segment, "source": source if source and frappe.db.exists("CRM Lead Source", source) else None, "lead_owner": user})
+	if missing:
+		gates.stop(_("Lead cannot be saved"), missing)
 	# SK 27-Oct: the status is picked on the form (New by default)
 	status = [status] if status and frappe.db.exists("CRM Lead Status", status) else frappe.get_all("CRM Lead Status", order_by="position asc", pluck="name", limit=1)
 	doc = frappe.get_doc({

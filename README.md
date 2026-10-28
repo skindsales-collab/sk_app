@@ -245,3 +245,23 @@ Tools: `hub_overview`, `describe_doctype`, `search_records`, `get_record`, `coun
 Set-up after deploy: check **OAuth Settings** (Enable Dynamic Client Registration, Show Auth Server Metadata and Show
 Protected Resource Metadata ticked, Skip Authorization off), then in Claude: Settings → Connectors → Add custom
 connector → the address above, Client ID / Secret empty → Connect → ERPNext login → Allow. Tests: `sk_app/tests/test_hub.py`.
+
+## Mandatory gate: no next step until the data is filled (28-Oct-2026)
+
+SK: "without processing mandatory things the screen will not process further, and all data will be captured". The rules
+are in `sk_app/gate_rules.py` (unit tested) and applied by `sk_app/gates.py` both in the app and in ERPNext (doc events),
+so the phone, the ERPNext desk and the API all stop at the same place. Every refusal lists what is missing in plain words.
+
+| Screen | Must be filled before it moves on |
+|---|---|
+| New lead | Real customer name (not "Enquiry"), mobile (10 digits), source, segment; salesperson = the person |
+| Lead / deal status | Moving past New needs the lead data above. Quotation step needs a quotation; Negotiations a submitted quotation; Won a submitted Sales Order. Old "Enquiry" leads get a ⚠️ card on the detail screen to fill the gaps; locked status chips show 🔒 and why |
+| Customer (from the deal) | GSTIN (checked, 15 characters) or "unregistered" with the reason; billing address with state and PIN; mobile |
+| Quotation | Submitted only with a complete customer, items with qty and rate, GST (company default template applied) and valid-till date. The app submits it when complete; a draft shows "Submit quotation" |
+| Order received = Deal Won | Order date, promised delivery date (no default), customer PO number or PO copy. The Sales Order is made from the quotation and submitted; the deal (and its lead) turn Won with the order value. Without the right to submit, it waits for the manager's Confirm |
+| Sales Order (ERPNext too) | Delivery date, PO number or PO file, items with rate, value, complete customer |
+| Purchase request | Item and qty, required-by date, reason (ERPNext's own re-order run gets an automatic reason); CEO approval as before |
+| Stock count | Every line counted (0 if none), not only the differences |
+
+Junk / lost needs nothing. Background drafts (mail leads, design quote values) are still saved; the gate sits on the step
+that moves them on.

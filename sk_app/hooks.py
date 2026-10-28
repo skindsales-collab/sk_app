@@ -33,16 +33,20 @@ doc_events = {
 	"SK Day Report": {"before_insert": "sk_app.permissions.stamp_user"},
 	"File": {"after_insert": ["sk_app.crm.on_file_attached", "sk_app.deal_quotes.on_file"]},  # SK 28-Oct: a quote file → Quotation
 	"SK Library Item": {"validate": "sk_app.library.make_public"},
-	"CRM Lead": {"validate": "sk_app.segments.set_main"},
-	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.crm.set_deal_customer"], "on_update": "sk_app.deal_quotes.on_deal_update"},
+	# SK 28-Oct mandatory gate: a lead / deal moves on only with its data and the step's ERPNext document (sk_app.gates)
+	"CRM Lead": {"validate": ["sk_app.segments.set_main", "sk_app.gates.check_crm"]},
+	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.crm.set_deal_customer", "sk_app.gates.check_crm"],
+		"on_update": "sk_app.deal_quotes.on_deal_update"},
+	"Quotation": {"before_submit": "sk_app.gates.check_quotation"},
 	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal", "on_update": "sk_app.segments.on_customer_update"},
 	# SK 28-Oct: every order has its salesperson; income ledger and Non-Cabin sub-group cost centre from the customer
-	"Sales Order": {"validate": ["sk_app.sales_owner.fill_order_team", "sk_app.segment_accounts.set_segment"]},
+	"Sales Order": {"validate": ["sk_app.sales_owner.fill_order_team", "sk_app.segment_accounts.set_segment"],
+		"before_submit": "sk_app.gates.check_sales_order"},
 	"Sales Invoice": {"validate": "sk_app.segment_accounts.set_segment"},
 	"SK App User": {"on_update": ["sk_app.segments.on_app_user_update", "sk_app.logins.set_company_default"]},
 	"Job Card": {"validate": "sk_app.store.set_job_card_cabin"},  # SK 27-Oct: customer + cabin size, not just the number
 	# SK 27-Oct purchase flow: requisition → CEO approval → PO → receipt against the PO, in ERPNext too
-	"Material Request": {"before_submit": "sk_app.requisition.check_submit"},
+	"Material Request": {"validate": "sk_app.gates.check_request", "before_submit": "sk_app.requisition.check_submit"},
 	"Purchase Order": {"before_submit": "sk_app.requisition.check_po"},
 	"Purchase Receipt": {"before_submit": "sk_app.requisition.check_receipt"},
 	# SK 28-Oct: subcontractor bills post only after Rushi + CEO; only CEO / Accounts change the rate sheet

@@ -790,7 +790,13 @@
 		cq_other: "Other quotation (non-cabin)", cq_rc: "Rate card", cq_disc_list: "Quotation discounts", cq_ok: "Approve", cq_no: "Reject",
 		fl_new_quote: "Make quotation", dq_title: "This quote is not in ERPNext yet", dq_amount: "Quote amount ₹ (before GST)", dq_make: "Make ERPNext quotation", dq_done: "Quotation saved in ERPNext ✓", fl_quote_why: "Saved in ERPNext as a Quotation for this customer (the customer is made by itself). The PDF opens to send.",
 		fl_add_item: "Add item", fl_rate_blank: "blank = price list", fl_valid: "Valid for days", fl_desc: "Description (Enter = new line)", fl_terms: "Terms / note", fl_quote_saved: "Quotation saved",
-		fl_order_why: "The quotation is submitted and a Sales Order is made from it.", fl_delivery: "Promised delivery date", fl_po_no: "Customer PO no (optional)",
+		fl_order_why: "Order received = Deal Won. The Sales Order is made from the quotation and submitted.", fl_delivery: "Promised delivery date", fl_po_no: "Customer PO no",
+		g_fill: "Please fill first", g_missing: "Data missing: this cannot move on until it is filled", g_save: "Save details", g_locked: "Locked: fill first",
+		g_cust: "Customer details for GST bill", g_gstin: "GSTIN (15 letters / digits)", g_unreg: "Customer has no GSTIN (unregistered)", g_unreg_why: "Why no GSTIN",
+		g_addr: "Billing address", g_city: "City", g_state: "State", g_pin: "PIN code", g_cmobile: "Customer mobile", g_cust_ok: "Customer complete ✓",
+		g_qsubmit: "Submit quotation (send to customer)", g_qsubmitted: "Quotation submitted ✓", g_order_date: "Order date", g_po_date: "PO date",
+		g_po_photo: "PO copy (photo / PDF)", g_po_or_photo: "Customer PO number or PO copy", g_won: "Deal Won ✓ Sales Order submitted", g_wait_confirm: "Saved. Waiting for the manager's Confirm; the deal turns Won then",
+		g_count_all: "Count every line (0 if none)", g_reason: "Reason",
 		fl_so_saved: "Sales Order saved", fl_plan_why: "Confirmed orders without a Work Order. Make one per cabin; its stages become job cards.",
 		fl_no_bom: "No BOM yet: Design makes it first", fl_make_wo: "Make Work Order", fl_wo_saved: "Work Order saved",
 		more: "More", grp_work: "My work", grp_me: "Me", grp_help: "Help", leadership: "Leadership & Strategy",
@@ -822,7 +828,13 @@
 		cq_other: "इतर कोटेशन (नॉन-केबिन)", cq_rc: "रेट कार्ड", cq_disc_list: "कोटेशन सूट", cq_ok: "मंजूर", cq_no: "नाकारा",
 		fl_new_quote: "कोटेशन बनवा", dq_title: "हे कोटेशन अजून ERPNext मध्ये नाही", dq_amount: "कोटेशन रक्कम ₹ (GST आधी)", dq_make: "ERPNext कोटेशन बनवा", dq_done: "कोटेशन ERPNext मध्ये जतन ✓", fl_quote_why: "या ग्राहकासाठी ERPNext मध्ये कोटेशन म्हणून जतन होते (ग्राहक आपोआप बनतो). पाठवण्यासाठी PDF उघडते.",
 		fl_add_item: "आयटम जोडा", fl_rate_blank: "रिकामे = किंमत यादी", fl_valid: "किती दिवस वैध", fl_desc: "वर्णन (Enter = नवी ओळ)", fl_terms: "अटी / नोंद", fl_quote_saved: "कोटेशन जतन झाले",
-		fl_order_why: "कोटेशन सबमिट होते आणि त्यावरून सेल्स ऑर्डर बनते.", fl_delivery: "दिलेली डिलिव्हरी तारीख", fl_po_no: "ग्राहकाचा PO नंबर (ऐच्छिक)",
+		fl_order_why: "ऑर्डर मिळाली = डील जिंकली. कोटेशनवरून सेल्स ऑर्डर बनून सबमिट होते.", fl_delivery: "दिलेली डिलिव्हरी तारीख", fl_po_no: "ग्राहकाचा PO नंबर",
+		g_fill: "आधी हे भरा", g_missing: "माहिती अपूर्ण: भरल्याशिवाय पुढे जाता येणार नाही", g_save: "माहिती सेव्ह करा", g_locked: "बंद: आधी माहिती भरा",
+		g_cust: "GST बिलासाठी ग्राहकाची माहिती", g_gstin: "GSTIN (15 अक्षरे / अंक)", g_unreg: "ग्राहकाकडे GSTIN नाही (अनरजिस्टर्ड)", g_unreg_why: "GSTIN का नाही",
+		g_addr: "बिलिंग पत्ता", g_city: "शहर", g_state: "राज्य", g_pin: "पिन कोड", g_cmobile: "ग्राहकाचा मोबाईल", g_cust_ok: "ग्राहक माहिती पूर्ण ✓",
+		g_qsubmit: "कोटेशन सबमिट करा (ग्राहकाला पाठवा)", g_qsubmitted: "कोटेशन सबमिट झाले ✓", g_order_date: "ऑर्डर तारीख", g_po_date: "PO तारीख",
+		g_po_photo: "PO ची प्रत (फोटो / PDF)", g_po_or_photo: "ग्राहकाचा PO नंबर किंवा PO ची प्रत", g_won: "डील जिंकली ✓ सेल्स ऑर्डर सबमिट", g_wait_confirm: "सेव्ह झाले. मॅनेजरच्या Confirm ची वाट; मग डील जिंकली दिसेल",
+		g_count_all: "प्रत्येक ओळ मोजा (नसेल तर 0)", g_reason: "कारण",
 		fl_so_saved: "सेल्स ऑर्डर जतन झाली", fl_plan_why: "वर्क ऑर्डर नसलेल्या निश्चित ऑर्डर. प्रत्येक केबिनसाठी एक बनवा; त्याचे टप्पे जॉब कार्ड होतात.",
 		fl_no_bom: "BOM अजून नाही: आधी डिझाईन बनवेल", fl_make_wo: "वर्क ऑर्डर बनवा", fl_wo_saved: "वर्क ऑर्डर जतन झाली",
 		more: "अधिक", grp_work: "माझे काम", grp_me: "मी", grp_help: "मदत", leadership: "नेतृत्व व रणनीती",
@@ -2289,11 +2301,45 @@
 	}
 	// ERP flow in the app (SK 26-Oct): the next ERPNext step of each document, done by its owner here
 	function flowButtons(doctype, d) {
-		if (doctype === "Quotation" && d.docstatus < 2 && !["Ordered", "Lost", "Expired"].includes(d.status))
+		// SK 28-Oct mandatory gate: a draft quotation is submitted first (all data there); the order comes from a submitted one
+		if (doctype === "Quotation" && d.docstatus === 0)
+			return `<button class="sk-btn go wide" data-act="fl-qsubmit" data-name="${esc(d.name)}">📤 ${t("g_qsubmit")}</button>`;
+		if (doctype === "Quotation" && d.docstatus === 1 && !["Ordered", "Lost", "Expired"].includes(d.status))
 			return `<button class="sk-btn ok wide" data-act="fl-order" data-name="${esc(d.name)}">✅ ${t("fl_order_received")}</button>`;
 		if (doctype === "Sales Order" && d.docstatus === 0)
 			return `<button class="sk-btn go wide" data-act="fl-confirm" data-name="${esc(d.name)}">✔ ${t("fl_confirm")}</button>`;
 		return "";
+	}
+	// SK 28-Oct mandatory gate: the lead's missing data, filled right here (old "Enquiry" leads too)
+	function gateCard(d, o) {
+		const miss = (d.gate && d.gate.missing) || [];
+		if (!miss.length) return "";
+		const opt = (items) => `<option value=""></option>${(items || []).map((x) => `<option>${esc(x)}</option>`).join("")}`;
+		const input = (m) => {
+			const id = "g-" + m.key;
+			if (m.key === "mobile_no") return `<label class="sk-field"><span>${esc(m.text)}</span><div class="sk-input-row"><input id="${id}" type="tel"></div></label>`;
+			if (m.key === "source") return `<label class="sk-field"><span>${esc(m.text)}</span><select id="${id}" class="sk-select">${opt(o.sources)}</select></label>`;
+			if (m.key === "sk_segment") return segmentSelect(id, o.segment_tree, o.segments);
+			if (m.key === "lead_owner") return `<p class="sk-note">👤 ${esc(m.text)}: ${t("g_save")} ✓</p>`;
+			return formField(id, m.text);
+		};
+		S.gateKeys = miss.map((m) => m.key);
+		return `<div class="sk-card sk-gate sk-gap"><div class="sk-item-title">⚠️ ${t("g_missing")}</div>${miss.map(input).join("")}
+			<button class="sk-btn go wide" data-act="gate-save">${t("g_save")}</button></div>`;
+	}
+	// the deal's ERPNext customer: GSTIN (or unregistered + why), billing address with state / PIN, mobile
+	function customerCard(d) {
+		if (!d.deal || (d.customer && !d.customer.missing.length)) return d.customer ? `<p class="sk-note">✅ ${t("g_cust_ok")}: ${esc(d.customer.name)}</p>` : "";
+		const miss = d.customer ? d.customer.missing : [];
+		return `<div class="sk-card sk-gate sk-gap"><div class="sk-item-title">🧾 ${t("g_cust")}</div>
+			${miss.length ? `<p class="sk-note">${miss.map(esc).join(" · ")}</p>` : ""}
+			${formField("gc-gstin", t("g_gstin"))}
+			<label class="sk-check"><input id="gc-unreg" type="checkbox"> ${t("g_unreg")}</label>${formField("gc-why", t("g_unreg_why"))}
+			${formField("gc-addr", t("g_addr"), true)}${formField("gc-city", t("g_city"))}
+			<label class="sk-field"><span>${t("g_state")}</span><select id="gc-state" class="sk-select"><option value=""></option>${GST_STATES.map((x) => `<option>${esc(x)}</option>`).join("")}</select></label>
+			<label class="sk-field"><span>${t("g_pin")}</span><div class="sk-input-row"><input id="gc-pin" type="tel" maxlength="6"></div></label>
+			<label class="sk-field"><span>${t("g_cmobile")}</span><div class="sk-input-row"><input id="gc-mobile" type="tel"></div></label>
+			<button class="sk-btn go wide" data-act="gate-customer" data-deal="${esc(d.deal)}">${t("g_save")}</button></div>`;
 	}
 	function quoteLine(k) {
 		// SK 27-Oct: the description takes new lines (Enter), like WhatsApp: size, specs, scope one per line
@@ -2470,7 +2516,11 @@
 		const doc = d.doc;
 		current = { doctype, name, mobile: doc.mobile_no || doc.phone, email: doc.email };
 		const statuses = (doctype === "CRM Lead" ? o.lead_statuses : o.deal_statuses) || [];
-		const chips = statuses.map((s) => `<button class="sk-chip ${s.name === doc.status ? "on" : ""}" data-act="status" data-status="${esc(s.name)}">${esc(s.name)}</button>`).join("");
+		// SK 28-Oct mandatory gate: a status whose data is not there yet is locked (🔒) and says what to fill
+		const locked = (d.gate && d.gate.locked) || {};
+		const chips = statuses.map((s) => locked[s.name] && s.name !== doc.status
+			? `<button class="sk-chip sk-locked" data-act="status-locked" data-why="${esc(locked[s.name].join(" · "))}">🔒 ${esc(s.name)}</button>`
+			: `<button class="sk-chip ${s.name === doc.status ? "on" : ""}" data-act="status" data-status="${esc(s.name)}">${esc(s.name)}</button>`).join("");
 		const files = d.files.map((f) => `<li class="sk-item"><div><a class="sk-item-title" href="${esc(f.file_url)}" target="_blank">📎 ${esc(f.file_name)}</a><div class="sk-item-meta">${esc(f.owner)} · ${when(f.creation)}</div></div>
 			<button class="sk-open ${f.for_customer ? "sk-send" : ""}" data-act="share-pdf" data-pdf="${esc(f.file_url)}" data-file="${esc(f.file_name)}" ${f.for_customer ? `data-fileid="${esc(f.name)}"` : ""}>${f.for_customer ? "💬 " + t("send") : "↗"}</button>
 			${f.for_customer ? `<button class="sk-open sk-fix" data-act="correction" data-fileid="${esc(f.name)}" data-file="${esc(f.file_name)}">✏️</button>` : ""}</li>`).join("");
@@ -2486,6 +2536,7 @@
 				${doc.next_step ? `<div class="sk-item-meta">${t("next")}: ${esc(doc.next_step)}</div>` : ""}
 				${doc.design_status ? `<div class="sk-item-meta">📐 ${t("design_status")}: <b>${esc(doc.design_status)}</b></div>` : ""}
 				${contactButtons({ doctype, name, mobile, email: doc.email })}</div>
+			${gateCard(d, o)}${customerCard(d)}
 			<h3 class="sk-h">${t("status")}</h3><div class="sk-chips">${chips}</div>
 			${doctype === "CRM Lead" && !doc.converted ? `<button class="sk-btn go wide sk-gap" data-act="convert-deal">🤝 ${t("convert_deal")}</button>` : ""}
 			${doctype === "CRM Lead" && !doc.converted && doc.sk_cold !== undefined ? `<button class="sk-btn wide sk-gap" data-act="cold-set" data-lead="${esc(name)}" data-cold="${doc.sk_cold ? 0 : 1}">${doc.sk_cold ? "🔥 " + t("cold_interested") : "🧊 " + t("cold_move")}</button>` : ""}
@@ -2563,10 +2614,10 @@
 		const sel = (id, label, items) => `<label class="sk-field"><span>${esc(label)}</span><select id="${id}" class="sk-select"><option value=""></option>${(items || []).map((x) => `<option>${esc(x)}</option>`).join("")}</select></label>`;
 		root.innerHTML = header(t("new_lead")) + `<main class="sk-form">
 			${photoField("f-card", "📷 " + t("card_photo"))}
-			${formField("f-first", t("cust_name"))}${formField("f-org", t("company"))}
-			<label class="sk-field"><span>${t("mobile")}</span><div class="sk-input-row"><input id="f-mobile" type="tel"></div></label>
+			${formField("f-first", t("cust_name") + " *")}${formField("f-org", t("company"))}
+			<label class="sk-field"><span>${t("mobile")} *</span><div class="sk-input-row"><input id="f-mobile" type="tel"></div></label>
 			<label class="sk-field"><span>${t("email")}</span><div class="sk-input-row"><input id="f-email" type="email"></div></label>
-			${sel("f-source", t("source"), o.sources)}${segmentSelect("f-segment", o.segment_tree, o.segments)}${(o.products || []).length ? sel("f-product", t("product_asked"), o.products) : ""}
+			${sel("f-source", t("source") + " *", o.sources)}${segmentSelect("f-segment", o.segment_tree, o.segments)}${(o.products || []).length ? sel("f-product", t("product_asked"), o.products) : ""}
 			<label class="sk-field"><span>${t("status")}</span><select id="f-status" class="sk-select">${(o.lead_statuses || []).filter((s) => s.type !== "Won" && s.type !== "Lost").map((s) => `<option>${esc(s.name)}</option>`).join("")}</select></label>
 			<label class="sk-check" id="f-design-row" hidden><input id="f-design" type="checkbox" checked> ✏️ ${t("send_design")}</label>
 			${formField("f-req", t("requirement"), true)}
@@ -4100,6 +4151,8 @@
 				if (RQ.items.some((x) => !x.item_code)) return toast(t("rq_check") + ": " + t("rq_need_item"), true);
 				if (RQ.items.length > 20) return toast(t("rq_max"), true);
 				if (RQ.noPo && !val("rq-sup")) return toast(t("rq_need_sup"), true);
+				// SK 28-Oct mandatory gate: required-by date and the reason (without PO: the reason or the bill / challan no)
+				if (!mustFill(RQ.noPo ? [["rq-note", t("why_no_po"), !!val("rq-note") || !!val("rq-billno")]] : [["rq-date", t("need_by")], ["rq-note", t("g_reason")]])) return;
 				el.disabled = true;
 				const args = { items: JSON.stringify(RQ.items.map((x) => ({ item_code: x.item_code, qty: x.qty }))), priority: RQ.priority,
 					cabin: val("rq-cabin") || null, note: val("rq-note") || null };
@@ -4211,21 +4264,37 @@
 				const items = [...Array(S.qLines).keys()].map((k) => ({ item_code: val("ql-item" + k), qty: val("ql-qty" + k), rate: val("ql-rate" + k), description: val("ql-desc" + k) })).filter((x) => x.item_code);
 				try {
 					const r = await call("flow_make_quotation", { deal: S.qDeal, items: JSON.stringify(items), valid_days: val("ql-valid"), note: val("ql-note") }, true);
-					closeSheet(); saved(`${t("fl_quote_saved")}: ${r.name}`); window.open(r.pdf, "_blank");
+					closeSheet(); window.open(r.pdf, "_blank");
+					if (r.submitted) saved(`${t("fl_quote_saved")}: ${r.name} · ${t("g_qsubmitted")}`);
+					else toast(`${t("fl_quote_saved")}: ${r.name}. ${t("g_fill")}: ${(r.missing || []).join(", ")}`, true);
 				} finally { el.disabled = false; }
 				return go("detail");
 			}
 			case "fl-order":
 				S.flQuote = el.dataset.name;
+				// SK 28-Oct mandatory gate: Deal Won needs order date, promised delivery date and the PO number or PO copy
 				return sheet(`<h3 class="sk-h">✅ ${t("fl_order_received")}</h3><p class="sk-note">${esc(el.dataset.name)} · ${t("fl_order_why")}</p>
-					<label class="sk-field"><span>${t("fl_delivery")}</span><input id="fo-date" type="date" value="${new Date(Date.now() + 21 * 864e5).toISOString().slice(0, 10)}"></label>
-					${formField("fo-po", t("fl_po_no"))}<button class="sk-btn ok wide" data-act="fl-order-save">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+					<label class="sk-field"><span>${t("g_order_date")} *</span><input id="fo-odate" type="date" value="${new Date().toISOString().slice(0, 10)}"></label>
+					<label class="sk-field"><span>${t("fl_delivery")} *</span><input id="fo-date" type="date"></label>
+					${formField("fo-po", t("fl_po_no") + " *")}<label class="sk-field"><span>${t("g_po_date")}</span><input id="fo-podate" type="date"></label>
+					${photoField("fo-pophoto", "📷 " + t("g_po_photo"))}
+					<button class="sk-btn ok wide" data-act="fl-order-save">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
 			case "fl-order-save": {
+				const poFile = document.getElementById("fo-pophoto");
+				if (!mustFill([["fo-odate", t("g_order_date")], ["fo-date", t("fl_delivery")],
+					["fo-po", t("g_po_or_photo"), !!val("fo-po") || !!(poFile && poFile.files[0])]])) return;
 				el.disabled = true;
 				try {
-					const r = await call("flow_order_received", { quotation: S.flQuote, delivery_date: val("fo-date"), po_no: val("fo-po") }, true);
-					closeSheet(); saved(`${t("fl_so_saved")}: ${r.name}`);
+					const r = await call("flow_order_received", { quotation: S.flQuote, delivery_date: val("fo-date"), po_no: val("fo-po"),
+						order_date: val("fo-odate"), po_date: val("fo-podate") || null, po_photo: await photoUrl("fo-pophoto") }, true);
+					closeSheet(); saved(r.submitted ? `${t("g_won")}: ${r.name}` : `${t("fl_so_saved")}: ${r.name}. ${t("g_wait_confirm")}`);
 				} finally { el.disabled = false; }
+				return go("detail");
+			}
+			case "fl-qsubmit": {
+				el.disabled = true;
+				try { await call("flow_submit_quotation", { quotation: el.dataset.name }, true); saved(t("g_qsubmitted")); }
+				finally { el.disabled = false; }
 				return go("detail");
 			}
 			case "fl-confirm": { el.disabled = true; const r = await call("flow_confirm_order", { sales_order: el.dataset.name }, true); saved(`✔ ${r.name} · ${r.status}`); return go("detail"); }
@@ -4300,8 +4369,10 @@
 			}
 			case "st-order-low": { el.disabled = true; const r = await call("store_order_low", {}, true); saved(`${t("sent_purchase")}: ${r.name}`); return go("low_stock"); }
 			case "st-count": {
+				// SK 28-Oct mandatory gate: every line is counted (0 if none), not only the differences
+				if (!mustFill(S.count.map((r, k) => ["c-q" + k, r.item_name || r.item_code]))) { toast(t("g_count_all"), true); return; }
 				el.disabled = true;
-				const counts = S.count.map((r, k) => ({ item_code: r.item_code, qty: val("c-q" + k) })).filter((x) => x.qty !== "");
+				const counts = S.count.map((r, k) => ({ item_code: r.item_code, qty: val("c-q" + k) }));
 				const r = await call("store_count", { warehouse: val("c-wh"), counts: JSON.stringify(counts), photo: await photoUrl("c-photo") }, true);
 				saved(r.name ? `${r.differences} ${t("differences_sent")}: ${r.name}` : t("no_differences"));
 				el.disabled = false;
@@ -5711,6 +5782,31 @@
 				toast(t("saved"));
 				return go("dept_visits");
 			}
+			if (act === "status-locked") { toast(`🔒 ${t("g_locked")}: ${el.dataset.why}`, true); return; }
+			if (act === "gate-save") {
+				const values = {};
+				(S.gateKeys || []).forEach((k) => { if (document.getElementById("g-" + k)) values[k] = val("g-" + k); });
+				const need = (S.gateKeys || []).filter((k) => document.getElementById("g-" + k)).map((k) => ["g-" + k, k === "mobile_no" ? t("mobile") : k === "source" ? t("source") : k === "sk_segment" ? t("segment") : k === "organization" ? t("company") : t("cust_name"),
+					k === "mobile_no" ? values[k].replace(/\D/g, "").length >= 10 : undefined]);
+				if (!mustFill(need)) return;
+				el.disabled = true;
+				try { await call("complete_lead", { doctype: current.doctype, name: current.name, values: JSON.stringify(values) }, true); toast(t("saved")); }
+				finally { el.disabled = false; }
+				return go("detail");
+			}
+			if (act === "gate-customer") {
+				const unreg = document.getElementById("gc-unreg").checked;
+				if (!mustFill([["gc-gstin", t("g_gstin"), unreg || /^[0-9]{2}[A-Z0-9]{10}[0-9A-Z]{3}$/.test(val("gc-gstin").toUpperCase())],
+					["gc-why", t("g_unreg_why"), !unreg || !!val("gc-why")], ["gc-addr", t("g_addr")], ["gc-state", t("g_state")],
+					["gc-pin", t("g_pin"), /^\d{6}$/.test(val("gc-pin"))], ["gc-mobile", t("g_cmobile"), val("gc-mobile").replace(/\D/g, "").length >= 10]])) return;
+				el.disabled = true;
+				try {
+					const r = await call("flow_make_customer", { deal: el.dataset.deal, gstin: unreg ? null : val("gc-gstin").toUpperCase(), unregistered: unreg ? 1 : 0,
+						gst_note: val("gc-why") || null, address: val("gc-addr"), city: val("gc-city") || null, state: val("gc-state"), pincode: val("gc-pin"), mobile: val("gc-mobile") }, true);
+					if (r.missing && r.missing.length) toast(`${t("g_fill")}: ${r.missing.join(", ")}`, true); else toast(t("g_cust_ok"));
+				} finally { el.disabled = false; }
+				return go("detail");
+			}
 			if (act === "status") {
 				await call("set_crm_status", { doctype: current.doctype, name: current.name, status: el.dataset.status }, true);
 				toast(t("saved"));
@@ -5874,7 +5970,9 @@
 				return go("detail");
 			}
 			if (act === "save-lead") {
-				if (!val("f-segment")) { toast(t("pick_segment")); document.getElementById("f-segment").focus(); return; }
+				// SK 28-Oct mandatory gate: real name (not "Enquiry"), company, mobile, source and segment before it is saved
+				if (!mustFill([["f-first", t("cust_name"), !/^\s*(enquiry|inquiry|enq|lead|customer|sir|madam)?\s*$/i.test(val("f-first"))],
+					["f-mobile", t("mobile"), val("f-mobile").replace(/\D/g, "").length >= 10], ["f-source", t("source")], ["f-segment", t("segment")]])) return;
 				el.disabled = true;
 				const name = await call("new_lead", { first_name: val("f-first"), organization: val("f-org"), mobile_no: val("f-mobile"),
 					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl, product: val("f-product"), status: val("f-status") }, true);
@@ -5919,6 +6017,21 @@
 	});
 
 	function val(id) { const el = document.getElementById(id); return el ? el.value.trim() : ""; }
+	// SK 28-Oct mandatory gate: [id, label, ok?] pairs; every empty (or not ok) field turns red and nothing is sent
+	function mustFill(pairs) {
+		const miss = pairs.filter(([id, , ok]) => ok === undefined ? !val(id) : !ok);
+		root.querySelectorAll(".sk-missing").forEach((x) => x.classList.remove("sk-missing"));
+		miss.forEach(([id]) => { const el = document.getElementById(id); if (el) (el.closest(".sk-field") || el).classList.add("sk-missing"); });
+		if (!miss.length) return true;
+		toast(`${t("g_fill")}: ${miss.map(([, label]) => label).join(", ")}`, true);
+		const first = document.getElementById(miss[0][0]);
+		if (first) first.focus();
+		return false;
+	}
+	const GST_STATES = ["Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh",
+		"Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand",
+		"Karnataka", "Kerala", "Ladakh", "Lakshadweep Islands", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
+		"Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"];
 
 
 	// ---------- App lock (point 20, SK 26-Oct): face / finger only after set-up, locks after 30 min without use ----------
