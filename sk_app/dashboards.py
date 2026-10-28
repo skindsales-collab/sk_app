@@ -93,7 +93,7 @@ def _card(key, label, value, kind="count", prev=None, rows=None, c=None) -> dict
 # ---------- shared pieces ----------
 
 def _invoiced(start, end, segment=None) -> float:
-	return _sum("Sales Invoice", "base_net_total", {"docstatus": 1, "is_return": 0, "posting_date": ["between", [start, end]],
+	return _sum("Sales Invoice", "base_net_total", {"docstatus": 1, "is_return": 0, "is_opening": ["!=", "Yes"], "posting_date": ["between", [start, end]],
 		**_seg_filter(segment)}) + sum(r.amount for r in _tally_sales(start, end, segment))
 
 
@@ -127,9 +127,43 @@ def _tally_sales(start, end, segment=None) -> list:
 
 def _orders(start, end, segment=None) -> list:
 	# DEC-013 (SK 25-Oct): the draft Sales Orders are real orders; only cancelled ones are left out
-	return frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "transaction_date": ["between", [start, end]], **_seg_filter(segment)},
+	orders = frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "transaction_date": ["between", [start, end]], **_seg_filter(segment)},
 		fields=["name", "customer_name", "base_net_total", "transaction_date", "customer_group", "delivery_date", "docstatus"],
 		order_by="base_net_total desc", limit=0)
+	for o in orders:
+		o.doctype = "Sales Order"
+	return sorted(orders + _safe(lambda: won_deals(start, end, segment), []), key=lambda o: -flt(o.base_net_total))
+
+
+def won_deals(start, end, segment=None) -> list:
+	"""SK 28-Oct "why no order is seen Apr to Jul ... it was available in CRM": the orders before the Sales Orders were
+	entered are won CRM deals. A won deal counts as an order on its closing date, at its deal value, unless its customer
+	already has a Sales Order (then the Sales Order counts)."""
+	if not frappe.db.exists("DocType", "CRM Deal") or _other_company():
+		return []
+	won = frappe.get_all("CRM Deal Status", filters={"type": "Won"}, pluck="name") or ["Won"]
+	meta = frappe.get_meta("CRM Deal")
+	fields = ["name", "organization", "deal_value", "expected_deal_value", "closed_date", "expected_closure_date", "modified", "deal_owner"]
+	fields = [f for f in fields if f in ("name", "modified") or meta.has_field(f)]
+	seg = _crm_seg(segment)
+	seg = {k: v for k, v in seg.items() if meta.has_field(k)}
+	ordered = {(n or "").strip().lower() for n in frappe.get_all("Sales Order", filters={"docstatus": ["<", 2]}, pluck="customer_name", limit=0)}
+	out = []
+	for d in frappe.get_all("CRM Deal", filters={"status": ["in", won], **seg}, fields=fields, limit=0):
+		day = getdate(d.get("closed_date") or d.get("expected_closure_date") or d.modified)
+		if not (getdate(start) <= day <= getdate(end)) or (d.get("organization") or "").strip().lower() in ordered:
+			continue
+		out.append(frappe._dict(name=d.name, doctype="CRM Deal", customer_name=d.get("organization") or d.name, transaction_date=day,
+			base_net_total=flt(d.get("deal_value") or d.get("expected_deal_value")), customer_group=None, delivery_date=None, docstatus=0,
+			deal_owner=d.get("deal_owner")))
+	return out
+
+
+def _other_company() -> bool:
+	"""CRM deals carry no company: they count for the first (main) company only."""
+	chosen = frappe.flags.get("sk_company")
+	first = frappe.get_all("Company", pluck="name", order_by="creation asc", limit=1)
+	return bool(chosen and first and chosen != first[0])
 
 
 def _orders_card(start, end, prev_start, prev_end, segment=None, key="orders"):
@@ -137,12 +171,12 @@ def _orders_card(start, end, prev_start, prev_end, segment=None, key="orders"):
 	prev = sum(flt(r.base_net_total) for r in _orders(prev_start, prev_end, segment))
 	return _card(key, "Orders this month", sum(flt(r.base_net_total) for r in rows), "money", prev,
 		[_row(r.customer_name, f"{r.transaction_date} · {segments.SEGMENT_OF_GROUP.get(r.customer_group) or r.customer_group or ''}"
-			f"{' · draft' if r.docstatus == 0 else ''}",
-			r.base_net_total, "Sales Order", r.name) for r in rows])
+			f"{' · CRM deal won' if r.doctype == 'CRM Deal' else ' · draft' if r.docstatus == 0 else ''}",
+			r.base_net_total, r.doctype, r.name) for r in rows])
 
 
 def _sales_card(start, end, prev_start, prev_end, segment=None):
-	rows = frappe.get_all("Sales Invoice", filters={"docstatus": 1, "is_return": 0, "posting_date": ["between", [start, end]], **_seg_filter(segment)},
+	rows = frappe.get_all("Sales Invoice", filters={"docstatus": 1, "is_return": 0, "is_opening": ["!=", "Yes"], "posting_date": ["between", [start, end]], **_seg_filter(segment)},
 		fields=["name", "customer_name", "base_net_total", "posting_date"], order_by="base_net_total desc", limit=50)
 	tally = sorted(_tally_sales(start, end, segment), key=lambda r: -r.amount)
 	return _card("sales", "Sales (invoiced, before GST)", _invoiced(start, end, segment), "money", _invoiced(prev_start, prev_end, segment),
@@ -338,7 +372,7 @@ def _fy_values(fy, by_month: dict) -> list:
 
 def _invoice_months(fy, segment=None) -> dict:
 	end = get_last_day(add_months(fy, 11))
-	inv = frappe.get_all("Sales Invoice", filters={"docstatus": 1, "is_return": 0, "posting_date": ["between", [fy, end]], **_seg_filter(segment)},
+	inv = frappe.get_all("Sales Invoice", filters={"docstatus": 1, "is_return": 0, "is_opening": ["!=", "Yes"], "posting_date": ["between", [fy, end]], **_seg_filter(segment)},
 		fields=["posting_date", "base_net_total"], limit=0)
 	out = _bucket(inv, "posting_date", lambda r: r.base_net_total)
 	for k, v in _bucket(_tally_sales(fy, end, segment), "posting_date", lambda r: r.amount).items():

@@ -68,7 +68,7 @@ def invoiced_for(persons: list[str], start, end) -> float:
 	owners = customer_persons()
 	mine = lambda key: bool(set(owners.get(key) or []) & set(persons))  # noqa: E731
 	total = 0.0
-	for si in frappe.get_all("Sales Invoice", filters={"docstatus": 1, "is_return": 0, "posting_date": ["between", [start, end]]},
+	for si in frappe.get_all("Sales Invoice", filters={"docstatus": 1, "is_return": 0, "is_opening": ["!=", "Yes"], "posting_date": ["between", [start, end]]},
 			fields=["name", "customer", "base_net_total"], limit=0):
 		team = frappe.get_all("Sales Team", filters={"parenttype": "Sales Invoice", "parent": si.name}, fields=["sales_person", "allocated_percentage"])
 		if team:
@@ -97,7 +97,7 @@ def assign_list(user: str, q: str | None = None) -> dict:
 	for t in dashboards._tally_sales(start, end):
 		key = (t.customer_name or "").strip()
 		sale[key.lower()] = (key, sale.get(key.lower(), (key, 0))[1] + flt(t.amount))
-	for si in frappe.get_all("Sales Invoice", filters={"docstatus": 1, "is_return": 0, "posting_date": ["between", [start, end]]},
+	for si in frappe.get_all("Sales Invoice", filters={"docstatus": 1, "is_return": 0, "is_opening": ["!=", "Yes"], "posting_date": ["between", [start, end]]},
 			fields=["customer_name", "base_net_total"], limit=0):
 		key = (si.customer_name or "").strip()
 		sale[key.lower()] = (key, sale.get(key.lower(), (key, 0))[1] + flt(si.base_net_total))

@@ -195,7 +195,8 @@ def _orders_value(owners, segment=None):
 			if persons:
 				drafts.update(frappe.get_all("Sales Team", filters={"parenttype": "Sales Order", "sales_person": ["in", persons],
 					"parent": ["in", [s.name for s in orders] or [""]]}, pluck="parent"))
-			orders = [s for s in orders if s.name in mine or s.name in drafts]
+			# a won CRM deal (orders before Sales Orders were entered) counts for its deal owner
+			orders = [s for s in orders if s.name in mine or s.name in drafts or (s.doctype == "CRM Deal" and s.deal_owner in owners)]
 		return sum(flt(s.base_net_total) for s in orders)
 	return amount
 
