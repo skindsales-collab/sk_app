@@ -5,7 +5,7 @@
  "custom": 0,
  "engine": "InnoDB",
  "creation": "2026-10-25 08:30:00.000000",
- "modified": "2026-10-26 06:00:00.000000",
+ "modified": "2026-10-28 12:00:00.000000",
  "owner": "Administrator",
  "modified_by": "Administrator",
  "naming_rule": "By fieldname",
@@ -24,7 +24,8 @@
   "workstation",
   "language",
   "manager",
-  "sk_main_segment"
+  "sk_main_segment",
+  "company"
  ],
  "fields": [
   {
@@ -111,6 +112,13 @@
    "label": "Segment (customers seen)",
    "options": "\nCabin\nNon-Cabin\nBoth",
    "description": "Cabin team sees Cabin customers, Aditya Non-Cabin, Management / Accounts both. Blank: from the function."
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "description": "SK 28-Oct: the company this person's entries go to (SK Ind Tech Solutions Pvt Ltd or SK Enterprises). Empty = the default company."
   }
  ],
  "permissions": [

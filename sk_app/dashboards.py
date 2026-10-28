@@ -58,12 +58,20 @@ def _sum(doctype: str, field: str, filters) -> float:
 	return sum(flt(v) for v in frappe.get_all(doctype, filters=filters, pluck=field))
 
 
-def _seg_filter(segment: str | None, field: str = "customer_group") -> dict:
+def _seg_filter(segment: str | None, field: str = "customer_group", company: bool = True) -> dict:
+	"""Segment filter for orders, quotes and invoices, plus the company picked on the dashboard (SK 28-Oct)."""
+	out = {"company": frappe.flags.sk_company} if company and frappe.flags.get("sk_company") else {}
 	if segment in segments.TREE:
-		return {field: ["in", segments.groups_of(segment)]}
-	if segment in segments.SUB_SEGMENTS:
-		return {field: segments.GROUP_OF[segment]}
-	return {}
+		out[field] = ["in", segments.groups_of(segment)]
+	elif segment in segments.SUB_SEGMENTS:
+		out[field] = segments.GROUP_OF[segment]
+	return out
+
+
+def companies() -> list[str]:
+	"""SK 28-Oct (Rev 1 point 5): SK Ind Tech Solutions Pvt Ltd and SK Enterprises, one or both (the dashboard filter)."""
+	chosen = frappe.flags.get("sk_company")
+	return [chosen] if chosen else frappe.get_all("Company", pluck="name", order_by="creation asc")
 
 
 def _crm_seg(segment: str | None) -> dict:
@@ -96,7 +104,7 @@ def _tally_sales(start, end, segment=None) -> list:
 	"""SK 26-Oct: until change list point 18 turns them into Sales Invoices, the year's sales came from Tally as Journal
 	Entries ("Tally Sales 825 | party"). Their income-account amount (before GST) counts as sales; credit notes reduce it.
 	Once point 18 cancels them for real invoices they drop out here by themselves (only posted entries count)."""
-	jes = frappe.get_all("Journal Entry", filters={"docstatus": 1, "posting_date": ["between", [start, end]]},
+	jes = frappe.get_all("Journal Entry", filters={"docstatus": 1, "posting_date": ["between", [start, end]], **_seg_filter(None)},
 		or_filters=[["user_remark", "like", w] for w in TALLY_SALES], fields=["name", "posting_date", "user_remark"], limit=0)
 	if not jes:
 		return []
@@ -146,17 +154,15 @@ def _party_dues(party_type: str, segment=None) -> list:
 	"""Dues per customer / supplier from the General Ledger (SK 26-Oct trial: the year's bills came from Tally as Journal
 	Entries, so the invoices' outstanding showed Rs 23.6 L of the Rs 71.7 L really owed). Payments are set against the
 	oldest bills first; "late" is the age of the oldest bill still unpaid. Advances (minus balances) are left out."""
-	from sk_app.store import _company
-
-	company = _company()
-	accts = frappe.get_all("Account", filters={"company": company, "is_group": 0,
+	cos = companies()
+	accts = frappe.get_all("Account", filters={"company": ["in", cos or [""]], "is_group": 0,
 		"account_type": "Receivable" if party_type == "Customer" else "Payable"}, pluck="name")
 	if not accts:
 		return []
 	sign = 1 if party_type == "Customer" else -1
 	lines = frappe.db.sql("""select party, posting_date, sum(debit - credit) as amount from `tabGL Entry`
-		where company = %s and is_cancelled = 0 and party_type = %s and ifnull(party, '') != '' and account in %s
-		group by party, posting_date, voucher_no order by posting_date""", (company, party_type, tuple(accts)), as_dict=True)
+		where company in %s and is_cancelled = 0 and party_type = %s and ifnull(party, '') != '' and account in %s
+		group by party, posting_date, voucher_no order by posting_date""", (tuple(cos), party_type, tuple(accts)), as_dict=True)
 	by = {}
 	for line in lines:
 		by.setdefault(line.party, []).append((line.posting_date, sign * flt(line.amount)))
@@ -164,7 +170,7 @@ def _party_dues(party_type: str, segment=None) -> list:
 	group_field = "customer_group" if party_type == "Customer" else "supplier_group"
 	allowed = None
 	if party_type == "Customer" and segment:
-		allowed = set(frappe.get_all("Customer", filters=_seg_filter(segment), pluck="name"))
+		allowed = set(frappe.get_all("Customer", filters=_seg_filter(segment, company=False), pluck="name"))
 	today = getdate()
 	out = []
 	for party, items in by.items():
@@ -217,12 +223,11 @@ def _payables_card(key="payables", label="Payables (supplier dues)"):
 def _cash_card():
 	from erpnext.accounts.utils import get_balance_on
 
-	from sk_app.store import _company
-
-	company = _company()
-	accounts = frappe.get_all("Account", filters={"company": company, "is_group": 0, "account_type": ["in", ["Bank", "Cash"]], "disabled": 0},
-		fields=["name", "account_name"])
-	rows = [_row(a.account_name, "", flt(get_balance_on(account=a.name, date=nowdate(), company=company)), "Account", a.name) for a in accounts]
+	cos = companies()
+	accounts = frappe.get_all("Account", filters={"company": ["in", cos or [""]], "is_group": 0, "account_type": ["in", ["Bank", "Cash"]], "disabled": 0},
+		fields=["name", "account_name", "company"])
+	rows = [_row(a.account_name, a.company if len(cos) > 1 else "", flt(get_balance_on(account=a.name, date=nowdate(), company=a.company)),
+		"Account", a.name) for a in accounts]
 	return _card("cash", "Cash & bank now", sum(r["value"] for r in rows), "money", None, rows)
 
 
@@ -755,10 +760,20 @@ BUILDERS = {
 WITH_USER = {"finance", "store", "ai"}
 
 
-def page(user: str, key: str, month=None, segment=None) -> dict:
+def page(user: str, key: str, month=None, segment=None, company=None) -> dict:
 	check(user)
 	if key not in PAGE_KEYS:
 		frappe.throw(_("Unknown dashboard"))
+	all_cos = frappe.get_all("Company", pluck="name", order_by="creation asc")
+	frappe.flags.sk_company = company if company in all_cos else None
+	try:
+		out = _page(user, key, month, segment)
+	finally:
+		frappe.flags.sk_company = None
+	return {**out, "companies": all_cos, "company": company if company in all_cos else ""}
+
+
+def _page(user: str, key: str, month=None, segment=None) -> dict:
 	start, end, ps, pe = _period(month)
 	segment = segment if segment in segments.TREE else None
 	if key in ("machine_shifting", "job_work"):

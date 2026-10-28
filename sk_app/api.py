@@ -546,14 +546,15 @@ def hr_login_options():
 	return {"functions": [{"name": f, "label": spec["label"]} for f, spec in FUNCTIONS.items()
 			if admin or f not in logins.ADMIN_FUNCTIONS],
 		"managers": frappe.get_all("SK App User", filters={"enabled": 1}, fields=["user", "full_name"], order_by="full_name asc"),
-		"workstations": frappe.get_all("Workstation", pluck="name", order_by="name asc")}
+		"workstations": frappe.get_all("Workstation", pluck="name", order_by="name asc"),
+		"companies": frappe.get_all("Company", pluck="name", order_by="creation asc")}
 
 
 @frappe.whitelist(methods=["POST"])
-def hr_make_login(mobile, functions, employee=None, full_name=None, manager=None, language="English", workstation=None):
+def hr_make_login(mobile, functions, employee=None, full_name=None, manager=None, language="English", workstation=None, company=None):
 	_me()
 	functions = frappe.parse_json(functions) if isinstance(functions, str) else functions
-	return logins.make_login(frappe.session.user, mobile, functions, employee, full_name, manager, language, workstation)
+	return logins.make_login(frappe.session.user, mobile, functions, employee, full_name, manager, language, workstation, company)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -1502,8 +1503,8 @@ def my_home_kpi():
 
 
 @frappe.whitelist()
-def dash_page(key="overview", month=None, segment=None):
-	return dashboards.page(_me().user, key, month, segment)
+def dash_page(key="overview", month=None, segment=None, company=None):
+	return dashboards.page(_me().user, key, month, segment, company)
 
 
 # point 5: customer complaints

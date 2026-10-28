@@ -86,8 +86,9 @@ def uom(item_code: str) -> dict:
 
 
 def _company():
-	return frappe.defaults.get_user_default("Company") or frappe.db.get_single_value("Global Defaults", "default_company") \
-		or frappe.db.get_value("Company", {}, "name")
+	# SK 28-Oct (Rev 1 point 5): a dashboard set to one company reads that company; entries use the person's company
+	return frappe.flags.get("sk_company") or frappe.defaults.get_user_default("Company") \
+		or frappe.db.get_single_value("Global Defaults", "default_company") or frappe.db.get_value("Company", {}, "name")
 
 
 # ---------- Stock Check ----------
