@@ -13,7 +13,7 @@ from frappe import _
 CABIN, NON_CABIN, BOTH = "Cabin", "Non-Cabin", "Both"
 TREE = {
 	CABIN: ["Standard Cabin (GI / ACP)", "LGSF", "Modular / Labour Camp"],
-	NON_CABIN: ["Machine Shifting", "Job Work", "Other"],
+	NON_CABIN: ["Machine Shifting", "Job Work", "Maintenance", "Other"],  # Maintenance: SK 28-Oct
 }
 SUB_SEGMENTS = [s for subs in TREE.values() for s in subs]
 LEGACY = {"Cabin": "Standard Cabin (GI / ACP)"}  # the old flat list had a plain "Cabin"

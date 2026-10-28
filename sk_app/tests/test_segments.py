@@ -206,3 +206,24 @@ class TestCeoDashboards(IntegrationTestCase):
 		self.assertGreaterEqual(r["non_cabin"], 1)
 		self.assertEqual(frappe.db.get_value("Customer", party, "customer_group"), "Other Non-Cabin")
 		self.assertNotIn(party, segments.tally_suggestions())
+
+
+class TestSegmentAccounts(IntegrationTestCase):
+	def test_job_work_order_gets_its_cost_centre(self):
+		from sk_app import segment_accounts
+
+		segments.ensure_customer_groups()
+		segment_accounts.ensure_cost_centres()
+		company = frappe.get_all("Company", pluck="name", limit=1)[0]
+		abbr = frappe.get_cached_value("Company", company, "abbr")
+		self.assertTrue(frappe.db.exists("Cost Center", f"Job Work Execution - {abbr}"))
+		doc = frappe.new_doc("Sales Invoice")
+		doc.update({"company": company, "customer_group": "Job Work", "cost_center": f"Main - {abbr}"})
+		doc.append("items", {"item_code": "X", "qty": 1, "rate": 1})
+		segment_accounts.set_segment(doc)
+		self.assertEqual(doc.cost_center, f"Job Work Execution - {abbr}")
+		self.assertEqual(doc.items[0].cost_center, f"Job Work Execution - {abbr}")
+		doc = frappe.new_doc("Sales Invoice")
+		doc.update({"company": company, "customer_group": "LGSF", "cost_center": f"Main - {abbr}"})
+		segment_accounts.set_segment(doc)
+		self.assertEqual(doc.cost_center, f"Main - {abbr}")  # cabin entries keep their cost centre

@@ -164,6 +164,21 @@ class TestLedgerScreens(IntegrationTestCase):
 		mw = ledger.month_wise(acc)
 		self.assertTrue(mw["rows"])
 		self.assertEqual(mw["rows"][0]["month"][5:], "04")
+		# SK 28-Oct: each month split Cabin / Non-Cabin / Common, adding up to the month
+		self.assertIsNone(mw["only"])
+		for r in mw["rows"]:
+			self.assertAlmostEqual(sum(r["segments"][s]["net"] for s in ("Cabin", "Non-Cabin", "Common")), r["net"], 2)
+			# Non-Cabin split into Machine Shifting / Job Work / Maintenance, older entries combined
+			self.assertAlmostEqual(sum(r["subs"][s]["net"] for s in ledger.NON_CABIN_SUBS), r["segments"]["Non-Cabin"]["net"], 2)
+		self.assertEqual(ledger._non_cabin_sub(None, {}), ledger.COMBINED)
+		self.assertEqual(ledger._non_cabin_sub("Site Expenses - X", {"Site Expenses - X": "Machine Shifting - X"}), "Machine Shifting")
+		self.assertEqual(ledger._segment_of(None, None, {}, "Cabin"), "Cabin")
+		# Aditya (Machine Shifting) sees the Non-Cabin P&L only
+		ms = "sk_test_a_ms@example.com"
+		_app_user(ms, "Machine Shifting", ["Sales User"])
+		nc = ledger.month_wise(ms)
+		self.assertEqual(nc["only"], "Non-Cabin")
+		self.assertEqual([r["net"] for r in nc["rows"]], [r["segments"]["Non-Cabin"]["net"] for r in mw["rows"]])
 		self.assertRaises(frappe.PermissionError, ledger.ledgers, REP, "bank")
 		self.assertEqual(ledger._segment_of_names(["Direct Expenses Non Cabin - X"]), "Non-Cabin")
 		self.assertEqual(ledger._segment_of_names(["Cabin Sales - X"]), "Cabin")
