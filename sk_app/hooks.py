@@ -18,7 +18,8 @@ app_include_js = ["/assets/sk_app/js/sk_tally_keys.js", "/assets/sk_app/js/sk_he
 # SK 28-Oct: "Post Tally invoices" button for Accounts (sk_app.tally_invoices)
 doctype_list_js = {"Sales Invoice": "public/js/sales_invoice_list.js"}
 
-jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html"]}
+# SK 29-Oct: GST tax invoice print with Bill to and Ship to, {{ sk_tax_invoice_html(doc) }}
+jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html", "sk_app.tax_invoice.sk_tax_invoice_html"]}
 
 scheduler_events = {
 	"hourly": ["sk_app.deal_quotes.sync", "sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge", "sk_app.mailbox.remind"],
@@ -48,7 +49,9 @@ doc_events = {
 	"Sales Order": {"validate": ["sk_app.sales_owner.fill_order_team", "sk_app.segment_accounts.set_segment"],
 		"before_submit": "sk_app.gates.check_sales_order",
 		"on_submit": "sk_app.won_deals.on_submit"},  # SK 28-Oct: its lead / deal shows Won in the CRM at once
-	"Sales Invoice": {"validate": ["sk_app.segment_accounts.set_segment", "sk_app.cabin_projects.set_cost_centre"]},
+	# SK 29-Oct (Shraddha): a tax invoice is submitted only with the buyer's Bill to address (Ship to defaults to it)
+	"Sales Invoice": {"validate": ["sk_app.segment_accounts.set_segment", "sk_app.cabin_projects.set_cost_centre"],
+		"before_submit": "sk_app.gates.check_sales_invoice"},
 	"SK App User": {"on_update": ["sk_app.segments.on_app_user_update", "sk_app.logins.set_company_default"]},
 	"Job Card": {"validate": "sk_app.store.set_job_card_cabin"},  # SK 27-Oct: customer + cabin size, not just the number
 	# SK 29-Oct: one Project + cost centre per cabin; its material, bills and sales rows go to that cost centre at once,

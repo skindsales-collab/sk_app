@@ -78,6 +78,9 @@ def after_migrate():
 	# 27-Oct: two sk-dev updates were rolled back; one setup step that ERPNext refuses on the live data (a master it
 	# needs, a mandatory field) is now logged in Error Log for the AI team and no longer stops the whole update
 	_safe(cabin_quote_setup, "cabin quotation")  # SK 27-Oct: one rate card, same cabin price from any salesperson, SK's quote print
+	from sk_app.tax_invoice import ensure_setup as tax_invoice_setup
+
+	_safe(tax_invoice_setup, "tax invoice print")  # SK 29-Oct (Shraddha): invoice print shows Bill to and Ship to
 	_safe(ensure_job_card_cabin, "job card customer / size")  # SK 27-Oct (Yogesh): job card picker shows customer and cabin size
 	_safe(ensure_crm_search, "lead search")  # SK 27-Oct: lead search in ERPNext
 	from sk_app.cold_calls import ensure_field as cold_calling_field
