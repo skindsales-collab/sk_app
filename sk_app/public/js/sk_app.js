@@ -1048,8 +1048,16 @@
 		dk_faq: "या रोलच्या FAQ मध्ये जोडा", dk_solve_btn: "✅ उत्तर पाठवा आणि बंद करा", dk_wait_ceo: "बंद करण्याआधी CEO मंजुरीची वाट.",
 		dk_approve: "✅ मंजूर", dk_reject: "✖ नामंजूर", dk_hold: "⏸ थांबवा", dk_open_erp: "ERPNext मध्ये उघडा", dk_steps: "टप्पे",
 		dk_move_old: "जुन्या उघड्या अडचणी व प्रश्न इथे आणा", dk_moved: "आणले", dk_ai_use: "AI मसुदा वापरा" });
+	Object.assign(T.English, { nav_back: "Back", nav_fwd: "Forward" });
+	Object.assign(T.Marathi, { nav_back: "मागे", nav_fwd: "पुढे" });
 	Object.assign(T.English, { lk_setup_skip: "Not now, keep using my PIN" });
 	Object.assign(T.Marathi, { lk_setup_skip: "आत्ता नको, पिनच वापरतो" });
+	Object.assign(T.English, { lk_help: "How to open: fingerprint, face or PIN",
+		lk_help_phone: "1. First time on this phone: type your PIN and tap Open. 2. The app asks \"Set up face / finger\": tap Set up now and touch the finger sensor or look at the camera. 3. Next time tap the fingerprint / face button. If a box asks to \"Use a phone or tablet\" or a security key, tap Cancel and type your PIN. Forgot PIN: use the e-mail code button below.",
+		lk_help_pc: "On a computer, open with your PIN: type it and press Enter. Fingerprint / face works on a PC only if it has its own fingerprint reader or face camera, set up in Windows: Settings → Accounts → Sign-in options → Windows Hello. If a box appears asking to \"Use a phone or tablet\" or an external security key, click Cancel and type your PIN. Forgot PIN: use the e-mail code button below." });
+	Object.assign(T.Marathi, { lk_help: "कसे उघडायचे: बोट, चेहरा किंवा पिन",
+		lk_help_phone: "1. या फोनवर पहिल्यांदा: पिन टाका आणि उघडा दाबा. 2. ॲप \"चेहरा / बोट लॉक सुरू करा\" विचारेल: आत्ता सुरू करा दाबा आणि बोट सेन्सरला लावा किंवा कॅमेऱ्याकडे पहा. 3. पुढच्या वेळी बोट / चेहरा बटण दाबा. \"Use a phone or tablet\" किंवा security key विचारणारा बॉक्स आला तर Cancel दाबा आणि पिन टाका. पिन विसरलात: खालील ई-मेल कोड बटण वापरा.",
+		lk_help_pc: "संगणकावर पिनने उघडा: पिन टाका आणि Enter दाबा. संगणकाला स्वतःचा फिंगरप्रिंट रीडर किंवा फेस कॅमेरा असेल आणि Windows मध्ये सुरू केला असेल तरच बोट / चेहरा चालतो: Settings → Accounts → Sign-in options → Windows Hello. \"Use a phone or tablet\" किंवा external security key विचारणारा बॉक्स आला तर Cancel दाबा आणि पिन टाका. पिन विसरलात: खालील ई-मेल कोड बटण वापरा." });
 	Object.assign(T.English, { lk_mail_btn: "Forgot PIN? Send code to my e-mail", lk_mail_code: "Code from the e-mail",
 		lk_mail_sent: "Code sent to your e-mail (check Spam too). Valid 10 minutes." });
 	Object.assign(T.Marathi, { lk_mail_btn: "पिन विसरलात? ईमेलवर कोड पाठवा", lk_mail_code: "ईमेलमधील कोड",
@@ -1559,7 +1567,8 @@
 		const bar = state.viewAs ? `<div class="sk-viewbar"><span>👀 ${t("viewing")} ${esc(state.viewAs.name)} ${t("viewing_app")}</span>
 			<button data-act="view-idea">💡</button><button data-act="view-exit">✕ ${t("exit_view")}</button></div>` : "";
 		return bar + `<header class="sk-head">
-			${state.view !== "home" ? `<button class="sk-back" data-go="${state.view === "fnpage" || state.view === "more" ? "home" : state.parent || "home"}">‹</button>` : `<img src="/assets/sk_app/icons/icon-192.png" class="sk-logo" alt="SK">`}
+			${state.view !== "home" || nav.idx > 0 ? `<button class="sk-back" data-act="nav-back" title="${t("nav_back")}">‹</button>` : `<img src="/assets/sk_app/icons/icon-192.png" class="sk-logo" alt="SK">`}
+			<button class="sk-back sk-fwd" data-act="nav-fwd" title="${t("nav_fwd")}" ${nav.idx < nav.max ? "" : "disabled"}>›</button>
 			<div class="sk-title">${esc(title)}<small>${esc(whoAmI())}</small></div>
 			<button class="sk-lang" data-act="lang">${t("lang")}</button>
 		</header>`;
@@ -5568,7 +5577,35 @@
 		call("report_screen_error", { view, message: String(msg).slice(0, 300) }, true).catch(() => {});
 	}
 
+	// SK 29-Oct: Back and Forward on every page, and the phone / browser back button moves between app screens too.
+	// Each screen opened is a browser history entry; nav.idx is where we are, nav.max the furthest forward.
+	const nav = { idx: 0, max: 0, popping: false, key: "home|" };
+	const navKey = (view) => view + "|" + (view === "fnpage" ? fnPage : view === "detail" && current ? current.doctype + "/" + current.name : "");
+	function navPush(view) {
+		if (nav.popping || navKey(view) === nav.key) return; // the same screen refreshed is not a new step
+		nav.key = navKey(view);
+		const entry = { sk: view, fnPage, current, idx: nav.idx + 1 };
+		try { history.pushState(entry, "", "#" + view); nav.idx = nav.max = entry.idx; } catch (e) { /* old browser */ }
+	}
+	function navBack() {
+		if (nav.idx > 0) return history.back();
+		// first screen after opening: up one level, as the old back button did
+		return go(state.view === "fnpage" || state.view === "more" ? "home" : state.parent || "home");
+	}
+	window.addEventListener("popstate", (ev) => {
+		const e = ev.state;
+		if (!e || !e.sk) return;
+		nav.idx = e.idx || 0;
+		if (e.fnPage !== undefined) fnPage = e.fnPage;
+		if (e.current !== undefined) current = e.current;
+		nav.key = navKey(e.sk);
+		nav.popping = true;
+		Promise.resolve(go(e.sk)).finally(() => { nav.popping = false; });
+	});
+	try { history.replaceState({ sk: "home", idx: 0 }, "", location.pathname + location.search); } catch (e) { /* old browser */ }
+
 	async function go(view) {
+		navPush(view);
 		stopListening(); // a mic left on keeps listening into the old screen (point 4)
 		closeSheet();
 		if (view === "erpnext_desk") { window.location.href = "/app"; return; }
@@ -5857,6 +5894,8 @@
 			}
 			if (act === "newcard") { state.card = await call("next_card", { force: 1 }, true); return go(state.view); }
 			if (act === "read" && state.card) return readAloud(state.card.card_text);
+			if (act === "nav-back") return navBack();
+			if (act === "nav-fwd") return history.forward();
 			if (act === "lang") {
 				state.lang = state.lang === "English" ? "Marathi" : "English";
 				if (state.viewAs) return go(state.view); // the member's own language setting is not changed
@@ -6427,6 +6466,9 @@
 			localStorage.setItem("sk_face", JSON.stringify({ ids: [id, ...ids].slice(0, 3), name: (state.home && state.home.full_name) || f.name || "" }));
 		} catch (e) { /* private mode */ }
 	}
+	function hasLocalFace() {
+		try { return (JSON.parse(localStorage.getItem("sk_face") || "{}").ids || []).length > 0; } catch (e) { return false; }
+	}
 	function hideLock() {
 		const el = document.getElementById("sk-lock");
 		if (el) el.remove();
@@ -6442,12 +6484,20 @@
 		if (!el) { el = document.createElement("div"); el.id = "sk-lock"; el.className = "sk-lock"; document.body.appendChild(el); }
 		// SK 28-Oct: the fingerprint / face button is always shown when the phone has a fingerprint / face lock, with
 		// the PIN under it. Not set up yet: the button says so and the PIN opens the app once, then set-up follows.
-		const phoneCan = await canFace();
+		// SK 29-Oct (PC): a key made on the phone is not on the PC, so Windows opened its passkey box ("Use a phone or
+		// tablet"). The button opens the finger / face check only on a device that has its own key; a PC without one
+		// shows no button, and a short help says what to do.
+		const pc = !window.matchMedia("(pointer: coarse)").matches;
+		const localKey = hasLocalFace();
+		const phoneCan = await canFace() && (!pc || localKey);
 		const face = phoneCan && lockInfo.has_key;
-		el.innerHTML = `<div class="sk-lock-box"><div class="sk-lock-icon">🔒</div><h2>${t("lk_locked")}</h2>
+		el.innerHTML = `<div class="sk-lock-nav"><button class="sk-back" data-lock="back" title="${t("nav_back")}">‹</button>
+			<button class="sk-back" data-lock="fwd" title="${t("nav_fwd")}">›</button></div>
+			<div class="sk-lock-box"><div class="sk-lock-icon">🔒</div><h2>${t("lk_locked")}</h2>
 			<p class="sk-note">${esc(lockInfo.name || "")}</p>
 			${phoneCan ? `<button class="sk-btn go wide sk-face-btn" data-lock="${face ? "face" : "noface"}">👆 🙂 ${t(face ? "lk_open_face" : "lk_face_first")}</button>
 				<p class="sk-login-or">${t("lk_or_pin")}</p>` : ""}
+			<details class="sk-forgot sk-face-help"><summary>❓ ${t("lk_help")}</summary><p class="sk-note">${t(pc ? "lk_help_pc" : "lk_help_phone")}</p></details>
 			<label class="sk-field"><span>${t("lk_pin")}</span><input id="lk-pin" type="password" inputmode="numeric" autocomplete="current-password"></label>
 			<button class="sk-btn ${phoneCan ? "" : "go "}wide" data-lock="pin">${t("lk_open")}</button>
 			${lockInfo.email_code ? `<button class="sk-btn wide" data-lock="mailcode">📧 ${t("lk_mail_btn")}</button>
@@ -6463,7 +6513,7 @@
 		if (!state.home) await start();
 		else if (lockHit) go(state.view); // a screen that could not load while locked opens now (typed forms are left as they are)
 		lockHit = false;
-		if ((!st.has_key || faceFailedHere) && !faceSkipped() && await canFace()) faceSetupSheet();
+		if ((!st.has_key || faceFailedHere) && !faceSkipped() && window.matchMedia("(pointer: coarse)").matches && await canFace()) faceSetupSheet();
 		faceFailedHere = false;
 		setTimeout(askPending, 800);
 	}
@@ -6485,6 +6535,12 @@
 			if (b.dataset.lock === "relogin") {
 				await fetch("/api/method/logout", { method: "POST", credentials: "same-origin", headers: { "X-Frappe-CSRF-Token": CSRF } }).catch(() => {});
 				return location.reload();
+			}
+			// SK 29-Oct: Back / Forward on the lock screen too; the app opens on that screen after unlock
+			if (b.dataset.lock === "back" || b.dataset.lock === "fwd") {
+				lockHit = true;
+				b.disabled = false;
+				return b.dataset.lock === "back" ? history.back() : history.forward();
 			}
 			if (b.dataset.lock === "usepin") { lockInfo.usePin = true; return showLock(lockInfo); }
 			// SK 29-Oct: forgot PIN on the lock screen → code by e-mail opens the app; then a new PIN without the old one
