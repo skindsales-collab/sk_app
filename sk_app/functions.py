@@ -37,7 +37,7 @@ FUNCTIONS = {
 	"Production": {
 		"label": {"English": "Production", "Marathi": "उत्पादन"},
 		# point 17 (SK's mock-up): Need Material → Job Cards → Order Board → Progress Photos → Ready to Dispatch → Non-Conformance
-		"tiles": ["my_day", "to_plan", "need_material", "job_cards", "order_board", "progress_photos", "ready_dispatch", "non_conformance", "complaints", "mail", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "to_plan", "need_material", "job_cards", "order_board", "lead_time", "progress_photos", "ready_dispatch", "non_conformance", "complaints", "mail", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Manufacturing User", "Manufacturing Manager"],
 		"desk": "/app/manufacturing",

@@ -48,10 +48,12 @@ doc_events = {
 	# SK 28-Oct: every order has its salesperson; income ledger and Non-Cabin sub-group cost centre from the customer
 	"Sales Order": {"validate": ["sk_app.sales_owner.fill_order_team", "sk_app.segment_accounts.set_segment"],
 		"before_submit": "sk_app.gates.check_sales_order",
-		"on_submit": "sk_app.won_deals.on_submit"},  # SK 28-Oct: its lead / deal shows Won in the CRM at once
+		"on_submit": ["sk_app.won_deals.on_submit", "sk_app.lead_time.on_sales_order_submit"]},  # SK 28-Oct: its lead / deal shows Won in the CRM at once
 	# SK 29-Oct (Shraddha): a tax invoice is submitted only with the buyer's Bill to address (Ship to defaults to it)
 	"Sales Invoice": {"validate": ["sk_app.segment_accounts.set_segment", "sk_app.cabin_projects.set_cost_centre"],
-		"before_submit": "sk_app.gates.check_sales_invoice"},
+		"before_submit": "sk_app.gates.check_sales_invoice", "on_submit": "sk_app.lead_time.on_sales_invoice_submit"},
+	# SK 29-Oct: PO date → invoice date per cabin, days per 100 sq ft for Production (sk_app.lead_time)
+	"Project": {"validate": "sk_app.lead_time.on_project_validate"},
 	"SK App User": {"on_update": ["sk_app.segments.on_app_user_update", "sk_app.logins.set_company_default"]},
 	"Job Card": {"validate": "sk_app.store.set_job_card_cabin"},  # SK 27-Oct: customer + cabin size, not just the number
 	# SK 29-Oct: one Project + cost centre per cabin; its material, bills and sales rows go to that cost centre at once,

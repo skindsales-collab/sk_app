@@ -35,3 +35,11 @@ class TestCabinProjects(IntegrationTestCase):
 			"items": [{"item_code": item, "qty": 1, "project": self.project}]})
 		cabin_projects.set_cost_centre(mr)
 		self.assertEqual(mr.items[0].cost_center, self.cc)
+
+	def test_days_per_100_sqft(self):
+		from sk_app import lead_time
+
+		self.assertEqual(lead_time.area("Cabin 314 · HD Hyundai · Electric Control Room 8ft x 6ft x 8.6ft"), 48)
+		self.assertEqual(lead_time.area("25ft x 22ft x 8.6ft"), 550)
+		self.assertEqual(lead_time.per_100(30, 300), 10)
+		self.assertEqual(lead_time.per_100(30, 0), 0)

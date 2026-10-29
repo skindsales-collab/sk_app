@@ -98,6 +98,9 @@ def after_migrate():
 	from sk_app.cabin_projects import ensure_setup as cabin_projects_setup
 
 	_safe(cabin_projects_setup, "cabin stages done before ERPNext")  # SK 29-Oct: Yogesh's cabin status list
+	from sk_app.lead_time import ensure_setup as lead_time_setup
+
+	_safe(lead_time_setup, "cabin lead time")  # SK 29-Oct: days per 100 sq ft, PO to invoice
 	_safe(sub_bills_setup, "subcontractor bills")  # SK 28-Oct: rate sheet → bill → Rushi → CEO → payable
 	_safe(requisition_setup, "purchase requisition")  # SK 27-Oct: requisition → CEO → PO → receipt
 	_safe(marketing_list_setup, "marketing list")  # SK 27-Oct: potential customers for greetings / promotions, not leads
