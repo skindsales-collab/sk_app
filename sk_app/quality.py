@@ -134,7 +134,7 @@ def save(user: str, reference_type: str, reference_name: str, item_code: str, po
 	if reference_type == "Job Card" and not bad and posted:
 		from sk_app.sub_bills import on_qc_pass
 
-		on_qc_pass(reference_name)  # SK 28-Oct: passed → the subcontractor's bill is made from the rate sheet
+		on_qc_pass(reference_name)  # SK 29-Oct: passed → the labour bill from the job's service GRN, payable
 	if reference_type == "Job Card" and bad:
 		out["non_conformance"] = raise_nc(user, _("Rework: {0}").format(", ".join(p["specification"] for p in bad)),
 			"\n".join(f"{p['specification']}: {p.get('note')}" for p in bad), job_card=reference_name, photos=photos)["name"]

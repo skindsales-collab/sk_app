@@ -317,7 +317,7 @@ def save_el_points(user: str, job_card: str, points: dict, photo=None, note=None
 	attach(photo, "SK Electrical Points", doc.name, user)
 	from sk_app.sub_bills import on_points
 
-	on_points(job_card)  # electrical bill is per point, so it waits for the points
+	on_points(job_card)  # electrical labour PO is per point, so it waits for the points
 	return {"name": doc.name, "total_points": doc.total_points}
 
 

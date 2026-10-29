@@ -1,0 +1,574 @@
+{
+ "revision": "Rev-02 25/09/2025",
+ "signed": "Shraddha Gardas, Babasaheb Kardile, Rishikesh Mhase, Sunil Khapake on 03/10/2025",
+ "note": "Labour rates for making a cabin, per cabin unless said. Carpenter (MDF / base cement sheet): small cabins a lump sum, from 6x8 on Rs per sq ft of floor.",
+ "electrical_per_point": 100,
+ "sizes": [
+  {
+   "sr_no": 1,
+   "length": 4.0,
+   "width": 4.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 3000.0,
+   "carpenter": 2000.0,
+   "carpenter_per_sqft": 0,
+   "painter": 2000.0
+  },
+  {
+   "sr_no": 2,
+   "length": 4.0,
+   "width": 6.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 3000.0,
+   "carpenter": 2500.0,
+   "carpenter_per_sqft": 0,
+   "painter": 2000.0
+  },
+  {
+   "sr_no": 3,
+   "length": 4.0,
+   "width": 8.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 3000.0,
+   "carpenter": 3000.0,
+   "carpenter_per_sqft": 0,
+   "painter": 2500.0
+  },
+  {
+   "sr_no": 4,
+   "length": 6.0,
+   "width": 6.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 3000.0,
+   "carpenter": 3000.0,
+   "carpenter_per_sqft": 0,
+   "painter": 2500.0
+  },
+  {
+   "sr_no": 5,
+   "length": 6.0,
+   "width": 8.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 3500.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 2500.0
+  },
+  {
+   "sr_no": 6,
+   "length": 8.0,
+   "width": 8.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 5000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 3000.0
+  },
+  {
+   "sr_no": 7,
+   "length": 10.0,
+   "width": 10.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 6000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 3000.0
+  },
+  {
+   "sr_no": 8,
+   "length": 10.0,
+   "width": 8.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 6000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 3000.0
+  },
+  {
+   "sr_no": 9,
+   "length": 10.0,
+   "width": 12.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 6000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 3000.0
+  },
+  {
+   "sr_no": 10,
+   "length": 12.0,
+   "width": 8.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 7000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 3000.0
+  },
+  {
+   "sr_no": 11,
+   "length": 12.0,
+   "width": 10.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 7000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 3000.0
+  },
+  {
+   "sr_no": 12,
+   "length": 15.0,
+   "width": 8.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 7000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 3500.0
+  },
+  {
+   "sr_no": 13,
+   "length": 15.0,
+   "width": 10.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 7000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 3500.0
+  },
+  {
+   "sr_no": 14,
+   "length": 15.0,
+   "width": 12.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 7000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 3500.0
+  },
+  {
+   "sr_no": 15,
+   "length": 16.0,
+   "width": 10.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 7000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 4000.0
+  },
+  {
+   "sr_no": 16,
+   "length": 16.0,
+   "width": 8.0,
+   "height": 8.6,
+   "windows": 2,
+   "doors": 1,
+   "fabrication": 7000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 4000.0
+  },
+  {
+   "sr_no": 17,
+   "length": 20.0,
+   "width": 8.0,
+   "height": 8.6,
+   "windows": 3,
+   "doors": 1,
+   "fabrication": 9000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 4500.0
+  },
+  {
+   "sr_no": 18,
+   "length": 20.0,
+   "width": 10.0,
+   "height": 8.6,
+   "windows": 3,
+   "doors": 1,
+   "fabrication": 9000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 4500.0
+  },
+  {
+   "sr_no": 19,
+   "length": 20.0,
+   "width": 12.0,
+   "height": 8.6,
+   "windows": 3,
+   "doors": 1,
+   "fabrication": 9000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 4500.0
+  },
+  {
+   "sr_no": 20,
+   "length": 25.0,
+   "width": 8.0,
+   "height": 8.6,
+   "windows": 4,
+   "doors": 2,
+   "fabrication": 12000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 5500.0
+  },
+  {
+   "sr_no": 21,
+   "length": 25.0,
+   "width": 10.0,
+   "height": 8.6,
+   "windows": 4,
+   "doors": 2,
+   "fabrication": 12000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 5500.0
+  },
+  {
+   "sr_no": 22,
+   "length": 25.0,
+   "width": 12.0,
+   "height": 8.6,
+   "windows": 4,
+   "doors": 2,
+   "fabrication": 12500.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 5500.0
+  },
+  {
+   "sr_no": 23,
+   "length": 30.0,
+   "width": 8.0,
+   "height": 8.6,
+   "windows": 4,
+   "doors": 2,
+   "fabrication": 13500.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 6500.0
+  },
+  {
+   "sr_no": 24,
+   "length": 30.0,
+   "width": 10.0,
+   "height": 8.6,
+   "windows": 4,
+   "doors": 2,
+   "fabrication": 13500.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 6500.0
+  },
+  {
+   "sr_no": 25,
+   "length": 30.0,
+   "width": 12.0,
+   "height": 8.6,
+   "windows": 5,
+   "doors": 2,
+   "fabrication": 14000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 6500.0
+  },
+  {
+   "sr_no": 26,
+   "length": 35.0,
+   "width": 8.0,
+   "height": 8.6,
+   "windows": 5,
+   "doors": 2,
+   "fabrication": 15000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 7500.0
+  },
+  {
+   "sr_no": 27,
+   "length": 35.0,
+   "width": 10.0,
+   "height": 8.6,
+   "windows": 5,
+   "doors": 2,
+   "fabrication": 15000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 7500.0
+  },
+  {
+   "sr_no": 28,
+   "length": 35.0,
+   "width": 12.0,
+   "height": 8.6,
+   "windows": 5,
+   "doors": 2,
+   "fabrication": 15000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 7500.0
+  },
+  {
+   "sr_no": 29,
+   "length": 40.0,
+   "width": 8.0,
+   "height": 8.6,
+   "windows": 6,
+   "doors": 2,
+   "fabrication": 18000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 9000.0
+  },
+  {
+   "sr_no": 30,
+   "length": 40.0,
+   "width": 10.0,
+   "height": 8.6,
+   "windows": 6,
+   "doors": 2,
+   "fabrication": 18000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 9000.0
+  },
+  {
+   "sr_no": 31,
+   "length": 40.0,
+   "width": 12.0,
+   "height": 8.6,
+   "windows": 6,
+   "doors": 2,
+   "fabrication": 20000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 10000.0
+  },
+  {
+   "sr_no": 32,
+   "length": 40.0,
+   "width": 8.0,
+   "height": 10.0,
+   "windows": 8,
+   "doors": 2,
+   "fabrication": 20000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 10000.0
+  },
+  {
+   "sr_no": 33,
+   "length": 40.0,
+   "width": 10.0,
+   "height": 10.0,
+   "windows": 8,
+   "doors": 2,
+   "fabrication": 20000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 10000.0
+  },
+  {
+   "sr_no": 34,
+   "length": 40.0,
+   "width": 20.0,
+   "height": 10.0,
+   "windows": 16,
+   "doors": 3,
+   "fabrication": 40000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 20000.0
+  },
+  {
+   "sr_no": 35,
+   "length": 40.0,
+   "width": 20.0,
+   "height": 10.0,
+   "windows": 16,
+   "doors": 3,
+   "fabrication": 36000.0,
+   "carpenter": 6.0,
+   "carpenter_per_sqft": 1,
+   "painter": 18000.0,
+   "enabled": 0,
+   "remark": "Same size as row 34 with lower rates: waiting for SK to say which cabin this row is for"
+  }
+ ],
+ "extras": [
+  {
+   "code": "OUT-PAINT-JOINT",
+   "trade": "Outer Painter",
+   "name": "Cabin joint at site (outer painting)",
+   "rate": 2000,
+   "uom": "Nos"
+  },
+  {
+   "code": "CARP-CARPET",
+   "trade": "Carpenter",
+   "name": "Carpet fitting",
+   "rate": 4,
+   "uom": "Square Foot"
+  },
+  {
+   "code": "CARP-WALL-CEMENT",
+   "trade": "Carpenter",
+   "name": "Wall cement sheet fitting",
+   "rate": 12,
+   "uom": "Square Foot"
+  },
+  {
+   "code": "CARP-JOINT",
+   "trade": "Carpenter",
+   "name": "Cabin joint at site (carpenter)",
+   "rate": 2000,
+   "uom": "Nos"
+  },
+  {
+   "code": "TILES",
+   "trade": "Tiles",
+   "name": "Tiles fitting",
+   "rate": 25,
+   "uom": "Square Foot"
+  },
+  {
+   "code": "INT-PAINT",
+   "trade": "Internal Painter",
+   "name": "Internal painting",
+   "rate": 8,
+   "uom": "Square Foot"
+  },
+  {
+   "code": "PLB-TOILET",
+   "trade": "Plumber",
+   "name": "Toilet block (1 WC, 1 wash basin, 1 flush tank, 1 two-way tap)",
+   "rate": 2000,
+   "uom": "Nos"
+  },
+  {
+   "code": "PLB-SHOWER-MIXER",
+   "trade": "Plumber",
+   "name": "Shower mixer set with hot & cold water fitting",
+   "rate": 2000,
+   "uom": "Nos"
+  },
+  {
+   "code": "PLB-URINAL",
+   "trade": "Plumber",
+   "name": "Urinal fitting",
+   "rate": 1000,
+   "uom": "Nos"
+  },
+  {
+   "code": "PLB-BASIN",
+   "trade": "Plumber",
+   "name": "Wash basin / sink fitting",
+   "rate": 700,
+   "uom": "Nos"
+  },
+  {
+   "code": "PLB-EXTRA-POINT",
+   "trade": "Plumber",
+   "name": "Extra point (shower without mixer, 1 tap)",
+   "rate": 0,
+   "uom": "Nos",
+   "remark": "No rate written on the sheet"
+  },
+  {
+   "code": "FAB-WATER-STAND",
+   "trade": "Fabrication",
+   "name": "Water stand",
+   "rate": 500,
+   "uom": "Nos"
+  },
+  {
+   "code": "FAB-PANTRY",
+   "trade": "Fabrication",
+   "name": "Pantry structure",
+   "rate": 500,
+   "uom": "Nos"
+  },
+  {
+   "code": "FAB-EXTRA-WINDOW",
+   "trade": "Fabrication",
+   "name": "Extra window",
+   "rate": 500,
+   "uom": "Nos"
+  },
+  {
+   "code": "FAB-EXTRA-DOOR",
+   "trade": "Fabrication",
+   "name": "Extra door",
+   "rate": 700,
+   "uom": "Nos"
+  },
+  {
+   "code": "FAB-FULL-PARTITION",
+   "trade": "Fabrication",
+   "name": "Internal full partition (10 ft x 8 ft)",
+   "rate": 1000,
+   "uom": "Nos"
+  },
+  {
+   "code": "FAB-HALF-PARTITION",
+   "trade": "Fabrication",
+   "name": "Internal half partition (4 ft x 8 ft)",
+   "rate": 500,
+   "uom": "Nos"
+  },
+  {
+   "code": "FAB-JOINT",
+   "trade": "Fabrication",
+   "name": "Cabin joint at site (fabrication)",
+   "rate": 5000,
+   "uom": "Nos"
+  },
+  {
+   "code": "FAB-CHEQUER-PLATE",
+   "trade": "Fabrication",
+   "name": "Chequered plate welding at base",
+   "rate": 9,
+   "uom": "Square Foot"
+  },
+  {
+   "code": "PAINT-SQFT",
+   "trade": "Painter",
+   "name": "Painting per sq ft (handwritten line on the sheet)",
+   "rate": 3,
+   "uom": "Square Foot",
+   "remark": "Handwritten under the chequered plate line; SK to confirm what it is for"
+  }
+ ]
+}

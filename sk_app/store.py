@@ -149,9 +149,14 @@ def item_detail(user: str, item_code: str) -> dict:
 
 # ---------- Receive ----------
 
+def material_pos() -> dict:
+	"""Filter for POs Store receives: a labour PO (sk_job_card) gets its GRN by itself when the job is done (SK 29-Oct)."""
+	return {"sk_job_card": ["is", "not set"]} if frappe.get_meta("Purchase Order").has_field("sk_job_card") else {}
+
+
 def open_purchase_orders(user: str) -> list[dict]:
 	need(user, STORE, "Purchase")
-	pos = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]]},
+	pos = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]], **material_pos()},
 		fields=["name", "supplier", "supplier_name", "schedule_date", "grand_total"], order_by="schedule_date asc", limit=0)
 	for po in pos:
 		po["items"] = frappe.get_all("Purchase Order Item", filters={"parent": po.name},
@@ -570,7 +575,7 @@ def badges(user: str, functions: list[str]) -> dict:
 		return {}
 	out = {"store_requests": len(material_requests(user)), "low_stock": len(low_stock(user)),
 		"receive": frappe.db.count("Purchase Order", {"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]],
-			"schedule_date": ["<=", nowdate()]}),
+			"schedule_date": ["<=", nowdate()], **material_pos()}),
 		"dispatch": frappe.db.count("Sales Order", {"docstatus": 1, "status": ["in", ["To Deliver and Bill", "To Deliver"]],
 			"delivery_date": ["<=", nowdate()]})}
 	return {k: v for k, v in out.items() if cint(v)}

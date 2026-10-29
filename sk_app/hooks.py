@@ -55,17 +55,22 @@ doc_events = {
 	# SK 29-Oct: PO date → invoice date per cabin, days per 100 sq ft for Production (sk_app.lead_time)
 	"Project": {"validate": "sk_app.lead_time.on_project_validate"},
 	"SK App User": {"on_update": ["sk_app.segments.on_app_user_update", "sk_app.logins.set_company_default"]},
-	"Job Card": {"validate": "sk_app.store.set_job_card_cabin"},  # SK 27-Oct: customer + cabin size, not just the number
+	"Job Card": {"validate": "sk_app.store.set_job_card_cabin",  # SK 27-Oct: customer + cabin size, not just the number
+		# SK 29-Oct labour: each job has its service PO from the rate sheet; done → service GRN at once (sk_app.sub_bills)
+		"after_insert": "sk_app.sub_bills.on_job_card_insert",
+		"on_update": "sk_app.sub_bills.on_job_card_change", "on_submit": "sk_app.sub_bills.on_job_card_change"},
 	# SK 29-Oct: one Project + cost centre per cabin; its material, bills and sales rows go to that cost centre at once,
 	# and stages done before ERPNext close when the cabin's Work Order is submitted (sk_app.cabin_projects)
-	"Work Order": {"on_submit": "sk_app.cabin_projects.close_done_stages"},
+	"Work Order": {"before_submit": "sk_app.sub_bills.wo_submitting",
+		"on_submit": ["sk_app.cabin_projects.close_done_stages", "sk_app.sub_bills.on_work_order_submit"]},
 	"Stock Entry": {"validate": "sk_app.cabin_projects.set_cost_centre"},
 	"Delivery Note": {"validate": "sk_app.cabin_projects.set_cost_centre"},
 	# SK 27-Oct purchase flow: requisition → CEO approval → PO → receipt against the PO, in ERPNext too
 	"Material Request": {"validate": ["sk_app.gates.check_request", "sk_app.cabin_projects.set_cost_centre"], "before_submit": "sk_app.requisition.check_submit"},
-	"Purchase Order": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.requisition.check_po"},
+	"Purchase Order": {"validate": "sk_app.cabin_projects.set_cost_centre",
+		"before_submit": ["sk_app.requisition.check_po", "sk_app.sub_bills.check_submit"], "on_submit": "sk_app.sub_bills.on_po_submit"},
 	"Purchase Receipt": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.requisition.check_receipt"},
-	# SK 28-Oct: subcontractor bills post only after Rushi + CEO; only CEO / Accounts change the rate sheet
+	# SK 28/29-Oct: labour bill only from the service GRN of a PO Rushi + CEO approved; only CEO / Accounts change the rates
 	"Purchase Invoice": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.sub_bills.check_submit"},
 	"Item Price": {"validate": "sk_app.sub_bills.check_rate_edit"},
 	# SK 29-Oct: a desk request set to Resolved (app or ERPNext) sends the reply and joins the role's FAQ at once

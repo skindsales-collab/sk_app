@@ -1260,7 +1260,7 @@ def prod_lead_time():
 	return lead_time.board(_me().user)
 
 
-# ---------- Subcontractor bills (SK 28-Oct) ----------
+# ---------- Labour POs: rate sheet → Rushi → CEO → GRN → bill (SK 28/29-Oct) ----------
 
 @frappe.whitelist()
 def sb_to_approve():
@@ -1273,8 +1273,8 @@ def sb_mine():
 
 
 @frappe.whitelist(methods=["POST"])
-def sb_decide(name, approve, note=None, qty=None):
-	return sub_bills.decide(_me().user, name, approve, note, qty)
+def sb_decide(name, approve, note=None, qty=None, rate=None):
+	return sub_bills.decide(_me().user, name, approve, note, qty, rate)
 
 
 @frappe.whitelist(methods=["POST"])
