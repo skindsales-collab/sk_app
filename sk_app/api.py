@@ -1253,6 +1253,13 @@ def prod_ready():
 	return production.ready_to_dispatch(_me().user)
 
 
+@frappe.whitelist()
+def prod_lead_time():
+	from sk_app import lead_time
+
+	return lead_time.board(_me().user)
+
+
 # ---------- Subcontractor bills (SK 28-Oct) ----------
 
 @frappe.whitelist()

@@ -403,6 +403,14 @@
 		need_material: "Need Material",
 		progress_photos: "Progress Photos",
 		ready_dispatch: "Ready to Dispatch",
+		lead_time: "Days per 100 sq ft",
+		lt_help: "PO received date to invoice date, per 100 sq ft of cabin. Average is weighted by area.",
+		lt_avg: "days to make 100 sq ft",
+		lt_cabins: "invoiced cabins",
+		lt_open: "In production: ready by (at average speed)",
+		lt_done: "Invoiced cabins",
+		lt_none: "No cabin has both a PO date and an invoice date yet.",
+		lt_approx: "PO month only",
 		non_conformance: "Non-Conformance",
 		my_fixes: "To Fix",
 		inspect: "Inspect",
@@ -459,6 +467,14 @@
 		need_material: "माल हवा",
 		progress_photos: "प्रगती फोटो",
 		ready_dispatch: "डिस्पॅचला तयार",
+		lead_time: "१०० चौ.फूट साठी दिवस",
+		lt_help: "PO मिळाल्यापासून इनव्हॉइसपर्यंत दिवस, १०० चौ.फूट केबिनसाठी. सरासरी क्षेत्रफळानुसार.",
+		lt_avg: "दिवस १०० चौ.फूट साठी",
+		lt_cabins: "इनव्हॉइस झालेल्या केबिन",
+		lt_open: "उत्पादनात: सरासरी वेगाने तयार होण्याची तारीख",
+		lt_done: "इनव्हॉइस झालेल्या केबिन",
+		lt_none: "अजून कोणत्याही केबिनला PO तारीख आणि इनव्हॉइस तारीख दोन्ही नाहीत.",
+		lt_approx: "फक्त PO महिना",
 		non_conformance: "दोष (NC)",
 		my_fixes: "दुरुस्ती",
 		inspect: "तपासणी",
@@ -991,7 +1007,7 @@
 		calls: "📞", whatsapp: "💬", mail: "✉️", reminders: "⏰", library: "🏢", logins: "🔑", team_leads: "👥",
 		stock_check: "📦", receive: "🚚", issue: "📤", store_requests: "📋", dispatch: "🚛", low_stock: "⚠️", stock_count: "🔢", new_item: "🆕",
 		requisition: "📝", buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅", questions: "❓", sub_bills: "🧾", my_bills: "🧾",
-		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", non_conformance: "❗",
+		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", lead_time: "⏱️", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁", el_points: "🔌",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
 		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", sales_owner: "🧑‍💼", new_joiner: "🪪", activities: "🎯", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
@@ -4855,6 +4871,20 @@
 			w.qc === "Accepted" ? `<span class="sk-chip on">QC ✓</span>` : `<span class="sk-chip">${w.qc === "Rejected" ? "QC ✗" : t("qc_pending")}</span>`)).join("") || empty()}</ul></main>`;
 	}
 
+	// SK 29-Oct: PO received → invoice, days per 100 sq ft of cabin; open cabins against the average
+	async function renderLeadTime() {
+		const d = await call("prod_lead_time");
+		const name = (r) => `${esc(r.cabin)}${r.customer ? " · " + esc(r.customer) : ""}`;
+		const po = (r) => `PO ${esc(r.po_date || t("not_set"))}${r.approx ? ` (${t("lt_approx")})` : ""}`;
+		root.innerHTML = header(t("lead_time")) + `<main><p class="sk-note">${t("lt_help")}</p>
+			${d.average ? `<section class="sk-card"><div class="sk-card-text" style="font-size:2em"><b>${num(d.average)}</b></div>
+				<div class="sk-card-meta">${t("lt_avg")} · ${d.count} ${t("lt_cabins")}</div></section>` : `<p class="sk-note">${t("lt_none")}</p>`}
+			${d.open.length ? `<h3 class="sk-h">${t("lt_open")}</h3><ul class="sk-list">${d.open.map((r) => li(name(r),
+				`${esc(r.size)} · ${num(r.sqft)} sq ft · ${po(r)}`, r.due ? `<span class="sk-chip ${r.late ? "" : "on"}">${r.late ? "⚠ " : ""}${esc(r.due)}</span>` : "")).join("")}</ul>` : ""}
+			${d.done.length ? `<h3 class="sk-h">${t("lt_done")}</h3><ul class="sk-list">${d.done.map((r) => li(name(r),
+				`${esc(r.size)} · ${num(r.sqft)} sq ft · ${po(r)} → ${esc(r.invoice_date)} · ${r.days} d`, `<span class="sk-chip on">${num(r.per_100)} / 100</span>`)).join("")}</ul>` : ""}</main>`;
+	}
+
 	// ---------- Subcontractor bills (SK 28-Oct): rate sheet → bill → Rushi → CEO → payable ----------
 	const SB_STAGE = { "Waiting Rushi": ["yel", "sb_st_rushi"], "Waiting CEO": ["yel", "sb_st_ceo"], Approved: ["green", "sb_st_ok"], Rejected: ["red", "sb_st_no"] };
 	const sbCard = (b, i, mode) => {
@@ -5556,7 +5586,7 @@
 		buy_requests: renderBuyRequests, get_rates: renderGetRates, compare: renderCompare, po_follow_up: renderFollowUpPo,
 		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals, questions: renderQuestions, sub_bills: () => renderSubBills("sub_bills"), my_bills: () => renderSubBills("my_bills"), requisition: () => renderRequisition(),
 		order_board: renderOrderBoard, job_cards: () => renderJobs("job_cards"), my_jobs: () => renderJobs("my_jobs"), need_material: renderNeedMaterial,
-		progress_photos: renderProgressPhotos, ready_dispatch: renderReadyDispatch, non_conformance: () => renderNcs("non_conformance"),
+		progress_photos: renderProgressPhotos, ready_dispatch: renderReadyDispatch, lead_time: renderLeadTime, non_conformance: () => renderNcs("non_conformance"),
 		my_fixes: () => renderNcs("my_fixes"), inspect: () => renderInspect("inspect"), final_check: () => renderInspect("final_check"),
 		cash_today: () => finScreen("cash_today", renderCash), to_collect: () => finScreen("to_collect", renderCollect),
 		to_pay: () => finScreen("to_pay", () => renderToPay("to_pay")), pay_approvals: () => renderToPay("pay_approvals"),
