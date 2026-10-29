@@ -55,7 +55,8 @@ def deal_of(doctype: str, doc) -> str | None:
 
 
 def erp_docs(deal: str | None) -> tuple[list, list]:
-	if not deal:
+	# a deal being made right now (not saved yet) has no quotation or order (28-Oct: a new deal saved as Won crashed here)
+	if not deal or not frappe.db.exists("CRM Deal", deal):
 		return [], []
 	cache = getattr(frappe.local, "sk_gate_docs", None)
 	if cache is None:  # frappe.local has no __dict__ (28-Oct: that error blocked every CRM Lead / Deal save)
