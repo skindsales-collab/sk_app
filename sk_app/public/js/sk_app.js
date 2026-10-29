@@ -1027,6 +1027,10 @@
 		hp_ai: "AI चे मसुदा उत्तर", hp_ai_wait: "AI उत्तर लिहित आहे… एक मिनिटाने पुन्हा उघडा", hp_ai_again: "AI ला पुन्हा विचारा", hp_screen_l: "विचारले",
 		hp_how_to: "फक्त उत्तर", hp_app_fix: "SK App मध्ये बदल हवा", hp_erp_setting: "ERPNext सेटिंग / रोल बदल हवा", hp_data_fix: "डेटा दुरुस्ती हवी", hp_need_info: "अधिक माहिती हवी",
 		hp_use_mr: "मराठी उत्तर वापरा", hp_use_en: "इंग्रजी उत्तर वापरा" });
+	Object.assign(T.English, { lk_mail_btn: "Forgot PIN? Send code to my e-mail", lk_mail_code: "Code from the e-mail",
+		lk_mail_sent: "Code sent to your e-mail (check Spam too). Valid 10 minutes." });
+	Object.assign(T.Marathi, { lk_mail_btn: "पिन विसरलात? ईमेलवर कोड पाठवा", lk_mail_code: "ईमेलमधील कोड",
+		lk_mail_sent: "ईमेलवर कोड पाठवला (Spam पण पाहा). 10 मिनिटे चालेल." });
 	Object.assign(T.English, { fp_btn: "Forgot PIN? Ask the CEO", fp_sent: "Request sent to the CEO. You will get a new PIN by WhatsApp or call.", fp_wait: "Too many tries. Please wait an hour.",
 		fp_fail: "Could not send. Please call the CEO.", fp_requests: "Forgot PIN requests", fp_from: "from", fp_lock: "lock screen", fp_login: "login page",
 		fp_check: "First make sure it is really this person (call them).", fp_give: "Give new PIN", fp_no: "Not approved", fp_no_q: "Close this request without a new PIN?" });
@@ -6315,6 +6319,9 @@
 				<p class="sk-login-or">${t("lk_or_pin")}</p>` : ""}
 			<label class="sk-field"><span>${t("lk_pin")}</span><input id="lk-pin" type="password" inputmode="numeric" autocomplete="current-password"></label>
 			<button class="sk-btn ${phoneCan ? "" : "go "}wide" data-lock="pin">${t("lk_open")}</button>
+			${lockInfo.email_code ? `<button class="sk-btn wide" data-lock="mailcode">📧 ${t("lk_mail_btn")}</button>
+				<div id="lk-code-box" hidden><label class="sk-field"><span>${t("lk_mail_code")}</span><input id="lk-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6"></label>
+				<button class="sk-btn ok wide" data-lock="mailopen">${t("lk_open")}</button></div>` : ""}
 			<button class="sk-btn wide" data-lock="forgot">🔑 ${t("fp_btn")}</button><button class="sk-btn wide" data-lock="relogin">${t("lk_relogin")}</button><p class="sk-note">${t("lk_ask_ceo")}</p>
 			<p class="sk-lock-msg" id="lk-msg"></p></div>`;
 		if (face && !lockInfo.usePin) setTimeout(() => el.querySelector("[data-lock=face]") && el.querySelector("[data-lock=face]").click(), 300);
@@ -6344,6 +6351,22 @@
 				return location.reload();
 			}
 			if (b.dataset.lock === "usepin") { lockInfo.usePin = true; return showLock(lockInfo); }
+			// SK 29-Oct: forgot PIN on the lock screen → code by e-mail opens the app; then a new PIN without the old one
+			if (b.dataset.lock === "mailcode") {
+				await call("lock_email_code", {}, true);
+				const box = document.getElementById("lk-code-box");
+				if (box) { box.hidden = false; document.getElementById("lk-code").focus(); }
+				if (msg) msg.textContent = t("lk_mail_sent");
+				b.disabled = false;
+				return;
+			}
+			if (b.dataset.lock === "mailopen") {
+				const st = await call("lock_email_verify", { code: (document.getElementById("lk-code") || {}).value || "" }, true);
+				if (state.home) state.home.must_set_pin = state.home.pin_free = true;
+				await afterUnlock(st);
+				if (state.home) renderSetPin();
+				return;
+			}
 			if (b.dataset.lock === "forgot") {
 				const r = await fetch("/api/method/sk_app.api.forgot_pin_me", { method: "POST", credentials: "same-origin", headers: { "X-Frappe-CSRF-Token": CSRF, Accept: "application/json" } });
 				if (msg) msg.textContent = r.ok ? t("fp_sent") : r.status === 429 ? t("fp_wait") : t("fp_fail");

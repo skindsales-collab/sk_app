@@ -279,3 +279,5 @@ that moves them on.
   use **Ask the CEO for a new PIN** as before.
 - The mail is sent from the default outgoing mailbox's own address (cabin@skind.tech): Hostinger refuses a "from" it does
   not own, which is why ERPNext's own reset mail failed.
+- Lock screen (29-Oct): **Forgot PIN? Send code to my e-mail** opens the locked app with the e-mailed code, then asks
+  for a new PIN. The Administrator login (Frappe Cloud's own) is never locked: it has no PIN to open the lock with.
