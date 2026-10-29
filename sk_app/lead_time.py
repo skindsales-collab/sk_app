@@ -67,7 +67,8 @@ def on_project_validate(doc, method=None):
 
 
 def _set_project(project: str, values: dict):
-	"""Fill the Project's empty lead-time fields; never stops the order or invoice being submitted."""
+	"""Fill the Project's empty lead-time fields (an approximate PO date counts as empty); never stops the order or
+	invoice being submitted."""
 	try:
 		_fill(project, values)
 	except Exception:
@@ -79,6 +80,9 @@ def _fill(project: str, values: dict):
 	if not _has_fields(p):
 		return
 	changed = False
+	if values.get("sk_po_date") and p.sk_po_date_approx:
+		# a real PO date replaces the month-only / won-date estimate loaded for older cabins
+		p.sk_po_date, p.sk_po_date_approx = None, 0
 	for k, v in values.items():
 		if v and not p.get(k):
 			p.set(k, v)
