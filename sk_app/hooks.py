@@ -46,15 +46,20 @@ doc_events = {
 	"Sales Order": {"validate": ["sk_app.sales_owner.fill_order_team", "sk_app.segment_accounts.set_segment"],
 		"before_submit": "sk_app.gates.check_sales_order",
 		"on_submit": "sk_app.won_deals.on_submit"},  # SK 28-Oct: its lead / deal shows Won in the CRM at once
-	"Sales Invoice": {"validate": "sk_app.segment_accounts.set_segment"},
+	"Sales Invoice": {"validate": ["sk_app.segment_accounts.set_segment", "sk_app.cabin_projects.set_cost_centre"]},
 	"SK App User": {"on_update": ["sk_app.segments.on_app_user_update", "sk_app.logins.set_company_default"]},
 	"Job Card": {"validate": "sk_app.store.set_job_card_cabin"},  # SK 27-Oct: customer + cabin size, not just the number
+	# SK 29-Oct: one Project + cost centre per cabin; its material, bills and sales rows go to that cost centre at once,
+	# and stages done before ERPNext close when the cabin's Work Order is submitted (sk_app.cabin_projects)
+	"Work Order": {"on_submit": "sk_app.cabin_projects.close_done_stages"},
+	"Stock Entry": {"validate": "sk_app.cabin_projects.set_cost_centre"},
+	"Delivery Note": {"validate": "sk_app.cabin_projects.set_cost_centre"},
 	# SK 27-Oct purchase flow: requisition → CEO approval → PO → receipt against the PO, in ERPNext too
-	"Material Request": {"validate": "sk_app.gates.check_request", "before_submit": "sk_app.requisition.check_submit"},
-	"Purchase Order": {"before_submit": "sk_app.requisition.check_po"},
-	"Purchase Receipt": {"before_submit": "sk_app.requisition.check_receipt"},
+	"Material Request": {"validate": ["sk_app.gates.check_request", "sk_app.cabin_projects.set_cost_centre"], "before_submit": "sk_app.requisition.check_submit"},
+	"Purchase Order": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.requisition.check_po"},
+	"Purchase Receipt": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.requisition.check_receipt"},
 	# SK 28-Oct: subcontractor bills post only after Rushi + CEO; only CEO / Accounts change the rate sheet
-	"Purchase Invoice": {"before_submit": "sk_app.sub_bills.check_submit"},
+	"Purchase Invoice": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.sub_bills.check_submit"},
 	"Item Price": {"validate": "sk_app.sub_bills.check_rate_edit"},
 }
 

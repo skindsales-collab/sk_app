@@ -4673,7 +4673,7 @@
 	async function renderOrderBoard() {
 		S.board = await call("prod_board");
 		root.innerHTML = header(t("order_board")) + `<main><p class="sk-note">${t("board_help")}</p><ul class="sk-list">${S.board.map((w) => `<li class="sk-item sk-person ${w.late ? "k-lead_new" : ""}">
-			<div><div class="sk-item-title">${esc(w.item_name || w.production_item)}</div>
+			<div><div class="sk-item-title">${w.cabin_no ? esc(w.cabin_no) + " · " : ""}${esc(w.item_name || w.production_item)}</div>
 			<div class="sk-item-meta">${esc(w.name)}${w.customer ? " · " + esc(w.customer) : ""} · ${t("delivery")}: ${esc(w.expected_delivery_date || t("not_set"))}${w.late ? ` <span class="sk-due">${t("late")}</span>` : ""}</div>
 			${w.no_order ? `<div class="sk-item-meta sk-due">⚠ ${t("no_order_link")}</div>` : ""}</div>
 			<div class="sk-stages">${w.stages.map(stageChip).join("") || t("no_job_cards")}</div></li>`).join("") || empty()}</ul></main>`;
@@ -4685,7 +4685,7 @@
 		const sub = view === "my_jobs";
 		const card = (j, i) => `<section class="sk-card ${j.status === "Work In Progress" ? "sk-working" : ""}">
 			<div class="sk-card-label">${esc(j.operation || "")} · ${esc(j.workstation || "")} <button class="sk-icon" data-act="pr-read" data-i="${i}">🔊</button></div>
-			<div class="sk-card-text">${j.customer ? `${esc(j.customer)} · ` : ""}${esc(j.item_name || j.production_item)}</div>
+			<div class="sk-card-text">${j.cabin_no ? `${esc(j.cabin_no)} · ` : ""}${j.customer ? `${esc(j.customer)} · ` : ""}${esc(j.item_name || j.production_item)}</div>
 			<div class="sk-card-meta">${esc(j.name)} · ${esc(j.work_order || "")}${j.started ? ` · ${t("started")} ${esc(j.started.slice(11, 16))}` : ""} · 📷 ${j.photos}</div>
 			<div class="sk-card-actions">
 				${j.started ? "" : `<button class="sk-btn go" data-act="pr-start" data-i="${i}">▶ ${t("start")}</button>`}
