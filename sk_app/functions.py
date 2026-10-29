@@ -18,7 +18,7 @@ FUNCTIONS = {
 		"label": {"English": "Sales", "Marathi": "विक्री"},
 		# point 17 (SK's mock-up 26-Oct): own icons in work order New Lead → My Leads → My Deals → Customers → Follow-up → Complaints
 		# SK 28-Oct (Rev 1 point 7): no Cold Calling icon; cold-calling data lives on the Marketing list
-		"tiles": ["my_day", "new_lead", "my_leads", "marketing_list", "my_deals", "customers", "follow_up", "complaints", *CONTACT_TILES, "activities", "reminders", "library",
+		"tiles": ["my_day", "to_submit", "new_lead", "my_leads", "marketing_list", "my_deals", "customers", "follow_up", "complaints", *CONTACT_TILES, "activities", "reminders", "library",
 			"day_report", "my_kpi", "dsi", "problem", "training"],
 		"live": True,
 		# not Sales Manager: in Frappe CRM that role shows every lead of the company (SK 26-Oct: each salesperson sees
@@ -28,7 +28,7 @@ FUNCTIONS = {
 	},
 	"Marketing": {
 		"label": {"English": "Marketing", "Marathi": "मार्केटिंग"},
-		"tiles": ["my_day", "new_lead", "my_leads", "marketing_list", "follow_up", "complaints", *CONTACT_TILES, "activities", "reminders", "library", "day_report",
+		"tiles": ["my_day", "to_submit", "new_lead", "my_leads", "marketing_list", "follow_up", "complaints", *CONTACT_TILES, "activities", "reminders", "library", "day_report",
 			"my_kpi", "dsi", "problem", "training"],
 		"live": True,  # uses the same CRM lead screens as Sales
 		"erpnext_roles": ["Sales User"],
@@ -37,7 +37,7 @@ FUNCTIONS = {
 	"Production": {
 		"label": {"English": "Production", "Marathi": "उत्पादन"},
 		# point 17 (SK's mock-up): Need Material → Job Cards → Order Board → Progress Photos → Ready to Dispatch → Non-Conformance
-		"tiles": ["my_day", "to_plan", "need_material", "job_cards", "order_board", "lead_time", "progress_photos", "ready_dispatch", "non_conformance", "complaints", "mail", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "to_submit", "to_plan", "need_material", "job_cards", "order_board", "lead_time", "progress_photos", "ready_dispatch", "non_conformance", "complaints", "mail", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Manufacturing User", "Manufacturing Manager"],
 		"desk": "/app/manufacturing",
@@ -53,7 +53,7 @@ FUNCTIONS = {
 		"label": {"English": "Stores", "Marathi": "स्टोअर"},
 		# SK draft F01: My Day first, then the Store icons, then the common ones
 		# point 17 (SK's mock-up): Requests → Stock Check → Receive → Issue → Stock Count → New Item → Low Stock → Dispatch
-		"tiles": ["my_day", "requisition", "store_requests", "stock_check", "receive", "issue", "stock_count", "new_item", "low_stock", "dispatch", "complaints", "mail", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "to_submit", "requisition", "store_requests", "stock_check", "receive", "issue", "stock_count", "new_item", "low_stock", "dispatch", "complaints", "mail", *COMMON_TILES[1:]],
 		"live": True,
 		# Stock Manager: needed to make stock count drafts and to pick accounts on receipts / delivery notes
 		"erpnext_roles": ["Stock User", "Stock Manager"],
@@ -61,7 +61,7 @@ FUNCTIONS = {
 	},
 	"Purchase": {
 		"label": {"English": "Purchase", "Marathi": "खरेदी"},
-		"tiles": ["my_day", "requisition", "buy_requests", "get_rates", "compare", "po_follow_up", "suppliers", "bills", "last_rates", "stock_check", "mail", *COMMON_TILES[1:]],
+		"tiles": ["my_day", "to_submit", "requisition", "buy_requests", "get_rates", "compare", "po_follow_up", "suppliers", "bills", "last_rates", "stock_check", "mail", *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Purchase User"],
 		"desk": "/app/buying",
@@ -72,7 +72,7 @@ FUNCTIONS = {
 		# SK / Shraddha 26-Oct: ledger-wise screens; Expenses is the Journal Voucher list, plus Direct and Indirect Expenses
 		# SK 27-Oct: the team knows Tally, so Accounts opens on the Accounts Gateway (Gateway of Tally sections and names)
 		# SK 27-Oct: every entry can start from a photo of the bill / e-invoice / voucher / payment proof (Photo entry)
-		"tiles": ["my_day", "gateway", "photo_entry", "day_book", "cash_today", "to_collect", "to_pay", "bills_to_post", "invoices", "expenses", "dir_expenses",
+		"tiles": ["my_day", "to_submit", "gateway", "photo_entry", "day_book", "cash_today", "to_collect", "to_pay", "bills_to_post", "invoices", "expenses", "dir_expenses",
 			"segment_pnl", "month_close", "new_product", "complaints",
 			*CONTACT_TILES, *COMMON_TILES[1:]],
 		"live": True,
@@ -92,7 +92,7 @@ FUNCTIONS = {
 	"Machine Shifting": {
 		"label": {"English": "Machine Shifting", "Marathi": "मशीन शिफ्टिंग"},
 		# SK 28-Oct: Aditya sees the Non-Cabin P&L month by month (Month Wise Report, Non-Cabin only)
-		"tiles": COMMON_TILES + ["my_deals", "customers", "complaints", "site_checklist", "mail", "month_close"],
+		"tiles": COMMON_TILES + ["to_submit", "my_deals", "customers", "complaints", "site_checklist", "mail", "month_close"],
 		"live": False,
 		"erpnext_roles": ["Projects User", "Sales User"],
 		"desk": "/crm",
@@ -130,7 +130,7 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": [*DASH_TILES, "leadership", "questions", "view_member", "attendance", "lead_sources", "customers", "sales_owner", "complaints", "po_approvals", "sub_bills", "pay_approvals", "cabin_discounts", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "reminders", "day_report", "my_kpi", "dsi", "problem",
+		"tiles": [*DASH_TILES, "leadership", "questions", "view_member", "attendance", "lead_sources", "customers", "sales_owner", "complaints", "to_submit", "po_approvals", "sub_bills", "pay_approvals", "cabin_discounts", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "reminders", "day_report", "my_kpi", "dsi", "problem",
 			"library", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager", "Purchase Manager", "Purchase User"],  # SK approves big POs

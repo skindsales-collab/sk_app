@@ -1020,7 +1020,7 @@
 		collections: "💰", team_scorecards: "👥", site_checklist: "📋", ceo_view: "📊",
 		calendar: "📅", follow_up: "🔔", new_lead: "➕", training: "🎓", day_report: "📝", team_reports: "🗂️",
 		calls: "📞", whatsapp: "💬", mail: "✉️", reminders: "⏰", library: "🏢", logins: "🔑", team_leads: "👥",
-		stock_check: "📦", receive: "🚚", issue: "📤", store_requests: "📋", dispatch: "🚛", low_stock: "⚠️", stock_count: "🔢", new_item: "🆕",
+		stock_check: "📦", receive: "🚚", issue: "📤", store_requests: "📋", dispatch: "🚛", low_stock: "⚠️", stock_count: "🔢", new_item: "🆕", to_submit: "✅",
 		requisition: "📝", buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅", questions: "❓", sub_bills: "🧾", my_bills: "🧾",
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", lead_time: "⏱️", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁", el_points: "🔌",
@@ -1079,8 +1079,16 @@
 		dk_faq: "या रोलच्या FAQ मध्ये जोडा", dk_solve_btn: "✅ उत्तर पाठवा आणि बंद करा", dk_wait_ceo: "बंद करण्याआधी CEO मंजुरीची वाट.",
 		dk_approve: "✅ मंजूर", dk_reject: "✖ नामंजूर", dk_hold: "⏸ थांबवा", dk_open_erp: "ERPNext मध्ये उघडा", dk_steps: "टप्पे",
 		dk_move_old: "जुन्या उघड्या अडचणी व प्रश्न इथे आणा", dk_moved: "आणले", dk_ai_use: "AI मसुदा वापरा" });
-	Object.assign(T.English, { nav_back: "Back", nav_fwd: "Forward" });
-	Object.assign(T.Marathi, { nav_back: "मागे", nav_fwd: "पुढे" });
+	Object.assign(T.English, { to_submit: "Check & Submit", ds_why: "Drafts waiting for you. Tap Check, look at the numbers, then Submit.", ds_check: "Check",
+		ds_none: "Nothing waiting to submit ✓", ds_item: "Item", ds_old: "Old qty", ds_new: "Counted", ds_diff: "Difference", ds_qty: "Qty", ds_total: "Total",
+		ds_submit: "Submit in ERPNext", ds_sure: "Submit now? It cannot be changed after this.", ds_done: "submitted" });
+	Object.assign(T.Marathi, { to_submit: "तपासा व सबमिट करा", ds_why: "तुमच्याकडे बाकी ड्राफ्ट. तपासा दाबा, आकडे पहा, मग सबमिट करा.", ds_check: "तपासा",
+		ds_none: "सबमिट करायला काही बाकी नाही ✓", ds_item: "आयटम", ds_old: "जुना साठा", ds_new: "मोजलेला", ds_diff: "फरक", ds_qty: "नग", ds_total: "एकूण",
+		ds_submit: "ERPNext मध्ये सबमिट करा", ds_sure: "आता सबमिट करायचे? नंतर बदलता येणार नाही.", ds_done: "सबमिट झाले" });
+	Object.assign(T.English, { lk_forgot: "Forgot PIN?", lk_f_mail: "Send a code to my e-mail", lk_f_ceo: "Ask the CEO for a new PIN", lk_f_relogin: "Log in again" });
+	Object.assign(T.Marathi, { lk_forgot: "पिन विसरलात?", lk_f_mail: "माझ्या ईमेलवर कोड पाठवा", lk_f_ceo: "CEO कडे नवीन पिन मागा", lk_f_relogin: "पुन्हा लॉगिन करा" });
+	Object.assign(T.English, { nav_back: "Back", nav_fwd: "Forward", mode_pc: "PC view", mode_phone: "Phone view" });
+	Object.assign(T.Marathi, { nav_back: "मागे", nav_fwd: "पुढे", mode_pc: "PC दृश्य", mode_phone: "फोन दृश्य" });
 	Object.assign(T.English, { lk_setup_skip: "Not now, keep using my PIN" });
 	Object.assign(T.Marathi, { lk_setup_skip: "आत्ता नको, पिनच वापरतो" });
 	Object.assign(T.English, { lk_help: "How to open: fingerprint, face or PIN",
@@ -1601,9 +1609,21 @@
 			${state.view !== "home" || nav.idx > 0 ? `<button class="sk-back" data-act="nav-back" title="${t("nav_back")}">‹</button>` : `<img src="/assets/sk_app/icons/icon-192.png" class="sk-logo" alt="SK">`}
 			<button class="sk-back sk-fwd" data-act="nav-fwd" title="${t("nav_fwd")}" ${nav.idx < nav.max ? "" : "disabled"}>›</button>
 			<div class="sk-title">${esc(title)}<small>${esc(whoAmI())}</small></div>
+			${pcCapable() ? `<button class="sk-lang sk-modesw" data-act="pcmode" title="${t(isPc() ? "mode_phone" : "mode_pc")}">${isPc() ? "📱" : "🖥️"}</button>` : ""}
 			<button class="sk-lang" data-act="lang">${t("lang")}</button>
 		</header>`;
 	}
+	// SK 29-Oct: separate PC path (same content, more on one page). Auto from 1024 px wide; the 🖥️ / 📱 button in the
+	// header switches it by hand and this device remembers the choice. Phones stay on the phone path.
+	const pcCapable = () => window.innerWidth >= 900;
+	function isPc() {
+		let m = "";
+		try { m = localStorage.getItem("sk_mode") || ""; } catch (e) { /* private window */ }
+		return pcCapable() && (m === "pc" || (m !== "phone" && window.innerWidth >= 1024));
+	}
+	function applyMode() { document.body.classList.toggle("sk-pc", isPc()); }
+	applyMode();
+	window.addEventListener("resize", applyMode);
 
 	function fitHead() {
 		const h = root.querySelector(".sk-head");
@@ -1741,8 +1761,8 @@
 			} else groups.push([fnLabel(x.label), x.more, true]);
 		}
 		(h.sections ? h.sections.more_groups || [] : []).forEach((g) => groups.push([t(g.group), g.tiles, false]));
-		root.innerHTML = header(`${ICON.more} ${t("more")}`) + `<main class="sk-l1">${big}${groups.map(([title, keys, seq]) => `<h3 class="sk-h sk-fn-row">${esc(title)}</h3>
-			<div class="sk-tiles small ${seq ? "sk-seq" : ""}">${keys.map((k) => tileBtn(k, badge)).join("")}</div>`).join("")}</main>`;
+		root.innerHTML = header(`${ICON.more} ${t("more")}`) + `<main class="sk-l1 sk-more">${big ? `<div class="sk-mgroup">${big}</div>` : ""}${groups.map(([title, keys, seq]) => `<div class="sk-mgroup"><h3 class="sk-h sk-fn-row">${esc(title)}</h3>
+			<div class="sk-tiles small ${seq ? "sk-seq" : ""}">${keys.map((k) => tileBtn(k, badge)).join("")}</div></div>`).join("")}</main>`;
 	}
 	// ---------- main screen Rev 2 (SK 26-Oct): one KPI chart against target, 3D flow, "Decide now" ----------
 	let kpiData = null, kpiAt = 0, kpiLoading = false, kpiView = "week";
@@ -2625,14 +2645,18 @@
 	function customerCard(d) {
 		if (!d.deal || (d.customer && !d.customer.missing.length)) return d.customer ? `<p class="sk-note">✅ ${t("g_cust_ok")}: ${esc(d.customer.name)}</p>` : "";
 		const miss = d.customer ? d.customer.missing : [];
+		// SK 29-Oct (Aditya: details asked 3 times): only what the customer still lacks; the lead's mobile is already there
+		const keys = d.customer && d.customer.keys ? d.customer.keys : ["gstin", "address", "mobile_no"];
+		const want = (k) => keys.includes(k);
+		const mob = (d.doc && (d.doc.mobile_no || d.doc.phone)) || "";
 		return `<div class="sk-card sk-gate sk-gap"><div class="sk-item-title">🧾 ${t("g_cust")}</div>
 			${miss.length ? `<p class="sk-note">${miss.map(esc).join(" · ")}</p>` : ""}
-			${formField("gc-gstin", t("g_gstin"))}
-			<label class="sk-check"><input id="gc-unreg" type="checkbox"> ${t("g_unreg")}</label>${formField("gc-why", t("g_unreg_why"))}
-			${formField("gc-addr", t("g_addr"), true)}${formField("gc-city", t("g_city"))}
+			<div ${want("gstin") ? "" : "hidden"}>${formField("gc-gstin", t("g_gstin"))}
+			<label class="sk-check"><input id="gc-unreg" type="checkbox"> ${t("g_unreg")}</label>${formField("gc-why", t("g_unreg_why"))}</div>
+			<div ${want("address") ? "" : "hidden"}>${formField("gc-addr", t("g_addr"), true)}${formField("gc-city", t("g_city"))}
 			<label class="sk-field"><span>${t("g_state")}</span><select id="gc-state" class="sk-select"><option value=""></option>${GST_STATES.map((x) => `<option>${esc(x)}</option>`).join("")}</select></label>
-			<label class="sk-field"><span>${t("g_pin")}</span><div class="sk-input-row"><input id="gc-pin" type="tel" maxlength="6"></div></label>
-			<label class="sk-field"><span>${t("g_cmobile")}</span><div class="sk-input-row"><input id="gc-mobile" type="tel"></div></label>
+			<label class="sk-field"><span>${t("g_pin")}</span><div class="sk-input-row"><input id="gc-pin" type="tel" maxlength="6"></div></label></div>
+			<div ${want("mobile_no") ? "" : "hidden"}><label class="sk-field"><span>${t("g_cmobile")}</span><div class="sk-input-row"><input id="gc-mobile" type="tel" value="${esc(mob)}"></div></label></div>
 			<button class="sk-btn go wide" data-act="gate-customer" data-deal="${esc(d.deal)}">${t("g_save")}</button></div>`;
 	}
 	function quoteLine(k) {
@@ -2641,9 +2665,10 @@
 			<div class="sk-row"><label class="sk-field"><span>${t("qty")}</span>${qtyBox("ql-qty" + k, 1)}</label>
 			<label class="sk-field"><span>${t("rate")} (${t("fl_rate_blank")})</span>${qtyBox("ql-rate" + k)}</label></div></div>`;
 	}
-	function quotationSheet(deal) {
+	function quotationSheet(deal, lead) {
 		S.qLines = 1;
 		S.qDeal = deal;
+		S.qLead = lead || null;
 		sheet(`<h3 class="sk-h">📝 ${t("fl_new_quote")}</h3><p class="sk-note">${t("fl_quote_why")}</p><div id="ql-box">${quoteLine(0)}</div>
 			<button class="sk-btn wide" data-act="fl-addline">＋ ${t("fl_add_item")}</button>
 			<label class="sk-field"><span>${t("fl_valid")}</span>${qtyBox("ql-valid", 15)}</label>${formField("ql-note", t("fl_terms"), true)}
@@ -2839,7 +2864,7 @@
 				<button class="sk-btn wide sk-gap" data-act="reminder-new" data-doctype="${esc(doctype)}" data-name="${esc(name)}">⏰ + ${t("reminder")}</button></div>
 			${(d.products || []).length ? `<h3 class="sk-h">${t("products_for")}</h3>${productStrip(d.products)}` : ""}
 			${["CRM Deal", "CRM Lead"].includes(doctype) ? `<button class="sk-btn go wide" data-act="fl-cabinq" data-dt="${esc(doctype)}" data-name="${esc(name)}">📝 ${t("fl_new_quote")}: ${t("cq_title")}</button>` : ""}
-			${doctype === "CRM Deal" ? `<button class="sk-btn wide" data-act="fl-quote" data-name="${esc(name)}">📝 ${t("cq_other")}</button>` : ""}
+			${["CRM Deal", "CRM Lead"].includes(doctype) ? `<button class="sk-btn wide" data-act="fl-quote" data-dt="${esc(doctype)}" data-name="${esc(name)}">📝 ${t("cq_other")}</button>` : ""}
 			${d.quote_pending ? `<div class="sk-card sk-gap"><div class="sk-item-title">📄 ${t("dq_title")}</div><div class="sk-item-meta">${esc(d.quote_pending.file)}</div>
 				<div class="sk-form">${formField("dq-amount", t("dq_amount"), false, "number")}<button class="sk-btn go wide" data-act="dq-make" data-name="${esc(name)}">${t("dq_make")}</button></div></div>` : ""}
 			${sec(t("quotations"), d.quotations.map((q) => erpDocRow("Quotation", q, mobile)).join(""))}
@@ -2851,14 +2876,22 @@
 	}
 
 	function sheet(html) {
-		closeSheet();
+		const had = root.querySelector(".sk-sheet-wrap");
+		if (had) had.remove(); // one pop-up replaces another in the same history step
+		else navPush(state.view, { sheet: 1 });
 		const el = document.createElement("div");
 		el.className = "sk-sheet-wrap";
 		el.innerHTML = `<div class="sk-sheet sk-form">${html}</div>`;
 		root.appendChild(el);
 		return el;
 	}
-	function closeSheet() { const s = root.querySelector(".sk-sheet-wrap"); if (s) s.remove(); }
+	function closeSheet() {
+		const s = root.querySelector(".sk-sheet-wrap");
+		if (!s) return;
+		s.remove();
+		// closed by its own button: its history step is dropped too, so Back then goes to the previous screen
+		if (!nav.popping && history.state && history.state.sheet && (!nav.leaving || nav.dropSheet)) { nav.silent = true; history.back(); }
+	}
 
 	function outcomeSheet(p) {
 		const outs = p.channel === "Call" ? ((crmOpts && crmOpts.call_outcomes) || ["Talked", "No answer", "Busy", "Missed", "Call back later", "Wrong number"]) : [];
@@ -3187,6 +3220,7 @@
 	}
 
 	async function renderLesson(name) {
+		navPush("lesson", { lesson: name }); // SK 29-Oct: Back from a lesson returns to the list
 		const l = await call("training_lesson", { name });
 		const mr = state.lang === "Marathi";
 		state.view = "lesson";
@@ -3908,11 +3942,11 @@
 		const q = vmQuery.toLowerCase();
 		root.innerHTML = header(t("view_member")) + `<main><p class="sk-note">${t("view_hint")}</p>
 			<div class="sk-input-row sk-gap"><input id="vm-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(vmQuery)}">${micBox("vm-q")}</div>
-			${d.groups.map((g) => {
+			<div class="sk-vm">${d.groups.map((g) => {
 				const people = g.people.filter((p) => !q || p.full_name.toLowerCase().includes(q));
-				return people.length ? `<h3 class="sk-h">${esc((g.label && (g.label[state.lang] || g.label.English)) || g.function)}</h3><ul class="sk-list">${people.map((p) => `<li class="sk-item"><button class="sk-fu-main" data-act="view-enter" data-user="${esc(p.user)}" data-uname="${esc(p.full_name)}">
-					<div class="sk-item-title">👤 ${esc(p.full_name)}</div><div class="sk-item-meta">${p.functions.map(esc).join(", ")} · ${t("last_active")}: ${esc(p.last_active || t("never"))}</div></button></li>`).join("")}</ul>` : "";
-			}).join("")}</main>`;
+				return people.length ? `<div class="sk-vm-grp"><h3 class="sk-h">${esc((g.label && (g.label[state.lang] || g.label.English)) || g.function)}</h3><ul class="sk-list">${people.map((p) => `<li class="sk-item"><button class="sk-fu-main" data-act="view-enter" data-user="${esc(p.user)}" data-uname="${esc(p.full_name)}">
+					<div class="sk-item-title">👤 ${esc(p.full_name)}</div><div class="sk-item-meta">${p.functions.map(esc).join(", ")} · ${t("last_active")}: ${esc(p.last_active || t("never"))}</div></button></li>`).join("")}</ul></div>` : "";
+			}).join("")}</div></main>`;
 	}
 	async function enterView(user, name) {
 		state.own = { home: state.home, lang: state.lang };
@@ -4287,6 +4321,40 @@
 			${S.low.length ? `<button class="sk-btn go wide" data-act="st-order-low">${t("send_all_purchase")} (${S.low.length})</button>` : ""}</main>`;
 	}
 
+	// SK 29-Oct: Check & Submit — every draft the person's function submits, big numbers, one Submit with a confirm
+	async function renderToSubmit() {
+		S.drafts = await call("drafts_mine");
+		root.innerHTML = header(t("to_submit")) + `<main><p class="sk-note">${t("ds_why")}</p><ul class="sk-list">${S.drafts.map((r, k) => li(
+			`${esc(t(r.doctype) || r.doctype)} · ${esc(r.name)}`, `${esc(r.party)} · ${esc(r.by)} · ${esc(r.modified)}`,
+			`${r.amount !== null ? `<b class="sk-big">${num(r.amount)}</b>` : ""}<button class="sk-btn go" data-ds-open="${k}">${t("ds_check")}</button>`)).join("")
+			|| `<li class="sk-empty">${t("ds_none")}</li>`}</ul></main>`;
+	}
+	async function draftSheet(k) {
+		const r = S.drafts[k];
+		const d = await call("drafts_lines", { doctype: r.doctype, name: r.name });
+		const sr = r.doctype === "Stock Reconciliation";
+		const rows = d.lines.map((x) => `<tr><td>${esc(x.item)}</td>${sr ? `<td class="sk-big">${num(x.old)}</td><td class="sk-big">${num(x.new)}</td>
+			<td class="sk-big ${x.diff < 0 ? "bad" : "ok"}">${x.diff > 0 ? "+" : ""}${num(x.diff)}</td>` : `<td class="sk-big">${num(x.qty)} ${esc(x.uom)}</td><td class="sk-big">${num(x.amount)}</td>`}</tr>`).join("");
+		sheet(`<h3 class="sk-h">✅ ${esc(t(r.doctype) || r.doctype)} ${esc(r.name)}</h3><p class="sk-note">${esc(d.party)}</p>
+			<div class="sk-table-wrap"><table class="sk-table"><tr><th>${t("ds_item")}</th>${sr ? `<th>${t("ds_old")}</th><th>${t("ds_new")}</th><th>${t("ds_diff")}</th>` : `<th>${t("ds_qty")}</th><th>₹</th>`}</tr>${rows}</table></div>
+			${d.total ? `<p class="sk-big">${t("ds_total")}: ${num(d.total)}</p>` : ""}
+			<button class="sk-btn go wide" data-ds-submit="${k}">✅ ${t("ds_submit")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+	document.addEventListener("click", async (ev) => {
+		const o = ev.target.closest("[data-ds-open], [data-ds-submit]");
+		if (!o) return;
+		try {
+			if (o.dataset.dsOpen !== undefined) return await draftSheet(Number(o.dataset.dsOpen));
+			const r = S.drafts[Number(o.dataset.dsSubmit)];
+			if (!window.confirm(`${r.name}: ${t("ds_sure")}`)) return;
+			o.disabled = true;
+			await call("drafts_submit", { doctype: r.doctype, name: r.name }, true);
+			closeSheet();
+			toast(`✓ ${r.name} ${t("ds_done")}`);
+			return renderToSubmit();
+		} catch (e) { o.disabled = false; toast(e.message, true); }
+	});
+
 	async function renderStockCount() {
 		const whs = await call("store_warehouses");
 		root.innerHTML = header(t("stock_count")) + `<main class="sk-form">${pick("c-wh", t("store_name"), whs, 'data-act-change="st-count-wh"')}<div id="c-list"></div></main>`;
@@ -4600,7 +4668,7 @@
 			case "st-item": return itemSheet(S.items[i].item_code);
 			case "st-po": return receiveForm(i);
 			case "st-nopo": return receiveNoPo();
-			case "fl-quote": return quotationSheet(el.dataset.name);
+			case "fl-quote": return quotationSheet(el.dataset.dt === "CRM Lead" ? null : el.dataset.name, el.dataset.dt === "CRM Lead" ? el.dataset.name : null);
 			case "fl-cabinq": return cabinQuoteSheet(el.dataset.dt, el.dataset.name);
 			case "fl-cabinq-save": {
 				const req = cabinReq();
@@ -4655,7 +4723,7 @@
 				el.disabled = true;
 				const items = [...Array(S.qLines).keys()].map((k) => ({ item_code: val("ql-item" + k), qty: val("ql-qty" + k), rate: val("ql-rate" + k), description: val("ql-desc" + k) })).filter((x) => x.item_code);
 				try {
-					const r = await call("flow_make_quotation", { deal: S.qDeal, items: JSON.stringify(items), valid_days: val("ql-valid"), note: val("ql-note") }, true);
+					const r = await call("flow_make_quotation", { deal: S.qDeal, lead: S.qLead, items: JSON.stringify(items), valid_days: val("ql-valid"), note: val("ql-note") }, true);
 					closeSheet(); window.open(r.pdf, "_blank");
 					if (r.submitted) saved(`${t("fl_quote_saved")}: ${r.name} · ${t("g_qsubmitted")}`);
 					else toast(`${t("fl_quote_saved")}: ${r.name}. ${t("g_fill")}: ${(r.missing || []).join(", ")}`, true);
@@ -5633,7 +5701,7 @@
 		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name),
 		reminders: renderReminders, calls: renderCalls, whatsapp: renderWhatsApp, mail: renderMail, library: renderLibrary,
 		logins: renderLogins, team_leads: renderTeamLeads, stock_check: renderStockCheck, receive: renderReceive, issue: renderIssue, store_requests: renderStoreRequests,
-		dispatch: renderDispatch, low_stock: renderLowStock, stock_count: renderStockCount, new_item: renderNewItem,
+		dispatch: renderDispatch, low_stock: renderLowStock, stock_count: renderStockCount, to_submit: renderToSubmit, new_item: renderNewItem,
 		buy_requests: renderBuyRequests, get_rates: renderGetRates, compare: renderCompare, po_follow_up: renderFollowUpPo,
 		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals, questions: renderQuestions, sub_bills: () => renderSubBills("sub_bills"), my_bills: () => renderSubBills("my_bills"), requisition: () => renderRequisition(),
 		order_board: renderOrderBoard, job_cards: () => renderJobs("job_cards"), my_jobs: () => renderJobs("my_jobs"), need_material: renderNeedMaterial,
@@ -5662,11 +5730,19 @@
 	// Each screen opened is a browser history entry; nav.idx is where we are, nav.max the furthest forward.
 	const nav = { idx: 0, max: 0, popping: false, key: "home|" };
 	const navKey = (view) => view + "|" + (view === "fnpage" ? fnPage : view === "detail" && current ? current.doctype + "/" + current.name : "");
-	function navPush(view) {
-		if (nav.popping || navKey(view) === nav.key) return; // the same screen refreshed is not a new step
-		nav.key = navKey(view);
-		const entry = { sk: view, fnPage, current, idx: nav.idx + 1 };
-		try { history.pushState(entry, "", "#" + view); nav.idx = nav.max = entry.idx; } catch (e) { /* old browser */ }
+	function navPush(view, extra) {
+		const onSheet = history.state && history.state.sheet;
+		nav.dropSheet = false;
+		if (nav.popping) return;
+		if (!extra && navKey(view) === nav.key) { nav.dropSheet = !!onSheet; return; } // the same screen refreshed is not a new step
+		nav.key = extra && extra.lesson ? "lesson|" + extra.lesson : navKey(view);
+		// a pop-up still open when the screen changes: its history step is reused for the new screen
+		const idx = onSheet && !(extra && extra.sheet) ? nav.idx : nav.idx + 1;
+		const entry = { sk: view, fnPage, current, idx, ...(extra || {}) };
+		try {
+			if (idx === nav.idx) history.replaceState(entry, "", "#" + view); else history.pushState(entry, "", "#" + view);
+			nav.idx = nav.max = idx;
+		} catch (e) { /* old browser */ }
 	}
 	function navBack() {
 		if (nav.idx > 0) return history.back();
@@ -5675,8 +5751,17 @@
 	}
 	window.addEventListener("popstate", (ev) => {
 		const e = ev.state;
+		if (nav.silent) { nav.silent = false; if (e) nav.idx = e.idx || 0; return; }
 		if (!e || !e.sk) return;
+		// SK 29-Oct: the phone's back button closes an open pop-up first, then goes back a screen
+		const open = root.querySelector(".sk-sheet-wrap");
+		if (open) {
+			open.remove();
+			nav.idx = e.idx || 0;
+			if (e.sk === state.view && !e.lesson) return;
+		}
 		nav.idx = e.idx || 0;
+		if (e.lesson) { nav.popping = true; Promise.resolve(renderLesson(e.lesson)).finally(() => { nav.popping = false; }); return; }
 		if (e.fnPage !== undefined) fnPage = e.fnPage;
 		if (e.current !== undefined) current = e.current;
 		nav.key = navKey(e.sk);
@@ -5688,7 +5773,9 @@
 	async function go(view) {
 		navPush(view);
 		stopListening(); // a mic left on keeps listening into the old screen (point 4)
+		nav.leaving = true;
 		closeSheet();
+		nav.leaving = false;
 		if (view === "erpnext_desk") { window.location.href = "/app"; return; }
 		if (view !== state.view) clearDraftIfOther(view);
 		// back from an icon opened on a function page or More goes back there (levels 2 and 3, SK 26-Oct)
@@ -5977,6 +6064,11 @@
 			if (act === "read" && state.card) return readAloud(state.card.card_text);
 			if (act === "nav-back") return navBack();
 			if (act === "nav-fwd") return history.forward();
+			if (act === "pcmode") {
+				try { localStorage.setItem("sk_mode", isPc() ? "phone" : "pc"); } catch (e) { /* private window */ }
+				applyMode();
+				return go(state.view);
+			}
 			if (act === "lang") {
 				state.lang = state.lang === "English" ? "Marathi" : "English";
 				if (state.viewAs) return go(state.view); // the member's own language setting is not changed
@@ -6278,9 +6370,11 @@
 			}
 			if (act === "gate-customer") {
 				const unreg = document.getElementById("gc-unreg").checked;
-				if (!mustFill([["gc-gstin", t("g_gstin"), unreg || /^[0-9]{2}[A-Z0-9]{10}[0-9A-Z]{3}$/.test(val("gc-gstin").toUpperCase())],
-					["gc-why", t("g_unreg_why"), !unreg || !!val("gc-why")], ["gc-addr", t("g_addr")], ["gc-state", t("g_state")],
-					["gc-pin", t("g_pin"), /^\d{6}$/.test(val("gc-pin"))], ["gc-mobile", t("g_cmobile"), val("gc-mobile").replace(/\D/g, "").length >= 10]])) return;
+				const shown = (id) => !document.getElementById(id).closest("[hidden]");
+				if (!mustFill([["gc-gstin", t("g_gstin"), !shown("gc-gstin") || unreg || /^[0-9]{2}[A-Z0-9]{10}[0-9A-Z]{3}$/.test(val("gc-gstin").toUpperCase())],
+					["gc-why", t("g_unreg_why"), !shown("gc-why") || !unreg || !!val("gc-why")], ["gc-addr", t("g_addr"), !shown("gc-addr") || !!val("gc-addr")],
+					["gc-state", t("g_state"), !shown("gc-state") || !!val("gc-state")],
+					["gc-pin", t("g_pin"), !shown("gc-pin") || /^\d{6}$/.test(val("gc-pin"))], ["gc-mobile", t("g_cmobile"), !shown("gc-mobile") || val("gc-mobile").replace(/\D/g, "").length >= 10]])) return;
 				el.disabled = true;
 				try {
 					const r = await call("flow_make_customer", { deal: el.dataset.deal, gstin: unreg ? null : val("gc-gstin").toUpperCase(), unregistered: unreg ? 1 : 0,
@@ -6579,18 +6673,21 @@
 		const face = phoneCan && lockInfo.has_key;
 		el.innerHTML = `<div class="sk-lock-nav"><button class="sk-back" data-lock="back" title="${t("nav_back")}">‹</button>
 			<button class="sk-back" data-lock="fwd" title="${t("nav_fwd")}">›</button></div>
-			<div class="sk-lock-box"><div class="sk-lock-icon">🔒</div><h2>${t("lk_locked")}</h2>
-			<p class="sk-note">${esc(lockInfo.name || "")}</p>
+			<div class="sk-lock-box"><img class="sk-lock-logo sk-brand-logo" src="/assets/sk_app/images/sk_logo.png" alt="SK Tech">
+			<h2>🔒 ${t("lk_locked")}</h2><p class="sk-lock-name">${esc(lockInfo.name || "")}</p>
 			${phoneCan ? `<button class="sk-btn go wide sk-face-btn" data-lock="${face ? "face" : "noface"}">👆 🙂 ${t(face ? "lk_open_face" : "lk_face_first")}</button>
 				<p class="sk-login-or">${t("lk_or_pin")}</p>` : ""}
-			<details class="sk-forgot sk-face-help"><summary>❓ ${t("lk_help")}</summary><p class="sk-note">${t(pc ? "lk_help_pc" : "lk_help_phone")}</p></details>
-			<label class="sk-field"><span>${t("lk_pin")}</span><input id="lk-pin" type="password" inputmode="numeric" autocomplete="current-password"></label>
-			<button class="sk-btn ${phoneCan ? "" : "go "}wide" data-lock="pin">${t("lk_open")}</button>
-			${lockInfo.email_code ? `<button class="sk-btn wide" data-lock="mailcode">📧 ${t("lk_mail_btn")}</button>
+			<label class="sk-field"><span>${t("lk_pin")}</span><input id="lk-pin" class="sk-pin-big" type="password" inputmode="numeric" autocomplete="current-password"></label>
+			<button class="sk-btn go wide" data-lock="pin">${t("lk_open")}</button>
+			<p class="sk-lock-msg" id="lk-msg"></p>
+			<!-- SK 29-Oct: one "Forgot PIN?" link opens the choices, instead of three Forgot PIN buttons -->
+			<details class="sk-forgot"><summary class="sk-link-btn">${t("lk_forgot")}</summary>
+			${lockInfo.email_code ? `<button class="sk-btn wide" data-lock="mailcode">📧 ${t("lk_f_mail")}</button>
 				<div id="lk-code-box" hidden><label class="sk-field"><span>${t("lk_mail_code")}</span><input id="lk-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6"></label>
 				<button class="sk-btn ok wide" data-lock="mailopen">${t("lk_open")}</button></div>` : ""}
-			<button class="sk-btn wide" data-lock="forgot">🔑 ${t("fp_btn")}</button><button class="sk-btn wide" data-lock="relogin">${t("lk_relogin")}</button><p class="sk-note">${t("lk_ask_ceo")}</p>
-			<p class="sk-lock-msg" id="lk-msg"></p></div>`;
+			<button class="sk-btn wide" data-lock="forgot">🔑 ${t("lk_f_ceo")}</button><button class="sk-btn wide" data-lock="relogin">↩ ${t("lk_f_relogin")}</button>
+			<p class="sk-note">${t("lk_ask_ceo")}</p></details>
+			<details class="sk-forgot sk-face-help"><summary class="sk-link-btn">❓ ${t("lk_help")}</summary><p class="sk-note">${t(pc ? "lk_help_pc" : "lk_help_phone")}</p></details></div>`;
 		if (face && !lockInfo.usePin) setTimeout(() => el.querySelector("[data-lock=face]") && el.querySelector("[data-lock=face]").click(), 300);
 	}
 	async function afterUnlock(st) {

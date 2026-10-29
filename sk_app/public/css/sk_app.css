@@ -1,10 +1,13 @@
 :root {
-	--navy: #12355b;
-	--red: #c8102e;
-	--light: #eaf0f7;
+	/* SK 29-Oct brand: colours of the SK Tech logo (blue gear, red SK ring) and the steel of the 3D reference */
+	--navy: #1878a8;
+	--red: #c82030;
+	--steel: #4a5563;
+	--steel2: #8a95a3;
+	--light: #e3ebf3;
 	--ink: #1b2430;
 	--muted: #5a6472;
-	--bg: #f6f8fb;
+	--bg: #eef2f7;
 	--card: #ffffff;
 	--green: #1e8e3e;
 	--yellow: #e0a100;
@@ -558,69 +561,69 @@ a.sk-chip { text-decoration: none; }
 /* SK 29-Oct: PC layout. Phones are unchanged; from 1024 px wide (office PC / laptop) the app uses the width:
    wider page, Home in two columns (decide on the left, work icons on the right), lists in two columns,
    pop-up sheets as a centred window, hover on everything you can click. */
-@media (min-width: 1024px) {
-	body { font-size: 16px; }
-	/* SK 29-Oct: "no open space at one side": the page uses the PC width (up to 1680 px) */
-	main { max-width: 1680px; padding: 20px 28px 48px; }
-	.sk-head { padding-left: max(28px, calc((100% - 1680px) / 2 + 28px)); padding-right: max(28px, calc((100% - 1680px) / 2 + 28px)); }
+/* SK 29-Oct: PC path = body.sk-pc (auto from 1024 px, or the 🖥️/📱 switch in the header, kept per device) */
+body.sk-pc { font-size: 14px; }
+/* SK 29-Oct: "no open space at one side": the page uses the PC width (up to 1680 px) */
+body.sk-pc main { max-width: 1680px; padding: 20px 28px 48px; }
+body.sk-pc .sk-head { padding-left: max(28px, calc((100% - 1680px) / 2 + 28px)); padding-right: max(28px, calc((100% - 1680px) / 2 + 28px)); }
 
-	/* Home: two columns, no squeezing to phone height */
-	.sk-home2 { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); column-gap: 20px; row-gap: 12px; align-content: start;
-		grid-template-areas: "kpi own" "kpi common" "kpi contact" "flow bottom" "decide decide"; }
-	.sk-home2 > .sk-kpibox { grid-area: kpi; }
-	.sk-home2 > .sk-flowbox { grid-area: flow; }
-	.sk-home2 > .sk-decide { grid-area: decide; }
-	.sk-home2 > .sk-own { grid-area: own; }
-	.sk-home2 > .sk-common { grid-area: common; }
-	.sk-home2 > .sk-contact { grid-area: contact; }
-	.sk-home2 > .sk-bottom { grid-area: bottom; position: static; }
-	.sk-home2 > * { align-self: start; }
-	.sk-home2 .sk-tiles.small, .sk-home2 .sk-contact, .sk-home2 .sk-decs { grid-auto-rows: auto; }
-	.sk-home2 .sk-own .sk-tile { padding: 18px 4px; font-size: 14px; }
-	.sk-home2 .sk-own .sk-tile-icon { font-size: 30px; }
-	.sk-ksvg { max-height: 34vh; }
-	.sk-dec span { font-size: 12px; }
-	.sk-dec b { font-size: 20px; }
-	.sk-ar3 { height: 64px; }
+/* Home: two columns, no squeezing to phone height */
+body.sk-pc .sk-home2 { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); column-gap: 20px; row-gap: 12px; align-content: start;
+	grid-template-areas: "kpi own" "kpi common" "kpi contact" "flow bottom" "decide decide"; }
+body.sk-pc .sk-home2 > .sk-kpibox { grid-area: kpi; }
+body.sk-pc .sk-home2 > .sk-flowbox { grid-area: flow; }
+body.sk-pc .sk-home2 > .sk-decide { grid-area: decide; }
+body.sk-pc .sk-home2 > .sk-own { grid-area: own; }
+body.sk-pc .sk-home2 > .sk-common { grid-area: common; }
+body.sk-pc .sk-home2 > .sk-contact { grid-area: contact; }
+body.sk-pc .sk-home2 > .sk-bottom { grid-area: bottom; position: static; }
+body.sk-pc .sk-home2 > * { align-self: start; }
+body.sk-pc .sk-home2 .sk-tiles.small, body.sk-pc .sk-home2 .sk-contact, body.sk-pc .sk-home2 .sk-decs { grid-auto-rows: auto; }
+body.sk-pc .sk-home2 .sk-own .sk-tile { padding: 18px 4px; font-size: 14px; }
+body.sk-pc .sk-home2 .sk-own .sk-tile-icon { font-size: 30px; }
+body.sk-pc .sk-ksvg { max-height: 34vh; }
+body.sk-pc .sk-dec span { font-size: 12px; }
+body.sk-pc .sk-dec b { font-size: 20px; }
+body.sk-pc .sk-ar3 { height: 64px; }
 
-	/* icons and cards use the width */
-	.sk-tiles { grid-template-columns: repeat(4, 1fr); }
-	.sk-tiles.small { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
-	.sk-home2 .sk-tiles.small { grid-template-columns: repeat(4, 1fr); }
-	.sk-home2 .sk-bottom { grid-template-columns: repeat(3, 1fr); }
-	.sk-dash-cards { grid-template-columns: repeat(4, 1fr); }
-	.sk-facts { grid-template-columns: repeat(8, 1fr); }
+/* icons and cards use the width */
+body.sk-pc .sk-tiles { grid-template-columns: repeat(4, 1fr); }
+body.sk-pc .sk-tiles.small { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+body.sk-pc .sk-home2 .sk-tiles.small { grid-template-columns: repeat(4, 1fr); }
+body.sk-pc .sk-home2 .sk-bottom { grid-template-columns: repeat(3, 1fr); }
+body.sk-pc .sk-dash-cards { grid-template-columns: repeat(4, 1fr); }
+body.sk-pc .sk-facts { grid-template-columns: repeat(8, 1fr); }
 
-	/* lists side by side */
-	.sk-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 12px; align-items: start; }
-	.sk-list > .sk-item { margin-bottom: 10px; }
+/* lists side by side */
+body.sk-pc .sk-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 12px; align-items: start; }
+body.sk-pc .sk-list > .sk-item { margin-bottom: 10px; }
 
-	/* forms: fields in two columns across the page (headings, notes, lists and buttons take the full row) */
-	main.sk-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; align-content: start; }
-	main.sk-form > :not(.sk-field) { grid-column: 1 / -1; }
-	main.sk-form > .sk-btn.wide { justify-self: start; min-width: 320px; width: auto; }
+/* forms: fields in two columns across the page (headings, notes, lists and buttons take the full row) */
+body.sk-pc main.sk-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; align-content: start; }
+body.sk-pc main.sk-form > :not(.sk-field) { grid-column: 1 / -1; }
+body.sk-pc main.sk-form > .sk-btn.wide { justify-self: start; min-width: 320px; width: auto; }
 
-	/* pop-up sheets become a centred window */
-	.sk-sheet-wrap { align-items: center; justify-content: center; padding: 24px; }
-	.sk-sheet { max-width: 760px; max-height: 86vh; border-radius: 16px; }
+/* pop-up sheets become a centred window */
+body.sk-pc .sk-sheet-wrap { align-items: center; justify-content: center; padding: 24px; }
+body.sk-pc .sk-sheet { max-width: 760px; max-height: 86vh; border-radius: 16px; }
 
-	/* calendars and tables get room */
-	.cell { min-height: 92px; font-size: 12px; }
-	.dot { font-size: 11px; }
-	.sk-table { font-size: 14px; }
-	.sk-table th, .sk-table td { padding: 8px 10px; }
+/* calendars and tables get room */
+body.sk-pc .cell { min-height: 92px; font-size: 12px; }
+body.sk-pc .dot { font-size: 11px; }
+body.sk-pc .sk-table { font-size: 14px; }
+body.sk-pc .sk-table th, body.sk-pc .sk-table td { padding: 8px 10px; }
 
-	/* messages and help button sit in the corner, not across the screen */
-	.sk-toast { left: auto; right: 24px; width: 380px; }
-	.sk-fab { bottom: 24px; right: 24px; }
-	.sk-pstrip { flex-wrap: wrap; overflow: visible; }
-}
+/* messages and help button sit in the corner, not across the screen */
+body.sk-pc .sk-toast { left: auto; right: 24px; width: 380px; }
+body.sk-pc .sk-fab { bottom: 24px; right: 24px; }
+body.sk-pc .sk-pstrip { flex-wrap: wrap; overflow: visible; }
+
 /* big PC screens: more cards and list columns side by side */
 @media (min-width: 1440px) {
-	.sk-tiles { grid-template-columns: repeat(6, 1fr); }
-	.sk-home2 .sk-tiles { grid-template-columns: repeat(4, 1fr); }
-	.sk-dash-cards { grid-template-columns: repeat(6, 1fr); }
-	.sk-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+	body.sk-pc .sk-tiles { grid-template-columns: repeat(6, 1fr); }
+	body.sk-pc .sk-home2 .sk-tiles { grid-template-columns: repeat(4, 1fr); }
+	body.sk-pc .sk-dash-cards { grid-template-columns: repeat(6, 1fr); }
+	body.sk-pc .sk-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 /* mouse users: show what is clickable */
 @media (hover: hover) and (pointer: fine) {
@@ -636,3 +639,67 @@ a.sk-chip { text-decoration: none; }
 .sk-forgot summary { list-style: none; cursor: pointer; text-align: center; }
 .sk-forgot summary::-webkit-details-marker { display: none; }
 .sk-forgot[open] summary { margin-bottom: 8px; }
+
+/* ---------- SK 29-Oct point 12: brand look (logo colours, brushed steel, diagonal silver lines) ---------- */
+.sk-head { background: linear-gradient(115deg, rgba(255,255,255,0) 62%, rgba(255,255,255,.16) 62.5%, rgba(255,255,255,0) 64%, rgba(255,255,255,0) 70%, rgba(255,255,255,.10) 70.4%, rgba(255,255,255,0) 71.5%),
+	linear-gradient(100deg, #135f86 0%, var(--navy) 45%, var(--steel) 100%); box-shadow: 0 2px 0 var(--red), 0 3px 8px rgba(0,0,0,.18); }
+.sk-logo { object-fit: contain; padding: 1px; }
+.sk-h { color: var(--navy); border-left: 4px solid var(--red); padding-left: 8px; }
+.sk-card, .sk-dash-card, .sk-kpibox { border-top: 3px solid var(--steel2); }
+.sk-login, .sk-lock-box { background: linear-gradient(115deg, rgba(255,255,255,0) 70%, rgba(138,149,163,.18) 70.5%, rgba(255,255,255,0) 73%), var(--card);
+	border-radius: 18px; box-shadow: 0 4px 18px rgba(24,120,168,.15); border-top: 4px solid var(--navy); }
+.sk-login { margin-top: 24px; }
+.sk-brand-logo { width: 96px; height: 96px; border-radius: 18px; object-fit: contain; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+@media (prefers-color-scheme: dark) { .sk-h { color: #6fb7dc; } }
+
+/* new screen parts of this batch: lock screen, Check & Submit table, small text links */
+.sk-lock-box { width: 100%; max-width: 400px; padding: 24px 20px; text-align: center; }
+.sk-lock-box h2 { margin: 10px 0 2px; font-size: 20px; }
+.sk-lock-name { color: var(--muted); margin: 0 0 14px; font-weight: 600; }
+.sk-lock-box .sk-field { display: block; text-align: left; }
+.sk-pin-big { width: 100%; font-size: 26px; letter-spacing: 6px; text-align: center; padding: 12px; border-radius: 10px; border: 1px solid #b8c4d2; background: var(--card); color: var(--ink); }
+.sk-link-btn { background: none; border: 0; color: var(--navy); text-decoration: underline; font-size: 14px; padding: 8px; cursor: pointer; display: block; text-align: center; }
+.sk-table-wrap { overflow-x: auto; margin: 8px 0; }
+.sk-table { width: 100%; border-collapse: collapse; background: var(--card); font-size: 15px; }
+.sk-table th { background: var(--light); color: var(--navy); text-align: left; }
+.sk-table th, .sk-table td { padding: 6px 8px; border-bottom: 1px solid rgba(0,0,0,.08); }
+.sk-big { font-size: 20px; font-weight: 700; }
+td.sk-big { font-size: 18px; text-align: right; }
+.sk-big.bad { color: var(--red); }
+.sk-big.ok { color: var(--green); }
+.sk-modesw { font-size: 18px !important; padding: 6px 10px !important; }
+
+/* ---------- SK 29-Oct point 10 / 11: PC path. Same content, more on one page; one font scale ----------
+   title 20, card heading 16, body 14, labels 12, numbers 24, chart text 12; nothing grows just because the screen is big */
+body.sk-pc .sk-title { font-size: 20px; }
+body.sk-pc .sk-title small { font-size: 12px; }
+body.sk-pc .sk-h, body.sk-pc .sk-item-title, body.sk-pc .sk-card-label { font-size: 16px; }
+body.sk-pc .sk-item-meta, body.sk-pc .sk-field span, body.sk-pc .sk-dash-label, body.sk-pc .sk-note, body.sk-pc .sk-tile span:not(.sk-tile-icon) { font-size: 12px; }
+body.sk-pc .sk-dash-value, body.sk-pc .sk-dec b, body.sk-pc .sk-big { font-size: 24px; }
+body.sk-pc .sk-chart text, body.sk-pc .sk-ksvg text, body.sk-pc .sk-chart-leg { font-size: 12px; }
+body.sk-pc .sk-btn, body.sk-pc .sk-chip, body.sk-pc input, body.sk-pc select, body.sk-pc textarea { font-size: 14px; }
+/* Home (point 10): no stretched rows, bigger icons packed close */
+body.sk-pc main.sk-home2 { min-height: 0 !important; }
+body.sk-pc .sk-tiles { gap: 10px; grid-auto-rows: auto !important; }
+body.sk-pc .sk-tiles.small { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); }
+body.sk-pc .sk-tiles .sk-tile { min-height: 0; padding: 14px 6px; }
+body.sk-pc .sk-tiles .sk-tile-icon { font-size: 34px; }
+body.sk-pc .sk-home2 .sk-own .sk-tile-icon { font-size: 40px; }
+/* More: groups side by side, 6–8 icons per row */
+body.sk-pc main.sk-more { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 16px; align-items: start; }
+body.sk-pc .sk-mgroup { background: var(--card); border-radius: 12px; padding: 10px 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+body.sk-pc .sk-mgroup .sk-tiles.small { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+/* dashboards (CEO Overview and all live pages): fixed chart height, many cards per row */
+body.sk-pc .sk-dash-cards { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+body.sk-pc .sk-dash-card.wide { grid-column: span 2; }
+body.sk-pc .sk-dash-card .sk-chart { height: 280px; width: 100%; }
+body.sk-pc .sk-ksvg { height: 280px; max-height: none; }
+/* View Member App: functions side by side (masonry), members 4–6 per row */
+body.sk-pc .sk-vm { columns: 3 420px; column-gap: 16px; }
+body.sk-pc .sk-vm-grp { break-inside: avoid; background: var(--card); border-radius: 12px; padding: 8px 12px 4px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+body.sk-pc .sk-vm-grp .sk-list { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+body.sk-pc .sk-vm-grp .sk-item { margin: 0; }
+/* forms (point 4): every sk-form block, not only <main>, uses two columns */
+body.sk-pc div.sk-form, body.sk-pc section.sk-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; align-content: start; }
+body.sk-pc div.sk-form > :not(.sk-field), body.sk-pc section.sk-form > :not(.sk-field) { grid-column: 1 / -1; }
+body.sk-pc .sk-sheet .sk-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }

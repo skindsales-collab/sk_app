@@ -415,17 +415,17 @@ EXCL = [
 CSS = """
 .skq{font-family:'Liberation Sans',Arial,sans-serif;font-size:9.6pt;color:#222}
 .skq .hdr{width:100%}
-.skq .band{background:#C8233C;color:#fff;font-weight:bold;text-align:center;padding:5px;font-size:10.5pt}
+.skq .band{background:#C82030;color:#fff;font-weight:bold;text-align:center;padding:5px;font-size:10.5pt}
 .skq .addr td{border:0;vertical-align:top;padding:2px}
 .skq .k{font-style:italic;color:#777;width:95px;display:inline-block}
-.skq .subj{color:#1D4F86;font-weight:bold;font-size:11pt;margin:10px 0 4px}
-.skq .bar{background:#2A6EB4;color:#fff;font-weight:bold;padding:4px 6px;margin:12px 0 4px;text-transform:uppercase}
+.skq .subj{color:#135F86;font-weight:bold;font-size:11pt;margin:10px 0 4px}
+.skq .bar{background:#1878A8;color:#fff;font-weight:bold;padding:4px 6px;margin:12px 0 4px;text-transform:uppercase}
 .skq table.p{border-collapse:collapse;width:100%}
-.skq table.p th{background:#1D4F86;color:#fff;padding:4px}
+.skq table.p th{background:#135F86;color:#fff;padding:4px}
 .skq table.p td{border:1px solid #BFBFBF;padding:4px}
 .skq .c{text-align:center}.skq .r{text-align:right}.skq .b{font-weight:bold}
 .skq tr.tot td{background:#FFF2CC;font-weight:bold}.skq tr.gst td{background:#F2F2F2;font-weight:bold}
-.skq .words{color:#1D4F86;font-weight:bold;font-style:italic;margin:5px 0}
+.skq .words{color:#135F86;font-weight:bold;font-style:italic;margin:5px 0}
 .skq ol{margin:2px 0 2px 22px;padding:0}.skq li{margin:2px 0}
 """
 

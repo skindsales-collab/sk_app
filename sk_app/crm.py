@@ -257,7 +257,7 @@ def detail(doctype: str, name: str) -> dict:
 	customer = erp_flow.customer_of(deal["name"]) if deal else None
 	return {
 		"gate": _gate(doctype, name),
-		"customer": customer and {"name": customer, "missing": [t for _k, t in gates.customer_missing(customer)]},
+		"customer": customer and _customer_gaps(customer),
 		"doctype": doctype,
 		"doc": doc,
 		"notes": notes,
@@ -702,3 +702,11 @@ def setup_deal_customer_column():
 		ensure_deal_list_views()
 	except Exception:
 		frappe.log_error("SK App deals Customer Name column")
+
+
+def _customer_gaps(customer: str) -> dict:
+	"""SK 29-Oct (Aditya: details asked 3 times): the deal screen asks only what the customer still lacks."""
+	from sk_app import gates
+
+	miss = gates.customer_missing(customer)
+	return {"name": customer, "missing": [t for _k, t in miss], "keys": sorted({k for k, _t in miss})}

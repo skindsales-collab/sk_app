@@ -1879,10 +1879,10 @@ def flow_submit_quotation(quotation):
 
 
 @frappe.whitelist(methods=["POST"])
-def flow_make_quotation(deal, items, valid_days=15, note=None):
+def flow_make_quotation(deal=None, items=None, valid_days=15, note=None, lead=None):
 	from sk_app import erp_flow
 
-	return erp_flow.make_quotation(_me().user, deal, _list(items), int(valid_days or 15), note)
+	return erp_flow.make_quotation(_me().user, deal, _list(items), int(valid_days or 15), note, lead)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -2029,3 +2029,26 @@ def product_make(template=None, length=None, width=None, height=None, vendor=Non
 	from sk_app import new_product
 
 	return new_product.make(_me().user, template or None, length, width, height, vendor or None, new_vendor, item_name, cint(subcontracted))
+
+
+# ---------- Check & Submit (SK 29-Oct) ----------
+
+@frappe.whitelist()
+def drafts_mine():
+	from sk_app import drafts
+
+	return drafts.my_drafts(_me().user)
+
+
+@frappe.whitelist()
+def drafts_lines(doctype, name):
+	from sk_app import drafts
+
+	return drafts.lines(_me().user, doctype, name)
+
+
+@frappe.whitelist(methods=["POST"])
+def drafts_submit(doctype, name):
+	from sk_app import drafts
+
+	return drafts.submit(_me().user, doctype, name)
