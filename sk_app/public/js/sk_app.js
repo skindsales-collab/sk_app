@@ -404,10 +404,12 @@
 		progress_photos: "Progress Photos",
 		ready_dispatch: "Ready to Dispatch",
 		lead_time: "Days per 100 sq ft",
-		lt_help: "PO received date to invoice date, per 100 sq ft of cabin. Average is weighted by area.",
+		lt_help: "Each cabin: days from PO to invoice ÷ (sq ft ÷ 100). A month = the average of its invoiced cabins.",
+		lt_months: "By invoice month",
+		lt_all: "all months",
 		lt_avg: "days to make 100 sq ft",
 		lt_cabins: "invoiced cabins",
-		lt_open: "In production: ready by (at average speed)",
+		lt_open: "In production: ready by (average of similar-size cabins)",
 		lt_done: "Invoiced cabins",
 		lt_none: "No cabin has both a PO date and an invoice date yet.",
 		lt_approx: "PO month only",
@@ -468,10 +470,12 @@
 		progress_photos: "प्रगती फोटो",
 		ready_dispatch: "डिस्पॅचला तयार",
 		lead_time: "१०० चौ.फूट साठी दिवस",
-		lt_help: "PO मिळाल्यापासून इनव्हॉइसपर्यंत दिवस, १०० चौ.फूट केबिनसाठी. सरासरी क्षेत्रफळानुसार.",
+		lt_help: "प्रत्येक केबिन: PO ते इनव्हॉइस दिवस ÷ (चौ.फूट ÷ १००). महिना = त्या महिन्यात इनव्हॉइस झालेल्या केबिनची सरासरी.",
+		lt_months: "इनव्हॉइस महिन्यानुसार",
+		lt_all: "सर्व महिने",
 		lt_avg: "दिवस १०० चौ.फूट साठी",
 		lt_cabins: "इनव्हॉइस झालेल्या केबिन",
-		lt_open: "उत्पादनात: सरासरी वेगाने तयार होण्याची तारीख",
+		lt_open: "उत्पादनात: याच आकाराच्या केबिनच्या सरासरीने तयार होण्याची तारीख",
 		lt_done: "इनव्हॉइस झालेल्या केबिन",
 		lt_none: "अजून कोणत्याही केबिनला PO तारीख आणि इनव्हॉइस तारीख दोन्ही नाहीत.",
 		lt_approx: "फक्त PO महिना",
@@ -4908,7 +4912,9 @@
 		const po = (r) => `PO ${esc(r.po_date || t("not_set"))}${r.approx ? ` (${t("lt_approx")})` : ""}`;
 		root.innerHTML = header(t("lead_time")) + `<main><p class="sk-note">${t("lt_help")}</p>
 			${d.average ? `<section class="sk-card"><div class="sk-card-text" style="font-size:2em"><b>${num(d.average)}</b></div>
-				<div class="sk-card-meta">${t("lt_avg")} · ${d.count} ${t("lt_cabins")}</div></section>` : `<p class="sk-note">${t("lt_none")}</p>`}
+				<div class="sk-card-meta">${t("lt_avg")} · ${d.count} ${t("lt_cabins")} · ${t("lt_all")}</div></section>` : `<p class="sk-note">${t("lt_none")}</p>`}
+			${(d.months || []).length ? `<h3 class="sk-h">${t("lt_months")}</h3><ul class="sk-list">${d.months.map((m) => li(esc(m.month),
+				`${m.count} ${t("lt_cabins")}`, `<span class="sk-chip on">${num(m.value)} / 100</span>`)).join("")}</ul>` : ""}
 			${d.open.length ? `<h3 class="sk-h">${t("lt_open")}</h3><ul class="sk-list">${d.open.map((r) => li(name(r),
 				`${esc(r.size)} · ${num(r.sqft)} sq ft · ${po(r)}`, r.due ? `<span class="sk-chip ${r.late ? "" : "on"}">${r.late ? "⚠ " : ""}${esc(r.due)}</span>` : "")).join("")}</ul>` : ""}
 			${d.done.length ? `<h3 class="sk-h">${t("lt_done")}</h3><ul class="sk-list">${d.done.map((r) => li(name(r),

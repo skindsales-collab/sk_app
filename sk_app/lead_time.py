@@ -6,6 +6,10 @@ Each cabin Project keeps its PO date, invoice date and area. Live, with no night
 - the first Sales Invoice submitted for the Project gives the invoice date;
 - every Project save works out the days and the days per 100 sq ft.
 Production sees each cabin and the average, and for open cabins the date the average says they should be ready.
+
+SK 29-Oct worked example: a month's figure is the plain average of each cabin's days per 100 sq ft, cabins taken by
+their invoice month (10x20 in 8 days = 4, 10x10 in 5 days = 5 ...; Sep = 54, Oct = 19). Open cabins are due after the
+average days of invoiced cabins of a similar size, since a small cabin does not take a fraction of a big one's time.
 """
 
 import re
@@ -114,6 +118,38 @@ def on_sales_invoice_submit(doc, method=None):
 		_set_project(project, {"sk_invoice": doc.name, "sk_invoice_date": doc.posting_date})
 
 
+# similar-size bands for the ready date (sq ft): small security / FRP, toilets and small offices, offices, big cabins
+BANDS = (50, 150, 300)
+
+
+def band(sqft) -> int:
+	return sum(1 for b in BANDS if flt(sqft) >= b)
+
+
+def _done(filters=None) -> list:
+	return frappe.get_all("Project", filters={"sk_invoice_date": ["is", "set"], "sk_po_date": ["is", "set"],
+		"sk_days_per_100": [">", 0], **(filters or {})}, fields=["sk_sqft", "sk_days", "sk_days_per_100", "sk_invoice_date"],
+		limit=0)
+
+
+def month_value(start, end):
+	"""Plain average of the days per 100 sq ft of the cabins invoiced from start to end; None when there are none."""
+	if not frappe.get_meta("Project").has_field("sk_days_per_100"):
+		return None
+	rows = _done({"sk_invoice_date": ["between", [start, end]]})
+	return round(sum(flt(r.sk_days_per_100) for r in rows) / len(rows), 1) if rows else None
+
+
+def band_days(done: list) -> dict:
+	"""Average days PO to invoice per size band, and over all cabins (key None)."""
+	out = {}
+	for key in [None, *range(len(BANDS) + 1)]:
+		rows = [d for d in done if key is None or band(d["sqft"]) == key]
+		if rows:
+			out[key] = sum(flt(d["days"]) for d in rows) / len(rows)
+	return out
+
+
 def board(user: str) -> dict:
 	"""Production: each invoiced cabin's days and days per 100 sq ft, the average, and open cabins against it."""
 	from sk_app.cabin_projects import cabin_no, project_customer
@@ -132,19 +168,24 @@ def board(user: str) -> dict:
 			"approx": p.sk_po_date_approx, "invoice": p.sk_invoice, "invoice_date": str(p.sk_invoice_date or ""),
 			"days": p.sk_days, "per_100": flt(p.sk_days_per_100)}
 
-	done = [row(p) for p in rows if p.sk_invoice_date and p.sk_po_date]
-	# area-weighted: total days over total area, so one tiny cabin does not swing the figure
-	sqft = sum(d["sqft"] for d in done)
-	average = round(sum(flt(d["days"]) for d in done) * 100 / sqft, 1) if sqft else 0
+	done = [row(p) for p in rows if p.sk_invoice_date and p.sk_po_date and flt(p.sk_days_per_100) > 0]
+	average = round(sum(d["per_100"] for d in done) / len(done), 1) if done else 0
+	months = {}
+	for d in done:
+		months.setdefault(d["invoice_date"][:7], []).append(d["per_100"])
+	months = [{"month": getdate(m + "-01").strftime("%b-%y"), "count": len(v), "value": round(sum(v) / len(v), 1)}
+		for m, v in sorted(months.items(), reverse=True)]
+	days = band_days(done)
 	today = getdate(nowdate())
 	open_ = []
 	for p in rows:
 		if p.sk_invoice_date or p.status in ("Completed", "Cancelled"):
 			continue
 		r = row(p)
-		if average and p.sk_po_date:
-			due = add_days(p.sk_po_date, round(average * flt(p.sk_sqft) / 100))
+		typical = days.get(band(p.sk_sqft), days.get(None))
+		if typical and p.sk_po_date:
+			due = add_days(p.sk_po_date, round(typical))
 			r["due"] = str(due)
 			r["late"] = getdate(due) < today
 		open_.append(r)
-	return {"average": average, "count": len(done), "done": done, "open": open_}
+	return {"average": average, "count": len(done), "months": months, "done": done, "open": open_}

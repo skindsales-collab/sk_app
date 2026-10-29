@@ -286,8 +286,15 @@ def company(user: str) -> dict:
 # ---------- month by month (all other functions) ----------
 
 def production(user: str) -> dict:
-	"""SK 26-Oct: each month, the cabins finished that month: total days used ÷ total sq ft × 100."""
+	"""SK 26-Oct / 29-Oct: each month, days to build 100 sq ft. From the cabin Projects (PO to invoice, SK's worked
+	example: each cabin's days per 100 sq ft, plain average over the cabins invoiced that month); a month with no
+	invoiced cabin falls back to the Work Orders finished in it."""
+	from sk_app import lead_time
+
 	def value(start, end):
+		from_projects = lead_time.month_value(start, end)
+		if from_projects is not None:
+			return from_projects
 		days = area = 0.0
 		for w in frappe.get_all("Work Order", filters={"docstatus": 1, "status": "Completed", "actual_end_date": ["between", [f"{start} 00:00:00", f"{end} 23:59:59"]]},
 				fields=["item_name", "production_item", "actual_start_date", "planned_start_date", "creation", "actual_end_date"], limit=0):
@@ -299,7 +306,7 @@ def production(user: str) -> dict:
 			area += size
 		return round(days / area * 100, 1) if area else None
 	return _trend("Production", "Days to build 100 sq ft", "d", TARGETS["Production"], value, good_low=True,
-		need="Finish Work Orders in ERPNext (start and end dates) for cabins whose item name has the size, e.g. 12x10.")
+		need="Each cabin Project needs its size, PO date and invoice date (filled when its order and invoice are submitted).")
 
 
 PNL_PROJECTS = 30  # projects on Shraddha's chart, open ones first, then the latest finished

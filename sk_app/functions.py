@@ -193,7 +193,7 @@ MAIN_TILES = {
 	"Sales": ["new_lead", "my_leads", "follow_up", "team_leads", "my_deals"],
 	"Marketing": ["new_lead", "my_leads", "follow_up", "my_deals"],
 	"Machine Shifting": ["my_deals", "customers", "site_checklist", "complaints"],
-	"Production": ["to_plan", "job_cards", "need_material", "order_board"],
+	"Production": ["to_plan", "job_cards", "need_material", "order_board", "lead_time"],
 	"Quality": ["inspect", "final_check", "non_conformance", "el_points"],
 	"Stores": ["requisition", "store_requests", "receive", "issue"],
 	"Purchase": ["requisition", "buy_requests", "get_rates", "po_follow_up"],

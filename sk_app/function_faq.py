@@ -68,10 +68,12 @@ FUNCTION_FAQ = [
 		"Order Board shows every cabin stage by stage with the customer, product and delivery date. Late ones are red at the top.",
 		"ऑर्डर बोर्डवर प्रत्येक केबिन टप्प्यानुसार ग्राहक, उत्पादन आणि डिलिव्हरी तारखेसह दिसते. उशिराचे लाल रंगात वर दिसतात."),
 	("Production", 6, "What is the Production graph on my main screen?", "माझ्या मुख्य स्क्रीनवरील उत्पादन ग्राफ काय आहे?",
-		"Days to build 100 sq ft: total days of the cabins finished in the month ÷ their total sq ft × 100. Lower is better. "
-		"Tap 🎯 for the actions that bring it down.",
-		"100 चौ.फूट बनवण्याचे दिवस: महिन्यात पूर्ण झालेल्या केबिनचे एकूण दिवस ÷ त्यांचे एकूण चौ.फूट × 100. कमी असणे चांगले. "
-		"ते कमी करणाऱ्या कामांसाठी 🎯 दाबा."),
+		"Days to build 100 sq ft: for each cabin invoiced in the month, days from PO to invoice ÷ (its sq ft ÷ 100); the month "
+		"shows the average of these (e.g. 10x20 in 8 days = 4, 10x10 in 5 days = 5). Lower is better. Tap 🎯 for the actions "
+		"that bring it down; the ⏱️ tile shows each cabin.",
+		"100 चौ.फूट बनवण्याचे दिवस: महिन्यात इनव्हॉइस झालेल्या प्रत्येक केबिनचे PO ते इनव्हॉइस दिवस ÷ (त्याचे चौ.फूट ÷ 100); "
+		"महिन्याचा आकडा म्हणजे यांची सरासरी (उदा. 10x20 ला 8 दिवस = 4, 10x10 ला 5 दिवस = 5). कमी असणे चांगले. ते कमी करणाऱ्या "
+		"कामांसाठी 🎯 दाबा; ⏱️ टाइलवर प्रत्येक केबिन दिसते."),
 	("Production", 7, "A machine broke down or there is a safety problem.", "मशीन बंद पडले किंवा सुरक्षेची अडचण आहे.",
 		"Tap Report Problem, pick Machine or Safety, take a photo and speak what happened. The owner is told at once and it stays open "
 		"until it is fixed.",
