@@ -127,34 +127,28 @@ def _sender() -> str | None:
 	return frappe.db.get_value("Email Account", {"default_outgoing": 1, "enable_outgoing": 1}, "email_id")
 
 
-@frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(limit=10, seconds=60 * 60)
-def email_code(login):
-	"""Guest: send a login code to the e-mail of this mobile / e-mail. Same answer whether or not it has a login."""
-	user = _user_for_login(login)
+def _send_code(user: str) -> None:
 	email = frappe.db.get_value("User", user, "email") if user else None
-	if user and has_real_email(email):
-		sends_key = f"sk_email_sends:{user}"
-		sends = frappe.cache.get_value(sends_key) or 0
-		if sends >= MAX_SENDS_PER_HOUR:  # same answer as ever: never tells whether this login exists
-			return {"sent": True, "valid_minutes": EMAIL_VALID_SECONDS // 60}
-		frappe.cache.set_value(sends_key, sends + 1, expires_in_sec=60 * 60)
-		code = f"{secrets.randbelow(10**6):06d}"
-		frappe.cache.set_value(_email_key(user), {"hash": _hash(user, code), "tries": 0}, expires_in_sec=EMAIL_VALID_SECONDS)
-		try:
-			frappe.sendmail(recipients=[email], sender=_sender(), subject=_("SK App login code: {0}").format(code),
-				message=_("Your SK App login code is <b>{0}</b>. It is valid for 10 minutes. After login, set a new PIN.<br>"
-					"If you did not ask for it, ignore this mail.").format(code), now=True)
-		except Exception:
-			frappe.log_error("SK App e-mail login code failed")
-			frappe.throw(_("E-mail could not be sent. Please ask the CEO for a new PIN."))
-	return {"sent": True, "valid_minutes": EMAIL_VALID_SECONDS // 60}
+	if not (user and has_real_email(email)):
+		return
+	sends_key = f"sk_email_sends:{user}"
+	sends = frappe.cache.get_value(sends_key) or 0
+	if sends >= MAX_SENDS_PER_HOUR:  # same answer as ever: never tells whether this login exists
+		return
+	frappe.cache.set_value(sends_key, sends + 1, expires_in_sec=60 * 60)
+	code = f"{secrets.randbelow(10**6):06d}"
+	frappe.cache.set_value(_email_key(user), {"hash": _hash(user, code), "tries": 0}, expires_in_sec=EMAIL_VALID_SECONDS)
+	try:
+		frappe.sendmail(recipients=[email], sender=_sender(), subject=_("SK App login code: {0}").format(code),
+			message=_("Your SK App login code is <b>{0}</b>. It is valid for 10 minutes. After login, set a new PIN.<br>"
+				"If you did not ask for it, ignore this mail.").format(code), now=True)
+	except Exception:
+		frappe.log_error("SK App e-mail login code failed")
+		frappe.throw(_("E-mail could not be sent. Please ask the CEO for a new PIN."))
 
 
-@frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(limit=30, seconds=60 * 60)
-def email_verify(login, code):
-	user = _user_for_login(login)
+def _check_code(user: str | None, code) -> None:
+	"""Right code: forgotten; the app then asks for a new PIN without the old one. Wrong: AuthenticationError."""
 	wrong = _("Code is wrong or old. Please ask for a new code.")
 	saved = frappe.cache.get_value(_email_key(user)) if user else None
 	if not saved:
@@ -167,12 +161,44 @@ def email_verify(login, code):
 		frappe.cache.set_value(_email_key(user), saved, expires_in_sec=EMAIL_VALID_SECONDS)
 		frappe.throw(wrong, frappe.AuthenticationError)
 	frappe.cache.delete_value(_email_key(user))
-	# the app asks for a new PIN at once, without the old one
 	frappe.cache.set_value(f"sk_pin_free:{user}", 1, expires_in_sec=PIN_FREE_SECONDS)
 	if frappe.db.exists("SK App User", {"user": user}):
 		frappe.db.set_value("SK App User", {"user": user}, "must_set_pin", 1)
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=10, seconds=60 * 60)
+def email_code(login):
+	"""Guest: send a login code to the e-mail of this mobile / e-mail. Same answer whether or not it has a login."""
+	_send_code(_user_for_login(login))
+	return {"sent": True, "valid_minutes": EMAIL_VALID_SECONDS // 60}
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=30, seconds=60 * 60)
+def email_verify(login, code):
+	user = _user_for_login(login)
+	_check_code(user, code)
 	frappe.local.login_manager.login_as(user)
 	return {"ok": True}
+
+
+# SK 29-Oct (CEO locked out on the lock screen): the same code opens the locked app for the logged-in person
+def lock_email_code(user: str) -> dict:
+	_send_code(user)
+	return {"sent": True, "valid_minutes": EMAIL_VALID_SECONDS // 60}
+
+
+def lock_email_verify(user: str, code) -> dict:
+	from sk_app import applock
+
+	try:
+		_check_code(user, code)
+	except frappe.AuthenticationError:
+		# not an AuthenticationError to the browser: ERPNext would end the session on that
+		frappe.throw(_("Code is wrong or old. Please ask for a new code."))
+	applock._unlock(user, "Unlock e-mail code")
+	return applock.status(user)
 
 
 def pin_free(user: str) -> bool:

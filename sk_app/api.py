@@ -649,6 +649,19 @@ def unlock_pin(pin):
 
 
 @frappe.whitelist(methods=["POST"])
+@rate_limit(limit=10, seconds=60 * 60)
+def lock_email_code():
+	"""SK 29-Oct: forgot PIN on the lock screen → a code to the person's own e-mail."""
+	return otp.lock_email_code(_me(unlocked=False).user)
+
+
+@frappe.whitelist(methods=["POST"])
+@rate_limit(limit=30, seconds=60 * 60)
+def lock_email_verify(code):
+	return otp.lock_email_verify(_me(unlocked=False).user, code)
+
+
+@frappe.whitelist(methods=["POST"])
 def face_options(purpose="unlock"):
 	user = _me(unlocked=purpose == "setup").user
 	return applock.options(user, "setup" if purpose == "setup" else "unlock")

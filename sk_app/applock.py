@@ -44,7 +44,8 @@ def _key() -> str:
 
 def applies() -> bool:
 	"""Only phone / browser calls are locked (not background jobs, tests or the API key of the AI desk)."""
-	if not minutes() or frappe.session.user in ("Guest", None):
+	# SK 29-Oct: Administrator comes in through Frappe Cloud's own login and has no PIN to open the lock with
+	if not minutes() or frappe.session.user in ("Guest", "Administrator", None):
 		return False
 	request = getattr(frappe.local, "request", None)
 	if not request or not _sid() or _sid() == "Guest":
@@ -122,11 +123,14 @@ def keys(user: str) -> list:
 
 
 def status(user: str) -> dict:
+	from sk_app.otp import has_real_email
+
 	have = keys(user)
 	at = float(_state().get("at") or 0)
 	return {"locked": is_locked(), "minutes": minutes(), "has_key": bool(have), "pin_ok": True,
 		"just_unlocked": bool(at) and time.time() - at < 90,
-		"phones": [k.device for k in have], "name": frappe.utils.get_fullname(user)}
+		"phones": [k.device for k in have], "name": frappe.utils.get_fullname(user),
+		"email_code": has_real_email(frappe.db.get_value("User", user, "email"))}
 
 
 # ---------- PIN (always works; face / finger is the quick way once set up) ----------
