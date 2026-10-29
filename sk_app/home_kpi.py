@@ -346,33 +346,55 @@ def project_pnl(projects: list) -> dict:
 	return out
 
 
+def _invoiced_sale(projects: list, pnl: dict):
+	"""SK 29-Oct "P&L is applicable after invoice only": a project is invoiced when sale income is posted to it, or when
+	its submitted Sales Invoice is linked on the Project (sk_invoice, filled on invoice submit). An invoice linked to
+	several cabins without income posted to each is shared equally between them."""
+	if not frappe.get_meta("Project").has_field("sk_invoice"):
+		return
+	linked = {p.name: inv for p, inv in ((p, frappe.db.get_value("Project", p.name, "sk_invoice")) for p in projects) if inv}
+	share = {}
+	for inv in linked.values():
+		share[inv] = share.get(inv, 0) + 1
+	for name, inv in linked.items():
+		if not pnl[name]["sale"]:
+			net = frappe.db.get_value("Sales Invoice", {"name": inv, "docstatus": 1}, "base_net_total")
+			pnl[name]["sale"] = flt(net) / share[inv]
+
+
 def accounts(user: str) -> dict:
 	"""SK 29-Oct: Shraddha's graph shows how many projects there are and each project's own profit & loss, read live
 	from the ledger (sale less material, vendor / subcontract bills and labour posted to the project or its cost centre).
-	SK 26-Oct: the target is 100% of projects with a correct P&L, i.e. both their sale and their cost posted."""
+	"P&L is applicable after invoice only": until its sale invoice is submitted a cabin is work in progress and shows
+	only its cost so far. SK 26-Oct: target 100% of invoiced projects with a correct P&L, i.e. their cost posted too."""
 	projects = _pnl_projects()
 	pnl = project_pnl(projects)
+	_invoiced_sale(projects, pnl)
 	orders = {so: flt(v) for so, v in frappe.get_all("Sales Order", filters={"name": ["in", [p.sales_order for p in projects if p.sales_order] or [""]]},
 		fields=["name", "base_net_total"], as_list=True)}
 	rows = []
 	for p in projects:
 		v = pnl[p.name]
 		cost = v["material"] + v["bills"] + v["other"]
-		missing = [k for k, ok in (("order", p.sales_order), ("sale", v["sale"]), ("material", v["material"]),
-			("bills", v["bills"] or v["other"])) if not ok]
+		invoiced = v["sale"] > 0
+		missing = [k for k, ok in (("material", v["material"]), ("bills", v["bills"] or v["other"])) if not ok]
 		label = re.sub(r"^\s*Cabin\s+", "", (p.project_name or p.name).split("·")[0]).strip()
 		who = (p.project_name or "").split("·")
 		rows.append({"name": p.name, "label": f"{label} {who[1].strip()}" if len(who) > 1 else label, "status": p.status,
-			"order": orders.get(p.sales_order, 0), "sale": round(v["sale"]), "cost": round(cost), "material": round(v["material"]),
-			"bills": round(v["bills"]), "other": round(v["other"]), "profit": round(v["sale"] - cost),
-			"margin": round((v["sale"] - cost) * 100 / v["sale"], 1) if v["sale"] else None, "missing": missing})
-	ok = sum(1 for r in rows if r["sale"] and r["cost"])
-	total = {k: sum(r[k] for r in rows) for k in ("sale", "cost", "profit")}
-	total["order"] = round(sum(orders.values()))  # one order can cover several cabins (Jayostute 315-317)
+			"invoiced": invoiced, "order": orders.get(p.sales_order, 0), "sale": round(v["sale"]), "cost": round(cost),
+			"material": round(v["material"]), "bills": round(v["bills"]), "other": round(v["other"]),
+			"profit": round(v["sale"] - cost) if invoiced else None,
+			"margin": round((v["sale"] - cost) * 100 / v["sale"], 1) if invoiced else None, "missing": missing})
+	rows.sort(key=lambda r: not r["invoiced"])  # P&L first, then work in progress
+	done = [r for r in rows if r["invoiced"]]
+	ok = sum(1 for r in done if r["cost"])
+	total = {"sale": sum(r["sale"] for r in done), "cost": sum(r["cost"] for r in done), "profit": sum(r["profit"] for r in done),
+		"wip": sum(r["cost"] for r in rows if not r["invoiced"]), "order": round(sum(orders.values()))}
 	return {"kind": "projects", "function": "Accounts", "title": "Project profit & loss", "unit": "%", "target": TARGETS["Accounts"],
-		"good_low": False, "count": len(rows), "correct": ok, "pct": round(ok * 100 / len(rows)) if rows else None, "total": total,
-		"projects": rows, "need": "" if ok else
-			"Post each project's sale invoice, material issues and vendor / subcontract / labour bills to its Project or cost centre."}
+		"good_low": False, "count": len(rows), "invoiced": len(done), "correct": ok,
+		"pct": round(ok * 100 / len(done)) if done else None, "total": total, "projects": rows,
+		"need": "" if ok else "When a cabin is invoiced, post its material issues and vendor / subcontract / labour bills to its Project "
+			"or cost centre, so its profit & loss is right."}
 
 
 def hr(user: str) -> dict:

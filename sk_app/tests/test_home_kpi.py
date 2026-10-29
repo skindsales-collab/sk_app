@@ -90,7 +90,9 @@ class TestHomeKpi(IntegrationTestCase):
 		before = {r["name"]: r for r in home_kpi.accounts("Administrator")["projects"]}
 		self.assertIn(pid, before)
 		self.assertEqual(before[pid]["label"], "999 SK Test PnL")
-		self.assertIn("sale", before[pid]["missing"])
+		self.assertFalse(before[pid]["invoiced"])  # SK 29-Oct: no P&L before the invoice, only work in progress
+		self.assertIsNone(before[pid]["profit"])
+		self.assertNotIn("sale", before[pid]["missing"])
 		income = frappe.db.get_value("Account", {"company": company, "root_type": "Income", "is_group": 0})
 		expense = frappe.db.get_value("Account", {"company": company, "root_type": "Expense", "is_group": 0})
 		other = frappe.db.get_value("Account", {"company": company, "root_type": "Asset", "is_group": 0, "account_type": ["in", ["Cash", "Bank", ""]]})
@@ -103,7 +105,9 @@ class TestHomeKpi(IntegrationTestCase):
 		self.assertEqual(c["count"], len(c["projects"]))
 		r = next(r for r in c["projects"] if r["name"] == pid)
 		self.assertEqual((r["sale"] - before[pid]["sale"], r["cost"] - before[pid]["cost"]), (100000, 30000))
-		self.assertNotIn("sale", r["missing"])
+		self.assertTrue(r["invoiced"])
+		self.assertEqual(r["profit"], r["sale"] - r["cost"])
+		self.assertEqual(r["profit"] - (before[pid]["sale"] - before[pid]["cost"]), 70000)
 		self.assertIn("material", r["missing"])  # no material issue posted yet
 		self.assertNotIn("ERPNext Implementation", [x["label"] for x in c["projects"]])  # internal projects stay off
 
