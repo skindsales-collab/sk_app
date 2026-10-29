@@ -13,7 +13,7 @@ from frappe import _
 from frappe.utils import add_days, cint, flt, nowdate
 
 from sk_app.production import wo_customer
-from sk_app.store import _todo, _users_with_function, attach, need, try_submit
+from sk_app.store import _todo, _users_with_function, attach, material_pos, need, try_submit
 
 QUALITY = "Quality"
 FINAL_WORDS = ("final", "inspection", "qc")
@@ -47,7 +47,8 @@ def pending(user: str) -> dict:
 		pluck="reference_name"))
 	done_pr = checked("Purchase Receipt")
 	incoming = []
-	for pr in frappe.get_all("Purchase Receipt", filters={"docstatus": ["<", 2], "creation": [">=", add_days(nowdate(), -14)]},
+	# a labour GRN is checked as its job card's stage, not as incoming material
+	for pr in frappe.get_all("Purchase Receipt", filters={"docstatus": ["<", 2], "creation": [">=", add_days(nowdate(), -14)], **material_pos("Purchase Receipt")},
 			fields=["name", "supplier_name", "creation", "docstatus"], order_by="creation asc"):
 		if pr.name in done_pr:
 			continue

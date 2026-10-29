@@ -226,7 +226,9 @@ def stores(user: str) -> list[dict]:
 
 	issue = frappe.get_all("Material Request", filters={"docstatus": 1, "material_request_type": "Material Issue", "status": ["in", ["Pending", "Partially Ordered"]]},
 		fields=["name", "schedule_date", "transaction_date", "owner"], order_by="schedule_date asc", limit=0)
-	to_receive = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]]},
+	from sk_app.store import material_pos
+
+	to_receive = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]], **material_pos()},
 		fields=["name", "supplier_name", "schedule_date", "grand_total", "transaction_date"], order_by="schedule_date asc", limit=0)
 	moved = frappe.get_all("Stock Entry", filters={"posting_date": nowdate(), "docstatus": ["<", 2]}, fields=["name", "stock_entry_type", "total_outgoing_value"])
 	low = _safe(lambda: low_stock(user), []) or []
@@ -256,10 +258,13 @@ def purchase(user: str) -> list[dict]:
 		fields=["name", "schedule_date", "transaction_date"], order_by="transaction_date asc", limit=0)
 	rfq = frappe.get_all("Supplier Quotation", filters={"docstatus": ["<", 2], "transaction_date": [">=", add_days(nowdate(), -30)]},
 		fields=["name", "supplier_name", "grand_total", "transaction_date", "status"], limit=0) if _has("Supplier Quotation") else []
-	draft = frappe.get_all("Purchase Order", filters={"docstatus": 0}, fields=["name", "supplier_name", "grand_total", "creation"], order_by="creation asc", limit=0)
-	sent = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]]},
+	from sk_app.store import material_pos
+
+	mat = material_pos()  # labour POs: own chain (Rushi → CEO → GRN when the job is done)
+	draft = frappe.get_all("Purchase Order", filters={"docstatus": 0, **mat}, fields=["name", "supplier_name", "grand_total", "creation"], order_by="creation asc", limit=0)
+	sent = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]], **mat},
 		fields=["name", "supplier_name", "grand_total", "schedule_date", "transaction_date"], order_by="schedule_date asc", limit=0)
-	got = frappe.get_all("Purchase Receipt", filters={"docstatus": ["<", 2], "posting_date": [">=", get_first_day(getdate())]},
+	got = frappe.get_all("Purchase Receipt", filters={"docstatus": ["<", 2], "posting_date": [">=", get_first_day(getdate())], **material_pos("Purchase Receipt")},
 		fields=["name", "supplier_name", "grand_total", "posting_date", "per_billed"], limit=0)
 	bills = frappe.get_all("Purchase Invoice", filters={"docstatus": 0}, fields=["name", "supplier_name", "grand_total", "creation"], limit=0)
 	limit = po_limit()

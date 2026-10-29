@@ -144,7 +144,9 @@ def check_bill(v: dict) -> list:
 		rows.append(_row("bill_no", "Bill no", bill, "red" if dup else "green", f"Already entered: {dup}" if dup else None))
 	amt = frappe.utils.flt(v.get("amount"))
 	if amt and sup:
-		pos = frappe.get_all("Purchase Order", filters={"supplier": sup, "docstatus": 1, "per_billed": ["<", 100]},
+		from sk_app.store import material_pos
+
+		pos = frappe.get_all("Purchase Order", filters={"supplier": sup, "docstatus": 1, "per_billed": ["<", 100], **material_pos()},
 			fields=["name", "grand_total"], limit=20)
 		hit = [p.name for p in pos if abs(frappe.utils.flt(p.grand_total) - amt) <= max(1, amt * 0.02)]
 		rows.append(_row("grand_total", "Bill total", amt, "green" if hit else "amber",

@@ -327,7 +327,7 @@ def badges(user: str, functions: list[str]) -> dict:
 	if PURCHASE in functions:
 		out["buy_requests"] = len(material_requests(user, "purchase"))
 		out["po_follow_up"] = frappe.db.count("Purchase Order", {"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]],
-			"schedule_date": ["<=", nowdate()]})
+			"schedule_date": ["<=", nowdate()], **material_pos()})
 	if "Management" in functions:
 		from sk_app.requisition import badges as req_badges
 

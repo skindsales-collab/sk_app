@@ -46,8 +46,9 @@ def ensure_setup():
 	}, update=True)
 	# draft POs that waited for SK under the old Rs limit stay in the CEO's list
 	from sk_app.purchase import po_limit
+	from sk_app.store import material_pos
 
-	for name in frappe.get_all("Purchase Order", filters={"docstatus": 0, "grand_total": [">", po_limit()]}, pluck="name"):
+	for name in frappe.get_all("Purchase Order", filters={"docstatus": 0, "grand_total": [">", po_limit()], **material_pos()}, pluck="name"):
 		frappe.db.set_value("Purchase Order", name, "sk_needs_ceo", 1, update_modified=False)
 
 

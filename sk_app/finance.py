@@ -11,7 +11,7 @@ from frappe import _
 from frappe.utils import add_days, cint, date_diff, flt, fmt_money, get_first_day, getdate, nowdate
 
 from sk_app.purchase import po_limit
-from sk_app.store import _company, _todo, _users_with_function, attach, need, try_submit
+from sk_app.store import _company, _todo, _users_with_function, attach, material_pos, need, try_submit
 
 ACCOUNTS = "Accounts"
 MANAGEMENT = "Management"
@@ -188,11 +188,12 @@ def bills_to_post(user: str) -> dict:
 		p["supplier_name"] = frappe.db.get_value("Supplier", p.reference_name, "supplier_name")
 		p["photo"] = frappe.db.get_value("File", {"attached_to_doctype": "Supplier", "attached_to_name": p.reference_name},
 			"file_url", order_by="creation desc")
-		p["orders"] = frappe.get_all("Purchase Order", filters={"supplier": p.reference_name, "docstatus": 1, "per_billed": ["<", 100]},
+		# labour POs are billed by themselves from their GRN after Quality (SK 29-Oct): not offered here
+		p["orders"] = frappe.get_all("Purchase Order", filters={"supplier": p.reference_name, "docstatus": 1, "per_billed": ["<", 100], **material_pos()},
 			fields=["name", "grand_total", "transaction_date"], order_by="creation desc", limit=10)
 		# the bill can also be made from the store's receipt (received against the PO)
 		p["receipts"] = frappe.get_all("Purchase Receipt", filters={"supplier": p.reference_name, "docstatus": 1, "per_billed": ["<", 100],
-			"is_return": 0}, fields=["name", "grand_total", "posting_date", "supplier_delivery_note"], order_by="creation desc", limit=10)
+			"is_return": 0, **material_pos("Purchase Receipt")}, fields=["name", "grand_total", "posting_date", "supplier_delivery_note"], order_by="creation desc", limit=10)
 		for x in p["receipts"]:
 			x["posting_date"] = str(x.posting_date)
 		p["creation"] = str(p.creation)

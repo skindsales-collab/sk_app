@@ -436,7 +436,10 @@ def quality(user: str) -> dict:
 
 def purchase(user: str) -> dict:
 	def value(start, end):
-		pos = frappe.get_all("Purchase Order", filters={"docstatus": 1, "schedule_date": ["between", [start, end]]}, fields=["name", "schedule_date"], limit=0)
+		from sk_app.store import material_pos
+
+		pos = frappe.get_all("Purchase Order", filters={"docstatus": 1, "schedule_date": ["between", [start, end]], **material_pos()},
+			fields=["name", "schedule_date"], limit=0)  # labour POs are received when the job is done, not on a supplier date
 		if not pos:
 			return None
 		got = {}

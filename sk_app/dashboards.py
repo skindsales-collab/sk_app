@@ -480,8 +480,9 @@ def _attention() -> list[dict]:
 	if old:
 		out.append({"label": "Dues over 60 days", "rows": [_row(r.customer_name, f"oldest bill {r.late} days", r.outstanding_amount, "Customer", r.name, "red") for r in old[:20]]})
 	from sk_app.purchase import po_limit
+	from sk_app.store import material_pos
 
-	pos = _safe(lambda: frappe.get_all("Purchase Order", filters={"docstatus": 0, "grand_total": [">", po_limit()]},
+	pos = _safe(lambda: frappe.get_all("Purchase Order", filters={"docstatus": 0, "grand_total": [">", po_limit()], **material_pos()},
 		fields=["name", "supplier_name", "grand_total"], order_by="creation asc"), [])
 	if pos:
 		out.append({"label": "POs waiting for your OK", "rows": [_row(p.supplier_name, "PO to approve", p.grand_total, "Purchase Order", p.name, "amber") for p in pos]})
@@ -641,17 +642,19 @@ def _manufacturing(start, end, ps, pe, segment):
 
 def _purchase(start, end, ps, pe, segment):
 	from sk_app.purchase import po_limit
+	from sk_app.store import material_pos
 
-	open_po = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive", "To Bill"]]},
+	mat = material_pos()  # labour POs have their own tile (Rushi → CEO) and GRN
+	open_po = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive", "To Bill"]], **mat},
 		fields=["name", "supplier_name", "grand_total", "schedule_date", "per_received"], order_by="schedule_date asc", limit=0)
-	waiting = frappe.get_all("Purchase Order", filters={"docstatus": 0}, fields=["name", "supplier_name", "grand_total", "creation"],
+	waiting = frappe.get_all("Purchase Order", filters={"docstatus": 0, **mat}, fields=["name", "supplier_name", "grand_total", "creation"],
 		order_by="creation asc", limit=0)
 	late = [p for p in open_po if p.schedule_date and getdate(p.schedule_date) < getdate() and flt(p.per_received) < 100]
 	reqs = frappe.get_all("Material Request", filters={"docstatus": 1, "material_request_type": "Purchase", "status": ["in", ["Pending", "Partially Ordered"]]},
 		fields=["name", "schedule_date", "status"], limit=0)
 	limit = po_limit()
 	return [
-		_safe(lambda: _count_chart("po_chart", "Purchase orders", "Purchase Order", "transaction_date", {"docstatus": 1})),
+		_safe(lambda: _count_chart("po_chart", "Purchase orders", "Purchase Order", "transaction_date", {"docstatus": 1, **mat})),
 		_card("open_po", "Open POs", sum(flt(p.grand_total) for p in open_po), "money", None,
 			[_row(p.supplier_name, f"needed by {p.schedule_date}", p.grand_total, "Purchase Order", p.name) for p in open_po]),
 		_card("approvals", "POs waiting (draft)", len(waiting), "count", None,
@@ -667,15 +670,16 @@ def _purchase(start, end, ps, pe, segment):
 
 def _store(start, end, ps, pe, segment, user=None):
 	value = sum(flt(v) for v in frappe.get_all("Bin", pluck="stock_value"))
-	from sk_app.store import low_stock
+	from sk_app.store import low_stock, material_pos
 
 	low = _safe(lambda: low_stock(user), []) or []
 	today = nowdate()
-	receipts = frappe.get_all("Purchase Receipt", filters={"posting_date": today, "docstatus": ["<", 2]}, fields=["name", "supplier_name", "grand_total"])
+	mat = material_pos("Purchase Receipt")  # a labour GRN is not material received by Store
+	receipts = frappe.get_all("Purchase Receipt", filters={"posting_date": today, "docstatus": ["<", 2], **mat}, fields=["name", "supplier_name", "grand_total"])
 	issues = frappe.get_all("Stock Entry", filters={"posting_date": today, "docstatus": ["<", 2]}, fields=["name", "stock_entry_type", "total_outgoing_value"])
 	dispatch = frappe.get_all("Delivery Note", filters={"posting_date": today, "docstatus": ["<", 2]}, fields=["name", "customer_name", "base_net_total"])
 	return [
-		_safe(lambda: _count_chart("rec_chart", "Receipts", "Purchase Receipt", "posting_date", {"docstatus": 1})),
+		_safe(lambda: _count_chart("rec_chart", "Receipts", "Purchase Receipt", "posting_date", {"docstatus": 1, **mat})),
 		_card("stock_value", "Stock value", value, "money"),
 		_card("low", "Low stock items", len(low), "count", None,
 			[_row(r["item_name"] or r["item_code"], f"{r['warehouse']} · have {r['qty']} / level {r['level']}", None, "Item", r["item_code"], "red") for r in low],
