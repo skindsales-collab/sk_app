@@ -27,8 +27,18 @@
 		<button class="sk-btn {{ 'wide' if otp else 'go wide' }}" type="submit">Login with PIN · पिनने लॉगिन</button>
 		<p id="l-msg" class="sk-login-msg"></p>
 	</form>
-	<button class="sk-btn wide" type="button" id="forgot-pin">🔑 Forgot PIN / password? · पिन / पासवर्ड विसरलात?</button>
-	<p class="sk-login-help">Type your mobile number above, then tap. The CEO approves and sends you a new PIN. · वर मोबाईल नंबर टाका आणि दाबा. CEO मंजूर करून नवीन पिन पाठवतील.</p>
+	<details class="sk-forgot">
+		<summary class="sk-btn wide">🔑 Forgot PIN / password? · पिन / पासवर्ड विसरलात?</summary>
+		<label class="sk-field"><span>Your e-mail or mobile number · तुमचा ईमेल किंवा मोबाईल नंबर</span>
+			<input id="f-login" type="text" autocomplete="username"></label>
+		<button class="sk-btn go wide" type="button" id="f-send">📧 Send code to my e-mail · ईमेलवर कोड पाठवा</button>
+		<label class="sk-field" id="f-code-row" hidden><span>Code from the e-mail · ईमेलमधील कोड</span>
+			<input id="f-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6"></label>
+		<button class="sk-btn ok wide" type="button" id="f-verify" hidden>Login and set new PIN · लॉगिन करा, नवीन पिन ठेवा</button>
+		<p class="sk-login-help">No e-mail? Type your mobile number and ask the CEO. · ईमेल नाही? मोबाईल नंबर टाकून CEO ला विचारा.</p>
+		<button class="sk-btn wide" type="button" id="forgot-pin">🙋 Ask the CEO for a new PIN · CEO कडे नवीन पिन मागा</button>
+		<p id="f-msg" class="sk-login-msg"></p>
+	</details>
 	<a class="sk-link" href="/login?redirect-to=/sk">Login with email (optional) · ईमेलने लॉगिन</a>
 </main>
 <script>
@@ -95,14 +105,44 @@
 			}
 		});
 	})();
+	// SK 29-Oct: forgot PIN → a code by e-mail (CEO / admin and staff with an e-mail); then the app asks for a new PIN
+	const fmsg = document.getElementById("f-msg");
+	const fsay = (t) => { fmsg.textContent = t; };
+	const flogin = () => {
+		const v = document.getElementById("f-login").value.trim() || document.getElementById("l-mobile").value.trim();
+		if (!v) fsay("Please type your e-mail or mobile number · ईमेल किंवा मोबाईल नंबर टाका");
+		return v;
+	};
+	document.getElementById("f-send").addEventListener("click", async (ev) => {
+		const v = flogin();
+		if (!v) return;
+		ev.target.disabled = true;
+		fsay("…");
+		const r = await post("/api/method/sk_app.otp.email_code", { login: v });
+		ev.target.disabled = false;
+		if (!r.ok) { fsay(r.status === 429 ? "Too many tries. Wait an hour · खूप प्रयत्न झाले, एक तास थांबा" : (r.text || "Please try again · पुन्हा प्रयत्न करा")); return; }
+		document.getElementById("f-code-row").hidden = false;
+		document.getElementById("f-verify").hidden = false;
+		document.getElementById("f-code").focus();
+		fsay("If this login has an e-mail, the code is sent there (check Spam too). Valid 10 minutes. · या लॉगिनला ईमेल असल्यास कोड तिथे पाठवला (Spam पण पाहा). 10 मिनिटे चालेल.");
+	});
+	document.getElementById("f-verify").addEventListener("click", async () => {
+		const v = flogin();
+		if (!v) return;
+		const r = await post("/api/method/sk_app.otp.email_verify", { login: v, code: document.getElementById("f-code").value });
+		if (r.ok) { window.location.reload(); return; }
+		fsay(r.text || "Code is wrong · कोड चुकीचा");
+	});
 	// SK 28-Oct: forgot PIN / password → request to the CEO; the answer is the same whether or not the number has a login
 	document.getElementById("forgot-pin").addEventListener("click", async (ev) => {
-		const m = mobile();
-		if (!m) return;
+		let m = document.getElementById("f-login").value.replace(/\D/g, "");
+		if (m.length === 12 && m.startsWith("91")) m = m.slice(2);
+		if (m.length !== 10) m = mobile();
+		if (!m) { fsay("Please type your 10-digit mobile number · 10 अंकी मोबाईल नंबर टाका"); return; }
 		ev.target.disabled = true;
-		say("…");
+		fsay("…");
 		const r = await post("/api/method/sk_app.api.forgot_pin", { mobile: m });
-		say(r.ok ? "Request sent to the CEO. You will get a new PIN by WhatsApp or call; then set your own PIN. · विनंती CEO कडे गेली. नवीन पिन WhatsApp / कॉलवर मिळेल; मग स्वतःचा पिन ठेवा."
+		fsay(r.ok ? "Request sent to the CEO. You will get a new PIN by WhatsApp or call; then set your own PIN. · विनंती CEO कडे गेली. नवीन पिन WhatsApp / कॉलवर मिळेल; मग स्वतःचा पिन ठेवा."
 			: r.status === 429 ? "Too many tries. Wait an hour · खूप प्रयत्न झाले, एक तास थांबा" : (r.text || "Please try again · पुन्हा प्रयत्न करा"));
 		ev.target.disabled = false;
 	});

@@ -7,7 +7,7 @@ from frappe import _
 from frappe.rate_limiter import rate_limit
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import activities, ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, photocheck, production, products, purchase, quality, requisition, sales_owner, segments, store, sub_bills, training, view_member, work
+from sk_app import activities, ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, otp, photocheck, production, products, purchase, quality, requisition, sales_owner, segments, store, sub_bills, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -83,6 +83,7 @@ def home():
 		# SK: a person in several functions sees all of them on one Home, one labelled row each
 		"sections": sections,
 		"must_set_pin": bool(frappe.db.get_value("SK App User", profile.name, "must_set_pin")),
+		"pin_free": otp.pin_free(profile.user),
 		"card": _latest_card(profile.user),
 		"new_files": crm.files_to_send(profile.user), "day_report_sent": bool(day_report._find(profile.user, getdate())),
 		"due_reminders": comms.due_reminders(profile.user), "badges": _colours(profile, functions), "gate_pending": _gate_pending(profile.user)}
