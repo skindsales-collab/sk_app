@@ -53,3 +53,13 @@ class TestCabinProjects(IntegrationTestCase):
 		self.assertFalse(frappe.db.get_value("Project", self.project, "sk_po_date_approx"))
 		lead_time._fill(self.project, {"sk_po_date": "2026-10-20"})  # a real date stays
 		self.assertEqual(str(frappe.db.get_value("Project", self.project, "sk_po_date")), "2026-10-09")
+
+	def test_ready_date_by_similar_size(self):
+		from sk_app import lead_time
+
+		self.assertEqual([lead_time.band(x) for x in (9, 36, 120, 200, 480)], [0, 0, 1, 2, 3])
+		done = [{"sqft": 36, "days": 30}, {"sqft": 36, "days": 20}, {"sqft": 300, "days": 40}]
+		days = lead_time.band_days(done)
+		self.assertEqual(days[0], 25)  # small cabins: their own average, not a share of a big cabin's time
+		self.assertEqual(days[3], 40)
+		self.assertEqual(days[None], 30)
