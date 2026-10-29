@@ -59,12 +59,12 @@ def rules(user: str, functions: list[str]) -> list[dict]:
 				out.append({"key": "trend", "term": "long", "days": 7, "priority": "Medium",
 					"text": f"Bring {card['title']} to the target {card['target']}{card['unit']}",
 					"why": f"{last['m']}: {last['v']}{card['unit']}"})
-	elif card and card["kind"] == "projects" and card["count"] and card["correct"] < card["count"]:
-		# SK 29-Oct: each project's P&L is only right once its sale and its cost are both posted to it
-		gaps = [r for r in card["projects"] if r["missing"]]
+	elif card and card["kind"] == "projects" and card["invoiced"] and card["correct"] < card["invoiced"]:
+		# SK 29-Oct: P&L applies after the invoice; an invoiced project's P&L is only right once its cost is posted too
+		gaps = [r for r in card["projects"] if r["invoiced"] and r["missing"]]
 		out.append({"key": "projects", "term": "short", "days": 1, "priority": "High",
-			"text": f"Post the missing sale / material / bills of {len(gaps)} projects, first {', '.join(r['label'] for r in gaps[:3])}",
-			"why": f"{card['correct']} of {card['count']} projects have both sale and cost posted (target {card['target']}%)"})
+			"text": f"Post the material / bills of {len(gaps)} invoiced projects, first {', '.join(r['label'] for r in gaps[:3])}",
+			"why": f"{card['correct']} of {card['invoiced']} invoiced projects have their cost posted (target {card['target']}%)"})
 	if card and card.get("need"):
 		out.append({"key": "start", "term": "long", "days": 7, "priority": "Medium", "text": f"Start here: {card['need']}",
 			"why": "Your graph has no data in ERPNext yet"})

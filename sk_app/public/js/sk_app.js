@@ -966,7 +966,7 @@
 		ka_new: "New action (what will lift the graph?)", ka_add: "Add action", ka_what_done: "What did you do?", ka_proof: "Proof photo",
 		d_title: "Decide now", d_gap: "gap to target", d_none: "Nothing late. Good work.",
 		pp_projects: "projects", pp_correct: "P&L correct", pp_sale: "Sale", pp_cost: "Cost", pp_profit: "Profit", pp_loss: "Loss",
-		pp_order: "Order", pp_miss: "Missing", pp_miss_order: "order", pp_miss_sale: "sale invoice", pp_miss_material: "material issue", pp_miss_bills: "bills / labour",
+		pp_order: "Order", pp_invoiced: "invoiced", pp_wip: "Work in progress", pp_miss: "Missing", pp_miss_order: "order", pp_miss_sale: "sale invoice", pp_miss_material: "material issue", pp_miss_bills: "bills / labour",
 		el_points: "Electrical points", el_month: "Points this month", el_pts: "points", el_light: "Light points", el_fan: "Fan points",
 		el_socket_5a: "5A sockets", el_socket_15a: "15A sockets", el_ac_point: "AC points", el_mcb_db: "MCB / DB", el_earthing: "Earthing", el_other_points: "Other points" });
 	Object.assign(T.Marathi, { k_of: "पैकी", k_no_target: "टार्गेट ठरलेले नाही", k_behind: "मागे", k_on_track: "बरोबर चालू", k_target: "टार्गेट", k_off: "टार्गेटपेक्षा कमी",
@@ -974,7 +974,7 @@
 		"kt_PO booking": "PO बुकिंग", "kt_Team PO booking": "टीम PO बुकिंग", "kt_Non-Cabin sale": "नॉन-केबिन विक्री", "kt_Order booking & invoices": "ऑर्डर बुकिंग व इनव्हॉइस",
 		"kt_Days to build 100 sq ft": "100 चौ.फूट बनवायला दिवस", "kt_Projects with correct P&L": "बरोबर नफा-तोटा असलेले प्रोजेक्ट",
 		"kt_Project profit & loss": "प्रोजेक्टनुसार नफा-तोटा", pp_projects: "प्रोजेक्ट", pp_correct: "नफा-तोटा बरोबर", pp_sale: "विक्री", pp_cost: "खर्च",
-		pp_profit: "नफा", pp_loss: "तोटा", pp_order: "ऑर्डर", pp_miss: "बाकी", pp_miss_order: "ऑर्डर", pp_miss_sale: "विक्री इनव्हॉइस",
+		pp_profit: "नफा", pp_loss: "तोटा", pp_order: "ऑर्डर", pp_invoiced: "इनव्हॉइस झाले", pp_wip: "काम चालू", pp_miss: "बाकी", pp_miss_order: "ऑर्डर", pp_miss_sale: "विक्री इनव्हॉइस",
 		pp_miss_material: "माल इश्यू", pp_miss_bills: "बिल / मजुरी", "kt_Days to recruit": "भरतीसाठी दिवस",
 		"kt_Stock accuracy": "स्टॉक अचूकता", "kt_QC first-time pass": "QC पहिल्यांदा पास", "kt_POs received on time": "वेळेवर आलेले PO",
 		"kt_ERP tasks finished": "पूर्ण ERP कामे", "kt_Jobs finished": "पूर्ण कामे",
@@ -1764,7 +1764,7 @@
 		const c = kpiData && kpiData.chart;
 		if (!c) return null;
 		// SK 29-Oct: Accounts, % of projects whose sale and cost are both posted
-		if (c.kind === "projects") return c.count ? { actual: c.pct, target: c.target, gap: Math.max(0, c.target - c.pct), unit: "%", month: "" } : null;
+		if (c.kind === "projects") return c.invoiced ? { actual: c.pct, target: c.target, gap: Math.max(0, c.target - c.pct), unit: "%", month: "" } : null;
 		if (c.kind === "money") {
 			const w = c.week, pts = w.lines[0].points, n = pts.length;
 			const actual = n ? pts[n - 1] : 0, due = n ? w.target[n - 1] : 0;
@@ -1789,9 +1789,11 @@
 			if (c.board) sub += `<br>📋 ${t("k_board")}: ${t("k_board_open")} ₹${kAmt(c.board.open)} · ${t("k_board_now")} <b>₹${kAmt(c.board.now)}</b>`;
 		} else if (c.kind === "projects") {
 			const tt = c.total;
-			sub = `<b>${c.count}</b> ${t("pp_projects")} · ${c.correct}/${c.count} ${t("pp_correct")} · ${t("pp_sale")} ₹${kAmt(tt.sale)} · ${t("pp_cost")} ₹${kAmt(tt.cost)} · `
-				+ `<b class="${tt.profit < 0 ? "sk-due" : "sk-ok"}">${t(tt.profit < 0 ? "pp_loss" : "pp_profit")} ₹${kAmt(Math.abs(tt.profit))}</b>`;
-			if (!c.correct && c.need) sub += `<br><span class="sk-due">${esc(c.need)}</span>`;
+			// SK 29-Oct "P&L is applicable after invoice only": invoiced projects give the P&L, the rest is work in progress
+			sub = `<b>${c.count}</b> ${t("pp_projects")} · ${c.invoiced} ${t("pp_invoiced")}${c.invoiced ? ` (${c.correct}/${c.invoiced} ${t("pp_correct")}) · ${t("pp_sale")} ₹${kAmt(tt.sale)} · ${t("pp_cost")} ₹${kAmt(tt.cost)} · `
+				+ `<b class="${tt.profit < 0 ? "sk-due" : "sk-ok"}">${t(tt.profit < 0 ? "pp_loss" : "pp_profit")} ₹${kAmt(Math.abs(tt.profit))}</b>` : ""}`
+				+ ` · ${t("pp_wip")} ₹${kAmt(tt.wip)}`;
+			if (c.invoiced && c.correct < c.invoiced && c.need) sub += `<br><span class="sk-due">${esc(c.need)}</span>`;
 		} else if (now) {
 			sub = `${now.month}: ${now.actual}${c.unit} · ${t("k_target")} ${c.target}${c.unit}${now.gap ? ` · <b class="sk-due">${t("k_off")}</b>` : ` · <b class="sk-ok">${t("k_on_track")}</b>`}`;
 		} else sub = `<span class="sk-due">${esc(c.need || t("k_no_data"))}</span>`;
@@ -1833,8 +1835,9 @@
 		const rows = c.projects.map((r) => `<a class="sk-prow" target="_blank" href="/app/project/${encodeURIComponent(r.name)}">
 			<span class="n">${esc(r.label)}</span>
 			<span class="b">${r.order ? `<em style="width:${pct(r.order)}%" title="${t("pp_order")} ₹${kAmt(r.order)}"></em>` : ""}<i class="s" style="width:${pct(r.sale)}%"></i><i class="c" style="width:${pct(r.cost)}%"></i></span>
-			<b class="${r.profit < 0 ? "bad" : r.sale ? "ok" : ""}">${r.sale || r.cost ? `${r.profit < 0 ? "−" : ""}₹${kAmt(Math.abs(r.profit))}${r.margin != null ? ` <small>${r.margin}%</small>` : ""}` : "—"}</b>
-			${r.missing.length ? `<small class="m">${t("pp_miss")}: ${r.missing.map((k) => t("pp_miss_" + k)).join(", ")}</small>` : ""}</a>`).join("");
+			<b class="${!r.invoiced ? "" : r.profit < 0 ? "bad" : "ok"}">${r.invoiced ? `${r.profit < 0 ? "−" : ""}₹${kAmt(Math.abs(r.profit))} <small>${r.margin}%</small>`
+				: `<small>${t("pp_wip")}</small> ${r.cost ? "₹" + kAmt(r.cost) : "—"}`}</b>
+			${r.invoiced && r.missing.length ? `<small class="m">${t("pp_miss")}: ${r.missing.map((k) => t("pp_miss_" + k)).join(", ")}</small>` : ""}</a>`).join("");
 		return `<div class="sk-plist">${rows || `<p class="sk-note">${t("k_no_data")}</p>`}</div>
 			<div class="sk-klegend"><span class="k-g">● ${t("pp_sale")}</span><span class="k-o">● ${t("pp_cost")}</span><span class="k-n">▭ ${t("pp_order")}</span></div>`;
 	}
