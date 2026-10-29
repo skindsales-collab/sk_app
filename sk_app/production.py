@@ -10,6 +10,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate, now_datetime, nowdate, time_diff_in_seconds
 
+from sk_app import cabin_projects
 from sk_app.store import _todo, _users_with_function, attach, need, try_submit, uom
 
 PRODUCTION = "Production"
@@ -50,14 +51,15 @@ def order_board(user: str) -> list[dict]:
 	"""Every cabin in production with its stages (Job Cards in route order) and whether it is late."""
 	need(user, PRODUCTION, "Quality", "Stores", "Management", "Sales")
 	wos = frappe.get_all("Work Order", filters={"docstatus": 1, "status": ["not in", ["Completed", "Stopped", "Closed", "Cancelled"]]},
-		fields=["name", "production_item", "item_name", "qty", "status", "sales_order", "expected_delivery_date", "planned_start_date"],
+		fields=["name", "production_item", "item_name", "qty", "status", "sales_order", "project", "expected_delivery_date", "planned_start_date"],
 		order_by="expected_delivery_date asc, planned_start_date asc")
 	skip = non_cabin_orders()
 	wos = [w for w in wos if not w.sales_order or w.sales_order not in skip]
 	for w in wos:
 		w["stages"] = [_stage(j) for j in frappe.get_all("Job Card", filters={"work_order": w.name, "docstatus": ["<", 2]},
 			fields=["name", "operation", "workstation", "status", "docstatus", "sequence_id", "total_completed_qty"], order_by="sequence_id asc, creation asc")]
-		w["customer"] = frappe.db.get_value("Sales Order", w.sales_order, "customer_name") if w.sales_order else None
+		w["customer"] = wo_customer(w.name)  # SK 29-Oct: from the cabin's Project while its Sales Order is a draft
+		w["cabin_no"] = cabin_projects.cabin_no(w.project)
 		w["late"] = bool(w.expected_delivery_date and getdate(w.expected_delivery_date) < getdate())
 		w["no_order"] = not w.sales_order or not w.expected_delivery_date
 		w["expected_delivery_date"] = str(w.expected_delivery_date or "")
@@ -86,9 +88,9 @@ def wo_label(work_order: str | None, fallback: str = "") -> str:
 	if cache is None:  # frappe.local has no __dict__ (27-Oct: that error blanked the factory arrows)
 		cache = frappe.local.sk_wo_label = {}
 	if work_order not in cache:
-		wo = frappe.db.get_value("Work Order", work_order, ["item_name", "production_item", "sales_order"], as_dict=True) or {}
-		customer = frappe.db.get_value("Sales Order", wo.get("sales_order"), "customer_name") if wo.get("sales_order") else None
-		cache[work_order] = " · ".join(x for x in (customer, wo.get("item_name") or wo.get("production_item")) if x) or work_order
+		wo = frappe.db.get_value("Work Order", work_order, ["item_name", "production_item", "project"], as_dict=True) or {}
+		parts = (cabin_projects.cabin_no(wo.get("project")), wo_customer(work_order), wo.get("item_name") or wo.get("production_item"))
+		cache[work_order] = " · ".join(x for x in parts if x) or work_order
 	return cache[work_order]
 
 
@@ -98,8 +100,7 @@ def wo_customer(work_order: str | None) -> str | None:
 		return None
 	if wo.sales_order:
 		return frappe.db.get_value("Sales Order", wo.sales_order, "customer_name")
-	customer = frappe.db.get_value("Project", wo.project, "customer") if wo.project else None
-	return frappe.db.get_value("Customer", customer, "customer_name") if customer else None
+	return cabin_projects.project_customer(wo.project)
 
 
 def job_cards(user: str) -> list[dict]:
@@ -112,13 +113,14 @@ def job_cards(user: str) -> list[dict]:
 			return []
 		filters["workstation"] = ws
 	rows = frappe.get_all("Job Card", filters=filters, fields=["name", "work_order", "operation", "workstation", "status", "for_quantity",
-		"production_item", "item_name", "expected_start_date", "sequence_id"], order_by="expected_start_date asc, creation asc", limit=0)
+		"production_item", "item_name", "expected_start_date", "sequence_id", "project"], order_by="expected_start_date asc, creation asc", limit=0)
 	order = {"Work In Progress": 0, "Material Transferred": 1, "On Hold": 2}
 	for r in rows:
 		r["started"] = _open_log(r.name)
 		r["photos"] = frappe.db.count("File", {"attached_to_doctype": "Job Card", "attached_to_name": r.name})
 		r["drawing"] = _drawing(r.work_order)
 		r["customer"] = wo_customer(r.work_order)
+		r["cabin_no"] = cabin_projects.cabin_no(r.project or frappe.db.get_value("Work Order", r.work_order, "project"))
 	rows.sort(key=lambda r: (order.get(r.status, 3), str(r.expected_start_date or "")))
 	return rows
 

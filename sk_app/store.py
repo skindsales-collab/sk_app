@@ -271,11 +271,15 @@ def cabin_size(item: str | None) -> str:
 def job_card_cabin(work_order: str | None) -> str:
 	if not work_order:
 		return ""
-	wo = frappe.db.get_value("Work Order", work_order, ["sales_order", "item_name", "production_item"], as_dict=True)
+	from sk_app import cabin_projects
+
+	wo = frappe.db.get_value("Work Order", work_order, ["sales_order", "project", "item_name", "production_item"], as_dict=True)
 	if not wo:
 		return ""
-	customer = frappe.db.get_value("Sales Order", wo.sales_order, "customer_name") if wo.sales_order else None
-	return " · ".join(x for x in (customer, cabin_size(wo.item_name or wo.production_item)) if x)[:140]
+	customer = frappe.db.get_value("Sales Order", wo.sales_order, "customer_name") if wo.sales_order \
+		else cabin_projects.project_customer(wo.project)  # SK 29-Oct: cabin Project while the order is a draft
+	parts = (cabin_projects.cabin_no(wo.project), customer, cabin_size(wo.item_name or wo.production_item))
+	return " · ".join(x for x in parts if x)[:140]
 
 
 def set_job_card_cabin(doc, method=None):
