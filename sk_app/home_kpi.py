@@ -27,7 +27,7 @@ TARGETS = {
 	"Production": 4,  # days to build 100 sq ft (proposed)
 	"Accounts": 100,  # % of finished, invoiced projects whose material is posted to the project (SK 26-Oct)
 	"HR": 30,  # days to recruit (proposed)
-	"Stores": 99,  # stock accuracy % (proposed)
+	"Stores": 0,  # urgent buys without a PO in the month (SK 29-Oct: "this target should be zero")
 	"Quality": 95,  # first-time pass % (proposed)
 	"Purchase": 90,  # POs received on time % (proposed)
 	"AI": 20,  # ERP tasks finished a month (proposed)
@@ -309,18 +309,25 @@ def production(user: str) -> dict:
 		need="Each cabin Project needs its size, PO date and invoice date (filled when its order and invoice are submitted).")
 
 
-PNL_PROJECTS = 30  # projects on Shraddha's chart, open ones first, then the latest finished
+def _fy_start(day=None):
+	day = getdate(day or nowdate())
+	return getdate(f"{day.year if day.month >= 4 else day.year - 1}-04-01")
 
 
 def _pnl_projects() -> list:
-	"""Customer projects (one per cabin, SK 29-Oct): open ones and those finished in the last three months.
-	Internal projects (no customer and no cost centre, e.g. ERPNext Implementation) stay off the chart."""
-	since = add_months(get_first_day(getdate()), -2)
+	"""Customer projects (one per cabin, SK 29-Oct): every open one and every one finished or invoiced since April
+	(SK 29-Oct "capture all data from April monthwise"; the first 30 only left 23 cabins out). Open ones first, then
+	the finished ones newest invoice first. Internal projects (no customer and no cost centre, e.g. ERPNext
+	Implementation) stay off the chart."""
+	since = _fy_start()
+	has_inv = frappe.get_meta("Project").has_field("sk_invoice_date")
+	fields = ["name", "project_name", "status", "customer", "sales_order", "cost_center", "actual_end_date", "modified"]
 	rows = frappe.get_all("Project", filters={"status": ["!=", "Cancelled"]}, or_filters={"customer": ["is", "set"], "cost_center": ["is", "set"]},
-		fields=["name", "project_name", "status", "customer", "sales_order", "cost_center", "actual_end_date", "modified"], limit=0)
-	rows = [r for r in rows if r.status != "Completed" or getdate(r.actual_end_date or r.modified) >= since]
-	rows.sort(key=lambda r: (r.status == "Completed", r.name))
-	return rows[:PNL_PROJECTS]
+		fields=fields + (["sk_invoice_date"] if has_inv else []), limit=0)
+	done_on = lambda r: getdate(r.get("sk_invoice_date") or r.actual_end_date or r.modified)  # noqa: E731
+	rows = [r for r in rows if r.status != "Completed" or done_on(r) >= since]
+	rows.sort(key=lambda r: (r.status == "Completed", -done_on(r).toordinal() if r.status == "Completed" else 0, r.name))
+	return rows
 
 
 def project_pnl(projects: list) -> dict:
@@ -385,17 +392,22 @@ def accounts(user: str) -> dict:
 		cost = v["material"] + v["bills"] + v["other"]
 		invoiced = v["sale"] > 0
 		missing = [k for k, ok in (("material", v["material"]), ("bills", v["bills"] or v["other"])) if not ok]
+		# SK 29-Oct check: an invoiced cabin with no cost posted is not 100% profit, its cost is missing
+		costed = invoiced and cost > 0
 		label = re.sub(r"^\s*Cabin\s+", "", (p.project_name or p.name).split("·")[0]).strip()
 		who = (p.project_name or "").split("·")
 		rows.append({"name": p.name, "label": f"{label} {who[1].strip()}" if len(who) > 1 else label, "status": p.status,
 			"invoiced": invoiced, "order": orders.get(p.sales_order, 0), "sale": round(v["sale"]), "cost": round(cost),
 			"material": round(v["material"]), "bills": round(v["bills"]), "other": round(v["other"]),
-			"profit": round(v["sale"] - cost) if invoiced else None,
-			"margin": round((v["sale"] - cost) * 100 / v["sale"], 1) if invoiced else None, "missing": missing})
+			"profit": round(v["sale"] - cost) if costed else None, "cost_missing": invoiced and not costed,
+			"margin": round((v["sale"] - cost) * 100 / v["sale"], 1) if costed else None, "missing": missing,
+			"month": getdate(p.sk_invoice_date).strftime("%b") if p.get("sk_invoice_date") else ""})
 	rows.sort(key=lambda r: not r["invoiced"])  # P&L first, then work in progress
 	done = [r for r in rows if r["invoiced"]]
 	ok = sum(1 for r in done if r["cost"])
-	total = {"sale": sum(r["sale"] for r in done), "cost": sum(r["cost"] for r in done), "profit": sum(r["profit"] for r in done),
+	costed = [r for r in done if r["profit"] is not None]
+	total = {"sale": sum(r["sale"] for r in costed), "cost": sum(r["cost"] for r in costed), "profit": sum(r["profit"] for r in costed),
+		"sale_no_cost": sum(r["sale"] for r in done if r["cost_missing"]),
 		"wip": sum(r["cost"] for r in rows if not r["invoiced"]), "order": round(sum(orders.values()))}
 	return {"kind": "projects", "function": "Accounts", "title": "Project profit & loss", "unit": "%", "target": TARGETS["Accounts"],
 		"good_low": False, "count": len(rows), "invoiced": len(done), "correct": ok,
@@ -418,16 +430,42 @@ def hr(user: str) -> dict:
 		need="Add each new joiner from a Job Opening → Job Applicant → Employee in ERPNext.")
 
 
+URD_MATERIAL = "URD MATERIAL FOR MANUFACTURING%"  # Tally ledger of cash / local material buys (no PO, no GST bill)
+
+
+def urgent_buys(start, end) -> int:
+	"""SK 29-Oct (Yogesh's graph): material bought without a Purchase Order in these days, counted once each:
+	- an urgent requisition for material that came without a PO (Store → CEO → PO, sk_without_po),
+	- a posted Purchase Receipt or Purchase Invoice of material with no PO on any line (the flow was bypassed),
+	- before ERPNext, the Tally cash / local buys booked to URD MATERIAL FOR MANUFACTURING."""
+	from sk_app.store import material_pos
+
+	n = 0
+	if frappe.get_meta("Material Request").has_field("sk_without_po"):
+		n += frappe.db.count("Material Request", {"docstatus": ["<", 2], "sk_without_po": 1, "transaction_date": ["between", [start, end]]})
+	for doctype in ("Purchase Receipt", "Purchase Invoice"):
+		extra = {"is_opening": ["!=", "Yes"]} if doctype == "Purchase Invoice" else {}
+		docs = frappe.get_all(doctype, filters={"docstatus": 1, "is_return": 0, "posting_date": ["between", [start, end]], **extra, **material_pos(doctype)}, pluck="name", limit=0)
+		if not docs:
+			continue
+		links = ["purchase_order"] + (["purchase_receipt"] if doctype == "Purchase Invoice" else [])
+		rows = frappe.get_all(f"{doctype} Item", filters={"parent": ["in", docs]}, fields=["parent", *links], limit=0)
+		with_po = {r.parent for r in rows if r.purchase_order}
+		# a bill made from a receipt is the same buy as the receipt
+		from_receipt = {r.parent for r in rows if r.get("purchase_receipt")}
+		n += len([d for d in docs if d not in with_po and d not in from_receipt])
+	accounts = frappe.get_all("Account", filters={"account_name": ["like", URD_MATERIAL]}, pluck="name")
+	if accounts:
+		n += len(set(frappe.get_all("Journal Entry", filters=[["docstatus", "=", 1], ["posting_date", "between", [start, end]],
+			["Journal Entry Account", "account", "in", accounts]], pluck="name", limit=0)))
+	return n
+
+
 def stores(user: str) -> dict:
-	def value(start, end):
-		recos = frappe.get_all("Stock Reconciliation", filters={"docstatus": 1, "purpose": "Stock Reconciliation", "posting_date": ["between", [start, end]]}, pluck="name")
-		if not recos:
-			return None
-		items = frappe.get_all("Stock Reconciliation Item", filters={"parent": ["in", recos]}, fields=["qty", "current_qty"], limit=0)
-		ok = sum(1 for i in items if abs(flt(i.qty) - flt(i.current_qty)) < 0.001)
-		return round(ok * 100 / len(items), 1) if items else None
-	return _trend("Stores", "Stock accuracy", "%", TARGETS["Stores"], value,
-		need="Count stock with the Stock count icon; each posted count shows here.")
+	"""SK 29-Oct: Yogesh's graph is the number of urgent buys without a PO each month, target 0 (fewer is better).
+	Stock accuracy moved to the Store dashboard (dashboards.stock_accuracy)."""
+	return _trend("Stores", "Urgent buys without PO", "", TARGETS["Stores"], urgent_buys, good_low=True,
+		need="Raise every buy as a requisition before the material comes, so the PO is made first.", count=True)
 
 
 def quality(user: str) -> dict:
@@ -442,11 +480,16 @@ def quality(user: str) -> dict:
 
 
 def purchase(user: str) -> dict:
-	def value(start, end):
-		from sk_app.store import material_pos
+	"""POs received by their 'required by' date. SK 29-Oct check: only POs already due count (a PO due later in the
+	month is not late yet); labour POs run their own chain and stay out."""
+	from sk_app.store import material_pos
 
-		pos = frappe.get_all("Purchase Order", filters={"docstatus": 1, "schedule_date": ["between", [start, end]], **material_pos()},
-			fields=["name", "schedule_date"], limit=0)  # labour POs are received when the job is done, not on a supplier date
+	def value(start, end):
+		due_by = min(getdate(end), getdate())
+		if getdate(start) > due_by:
+			return None
+		pos = frappe.get_all("Purchase Order", filters={"docstatus": 1, "schedule_date": ["between", [start, due_by]], **material_pos()},
+			fields=["name", "schedule_date"], limit=0)
 		if not pos:
 			return None
 		got = {}
@@ -483,6 +526,11 @@ def chart_for(user: str, functions: list[str]) -> dict | None:
 	"""The person's one KPI chart. SK 27-Oct: people kept getting the Sales graph; a person with Sales plus their own
 	function (Aditya: Non-Cabin) gets their own function's graph, the CEO the company graph."""
 	rank = lambda fn: 0 if fn == "Management" else 2 if fn in ("Sales", "Marketing") else 1  # noqa: E731
+	# SK 29-Oct check: a salesperson set to Non-Cabin on SK App User (Aditya) gets the Non-Cabin graph, also when the
+	# Machine Shifting function is not ticked
+	if {"Sales", "Marketing"} & set(functions) and "Management" not in functions \
+			and frappe.db.get_value("SK App User", {"user": user}, "sk_main_segment") == segments.NON_CABIN:
+		functions = [("Machine Shifting" if fn in ("Sales", "Marketing") else fn) for fn in functions]
 	for fn in sorted(functions, key=rank):
 		build = BUILDERS.get(fn)
 		if build:
