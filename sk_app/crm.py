@@ -183,7 +183,7 @@ def _erp_docs(deal: dict | None) -> dict:
 	quotes = []
 	if frappe.has_permission("Quotation", "read") and frappe.get_meta("Quotation").has_field("crm_deal"):
 		quotes = frappe.get_list("Quotation", filters={"crm_deal": deal["name"], "docstatus": ["<", 2]},
-			fields=["name", "status", "grand_total", "transaction_date", "docstatus"], order_by="creation desc")
+			fields=["name", "status", "grand_total", "net_total", "transaction_date", "docstatus"], order_by="creation desc")
 	out["quotations"] = [{**q, "pdf": _pdf("Quotation", q.name)} for q in quotes]
 	customer = deal.get("erpnext_customer")
 	if not customer and frappe.get_meta("Customer").has_field("crm_deal"):

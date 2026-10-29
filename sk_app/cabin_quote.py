@@ -464,7 +464,7 @@ def quote_html(doc) -> str:
 		intro = "Thank you for your enquiry. Please find our offer below."
 	sections = [f"<div class=bar>1. Price schedule (INR)</div><table class=p><tr><th>Sr.</th><th>Description</th><th>Qty</th><th>Unit</th><th>Unit price</th><th>Amount</th></tr>{rows}{disc}"
 		f"<tr class=tot><td colspan=5 class=r>Total (excl. GST)</td><td class=r>{inr(doc.net_total)}</td></tr>"
-		f"<tr class=gst><td colspan=5 class=r>GST @ 18%</td><td class=r>Extra</td></tr></table>"
+		f"<tr class=gst><td colspan=6 class=r>GST @ 18% extra as applicable</td></tr></table>"
 		f"<div class=words>Amount in words (excl. GST): Rupees {words(int(round(flt(doc.net_total))))} Only</div>"]
 	n = 2
 	if cabin:
