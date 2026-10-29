@@ -90,3 +90,90 @@ def verify(mobile, otp):
 		frappe.throw(wrong, frappe.AuthenticationError)
 	frappe.local.login_manager.login_as(user)
 	return {"ok": True}
+
+
+# ---------- Forgot PIN: login code by email (SK 29-Oct: "if admin forgot then need to login with email", "for user" too) ----------
+# Anyone whose login has a real e-mail gets a 6-digit code there; staff without an e-mail (…@staff.skind.local) still ask
+# the CEO (logins.ask_new_pin). After the code, the app asks for a new PIN without the old one. The mail goes out from
+# the default outgoing mailbox's own address: Hostinger refuses a "from" it does not own (ERPNext's reset mail failed so).
+EMAIL_VALID_SECONDS = 10 * 60
+PIN_FREE_SECONDS = 15 * 60
+
+
+def has_real_email(email: str | None) -> bool:
+	email = (email or "").strip().lower()
+	return "@" in email and not email.endswith("@staff.skind.local") and not email.endswith("@example.com")
+
+
+def _user_for_login(login: str) -> str | None:
+	"""Mobile number, e-mail or user id → enabled user (never Administrator / Guest)."""
+	login = (login or "").strip()
+	if not login:
+		return None
+	skip = ["not in", ["Administrator", "Guest"]]
+	if "@" not in login:
+		return _user_for(clean_mobile(login))
+	if login in ("Administrator", "Guest"):
+		return None
+	return frappe.db.get_value("User", {"name": login, "enabled": 1}, "name") \
+		or frappe.db.get_value("User", {"email": login, "enabled": 1, "name": skip}, "name")
+
+
+def _email_key(user: str) -> str:
+	return f"sk_email_code:{user}"
+
+
+def _sender() -> str | None:
+	return frappe.db.get_value("Email Account", {"default_outgoing": 1, "enable_outgoing": 1}, "email_id")
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=10, seconds=60 * 60)
+def email_code(login):
+	"""Guest: send a login code to the e-mail of this mobile / e-mail. Same answer whether or not it has a login."""
+	user = _user_for_login(login)
+	email = frappe.db.get_value("User", user, "email") if user else None
+	if user and has_real_email(email):
+		sends_key = f"sk_email_sends:{user}"
+		sends = frappe.cache.get_value(sends_key) or 0
+		if sends >= MAX_SENDS_PER_HOUR:  # same answer as ever: never tells whether this login exists
+			return {"sent": True, "valid_minutes": EMAIL_VALID_SECONDS // 60}
+		frappe.cache.set_value(sends_key, sends + 1, expires_in_sec=60 * 60)
+		code = f"{secrets.randbelow(10**6):06d}"
+		frappe.cache.set_value(_email_key(user), {"hash": _hash(user, code), "tries": 0}, expires_in_sec=EMAIL_VALID_SECONDS)
+		try:
+			frappe.sendmail(recipients=[email], sender=_sender(), subject=_("SK App login code: {0}").format(code),
+				message=_("Your SK App login code is <b>{0}</b>. It is valid for 10 minutes. After login, set a new PIN.<br>"
+					"If you did not ask for it, ignore this mail.").format(code), now=True)
+		except Exception:
+			frappe.log_error("SK App e-mail login code failed")
+			frappe.throw(_("E-mail could not be sent. Please ask the CEO for a new PIN."))
+	return {"sent": True, "valid_minutes": EMAIL_VALID_SECONDS // 60}
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=30, seconds=60 * 60)
+def email_verify(login, code):
+	user = _user_for_login(login)
+	wrong = _("Code is wrong or old. Please ask for a new code.")
+	saved = frappe.cache.get_value(_email_key(user)) if user else None
+	if not saved:
+		frappe.throw(wrong, frappe.AuthenticationError)
+	if saved["tries"] >= MAX_TRIES:
+		frappe.cache.delete_value(_email_key(user))
+		frappe.throw(wrong, frappe.AuthenticationError)
+	if not secrets.compare_digest(saved["hash"], _hash(user, str(code or "").strip())):
+		saved["tries"] += 1
+		frappe.cache.set_value(_email_key(user), saved, expires_in_sec=EMAIL_VALID_SECONDS)
+		frappe.throw(wrong, frappe.AuthenticationError)
+	frappe.cache.delete_value(_email_key(user))
+	# the app asks for a new PIN at once, without the old one
+	frappe.cache.set_value(f"sk_pin_free:{user}", 1, expires_in_sec=PIN_FREE_SECONDS)
+	if frappe.db.exists("SK App User", {"user": user}):
+		frappe.db.set_value("SK App User", {"user": user}, "must_set_pin", 1)
+	frappe.local.login_manager.login_as(user)
+	return {"ok": True}
+
+
+def pin_free(user: str) -> bool:
+	return bool(frappe.cache.get_value(f"sk_pin_free:{user}"))

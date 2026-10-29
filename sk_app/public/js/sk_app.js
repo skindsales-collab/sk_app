@@ -2017,7 +2017,7 @@
 		state.view = "home";
 		root.innerHTML = header(t("set_pin")) + `<main class="sk-form">
 			<p class="sk-note">🔑 ${t("set_pin_why")}</p>
-			<label class="sk-field"><span>${t("old_pin")}</span><input id="p-old" type="password" inputmode="numeric" autocomplete="current-password"></label>
+			${state.home && state.home.pin_free ? "" : `<label class="sk-field"><span>${t("old_pin")}</span><input id="p-old" type="password" inputmode="numeric" autocomplete="current-password"></label>`}
 			<label class="sk-field"><span>${t("new_pin")}</span><input id="p-new" type="password" inputmode="numeric" autocomplete="new-password" maxlength="8"></label>
 			<label class="sk-field"><span>${t("new_pin2")}</span><input id="p-new2" type="password" inputmode="numeric" autocomplete="new-password" maxlength="8"></label>
 			<button class="sk-btn ok wide" data-act="pin-save">${t("save")}</button></main>`;
@@ -5670,8 +5670,8 @@
 			if (act === "pin-save") {
 				if (val("p-new") !== val("p-new2")) return toast(t("pin_mismatch"), true);
 				el.disabled = true;
-				await call("set_pin", { old_pin: val("p-old"), new_pin: val("p-new") }, true);
-				state.home.must_set_pin = false;
+				await call("set_pin", { old_pin: document.getElementById("p-old") ? val("p-old") : "", new_pin: val("p-new") }, true);
+				state.home.must_set_pin = state.home.pin_free = false;
 				toast(t("pin_saved"));
 				return go("home");
 			}

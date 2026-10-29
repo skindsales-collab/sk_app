@@ -269,3 +269,13 @@ the records: a lead opens its detail screen with the fill-first card, a draft op
 
 Junk / lost needs nothing. Background drafts (mail leads, design quote values) are still saved; the gate sits on the step
 that moves them on.
+
+## Forgot PIN: login code by e-mail (29-Oct-2026)
+
+- Login page → **Forgot PIN / password?** → type the e-mail or mobile number → **Send code to my e-mail**. A 6-digit code
+  (10 minutes, 5 tries, 5 codes an hour) goes to the login's e-mail. After the code the person is logged in and the app
+  asks for a new PIN without the old one (`otp.email_code`, `otp.email_verify`).
+- For the CEO / admin and every staff member whose login has a real e-mail. Staff without one (`…@staff.skind.local`)
+  use **Ask the CEO for a new PIN** as before.
+- The mail is sent from the default outgoing mailbox's own address (cabin@skind.tech): Hostinger refuses a "from" it does
+  not own, which is why ERPNext's own reset mail failed.

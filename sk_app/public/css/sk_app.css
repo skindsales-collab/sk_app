@@ -600,3 +600,9 @@ a.sk-chip { text-decoration: none; }
 	.sk-item:hover, .ev:hover { box-shadow: 0 2px 6px rgba(0,0,0,.12); }
 	:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
 }
+
+/* SK 29-Oct: Forgot PIN on the login page (code by e-mail, or ask the CEO) */
+.sk-forgot { width: 100%; }
+.sk-forgot summary { list-style: none; cursor: pointer; text-align: center; }
+.sk-forgot summary::-webkit-details-marker { display: none; }
+.sk-forgot[open] summary { margin-bottom: 8px; }
