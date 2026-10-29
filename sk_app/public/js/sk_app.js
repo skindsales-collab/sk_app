@@ -965,12 +965,17 @@
 		ka_high: "High", ka_medium: "Medium", ka_low: "Low", ka_by_date: "by", ka_from: "from", ka_none: "No actions yet. Add the first one below.",
 		ka_new: "New action (what will lift the graph?)", ka_add: "Add action", ka_what_done: "What did you do?", ka_proof: "Proof photo",
 		d_title: "Decide now", d_gap: "gap to target", d_none: "Nothing late. Good work.",
+		pp_projects: "projects", pp_correct: "P&L correct", pp_sale: "Sale", pp_cost: "Cost", pp_profit: "Profit", pp_loss: "Loss",
+		pp_order: "Order", pp_miss: "Missing", pp_miss_order: "order", pp_miss_sale: "sale invoice", pp_miss_material: "material issue", pp_miss_bills: "bills / labour",
 		el_points: "Electrical points", el_month: "Points this month", el_pts: "points", el_light: "Light points", el_fan: "Fan points",
 		el_socket_5a: "5A sockets", el_socket_15a: "15A sockets", el_ac_point: "AC points", el_mcb_db: "MCB / DB", el_earthing: "Earthing", el_other_points: "Other points" });
 	Object.assign(T.Marathi, { k_of: "पैकी", k_no_target: "टार्गेट ठरलेले नाही", k_behind: "मागे", k_on_track: "बरोबर चालू", k_target: "टार्गेट", k_off: "टार्गेटपेक्षा कमी",
 		k_no_data: "अजून डेटा नाही", k_day: "दिवस", k_per_day: "रोज", k_board: "ऑर्डर बोर्ड", k_board_open: "महिन्याच्या 1 तारखेला", k_board_now: "आता", k_week: "आठवडा", k_month: "महिना", kl_Orders: "ऑर्डर", kl_Invoices: "इनव्हॉइस",
 		"kt_PO booking": "PO बुकिंग", "kt_Team PO booking": "टीम PO बुकिंग", "kt_Non-Cabin sale": "नॉन-केबिन विक्री", "kt_Order booking & invoices": "ऑर्डर बुकिंग व इनव्हॉइस",
-		"kt_Days to build 100 sq ft": "100 चौ.फूट बनवायला दिवस", "kt_Projects with correct P&L": "बरोबर नफा-तोटा असलेले प्रोजेक्ट", "kt_Days to recruit": "भरतीसाठी दिवस",
+		"kt_Days to build 100 sq ft": "100 चौ.फूट बनवायला दिवस", "kt_Projects with correct P&L": "बरोबर नफा-तोटा असलेले प्रोजेक्ट",
+		"kt_Project profit & loss": "प्रोजेक्टनुसार नफा-तोटा", pp_projects: "प्रोजेक्ट", pp_correct: "नफा-तोटा बरोबर", pp_sale: "विक्री", pp_cost: "खर्च",
+		pp_profit: "नफा", pp_loss: "तोटा", pp_order: "ऑर्डर", pp_miss: "बाकी", pp_miss_order: "ऑर्डर", pp_miss_sale: "विक्री इनव्हॉइस",
+		pp_miss_material: "माल इश्यू", pp_miss_bills: "बिल / मजुरी", "kt_Days to recruit": "भरतीसाठी दिवस",
 		"kt_Stock accuracy": "स्टॉक अचूकता", "kt_QC first-time pass": "QC पहिल्यांदा पास", "kt_POs received on time": "वेळेवर आलेले PO",
 		"kt_ERP tasks finished": "पूर्ण ERP कामे", "kt_Jobs finished": "पूर्ण कामे",
 		ka_short: "कृती", ka_title: "ग्राफ सुधारण्यासाठी कृती", ka_why: "हे आधी करा: यामुळे तुमचा ग्राफ वर जाईल. AI, मॅनेजर, CEO किंवा तुम्ही जोडलेले.",
@@ -1758,6 +1763,8 @@
 	function kpiNow() {
 		const c = kpiData && kpiData.chart;
 		if (!c) return null;
+		// SK 29-Oct: Accounts, % of projects whose sale and cost are both posted
+		if (c.kind === "projects") return c.count ? { actual: c.pct, target: c.target, gap: Math.max(0, c.target - c.pct), unit: "%", month: "" } : null;
 		if (c.kind === "money") {
 			const w = c.week, pts = w.lines[0].points, n = pts.length;
 			const actual = n ? pts[n - 1] : 0, due = n ? w.target[n - 1] : 0;
@@ -1780,6 +1787,11 @@
 			if (!now.actual && c.need) sub += `<br><span class="sk-due">${esc(c.need)}</span>`;
 			// SK 28-Oct (Rev 1 point 4): order board (open orders not yet delivered) on the 1st and today
 			if (c.board) sub += `<br>📋 ${t("k_board")}: ${t("k_board_open")} ₹${kAmt(c.board.open)} · ${t("k_board_now")} <b>₹${kAmt(c.board.now)}</b>`;
+		} else if (c.kind === "projects") {
+			const tt = c.total;
+			sub = `<b>${c.count}</b> ${t("pp_projects")} · ${c.correct}/${c.count} ${t("pp_correct")} · ${t("pp_sale")} ₹${kAmt(tt.sale)} · ${t("pp_cost")} ₹${kAmt(tt.cost)} · `
+				+ `<b class="${tt.profit < 0 ? "sk-due" : "sk-ok"}">${t(tt.profit < 0 ? "pp_loss" : "pp_profit")} ₹${kAmt(Math.abs(tt.profit))}</b>`;
+			if (!c.correct && c.need) sub += `<br><span class="sk-due">${esc(c.need)}</span>`;
 		} else if (now) {
 			sub = `${now.month}: ${now.actual}${c.unit} · ${t("k_target")} ${c.target}${c.unit}${now.gap ? ` · <b class="sk-due">${t("k_off")}</b>` : ` · <b class="sk-ok">${t("k_on_track")}</b>`}`;
 		} else sub = `<span class="sk-due">${esc(c.need || t("k_no_data"))}</span>`;
@@ -1790,7 +1802,7 @@
 		const act = `<button class="sk-kact ${n ? "on" : ""}" data-go="kpi_actions">🎯 ${t("ka_short")}${n ? ` <b>${n}</b>` : ""}</button>`;
 		// SK 27-Oct: the Actions button sits inside the graph, in its open top-left corner
 		return `<div class="sk-kcard"><div class="sk-khead"><b>${esc(t("kt_" + c.title) !== "kt_" + c.title ? t("kt_" + c.title) : c.title)}</b>${tabs}</div><small>${sub}</small>
-			<div class="sk-kplot">${act}${c.kind === "money" ? moneySvg(c) : trendSvg(c)}</div></div>`;
+			<div class="sk-kplot">${act}${c.kind === "money" ? moneySvg(c) : c.kind === "projects" ? projectsHtml(c) : trendSvg(c)}</div></div>`;
 	}
 	// amount up the side, weeks (running total this month) or months along the bottom (SK 26-Oct)
 	function moneySvg(c) {
@@ -1812,6 +1824,19 @@
 		v.labels.forEach((m, i) => { g += `<text x="${X(i)}" y="${H - 4}" text-anchor="middle" class="sk-ax">${m}</text>`; });
 		const legend = v.lines.length > 1 ? `<div class="sk-klegend">${v.lines.map((l) => `<span class="k-${l.c}">● ${t("kl_" + l.label)}</span>`).join("")}</div>` : "";
 		return `<svg viewBox="0 0 ${W} ${H}" class="sk-ksvg">${g}</svg>${legend}`;
+	}
+	// SK 29-Oct (Shraddha): one row per project, its sale (green) against its cost (orange) and the profit or loss;
+	// what is not yet posted to the project shows under it. A tap opens the Project in ERPNext.
+	function projectsHtml(c) {
+		const mx = Math.max(1, ...c.projects.map((r) => Math.max(r.sale, r.cost, r.order)));
+		const pct = (v) => Math.round(Math.max(0, v) * 100 / mx);
+		const rows = c.projects.map((r) => `<a class="sk-prow" target="_blank" href="/app/project/${encodeURIComponent(r.name)}">
+			<span class="n">${esc(r.label)}</span>
+			<span class="b">${r.order ? `<em style="width:${pct(r.order)}%" title="${t("pp_order")} ₹${kAmt(r.order)}"></em>` : ""}<i class="s" style="width:${pct(r.sale)}%"></i><i class="c" style="width:${pct(r.cost)}%"></i></span>
+			<b class="${r.profit < 0 ? "bad" : r.sale ? "ok" : ""}">${r.sale || r.cost ? `${r.profit < 0 ? "−" : ""}₹${kAmt(Math.abs(r.profit))}${r.margin != null ? ` <small>${r.margin}%</small>` : ""}` : "—"}</b>
+			${r.missing.length ? `<small class="m">${t("pp_miss")}: ${r.missing.map((k) => t("pp_miss_" + k)).join(", ")}</small>` : ""}</a>`).join("");
+		return `<div class="sk-plist">${rows || `<p class="sk-note">${t("k_no_data")}</p>`}</div>
+			<div class="sk-klegend"><span class="k-g">● ${t("pp_sale")}</span><span class="k-o">● ${t("pp_cost")}</span><span class="k-n">▭ ${t("pp_order")}</span></div>`;
 	}
 	// month by month against target: green dot = on target, red = not (SK 26-Oct: "trend monitoring")
 	function trendSvg(c) {

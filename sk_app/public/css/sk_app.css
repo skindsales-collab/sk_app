@@ -392,6 +392,21 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 .sk-klegend { display: flex; gap: 14px; font-size: 12px; font-weight: 600; }
 .sk-klegend .k-o { color: #e07b00; }
 .sk-klegend .k-g { color: #2e9d5b; }
+.sk-klegend .k-n { color: var(--muted); }
+/* SK 29-Oct: project-wise profit & loss (Accounts) */
+.sk-plist { max-height: 30vh; overflow-y: auto; margin-top: 4px; }
+.sk-prow { display: grid; grid-template-columns: 34% 1fr auto; gap: 2px 8px; align-items: center; padding: 4px 0; border-bottom: 1px solid #eef1f5; color: inherit; text-decoration: none; font-size: 12px; }
+.sk-prow .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sk-prow .b { position: relative; height: 14px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.sk-prow .b i { display: block; height: 5px; border-radius: 3px; min-width: 1px; }
+.sk-prow .b i.s { background: #2e9d5b; }
+.sk-prow .b i.c { background: #e07b00; }
+.sk-prow .b em { position: absolute; left: 0; top: 0; bottom: 0; border: 1px dashed #9aa5b5; border-radius: 3px; }
+.sk-prow > b { text-align: right; white-space: nowrap; }
+.sk-prow > b.ok { color: #2e9d5b; }
+.sk-prow > b.bad { color: #d9534f; }
+.sk-prow > b small { font-weight: 400; color: var(--muted); }
+.sk-prow .m { grid-column: 1 / -1; color: #d9534f; font-size: 11px; }
 /* 3D arrows: light top half, dark lower half, shadow under */
 .sk-flow3d { display: flex; overflow-x: auto; filter: drop-shadow(0 3px 2px rgba(0,0,0,.22)); padding-bottom: 2px; }
 .sk-ar3 { flex: 1 0 64px; min-width: 64px; height: 60px; margin-right: -8px; border: 0; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;

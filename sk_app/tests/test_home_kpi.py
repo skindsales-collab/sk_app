@@ -64,20 +64,7 @@ class TestHomeKpi(IntegrationTestCase):
 		c = run("Administrator", home_kpi.for_user, ["Management", "Sales"])["chart"]
 		self.assertEqual([l["label"] for l in c["month"]["lines"]], ["Orders", "Invoices"])  # SK 26-Oct
 		self.assertGreater(c["target"], 0)
-		# SK 26-Oct: Accounts = % of finished, invoiced projects whose material is posted to the project (e.g. 12 of 20)
-		before = run("Administrator", home_kpi.for_user, ["Accounts"])["chart"]["points"][-1]
-		for name, material in (("SK Test KPI P1", 40000), ("SK Test KPI P2", 0)):
-			if not frappe.db.exists("Project", {"project_name": name}):
-				frappe.get_doc({"doctype": "Project", "project_name": name}).insert()
-			pid = frappe.db.get_value("Project", {"project_name": name})
-			frappe.db.set_value("Project", pid, {"status": "Completed", "actual_end_date": getdate(), "total_billed_amount": 100000,
-				"total_consumed_material_cost": material, "total_purchase_cost": 0})
-		acc = run("Administrator", home_kpi.for_user, ["Accounts"])["chart"]
-		self.assertEqual((acc["kind"], acc["target"]), ("trend", 100))
-		ok, n = (int(x) for x in (before.get("note") or "0/0").split("/"))
-		self.assertEqual(acc["points"][-1]["note"], f"{ok + 1}/{n + 2}")
-		self.assertEqual(acc["points"][-1]["v"], round((ok + 1) * 100 / (n + 2)))
-		for fn in ("Production", "Accounts", "HR", "Stores", "Quality", "Purchase", "AI"):
+		for fn in ("Production", "HR", "Stores", "Quality", "Purchase", "AI"):
 			t = run("Administrator", home_kpi.for_user, [fn])["chart"]
 			self.assertEqual(t["kind"], "trend", fn)
 			self.assertEqual(len(t["points"]), home_kpi.MONTHS)
@@ -88,6 +75,37 @@ class TestHomeKpi(IntegrationTestCase):
 		# SK 27-Oct: Sales as an extra function never hides the person's own graph
 		self.assertEqual(run("Administrator", home_kpi.for_user, ["Sales", "Machine Shifting"])["chart"]["title"], "Non-Cabin sale")
 		self.assertEqual(run("Administrator", home_kpi.for_user, ["Sales", "Production"])["chart"]["function"], "Production")
+
+	def test_accounts_project_pnl(self):
+		"""SK 29-Oct: Shraddha's graph shows the number of projects and each project's own profit & loss, read from the
+		ledger rows posted to the project or to its cost centre; what is not posted yet is listed under the project."""
+		company = frappe.db.get_value("Company", {}, "name")
+		parent = frappe.db.get_value("Cost Center", {"company": company, "is_group": 1}, "name")
+		if not frappe.db.exists("Cost Center", {"cost_center_name": "SK Test PnL Cabin"}):
+			frappe.get_doc({"doctype": "Cost Center", "cost_center_name": "SK Test PnL Cabin", "parent_cost_center": parent, "company": company}).insert()
+		cc = frappe.db.get_value("Cost Center", {"cost_center_name": "SK Test PnL Cabin"})
+		if not frappe.db.exists("Project", {"project_name": "Cabin 999 · SK Test PnL · Office Cabin"}):
+			frappe.get_doc({"doctype": "Project", "project_name": "Cabin 999 · SK Test PnL · Office Cabin", "cost_center": cc, "company": company}).insert()
+		pid = frappe.db.get_value("Project", {"project_name": "Cabin 999 · SK Test PnL · Office Cabin"})
+		before = {r["name"]: r for r in home_kpi.accounts("Administrator")["projects"]}
+		self.assertIn(pid, before)
+		self.assertEqual(before[pid]["label"], "999 SK Test PnL")
+		self.assertIn("sale", before[pid]["missing"])
+		income = frappe.db.get_value("Account", {"company": company, "root_type": "Income", "is_group": 0})
+		expense = frappe.db.get_value("Account", {"company": company, "root_type": "Expense", "is_group": 0})
+		other = frappe.db.get_value("Account", {"company": company, "root_type": "Asset", "is_group": 0, "account_type": ["in", ["Cash", "Bank", ""]]})
+		for account, dr, cr, project in ((income, 0, 100000, pid), (other, 100000, 0, None), (expense, 30000, 0, None), (other, 0, 30000, None)):
+			frappe.get_doc({"doctype": "GL Entry", "company": company, "posting_date": getdate(), "account": account, "debit": dr, "credit": cr,
+				"debit_in_account_currency": dr, "credit_in_account_currency": cr, "cost_center": cc, "project": project,
+				"voucher_type": "Journal Entry", "voucher_no": "SK-TEST-PNL", "is_cancelled": 0}).db_insert()
+		c = home_kpi.accounts("Administrator")
+		self.assertEqual((c["kind"], c["title"], c["target"]), ("projects", "Project profit & loss", 100))
+		self.assertEqual(c["count"], len(c["projects"]))
+		r = next(r for r in c["projects"] if r["name"] == pid)
+		self.assertEqual((r["sale"] - before[pid]["sale"], r["cost"] - before[pid]["cost"]), (100000, 30000))
+		self.assertNotIn("sale", r["missing"])
+		self.assertIn("material", r["missing"])  # no material issue posted yet
+		self.assertNotIn("ERPNext Implementation", [x["label"] for x in c["projects"]])  # internal projects stay off
 
 	def test_actions_to_improve_graph(self):
 		"""SK 26-Oct: actions that lift the graph, added by AI / manager / CEO, shown first by priority, closed by the owner."""
