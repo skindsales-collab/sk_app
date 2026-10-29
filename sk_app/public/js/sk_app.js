@@ -1029,6 +1029,12 @@
 		hp_use_mr: "मराठी उत्तर वापरा", hp_use_en: "इंग्रजी उत्तर वापरा" });
 	Object.assign(T.English, { lk_setup_skip: "Not now, keep using my PIN" });
 	Object.assign(T.Marathi, { lk_setup_skip: "आत्ता नको, पिनच वापरतो" });
+	Object.assign(T.English, { lk_help: "How to open: fingerprint, face or PIN",
+		lk_help_phone: "1. First time on this phone: type your PIN and tap Open. 2. The app asks \"Set up face / finger\": tap Set up now and touch the finger sensor or look at the camera. 3. Next time tap the fingerprint / face button. If a box asks to \"Use a phone or tablet\" or a security key, tap Cancel and type your PIN. Forgot PIN: use the e-mail code button below.",
+		lk_help_pc: "On a computer, open with your PIN: type it and press Enter. Fingerprint / face works on a PC only if it has its own fingerprint reader or face camera, set up in Windows: Settings → Accounts → Sign-in options → Windows Hello. If a box appears asking to \"Use a phone or tablet\" or an external security key, click Cancel and type your PIN. Forgot PIN: use the e-mail code button below." });
+	Object.assign(T.Marathi, { lk_help: "कसे उघडायचे: बोट, चेहरा किंवा पिन",
+		lk_help_phone: "1. या फोनवर पहिल्यांदा: पिन टाका आणि उघडा दाबा. 2. ॲप \"चेहरा / बोट लॉक सुरू करा\" विचारेल: आत्ता सुरू करा दाबा आणि बोट सेन्सरला लावा किंवा कॅमेऱ्याकडे पहा. 3. पुढच्या वेळी बोट / चेहरा बटण दाबा. \"Use a phone or tablet\" किंवा security key विचारणारा बॉक्स आला तर Cancel दाबा आणि पिन टाका. पिन विसरलात: खालील ई-मेल कोड बटण वापरा.",
+		lk_help_pc: "संगणकावर पिनने उघडा: पिन टाका आणि Enter दाबा. संगणकाला स्वतःचा फिंगरप्रिंट रीडर किंवा फेस कॅमेरा असेल आणि Windows मध्ये सुरू केला असेल तरच बोट / चेहरा चालतो: Settings → Accounts → Sign-in options → Windows Hello. \"Use a phone or tablet\" किंवा external security key विचारणारा बॉक्स आला तर Cancel दाबा आणि पिन टाका. पिन विसरलात: खालील ई-मेल कोड बटण वापरा." });
 	Object.assign(T.English, { lk_mail_btn: "Forgot PIN? Send code to my e-mail", lk_mail_code: "Code from the e-mail",
 		lk_mail_sent: "Code sent to your e-mail (check Spam too). Valid 10 minutes." });
 	Object.assign(T.Marathi, { lk_mail_btn: "पिन विसरलात? ईमेलवर कोड पाठवा", lk_mail_code: "ईमेलमधील कोड",
@@ -6302,6 +6308,9 @@
 			localStorage.setItem("sk_face", JSON.stringify({ ids: [id, ...ids].slice(0, 3), name: (state.home && state.home.full_name) || f.name || "" }));
 		} catch (e) { /* private mode */ }
 	}
+	function hasLocalFace() {
+		try { return (JSON.parse(localStorage.getItem("sk_face") || "{}").ids || []).length > 0; } catch (e) { return false; }
+	}
 	function hideLock() {
 		const el = document.getElementById("sk-lock");
 		if (el) el.remove();
@@ -6317,12 +6326,18 @@
 		if (!el) { el = document.createElement("div"); el.id = "sk-lock"; el.className = "sk-lock"; document.body.appendChild(el); }
 		// SK 28-Oct: the fingerprint / face button is always shown when the phone has a fingerprint / face lock, with
 		// the PIN under it. Not set up yet: the button says so and the PIN opens the app once, then set-up follows.
-		const phoneCan = await canFace();
+		// SK 29-Oct (PC): a key made on the phone is not on the PC, so Windows opened its passkey box ("Use a phone or
+		// tablet"). The button opens the finger / face check only on a device that has its own key; a PC without one
+		// shows no button, and a short help says what to do.
+		const pc = !window.matchMedia("(pointer: coarse)").matches;
+		const localKey = hasLocalFace();
+		const phoneCan = await canFace() && (!pc || localKey);
 		const face = phoneCan && lockInfo.has_key;
 		el.innerHTML = `<div class="sk-lock-box"><div class="sk-lock-icon">🔒</div><h2>${t("lk_locked")}</h2>
 			<p class="sk-note">${esc(lockInfo.name || "")}</p>
 			${phoneCan ? `<button class="sk-btn go wide sk-face-btn" data-lock="${face ? "face" : "noface"}">👆 🙂 ${t(face ? "lk_open_face" : "lk_face_first")}</button>
 				<p class="sk-login-or">${t("lk_or_pin")}</p>` : ""}
+			<details class="sk-forgot sk-face-help"><summary>❓ ${t("lk_help")}</summary><p class="sk-note">${t(pc ? "lk_help_pc" : "lk_help_phone")}</p></details>
 			<label class="sk-field"><span>${t("lk_pin")}</span><input id="lk-pin" type="password" inputmode="numeric" autocomplete="current-password"></label>
 			<button class="sk-btn ${phoneCan ? "" : "go "}wide" data-lock="pin">${t("lk_open")}</button>
 			${lockInfo.email_code ? `<button class="sk-btn wide" data-lock="mailcode">📧 ${t("lk_mail_btn")}</button>
@@ -6338,7 +6353,7 @@
 		if (!state.home) await start();
 		else if (lockHit) go(state.view); // a screen that could not load while locked opens now (typed forms are left as they are)
 		lockHit = false;
-		if ((!st.has_key || faceFailedHere) && !faceSkipped() && await canFace()) faceSetupSheet();
+		if ((!st.has_key || faceFailedHere) && !faceSkipped() && window.matchMedia("(pointer: coarse)").matches && await canFace()) faceSetupSheet();
 		faceFailedHere = false;
 		setTimeout(askPending, 800);
 	}
