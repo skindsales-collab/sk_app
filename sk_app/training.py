@@ -368,7 +368,9 @@ def answer(user: str, todo: str, text: str, add_to_faq=1) -> dict:
 	function, _sep, question = body.partition(": ")
 	question, _screen = split_screen(question)
 	item = None
-	if str(add_to_faq) in ("1", "true", "True"):
+	from sk_app.issue_desk import faq_worthy
+
+	if str(add_to_faq) in ("1", "true", "True") and faq_worthy(text):  # SK 29-Oct: no "Ok" / one-liners in the FAQ
 		meta = frappe.get_meta("SK Library Item").get_field("function").options.split("\n")
 		item = frappe.get_doc({"doctype": "SK Library Item", "title": question[:140], "category": "FAQ", "audience": "Internal",
 			"function": function if function in meta else "All", "enabled": 1, "text": text.strip()}).insert(ignore_permissions=True).name

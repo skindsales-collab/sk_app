@@ -2558,7 +2558,9 @@
 	}
 
 	function erpDocRow(doctype, d, mobile) {
-		const amt = d.grand_total ? "₹" + Number(d.grand_total).toLocaleString("en-IN") : "";
+		// SK rule: a quotation shows its value before GST, never a GST amount
+		const value = doctype === "Quotation" && d.net_total != null ? d.net_total : d.grand_total;
+		const amt = value ? "₹" + Number(value).toLocaleString("en-IN") + (doctype === "Quotation" ? " + GST" : "") : "";
 		return `<li class="sk-item"><div><div class="sk-item-title">${esc(d.name)}</div><div class="sk-item-meta">${esc(d.status || "")} · ${esc(d.transaction_date || "")} · ${amt}</div>
 			<div class="sk-row">
 				<a class="sk-chip" href="${esc(d.pdf)}" target="_blank">📄 ${t("pdf")}</a>
@@ -3659,7 +3661,7 @@
 				<p class="sk-note">🟣 = ${t("dk_major")}</p>${formField("dk-snote", t("dk_note"))}
 				<button class="sk-btn wide" data-act="dk-sort" data-name="${esc(d.name)}">${t("dk_save_type")}</button>
 				${waiting ? `<p class="sk-note">🟣 ${t("dk_wait_ceo")}</p>` : `${formField("dk-reply", t("dk_reply_q"), true)}
-				<label class="sk-row"><input type="checkbox" id="dk-faq" ${["Not needed", "Data correction"].includes(d.sk_solution) ? "" : "checked"}> ${t("dk_faq")}</label>
+				<label class="sk-row"><input type="checkbox" id="dk-faq" ${["Not needed", "Data correction"].includes(d.sk_solution) || d.sk_kind === "Suggestion" ? "" : "checked"}> ${t("dk_faq")}</label>
 				<button class="sk-btn ok wide" data-act="dk-solve" data-name="${esc(d.name)}">${t("dk_solve_btn")}</button>`}` : ""}
 			${d.is_solver || d.is_ceo ? `<a class="sk-btn wide" href="${esc(d.erp_url)}" target="_blank">${t("dk_open_erp")}</a>` : ""}
 			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
