@@ -12,7 +12,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, flt, getdate, nowdate
 
-from sk_app import crm
+from sk_app import crm, store
 
 
 def _deal(name: str) -> dict:
@@ -107,7 +107,11 @@ def make_quotation(user: str, deal: str, items: list[dict], valid_days: int = 15
 	if doc.meta.has_field("crm_deal"):
 		doc.crm_deal = deal
 	doc.terms = gst_terms(note)
-	doc.insert()
+	if not frappe.has_permission("Quotation", "create"):
+		frappe.throw(_("You may not make quotations"), frappe.PermissionError)
+	# ERPNext fills the GST tax accounts while saving and refuses Sales, who may not read accounts (SK 29-Oct, Aditya:
+	# "User don't have permissions to select/read this account"); made by the system, kept in the person's name
+	store.insert_for(doc, user)
 	return {"name": doc.name, "grand_total": doc.grand_total, "pdf": crm._pdf("Quotation", doc.name), **submit_quotation(user, doc.name, quiet=True)}
 
 
@@ -122,12 +126,16 @@ def submit_quotation(user: str, quotation: str, quiet: bool = False) -> dict:
 	if quiet and not frappe.has_permission("Quotation", "submit", q.name):
 		return {"submitted": False, "missing": [_("Sales manager to submit")]}
 	q.check_permission("submit")
-	if not q.get("taxes") and "gst" not in (q.terms or "").lower():
-		q.terms = gst_terms(q.terms)
-		q.save()
+	current = frappe.session.user
+	frappe.set_user("Administrator")  # the account check, as in make_quotation; who may submit is checked above
 	try:
+		q.flags.ignore_permissions = True
+		if not q.get("taxes") and "gst" not in (q.terms or "").lower():
+			q.terms = gst_terms(q.terms)
+			q.save()
 		q.submit()
 	except frappe.ValidationError:
+		frappe.set_user(current)
 		if not quiet:
 			raise
 		frappe.clear_messages()
@@ -136,6 +144,9 @@ def submit_quotation(user: str, quotation: str, quiet: bool = False) -> dict:
 			"taxes": len(q.get("taxes") or []), "total_taxes_and_charges": q.total_taxes_and_charges, "terms": q.terms})
 		missing += gates.customer_missing(q.party_name) if q.quotation_to == "Customer" else []
 		return {"submitted": False, "missing": [t for _k, t in missing]}
+	finally:
+		frappe.set_user(current)
+	frappe.db.set_value("Quotation", q.name, "modified_by", user, update_modified=False)
 	return {"submitted": True, "missing": []}
 
 

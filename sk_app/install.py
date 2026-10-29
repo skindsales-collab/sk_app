@@ -49,6 +49,9 @@ def after_migrate():
 	from sk_app.complaints import ensure_setup
 
 	ensure_setup()
+	from sk_app.issue_desk import ensure_setup as issue_desk_setup
+
+	issue_desk_setup()  # SK 29-Oct: Problem / Suggestion desk (after the complaint fields it sits under)
 	from sk_app.products import ensure_fields as product_fields
 
 	product_fields()
@@ -92,6 +95,9 @@ def after_migrate():
 	from sk_app.sub_bills import ensure_setup as sub_bills_setup
 
 	_safe(ensure_voucher_fields, "cash vouchers")  # SK 28-Oct: paid to, project / cabin, no-bill reason; CEO approves all
+	from sk_app.cabin_projects import ensure_setup as cabin_projects_setup
+
+	_safe(cabin_projects_setup, "cabin stages done before ERPNext")  # SK 29-Oct: Yogesh's cabin status list
 	_safe(sub_bills_setup, "subcontractor bills")  # SK 28-Oct: rate sheet → bill → Rushi → CEO → payable
 	_safe(requisition_setup, "purchase requisition")  # SK 27-Oct: requisition → CEO → PO → receipt
 	_safe(marketing_list_setup, "marketing list")  # SK 27-Oct: potential customers for greetings / promotions, not leads

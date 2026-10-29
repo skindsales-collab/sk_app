@@ -7,7 +7,7 @@ from frappe import _
 from frappe.rate_limiter import rate_limit
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import activities, ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, kpi, lead_sources, ledger, logins, mailbox, otp, photocheck, production, products, purchase, quality, requisition, sales_owner, segments, store, sub_bills, training, view_member, work
+from sk_app import activities, ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, issue_desk, kpi, lead_sources, ledger, logins, mailbox, otp, photocheck, production, products, purchase, quality, requisition, sales_owner, segments, store, sub_bills, training, view_member, work
 from sk_app import library as lib
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
@@ -131,7 +131,7 @@ def _badges(user, functions):
 	try:
 		return {**store.badges(user, functions), **purchase.badges(user, functions), **production.badges(user, functions),
 			**quality.badges(user, functions), **finance.badges(user, functions), **ai_desk.badges(user, functions),
-			**mailbox.badges(user), **complaints.badge(user), **hr.badges(user, functions), **sub_bills.badges(user),
+			**mailbox.badges(user), **complaints.badge(user), **issue_desk.badge(user), **hr.badges(user, functions), **sub_bills.badges(user),
 			"questions": training.question_count(user), "logins": logins.pin_request_count(user)}
 	except Exception:
 		frappe.log_error("SK App badges")
@@ -1628,6 +1628,48 @@ def complaint_fixed(name, note=None, photo=None, cost=None):
 @frappe.whitelist(methods=["POST"])
 def complaint_customer(name, ok, note=None, photo=None):
 	return complaints.customer_answer(_me().user, name, ok, note, photo)
+
+
+# SK 29-Oct: Problem / Suggestion desk (issue_desk): every request an ERPNext Issue, owner solves, CEO approves changes
+@frappe.whitelist()
+def desk_list(tab="mine"):
+	return issue_desk.listing(_me().user, tab)
+
+
+@frappe.whitelist()
+def desk_detail(name):
+	return issue_desk.detail(_me().user, name)
+
+
+@frappe.whitelist(methods=["POST"])
+def desk_send(kind, area, text, photo=None, screen=None):
+	# the ❓ box on ERPNext pages also sends here, and ERPNext has no lock screen to open the SK App lock (as training_ask)
+	return issue_desk.submit(_me(unlocked=False).user, kind, area, text, photo, screen)
+
+
+@frappe.whitelist(methods=["POST"])
+def desk_sort(name, solution, note=None, fix_by=None):
+	return issue_desk.sort(_me().user, name, solution, note, fix_by)
+
+
+@frappe.whitelist(methods=["POST"])
+def desk_solve(name, reply, add_to_faq=1):
+	return issue_desk.solve(_me().user, name, reply, add_to_faq)
+
+
+@frappe.whitelist(methods=["POST"])
+def desk_decide(name, decision, note=None):
+	return issue_desk.decide(_me().user, name, decision, note)
+
+
+@frappe.whitelist(methods=["POST"])
+def desk_feedback(name, ok):
+	return issue_desk.feedback(_me().user, name, ok)
+
+
+@frappe.whitelist(methods=["POST"])
+def desk_move_old():
+	return issue_desk.move_old(_me().user)
 
 
 # point 7: FAQ per function with "Ask a question"

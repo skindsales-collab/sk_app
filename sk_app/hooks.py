@@ -28,7 +28,9 @@ scheduler_events = {
 		# SK 27-Oct: the AI's actions to lift each graph, every morning before work
 		"0 7 * * *": ["sk_app.ai_actions.morning"],
 		# SK 28-Oct: customers tagged Cabin / Non-Cabin and every order and customer given its salesperson
-		"30 1 * * *": ["sk_app.sales_owner.nightly"]},
+		"30 1 * * *": ["sk_app.sales_owner.nightly"],
+		# SK 29-Oct: a solved desk request the person did not answer for 3 days is closed
+		"0 2 * * *": ["sk_app.issue_desk.auto_close"]},
 }
 
 doc_events = {
@@ -48,16 +50,24 @@ doc_events = {
 		"before_submit": "sk_app.gates.check_sales_order",
 		"on_submit": "sk_app.won_deals.on_submit"},  # SK 28-Oct: its lead / deal shows Won in the CRM at once
 	# SK 29-Oct (Shraddha): a tax invoice is submitted only with the buyer's Bill to address (Ship to defaults to it)
-	"Sales Invoice": {"validate": "sk_app.segment_accounts.set_segment", "before_submit": "sk_app.gates.check_sales_invoice"},
+	"Sales Invoice": {"validate": ["sk_app.segment_accounts.set_segment", "sk_app.cabin_projects.set_cost_centre"],
+		"before_submit": "sk_app.gates.check_sales_invoice"},
 	"SK App User": {"on_update": ["sk_app.segments.on_app_user_update", "sk_app.logins.set_company_default"]},
 	"Job Card": {"validate": "sk_app.store.set_job_card_cabin"},  # SK 27-Oct: customer + cabin size, not just the number
+	# SK 29-Oct: one Project + cost centre per cabin; its material, bills and sales rows go to that cost centre at once,
+	# and stages done before ERPNext close when the cabin's Work Order is submitted (sk_app.cabin_projects)
+	"Work Order": {"on_submit": "sk_app.cabin_projects.close_done_stages"},
+	"Stock Entry": {"validate": "sk_app.cabin_projects.set_cost_centre"},
+	"Delivery Note": {"validate": "sk_app.cabin_projects.set_cost_centre"},
 	# SK 27-Oct purchase flow: requisition → CEO approval → PO → receipt against the PO, in ERPNext too
-	"Material Request": {"validate": "sk_app.gates.check_request", "before_submit": "sk_app.requisition.check_submit"},
-	"Purchase Order": {"before_submit": "sk_app.requisition.check_po"},
-	"Purchase Receipt": {"before_submit": "sk_app.requisition.check_receipt"},
+	"Material Request": {"validate": ["sk_app.gates.check_request", "sk_app.cabin_projects.set_cost_centre"], "before_submit": "sk_app.requisition.check_submit"},
+	"Purchase Order": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.requisition.check_po"},
+	"Purchase Receipt": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.requisition.check_receipt"},
 	# SK 28-Oct: subcontractor bills post only after Rushi + CEO; only CEO / Accounts change the rate sheet
-	"Purchase Invoice": {"before_submit": "sk_app.sub_bills.check_submit"},
+	"Purchase Invoice": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.sub_bills.check_submit"},
 	"Item Price": {"validate": "sk_app.sub_bills.check_rate_edit"},
+	# SK 29-Oct: a desk request set to Resolved (app or ERPNext) sends the reply and joins the role's FAQ at once
+	"Issue": {"on_update": "sk_app.issue_desk.on_issue_update"},
 }
 
 # SK Hub's activity log only records what was done; it must never stop a wrong draft from being deleted (28-Oct)
