@@ -102,12 +102,19 @@ def close_done_stages(doc, method=None):
 	for card in cards:
 		if (card.operation or "").lower() not in stages:
 			continue
-		jc = frappe.get_doc("Job Card", card.name)
-		jc.append("time_logs", {"from_time": now, "to_time": now, "time_in_mins": 0, "completed_qty": flt(jc.for_quantity) or 1})
-		jc.total_completed_qty = flt(jc.for_quantity) or 1
-		jc.status = "Completed"
-		jc.flags.ignore_permissions = True
-		jc.flags.ignore_validate = True
-		jc.save()
-		jc.add_comment("Comment", _("Stage already done before ERPNext ({0})").format(", ".join(done_stages(doc.get(DONE_FIELD)))))
-		try_submit(frappe.get_doc("Job Card", jc.name))
+		try:
+			_close(card.name, now, doc.get(DONE_FIELD), try_submit)
+		except Exception:  # never block the Work Order itself; the stage can still be closed with Done in the app
+			frappe.log_error(title=f"SK App: close done stage {card.name}")
+
+
+def _close(job_card: str, now, done_text: str, try_submit):
+	jc = frappe.get_doc("Job Card", job_card)
+	jc.append("time_logs", {"from_time": now, "to_time": now, "time_in_mins": 0, "completed_qty": flt(jc.for_quantity) or 1})
+	jc.total_completed_qty = flt(jc.for_quantity) or 1
+	jc.status = "Completed"
+	jc.flags.ignore_permissions = True
+	jc.flags.ignore_validate = True
+	jc.save()
+	jc.add_comment("Comment", _("Stage already done before ERPNext ({0})").format(", ".join(done_stages(done_text))))
+	try_submit(frappe.get_doc("Job Card", jc.name))
