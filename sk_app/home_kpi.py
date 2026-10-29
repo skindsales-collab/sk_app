@@ -302,18 +302,77 @@ def production(user: str) -> dict:
 		need="Finish Work Orders in ERPNext (start and end dates) for cabins whose item name has the size, e.g. 12x10.")
 
 
+PNL_PROJECTS = 30  # projects on Shraddha's chart, open ones first, then the latest finished
+
+
+def _pnl_projects() -> list:
+	"""Customer projects (one per cabin, SK 29-Oct): open ones and those finished in the last three months.
+	Internal projects (no customer and no cost centre, e.g. ERPNext Implementation) stay off the chart."""
+	since = add_months(get_first_day(getdate()), -2)
+	rows = frappe.get_all("Project", filters={"status": ["!=", "Cancelled"]}, or_filters={"customer": ["is", "set"], "cost_center": ["is", "set"]},
+		fields=["name", "project_name", "status", "customer", "sales_order", "cost_center", "actual_end_date", "modified"], limit=0)
+	rows = [r for r in rows if r.status != "Completed" or getdate(r.actual_end_date or r.modified) >= since]
+	rows.sort(key=lambda r: (r.status == "Completed", r.name))
+	return rows[:PNL_PROJECTS]
+
+
+def project_pnl(projects: list) -> dict:
+	"""{project: {sale, material, bills, other}} from the posted ledger: a GL row counts for a project when it carries the
+	project, else when it is booked to the project's cost centre (PR #86 sets both on every cabin document)."""
+	by_cc = {p.cost_center: p.name for p in projects if p.cost_center}
+	names = {p.name for p in projects}
+	out = {p.name: {"sale": 0.0, "material": 0.0, "bills": 0.0, "other": 0.0} for p in projects}
+	if not projects:
+		return out
+	rows = frappe.db.sql("""
+		select gle.project, gle.cost_center, gle.voucher_type, acc.root_type, sum(gle.debit - gle.credit) as amount
+		from `tabGL Entry` gle join `tabAccount` acc on acc.name = gle.account
+		where gle.is_cancelled = 0 and acc.root_type in ('Income', 'Expense')
+			and (gle.project in %(names)s or gle.cost_center in %(ccs)s)
+		group by gle.project, gle.cost_center, gle.voucher_type, acc.root_type""",
+		{"names": list(names), "ccs": list(by_cc) or [""]}, as_dict=True)
+	for r in rows:
+		key = r.project if r.project in names else by_cc.get(r.cost_center)
+		if not key:
+			continue
+		if r.root_type == "Income":
+			out[key]["sale"] -= flt(r.amount)
+		elif r.voucher_type == "Stock Entry":
+			out[key]["material"] += flt(r.amount)
+		elif r.voucher_type == "Purchase Invoice":
+			out[key]["bills"] += flt(r.amount)
+		else:  # labour, salary and site expenses posted by journal, expense claim or timesheet
+			out[key]["other"] += flt(r.amount)
+	return out
+
+
 def accounts(user: str) -> dict:
-	"""SK 26-Oct: of the projects finished and invoiced in the month, how many have their material posted to the project,
-	so that their project-wise profit & loss is right (e.g. 12 of 20 = 60%). Target 100%; the trend shows if posting improves."""
-	points = []
-	for m, start, end in _months():
-		rows = _safe(lambda start=start, end=end: frappe.get_all("Project", filters={"status": "Completed", "actual_end_date": ["between", [start, end]],
-			"total_billed_amount": [">", 0]}, fields=["total_consumed_material_cost", "total_purchase_cost"], limit=0), []) or []
-		ok = sum(1 for r in rows if flt(r.total_consumed_material_cost) + flt(r.total_purchase_cost) > 0)
-		points.append({"m": m, "v": round(ok * 100 / len(rows)) if rows else None, "note": f"{ok}/{len(rows)}" if rows else ""})
-	return {"kind": "trend", "function": "Accounts", "title": "Projects with correct P&L", "unit": "%", "target": TARGETS["Accounts"],
-		"good_low": False, "points": points, "need": "" if any(p["v"] is not None for p in points) else
-			"Link each order to an ERPNext Project and post its material issues and purchases to that Project; finished, invoiced projects show here."}
+	"""SK 29-Oct: Shraddha's graph shows how many projects there are and each project's own profit & loss, read live
+	from the ledger (sale less material, vendor / subcontract bills and labour posted to the project or its cost centre).
+	SK 26-Oct: the target is 100% of projects with a correct P&L, i.e. both their sale and their cost posted."""
+	projects = _pnl_projects()
+	pnl = project_pnl(projects)
+	orders = {so: flt(v) for so, v in frappe.get_all("Sales Order", filters={"name": ["in", [p.sales_order for p in projects if p.sales_order] or [""]]},
+		fields=["name", "base_net_total"], as_list=True)}
+	rows = []
+	for p in projects:
+		v = pnl[p.name]
+		cost = v["material"] + v["bills"] + v["other"]
+		missing = [k for k, ok in (("order", p.sales_order), ("sale", v["sale"]), ("material", v["material"]),
+			("bills", v["bills"] or v["other"])) if not ok]
+		label = re.sub(r"^\s*Cabin\s+", "", (p.project_name or p.name).split("·")[0]).strip()
+		who = (p.project_name or "").split("·")
+		rows.append({"name": p.name, "label": f"{label} {who[1].strip()}" if len(who) > 1 else label, "status": p.status,
+			"order": orders.get(p.sales_order, 0), "sale": round(v["sale"]), "cost": round(cost), "material": round(v["material"]),
+			"bills": round(v["bills"]), "other": round(v["other"]), "profit": round(v["sale"] - cost),
+			"margin": round((v["sale"] - cost) * 100 / v["sale"], 1) if v["sale"] else None, "missing": missing})
+	ok = sum(1 for r in rows if r["sale"] and r["cost"])
+	total = {k: sum(r[k] for r in rows) for k in ("sale", "cost", "profit")}
+	total["order"] = round(sum(orders.values()))  # one order can cover several cabins (Jayostute 315-317)
+	return {"kind": "projects", "function": "Accounts", "title": "Project profit & loss", "unit": "%", "target": TARGETS["Accounts"],
+		"good_low": False, "count": len(rows), "correct": ok, "pct": round(ok * 100 / len(rows)) if rows else None, "total": total,
+		"projects": rows, "need": "" if ok else
+			"Post each project's sale invoice, material issues and vendor / subcontract / labour bills to its Project or cost centre."}
 
 
 def hr(user: str) -> dict:
