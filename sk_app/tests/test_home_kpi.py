@@ -111,6 +111,18 @@ class TestHomeKpi(IntegrationTestCase):
 		self.assertIn("material", r["missing"])  # no material issue posted yet
 		self.assertNotIn("ERPNext Implementation", [x["label"] for x in c["projects"]])  # internal projects stay off
 
+	def test_store_graph_is_urgent_buys(self):
+		"""SK 29-Oct: Yogesh's graph is the urgent buys without a PO each month, target 0, fewer is better; stock
+		accuracy moved to the Store dashboard."""
+		c = home_kpi.stores("Administrator")
+		self.assertEqual((c["title"], c["target"], c["good_low"]), ("Urgent buys without PO", 0, True))
+		self.assertTrue(all(isinstance(p["v"], int) for p in c["points"]))  # a count, 0 included
+		from sk_app import dashboards
+
+		keys = [x["key"] for x in dashboards._store(getdate(), getdate(), getdate(), getdate(), None, "Administrator") if x]
+		self.assertIn("urgent_no_po", keys)
+		self.assertIn("accuracy", keys)
+
 	def test_actions_to_improve_graph(self):
 		"""SK 26-Oct: actions that lift the graph, added by AI / manager / CEO, shown first by priority, closed by the owner."""
 		run(MGR, home_kpi.add_action, REP, "Call 10 old customers for repeat orders", "High")

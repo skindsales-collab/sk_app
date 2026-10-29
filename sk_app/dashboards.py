@@ -668,6 +668,28 @@ def _purchase(start, end, ps, pe, segment):
 	]
 
 
+def stock_accuracy(start=None, end=None) -> dict | None:
+	"""SK 29-Oct: stock accuracy left Yogesh's home graph for this dashboard. The app counts every line of the store
+	(gate), but a Stock Reconciliation keeps only the lines that differed, so accuracy = lines counted with no
+	difference ÷ lines counted. Lines counted = the store's lines now plus those the count set to 0. With no dates:
+	the month of the last posted count."""
+	if not start:
+		last = frappe.get_all("Stock Reconciliation", filters={"docstatus": 1, "purpose": "Stock Reconciliation"}, pluck="posting_date",
+			order_by="posting_date desc", limit=1)
+		if not last:
+			return None
+		start, end = get_first_day(last[0]), get_last_day(last[0])
+	recos = frappe.get_all("Stock Reconciliation", filters={"docstatus": 1, "purpose": "Stock Reconciliation", "posting_date": ["between", [start, end]]}, pluck="name")
+	if not recos:
+		return None
+	rows = frappe.get_all("Stock Reconciliation Item", filters={"parent": ["in", recos]}, fields=["item_code", "warehouse", "qty", "current_qty"], limit=0)
+	differ = {(r.item_code, r.warehouse) for r in rows if abs(flt(r.qty) - flt(r.current_qty)) >= 0.001}
+	lines = {(b.item_code, b.warehouse) for b in frappe.get_all("Bin", filters={"warehouse": ["in", list({r.warehouse for r in rows})], "actual_qty": ["!=", 0]},
+		fields=["item_code", "warehouse"], limit=0)} | {(r.item_code, r.warehouse) for r in rows}
+	return {"pct": round((len(lines) - len(differ)) * 100 / len(lines), 1) if lines else None, "lines": len(lines), "differ": len(differ),
+		"month": getdate(start).strftime("%b"), "counts": recos}
+
+
 def _store(start, end, ps, pe, segment, user=None):
 	value = sum(flt(v) for v in frappe.get_all("Bin", pluck="stock_value"))
 	from sk_app.store import low_stock, material_pos
@@ -680,6 +702,8 @@ def _store(start, end, ps, pe, segment, user=None):
 	dispatch = frappe.get_all("Delivery Note", filters={"posting_date": today, "docstatus": ["<", 2]}, fields=["name", "customer_name", "base_net_total"])
 	return [
 		_safe(lambda: _count_chart("rec_chart", "Receipts", "Purchase Receipt", "posting_date", {"docstatus": 1, **mat})),
+		_safe(lambda: _urgent_card(start, end)),
+		_safe(lambda: _accuracy_card()),
 		_card("stock_value", "Stock value", value, "money"),
 		_card("low", "Low stock items", len(low), "count", None,
 			[_row(r["item_name"] or r["item_code"], f"{r['warehouse']} · have {r['qty']} / level {r['level']}", None, "Item", r["item_code"], "red") for r in low],
@@ -688,6 +712,23 @@ def _store(start, end, ps, pe, segment, user=None):
 		_card("issues", "Issued / moved today", len(issues), "count", None, [_row(r.stock_entry_type, "", r.total_outgoing_value, "Stock Entry", r.name) for r in issues]),
 		_card("dispatch", "Dispatched today", len(dispatch), "count", None, [_row(r.customer_name, "", r.base_net_total, "Delivery Note", r.name) for r in dispatch]),
 	]
+
+
+def _urgent_card(start, end):
+	"""SK 29-Oct: Yogesh's home graph, here for the month picked on the dashboard (target 0)."""
+	from sk_app.home_kpi import urgent_buys
+
+	n = urgent_buys(start, end)
+	return _card("urgent_no_po", "Urgent buys without PO (target 0)", n, "count", None, None, "red" if n else None)
+
+
+def _accuracy_card():
+	a = stock_accuracy()
+	if not a or a["pct"] is None:
+		return _card("accuracy", "Stock accuracy · no count posted yet", 0, "pct")
+	return _card("accuracy", f"Stock accuracy · count of {a['month']}", a["pct"], "pct", None,
+		[_row(n, "posted count", None, "Stock Reconciliation", n) for n in a["counts"]]
+		+ [_row(f"{a['differ']} of {a['lines']} lines differed", "")], "red" if a["pct"] < 99 else None)
 
 
 def _quality(start, end, ps, pe, segment):
