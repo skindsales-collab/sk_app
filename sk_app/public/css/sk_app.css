@@ -540,12 +540,13 @@ a.sk-chip { text-decoration: none; }
    pop-up sheets as a centred window, hover on everything you can click. */
 @media (min-width: 1024px) {
 	body { font-size: 16px; }
-	main { max-width: 1200px; padding: 20px 24px 48px; }
-	.sk-head { padding-left: max(24px, calc((100% - 1200px) / 2 + 24px)); padding-right: max(24px, calc((100% - 1200px) / 2 + 24px)); }
+	/* SK 29-Oct: "no open space at one side": the page uses the PC width (up to 1680 px) */
+	main { max-width: 1680px; padding: 20px 28px 48px; }
+	.sk-head { padding-left: max(28px, calc((100% - 1680px) / 2 + 28px)); padding-right: max(28px, calc((100% - 1680px) / 2 + 28px)); }
 
 	/* Home: two columns, no squeezing to phone height */
 	.sk-home2 { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); column-gap: 20px; row-gap: 12px; align-content: start;
-		grid-template-areas: "kpi own" "kpi common" "kpi contact" "flow bottom" "decide ."; }
+		grid-template-areas: "kpi own" "kpi common" "kpi contact" "flow bottom" "decide decide"; }
 	.sk-home2 > .sk-kpibox { grid-area: kpi; }
 	.sk-home2 > .sk-flowbox { grid-area: flow; }
 	.sk-home2 > .sk-decide { grid-area: decide; }
@@ -574,8 +575,10 @@ a.sk-chip { text-decoration: none; }
 	.sk-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 12px; align-items: start; }
 	.sk-list > .sk-item { margin-bottom: 10px; }
 
-	/* forms stay a comfortable width */
-	.sk-form { max-width: 760px; }
+	/* forms: fields in two columns across the page (headings, notes, lists and buttons take the full row) */
+	main.sk-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; align-content: start; }
+	main.sk-form > :not(.sk-field) { grid-column: 1 / -1; }
+	main.sk-form > .sk-btn.wide { justify-self: start; min-width: 320px; width: auto; }
 
 	/* pop-up sheets become a centred window */
 	.sk-sheet-wrap { align-items: center; justify-content: center; padding: 24px; }
@@ -591,6 +594,13 @@ a.sk-chip { text-decoration: none; }
 	.sk-toast { left: auto; right: 24px; width: 380px; }
 	.sk-fab { bottom: 24px; right: 24px; }
 	.sk-pstrip { flex-wrap: wrap; overflow: visible; }
+}
+/* big PC screens: more cards and list columns side by side */
+@media (min-width: 1440px) {
+	.sk-tiles { grid-template-columns: repeat(6, 1fr); }
+	.sk-home2 .sk-tiles { grid-template-columns: repeat(4, 1fr); }
+	.sk-dash-cards { grid-template-columns: repeat(6, 1fr); }
+	.sk-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 /* mouse users: show what is clickable */
 @media (hover: hover) and (pointer: fine) {
