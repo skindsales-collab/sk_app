@@ -1027,6 +1027,8 @@
 		hp_ai: "AI चे मसुदा उत्तर", hp_ai_wait: "AI उत्तर लिहित आहे… एक मिनिटाने पुन्हा उघडा", hp_ai_again: "AI ला पुन्हा विचारा", hp_screen_l: "विचारले",
 		hp_how_to: "फक्त उत्तर", hp_app_fix: "SK App मध्ये बदल हवा", hp_erp_setting: "ERPNext सेटिंग / रोल बदल हवा", hp_data_fix: "डेटा दुरुस्ती हवी", hp_need_info: "अधिक माहिती हवी",
 		hp_use_mr: "मराठी उत्तर वापरा", hp_use_en: "इंग्रजी उत्तर वापरा" });
+	Object.assign(T.English, { lk_setup_skip: "Not now, keep using my PIN" });
+	Object.assign(T.Marathi, { lk_setup_skip: "आत्ता नको, पिनच वापरतो" });
 	Object.assign(T.English, { lk_mail_btn: "Forgot PIN? Send code to my e-mail", lk_mail_code: "Code from the e-mail",
 		lk_mail_sent: "Code sent to your e-mail (check Spam too). Valid 10 minutes." });
 	Object.assign(T.Marathi, { lk_mail_btn: "पिन विसरलात? ईमेलवर कोड पाठवा", lk_mail_code: "ईमेलमधील कोड",
@@ -5648,6 +5650,10 @@
 				document.getElementById("q-note-wrap-" + k).hidden = el.dataset.v === "1";
 				return;
 			}
+			if (act === "face-skip") {
+				try { localStorage.setItem("sk_face_skip", String(Date.now())); } catch (e) { /* private mode: asks again next time */ }
+				return closeSheet();
+			}
 			if (act === "face-setup") {
 				try {
 					lockInfo = await faceSetup();
@@ -6332,13 +6338,18 @@
 		if (!state.home) await start();
 		else if (lockHit) go(state.view); // a screen that could not load while locked opens now (typed forms are left as they are)
 		lockHit = false;
-		if ((!st.has_key || faceFailedHere) && await canFace()) faceSetupSheet();
+		if ((!st.has_key || faceFailedHere) && !faceSkipped() && await canFace()) faceSetupSheet();
 		faceFailedHere = false;
 		setTimeout(askPending, 800);
 	}
 	function faceSetupSheet() {
 		sheet(`<h3 class="sk-h">🙂 ${t("lk_setup")}</h3><p class="sk-note">${t("lk_setup_why")}</p>
-			<button class="sk-btn go wide" data-act="face-setup">👆 ${t("lk_setup_now")}</button>`);
+			<button class="sk-btn go wide" data-act="face-setup">👆 ${t("lk_setup_now")}</button>
+			<button class="sk-btn wide" data-act="face-skip">${t("lk_setup_skip")}</button>`);
+	}
+	// SK 29-Oct (PC): "Not now" keeps the PIN on this device and does not ask again for 30 days
+	function faceSkipped() {
+		try { return Date.now() - Number(localStorage.getItem("sk_face_skip") || 0) < 30 * 24 * 3600 * 1000; } catch (e) { return false; }
 	}
 	document.addEventListener("click", async (ev) => {
 		const b = ev.target.closest("[data-lock]");
