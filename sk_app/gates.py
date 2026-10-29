@@ -255,6 +255,34 @@ def check_sales_order(doc, method=None):
 		stop(_("Sales Order {0} cannot be submitted").format(doc.name), missing)
 
 
+INVOICE_CUSTOMER_KEYS = ("customer_name", "gstin", "address")  # a tax invoice needs these; the mobile is the order's gate
+
+
+def check_sales_invoice(doc, method=None):
+	"""Sales Invoice before_submit (SK 29-Oct, Shraddha): the tax invoice must show the buyer (Bill to) and the consignee
+	(Ship to). An invoice without an address picked takes the customer's own; Ship to defaults to Bill to."""
+	if _skip() or not doc.customer:
+		return
+	from frappe.contacts.doctype.address.address import get_address_display
+
+	from sk_app import tax_invoice
+
+	if not doc.get("customer_address"):
+		bill = tax_invoice.party_address(doc.customer)
+		if bill:
+			doc.customer_address = bill.name
+			doc.address_display = get_address_display(bill.name)
+	if doc.get("customer_address") and not doc.get("shipping_address_name"):
+		ship = tax_invoice.party_address(doc.customer, shipping=True)
+		doc.shipping_address_name = ship.name if ship else doc.customer_address
+		doc.shipping_address = get_address_display(doc.shipping_address_name)
+	missing = [(k, _("Customer: {0}").format(t)) for k, t in customer_missing(doc.customer) if k in INVOICE_CUSTOMER_KEYS]
+	if not doc.get("customer_address") and not any(k == "address" for k, _t in missing):
+		missing.append(("address", _("Bill to address")))
+	if missing:
+		stop(_("Sales Invoice {0} cannot be submitted").format(doc.name), missing)
+
+
 # ---------- purchase request ----------
 
 def check_request(doc, method=None):
