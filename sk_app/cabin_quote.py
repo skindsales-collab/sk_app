@@ -447,10 +447,9 @@ def quote_html(doc) -> str:
 	date = formatdate(doc.transaction_date, "dd-MMM-yyyy")
 	contact = doc.get("contact_display") or ""
 	cust = doc.customer_name or doc.party_name
-	city = ""
-	if doc.get("customer_address"):
-		city = frappe.db.get_value("Address", doc.customer_address, "city") or ""
-	to = (f"{_esc(contact)} Sir / Madam<br>" if contact else "") + f"<b>{_esc(cust)}</b>" + (f"<br>{_esc(city)}" if city else "")
+	from sk_app.tax_invoice import quote_to_lines
+
+	to = (f"{_esc(contact)} Sir / Madam<br>" if contact else "") + f"<b>{_esc(cust)}</b>" + quote_to_lines(doc)
 	rows = "".join(
 		f"<tr><td class=c>{i}</td><td>{d.description or d.item_name}</td><td class=c>{flt(d.qty):g}</td><td class=c>{_esc(d.uom)}</td>"
 		f"<td class=r>{inr(d.rate)}</td><td class='r b'>{inr(d.amount)}</td></tr>" for i, d in enumerate(doc.items, 1))

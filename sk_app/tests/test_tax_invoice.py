@@ -35,6 +35,11 @@ class TestTaxInvoice(IntegrationTestCase):
 		self.assertEqual(frappe.db.get_value("Property Setter", {"doc_type": "Sales Invoice", "property": "default_print_format"}, "value"),
 			tax_invoice.PRINT_FORMAT)
 
+	def test_same_layout_for_challan_order_and_po(self):
+		for doctype, name in tax_invoice.FORMATS.items():
+			self.assertTrue(frappe.db.exists("Print Format", name))
+			self.assertEqual(frappe.db.get_value("Property Setter", {"doc_type": doctype, "property": "default_print_format"}, "value"), name)
+
 	def test_no_address_cannot_submit_but_prints_the_gap(self):
 		si = self._invoice(NO_ADDRESS)
 		html = tax_invoice.invoice_html(si)
