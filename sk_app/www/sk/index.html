@@ -2,7 +2,7 @@
 {% block content %}
 {% if guest %}
 <main class="sk-login">
-	<img src="/assets/sk_app/icons/icon-192.png" alt="SK" class="sk-login-logo">
+	<img src="/assets/sk_app/images/sk_logo.png" alt="SK Tech" class="sk-login-logo sk-brand-logo">
 	<h1>SK App</h1>
 	<p class="sk-login-co">SK Ind Tech Solutions Pvt Ltd</p>
 	<div id="face-box" hidden>
@@ -28,7 +28,7 @@
 		<p id="l-msg" class="sk-login-msg"></p>
 	</form>
 	<details class="sk-forgot">
-		<summary class="sk-btn wide">🔑 Forgot PIN / password? · पिन / पासवर्ड विसरलात?</summary>
+		<summary class="sk-link-btn">Forgot PIN? · पिन विसरलात?</summary>
 		<label class="sk-field"><span>Your e-mail or mobile number · तुमचा ईमेल किंवा मोबाईल नंबर</span>
 			<input id="f-login" type="text" autocomplete="username"></label>
 		<button class="sk-btn go wide" type="button" id="f-send">📧 Send code to my e-mail · ईमेलवर कोड पाठवा</button>
@@ -81,7 +81,10 @@
 	(async () => {
 		let ok = false;
 		try { ok = !!(window.PublicKeyCredential && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()); } catch (e) { ok = false; }
-		if (!ok) return;
+		// SK 29-Oct (PC): a key made on the phone is not on the PC (Windows then asks for a phone / security key), so a
+		// PC shows the button only when this PC has its own key
+		const pc = !window.matchMedia("(pointer: coarse)").matches;
+		if (!ok || (pc && !(face.ids || []).length)) return;
 		faceBox.hidden = false;
 		document.getElementById("face-name").textContent = face.name || "";
 		document.getElementById("face-login").addEventListener("click", async () => {

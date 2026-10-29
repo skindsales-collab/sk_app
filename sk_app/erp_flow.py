@@ -55,10 +55,16 @@ def make_customer(user: str, deal: str, details: dict | None = None) -> dict:
 			"mobile_no": d.get("mobile_no"), "email_id": d.get("email")})
 		if doc.meta.has_field("crm_deal"):
 			doc.crm_deal = deal
-		doc.insert()
+		if not frappe.has_permission("Customer", "create"):
+			frappe.throw(_("You may not make customers"), frappe.PermissionError)
+		store.insert_for(doc, user)  # debtors account filled by ERPNext (see store.as_system)
 		name = doc.name
 	if frappe.get_meta("CRM Deal").has_field("erpnext_customer"):
 		frappe.db.set_value("CRM Deal", deal, "erpnext_customer", name)
+	# SK 29-Oct (Aditya: customer details asked 3 times): what the lead / deal already has goes onto the customer
+	if not same and d.get("mobile_no"):
+		with store.as_system():
+			gates.complete_customer(name, mobile=d.mobile_no)
 	if details:
 		gates.complete_customer(name, **details)
 	return {"name": name, "new": not same, "missing": [t for _k, t in gates.customer_missing(name)]}
@@ -78,9 +84,13 @@ def _rate(item_code: str) -> float:
 	return flt(frappe.db.get_value("Item Price", {"item_code": item_code, "price_list": price_list, "selling": 1}, "price_list_rate"))
 
 
-def make_quotation(user: str, deal: str, items: list[dict], valid_days: int = 15, note: str | None = None) -> dict:
+def make_quotation(user: str, deal: str | None, items: list[dict], valid_days: int = 15, note: str | None = None, lead: str | None = None) -> dict:
 	"""Step 2 (Sales): a Quotation for the deal's customer, items with qty and rate (rate from the price list when
 	left empty). Saved as draft; its PDF opens at once to send to the customer."""
+	if lead and not deal:  # SK 29-Oct: a quote straight from the lead (it becomes a deal, as for cabin quotes)
+		from sk_app.cabin_quote import _customer_for
+
+		deal = _customer_for(user, None, lead)[1]
 	customer = make_customer(user, deal)["name"]
 	rows = []
 	for it in items or []:
@@ -183,12 +193,16 @@ def order_received(user: str, quotation: str, delivery_date=None, po_no: str | N
 	so.po_no = (po_no or "").strip() or None
 	if po_date:
 		so.po_date = getdate(po_date)
-	so.insert()
+	if not frappe.has_permission("Sales Order", "create"):
+		frappe.throw(_("You may not make sales orders"), frappe.PermissionError)
+	store.insert_for(so, user)
 	if po_photo:
 		_attach_po(po_photo, so.name, user)
 	out = {"name": so.name, "grand_total": so.grand_total, "delivery_date": str(so.delivery_date), "submitted": False}
 	if frappe.has_permission("Sales Order", "submit", so.name):
-		so.submit()
+		with store.as_system():
+			so.flags.ignore_permissions = True
+			so.submit()
 		out["submitted"] = True
 		_won(deal, so)
 	return out
@@ -221,7 +235,9 @@ def confirm_order(user: str, sales_order: str) -> dict:
 	so = frappe.get_doc("Sales Order", sales_order)
 	so.check_permission("submit")
 	if so.docstatus == 0:
-		so.submit()
+		with store.as_system():
+			so.flags.ignore_permissions = True
+			so.submit()
 	deals = {r.prevdoc_docname for r in so.items if r.get("prevdoc_docname")}
 	for q in deals:
 		_won(frappe.db.get_value("Quotation", q, "crm_deal") if frappe.get_meta("Quotation").has_field("crm_deal") else None, so)
@@ -277,6 +293,5 @@ def make_work_order(user: str, sales_order: str, so_item: str) -> dict:
 		"expected_delivery_date": it.delivery_date, "planned_start_date": nowdate(), **_warehouses(company)})
 	if hasattr(wo, "get_items_and_operations_from_bom"):  # stages (operations) become the factory's job cards
 		wo.get_items_and_operations_from_bom()
-	wo.flags.ignore_permissions = True  # need() above: Production / CEO only, saved under their login like the Store screens
-	wo.insert()
+	store.insert_for(wo, user)  # need() above: Production / CEO only; accounts / warehouses read by the system
 	return {"name": wo.name, "qty": wo.qty}

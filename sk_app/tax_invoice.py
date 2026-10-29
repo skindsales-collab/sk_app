@@ -38,6 +38,33 @@ def ensure_setup():
 				"custom_format": 1, "print_format_type": "Jinja", "standard": "No", "html": html, "margin_top": 0, "margin_left": 0,
 				"margin_right": 0}).insert(ignore_permissions=True)
 		make_property_setter(doctype, None, "default_print_format", name, "Data", validate_fields_for_doctype=False)
+	ensure_letter_head()
+
+
+LETTER_HEAD = "SK Tech Logo"
+
+
+def ensure_letter_head():
+	"""SK 29-Oct point 12: every other ERPNext print (PR, payment, MR, work order ...) gets the SK Tech logo name plate
+	instead of "Company Letterhead - Grey": one default letter head made from the same header picture as the quotes."""
+	img = "/assets/sk_app/images/sk-quote-header.png"
+	meta = frappe.get_meta("Letter Head")
+	vals = {"is_default": 1, "disabled": 0}
+	if meta.has_field("source"):
+		vals.update({"source": "Image", "image": img})
+		if meta.has_field("image_width"):
+			vals.update({"image_width": 190, "align": "Left"})
+	else:
+		vals["content"] = f'<img src="{img}" style="width:100%">'
+	vals = {k: v for k, v in vals.items() if meta.has_field(k)}
+	if frappe.db.exists("Letter Head", LETTER_HEAD):
+		frappe.db.set_value("Letter Head", LETTER_HEAD, vals)
+	else:
+		frappe.get_doc({"doctype": "Letter Head", "letter_head_name": LETTER_HEAD, **vals}).insert(ignore_permissions=True)
+	# only one default: the grey one steps back (it stays for anyone who picks it by hand)
+	frappe.db.sql("update `tabLetter Head` set is_default=0 where name != %s", LETTER_HEAD)
+	frappe.db.set_value("Letter Head", LETTER_HEAD, "is_default", 1)
+	frappe.db.set_default("letter_head", LETTER_HEAD)
 
 
 # ---------- addresses ----------
@@ -291,23 +318,23 @@ def sk_tax_invoice_html(doc) -> str:
 CSS = """
 .skq{font-family:'Liberation Sans',Arial,sans-serif;font-size:8.8pt;color:#222}
 .skq .hdr{width:100%}
-.skq .band{background:#C8233C;color:#fff;font-weight:bold;text-align:center;padding:5px;font-size:10.5pt;margin-bottom:6px}
+.skq .band{background:#C82030;color:#fff;font-weight:bold;text-align:center;padding:5px;font-size:10.5pt;margin-bottom:6px}
 .skq .irn{font-size:7.5pt;color:#555;margin:-3px 0 4px}
 .skq table{border-collapse:collapse;width:100%}
 .skq table.box td{border:1px solid #BFBFBF;vertical-align:top;padding:5px 6px;line-height:1.45}
-.skq .pt{background:#2A6EB4;color:#fff;font-weight:bold;padding:2px 6px;margin:-5px -6px 4px;text-transform:uppercase;font-size:8pt}
+.skq .pt{background:#1878A8;color:#fff;font-weight:bold;padding:2px 6px;margin:-5px -6px 4px;text-transform:uppercase;font-size:8pt}
 .skq .k{font-style:italic;color:#777;width:112px;display:inline-block;white-space:nowrap}
-.skq .miss{color:#C8233C;font-weight:bold}
+.skq .miss{color:#C82030;font-weight:bold}
 .skq .mut{color:#666;font-size:8pt}
 .skq table.p{margin-top:8px}
-.skq table.p th{background:#1D4F86;color:#fff;padding:3px 4px;border:1px solid #1D4F86;font-size:8pt}
+.skq table.p th{background:#135F86;color:#fff;padding:3px 4px;border:1px solid #135F86;font-size:8pt}
 .skq table.p td{border:1px solid #BFBFBF;padding:3px 4px;vertical-align:top}
 .skq .c{text-align:center}.skq .r{text-align:right}
 .skq tr.tot td{background:#FFF2CC;font-weight:bold}
 .skq table.sum td{vertical-align:top;border:0;padding:0}.skq table.sum td.w{width:58%;padding:10px 10px 0 0}
-.skq .words{color:#1D4F86;font-weight:bold;font-style:italic}
-.skq .words2{color:#1D4F86;font-style:italic;margin-top:3px}
-.skq .bar{background:#2A6EB4;color:#fff;font-weight:bold;padding:3px 6px;margin:10px 0 4px;text-transform:uppercase}
+.skq .words{color:#135F86;font-weight:bold;font-style:italic}
+.skq .words2{color:#135F86;font-style:italic;margin-top:3px}
+.skq .bar{background:#1878A8;color:#fff;font-weight:bold;padding:3px 6px;margin:10px 0 4px;text-transform:uppercase}
 .skq table.sign{margin-top:14px}.skq table.sign td{border:1px solid #BFBFBF;padding:6px;vertical-align:top;width:50%}
 .skq .foot{text-align:center;color:#777;font-size:7.5pt;margin-top:6px}
 """

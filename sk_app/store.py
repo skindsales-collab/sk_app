@@ -34,6 +34,20 @@ def attach(file_url: str | None, doctype: str, name: str, user: str):
 		frappe.db.set_value("File", file_name, {"attached_to_doctype": doctype, "attached_to_name": name})
 
 
+class as_system:
+	"""Run ERPNext's own save / submit as the system after the person's own permission was checked: ERPNext fills
+	accounts (tax, debtors, stock) while saving and refuses people who may not read Account (SK 29-Oct, horizontal
+	fix of Aditya's "User don't have permissions to select/read this account")."""
+
+	def __enter__(self):
+		self.user = frappe.session.user
+		frappe.set_user("Administrator")
+
+	def __exit__(self, *exc):
+		frappe.set_user(self.user)
+		return False
+
+
 def insert_for(doc, user: str):
 	"""Insert as the system, kept in the person's name. ERPNext fills the supplier's payable account while saving and
 	refuses when the person (Store) may not read accounts (SK 27-Oct, Yogesh: "User don't have permissions to
@@ -338,10 +352,9 @@ def issue(user: str, work_order: str, items: list[dict], taken_by=None, job_card
 		se.append("items", {"item_code": i["item_code"], "qty": flt(i["qty"]), "s_warehouse": from_wh, "t_warehouse": wo.wip_warehouse,
 			**({"job_card_item": card_rows[i["item_code"]]} if use_card else {}), **uom(i["item_code"])})
 	se.remarks = _("Issued from SK App to {0}").format(taken_by or "-") + (f" · {_('Job card')} {job_card}" if job_card and not use_card else "")
-	se.flags.ignore_permissions = True
-	se.insert()
+	insert_for(se, user)  # accounts filled by ERPNext (as_system)
 	attach(photo, "Stock Entry", se.name, user)
-	posted = try_submit(se)
+	posted = submit_for(se, user)
 	return {"name": se.name, "posted": posted}
 
 
@@ -382,9 +395,8 @@ def request_issue(user: str, request: str) -> dict:
 	from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 
 	se = make_stock_entry(request)
-	se.flags.ignore_permissions = True
-	se.insert()
-	return {"name": se.name, "posted": try_submit(se)}
+	insert_for(se, user)  # accounts filled by ERPNext (as_system)
+	return {"name": se.name, "posted": submit_for(se, user)}
 
 
 def request_to_purchase(user: str, request: str) -> dict:
@@ -457,8 +469,7 @@ def dispatch(user: str, sales_order: str, vehicle_no=None, driver_mobile=None, c
 		frappe.throw(_("Nothing left to deliver on {0}").format(sales_order))
 	dn.vehicle_no = (vehicle_no or "").upper().strip() or None
 	dn.instructions = "\n".join(x for x in (driver_mobile and _("Driver: {0}").format(driver_mobile), note) if x) or None
-	dn.flags.ignore_permissions = True
-	dn.insert()
+	insert_for(dn, user)  # accounts filled by ERPNext (as_system)
 	attach(cabin_photo, "Delivery Note", dn.name, user)
 	attach(plate_photo, "Delivery Note", dn.name, user)
 	owner = frappe.db.get_value("Sales Order", sales_order, "owner")
@@ -514,8 +525,7 @@ def stock_count(user: str, warehouse: str, counts: list[dict], photo=None) -> di
 	sr.purpose = "Stock Reconciliation"
 	for c in diffs:
 		sr.append("items", {"item_code": c["item_code"], "warehouse": warehouse, "qty": flt(c["qty"])})
-	sr.flags.ignore_permissions = True
-	sr.insert()
+	insert_for(sr, user)  # accounts filled by ERPNext (as_system)
 	attach(photo, "Stock Reconciliation", sr.name, user)
 	return {"name": sr.name, "differences": len(diffs)}
 
