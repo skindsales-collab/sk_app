@@ -1643,7 +1643,8 @@ def desk_detail(name):
 
 @frappe.whitelist(methods=["POST"])
 def desk_send(kind, area, text, photo=None, screen=None):
-	return issue_desk.submit(_me().user, kind, area, text, photo, screen)
+	# the ❓ box on ERPNext pages also sends here, and ERPNext has no lock screen to open the SK App lock (as training_ask)
+	return issue_desk.submit(_me(unlocked=False).user, kind, area, text, photo, screen)
 
 
 @frappe.whitelist(methods=["POST"])
