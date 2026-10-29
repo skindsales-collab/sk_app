@@ -27,7 +27,9 @@ scheduler_events = {
 		# SK 27-Oct: the AI's actions to lift each graph, every morning before work
 		"0 7 * * *": ["sk_app.ai_actions.morning"],
 		# SK 28-Oct: customers tagged Cabin / Non-Cabin and every order and customer given its salesperson
-		"30 1 * * *": ["sk_app.sales_owner.nightly"]},
+		"30 1 * * *": ["sk_app.sales_owner.nightly"],
+		# SK 29-Oct: a solved desk request the person did not answer for 3 days is closed
+		"0 2 * * *": ["sk_app.issue_desk.auto_close"]},
 }
 
 doc_events = {
@@ -56,6 +58,8 @@ doc_events = {
 	# SK 28-Oct: subcontractor bills post only after Rushi + CEO; only CEO / Accounts change the rate sheet
 	"Purchase Invoice": {"before_submit": "sk_app.sub_bills.check_submit"},
 	"Item Price": {"validate": "sk_app.sub_bills.check_rate_edit"},
+	# SK 29-Oct: a desk request set to Resolved (app or ERPNext) sends the reply and joins the role's FAQ at once
+	"Issue": {"on_update": "sk_app.issue_desk.on_issue_update"},
 }
 
 # SK Hub's activity log only records what was done; it must never stop a wrong draft from being deleted (28-Oct)

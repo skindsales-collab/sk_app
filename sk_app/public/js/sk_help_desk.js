@@ -1,5 +1,6 @@
-// SK 28-Oct: ❓ help on every ERPNext page. The question goes to the CEO's Questions screen in the SK App with the
-// page's name and a screenshot; Claude drafts the answer; the answer comes back to the person and can go into the FAQ.
+// SK 28-Oct: ❓ help on every ERPNext page. SK 29-Oct: the question goes to the Problem / Suggestion desk (an ERPNext
+// Issue for AI & ERP) with the page's name and a screenshot; Claude drafts the answer; the reply comes back to the
+// person and can go into the FAQ.
 (function () {
 	const MR = () => (frappe.boot && frappe.boot.lang || "").startsWith("mr");
 	const T = (en, mr) => (MR() ? mr : en);
@@ -17,11 +18,11 @@
 				{ fieldtype: "Small Text", fieldname: "question", label: T("What is the problem or question?", "अडचण किंवा प्रश्न काय आहे?"), reqd: 1 },
 				{ fieldtype: "Attach Image", fieldname: "shot", label: T("Screenshot (Windows: Win + Shift + S, then save or paste)", "स्क्रीनशॉट (Windows: Win + Shift + S)") },
 			],
-			primary_action_label: T("Send to CEO", "CEO ला पाठवा"),
+			primary_action_label: T("Send", "पाठवा"),
 			primary_action(v) {
 				d.disable_primary_action();
-				frappe.call({ method: "sk_app.api.training_ask", type: "POST", args: { question: v.question, photo: v.shot || null, screen: where } })
-					.then(() => { d.hide(); frappe.show_alert({ message: T("Sent. The answer comes to your ToDo and the SK App.", "पाठवले. उत्तर ToDo आणि SK App मध्ये मिळेल."), indicator: "green" }); })
+				frappe.call({ method: "sk_app.api.desk_send", type: "POST", args: { kind: "Question", area: "App / ERPNext", text: v.question, photo: v.shot || null, screen: where } })
+					.then((r) => { d.hide(); frappe.show_alert({ message: T("Sent", "पाठवले") + ` ${(r.message || {}).issue || ""}. ` + T("The answer comes to your ToDo and the SK App.", "उत्तर ToDo आणि SK App मध्ये मिळेल."), indicator: "green" }); })
 					.always(() => d.enable_primary_action());
 			},
 		});

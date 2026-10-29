@@ -49,6 +49,9 @@ def after_migrate():
 	from sk_app.complaints import ensure_setup
 
 	ensure_setup()
+	from sk_app.issue_desk import ensure_setup as issue_desk_setup
+
+	issue_desk_setup()  # SK 29-Oct: Problem / Suggestion desk (after the complaint fields it sits under)
 	from sk_app.products import ensure_fields as product_fields
 
 	product_fields()

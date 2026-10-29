@@ -16,7 +16,7 @@
 	const T = {
 		English: {
 			my_day: "My Day", my_leads: "My Leads", my_deals: "My Deals", my_kpi: "My Score",
-			work_book: "Work Book", dsi: "DSI", problem: "Report Problem", job_cards: "Job Cards",
+			work_book: "Work Book", dsi: "DSI", problem: "Problem / Suggestion", job_cards: "Job Cards",
 			inspections: "Inspections", stock_alerts: "Stock Alerts", material_requests: "Material Requests",
 			invoice_photo: "Invoice Photo", collections: "Collections", team_scorecards: "Team Scores",
 			site_checklist: "Site Checklist", ceo_view: "CEO View",
@@ -75,7 +75,7 @@
 		},
 		Marathi: {
 			my_day: "माझा दिवस", my_leads: "माझे लीड", my_deals: "माझे डील", my_kpi: "माझा स्कोअर",
-			work_book: "कामाची वही", dsi: "DSI", problem: "समस्या कळवा", job_cards: "जॉब कार्ड",
+			work_book: "कामाची वही", dsi: "DSI", problem: "समस्या / सूचना", job_cards: "जॉब कार्ड",
 			inspections: "तपासणी", stock_alerts: "स्टॉक सूचना", material_requests: "मटेरियल मागणी",
 			invoice_photo: "बिलाचा फोटो", collections: "वसुली", team_scorecards: "टीम स्कोअर",
 			site_checklist: "साईट चेकलिस्ट", ceo_view: "CEO दृश्य",
@@ -1017,16 +1017,37 @@
 		pc_tip: "टीप: एका फोटोत एकच साईज, सर्व टोके कॅमेऱ्याकडे, समोरून सरळ फोटो, चांगला उजेड.", pc_second: "दुसरी मोजणी" });
 	Object.assign(T.English, { hp_btn: "Help / question", hp_title: "Ask about this screen", hp_screen: "Screen", hp_q: "What is the problem or question? (speak or type)",
 		hp_shot: "Screenshot or photo of the screen", hp_shot_tip: "Take a phone screenshot first (power + volume down), then pick it from the gallery.",
-		hp_similar: "Already answered (check first)", hp_send: "Send to CEO", hp_sent: "Sent. You will get the answer here and in My Day.",
+		hp_similar: "Already answered (check first)", hp_send: "Send", hp_sent: "Sent. You will get the answer in My Day and in Problem / Suggestion → My requests.",
 		hp_ai: "AI draft answer", hp_ai_wait: "AI draft is being written… open again in a minute", hp_ai_again: "Ask AI again", hp_screen_l: "Asked on",
 		hp_how_to: "Answer only", hp_app_fix: "Needs SK App change", hp_erp_setting: "Needs ERPNext setting / role", hp_data_fix: "Needs data correction", hp_need_info: "Needs more detail",
 		hp_use_mr: "Use Marathi answer", hp_use_en: "Use English answer" });
 	Object.assign(T.Marathi, { hp_btn: "मदत / प्रश्न", hp_title: "या स्क्रीनबद्दल विचारा", hp_screen: "स्क्रीन", hp_q: "अडचण किंवा प्रश्न काय आहे? (बोला किंवा लिहा)",
 		hp_shot: "स्क्रीनचा स्क्रीनशॉट किंवा फोटो", hp_shot_tip: "आधी फोनचा स्क्रीनशॉट घ्या (पॉवर + आवाज कमी), मग गॅलरीतून निवडा.",
-		hp_similar: "आधीच उत्तर दिलेले (आधी पाहा)", hp_send: "CEO ला पाठवा", hp_sent: "पाठवले. उत्तर इथे आणि माझा दिवस मध्ये मिळेल.",
+		hp_similar: "आधीच उत्तर दिलेले (आधी पाहा)", hp_send: "पाठवा", hp_sent: "पाठवले. उत्तर माझा दिवस आणि समस्या / सूचना → माझ्या विनंत्या मध्ये मिळेल.",
 		hp_ai: "AI चे मसुदा उत्तर", hp_ai_wait: "AI उत्तर लिहित आहे… एक मिनिटाने पुन्हा उघडा", hp_ai_again: "AI ला पुन्हा विचारा", hp_screen_l: "विचारले",
 		hp_how_to: "फक्त उत्तर", hp_app_fix: "SK App मध्ये बदल हवा", hp_erp_setting: "ERPNext सेटिंग / रोल बदल हवा", hp_data_fix: "डेटा दुरुस्ती हवी", hp_need_info: "अधिक माहिती हवी",
 		hp_use_mr: "मराठी उत्तर वापरा", hp_use_en: "इंग्रजी उत्तर वापरा" });
+	// SK 29-Oct: Problem / Suggestion desk
+	Object.assign(T.English, { dk_mine: "Send / My requests", dk_solve: "To solve", dk_ceo: "CEO approval", dk_what: "What is it?",
+		dk_Problem: "🚩 Problem in my work", dk_Question: "❓ How do I…?", dk_Suggestion: "💡 Suggestion", dk_area: "Area",
+		dk_text: "Tell us (speak or type, Marathi or English)", dk_send: "Send", dk_sent: "Sent", dk_reply_in: "Reply within 1 working day.",
+		dk_pick_kind: "Pick Problem, Question or Suggestion", dk_my: "My requests", dk_st_sent: "Sent", dk_st_solving: "Being solved",
+		dk_st_ceo: "Waiting CEO approval", dk_st_solved: "Solved: read the reply", dk_st_closed: "Closed", dk_from: "From", dk_with: "With",
+		dk_by: "Reply by", dk_reply: "Reply", dk_solved: "✅ Solved", dk_not_solved: "❌ Not solved", dk_type: "Solution type",
+		dk_major: "needs CEO approval", dk_note: "Note (optional)", dk_save_type: "Save type", dk_reply_q: "Reply to the person (speak or type)",
+		dk_faq: "Add to the FAQ of this role", dk_solve_btn: "✅ Send reply and close", dk_wait_ceo: "Waiting for CEO approval before it can be closed.",
+		dk_approve: "✅ Approve", dk_reject: "✖ Reject", dk_hold: "⏸ Hold", dk_open_erp: "Open in ERPNext", dk_steps: "Steps",
+		dk_move_old: "Move old open problems and questions here", dk_moved: "Moved", dk_ai_use: "Use AI draft" });
+	Object.assign(T.Marathi, { dk_mine: "पाठवा / माझ्या विनंत्या", dk_solve: "सोडवायचे", dk_ceo: "CEO मंजुरी", dk_what: "हे काय आहे?",
+		dk_Problem: "🚩 माझ्या कामातील अडचण", dk_Question: "❓ हे कसे करायचे?", dk_Suggestion: "💡 सूचना", dk_area: "विभाग",
+		dk_text: "सांगा (बोला किंवा लिहा, मराठी किंवा इंग्रजी)", dk_send: "पाठवा", dk_sent: "पाठवले", dk_reply_in: "1 कामाच्या दिवसात उत्तर.",
+		dk_pick_kind: "अडचण, प्रश्न किंवा सूचना निवडा", dk_my: "माझ्या विनंत्या", dk_st_sent: "पाठवले", dk_st_solving: "सोडवत आहेत",
+		dk_st_ceo: "CEO मंजुरीची वाट", dk_st_solved: "सोडवले: उत्तर वाचा", dk_st_closed: "बंद", dk_from: "कडून", dk_with: "कडे",
+		dk_by: "उत्तर तारीख", dk_reply: "उत्तर", dk_solved: "✅ सुटले", dk_not_solved: "❌ सुटले नाही", dk_type: "उपायाचा प्रकार",
+		dk_major: "CEO मंजुरी लागेल", dk_note: "टीप (हवी तर)", dk_save_type: "प्रकार जतन करा", dk_reply_q: "त्या व्यक्तीला उत्तर (बोला किंवा लिहा)",
+		dk_faq: "या रोलच्या FAQ मध्ये जोडा", dk_solve_btn: "✅ उत्तर पाठवा आणि बंद करा", dk_wait_ceo: "बंद करण्याआधी CEO मंजुरीची वाट.",
+		dk_approve: "✅ मंजूर", dk_reject: "✖ नामंजूर", dk_hold: "⏸ थांबवा", dk_open_erp: "ERPNext मध्ये उघडा", dk_steps: "टप्पे",
+		dk_move_old: "जुन्या उघड्या अडचणी व प्रश्न इथे आणा", dk_moved: "आणले", dk_ai_use: "AI मसुदा वापरा" });
 	Object.assign(T.English, { lk_setup_skip: "Not now, keep using my PIN" });
 	Object.assign(T.Marathi, { lk_setup_skip: "आत्ता नको, पिनच वापरतो" });
 	Object.assign(T.English, { lk_mail_btn: "Forgot PIN? Send code to my e-mail", lk_mail_code: "Code from the e-mail",
@@ -1454,13 +1475,17 @@
 			${photoField("hp-shot", "📸 " + t("hp_shot"))}<p class="sk-note">${t("hp_shot_tip")}</p>
 			<button class="sk-btn ok wide" data-act="hp-send" data-screen="${esc(screen)}">✓ ${t("hp_send")}</button>
 			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+		similarFaq(el, "hp-q", "hp-similar");
+	}
+	// matching FAQ answers show while the person types, so the same question need not be sent again
+	function similarFaq(el, inputId, boxId) {
 		let timer = null;
 		el.addEventListener("input", (ev) => {
-			if (ev.target.id !== "hp-q") return;
+			if (ev.target.id !== inputId) return;
 			clearTimeout(timer);
 			timer = setTimeout(async () => {
-				const q = val("hp-q");
-				const box = el.querySelector("#hp-similar");
+				const q = val(inputId);
+				const box = el.querySelector("#" + boxId);
 				if (!box) return;
 				const words = (q || "").split(/\s+/).filter((w) => w.length > 3).slice(0, 3);
 				if (!words.length) { box.innerHTML = ""; return; }
@@ -3530,6 +3555,103 @@
 	}, { passive: true });
 
 	// Customer complaints (point 5): register with photo / voice; the concerned person accepts, fixes, the customer confirms
+	// SK 29-Oct: Problem / Suggestion desk. Every request is an ERPNext Issue sent to the owner of its area; small ones the
+	// owner solves, changes wait for the CEO; the reply reaches the person by itself and joins the FAQ of their role.
+	let dkTab = "mine";
+	const DK_COL = { sent: "k-amber", solving: "k-amber", ceo: "k-lead_new", solved: "k-green", closed: "" };
+	const DK_ICON = { sent: "🔵", solving: "🟡", ceo: "🟣", solved: "🟢", closed: "⚪" };
+	async function renderDesk() {
+		const d = S.dk = await call("desk_list", { tab: dkTab });
+		const tab = (k, label, n) => `<button class="${dkTab === k ? "on" : ""}" data-dktab="${k}">${label}${n ? ` (${n})` : ""}</button>`;
+		const row = (r) => `<li class="sk-item ${r.late ? "k-red" : DK_COL[r.state] || ""}"><button class="sk-fu-main" data-dk="${esc(r.name)}">
+			<div class="sk-item-title">${DK_ICON[r.state] || ""} ${esc(r.subject)}</div>
+			<div class="sk-item-meta">${esc(r.name)} · ${t("dk_st_" + r.state)} · ${esc(r.sk_area || "")}${dkTab === "mine" ? ` · ${t("dk_with")} ${esc(r.owner_name)}` : ` · ${t("dk_from")} ${esc(r.by)}`} · ${t("dk_by")} ${esc(r.sk_fix_by)}</div></button></li>`;
+		const list = `<ul class="sk-list sk-gap">${d.rows.map(row).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>`;
+		const form = dkTab !== "mine" ? "" : `<section class="sk-form">
+			<h3 class="sk-h">${t("dk_what")}</h3><div class="sk-chips" id="dk-kind">${d.kinds.map((k) => `<button class="sk-chip" data-ptype="${k}">${t("dk_" + k)}</button>`).join("")}</div>
+			<h3 class="sk-h">${t("dk_area")}</h3><div class="sk-chips" id="dk-area">${d.areas.map((a) => `<button class="sk-chip" data-ptype="${esc(a)}">${esc(a)}</button>`).join("")}</div>
+			${formField("dk-text", t("dk_text"), true)}<div id="dk-similar"></div>${photoField("dk-photo", "📸 " + t("hp_shot"))}
+			<button class="sk-btn bad wide" data-act="dk-send">✓ ${t("dk_send")}</button></section><h3 class="sk-h">${t("dk_my")}</h3>`;
+		root.innerHTML = header(t("problem")) + `<main>
+			<div class="cal-tabs">${tab("mine", t("dk_mine"))}${d.staff || d.counts.solve ? tab("solve", t("dk_solve"), d.counts.solve) : ""}${d.ceo ? tab("ceo", t("dk_ceo"), d.counts.ceo) : ""}</div>
+			${form}${list}${d.staff && dkTab === "solve" ? `<button class="sk-btn wide" data-act="dk-move-old">${t("dk_move_old")}</button>` : ""}</main>`;
+		if (dkTab === "mine") similarFaq(root.querySelector("main"), "dk-text", "dk-similar");
+	}
+	async function deskSheet(name) {
+		const d = await call("desk_detail", { name });
+		const open = ["Open", "Replied", "On Hold"].includes(d.status);
+		const waiting = ["Pending", "Hold"].includes(d.sk_ceo_approval);
+		const major = (S.dk && S.dk.major) || [];
+		const ai = d.ai && d.ai.answer ? d.ai : null;
+		sheet(`<h3 class="sk-h">${DK_ICON[d.state] || ""} ${esc(d.subject)}</h3>
+			<p class="sk-item-meta">${esc(d.name)} · ${t("dk_st_" + d.state)} · ${esc(d.sk_area || "")}${d.sk_screen ? ` · ${t("hp_screen_l")}: ${esc(d.sk_screen)}` : ""}</p>
+			<p class="sk-item-meta">${t("dk_from")} ${esc(d.by)} · ${t("dk_with")} ${esc(d.owner_name)} · ${t("dk_by")} ${esc(d.sk_fix_by)}${d.sk_solution ? ` · ${esc(d.sk_solution)}` : ""}${d.sk_ceo_approval ? ` · CEO: ${esc(d.sk_ceo_approval)}` : ""}</p>
+			<div class="sk-libtext">${esc(d.description)}</div>
+			${d.files.map((f) => `<a class="sk-chip" href="${esc(f.file_url)}" target="_blank">📎 ${esc(f.file_name)}</a>`).join("")}
+			${d.resolution_details ? `<h3 class="sk-h">💬 ${t("dk_reply")}</h3><div class="sk-libtext">${esc(d.resolution_details)}</div>` : ""}
+			${d.steps.length ? `<details><summary>${t("dk_steps")} (${d.steps.length})</summary><ul class="sk-list">${d.steps.map((x) => `<li class="sk-item"><div><div class="sk-item-meta">${esc(x.when)}</div><div>${esc(x.text)}</div></div></li>`).join("")}</ul></details>` : ""}
+			${d.is_mine && d.status === "Resolved" ? `<div class="sk-contact sk-two"><button class="sk-btn ok" data-act="dk-ok" data-ok="1" data-name="${esc(d.name)}">${t("dk_solved")}</button>
+				<button class="sk-btn bad" data-act="dk-ok" data-ok="0" data-name="${esc(d.name)}">${t("dk_not_solved")}</button></div>` : ""}
+			${d.is_ceo && waiting ? `${formField("dk-cnote", t("dk_note"), true)}<div class="sk-contact">
+				<button class="sk-btn ok" data-act="dk-decide" data-dec="Approved" data-name="${esc(d.name)}">${t("dk_approve")}</button>
+				<button class="sk-btn bad" data-act="dk-decide" data-dec="Rejected" data-name="${esc(d.name)}">${t("dk_reject")}</button>
+				${d.sk_ceo_approval !== "Hold" ? `<button class="sk-btn" data-act="dk-decide" data-dec="Hold" data-name="${esc(d.name)}">${t("dk_hold")}</button>` : ""}</div>` : ""}
+			${d.is_solver && open ? `${ai ? `<details><summary>🤖 ${t("hp_ai")}${ai.action ? ` · ${t("hp_" + ai.action)}` : ""}</summary><div class="sk-note" style="white-space:pre-wrap">${esc(ai.answer)}</div>
+					<button type="button" class="sk-chip" data-act="dk-ai">🤖 ${t("dk_ai_use")}</button></details>` : ""}
+				<h3 class="sk-h">${t("dk_type")}</h3><div class="sk-chips" id="dk-sol">${(S.dk ? S.dk.solutions : []).map((x) => `<button class="sk-chip ${d.sk_solution === x ? "on" : ""}" data-ptype="${esc(x)}">${esc(x)}${major.includes(x) ? " 🟣" : ""}</button>`).join("")}</div>
+				<p class="sk-note">🟣 = ${t("dk_major")}</p>${formField("dk-snote", t("dk_note"))}
+				<button class="sk-btn wide" data-act="dk-sort" data-name="${esc(d.name)}">${t("dk_save_type")}</button>
+				${waiting ? `<p class="sk-note">🟣 ${t("dk_wait_ceo")}</p>` : `${formField("dk-reply", t("dk_reply_q"), true)}
+				<label class="sk-row"><input type="checkbox" id="dk-faq" ${["Not needed", "Data correction"].includes(d.sk_solution) ? "" : "checked"}> ${t("dk_faq")}</label>
+				<button class="sk-btn ok wide" data-act="dk-solve" data-name="${esc(d.name)}">${t("dk_solve_btn")}</button>`}` : ""}
+			${d.is_solver || d.is_ceo ? `<a class="sk-btn wide" href="${esc(d.erp_url)}" target="_blank">${t("dk_open_erp")}</a>` : ""}
+			<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+		S.dkAi = ai;
+	}
+	async function deskAct(act, el) {
+		const name = el.dataset.name;
+		const on = (id) => { const c = document.querySelector(`#${id} .sk-chip.on`); return c ? c.dataset.ptype : null; };
+		if (act === "dk-ai") {
+			const box = document.getElementById("dk-reply");
+			if (box && S.dkAi) box.value = (state.lang === "Marathi" && S.dkAi.answer_marathi) || S.dkAi.answer;
+			return;
+		}
+		el.disabled = true;
+		try {
+			if (act === "dk-send") {
+				const kind = on("dk-kind");
+				if (!kind) { toast(t("dk_pick_kind"), true); return; }
+				if (!val("dk-text").trim()) { toast(t("dk_text"), true); return; }
+				const r = await call("desk_send", { kind, area: on("dk-area") || "Other", text: val("dk-text"), photo: await photoUrl("dk-photo") }, true);
+				clearDraft();
+				toast(`✓ ${t("dk_sent")}: ${r.issue}${r.owner ? ` → ${r.owner}` : ""}. ${t("dk_reply_in")}`);
+				return renderDesk();
+			}
+			if (act === "dk-ok") await call("desk_feedback", { name, ok: el.dataset.ok }, true);
+			if (act === "dk-decide") await call("desk_decide", { name, decision: el.dataset.dec, note: val("dk-cnote") }, true);
+			if (act === "dk-sort") {
+				const solution = on("dk-sol");
+				if (!solution) { toast(t("dk_type"), true); return; }
+				await call("desk_sort", { name, solution, note: val("dk-snote") }, true);
+				toast(t("saved"));
+				return deskSheet(name);
+			}
+			if (act === "dk-solve") {
+				if (!val("dk-reply").trim()) { toast(t("dk_reply_q"), true); return; }
+				const faq = document.getElementById("dk-faq");
+				await call("desk_solve", { name, reply: val("dk-reply"), add_to_faq: faq && faq.checked ? 1 : 0 }, true);
+			}
+			if (act === "dk-move-old") {
+				const r = await call("desk_move_old", {}, true);
+				toast(`${t("dk_moved")}: ${r.moved}`);
+				return renderDesk();
+			}
+			closeSheet();
+			toast(t("saved"));
+			return renderDesk();
+		} finally { el.disabled = false; }
+	}
+
 	let cpTab = "mine";
 	const cpChip = (r) => `<span class="chip2 ${r.late ? "red" : r.sk_stage === "Closed" ? "green" : r.sk_stage === "Fixed" ? "navy" : "yel"}">${t("st_" + r.sk_stage)}${r.late ? " · " + t("cp_late") : ""}</span>`;
 	async function renderComplaints() {
@@ -5416,7 +5538,7 @@
 	}
 
 	const LIVE_VIEWS = { data_missing: renderDataMissing, fnpage: () => renderFnPage(), more: renderMore, leadership: renderLeadership, to_plan: renderToPlan, my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), cold_calls: renderColdCalls, marketing_list: () => renderMarketing(), my_deals: () => renderLeads("my_deals"),
-		my_kpi: renderKpi, dsi: renderDsi, el_points: renderElPoints, kpi_actions: renderKpiActions, work_book: () => renderWork("work_book"), problem: () => renderWork("problem"),
+		my_kpi: renderKpi, dsi: renderDsi, el_points: renderElPoints, kpi_actions: renderKpiActions, work_book: () => renderWork("work_book"), problem: renderDesk,
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
 		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name),
 		reminders: renderReminders, calls: renderCalls, whatsapp: renderWhatsApp, mail: renderMail, library: renderLibrary,
@@ -5571,6 +5693,8 @@
 				return;
 			}
 			if (el.dataset.cptab) { cpTab = el.dataset.cptab; return go("complaints"); }
+			if (el.dataset.dktab) { dkTab = el.dataset.dktab; return go("problem"); }
+			if (el.dataset.dk) return deskSheet(el.dataset.dk);
 			if (el.dataset.atttab) { attTab = el.dataset.atttab; return go("attendance"); }
 			if (el.dataset.attmonth) {
 				const d = new Date((attMonth || new Date().toISOString().slice(0, 7) + "-01") + "T00:00:00");
@@ -5756,6 +5880,7 @@
 				return go(el.dataset.kind === "Problem" ? "home" : "my_day");
 			}
 			if (act === "close-sheet") { setPending(null); return closeSheet(); }
+			if (act && act.startsWith("dk-")) return deskAct(act, el);
 			if (act && act.startsWith("tm-")) {
 				const comm = el.dataset.comm;
 				el.disabled = true;
@@ -5781,8 +5906,8 @@
 				if (!val("hp-q").trim()) { toast(t("hp_q"), true); return; }
 				el.disabled = true;
 				try {
-					await call("training_ask", { question: val("hp-q"), photo: await photoUrl("hp-shot"), screen: el.dataset.screen || screenName() }, true);
-					closeSheet(); toast(t("hp_sent"));
+					const r = await call("desk_send", { kind: "Question", area: "App / ERPNext", text: val("hp-q"), photo: await photoUrl("hp-shot"), screen: el.dataset.screen || screenName() }, true);
+					closeSheet(); toast(`${t("hp_sent")} ${r.issue}`);
 				} finally { el.disabled = false; }
 				return;
 			}
