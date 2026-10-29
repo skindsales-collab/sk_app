@@ -39,9 +39,13 @@ def ensure_setup():
 		if frappe.db.exists("DocType", "Issue Type") and not frappe.db.exists("Issue Type", t):
 			frappe.get_doc({"doctype": "Issue Type", "description": t}).insert(ignore_permissions=True, set_name=t)
 	if frappe.db.exists("DocType", "Project") and not frappe.db.exists("Project", {"project_name": PROJECT}):
-		frappe.get_doc({"doctype": "Project", "project_name": PROJECT, "status": "Open",
-			"notes": "Every problem, question and suggestion sent from SK App (Problem / Suggestion tile and ❓ on every screen)."
-		}).insert(ignore_permissions=True)
+		try:  # never stop a migrate: the desk works without the project, Issues just have no project set
+			company = frappe.defaults.get_global_default("company") or frappe.db.get_value("Company", {}, "name")
+			frappe.get_doc({"doctype": "Project", "project_name": PROJECT, "status": "Open", "company": company,
+				"notes": "Every problem, question and suggestion sent from SK App (Problem / Suggestion tile and ❓ on every screen)."
+			}).insert(ignore_permissions=True)
+		except Exception:
+			frappe.log_error("SK App desk project")
 	create_custom_fields({"Issue": [
 		{"fieldname": "sk_desk_section", "label": "SK App desk", "fieldtype": "Section Break", "insert_after": "sk_registered_by",
 			"collapsible": 1, "depends_on": "eval:doc.sk_kind"},
