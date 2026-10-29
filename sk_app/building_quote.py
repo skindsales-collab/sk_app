@@ -247,8 +247,8 @@ def quote_html(doc, d: dict) -> str:
 	price = (f"<table class=p><tr><th>Sr.</th><th>Description</th><th>Structure size (L x W x H)</th><th>Sq ft / structure</th><th>Qty (Nos)</th>"
 		f"<th>Structure rate ₹/sq ft<br>(Supply + Erection{tr} + Plinth Dwg)</th><th>Electrical ₹/sq ft</th><th>Total rate ₹/sq ft</th><th>Amount ₹</th></tr>{rows}"
 		f"<tr class=tot><td colspan=3>Total built-up area (sq ft)</td><td class=r>{_m(round(d['total_area'], 2))}</td><td colspan=4 class=r>Total (before GST)</td><td class=r>{inr(doc.net_total)}</td></tr>"
-		f"<tr class=gst><td colspan=3>Capacity: {d['rooms']} rooms / {d['people']} people</td><td colspan=5 class=r>GST @ {d['gst_pct']:g}%</td><td class=r>{inr(doc.net_total * d['gst_pct'] / 100)}</td></tr>"
-		f"<tr class=tot><td colspan=8 class=r>Grand total (incl. GST)</td><td class=r>{inr(doc.net_total * (1 + d['gst_pct'] / 100))}</td></tr></table>"
+		# SK rule: a quote shows only the GST %, never a GST amount or a total with GST
+		f"<tr class=gst><td colspan=3>Capacity: {d['rooms']} rooms / {d['people']} people</td><td colspan=6 class=r>GST @ {d['gst_pct']:g}% extra as applicable</td></tr></table>"
 		f"<div class=words>Amount in words (excl. GST): Rupees {cq.words(int(round(flt(doc.net_total))))} Only</div>")
 	sk_scope = "Supply + Erection" + (" + Electrical" if d["electrical"] else "") + tr + " + Plinth Drawing"
 	cl_scope = ("Construction of plinth at site, " + ("" if d["transport"] else "Transportation, ") + ("" if d["electrical"] else "Electrical work, ")

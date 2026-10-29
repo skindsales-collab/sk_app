@@ -2554,7 +2554,9 @@
 	}
 
 	function erpDocRow(doctype, d, mobile) {
-		const amt = d.grand_total ? "₹" + Number(d.grand_total).toLocaleString("en-IN") : "";
+		// SK rule: a quotation shows its value before GST, never a GST amount
+		const value = doctype === "Quotation" && d.net_total != null ? d.net_total : d.grand_total;
+		const amt = value ? "₹" + Number(value).toLocaleString("en-IN") + (doctype === "Quotation" ? " + GST" : "") : "";
 		return `<li class="sk-item"><div><div class="sk-item-title">${esc(d.name)}</div><div class="sk-item-meta">${esc(d.status || "")} · ${esc(d.transaction_date || "")} · ${amt}</div>
 			<div class="sk-row">
 				<a class="sk-chip" href="${esc(d.pdf)}" target="_blank">📄 ${t("pdf")}</a>
