@@ -67,6 +67,14 @@ def on_project_validate(doc, method=None):
 
 
 def _set_project(project: str, values: dict):
+	"""Fill the Project's empty lead-time fields; never stops the order or invoice being submitted."""
+	try:
+		_fill(project, values)
+	except Exception:
+		frappe.log_error(title=f"SK App: cabin lead time on {project}")
+
+
+def _fill(project: str, values: dict):
 	p = frappe.get_doc("Project", project)
 	if not _has_fields(p):
 		return
