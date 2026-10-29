@@ -43,3 +43,13 @@ class TestCabinProjects(IntegrationTestCase):
 		self.assertEqual(lead_time.area("25ft x 22ft x 8.6ft"), 550)
 		self.assertEqual(lead_time.per_100(30, 300), 10)
 		self.assertEqual(lead_time.per_100(30, 0), 0)
+
+	def test_real_po_date_replaces_estimate(self):
+		from sk_app import lead_time
+
+		frappe.db.set_value("Project", self.project, {"sk_po_date": "2026-10-01", "sk_po_date_approx": 1})
+		lead_time._fill(self.project, {"sk_po_date": "2026-10-09"})
+		self.assertEqual(str(frappe.db.get_value("Project", self.project, "sk_po_date")), "2026-10-09")
+		self.assertFalse(frappe.db.get_value("Project", self.project, "sk_po_date_approx"))
+		lead_time._fill(self.project, {"sk_po_date": "2026-10-20"})  # a real date stays
+		self.assertEqual(str(frappe.db.get_value("Project", self.project, "sk_po_date")), "2026-10-09")
