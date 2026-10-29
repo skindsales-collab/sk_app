@@ -19,8 +19,9 @@ KINDS = {"Problem": "Internal Problem", "Question": "Internal Question", "Sugges
 AREAS = {"App / ERPNext": "AI", "Machine": "Production", "Material": "Stores", "Quality": "Quality", "Safety": "Production",
 	"Customer": "Sales", "HR / Leave": "HR", "Other": "AI"}
 HIGH = ("Machine", "Safety")
-SMALL = ("Answer only", "Training needed", "Data correction", "Not needed")
-MAJOR = ("ERPNext setting / role", "App change", "Process change", "Needs money")
+# SK 29-Oct: checking and answering need nobody's approval (AI replies itself); any correction or modification does
+SMALL = ("Answer only", "Training needed", "Not needed")
+MAJOR = ("Data correction", "ERPNext setting / role", "App change", "Process change", "Needs money")
 SOLUTIONS = SMALL + MAJOR
 REPLY_DAYS, FIX_DAYS, AUTO_CLOSE_DAYS = 1, 3, 3
 TAG = "[Desk]"
@@ -308,6 +309,14 @@ def solve(user: str, name: str, reply: str, add_to_faq=1) -> dict:
 		frappe.throw(_("Please speak or type the reply"))
 	if issue.sk_ceo_approval in ("Pending", "Hold"):
 		frappe.throw(_("Waiting for CEO approval: this change cannot be closed yet"))
+	if issue.sk_kind == "Suggestion" and issue.sk_ceo_approval != "Approved" and issue.sk_solution != "Not needed":
+		# SK 29-Oct (ISS-2026-00006 closed with "Ok"): a suggestion is built or turned down, never just closed
+		if is_ceo(user):
+			if issue.sk_solution not in MAJOR:
+				issue.sk_solution = "App change"
+				issue.save(ignore_permissions=True)
+			return decide(user, name, "Approved", reply)
+		frappe.throw(_("A suggestion needs a type: Not needed (say why) or a change that goes to the CEO"))
 	if not issue.sk_solution:
 		issue.sk_solution = "Answer only"
 	issue.resolution_details = reply.strip()
@@ -369,9 +378,15 @@ def on_issue_update(doc, method=None):
 			_tell(doc.sk_registered_by, by, f"Reply to your request {doc.name} (\"{strip_html(doc.subject)[:100]}\"): {reply}\n"
 				"Open Problem / Suggestion → My requests and tap Solved or Not solved.", doc.name)
 		add = doc.flags.sk_add_to_faq if doc.flags.sk_add_to_faq is not None else doc.sk_solution not in ("Not needed", "Data correction")
-		if add and not doc.sk_faq_item and doc.sk_ceo_approval != "Rejected":
+		if add and faq_worthy(reply) and doc.sk_kind != "Suggestion" and not doc.sk_faq_item and doc.sk_ceo_approval != "Rejected":
 			doc.sk_faq_item = _faq(doc, reply)
 			frappe.db.set_value("Issue", doc.name, "sk_faq_item", doc.sk_faq_item, update_modified=False)
+
+
+def faq_worthy(text: str) -> bool:
+	"""SK 29-Oct: only a real answer goes into the FAQ, not "Ok" / "Done" / a one-liner (also used by training.answer)."""
+	words = strip_html(text or "").split()
+	return len(words) >= 6
 
 
 def _faq(doc, reply: str) -> str | None:
@@ -423,6 +438,24 @@ def ai_draft(issue: str):
 		frappe.utils.get_fullname(doc.sk_registered_by) if doc.sk_registered_by else "", _faq_context(doc.sk_function or "All"), images)
 	if draft:
 		doc.add_comment("Comment", AI_TAG + " " + frappe.as_json(draft, indent=None))
+		send_ai_answer(doc, draft)
+
+
+def send_ai_answer(doc, draft: dict):
+	"""SK 29-Oct: checking and answering need nobody's approval. A how-to answer goes to the person at once (English +
+	Marathi); the owner only steps in if the person taps Not solved. Anything else stays with the owner."""
+	answer = (draft.get("answer") or "").strip()
+	if draft.get("action") != "how_to" or doc.sk_kind == "Suggestion" or not faq_worthy(answer):
+		return
+	doc.reload()
+	if doc.status not in ("Open", "Replied") or doc.sk_solution or doc.sk_ceo_approval:
+		return  # the owner already took it up
+	marathi = (draft.get("answer_marathi") or "").strip()
+	doc.sk_solution = "Answer only"
+	doc.resolution_details = answer + (f"\n\n{marathi}" if marathi else "")
+	doc.status = "Resolved"
+	doc.flags.sk_by = (_users_with_function("AI") or [doc.sk_concerned_user or "Administrator"])[0]
+	doc.save(ignore_permissions=True)
 
 
 def _draft_of(issue: str) -> dict | None:
