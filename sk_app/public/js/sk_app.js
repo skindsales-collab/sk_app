@@ -25,6 +25,9 @@
 			photo: "Photo", saved: "Saved", soon: "Coming in a later phase. Use ERPNext for now:",
 			open_erp: "Open in ERPNext", nothing: "Nothing open. Well done!",
 			dsi_q: "What small improvement did you make today?", before: "Before", after: "After",
+			dsi_saved_q: "What did it save?", sv_Time: "⏱ Time", sv_Cost: "₹ Cost", sv_Quality: "✅ Quality", sv_Safety: "🦺 Safety",
+			sv_Customer: "🤝 Customer", dsi_value: "Minutes or Rs saved", dsi_pick_type: "Please choose what it saved",
+			dsi_need_value: "Please give the minutes or Rs saved", dsi_problem: "Is it a problem, not an improvement?", dsi_this_month: "DSI this month",
 			work_q: "What did you do?", extra: "Extra work", problem_q: "What is the problem?",
 			score: "Score this month", target: "Target", actual: "Actual", not_live: "not live yet",
 			lang: "मराठी", leads: "Leads", deals: "Deals", due: "due", min: "min",
@@ -84,6 +87,9 @@
 			photo: "फोटो", saved: "जतन झाले", soon: "हे पुढच्या टप्प्यात येईल. सध्या ERPNext वापरा:",
 			open_erp: "ERPNext मध्ये उघडा", nothing: "काही काम उघडे नाही. छान!",
 			dsi_q: "आज तुम्ही कोणती छोटी सुधारणा केली?", before: "आधी", after: "नंतर",
+			dsi_saved_q: "यामुळे काय वाचले?", sv_Time: "⏱ वेळ", sv_Cost: "₹ खर्च", sv_Quality: "✅ गुणवत्ता", sv_Safety: "🦺 सुरक्षा",
+			sv_Customer: "🤝 ग्राहक", dsi_value: "किती मिनिटे किंवा रुपये वाचले", dsi_pick_type: "काय वाचले ते निवडा",
+			dsi_need_value: "किती मिनिटे किंवा रुपये वाचले ते लिहा", dsi_problem: "ही सुधारणा नसून समस्या आहे का?", dsi_this_month: "या महिन्यातील DSI",
 			work_q: "तुम्ही काय काम केले?", extra: "जादा काम", problem_q: "समस्या काय आहे?",
 			score: "या महिन्याचा स्कोअर", target: "लक्ष्य", actual: "प्रत्यक्ष", not_live: "अजून सुरू नाही",
 			lang: "English", leads: "लीड", deals: "डील", due: "मुदत", min: "मिनिटे",
@@ -2477,7 +2483,13 @@
 	}
 
 	function renderDsi() {
-		root.innerHTML = header(t("dsi")) + `<main class="sk-form">${formField("f-what", t("dsi_q"), true)}${formField("f-before", t("before"))}${formField("f-after", t("after"))}${photoField()}
+		// SK 29-Oct: what the DSI saved is mandatory, so the monthly summary can add it up; a problem goes to the desk
+		const types = ["Time", "Cost", "Quality", "Safety", "Customer"];
+		root.innerHTML = header(t("dsi")) + `<main class="sk-form">${formField("f-what", t("dsi_q"), true)}
+			<p class="sk-note">${t("dsi_problem")} <button class="sk-link" data-go="problem">🚩 ${t("problem")}</button></p>
+			${formField("f-before", t("before"))}${formField("f-after", t("after"))}
+			<h3 class="sk-h">${t("dsi_saved_q")} *</h3><div class="sk-chips" id="dsi-type">${types.map((x) => `<button class="sk-chip" data-ptype="${x}">${t("sv_" + x)}</button>`).join("")}</div>
+			<label class="sk-field"><span>${t("dsi_value")}</span><input id="f-saving" type="number" inputmode="decimal" min="0"></label>${photoField()}
 			<button class="sk-btn ok wide" data-act="save-dsi">${t("save")}</button></main>`;
 	}
 
@@ -3245,14 +3257,15 @@
 	}
 
 	let teamDay = null;
+	const dsiMonth = (p) => `${p.dsi_month || 0} / ${Math.round(p.dsi_target || 26)} ${t("dsi_this_month")}`;
 	async function renderTeamReports() {
 		const d = await call("team_day_reports", teamDay ? { day: teamDay } : {});
 		const ratings = ["Good", "OK", "Needs improvement"];
 		const people = d.people.map((p) => {
 			const r = p.report;
-			if (!r) return `<li class="sk-item k-lead_new"><div><div class="sk-item-title">${esc(p.full_name)}</div><div class="sk-item-meta">${esc(p.function || "")} · ❌ ${t("not_sent")}</div></div></li>`;
+			if (!r) return `<li class="sk-item k-lead_new"><div><div class="sk-item-title">${esc(p.full_name)}</div><div class="sk-item-meta">${esc(p.function || "")} · ❌ ${t("not_sent")} · 💡 ${dsiMonth(p)}</div></div></li>`;
 			return `<li class="sk-item"><div class="sk-grow"><div class="sk-item-title">${esc(p.full_name)} · ${r.on_time ? "✅ " + t("on_time") : "⏰ " + t("late")}</div>
-				<div class="sk-item-meta">${esc(p.function || "")} · ${when(r.submitted_on)}</div>
+				<div class="sk-item-meta">${esc(p.function || "")} · ${when(r.submitted_on)} · 💡 ${dsiMonth(p)}</div>
 				${factChips(r)}<div>${esc(r.work_done)}</div>
 				${r.problems ? `<div class="sk-prob">⚠ ${esc(r.problems)}</div>` : ""}
 				${r.plan_tomorrow ? `<div class="sk-item-meta">${t("plan_q")}: ${esc(r.plan_tomorrow)}</div>` : ""}
@@ -5972,8 +5985,13 @@
 				return go(state.view);
 			}
 			if (act === "save-dsi") {
+				const chip = document.querySelector("#dsi-type .sk-chip.on");
+				const saving = chip ? chip.dataset.ptype : null;
+				if (!saving) return toast(t("dsi_pick_type"));
+				if ((saving === "Time" || saving === "Cost") && !(parseFloat(val("f-saving")) > 0)) return toast(t("dsi_need_value"));
 				el.disabled = true;
-				await call("add_dsi", { what_changed: val("f-what"), before_text: val("f-before"), after_text: val("f-after"), photo: await photoUrl() }, true);
+				await call("add_dsi", { what_changed: val("f-what"), before_text: val("f-before"), after_text: val("f-after"),
+					saving_type: saving, saving_value: val("f-saving"), photo: await photoUrl() }, true);
 				clearDraft();
 				toast(t("saved"));
 				return go("home");

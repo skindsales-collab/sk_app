@@ -6,7 +6,7 @@ DSI, KPI score), so the person only writes what was done, the problems and tomor
 
 import frappe
 from frappe import _
-from frappe.utils import add_to_date, cint, get_datetime, getdate, now_datetime, strip_html
+from frappe.utils import add_to_date, cint, get_datetime, get_first_day, getdate, now_datetime, strip_html
 
 from sk_app import guide, kpi
 from sk_app.logic import WorkItem, to_time
@@ -154,10 +154,16 @@ def team(manager: str, day=None) -> dict:
 		fields=["name", "user", "work_done", "problems", "plan_tomorrow", "photo", "submitted_on", "on_time", "cards_done",
 			"calls_made", "talk_minutes", "missed_calls", "notes_added", "leads_created", "work_entries", "dsi_done", "kpi_score", "manager_rating",
 			"manager_comment"])}
+	from sk_app import dsi
+
+	# SK 29-Oct: each member's DSI so far this month against their target, for the manager too
+	month = {r["user"]: r for r in dsi.summary(get_first_day(day), day) if r["user"] in {p.user for p in people}}
 	out = []
 	for p in people:
 		r = rows.get(p.user)
-		out.append({"user": p.user, "full_name": p.full_name, "function": p.home, "reported": bool(r), "report": r})
+		m = month.get(p.user)
+		out.append({"user": p.user, "full_name": p.full_name, "function": p.home, "reported": bool(r), "report": r,
+			"dsi_month": m["entries"] if m else 0, "dsi_target": m["target"] if m else dsi.DEFAULT_TARGET})
 	sent = sum(1 for o in out if o["reported"])
 	return {"date": str(day), "total": len(out), "sent": sent, "missing": len(out) - sent, "people": out}
 

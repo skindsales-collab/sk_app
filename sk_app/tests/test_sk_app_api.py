@@ -52,7 +52,9 @@ class TestSKAppAPI(IntegrationTestCase):
 	def test_dsi_counts_in_kpi(self):
 		frappe.db.delete("SK DSI Entry", {"user": SALES})
 		with set_user(SALES):
-			api.add_dsi("Labelled the paint shelves so tins are found faster")
+			self.assertRaises(frappe.ValidationError, api.add_dsi, "No saving given")
+			self.assertRaises(frappe.ValidationError, api.add_dsi, "Time without minutes", saving_type="Time")
+			api.add_dsi("Labelled the paint shelves so tins are found faster", saving_type="Time", saving_value=15)
 			card = api.my_kpi()
 			items = api.my_day()["items"]
 		dsi = next(k for k in card["kpis"] if k["kpi_code"] == "dsi_count")
@@ -60,6 +62,18 @@ class TestSKAppAPI(IntegrationTestCase):
 		self.assertFalse(any(i["kind"] == "dsi" for i in items))
 		# manual KPI 50/100 at weight 50 gives 25 points, DSI 1/26 at weight 50 gives 1.92
 		self.assertAlmostEqual(card["total_score"], 26.9, places=1)
+
+	def test_dsi_monthly_summary_by_role(self):
+		from sk_app import dsi
+
+		frappe.db.delete("SK DSI Entry", {"user": SALES})
+		with set_user(SALES):
+			name = api.add_dsi("Kept the quote folder in order", saving_type="Time", saving_value=20)
+			api.add_dsi("Shorter call script", saving_type="Customer")
+		self.assertEqual(frappe.db.get_value("SK DSI Entry", name, "function"), dsi.main_function(SALES))
+		row = next(r for r in dsi.summary(frappe.utils.get_first_day(frappe.utils.today()), frappe.utils.today()) if r["user"] == SALES)
+		self.assertEqual((row["entries"], row["days"], row["time_min"], row["customer"]), (2, 1, 20, 1))
+		self.assertEqual(row["target"], 26)
 
 	def test_guide_card_rules_and_replan(self):
 		with set_user(SALES):
