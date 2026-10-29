@@ -228,8 +228,9 @@ def quote_html(doc, d: dict) -> str:
 	cust = doc.customer_name or doc.party_name
 	contact = doc.get("contact_display") or ""
 	to = (f"{esc(contact)} Sir / Madam<br>" if contact else "") + f"<b>{esc(cust)}</b>"
-	if doc.get("customer_address"):
-		to += f"<br>{esc(frappe.db.get_value('Address', doc.customer_address, 'city') or '')}"
+	from sk_app.tax_invoice import quote_to_lines
+
+	to += quote_to_lines(doc)  # SK 29-Oct: full address and GSTIN, as on the invoice
 	waiting = {"Requested": "WAITING FOR SK APPROVAL: DO NOT SEND", "Rejected": "NOT APPROVED BY SK: DO NOT SEND"}.get(doc.get("sk_discount_status"))
 	tr = " + Transport" if d["transport"] else ""
 	rows, i = "", 0

@@ -251,6 +251,8 @@ def check_sales_order(doc, method=None):
 	missing = R.order_missing({"transaction_date": doc.transaction_date, "delivery_date": doc.delivery_date, "po_no": doc.po_no,
 		"po_file": _has_file("Sales Order", doc.name), "items": _rows(doc), "grand_total": doc.grand_total})
 	missing += [(k, _("Customer: {0}").format(t)) for k, t in customer_missing(doc.customer)]
+	if doc.customer:
+		fill_addresses(doc)  # SK 29-Oct: the order acknowledgement prints Bill to and Ship to
 	if missing:
 		stop(_("Sales Order {0} cannot be submitted").format(doc.name), missing)
 
@@ -258,11 +260,8 @@ def check_sales_order(doc, method=None):
 INVOICE_CUSTOMER_KEYS = ("customer_name", "gstin", "address")  # a tax invoice needs these; the mobile is the order's gate
 
 
-def check_sales_invoice(doc, method=None):
-	"""Sales Invoice before_submit (SK 29-Oct, Shraddha): the tax invoice must show the buyer (Bill to) and the consignee
-	(Ship to). An invoice without an address picked takes the customer's own; Ship to defaults to Bill to."""
-	if _skip() or not doc.customer:
-		return
+def fill_addresses(doc):
+	"""Bill to / Ship to left empty on a sales document take the customer's own address (Ship to defaults to Bill to)."""
 	from frappe.contacts.doctype.address.address import get_address_display
 
 	from sk_app import tax_invoice
@@ -276,11 +275,19 @@ def check_sales_invoice(doc, method=None):
 		ship = tax_invoice.party_address(doc.customer, shipping=True)
 		doc.shipping_address_name = ship.name if ship else doc.customer_address
 		doc.shipping_address = get_address_display(doc.shipping_address_name)
+
+
+def check_sales_invoice(doc, method=None):
+	"""Sales Invoice / Delivery Note before_submit (SK 29-Oct, Shraddha): the invoice and the delivery challan must show
+	the buyer (Bill to) and the consignee (Ship to)."""
+	if _skip() or not doc.customer:
+		return
+	fill_addresses(doc)
 	missing = [(k, _("Customer: {0}").format(t)) for k, t in customer_missing(doc.customer) if k in INVOICE_CUSTOMER_KEYS]
 	if not doc.get("customer_address") and not any(k == "address" for k, _t in missing):
 		missing.append(("address", _("Bill to address")))
 	if missing:
-		stop(_("Sales Invoice {0} cannot be submitted").format(doc.name), missing)
+		stop(_("{0} {1} cannot be submitted").format(_(doc.doctype), doc.name), missing)
 
 
 # ---------- purchase request ----------

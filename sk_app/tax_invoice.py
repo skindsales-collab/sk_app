@@ -9,6 +9,9 @@ amounts are shown (quotations show only the GST %).
 When an invoice has no address picked (the Tally invoices of 28-Oct), the customer's own Billing / Shipping address in
 ERPNext is used, so adding the address to the customer fixes the print of old invoices too. Ship to falls back to the
 Bill to address. The gate (gates.check_sales_invoice) stops a new invoice being submitted without the buyer's address.
+
+SK 29-Oct (horizontal): the same layout prints the Delivery Challan (Delivery Note), the Order Acknowledgement (Sales
+Order) and the Purchase Order (SK as buyer, the supplier, and Ship to = our plant / site).
 """
 
 import frappe
@@ -17,21 +20,24 @@ from frappe.utils import cint, flt, formatdate
 from sk_app.cabin_quote import inr, words
 
 PRINT_FORMAT = "SK Tax Invoice"
+FORMATS = {"Sales Invoice": PRINT_FORMAT, "Delivery Note": "SK Delivery Challan", "Sales Order": "SK Order Acknowledgement",
+	"Purchase Order": "SK Purchase Order"}
 ADDRESS_FIELDS = ["name", "address_title", "address_line1", "address_line2", "city", "state", "pincode", "country",
 	"gstin", "gst_state_number", "phone", "email_id", "address_type", "is_primary_address", "is_shipping_address"]
 
 
 def ensure_setup():
-	html = "{{ sk_tax_invoice_html(doc) }}"
-	if frappe.db.exists("Print Format", PRINT_FORMAT):
-		frappe.db.set_value("Print Format", PRINT_FORMAT, {"html": html, "disabled": 0})
-	else:
-		frappe.get_doc({"doctype": "Print Format", "name": PRINT_FORMAT, "doc_type": "Sales Invoice", "module": "SK App",
-			"custom_format": 1, "print_format_type": "Jinja", "standard": "No", "html": html, "margin_top": 0, "margin_left": 0,
-			"margin_right": 0}).insert(ignore_permissions=True)
 	from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
-	make_property_setter("Sales Invoice", None, "default_print_format", PRINT_FORMAT, "Data", validate_fields_for_doctype=False)
+	html = "{{ sk_tax_invoice_html(doc) }}"
+	for doctype, name in FORMATS.items():
+		if frappe.db.exists("Print Format", name):
+			frappe.db.set_value("Print Format", name, {"html": html, "disabled": 0})
+		else:
+			frappe.get_doc({"doctype": "Print Format", "name": name, "doc_type": doctype, "module": "SK App",
+				"custom_format": 1, "print_format_type": "Jinja", "standard": "No", "html": html, "margin_top": 0, "margin_left": 0,
+				"margin_right": 0}).insert(ignore_permissions=True)
+		make_property_setter(doctype, None, "default_print_format", name, "Data", validate_fields_for_doctype=False)
 
 
 # ---------- addresses ----------
@@ -43,11 +49,11 @@ def _address(name: str | None) -> dict | None:
 	return frappe.db.get_value("Address", name, [f for f in ADDRESS_FIELDS if f == "name" or meta.has_field(f)], as_dict=True)
 
 
-def party_address(customer: str | None, shipping: bool = False) -> dict | None:
-	"""The customer's own address in ERPNext: for Ship to the shipping one first, else the primary / billing one."""
+def party_address(customer: str | None, shipping: bool = False, doctype: str = "Customer") -> dict | None:
+	"""The customer's (or supplier's) own address in ERPNext: for Ship to the shipping one first, else the primary / billing one."""
 	if not customer:
 		return None
-	names = frappe.get_all("Dynamic Link", filters={"link_doctype": "Customer", "link_name": customer, "parenttype": "Address"},
+	names = frappe.get_all("Dynamic Link", filters={"link_doctype": doctype, "link_name": customer, "parenttype": "Address"},
 		pluck="parent")
 	rows = [a for a in (_address(n) for n in names) if a]
 	if not rows:
@@ -56,16 +62,40 @@ def party_address(customer: str | None, shipping: bool = False) -> dict | None:
 		ship = [a for a in rows if cint(a.get("is_shipping_address")) or a.get("address_type") == "Shipping"]
 		if ship:
 			return ship[0]
-	primary = frappe.db.get_value("Customer", customer, "customer_primary_address")
+	primary = frappe.db.get_value(doctype, customer, f"{doctype.lower()}_primary_address") if doctype in ("Customer", "Supplier") else None
 	rows.sort(key=lambda a: (a.name != primary, not cint(a.get("is_primary_address")), a.get("address_type") != "Billing"))
 	return rows[0]
 
 
+def _company_address(doc) -> dict | None:
+	a = _address(doc.get("company_address") or doc.get("billing_address"))
+	if a or not doc.get("company"):
+		return a
+	return party_address(doc.company, doctype="Company")
+
+
 def parties(doc) -> tuple[dict | None, dict | None, bool]:
-	"""(bill to, ship to, ship to is the same place as bill to)."""
+	"""(bill to, ship to, ship to is the same place as bill to). Purchase Order: (supplier, our delivery place, False)."""
+	if doc.doctype == "Purchase Order":
+		ship = _address(doc.get("shipping_address")) or _company_address(doc)
+		return _address(doc.get("supplier_address")) or party_address(doc.supplier, doctype="Supplier"), ship, False
 	bill = _address(doc.get("customer_address")) or party_address(doc.customer)
 	ship = _address(doc.get("shipping_address_name")) or party_address(doc.customer, shipping=True) or bill
 	return bill, ship, bool(bill and ship and bill.name == ship.name)
+
+
+def quote_to_lines(doc) -> str:
+	"""Quotation "To" block (SK 29-Oct, horizontal): the customer's full address and GSTIN, not only the city."""
+	a = _address(doc.get("customer_address"))
+	if not a and doc.get("quotation_to") == "Customer":
+		a = party_address(doc.get("party_name"))
+	if not a:
+		return ""
+	lines = [_esc(x) for x in (a.get("address_line1"), a.get("address_line2")) if (x or "").strip()]
+	lines.append(" - ".join(x for x in (_esc((a.get("city") or "").strip()), _esc(a.get("pincode"))) if x))
+	if a.get("gstin"):
+		lines.append(f"GSTIN: {_esc(a.gstin)}")
+	return "".join(f"<br>{x}" for x in lines if x)
 
 
 # ---------- print ----------
@@ -102,7 +132,7 @@ def _party_html(title: str, name: str, a: dict | None, gstin: str | None, same: 
 		if a.get("phone"):
 			lines.append(f"<span class=k>Phone</span>{_esc(a.phone)}")
 	else:
-		lines.append("<span class=miss>Address not in ERPNext: add it to the customer, then print again</span>")
+		lines.append("<span class=miss>Address not in ERPNext: add it to the customer / supplier, then print again</span>")
 	lines.append(f"<span class=k>GSTIN</span><b>{_esc(gstin) if gstin else 'Unregistered'}</b>")
 	if same:
 		lines.append("<i class=mut>(same as Bill to)</i>")
@@ -131,9 +161,22 @@ def _bank(company: str) -> str:
 		+ (f"<br>IFSC: {_esc(a.get('branch_code'))}" if a.get("branch_code") else ""))
 
 
+KIND = {  # doctype: title, number label, date field, total label
+	"Sales Invoice": ("TAX INVOICE", "Invoice No.", "posting_date", "Invoice total"),
+	"Delivery Note": ("DELIVERY CHALLAN", "Challan No.", "posting_date", "Total value"),
+	"Sales Order": ("ORDER ACKNOWLEDGEMENT", "Order No.", "transaction_date", "Order total"),
+	"Purchase Order": ("PURCHASE ORDER", "PO No.", "transaction_date", "PO total"),
+}
+
+
 def invoice_html(doc) -> str:
 	bill, ship, same = parties(doc)
-	gstin_buyer = doc.get("billing_address_gstin") or (frappe.db.get_value("Customer", doc.customer, "gstin") if doc.customer else None)
+	po = doc.doctype == "Purchase Order"
+	title, no_label, date_field, total_label = KIND.get(doc.doctype, KIND["Sales Invoice"])
+	if po:
+		gstin_buyer = doc.get("supplier_gstin") or frappe.db.get_value("Supplier", doc.supplier, "gstin")
+	else:
+		gstin_buyer = doc.get("billing_address_gstin") or (frappe.db.get_value("Customer", doc.customer, "gstin") if doc.customer else None)
 	g = _gst(doc)
 	heads = g["heads"]
 	label = {"igst": "IGST", "cgst": "CGST", "sgst": "SGST", "cess": "Cess"}
@@ -165,7 +208,7 @@ def invoice_html(doc) -> str:
 	total = flt(doc.rounded_total) or flt(doc.grand_total)
 	summary_html = "".join(f"<tr><td>{k}</td><td class=r>{inr2(v)}</td></tr>" for k, v in summary)
 	tax_total = sum(g["total"].values()) or flt(doc.total_taxes_and_charges)
-	seller = _address(doc.get("company_address"))
+	seller = _company_address(doc)
 	seller_gstin = doc.get("company_gstin") or (seller or {}).get("gstin") or ""
 	seller_lines = [_esc(x) for x in ((seller or {}).get("address_line1"), (seller or {}).get("address_line2")) if (x or "").strip()]
 	if seller:
@@ -176,38 +219,60 @@ def invoice_html(doc) -> str:
 	if len(seller_gstin) == 15:
 		seller_lines.append(f"<span class=k>PAN</span>{_esc(seller_gstin[2:12])}")
 	date = lambda d: formatdate(d, "dd-MMM-yyyy") if d else ""  # noqa: E731
-	info = [("Invoice No.", f"<b>{_esc(doc.name)}</b>"), ("Date", f"<b>{date(doc.posting_date)}</b>"),
-		("Place of supply", _esc(doc.get("place_of_supply"))), ("Reverse charge", "Yes" if cint(doc.get("is_reverse_charge")) else "No")]
+	info = [(no_label, f"<b>{_esc(doc.name)}</b>"), ("Date", f"<b>{date(doc.get(date_field))}</b>")]
+	if doc.get("place_of_supply"):
+		info.append(("Place of supply", _esc(doc.place_of_supply)))
+	if doc.doctype == "Sales Invoice":
+		info.append(("Reverse charge", "Yes" if cint(doc.get("is_reverse_charge")) else "No"))
 	if doc.get("po_no"):
 		info.append(("Buyer's PO", _esc(doc.po_no) + (f" dt. {date(doc.po_date)}" if doc.get("po_date") else "")))
-	if doc.get("due_date"):
-		info.append(("Due date", date(doc.due_date)))
+	for field, k in (("delivery_date", "Delivery date"), ("schedule_date", "Delivery by"), ("due_date", "Due date"),
+			("lr_no", "LR no."), ("transporter_name", "Transporter")):
+		if doc.get(field):
+			info.append((k, date(doc.get(field)) if field.endswith("date") else _esc(doc.get(field))))
 	if doc.get("ewaybill"):
 		info.append(("e-Way bill", _esc(doc.ewaybill)))
 	if doc.get("vehicle_no"):
 		info.append(("Vehicle no.", _esc(doc.vehicle_no)))
 	irn = f"<div class=irn>IRN: {_esc(doc.irn)}</div>" if doc.get("irn") else ""
-	title = "CREDIT NOTE" if cint(doc.get("is_return")) else "DEBIT NOTE" if cint(doc.get("is_debit_note")) else "TAX INVOICE"
-	copy = _esc(doc.get("invoice_copy") or "Original for Recipient")
+	if doc.doctype == "Sales Invoice":
+		title = "CREDIT NOTE" if cint(doc.get("is_return")) else "DEBIT NOTE" if cint(doc.get("is_debit_note")) else title
+	elif cint(doc.get("is_return")):
+		title = "RETURN CHALLAN"
+	copy = _esc(doc.get("invoice_copy") or "Original for Recipient") if doc.doctype == "Sales Invoice" else ""
+	band = f"{title} &nbsp; | &nbsp; {copy}" if copy else title
+	us = f"<b>SK Ind Tech Solutions Pvt Ltd</b><br>{'<br>'.join(seller_lines)}"
+	if po:
+		party = (_party_html("Supplier", doc.supplier_name or doc.supplier, bill, gstin_buyer),
+			_party_html("Ship to (Deliver at)", (ship or {}).get("address_title") or "SK Ind Tech Solutions Pvt Ltd", ship, seller_gstin))
+	else:
+		party = (_party_html("Bill to (Buyer)", doc.customer_name or doc.customer, bill, gstin_buyer),
+			_party_html("Ship to (Consignee)", (ship or {}).get("address_title") or doc.customer_name or doc.customer, ship, gstin_buyer, same))
+	if doc.doctype == "Sales Invoice":
+		sign = ("<b>Declaration</b><br>We declare that this invoice shows the actual price of the goods / services described and "
+			"that all particulars are true and correct.")
+	elif doc.doctype == "Delivery Note":
+		sign = "<b>Received in good condition</b><br><br><br><br>Receiver's name, signature and date"
+	else:
+		sign = "<b>Please confirm this order</b><br>Quote our order no. on every bill and delivery challan." if po else (
+			"<b>Thank you for your order</b><br>Please check the details and tell us within 2 days if anything is to be changed.")
 	header = frappe.utils.get_url("/assets/sk_app/images/sk-quote-header.png")
 	terms = f"<div class=bar>Terms</div><div>{doc.terms}</div>" if doc.get("terms") else ""
 	return f"""<style>{CSS}</style><div class=skq><img class=hdr src="{header}">
-<div class=band>{title} &nbsp; | &nbsp; {copy}</div>{irn}
-<table class=box><tr><td style="width:55%"><div class=pt>Seller</div><b>SK Ind Tech Solutions Pvt Ltd</b><br>{"<br>".join(seller_lines)}</td>
+<div class=band>{band}</div>{irn}
+<table class=box><tr><td style="width:55%"><div class=pt>{"Buyer (Bill to)" if po else "Seller"}</div>{us}</td>
 <td>{"<br>".join(f"<span class=k>{k}</span>{v}" for k, v in info)}</td></tr>
-<tr><td>{_party_html("Bill to (Buyer)", doc.customer_name or doc.customer, bill, gstin_buyer)}</td>
-<td>{_party_html("Ship to (Consignee)", (ship or {}).get("address_title") or doc.customer_name or doc.customer, ship, gstin_buyer, same)}</td></tr></table>
+<tr><td>{party[0]}</td><td>{party[1]}</td></tr></table>
 <table class=p><tr><th rowspan=2>Sr.</th><th rowspan=2 style="width:30%">Description</th><th rowspan=2>HSN / SAC</th><th rowspan=2>Qty</th><th rowspan=2>Unit</th>
 <th rowspan=2>Rate</th><th rowspan=2>Taxable value</th>{head_th}</tr><tr>{sub_th}</tr>{"".join(rows)}
 <tr class=tot><td colspan=6 class=r>Total</td><td class=r>{inr2(taxable_total)}</td>{tot_tax}</tr></table>
 <table class=sum><tr><td class=w>
 <div class=words>Amount in words: Rupees {words(int(round(total)))} Only</div>
 <div class=words2>GST in words: Rupees {words(int(round(tax_total)))} Only</div><br>{_bank(doc.company)}</td>
-<td><table class=p>{summary_html}<tr class=tot><td>Invoice total</td><td class=r>{inr2(total)}</td></tr></table></td></tr></table>
+<td><table class=p>{summary_html}<tr class=tot><td>{total_label}</td><td class=r>{inr2(total)}</td></tr></table></td></tr></table>
 {terms}
-<table class=sign><tr><td><b>Declaration</b><br>We declare that this invoice shows the actual price of the goods / services described and
-that all particulars are true and correct.</td><td class=r><b>For SK Ind Tech Solutions Pvt Ltd</b><br><br><br><br>Authorised Signatory</td></tr></table>
-<div class=foot>This is a computer generated invoice. | SK Ind Tech Solutions Pvt Ltd</div></div>"""
+<table class=sign><tr><td>{sign}</td><td class=r><b>For SK Ind Tech Solutions Pvt Ltd</b><br><br><br><br>Authorised Signatory</td></tr></table>
+<div class=foot>This is a computer generated document. | SK Ind Tech Solutions Pvt Ltd</div></div>"""
 
 
 def inr2(x) -> str:

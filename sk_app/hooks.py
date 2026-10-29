@@ -18,7 +18,7 @@ app_include_js = ["/assets/sk_app/js/sk_tally_keys.js", "/assets/sk_app/js/sk_he
 # SK 28-Oct: "Post Tally invoices" button for Accounts (sk_app.tally_invoices)
 doctype_list_js = {"Sales Invoice": "public/js/sales_invoice_list.js"}
 
-# SK 29-Oct: GST tax invoice print with Bill to and Ship to, {{ sk_tax_invoice_html(doc) }}
+# SK 29-Oct: GST tax invoice, delivery challan, order acknowledgement and PO prints with Bill to and Ship to, {{ sk_tax_invoice_html(doc) }}
 jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html", "sk_app.tax_invoice.sk_tax_invoice_html"]}
 
 scheduler_events = {
@@ -64,7 +64,7 @@ doc_events = {
 	"Work Order": {"before_submit": "sk_app.sub_bills.wo_submitting",
 		"on_submit": ["sk_app.cabin_projects.close_done_stages", "sk_app.sub_bills.on_work_order_submit"]},
 	"Stock Entry": {"validate": "sk_app.cabin_projects.set_cost_centre"},
-	"Delivery Note": {"validate": "sk_app.cabin_projects.set_cost_centre"},
+	"Delivery Note": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.gates.check_sales_invoice"},
 	# SK 27-Oct purchase flow: requisition → CEO approval → PO → receipt against the PO, in ERPNext too
 	"Material Request": {"validate": ["sk_app.gates.check_request", "sk_app.cabin_projects.set_cost_centre"], "before_submit": "sk_app.requisition.check_submit"},
 	"Purchase Order": {"validate": "sk_app.cabin_projects.set_cost_centre",
