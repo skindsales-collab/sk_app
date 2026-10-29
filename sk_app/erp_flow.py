@@ -250,8 +250,11 @@ def orders_to_plan(user: str) -> list[dict]:
 
 	need(user, "Production", "Management")
 	out = []
+	wo_projects = set(frappe.get_all("Work Order", filters={"docstatus": ["<", 2], "project": ["is", "set"]}, pluck="project"))
 	for so in frappe.get_all("Sales Order", filters={"docstatus": 1, "status": ["not in", ["Closed", "Completed", "On Hold"]]},
-			fields=["name", "customer_name", "delivery_date", "base_net_total"], order_by="delivery_date asc", limit=0):
+			fields=["name", "customer_name", "delivery_date", "base_net_total", "project"], order_by="delivery_date asc", limit=0):
+		if so.project and so.project in wo_projects:  # cabin already started through its Project (SK 29-Oct)
+			continue
 		for it in frappe.get_all("Sales Order Item", filters={"parent": so.name}, fields=["name", "item_code", "item_name", "qty", "delivery_date"]):
 			made = flt(frappe.db.sql("""select sum(qty) from `tabWork Order` where sales_order=%s and sales_order_item=%s and docstatus<2""",
 				(so.name, it.name))[0][0])

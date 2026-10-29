@@ -165,10 +165,14 @@ def factory(user: str, go="job_cards", workstation=None) -> list[dict]:
 		from sk_app.production import non_cabin_orders
 
 		non_cabin = non_cabin_orders()  # SK 28-Oct: the factory board shows cabins only; Non-Cabin jobs are on Aditya's arrows
+		# SK 29-Oct: only submitted orders wait for the factory (drafts are still with sales), and a cabin whose Project
+		# already has a Work Order is started even when the Work Order is not linked to the order
 		with_wo = set(frappe.get_all("Work Order", filters={"docstatus": ["<", 2], "sales_order": ["is", "set"]}, pluck="sales_order"))
-		waiting = [s for s in frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "per_delivered": ["<", 100],
+		wo_projects = set(frappe.get_all("Work Order", filters={"docstatus": ["<", 2], "project": ["is", "set"]}, pluck="project"))
+		waiting = [s for s in frappe.get_all("Sales Order", filters={"docstatus": 1, "per_delivered": ["<", 100],
 			"status": ["not in", ["Closed", "Completed", "On Hold"]]}, fields=["name", "customer_name", "delivery_date", "base_net_total",
-			"transaction_date", "docstatus"], order_by="delivery_date asc", limit=0) if s.name not in with_wo and s.name not in non_cabin]
+			"transaction_date", "docstatus", "project"], order_by="delivery_date asc", limit=0)
+			if s.name not in with_wo and s.name not in non_cabin and not (s.project and s.project in wo_projects)]
 		stages.append(_stage("orders", "Orders to start", "🧾", [_late_row(s.customer_name, f"due {s.delivery_date or '?'}"
 			+ (" · draft order" if s.docstatus == 0 else ""), s.base_net_total, "Sales Order", s.name, s.delivery_date, 0, opened=s.transaction_date)
 			for s in waiting], sum(flt(s.base_net_total) for s in waiting), go="order_board", kind="money"))
