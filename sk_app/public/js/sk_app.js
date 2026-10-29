@@ -1027,6 +1027,8 @@
 		hp_ai: "AI चे मसुदा उत्तर", hp_ai_wait: "AI उत्तर लिहित आहे… एक मिनिटाने पुन्हा उघडा", hp_ai_again: "AI ला पुन्हा विचारा", hp_screen_l: "विचारले",
 		hp_how_to: "फक्त उत्तर", hp_app_fix: "SK App मध्ये बदल हवा", hp_erp_setting: "ERPNext सेटिंग / रोल बदल हवा", hp_data_fix: "डेटा दुरुस्ती हवी", hp_need_info: "अधिक माहिती हवी",
 		hp_use_mr: "मराठी उत्तर वापरा", hp_use_en: "इंग्रजी उत्तर वापरा" });
+	Object.assign(T.English, { nav_back: "Back", nav_fwd: "Forward" });
+	Object.assign(T.Marathi, { nav_back: "मागे", nav_fwd: "पुढे" });
 	Object.assign(T.English, { lk_setup_skip: "Not now, keep using my PIN" });
 	Object.assign(T.Marathi, { lk_setup_skip: "आत्ता नको, पिनच वापरतो" });
 	Object.assign(T.English, { lk_mail_btn: "Forgot PIN? Send code to my e-mail", lk_mail_code: "Code from the e-mail",
@@ -1534,7 +1536,8 @@
 		const bar = state.viewAs ? `<div class="sk-viewbar"><span>👀 ${t("viewing")} ${esc(state.viewAs.name)} ${t("viewing_app")}</span>
 			<button data-act="view-idea">💡</button><button data-act="view-exit">✕ ${t("exit_view")}</button></div>` : "";
 		return bar + `<header class="sk-head">
-			${state.view !== "home" ? `<button class="sk-back" data-go="${state.view === "fnpage" || state.view === "more" ? "home" : state.parent || "home"}">‹</button>` : `<img src="/assets/sk_app/icons/icon-192.png" class="sk-logo" alt="SK">`}
+			${state.view !== "home" || nav.idx > 0 ? `<button class="sk-back" data-act="nav-back" title="${t("nav_back")}">‹</button>` : `<img src="/assets/sk_app/icons/icon-192.png" class="sk-logo" alt="SK">`}
+			<button class="sk-back sk-fwd" data-act="nav-fwd" title="${t("nav_fwd")}" ${nav.idx < nav.max ? "" : "disabled"}>›</button>
 			<div class="sk-title">${esc(title)}<small>${esc(whoAmI())}</small></div>
 			<button class="sk-lang" data-act="lang">${t("lang")}</button>
 		</header>`;
@@ -5446,7 +5449,35 @@
 		call("report_screen_error", { view, message: String(msg).slice(0, 300) }, true).catch(() => {});
 	}
 
+	// SK 29-Oct: Back and Forward on every page, and the phone / browser back button moves between app screens too.
+	// Each screen opened is a browser history entry; nav.idx is where we are, nav.max the furthest forward.
+	const nav = { idx: 0, max: 0, popping: false, key: "home|" };
+	const navKey = (view) => view + "|" + (view === "fnpage" ? fnPage : view === "detail" && current ? current.doctype + "/" + current.name : "");
+	function navPush(view) {
+		if (nav.popping || navKey(view) === nav.key) return; // the same screen refreshed is not a new step
+		nav.key = navKey(view);
+		const entry = { sk: view, fnPage, current, idx: nav.idx + 1 };
+		try { history.pushState(entry, "", "#" + view); nav.idx = nav.max = entry.idx; } catch (e) { /* old browser */ }
+	}
+	function navBack() {
+		if (nav.idx > 0) return history.back();
+		// first screen after opening: up one level, as the old back button did
+		return go(state.view === "fnpage" || state.view === "more" ? "home" : state.parent || "home");
+	}
+	window.addEventListener("popstate", (ev) => {
+		const e = ev.state;
+		if (!e || !e.sk) return;
+		nav.idx = e.idx || 0;
+		if (e.fnPage !== undefined) fnPage = e.fnPage;
+		if (e.current !== undefined) current = e.current;
+		nav.key = navKey(e.sk);
+		nav.popping = true;
+		Promise.resolve(go(e.sk)).finally(() => { nav.popping = false; });
+	});
+	try { history.replaceState({ sk: "home", idx: 0 }, "", location.pathname + location.search); } catch (e) { /* old browser */ }
+
 	async function go(view) {
+		navPush(view);
 		stopListening(); // a mic left on keeps listening into the old screen (point 4)
 		closeSheet();
 		if (view === "erpnext_desk") { window.location.href = "/app"; return; }
@@ -5733,6 +5764,8 @@
 			}
 			if (act === "newcard") { state.card = await call("next_card", { force: 1 }, true); return go(state.view); }
 			if (act === "read" && state.card) return readAloud(state.card.card_text);
+			if (act === "nav-back") return navBack();
+			if (act === "nav-fwd") return history.forward();
 			if (act === "lang") {
 				state.lang = state.lang === "English" ? "Marathi" : "English";
 				if (state.viewAs) return go(state.view); // the member's own language setting is not changed
@@ -6319,7 +6352,9 @@
 		// the PIN under it. Not set up yet: the button says so and the PIN opens the app once, then set-up follows.
 		const phoneCan = await canFace();
 		const face = phoneCan && lockInfo.has_key;
-		el.innerHTML = `<div class="sk-lock-box"><div class="sk-lock-icon">🔒</div><h2>${t("lk_locked")}</h2>
+		el.innerHTML = `<div class="sk-lock-nav"><button class="sk-back" data-lock="back" title="${t("nav_back")}">‹</button>
+			<button class="sk-back" data-lock="fwd" title="${t("nav_fwd")}">›</button></div>
+			<div class="sk-lock-box"><div class="sk-lock-icon">🔒</div><h2>${t("lk_locked")}</h2>
 			<p class="sk-note">${esc(lockInfo.name || "")}</p>
 			${phoneCan ? `<button class="sk-btn go wide sk-face-btn" data-lock="${face ? "face" : "noface"}">👆 🙂 ${t(face ? "lk_open_face" : "lk_face_first")}</button>
 				<p class="sk-login-or">${t("lk_or_pin")}</p>` : ""}
@@ -6360,6 +6395,12 @@
 			if (b.dataset.lock === "relogin") {
 				await fetch("/api/method/logout", { method: "POST", credentials: "same-origin", headers: { "X-Frappe-CSRF-Token": CSRF } }).catch(() => {});
 				return location.reload();
+			}
+			// SK 29-Oct: Back / Forward on the lock screen too; the app opens on that screen after unlock
+			if (b.dataset.lock === "back" || b.dataset.lock === "fwd") {
+				lockHit = true;
+				b.disabled = false;
+				return b.dataset.lock === "back" ? history.back() : history.forward();
 			}
 			if (b.dataset.lock === "usepin") { lockInfo.usePin = true; return showLock(lockInfo); }
 			// SK 29-Oct: forgot PIN on the lock screen → code by e-mail opens the app; then a new PIN without the old one
