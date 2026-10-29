@@ -101,7 +101,7 @@ def after_migrate():
 	from sk_app.lead_time import ensure_setup as lead_time_setup
 
 	_safe(lead_time_setup, "cabin lead time")  # SK 29-Oct: days per 100 sq ft, PO to invoice
-	_safe(sub_bills_setup, "subcontractor bills")  # SK 28-Oct: rate sheet → bill → Rushi → CEO → payable
+	_safe(sub_bills_setup, "labour rates and POs")  # SK 29-Oct: rate sheet → service PO → Rushi → CEO → GRN → payable
 	_safe(requisition_setup, "purchase requisition")  # SK 27-Oct: requisition → CEO → PO → receipt
 	_safe(marketing_list_setup, "marketing list")  # SK 27-Oct: potential customers for greetings / promotions, not leads
 	from sk_app.cold_calls import move_all_once

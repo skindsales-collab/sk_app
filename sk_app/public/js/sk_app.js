@@ -174,10 +174,10 @@
 		bills: "Bills",
 		last_rates: "Last Rates",
 		po_approvals: "PO Approvals",
-		questions: "Questions", q_help: "Questions from Training, grouped by topic. Answer by typing or speaking: the person is told and the answer is saved in the FAQ. Or send it for development.", q_answer: "Answer", q_dev: "Send for development", q_dev_note: "Note for the AI & ERP desk (optional)", q_dev_sent: "Sent to the AI & ERP desk", q_in_dev: "In development: mark when deployed", q_dep_app: "Deployed in app", q_dep_erp: "Deployed in ERPNext", q_none: "No questions waiting", q_photo: "Screenshot or photo (optional)", sub_bills: "Subcontractor bills", my_bills: "My bills", sb_help: "Bills made from the rate sheet after Quality passed the job. Rushi checks rate and job card, then the CEO approves; then it is payable.",
-		sb_my_help: "Your bills for finished jobs. Answer any question so the bill can move on.", sb_discuss: "Discuss", sb_question: "Question",
-		sb_answer: "Answer", sb_qty: "Sq ft / points", sb_rate: "Rate", sb_qc: "QC", sb_no_size: "Cabin size not found: please put the sq ft",
-		sb_st_rushi: "Waiting Rushi", sb_st_ceo: "Waiting CEO", sb_st_ok: "Approved · payable", sb_st_no: "Rejected", sb_st_paid: "Posted",
+		questions: "Questions", q_help: "Questions from Training, grouped by topic. Answer by typing or speaking: the person is told and the answer is saved in the FAQ. Or send it for development.", q_answer: "Answer", q_dev: "Send for development", q_dev_note: "Note for the AI & ERP desk (optional)", q_dev_sent: "Sent to the AI & ERP desk", q_in_dev: "In development: mark when deployed", q_dep_app: "Deployed in app", q_dep_erp: "Deployed in ERPNext", q_none: "No questions waiting", q_photo: "Screenshot or photo (optional)", sub_bills: "Labour POs", my_bills: "My labour POs", sb_help: "One service PO per job from the labour rate sheet. Rushi checks the rate first, then the CEO approves and the PO is made. When the job is done the GRN comes by itself; after Quality passes it the bill is payable.",
+		sb_my_help: "Your labour POs, one per job: approved rate, GRN when the job is done, and the bill once Quality passed it. Answer any question so it can move on.", sb_grn: "GRN", sb_bill: "Bill", sb_paid: "paid", sb_due: "payable", sb_discuss: "Discuss", sb_question: "Question",
+		sb_answer: "Answer", sb_qty: "Qty (cabins / points)", sb_rate: "Rate", sb_qc: "QC", sb_no_size: "Rate not in the sheet for this cabin: please put the rate",
+		sb_st_rushi: "Waiting Rushi", sb_st_ceo: "Waiting CEO", sb_st_ok: "Approved · PO made", sb_st_no: "Rejected", sb_st_paid: "Posted",
 		sb_waiting_other: "Waiting for Rushi first",
 		search_item: "Item (type or speak)",
 		low: "Low",
@@ -293,10 +293,10 @@
 		bills: "बिले",
 		last_rates: "मागील दर",
 		po_approvals: "PO मंजुरी",
-		questions: "प्रश्न", q_help: "ट्रेनिंगमधील प्रश्न, विषयानुसार. लिहून किंवा बोलून उत्तर द्या: त्या व्यक्तीला कळवले जाते आणि उत्तर FAQ मध्ये जाते. किंवा डेव्हलपमेंटसाठी पाठवा.", q_answer: "उत्तर", q_dev: "डेव्हलपमेंटसाठी पाठवा", q_dev_note: "AI & ERP डेस्कसाठी टीप (ऐच्छिक)", q_dev_sent: "AI & ERP डेस्ककडे पाठवले", q_in_dev: "डेव्हलपमेंटमध्ये: डिप्लॉय झाल्यावर नोंदवा", q_dep_app: "ॲपमध्ये डिप्लॉय", q_dep_erp: "ERPNext मध्ये डिप्लॉय", q_none: "कोणतेही प्रश्न बाकी नाहीत", q_photo: "स्क्रीनशॉट किंवा फोटो (ऐच्छिक)", sub_bills: "कंत्राटदार बिले", my_bills: "माझी बिले", sb_help: "क्वालिटी पास झाल्यावर रेट शीटवरून बिल तयार होते. रुषी रेट व जॉब कार्ड तपासतात, मग CEO मंजूर करतात; मग देय होते.",
-		sb_my_help: "पूर्ण झालेल्या कामांची तुमची बिले. प्रश्न असल्यास उत्तर द्या म्हणजे बिल पुढे जाईल.", sb_discuss: "चर्चा", sb_question: "प्रश्न",
-		sb_answer: "उत्तर", sb_qty: "चौ. फूट / पॉइंट", sb_rate: "रेट", sb_qc: "QC", sb_no_size: "केबिन साईज मिळाली नाही: चौ. फूट टाका",
-		sb_st_rushi: "रुषीकडे बाकी", sb_st_ceo: "CEO कडे बाकी", sb_st_ok: "मंजूर · देय", sb_st_no: "नामंजूर", sb_st_paid: "पोस्ट झाले",
+		questions: "प्रश्न", q_help: "ट्रेनिंगमधील प्रश्न, विषयानुसार. लिहून किंवा बोलून उत्तर द्या: त्या व्यक्तीला कळवले जाते आणि उत्तर FAQ मध्ये जाते. किंवा डेव्हलपमेंटसाठी पाठवा.", q_answer: "उत्तर", q_dev: "डेव्हलपमेंटसाठी पाठवा", q_dev_note: "AI & ERP डेस्कसाठी टीप (ऐच्छिक)", q_dev_sent: "AI & ERP डेस्ककडे पाठवले", q_in_dev: "डेव्हलपमेंटमध्ये: डिप्लॉय झाल्यावर नोंदवा", q_dep_app: "ॲपमध्ये डिप्लॉय", q_dep_erp: "ERPNext मध्ये डिप्लॉय", q_none: "कोणतेही प्रश्न बाकी नाहीत", q_photo: "स्क्रीनशॉट किंवा फोटो (ऐच्छिक)", sub_bills: "लेबर PO", my_bills: "माझे लेबर PO", sb_help: "प्रत्येक कामासाठी लेबर रेट शीटवरून एक सर्व्हिस PO. आधी रुषी रेट तपासतात, मग CEO मंजूर करतात व PO तयार होतो. काम पूर्ण झाल्यावर GRN आपोआप होतो; क्वालिटी पास झाल्यावर बिल देय होते.",
+		sb_my_help: "प्रत्येक कामाचा तुमचा लेबर PO: मंजूर रेट, काम झाल्यावर GRN, क्वालिटी पास झाल्यावर बिल. प्रश्न असल्यास उत्तर द्या म्हणजे पुढे जाईल.", sb_grn: "GRN", sb_bill: "बिल", sb_paid: "पेड", sb_due: "देय", sb_discuss: "चर्चा", sb_question: "प्रश्न",
+		sb_answer: "उत्तर", sb_qty: "नग (केबिन / पॉइंट)", sb_rate: "रेट", sb_qc: "QC", sb_no_size: "या केबिनचा रेट शीटमध्ये नाही: रेट टाका",
+		sb_st_rushi: "रुषीकडे बाकी", sb_st_ceo: "CEO कडे बाकी", sb_st_ok: "मंजूर · PO तयार", sb_st_no: "नामंजूर", sb_st_paid: "पोस्ट झाले",
 		sb_waiting_other: "आधी रुषी तपासतील",
 		search_item: "आयटम (टाइप करा किंवा बोला)",
 		low: "कमी",
@@ -4923,11 +4923,11 @@
 			<div class="sk-item-meta">🏗️ ${esc(b.job.sk_cabin || "")} · ${esc(b.job.name || "")} · ${esc(b.date)}</div>
 			<div class="sk-item-meta">${num(l.qty)} ${esc(l.uom || "")} × ${money(l.rate)} = <b>${money(b.total)}</b>${!l.rate ? ` · <span class="sk-due">⚠ ${t("sb_rate")} 0</span>` : ""}</div>
 			${b.no_size ? `<div class="sk-item-meta sk-due">⚠ ${t("sb_no_size")}</div>` : ""}
-			<div class="sk-item-meta">${t("sb_qc")}: ${b.qc ? `${b.qc.status === "Accepted" ? "✓" : "✗"} ${esc(b.qc.name)}` : "—"}</div>
+			<div class="sk-item-meta">${t("sb_qc")}: ${b.qc ? `${b.qc.status === "Accepted" ? "✓" : "✗"} ${esc(b.qc.name)}` : "—"} · ${t("sb_grn")}: ${b.grn ? "✓ " + esc(b.grn) : "—"} · ${t("sb_bill")}: ${b.bill ? `${esc(b.bill.name)} ${b.bill.docstatus === 1 ? (b.bill.outstanding_amount > 0 ? t("sb_due") : t("sb_paid")) : ""}` : "—"}</div>
 			${(b.photos || []).slice(0, 4).map((u) => `<a class="sk-chip" target="_blank" href="${esc(u)}">📷</a>`).join("")}
 			${b.talk.map((m) => `<div class="sk-item-meta">💬 ${esc(m.text)}</div>`).join("")}
 			${b.question ? `<div class="sk-item-meta sk-due">❓ ${esc(b.question)}</div>` : ""}
-			${mode === "check" && b.mine ? `${b.stage === "Waiting Rushi" ? `<label class="sk-field"><span>${t("sb_qty")}</span>${qtyBox("sb-qty-" + i, l.qty)}</label>` : ""}
+			${mode === "check" && b.mine ? `${b.stage === "Waiting Rushi" ? `<label class="sk-field"><span>${t("sb_qty")}</span>${qtyBox("sb-qty-" + i, l.qty)}</label><label class="sk-field"><span>${t("sb_rate")}</span>${qtyBox("sb-rate-" + i, l.rate)}</label>` : ""}
 				<div class="sk-row sk-gap"><button class="sk-chip on" data-act="sb-ok" data-i="${i}">✓ ${t("approve")}</button>
 				<button class="sk-chip" data-act="sb-ask" data-i="${i}">💬 ${t("sb_discuss")}</button>
 				<button class="sk-chip bad" data-act="sb-no" data-i="${i}">✗ ${t("reject")}</button></div>`
@@ -5011,7 +5011,7 @@
 		switch (act) {
 			case "sb-ok": {
 				el.disabled = true;
-				const r = await call("sb_decide", { name: b.name, approve: 1, qty: val("sb-qty-" + i) || null }, true).catch((e) => { el.disabled = false; throw e; });
+				const r = await call("sb_decide", { name: b.name, approve: 1, qty: val("sb-qty-" + i) || null, rate: val("sb-rate-" + i) || null }, true).catch((e) => { el.disabled = false; throw e; });
 				toast(t(SB_STAGE[r.stage] ? SB_STAGE[r.stage][1] : "saved"));
 				return renderSubBills(S.sbView);
 			}

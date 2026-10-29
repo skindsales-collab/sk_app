@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, flt, fmt_money, getdate, nowdate
 
-from sk_app.store import _company, _todo, _users_with_function, attach, material_requests, need, try_submit, uom
+from sk_app.store import _company, _todo, _users_with_function, attach, material_pos, material_requests, need, try_submit, uom
 
 PURCHASE = "Purchase"
 # SK 26-Oct-2026: Rs 5,000 (draft F02 had proposed Rs 50,000); can be changed in site config "sk_po_approval_limit"
@@ -243,7 +243,7 @@ def follow_up(user: str) -> list[dict]:
 	"""Orders due today or late, with the supplier's phone."""
 	need(user, PURCHASE)
 	pos = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]],
-		"schedule_date": ["<=", nowdate()]}, fields=["name", "supplier", "supplier_name", "schedule_date", "grand_total"],
+		"schedule_date": ["<=", nowdate()], **material_pos()}, fields=["name", "supplier", "supplier_name", "schedule_date", "grand_total"],
 		order_by="schedule_date asc")
 	for p in pos:
 		p["days_late"] = (getdate() - getdate(p.schedule_date)).days
