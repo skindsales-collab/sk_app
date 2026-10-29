@@ -788,7 +788,27 @@ def _daily_review(start, end, ps, pe, segment):
 	return [
 		_card("today", "Today: day reports sent", sum(1 for r in today if not r["c"]), "count", None, today),
 		_card("yesterday", "Yesterday", sum(1 for r in yday if not r["c"]), "count", None, yday),
+		_safe(lambda: _dsi_card(start, end)),
 	]
+
+
+def _dsi_card(start, end):
+	"""SK 29-Oct: the month's DSI per person and role (sk_app.dsi), people with none at the top in red."""
+	from sk_app import dsi
+
+	done = {r["user"]: r for r in dsi.summary(start, end)}
+	rows = []
+	for u in frappe.get_all("SK App User", filters={"enabled": 1}, fields=["user", "full_name"], order_by="full_name asc"):
+		r = done.get(u.user)
+		if not r:
+			rows.append(_row(u.full_name or u.user, f"{dsi.main_function(u.user)} · 0 DSI", "0%", None, None, "red"))
+			continue
+		saved = " · ".join(x for x in (f"⏱ {r['time_min']:.0f} min" if r["time_min"] else "",
+			f"₹ {r['cost_rs']:,.0f}" if r["cost_rs"] else "", f"🏆 {r['best']}" if r["best"] else "") if x)
+		rows.append(_row(r["full_name"], " · ".join(x for x in (r["function"], f"{r['entries']} / {r['target']:.0f} DSI", f"{r['days']} days", saved) if x),
+			f"{r['pct']}%", None, None, "green" if r["pct"] >= 100 else "amber"))
+	rows.sort(key=lambda x: x["c"] != "red")
+	return _card("dsi_month", "DSI this month (per person)", sum(r["entries"] for r in done.values()), "count", None, rows)
 
 
 BUILDERS = {

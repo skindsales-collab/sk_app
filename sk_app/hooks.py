@@ -34,7 +34,7 @@ scheduler_events = {
 }
 
 doc_events = {
-	"SK DSI Entry": {"before_insert": "sk_app.permissions.stamp_user"},
+	"SK DSI Entry": {"before_insert": ["sk_app.permissions.stamp_user", "sk_app.dsi.stamp_function"]},  # SK 29-Oct: role for the monthly summary
 	"SK Work Log": {"before_insert": "sk_app.permissions.stamp_user"},
 	"SK Day Report": {"before_insert": "sk_app.permissions.stamp_user"},
 	"File": {"after_insert": ["sk_app.crm.on_file_attached", "sk_app.deal_quotes.on_file"]},  # SK 28-Oct: a quote file → Quotation

@@ -1,6 +1,8 @@
 [pre_model_sync]
+sk_app.patches.drop_dsi_report_builder
 
 [post_model_sync]
 sk_app.patches.sales_people_own_leads_only
 sk_app.patches.mailboxes_and_auto_leads_on
 sk_app.patches.two_level_segments
+sk_app.patches.dsi_function_and_report

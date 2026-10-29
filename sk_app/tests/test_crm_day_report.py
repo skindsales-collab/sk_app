@@ -191,7 +191,7 @@ class TestCalendars(IntegrationTestCase):
 
 	def test_today_week_month(self):
 		with set_user(REP):
-			api.add_dsi("Sorted cabin brochures")
+			api.add_dsi("Sorted cabin brochures", saving_type="Time", saving_value=10)
 			t = api.cal_today()
 			self.assertTrue(any(s["kind"] == "lunch" for s in t["slots"]) or t["later"] is not None)
 			w = api.cal_week()

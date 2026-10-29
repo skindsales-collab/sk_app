@@ -16,7 +16,7 @@ Staff open **`https://<erpnext-site>/sk`** on their phone, log in with **their o
 | My Leads / My Deals | Frappe CRM leads and deals owned by the person | CRM Lead, CRM Deal |
 | My Score | Live KRA/KPI chart for the month, weighted score and stars; colours green >= 100%, yellow 80-99%, red < 80% | SK KPI Target + counted live from ERPNext |
 | Work Book | Add extra work by voice or text, with photo; last 7 days | SK Work Log |
-| DSI | Daily Small Improvement with before / after / photo | SK DSI Entry |
+| DSI | Daily Small Improvement with before / after / photo and what it saved (required); monthly summary per person and role in ERPNext report "DSI Monthly Summary", Daily Review and Team Reports | SK DSI Entry |
 | Report Problem | 8 problem types, photo, voice | SK Work Log (type Problem) |
 
 English / Marathi switch on every screen, mic button on every text box (phone speech recognition, mr-IN / en-IN),

@@ -239,6 +239,11 @@ def add_dsi(what_changed, before_text=None, after_text=None, saving_type=None, s
 	profile = _me()
 	if not (what_changed or "").strip():
 		frappe.throw(_("Please say what you improved"))
+	# SK 29-Oct mandatory gate: the saving is what the monthly DSI summary adds up
+	if saving_type not in ("Time", "Cost", "Quality", "Safety", "Customer"):
+		frappe.throw(_("Please choose what the improvement saved: Time, Cost, Quality, Safety or Customer"))
+	if saving_type in ("Time", "Cost") and flt(saving_value) <= 0:
+		frappe.throw(_("Please give the minutes or Rs saved"))
 	doc = frappe.get_doc({
 		"doctype": "SK DSI Entry", "user": profile.user, "date": getdate(),
 		"what_changed": what_changed.strip(), "before_text": before_text, "after_text": after_text,
