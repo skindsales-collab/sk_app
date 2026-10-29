@@ -149,9 +149,10 @@ def item_detail(user: str, item_code: str) -> dict:
 
 # ---------- Receive ----------
 
-def material_pos() -> dict:
-	"""Filter for POs Store receives: a labour PO (sk_job_card) gets its GRN by itself when the job is done (SK 29-Oct)."""
-	return {"sk_job_card": ["is", "not set"]} if frappe.get_meta("Purchase Order").has_field("sk_job_card") else {}
+def material_pos(doctype: str = "Purchase Order") -> dict:
+	"""Filter for the POs / receipts of material: a labour PO (sk_job_card) runs its own chain, its GRN and bill made by
+	themselves when the job is done and passed (SK 29-Oct), so purchase, store, quality and accounts lists leave it out."""
+	return {"sk_job_card": ["is", "not set"]} if frappe.get_meta(doctype).has_field("sk_job_card") else {}
 
 
 def open_purchase_orders(user: str) -> list[dict]:
@@ -206,7 +207,7 @@ def receive(user: str, purchase_order: str | None, items: list[dict], challan_ph
 def receipts_to_post(user: str) -> list[dict]:
 	"""Draft receipts waiting for the store's check and Post (stock goes up only when posted)."""
 	need(user, STORE)
-	rows = frappe.get_all("Purchase Receipt", filters={"docstatus": 0}, fields=["name", "supplier", "supplier_name", "posting_date",
+	rows = frappe.get_all("Purchase Receipt", filters={"docstatus": 0, **material_pos("Purchase Receipt")}, fields=["name", "supplier", "supplier_name", "posting_date",
 		"owner", "supplier_delivery_note", "grand_total", "remarks"], order_by="creation desc", limit=50)
 	for r in rows:
 		r["items"] = frappe.get_all("Purchase Receipt Item", filters={"parent": r.name}, fields=["item_code", "item_name", "qty", "uom", "rate"],
