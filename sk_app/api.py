@@ -1680,9 +1680,7 @@ def training_faq(q=None):
 
 @frappe.whitelist(methods=["POST"])
 def training_ask(question, function=None, photo=None, screen=None):
-	# SK 29-Oct (Shraddha's ❓ question showed "Locked SK_LOCKED"): the ❓ box on ERPNext pages has no lock screen, so
-	# sending a question does not need the app unlocked; it only adds a question for the CEO
-	return training.ask(_me(unlocked=False).user, question, function, photo, screen)
+	return training.ask(_me().user, question, function, photo, screen)
 
 
 @frappe.whitelist(methods=["POST"])
