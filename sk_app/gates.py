@@ -250,11 +250,22 @@ def check_sales_order(doc, method=None):
 		return
 	missing = R.order_missing({"transaction_date": doc.transaction_date, "delivery_date": doc.delivery_date, "po_no": doc.po_no,
 		"po_file": _has_file("Sales Order", doc.name), "items": _rows(doc), "grand_total": doc.grand_total})
-	missing += [(k, _("Customer: {0}").format(t)) for k, t in customer_missing(doc.customer)]
+	cust = [(k, _("Customer: {0}").format(t)) for k, t in customer_missing(doc.customer)]
 	if doc.customer:
 		fill_addresses(doc)  # SK 29-Oct: the order acknowledgement prints Bill to and Ship to
+	if cust and not missing and _ceo_old_order(doc):
+		# SK 31-Oct: old order submitted by the CEO with customer data pending; the gap stays on record for later
+		doc.add_comment("Comment", _("Submitted by CEO with customer data pending (old order): {0}").format(R.words(cust)))
+		return
+	missing += cust
 	if missing:
 		stop(_("Sales Order {0} cannot be submitted").format(doc.name), missing)
+
+
+def _ceo_old_order(doc) -> bool:
+	from sk_app.requisition import _is_ceo
+
+	return R.old_order_data_pending(doc.transaction_date, _is_ceo(frappe.session.user))
 
 
 INVOICE_CUSTOMER_KEYS = ("customer_name", "gstin", "address")  # a tax invoice needs these; the mobile is the order's gate

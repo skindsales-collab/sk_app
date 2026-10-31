@@ -4,6 +4,7 @@ from sk_app.gate_rules import (
 	deal_step_needs,
 	is_placeholder_name,
 	lead_missing,
+	old_order_data_pending,
 	order_missing,
 	quotation_missing,
 	request_missing,
@@ -71,3 +72,11 @@ def test_deal_steps():
 	assert keys(deal_step_needs("Negotiations", [{"docstatus": 0}], [])) == {"quotation"}
 	assert keys(deal_step_needs("Won", [{"docstatus": 1}], [{"docstatus": 0}])) == {"sales_order"}
 	assert deal_step_needs("Won", [{"docstatus": 1}], [{"docstatus": 1}]) == []
+
+
+def test_ceo_may_submit_old_order_with_customer_data_pending():
+	assert old_order_data_pending("2026-07-20", True)
+	assert old_order_data_pending("2026-10-31", True)
+	assert not old_order_data_pending("2026-11-01", True)  # new orders: full gate
+	assert not old_order_data_pending("2026-07-20", False)  # only the CEO
+	assert not old_order_data_pending(None, True)
