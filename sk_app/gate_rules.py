@@ -136,6 +136,16 @@ def order_missing(d: dict) -> list[tuple[str, str]]:
 	return out
 
 
+OLD_ORDER_CUTOFF = "2026-11-01"  # SK 31-Oct: orders before this date came from Tally / old CRM
+
+
+def old_order_data_pending(transaction_date, is_ceo: bool) -> bool:
+	"""SK 31-Oct-2026: the CEO may submit an OLD order (dated before OLD_ORDER_CUTOFF) whose customer data (address / PIN,
+	mobile, GSTIN or GST note) is still missing; it is filled later. Order data itself (value, dates, PO) is still needed,
+	and new orders keep the full gate for everyone."""
+	return bool(is_ceo and transaction_date and str(transaction_date)[:10] < OLD_ORDER_CUTOFF)
+
+
 def request_missing(d: dict) -> list[tuple[str, str]]:
 	"""Purchase request. d: items [{item_code, qty}], schedule_date, reason."""
 	out = []
