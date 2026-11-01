@@ -69,7 +69,15 @@ class TestMailLeads(IntegrationTestCase):
 	def test_team_mailbox_take_once_and_only_its_people(self):
 		self.assertIn("cabin@skind.tech", mailbox.boxes_for(SALES1))
 		self.assertEqual(mailbox.boxes_for(ACC), ["acc@skind.tech"])
-		self.assertIn("9970960806@staff.skind.local", mailbox.team_boxes()["prod@skind.tech"])  # SK 27-Oct: Yogesh
+		self.assertNotIn("prod@skind.tech", mailbox.team_boxes())  # SK 1-Nov: no such mail ID, added by mistake
+		old = frappe.db.get_single_value("SK App Settings", "mailbox_map")
+		frappe.db.set_single_value("SK App Settings", "mailbox_map", "prod@skind.tech: Production")
+		frappe.clear_document_cache("SK App Settings", "SK App Settings")
+		try:
+			self.assertNotIn("prod@skind.tech", mailbox.team_boxes())
+		finally:
+			frappe.db.set_single_value("SK App Settings", "mailbox_map", old)
+			frappe.clear_document_cache("SK App Settings", "SK App Settings")
 		self.assertIn("cabin@skind.tech", mailbox.boxes_for("Administrator"))  # SK 27-Oct: the CEO sees every team box
 		comm = self._mail()
 		box = mailbox.inbox(SALES1)
