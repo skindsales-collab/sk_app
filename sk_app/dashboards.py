@@ -753,7 +753,10 @@ def _quality(start, end, ps, pe, segment):
 			"red" if late else None))
 		cards.append(_card("late_fixes", "Fixes late (over 7 days)", len(late), "count"))
 	if _has("Issue"):
-		issues = frappe.get_all("Issue", filters={"status": ["in", ["Open", "Replied"]]}, fields=["name", "subject", "customer", "opening_date"], limit=0)
+		# SK 1-Nov: staff Problem / Question / Suggestion (Help desk, Issue.sk_kind) are not customer complaints
+		only_customer = {"sk_kind": ["is", "not set"]} if frappe.db.has_column("Issue", "sk_kind") else {}
+		issues = frappe.get_all("Issue", filters={"status": ["in", ["Open", "Replied"]], **only_customer},
+			fields=["name", "subject", "customer", "opening_date"], limit=0)
 		cards.append(_card("complaints", "Customer complaints open", len(issues), "count", None,
 			[_row(i.subject, i.customer or "", None, "Issue", i.name) for i in issues]))
 	return cards
