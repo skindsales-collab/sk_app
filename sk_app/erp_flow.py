@@ -87,6 +87,7 @@ def _rate(item_code: str) -> float:
 def make_quotation(user: str, deal: str | None, items: list[dict], valid_days: int = 15, note: str | None = None, lead: str | None = None) -> dict:
 	"""Step 2 (Sales): a Quotation for the deal's customer, items with qty and rate (rate from the price list when
 	left empty). Saved as draft; its PDF opens at once to send to the customer."""
+	frappe.flags.sk_quote_in_hand = True  # made by hand: the quote AI must not make a second one (quote_pickup)
 	if lead and not deal:  # SK 29-Oct: a quote straight from the lead (it becomes a deal, as for cabin quotes)
 		from sk_app.cabin_quote import _customer_for
 

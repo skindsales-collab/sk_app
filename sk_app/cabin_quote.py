@@ -260,6 +260,7 @@ def _customer_for(user: str, deal=None, lead=None, customer=None) -> tuple[str, 
 
 def make(user: str, req: dict, deal=None, lead=None, customer=None, discount_pct=0, revise=None, contact=None) -> dict:
 	"""Make (or revise) the cabin quotation. The price comes from the rate card only."""
+	frappe.flags.sk_quote_in_hand = True  # no design / AI quote for a deal quoted here (quote_pickup)
 	rc = rate_card()
 	p = price(req, rc)
 	customer, deal = _customer_for(user, deal, lead, customer)

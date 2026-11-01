@@ -946,6 +946,12 @@
 		ex_no_bill_tag: "बिल नाही", lv_approve: "✓ मंजूर", lv_reject: "✗ नामंजूर", ex_posted: "मंजूर: अकाउंट्स पैसे देईल",
 		no_employee: "तुमचे लॉगिन अजून ERPNext कर्मचाऱ्याशी जोडलेले नाही. कृपया HR ला सांगा." });
 	Object.assign(T.English, { send_design: "Send to design (AI drawing)", design_sent: "Sent to design as deal", design_not_sent: "Not sent to design:" });
+	Object.assign(T.English, { qr_quote: "Quotation made from the rate card", qr_disc: "Discount waits for approval", qr_pdf: "Open quotation PDF",
+		qr_revise: "Change options / size: open the deal and tap Make quotation", qr_design: "Sent to design: drawing, BOM and quote will come to you",
+		qr_ms: "Sent for quote: the quotation will come to you", qr_none: "Not sent for quote yet" });
+	Object.assign(T.Marathi, { qr_quote: "रेट कार्डवरून कोटेशन तयार", qr_disc: "डिस्काउंट मंजुरीसाठी थांबले आहे", qr_pdf: "कोटेशन PDF उघडा",
+		qr_revise: "पर्याय / साईज बदला: डील उघडा आणि Make quotation दाबा", qr_design: "डिझाईनला पाठवले: ड्रॉइंग, BOM व कोटेशन तुम्हाला येईल",
+		qr_ms: "कोटेशनसाठी पाठवले: कोटेशन तुम्हाला येईल", qr_none: "अजून कोटेशनसाठी पाठवले नाही" });
 	Object.assign(T.Marathi, { send_design: "डिझाईनला पाठवा (AI ड्रॉइंग)", design_sent: "डिझाईनला डील म्हणून पाठवले", design_not_sent: "डिझाईनला पाठवले नाही:" });
 	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";
 	T.Marathi.mic_blocked = "माईक / कॅमेरा बंद आहे. Chrome → ⋮ → Settings → Site settings → Microphone (किंवा Camera) → ही साईट → Allow. मग परत येऊन 🎤 दाबा.";
@@ -2354,6 +2360,17 @@
 		inp.addEventListener("input", debounceSearch(() => { mkQ = inp.value; mkShown = 60; renderMarketing(true); }, "#mk-q"));
 	}
 
+	// SK 1-Nov: what happened to the lead's quote, in plain words (quote PDF / sent to design / sent for quote / why not)
+	function routeCard(x) {
+		if (!x) return "";
+		if (x.route === "quote") return `<section class="sk-card"><div class="sk-card-label">📝 ${t("qr_quote")}</div>
+			<div class="sk-card-text">${esc(x.ref || x.quotation)} · ${money(x.grand_total)}</div>${x.discount_waiting ? `<div class="sk-card-meta">${t("qr_disc")}</div>` : ""}
+			<a class="sk-btn ok wide" href="${esc(x.pdf)}" target="_blank">📄 ${t("qr_pdf")}</a><div class="sk-card-meta">${t("qr_revise")}</div></section>`;
+		if (x.route === "design") return `<section class="sk-card"><div class="sk-card-label">✏️ ${t("qr_design")}</div><div class="sk-card-meta">${esc(x.deal || "")}</div></section>`;
+		if (x.route === "ms_quote") return `<section class="sk-card"><div class="sk-card-label">🏗️ ${t("qr_ms")}</div><div class="sk-card-meta">${esc(x.deal || "")}</div></section>`;
+		return `<section class="sk-card"><div class="sk-card-label sk-due">⚠ ${t("qr_none")}</div><div class="sk-card-meta">${esc(x.reason || "")}</div></section>`;
+	}
+
 	// point 12: after Save the person sees where the lead went, its number, and what to do next
 	function leadSaved(r) {
 		state.view = "lead_saved";
@@ -2363,6 +2380,7 @@
 			<div class="sk-card-text">${esc(r.title)}${r.person && r.person !== r.title ? " · " + esc(r.person) : ""}</div>
 			<div class="sk-card-meta">${t("lead_no")} <b>${esc(r.name)}</b> · ${t("owner")} ${esc((state.home && state.home.full_name) || "")} · ${pad2(now.getHours())}:${pad2(now.getMinutes())}</div>
 			<div class="sk-card-meta">${[r.segment, r.source].filter(Boolean).map(esc).join(" · ")}</div></section>
+			${routeCard(r.route)}
 			${r.mobile ? `<button class="sk-btn ok wide" data-contact="Call" data-doctype="CRM Lead" data-name="${esc(r.name)}" data-mobile="${esc(r.mobile)}">📞 ${t("call_now")}</button>
 			<button class="sk-btn wide" data-contact="WhatsApp" data-doctype="CRM Lead" data-name="${esc(r.name)}" data-mobile="${esc(r.mobile)}">💬 WhatsApp</button>` : ""}
 			<button class="sk-btn wide" data-open="CRM Lead" data-name="${esc(r.name)}">📄 ${t("open_lead")}</button>
@@ -2462,13 +2480,6 @@
 			(e) => { note.textContent = "⚠ " + e.message; inp._up = null; throw e; });
 		inp._up.catch(() => {});
 	}
-	// "Send to design" shows only for Cabin segments (the AI design pickup makes cabin drawings)
-	root.addEventListener("change", (ev) => {
-		if (ev.target.id !== "f-segment") return;
-		const row = document.getElementById("f-design-row");
-		const tree = (crmOpts && crmOpts.segment_tree) || {};
-		if (row) row.hidden = !((tree.Cabin || []).includes(ev.target.value));
-	});
 	root.addEventListener("change", (ev) => { if (ev.target.classList && ev.target.classList.contains("sk-file")) { photoPicked(ev.target); photoNote(ev.target); } }, true);
 
 	async function photoUrl(id) {
@@ -2946,7 +2957,6 @@
 			<label class="sk-field"><span>${t("email")}</span><div class="sk-input-row"><input id="f-email" type="email"></div></label>
 			${sel("f-source", t("source") + " *", o.sources)}${segmentSelect("f-segment", o.segment_tree, o.segments)}${(o.products || []).length ? sel("f-product", t("product_asked"), o.products) : ""}
 			<label class="sk-field"><span>${t("status")}</span><select id="f-status" class="sk-select">${(o.lead_statuses || []).filter((s) => s.type !== "Won" && s.type !== "Lost").map((s) => `<option>${esc(s.name)}</option>`).join("")}</select></label>
-			<label class="sk-check" id="f-design-row" hidden><input id="f-design" type="checkbox" checked> ✏️ ${t("send_design")}</label>
 			${formField("f-req", t("requirement"), true)}
 			<button class="sk-btn ok wide" data-act="save-lead">${t("save")}</button>
 			<details class="sk-gap"><summary>📄 ${t("upload_list")}</summary>${uploadBox()}</details></main>`;
@@ -6552,16 +6562,13 @@
 				el.disabled = true;
 				const name = await call("new_lead", { first_name: val("f-first"), organization: val("f-org"), mobile_no: val("f-mobile"),
 					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl, product: val("f-product"), status: val("f-status") }, true);
-				const dz = document.getElementById("f-design");
-				if (dz && dz.checked && !document.getElementById("f-design-row").hidden) {
-					const r = await call("lead_to_design", { name }, true).catch((e) => ({ sent: false, reason: e.message }));
-					toast(r.sent ? `✏️ ${t("design_sent")} ${r.deal}` : `⚠ ${t("design_not_sent")} ${r.reason || ""}`, !r.sent);
-				}
+				// SK 1-Nov minimum input: no switch; the lead goes for its quote by itself (rate-card quote / design / quote AI)
+				const route = await call("lead_route", { name }, true).catch((e) => ({ route: "none", reason: e.message }));
 				cardUrl = null;
 				clearDraft();
 				if (S.mkFrom) { await call("marketing_lead_made", { contact: S.mkFrom, lead: name }, true).catch(() => null); S.mkFrom = null; }
 				return leadSaved({ name, title: val("f-org") || val("f-first"), person: val("f-first"), mobile: val("f-mobile"),
-					segment: val("f-segment"), source: val("f-source") });
+					segment: val("f-segment"), source: val("f-source"), route });
 			}
 			if (act === "lesson-done") {
 				const n = Number(el.dataset.n || 0);

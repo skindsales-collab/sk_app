@@ -50,7 +50,8 @@ def options() -> dict:
 	return {
 		"crm": True,
 		"lead_statuses": lead_status.app_statuses(),  # SK 27-Oct: his 8 steps
-		"deal_statuses": frappe.get_all("CRM Deal Status", fields=["name", "type"], order_by="position asc"),
+		# SK 1-Nov: the stage "Sent to Design" did nothing; design is sent by itself now (quote_pickup), so it is not offered
+		"deal_statuses": frappe.get_all("CRM Deal Status", filters={"name": ["!=", SENT_STATUS]}, fields=["name", "type"], order_by="position asc"),
 		"sources": frappe.get_all("CRM Lead Source", pluck="name", order_by="name asc"),
 		"segments": SEGMENTS,
 		"segment_tree": SEGMENT_TREE,
@@ -351,11 +352,14 @@ def add_note(user: str, doctype: str, name: str, text: str | None = None, photo:
 	if not text and not photo:
 		frappe.throw(_("Please type, speak or attach something"))
 	_attach(photo, doctype, name, user)
-	if not text:
-		return None
-	note = frappe.get_doc({"doctype": "FCRM Note", "title": text[:80], "content": text,
-		"reference_doctype": doctype, "reference_docname": name}).insert()
-	return note.name
+	note = None
+	if text:
+		note = frappe.get_doc({"doctype": "FCRM Note", "title": text[:80], "content": text,
+			"reference_doctype": doctype, "reference_docname": name}).insert().name
+	from sk_app import quote_pickup
+
+	quote_pickup.after_input(user, doctype, name)  # SK 1-Nov: a requirement / photo added later also goes for its quote
+	return note
 
 
 def _mark_first_response(doctype: str, name: str):
