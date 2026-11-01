@@ -2575,7 +2575,25 @@
 		const tree = (crmOpts && crmOpts.segment_tree) || {};
 		if (row) row.hidden = !((tree.Cabin || []).includes(ev.target.value));
 	});
-	root.addEventListener("change", (ev) => { if (ev.target.classList && ev.target.classList.contains("sk-file")) { photoPicked(ev.target); photoNote(ev.target); } }, true);
+	root.addEventListener("change", (ev) => { if (ev.target.classList && ev.target.classList.contains("sk-file")) { photoPicked(ev.target); photoNote(ev.target); docRead(ev.target); } }, true);
+	// SK 1-Nov minimum input: the bill / PO photo the person takes fills its form; empty boxes only, the person checks it
+	const DOC_READ = { "ex-photo": ["bill", { amount: "ex-amt", date: "ex-date", paid_to: "ex-paid", what: "ex-note" }],
+		"fo-pophoto": ["po", { po_no: "fo-po", po_date: "fo-podate", delivery_date: "fo-date" }] };
+	async function docRead(inp) {
+		const spec = DOC_READ[inp.id];
+		if (!spec || !inp.files[0] || !/^image\//.test(inp.files[0].type)) return;
+		const [kind, map] = spec;
+		let d = {};
+		try { d = (await call("read_doc_photo", { file_url: await (inp._up || photoUrl(inp.id)), kind }, true)) || {}; } catch (e) { return; }
+		let n = 0;
+		Object.entries(map).forEach(([k, id]) => {
+			const box = document.getElementById(id), v = String(d[k] || "").trim();
+			if (!box || box.value || !v) return;
+			const x = box.type === "number" ? v.replace(/[^0-9.]/g, "") : box.type === "date" ? (/^\d{4}-\d{2}-\d{2}$/.test(v) ? v : "") : v;
+			if (x) { box.value = x; box.classList.add("sk-autofilled"); n++; }
+		});
+		if (n) toast(t("read_ok"));
+	}
 
 	async function photoUrl(id) {
 		const f = document.getElementById(id || "f-photo");

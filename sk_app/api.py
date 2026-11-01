@@ -372,6 +372,14 @@ def log_contact(doctype, name, channel, outcome=None, text=None, photo=None, dur
 
 
 @frappe.whitelist(methods=["POST"])
+def read_doc_photo(file_url, kind):
+	"""SK 1-Nov minimum input: Claude reads a bill (cash voucher) or customer PO photo into its form. Empty when off."""
+	profile = _me()
+	content, media = crm.own_file_content(profile.user, file_url)
+	return claude.read_doc_photo(kind, content, media) or {}
+
+
+@frappe.whitelist(methods=["POST"])
 def read_photo(file_url):
 	"""Claude reads a visiting card / enquiry photo into the new-lead form. Empty result when Claude is off."""
 	profile = _me()
