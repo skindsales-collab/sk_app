@@ -340,7 +340,10 @@ def pending(user: str, rows: bool = False) -> dict:
 			groups.append({"key": key, "label": label, "n": len(items), "rows": items if rows else []})
 
 	if frappe.db.exists("DocType", "CRM Lead"):
-		closed = frappe.get_all("CRM Lead Status", filters={"type": ["in", ["Lost", "Junk"]]}, pluck="name")
+		# junk / lost leads need nothing ("Junk Lead" was type Open on sk-dev, so it was counted); won leads still need their data
+		from sk_app.lead_status import is_closed
+
+		closed = [r.name for r in frappe.get_all("CRM Lead Status", fields=["name", "type"]) if is_closed(r.name, r.type) and r.name != "Deal Won"]
 		meta = frappe.get_meta("CRM Lead")
 		fields = [f for f in ("name", "first_name", "organization", "mobile_no", "phone", "sk_segment", "source", "lead_owner", "status")
 			if f == "name" or meta.has_field(f)]

@@ -103,7 +103,7 @@
 		const items = lines.filter((l) => /[A-Za-z]{3}/.test(l) && (l.match(/\d+(?:[.,]\d+)*/g) || []).length >= 2 &&
 			!ADDRESS_ONLY(l) && !new RegExp(GSTIN.source).test(l.toUpperCase()) && !/invoice|gstin|total|cgst|sgst|igst|bank|ifsc|a\/c|phone|mob|pin|date|state\s*code/i.test(l)).slice(0, 15);
 		return {
-			number: val(/(?:invoice|bill)\s*(?:no\.?|number|#)\s*[:\-.]?\s*([A-Z0-9]*\d[A-Z0-9\/\-]*)/i) || underLabel(raw || [], /invoice\s*no/i),
+			number: val(/(?:invoice|bill)\s*(?:no\.?|number|#)\s*[:\-.]?\s*([A-Z0-9][A-Z0-9\/\-]*\d[A-Z0-9\/\-]*)/i) || underLabel(raw || [], /invoice\s*no/i),
 			date: val(/(?:invoice\s*)?date(?:d)?\s*[:\-.]?\s*(\d{1,2}[\/\-.](?:\d{1,2}|[A-Za-z]{3})[\/\-.]\d{2,4})/i)
 				|| (underLabel(raw || [], /\bdated\b/i).match(/^\d{1,2}[\/\-.](?:\d{1,2}|[A-Za-z]{3})[\/\-.]\d{2,4}$/) || [""])[0],
 			seller: sellerOf(raw || lines),

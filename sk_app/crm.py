@@ -82,6 +82,10 @@ def _product_names() -> list:
 
 
 def _closed(status_doctype: str) -> list[str]:
+	if status_doctype == "CRM Lead Status":
+		from sk_app.lead_status import closed_lead_statuses
+
+		return closed_lead_statuses()
 	return frappe.get_all(status_doctype, filters={"type": ["in", CLOSED_LEAD_TYPES]}, pluck="name")
 
 
