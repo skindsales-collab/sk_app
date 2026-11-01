@@ -18,8 +18,9 @@ def _sales_persons(user: str) -> list[str]:
 
 
 def user_sales_orders(user: str, start, end) -> list[str]:
-	"""Submitted Sales Orders in the month credited to the user: via Sales Team, else created by the user."""
-	base = {"docstatus": 1, "transaction_date": ["between", [start, end]]}
+	"""Sales Orders in the month credited to the user: via Sales Team, else created by the user. Draft orders count too
+	(DEC-013; SK 1-Nov logic check C1: My Score showed less than the Home graph, which counted the drafts)."""
+	base = {"docstatus": ["<", 2], "transaction_date": ["between", [start, end]]}
 	names = set()
 	persons = _sales_persons(user)
 	if persons:
@@ -68,8 +69,10 @@ def actual_for(target, start, end) -> float | None:
 		customers = _digital_customers()
 		if not customers:
 			return 0.0
-		names = frappe.get_all("Sales Order", filters={"docstatus": 1, "transaction_date": period, "customer": ["in", customers]}, pluck="name")
-		return _sum_orders(names)
+		# SK 1-Nov logic check C2: the person's own orders from digital customers, not the company total
+		mine = set(user_sales_orders(user, start, end))
+		names = frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "transaction_date": period, "customer": ["in", customers]}, pluck="name")
+		return _sum_orders([n for n in names if n in mine])
 	if code == "cabins_qty":
 		names = user_sales_orders(user, start, end)
 		groups = parse_lines(settings().cabin_item_groups)
@@ -92,9 +95,9 @@ def actual_for(target, start, end) -> float | None:
 		return _pct(ok, len(rows))
 	if code == "digital_leads":
 		sources = parse_lines(settings().digital_lead_sources)
-		return float(frappe.db.count("CRM Lead", {"source": ["in", sources or [""]], "creation": dt_period}))
+		return float(frappe.db.count("CRM Lead", {"lead_owner": user, "source": ["in", sources or [""]], "creation": dt_period}))  # C2: own leads
 	if code == "lead_data_quality_pct":
-		rows = frappe.get_all("CRM Lead", filters={"creation": dt_period}, fields=["source", "lead_owner", "organization", "mobile_no"])
+		rows = frappe.get_all("CRM Lead", filters={"lead_owner": user, "creation": dt_period}, fields=["source", "lead_owner", "organization", "mobile_no"])  # C2
 		good = sum(1 for r in rows if r.source and r.lead_owner and (r.organization or r.mobile_no))
 		return _pct(good, len(rows))
 	return None

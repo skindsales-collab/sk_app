@@ -12,7 +12,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cint, flt, getdate, now_datetime, nowdate
 
-from sk_app.store import STORE, _company, _default_store, _todo, _users_with_function, attach, need, uom
+from sk_app.store import STORE, _company, _default_store, _todo, _users_with_function, attach, need, uom, users_or_ceo
 
 MANAGEMENT = "Management"
 MAX_ITEMS = 20
@@ -48,7 +48,10 @@ def ensure_setup():
 	from sk_app.purchase import po_limit
 	from sk_app.store import material_pos
 
-	for name in frappe.get_all("Purchase Order", filters={"docstatus": 0, "grand_total": [">", po_limit()], **material_pos()}, pluck="name"):
+	# only the POs made before the 28-Oct rule (SK 1-Nov logic check B2: run on every migrate it re-flagged new POs
+	# from approved requisitions, which need the CEO only when over 10% above the approved value)
+	for name in frappe.get_all("Purchase Order", filters={"docstatus": 0, "grand_total": [">", po_limit()], "creation": ["<", "2026-10-28"],
+			**material_pos()}, pluck="name"):
 		frappe.db.set_value("Purchase Order", name, "sk_needs_ceo", 1, update_modified=False)
 
 
@@ -246,7 +249,7 @@ def decide(user: str, name: str, approve, note=None) -> dict:
 	mr.save()
 	mr.submit()
 	mr.add_comment("Comment", _("Approved by CEO") + (f": {note.strip()}" if (note or "").strip() else ""))
-	for who in _users_with_function("Purchase"):
+	for who in users_or_ceo("Purchase"):  # SK 1-Nov: never to nobody
 		_todo(who, "Material Request", name, _("Approved requisition {0}: make the PO").format(name))
 	if mr.owner != user:
 		_todo(mr.owner, "Material Request", name, _("Requisition {0} approved by CEO").format(name))

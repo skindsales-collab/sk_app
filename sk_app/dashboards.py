@@ -281,8 +281,9 @@ def _pipeline_card(segment=None):
 
 
 def _leads(start, end, segment=None, extra=None) -> list:
-	return frappe.get_all("CRM Lead", filters={"creation": ["between", [f"{start} 00:00:00", f"{end} 23:59:59"]], **_crm_seg(segment), **(extra or {})},
-		fields=["name", "first_name", "organization", "source", "status", "lead_owner", "creation", "sk_segment", "first_responded_on"],
+	# SK 1-Nov logic check B8: cold-calling list data is not a lead (same filter as the Sales arrows)
+	return frappe.get_all("CRM Lead", filters={"creation": ["between", [f"{start} 00:00:00", f"{end} 23:59:59"]], **_crm_seg(segment), **_not_cold(), **(extra or {})},
+		fields=["name", "first_name", "organization", "source", "status", "lead_owner", "creation", "sk_segment", "first_responded_on", "converted"],
 		order_by="creation desc", limit=0)
 
 
@@ -291,6 +292,12 @@ def _leads_card(start, end, prev_start, prev_end, segment=None, key="leads", lab
 	return _card(key, label, len(rows), "count", len(_leads(prev_start, prev_end, segment)),
 		[_row(r.organization or r.first_name, f"{r.source or ''} · {r.status} · {_name(r.lead_owner)}", None, "CRM Lead", r.name,
 			None if r.first_responded_on else "red") for r in rows])
+
+
+def _not_cold() -> dict:
+	from sk_app.cold_calls import not_cold
+
+	return not_cold()
 
 
 _names = {}
@@ -484,10 +491,25 @@ def _attention() -> list[dict]:
 	from sk_app.purchase import po_limit
 	from sk_app.store import material_pos
 
-	pos = _safe(lambda: frappe.get_all("Purchase Order", filters={"docstatus": 0, "grand_total": [">", po_limit()], **material_pos()},
+	# SK 1-Nov logic check B2: the CEO's purchase decisions by the same rules as his approval screens: requisitions waiting
+	# for him, and POs that came back to him (over 10% above the approved requisition, flag sk_needs_ceo)
+	from sk_app.requisition import WAITING
+
+	reqs = _safe(lambda: frappe.get_all("Material Request", filters={"docstatus": 0, "material_request_type": "Purchase", "sk_approval": WAITING},
+		fields=["name", "owner", "sk_priority", "transaction_date"], order_by="creation asc"), [])
+	if reqs:
+		out.append({"label": "Requisitions waiting your OK", "rows": [_row(m.name, f"{m.sk_priority or 'Planned'} · {_name(m.owner)} · {m.transaction_date}", None,
+			"Material Request", m.name, "red" if m.sk_priority == "Urgent" else "amber") for m in reqs]})
+	needs = {"sk_needs_ceo": 1} if frappe.get_meta("Purchase Order").has_field("sk_needs_ceo") else {"grand_total": [">", po_limit()]}
+	pos = _safe(lambda: frappe.get_all("Purchase Order", filters={"docstatus": 0, **needs, **material_pos()},
 		fields=["name", "supplier_name", "grand_total"], order_by="creation asc"), [])
 	if pos:
 		out.append({"label": "POs waiting for your OK", "rows": [_row(p.supplier_name, "PO to approve", p.grand_total, "Purchase Order", p.name, "amber") for p in pos]})
+	vouchers = (_safe(lambda: frappe.get_all("Expense Claim", filters={"approval_status": "Draft", "docstatus": 0},
+		fields=["name", "employee_name", "total_claimed_amount"], order_by="creation asc"), []) or []) if _has("Expense Claim") else []
+	if vouchers:
+		out.append({"label": "Cash vouchers waiting your OK", "rows": [_row(v.employee_name, "cash voucher", v.total_claimed_amount, "Expense Claim", v.name, "amber")
+			for v in vouchers]})
 	late = _safe(_late_orders, [])
 	if late:
 		out.append({"label": "Late orders", "rows": [_row(o.customer_name, f"due {o.delivery_date}", o.base_net_total, "Sales Order", o.name, "red") for o in late[:20]]})
@@ -531,9 +553,12 @@ def _sales(start, end, ps, pe, segment, sub=None, owner_users=None):
 		cards.append(_card("leads_day", "Leads per day (14 days)", sum(days.values()), "series", None,
 			[_row(d[5:], "", days.get(d, 0)) for d in (str(add_days(getdate(), -n)) for n in range(13, -1, -1))]))
 	quotes = _safe(lambda: frappe.get_all("Quotation", filters={"docstatus": ["<", 2], "transaction_date": ["between", [start, end]], **_seg_filter(seg)},
-		fields=["name", "party_name", "customer_name", "base_net_total", "status"], order_by="base_net_total desc", limit=0), [])
-	cards.append(_card("quotes", "Quotes this month", len(quotes), "count", None,
-		[_row(q.customer_name or q.party_name, q.status, q.base_net_total, "Quotation", q.name) for q in quotes]))
+		fields=["name", "party_name", "customer_name", "base_net_total", "status", "docstatus"], order_by="base_net_total desc", limit=0), [])
+	# SK 1-Nov logic check B9: a quote counts as sent when submitted; drafts are "to send"
+	sent = [q for q in quotes if q.docstatus == 1]
+	cards.append(_card("quotes", f"Quotes sent this month ({len(quotes) - len(sent)} drafts to send)", len(sent), "count", None,
+		[_row(q.customer_name or q.party_name, q.status if q.docstatus == 1 else "draft, to send", q.base_net_total, "Quotation", q.name,
+			None if q.docstatus == 1 else "amber") for q in quotes]))
 	cards.append(_safe(lambda: _card("team", "Team vs target (orders)", None, "list", None, _team_scorecard(start, end, owner_users))))
 	months = []
 	for n in range(5, -1, -1):
@@ -558,15 +583,16 @@ def _marketing(start, end, ps, pe, segment):
 	won = frappe.get_all("CRM Deal", filters={"creation": ["between", [f"{start} 00:00:00", f"{end} 23:59:59"]], **_crm_seg(segment)},
 		fields=["name", "organization", "source", "deal_value", "status"], limit=0) if _has("CRM Deal") else []
 	return [
-		_safe(lambda: _count_chart("quote_chart", "Quotes sent", "Quotation", "transaction_date", {"docstatus": ["<", 2], **_seg_filter(segment)})),
-		_safe(lambda: _count_chart("lead_chart", "New leads", "CRM Lead", "creation", _crm_seg(segment))),
+		_safe(lambda: _count_chart("quote_chart", "Quotes sent", "Quotation", "transaction_date", {"docstatus": 1, **_seg_filter(segment)})),
+		_safe(lambda: _count_chart("lead_chart", "New leads", "CRM Lead", "creation", {**_crm_seg(segment), **_not_cold()})),
 		_leads_card(start, end, ps, pe, segment),
 		_card("by_source", "Leads by source", len(rows), "list", None, [_row(k, "", v) for k, v in sorted(by.items(), key=lambda x: -x[1])]),
 		_card("digital", "Digital leads (IndiaMART, JustDial ...)", len(dig), "count", None,
 			[_row(r.organization or r.first_name, f"{r.source} · {_name(r.lead_owner)}", None, "CRM Lead", r.name) for r in dig]),
 		_card("to_deals", "Leads turned into deals", len(won), "count", None,
 			[_row(d.organization or d.name, f"{d.source or ''} · {d.status}", d.deal_value, "CRM Deal", d.name) for d in won]),
-		_card("conversion", "Lead → deal", round(len(won) * 100 / len(rows)) if rows else 0, "pct"),
+		# SK 1-Nov logic check C5: of this month's leads, how many became deals
+		_card("conversion", "Lead → deal (this month's leads)", round(sum(1 for r in rows if r.get("converted")) * 100 / len(rows)) if rows else 0, "pct"),
 		_card("not_called", "Leads nobody called (over 1 day)", len(_not_contacted()), "count", None,
 			[_row(r.organization or r.first_name, _name(r.lead_owner), None, "CRM Lead", r.name, "red") for r in _not_contacted()], "red"),
 	]
@@ -626,7 +652,8 @@ def _manufacturing(start, end, ps, pe, segment):
 	load = {}
 	for j in jobs:
 		load[j.workstation or "Not set"] = load.get(j.workstation or "Not set", 0) + 1
-	done = frappe.db.count("Work Order", {"status": "Completed", "modified": [">=", f"{start} 00:00:00"]})
+	# SK 1-Nov logic check C4: finished in the month = its end date, not the last edit
+	done = frappe.db.count("Work Order", {"status": "Completed", "actual_end_date": ["between", [f"{start} 00:00:00", f"{end} 23:59:59"]]})
 	return [
 		_safe(lambda: _count_chart("wo_chart", "Cabins / jobs finished", "Work Order", "actual_end_date", {"status": "Completed"})),
 		_safe(lambda: _count_chart("dn_chart", "Dispatches", "Delivery Note", "posting_date", {"docstatus": 1})),
@@ -643,25 +670,25 @@ def _manufacturing(start, end, ps, pe, segment):
 
 
 def _purchase(start, end, ps, pe, segment):
-	from sk_app.purchase import po_limit
 	from sk_app.store import material_pos
 
 	mat = material_pos()  # labour POs have their own tile (Rushi → CEO) and GRN
 	open_po = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive", "To Bill"]], **mat},
 		fields=["name", "supplier_name", "grand_total", "schedule_date", "per_received"], order_by="schedule_date asc", limit=0)
-	waiting = frappe.get_all("Purchase Order", filters={"docstatus": 0, **mat}, fields=["name", "supplier_name", "grand_total", "creation"],
+	flag = ["sk_needs_ceo"] if frappe.get_meta("Purchase Order").has_field("sk_needs_ceo") else []
+	waiting = frappe.get_all("Purchase Order", filters={"docstatus": 0, **mat}, fields=["name", "supplier_name", "grand_total", "creation", *flag],
 		order_by="creation asc", limit=0)
 	late = [p for p in open_po if p.schedule_date and getdate(p.schedule_date) < getdate() and flt(p.per_received) < 100]
 	reqs = frappe.get_all("Material Request", filters={"docstatus": 1, "material_request_type": "Purchase", "status": ["in", ["Pending", "Partially Ordered"]]},
 		fields=["name", "schedule_date", "status"], limit=0)
-	limit = po_limit()
 	return [
 		_safe(lambda: _count_chart("po_chart", "Purchase orders", "Purchase Order", "transaction_date", {"docstatus": 1, **mat})),
 		_card("open_po", "Open POs", sum(flt(p.grand_total) for p in open_po), "money", None,
 			[_row(p.supplier_name, f"needed by {p.schedule_date}", p.grand_total, "Purchase Order", p.name) for p in open_po]),
 		_card("approvals", "POs waiting (draft)", len(waiting), "count", None,
-			[_row(p.supplier_name, "needs your OK" if flt(p.grand_total) > limit else "draft", p.grand_total, "Purchase Order", p.name,
-				"amber" if flt(p.grand_total) > limit else None) for p in waiting]),
+			# SK 1-Nov logic check B2: "needs your OK" by the same flag as the CEO's approval screen
+			[_row(p.supplier_name, "needs your OK" if p.get("sk_needs_ceo") else "draft", p.grand_total, "Purchase Order", p.name,
+				"amber" if p.get("sk_needs_ceo") else None) for p in waiting]),
 		_card("late_po", "Late supplier deliveries", len(late), "count", None,
 			[_row(p.supplier_name, f"was due {p.schedule_date}", p.grand_total, "Purchase Order", p.name, "red") for p in late], "red" if late else None),
 		_safe(lambda: _payables_card("dues", "Supplier dues")),
@@ -699,9 +726,10 @@ def _store(start, end, ps, pe, segment, user=None):
 	low = _safe(lambda: low_stock(user), []) or []
 	today = nowdate()
 	mat = material_pos("Purchase Receipt")  # a labour GRN is not material received by Store
-	receipts = frappe.get_all("Purchase Receipt", filters={"posting_date": today, "docstatus": ["<", 2], **mat}, fields=["name", "supplier_name", "grand_total"])
-	issues = frappe.get_all("Stock Entry", filters={"posting_date": today, "docstatus": ["<", 2]}, fields=["name", "stock_entry_type", "total_outgoing_value"])
-	dispatch = frappe.get_all("Delivery Note", filters={"posting_date": today, "docstatus": ["<", 2]}, fields=["name", "customer_name", "base_net_total"])
+	# SK 1-Nov logic check B5: draft = not done, only submitted entries count
+	receipts = frappe.get_all("Purchase Receipt", filters={"posting_date": today, "docstatus": 1, **mat}, fields=["name", "supplier_name", "grand_total"])
+	issues = frappe.get_all("Stock Entry", filters={"posting_date": today, "docstatus": 1}, fields=["name", "stock_entry_type", "total_outgoing_value"])
+	dispatch = frappe.get_all("Delivery Note", filters={"posting_date": today, "docstatus": 1}, fields=["name", "customer_name", "base_net_total"])
 	return [
 		_safe(lambda: _count_chart("rec_chart", "Receipts", "Purchase Receipt", "posting_date", {"docstatus": 1, **mat})),
 		_safe(lambda: _urgent_card(start, end)),
@@ -806,7 +834,7 @@ def _ai(start, end, ps, pe, segment, user=None):
 		_card("app_use", "Used the app today", users["today"], "count", None,
 			[_row(r["full_name"] or r["user"], f"{r['function'] or ''} · {r['state']}", None, "User", r["user"],
 				"red" if r["state"] == "never" else None) for r in users["rows"]]),
-		_card("changes", "Change list (Rev 13)", len(changes), "list", None, [_row(k, "", v) for k, v in states.items()]),
+		_card("changes", "Change list", len(changes), "list", None, [_row(k, "", v) for k, v in states.items()]),
 	]
 
 
@@ -900,7 +928,8 @@ def badges(user: str) -> dict:
 	out = {}
 	for item in _attention():
 		n = len(item["rows"])
-		page_key = {"Dues over 60 days": "finance", "POs waiting for your OK": "purchase", "Late orders": "manufacturing",
+		page_key = {"Dues over 60 days": "finance", "POs waiting for your OK": "purchase", "Requisitions waiting your OK": "purchase",
+			"Cash vouchers waiting your OK": "finance", "Late orders": "manufacturing",
 			"Leads nobody called": "marketing", "No day report today": "daily_review", "Behind this month's target": "sales"}.get(item["label"])
 		if page_key:
 			out[f"dash_{page_key}"] = {"n": n, "c": "red"}

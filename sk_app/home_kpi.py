@@ -513,7 +513,9 @@ def subcontractor(user: str) -> dict:
 	def value(start, end):
 		if not ws:
 			return None
-		return frappe.db.count("Job Card", {"workstation": ws, "status": "Completed", "modified": ["between", [f"{start} 00:00:00", f"{end} 23:59:59"]]}) or None
+		# SK 1-Nov logic check C4: counted in the month the job was finished, not the month it was last edited
+		field = "actual_end_date" if frappe.get_meta("Job Card").has_field("actual_end_date") else "modified"
+		return frappe.db.count("Job Card", {"workstation": ws, "status": "Completed", field: ["between", [f"{start} 00:00:00", f"{end} 23:59:59"]]}) or None
 	return _trend("Subcontractor", "Jobs finished", "", TARGETS["Subcontractor"], value, need="Mark your jobs done with a photo.", count=True)
 
 
