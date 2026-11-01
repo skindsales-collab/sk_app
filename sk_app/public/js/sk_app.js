@@ -945,6 +945,10 @@
 		ex_no_bill: "बिल नाही? कारण सांगा", ex_help: "प्रत्येक कॅश व्हाउचर CEO कडे मंजुरीसाठी जाते. मग अकाउंट्स पैसे देते.", ex_st_wait: "CEO कडे बाकी", ex_st_ok: "मंजूर", ex_st_paid: "पैसे दिले", ex_st_no: "नामंजूर",
 		ex_no_bill_tag: "बिल नाही", lv_approve: "✓ मंजूर", lv_reject: "✗ नामंजूर", ex_posted: "मंजूर: अकाउंट्स पैसे देईल",
 		no_employee: "तुमचे लॉगिन अजून ERPNext कर्मचाऱ्याशी जोडलेले नाही. कृपया HR ला सांगा." });
+	Object.assign(T.English, { k_trend: "Trend", k_rising: "rising", k_falling: "falling", k_actual: "Actual", k_met: "Target met", k_missed: "Missed",
+		fl_late: "late", d_fix: "Fix", d_plan: "Plan", d_open: "Open", md_next: "next", md_late: "Late", md_today: "Today" });
+	Object.assign(T.Marathi, { k_trend: "कल", k_rising: "वाढत आहे", k_falling: "कमी होत आहे", k_actual: "प्रत्यक्ष", k_met: "लक्ष्य पूर्ण", k_missed: "लक्ष्य चुकले",
+		fl_late: "उशीर", d_fix: "पूर्ण करा", d_plan: "नियोजन", d_open: "उघडा", md_next: "पुढील", md_late: "उशीर", md_today: "आज" });
 	Object.assign(T.English, { send_design: "Send to design (AI drawing)", design_sent: "Sent to design as deal", design_not_sent: "Not sent to design:" });
 	Object.assign(T.Marathi, { send_design: "डिझाईनला पाठवा (AI ड्रॉइंग)", design_sent: "डिझाईनला डील म्हणून पाठवले", design_not_sent: "डिझाईनला पाठवले नाही:" });
 	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";
@@ -1696,10 +1700,38 @@
 			}).join("")}</div>`;
 		}
 		root.innerHTML = header("SK App") + `<main class="sk-l1 sk-home2"><div class="sk-kpibox">${kpiHtml()}</div>${middle}
-			<div class="sk-decide">${decideHtml()}</div>${row(S2.main_common || [], "sk-common")}${contact}${bottom}</main>`;
+			<div class="sk-decide">${decideHtml()}</div>${row(S2.main_common || [], "sk-common")}${contact}${isPc() ? `<div class="sk-mydaybox">${homeDayHtml()}</div>` : ""}${bottom}</main>`;
 		fitHome();
+		if (isPc()) loadHomeDay();
 		loadKpi();
 		loadFlows();
+	}
+	// SK 1-Nov PC Rev 2: on PC, Home shows "My Day · next" (the next items of My Day) so the right column has no empty space
+	let homeDay = null, homeDayAt = 0, homeDayWho = null;
+	async function loadHomeDay() {
+		if (homeDayWho !== whoKey()) { homeDayWho = whoKey(); homeDay = null; }
+		if (homeDay && Date.now() - homeDayAt < 5 * 60 * 1000) return paintHomeDay();
+		const who = homeDayWho;
+		try { homeDay = await call("my_day", {}, false, true); } catch (e) { homeDay = { items: [] }; }
+		if (who !== whoKey()) return;
+		homeDayAt = Date.now();
+		paintHomeDay();
+	}
+	function paintHomeDay() {
+		const b = state.view === "home" && root.querySelector(".sk-mydaybox");
+		if (b) b.innerHTML = homeDayHtml();
+	}
+	function homeDayHtml() {
+		if (!homeDay) return `<div class="sk-h">☀️ ${t("my_day")} · ${t("md_next")}</div><p class="sk-note">… ${t("fl_loading")}</p>`;
+		const now = new Date().toISOString().slice(0, 16).replace("T", " ");
+		const rows = (homeDay.items || []).slice(0, 7).map((i) => {
+			const late = i.due && i.due.slice(0, 16) < now;
+			const tm = i.due ? esc(i.due.slice(11, 16) || i.due.slice(5, 10)) : "—";
+			const open = i.doctype && i.doctype.startsWith("CRM ") && i.name ? `data-open="${esc(i.doctype)}" data-name="${esc(i.name)}"`
+				: i.kind === "day_report" ? `data-go="day_report"` : `data-go="my_day"`;
+			return `<button class="sk-mdrow ${late ? "late" : ""}" ${open}><span class="sk-mdt">${tm}</span><span class="sk-mdx">${esc(i.title)}<small>${esc(String(i.kind || "").replace("_", " "))}${i.customer && i.customer !== i.title ? " · " + esc(i.customer) : ""}</small></span><span class="sk-mdst ${late ? "r" : "a"}">${t(late ? "md_late" : "md_today")}</span></button>`;
+		}).join("");
+		return `<div class="sk-h">☀️ ${t("my_day")} · ${t("md_next")}</div><div class="sk-mdl">${rows || `<p class="sk-note">✓ ${t("nothing")}</p>`}</div>`;
 	}
 	// SK 27-Oct: no empty space under the Home icons: Home fills the phone screen, the icons grow taller to fill it
 	function fitHome() {
@@ -1840,7 +1872,8 @@
 	// amount up the side, weeks (running total this month) or months along the bottom (SK 26-Oct)
 	function moneySvg(c) {
 		const v = c[kpiView] || c.week;
-		const W = 320, H = 150, L = 34, B = 18, T = 12;
+		const pc = isPc();
+		const W = pc ? 800 : 320, H = pc ? 236 : 150, L = pc ? 46 : 34, B = pc ? 24 : 18, T = pc ? 26 : 12;
 		const tgt = kpiView === "month" ? v.labels.map(() => c.target) : v.target;
 		const all = [...v.lines.flatMap((l) => l.points), ...(c.target ? tgt : [])];
 		const mx = Math.max(1, ...all) * 1.1, n = v.labels.length;
@@ -1848,6 +1881,14 @@
 		let g = "";
 		(Math.max(0, ...all) ? [0, mx / 2, mx / 1.1] : [0]).forEach((val) => { g += `<line x1="${L}" x2="${W - 4}" y1="${Y(val)}" y2="${Y(val)}" class="sk-grid"/><text x="2" y="${Y(val) + 3}" class="sk-ax">${kAmt(val)}</text>`; });
 		if (c.target) g += `<polyline points="${tgt.map((val, i) => `${X(i)},${Y(val)}`).join(" ")}" class="sk-tline"/><text x="${W - 6}" y="${Y(tgt[n - 1]) - 4}" text-anchor="end" class="sk-tlabel">${t("k_target")} ₹${kAmt(tgt[n - 1])}</text>`;
+		if (pc) {
+			// SK 1-Nov PC Rev 2: line diagram, trend line, a value pill on every point, latest point big
+			g += pcTrend(v.lines[0] ? v.lines[0].points : [], X, Y);
+			v.lines.forEach((l, li) => { g += pcSeries(l.points, X, Y, l.c || "b", (x) => kAmt(x), li === 0); });
+			v.labels.forEach((m, i) => { g += `<text x="${X(i)}" y="${H - 6}" text-anchor="middle" class="sk-ax">${m}</text>`; });
+			const leg = `<div class="sk-klegend">${v.lines.map((l) => `<span class="k-${l.c}">● ${t("kl_" + l.label)}</span>`).join("")}<span class="k-t">··· ${t("k_trend")}</span></div>`;
+			return `<svg viewBox="0 0 ${W} ${H}" class="sk-ksvg sk-pcchart">${PC_DEFS}${g}</svg>${leg}`;
+		}
 		v.lines.forEach((l) => {
 			g += `<polyline points="${l.points.map((val, i) => `${X(i)},${Y(val)}`).join(" ")}" class="sk-kline k-${l.c}"/>`;
 			l.points.forEach((val, i) => { g += `<circle cx="${X(i)}" cy="${Y(val)}" r="3.5" class="sk-kdot k-${l.c}"/>`; });
@@ -1875,7 +1916,8 @@
 	}
 	// month by month against target: green dot = on target, red = not (SK 26-Oct: "trend monitoring")
 	function trendSvg(c) {
-		const W = 320, H = 150, L = 30, B = 18, T = 20;
+		const pc = isPc();
+		const W = pc ? 800 : 320, H = pc ? 236 : 150, L = pc ? 42 : 30, B = pc ? 24 : 18, T = pc ? 30 : 20;
 		const points = (kpiView !== "month" && c[kpiView]) || c.points;
 		const tg = (p) => (p.t != null ? p.t : c.target);
 		const vals = points.map((p) => p.v).filter((x) => x != null);
@@ -1887,6 +1929,18 @@
 		const lastT = tgts[n - 1];
 		let g = `<polyline points="${tgts.map((v, i) => `${X(i)},${Y(v)}`).join(" ")}" class="sk-tline"/><text x="${W - 6}" y="${Y(lastT) - 4}" text-anchor="end" class="sk-tlabel">${t("k_target")} ${lastT}${c.unit}</text>`;
 		[lo, hi].forEach((v) => { g += `<text x="2" y="${Y(v) + 3}" class="sk-ax">${Math.round(v)}</text>`; });
+		if (pc) {
+			// SK 1-Nov PC Rev 2: line, trend line, value pills; green dot = target met, red = missed
+			const idx = points.map((p, i) => (p.v == null ? null : i)).filter((i) => i != null);
+			g += pcTrend(points.map((p) => p.v), X, Y);
+			g += pcSeries(points.map((p) => p.v), X, Y, "b", (x) => `${x}${c.unit === "%" ? "%" : ""}`, true,
+				(i) => (c.good_low ? points[i].v <= tg(points[i]) : points[i].v >= tg(points[i])));
+			points.forEach((p, i) => {
+				g += `<text x="${X(i)}" y="${H - 6}" text-anchor="middle" class="sk-ax">${p.m}</text>`;
+				if (p.note && idx.includes(i)) g += `<text x="${X(i)}" y="${Y(p.v) + 22}" text-anchor="middle" class="sk-ax">${esc(p.note)}</text>`;
+			});
+			return `<svg viewBox="0 0 ${W} ${H}" class="sk-ksvg sk-pcchart">${PC_DEFS}${g}</svg><div class="sk-klegend"><span class="k-b">● ${t("k_actual")}</span><span class="k-g">● ${t("k_met")}</span><span class="k-r">● ${t("k_missed")}</span><span class="k-t">··· ${t("k_trend")}</span></div>`;
+		}
 		const pts = points.map((p, i) => (p.v == null ? null : `${X(i)},${Y(p.v)}`)).filter(Boolean);
 		if (pts.length > 1) g += `<polyline points="${pts.join(" ")}" class="sk-kline k-o"/>`;
 		points.forEach((p, i) => {
@@ -1899,22 +1953,74 @@
 		});
 		return `<svg viewBox="0 0 ${W} ${H}" class="sk-ksvg">${g}</svg>`;
 	}
+	// ---------- SK 1-Nov PC Rev 2 (PC only, phone unchanged): line charts with trend, 3D block arrows ----------
+	const KC = { b: "#1878a8", g: "#1e8e3e", o: "#e07b00", r: "#c82030", n: "#5a6472" };
+	const PC_DEFS = `<defs><filter id="skls" x="-5%" y="-20%" width="110%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#0b1e33" flood-opacity=".28"/></filter>
+		<radialGradient id="skgdot" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="#ff8a95"/><stop offset="1" stop-color="#b3101f"/></radialGradient>
+		<radialGradient id="skgok" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="#7fe0a0"/><stop offset="1" stop-color="#157a34"/></radialGradient></defs>`;
+	// least-squares trend over the points that have a value (purple dotted, SK 1-Nov "trend line in each graph")
+	function pcTrend(vals, X, Y) {
+		const pts = vals.map((v, i) => [i, v]).filter(([, v]) => v != null && !isNaN(v));
+		if (pts.length < 2) return "";
+		const n = pts.length, sx = pts.reduce((a, [i]) => a + i, 0), sy = pts.reduce((a, [, v]) => a + v, 0);
+		const sxx = pts.reduce((a, [i]) => a + i * i, 0), sxy = pts.reduce((a, [i, v]) => a + i * v, 0);
+		const k = (n * sxy - sx * sy) / ((n * sxx - sx * sx) || 1), b0 = (sy - k * sx) / n;
+		const i0 = pts[0][0], i1 = pts[n - 1][0];
+		return `<line x1="${X(i0)}" y1="${Y(b0 + k * i0)}" x2="${X(i1)}" y2="${Y(b0 + k * i1)}" class="sk-trend"/>`
+			+ `<text x="${X(0)}" y="14" class="sk-trendl">··· ${t("k_trend")} ${k >= 0 ? "▲" : "▼"} ${t(k >= 0 ? "k_rising" : "k_falling")}</text>`;
+	}
+	// one series: shadowed line with a white core, glossy dots, a value pill on each point, the latest point big
+	function pcSeries(vals, X, Y, c, fmt, main, okAt) {
+		const col = KC[c] || KC.b;
+		const pts = vals.map((v, i) => (v == null || isNaN(v) ? null : [i, v])).filter(Boolean);
+		if (!pts.length) return "";
+		const line = pts.map(([i, v]) => `${X(i)},${Y(v)}`).join(" ");
+		let g = `<polyline points="${line}" fill="none" stroke="${col}" stroke-width="${main ? 5 : 4}" stroke-linejoin="round" stroke-linecap="round" filter="url(#skls)"/>`
+			+ `<polyline points="${line}" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2" stroke-linejoin="round"/>`;
+		const last = pts[pts.length - 1][0];
+		pts.forEach(([i, v]) => {
+			const big = i === last, ok = okAt ? okAt(i) : null;
+			const fill = ok === true ? "url(#skgok)" : ok === false || big ? "url(#skgdot)" : "#fff";
+			g += `<circle cx="${X(i)}" cy="${Y(v)}" r="${big ? 8 : 5.5}" fill="${fill}" stroke="${col}" stroke-width="2.2" filter="url(#skls)"/>`;
+			if (!main && !big) return;
+			const txt = fmt(v), w = String(txt).length * 7.2 + 14, y = Y(v) - (big ? 30 : 26);
+			g += `<g class="sk-vpill"><rect x="${X(i) - w / 2}" y="${y}" width="${w}" height="19" rx="9.5" fill="${big ? col : "#fff"}" stroke="${col}" stroke-width="1.6"/>`
+				+ `<text x="${X(i)}" y="${y + 13.5}" text-anchor="middle" fill="${big ? "#fff" : col}">${esc(txt)}</text></g>`;
+		});
+		return g;
+	}
+	// one 3D block arrow (same drawing as the PC draft): lit front, top face up-right, dark tip side, floor shadow
+	const AR3D = { g: ["#5fd17f", "#178a36", "#0d5a22", "#a8f0bd"], a: ["#ffc35c", "#d97f00", "#8f5300", "#ffe2a8"],
+		r: ["#f0646f", "#bf1c2c", "#7c111c", "#ffb0b7"], b: ["#5cb8e6", "#156e9c", "#0b4565", "#b4e1f7"] };
+	let ar3id = 0;
+	function ar3Svg(c, first) {
+		const [ft, fb, sd, bv] = AR3D[c] || AR3D.b, id = "skar" + (++ar3id);
+		const w = 200, h = 74, tip = 26, dx = 14, dy = -16, x0 = 2, y0 = 20, notch = first ? 0 : tip;
+		const A = [x0, y0], B = [x0 + w - tip, y0], C = [x0 + w, y0 + h / 2], D = [x0 + w - tip, y0 + h], E = [x0, y0 + h], F = [x0 + notch, y0 + h / 2];
+		const o = (q) => [q[0] + dx, q[1] + dy], P = (a) => a.map((q) => q.join(",")).join(" ");
+		return `<svg class="sk-ar3svg" viewBox="0 0 ${w + dx + 10} ${h + y0 + 10}" preserveAspectRatio="none" aria-hidden="true">
+			<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${ft}"/><stop offset=".5" stop-color="${fb}"/><stop offset="1" stop-color="${fb}"/></linearGradient></defs>
+			<polygon points="${P([A, B, C, D, E, F])}" transform="translate(6,7)" fill="#0b1e33" opacity=".28"/>
+			<polygon points="${P([A, B, o(B), o(A)])}" fill="${bv}"/><polygon points="${P([B, C, o(C), o(B)])}" fill="${sd}" opacity=".8"/><polygon points="${P([C, D, o(D), o(C)])}" fill="${sd}"/>
+			<polygon points="${P([A, B, C, D, E, F])}" fill="url(#${id})" stroke="${sd}" stroke-width=".8"/>
+			<polygon points="${P([[A[0] + notch * .3, y0 + 6], [B[0] + 3, y0 + 6], [C[0] - 10, y0 + h * .42], [F[0] + 2, y0 + h * .42]])}" fill="#fff" opacity=".16"/></svg>`;
+	}
 	// the work flow as 3D arrows (SK 26-Oct "more attractive 3D shape"); the CEO gets one arrow per function
 	function flow3dHtml(fn) {
 		if (!flowData) return `<p class="sk-note">… ${t("fl_loading")}</p>`;
 		const flows = flowData.flows.map((f, i) => [f, i]).filter(([f]) => f.function === fn);
 		if (!flows.length) return "";
 		const col = (c) => ({ red: "r", amber: "a", green: "g" }[c] || "b");
-		let arrows;
+		let arrows, arrowsN = 0;
 		if (fn === "Management") {
 			arrows = flows.map(([f]) => {
 				const late = f.stages.reduce((n, st) => n + (st.late || 0), 0);
-				return `<button class="sk-ar3 ${late ? "r" : "g"}" data-fnpage="Management"><b>${late}</b><span>${esc(f.label || f.function)}</span></button>`;
+				return `<button class="sk-ar3 ${late ? "r" : "g"}" data-fnpage="Management">${isPc() ? ar3Svg(late ? "r" : "g", !arrowsN++) : ""}<b>${late}</b><span>${esc(f.label || f.function)}</span>${isPc() && late ? `<em>${late} ${t("fl_late")}</em>` : ""}</button>`;
 			});
 		} else {
 			const [f, fi] = flows[0];
 			if (f.error) return `<p class="sk-note">⚠️ ${t("fl_error")}: ${esc(f.error)}</p>`;
-			arrows = f.stages.map((st, si) => `<button class="sk-ar3 ${col(st.c)}" data-flow="${fi}:${si}"><b>${st.count}</b><span>${esc(st.label)}</span></button>`);
+			arrows = f.stages.map((st, si) => `<button class="sk-ar3 ${col(st.c)}" data-flow="${fi}:${si}">${isPc() ? ar3Svg(col(st.c), si === 0) : ""}<b>${st.count}</b><span>${esc(st.label)}</span>${isPc() && st.late ? `<em>${st.late} ${t("fl_late")}</em>` : ""}</button>`);
 		}
 		return `<div class="sk-flow3d">${arrows.join("")}</div>`;
 	}
@@ -1924,21 +2030,21 @@
 		const cells = [];
 		// SK 28-Oct mandatory gate: records with data missing / drafts not submitted come first on the main screen
 		const gp = state.home && state.home.gate_pending;
-		if (gp && gp.total) cells.push(`<button class="sk-dec bad" data-go="data_missing"><b>${gp.total}</b><span>⚠️ ${t("g_data_missing")}</span><small>${gp.groups.map((g) => g.n).join(" · ")}</small></button>`);
+		if (gp && gp.total) cells.push(`<button class="sk-dec bad" data-go="data_missing"><b>${gp.total}</b><span>⚠️ ${t("g_data_missing")}</span><small>${gp.groups.map((g) => g.n).join(" · ")}</small><em class="sk-go">✅ ${t("d_fix")}</em></button>`);
 		const now = kpiNow();
 		if (now && now.target) {
-			cells.push(`<button class="sk-dec ${now.gap ? "bad" : "ok"}" data-go="my_kpi"><b>${now.gap ? (now.money ? "₹" + kAmt(now.gap) : Math.round(now.gap * 10) / 10 + (now.unit || "")) : "✓"}</b><span>${now.gap ? t("d_gap") : t("k_on_track")}</span></button>`);
+			cells.push(`<button class="sk-dec ${now.gap ? "bad" : "ok"}" data-go="my_kpi"><b>${now.gap ? (now.money ? "₹" + kAmt(now.gap) : Math.round(now.gap * 10) / 10 + (now.unit || "")) : "✓"}</b><span>${now.gap ? t("d_gap") : t("k_on_track")}</span>${now.gap ? `<em class="sk-go b">🗓️ ${t("d_plan")}</em>` : ""}</button>`);
 		}
 		// badges come back as {n, c} once coloured (point 15): show the number, never the object
 		const mlRaw = state.home && (state.home.badges || {}).mail_late;
 		const ml = mlRaw && typeof mlRaw === "object" ? Number(mlRaw.n) || 0 : Number(mlRaw) || 0;
-		if (ml) cells.push(`<button class="sk-dec bad" data-go="mail"><b>${ml}</b><span>${t("mb_late")}</span><small>&gt; 1 ${t("fl_days")}</small></button>`);
+		if (ml) cells.push(`<button class="sk-dec bad" data-go="mail"><b>${ml}</b><span>${t("mb_late")}</span><small>&gt; 1 ${t("fl_days")}</small><em class="sk-go">✉️ ${t("d_open")}</em></button>`);
 		if (flowData) {
 			const late = [];
 			flowData.flows.forEach((f, fi) => f.stages.forEach((st, si) => { if (st.late) late.push({ st, fi, si, f }); }));
 			late.sort((a, b) => b.st.late - a.st.late || b.st.oldest - a.st.oldest);
 			late.slice(0, 4 - cells.length).forEach(({ st, fi, si, f }) => {
-				cells.push(`<button class="sk-dec bad" data-flow="${fi}:${si}"><b>${st.late}</b><span>${esc(st.label)}${f.label ? ` · ${esc(f.label)}` : ""}</span><small>${st.oldest} ${t("fl_days")}</small></button>`);
+				cells.push(`<button class="sk-dec bad" data-flow="${fi}:${si}"><b>${st.late}</b><span>${esc(st.label)}${f.label ? ` · ${esc(f.label)}` : ""}</span><small>${st.oldest} ${t("fl_days")}</small><em class="sk-go">📂 ${t("d_open")}</em></button>`);
 			});
 		}
 		if (!cells.length) return kpiData && flowData ? `<div class="sk-dec ok wide"><b>✓</b><span>${t("d_none")}</span></div>` : "";

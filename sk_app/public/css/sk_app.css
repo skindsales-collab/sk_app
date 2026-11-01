@@ -703,3 +703,157 @@ body.sk-pc .sk-vm-grp .sk-item { margin: 0; }
 body.sk-pc div.sk-form, body.sk-pc section.sk-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; align-content: start; }
 body.sk-pc div.sk-form > :not(.sk-field), body.sk-pc section.sk-form > :not(.sk-field) { grid-column: 1 / -1; }
 body.sk-pc .sk-sheet .sk-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* ==========================================================================================================
+   SK 1-Nov-2026 PC Rev 2 (PC only; the phone path is unchanged). Draft: SK_App_PC_Screens_Draft_Rev2..Rev4.
+   Home: left = KPI line chart, 3D block arrows, Decide now; right = own icons, common row, Call/WA/Mail,
+   My Day · next, bottom row. One 3D pattern everywhere = the arrow pattern: lit top face going up-right,
+   dark side on the right, soft floor shadow down-right (SK 1-Nov 09:39 "3D shadow same for all like arrow").
+   ========================================================================================================== */
+body.sk-pc { background: #e9eef5; }
+body.sk-pc main { gap: 16px; }
+body.sk-pc .sk-home2 { grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); column-gap: 24px; row-gap: 16px; align-items: stretch;
+	grid-template-areas: "kpi own" "kpi common" "flow contact" "decide myday" "decide bottom"; }
+body.sk-pc .sk-home2 > * { align-self: stretch; }
+body.sk-pc .sk-home2 > .sk-mydaybox { grid-area: myday; }
+body.sk-pc .sk-home2 > .sk-bottom { align-self: end; }
+
+/* cards */
+body.sk-pc .sk-kcard, body.sk-pc .sk-flowbox, body.sk-pc .sk-decide, body.sk-pc .sk-mydaybox, body.sk-pc .sk-card, body.sk-pc .sk-dash-card,
+body.sk-pc .sk-mgroup, body.sk-pc .sk-vm-grp {
+	background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 60%, #f3f6fa 100%); border: 1px solid #e3e9f0; border-radius: 6px; padding: 12px 16px; }
+body.sk-pc .sk-kpibox { border-top: 0; background: none; box-shadow: none; padding: 0; }
+body.sk-pc .sk-kcard { padding: 12px 16px 8px; height: 100%; }
+body.sk-pc .sk-khead { font-size: 16px; }
+body.sk-pc .sk-kcard > small { font-size: 13px; }
+body.sk-pc .sk-h { font-size: 16px; font-weight: 800; margin: 0 0 10px; }
+
+/* line chart at real size: text stays 12 px */
+body.sk-pc .sk-ksvg.sk-pcchart { width: 100%; height: auto; max-height: none; display: block; overflow: visible; }
+body.sk-pc .sk-pcchart .sk-ax { font-size: 12px; font-weight: 600; fill: #5a6472; }
+body.sk-pc .sk-pcchart .sk-grid { stroke: #e3e8ef; }
+body.sk-pc .sk-pcchart .sk-tline { stroke: #c82030; stroke-width: 2; stroke-dasharray: 7 5; }
+body.sk-pc .sk-pcchart .sk-tlabel { font-size: 12px; font-weight: 800; fill: #c82030; }
+body.sk-pc .sk-pcchart .sk-trend { stroke: #7b3fb5; stroke-width: 2.4; stroke-dasharray: 2 5; stroke-linecap: round; }
+body.sk-pc .sk-pcchart .sk-trendl { font-size: 12px; font-weight: 800; fill: #7b3fb5; }
+body.sk-pc .sk-pcchart .sk-vpill text { font-size: 12px; font-weight: 800; }
+body.sk-pc .sk-klegend { font-size: 12px; font-weight: 600; display: flex; flex-wrap: wrap; gap: 14px; margin-top: 4px; }
+body.sk-pc .sk-klegend .k-b { color: #1878a8; } body.sk-pc .sk-klegend .k-r { color: #c82030; } body.sk-pc .sk-klegend .k-t { color: #7b3fb5; }
+body.sk-pc .sk-kplot .sk-kact { left: auto; right: 8px; top: 0; }
+
+/* 3D block arrows (SVG drawn by flow3dHtml on PC), taller with bigger numbers (SK 1-Nov 09:33) */
+body.sk-pc .sk-flow3d { filter: none; overflow: visible; padding: 0 0 4px; }
+body.sk-pc .sk-ar3 { position: relative; height: 104px; flex: 1 1 0; min-width: 0; margin-right: -22px; background: none !important; clip-path: none !important;
+	border-radius: 0 !important; padding: 18px 26px 0 10px; justify-content: center; }
+body.sk-pc .sk-ar3:first-child { padding-left: 6px; }
+body.sk-pc .sk-ar3:last-child { margin-right: 0; }
+body.sk-pc .sk-ar3svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+body.sk-pc .sk-ar3 > b, body.sk-pc .sk-ar3 > span, body.sk-pc .sk-ar3 > em { position: relative; z-index: 1; }
+body.sk-pc .sk-ar3 > b { font-size: 26px; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+body.sk-pc .sk-ar3 > span { font-size: 13.5px; font-weight: 700; }
+body.sk-pc .sk-ar3 > em { font-style: normal; font-size: 11.5px; font-weight: 700; background: rgba(0,0,0,.28); border-radius: 5px; padding: 0 6px; margin-top: 2px; }
+body.sk-pc .sk-ar3:hover { filter: brightness(1.06); }
+
+/* Decide now: big cards with the action button inside (button hidden on the phone) */
+.sk-dec .sk-go { display: none; }
+body.sk-pc .sk-decs { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+body.sk-pc .sk-dec { flex-direction: row; align-items: center; text-align: left; gap: 12px; padding: 14px 14px; border: 1px solid #f3c7cb; border-left: 6px solid var(--red);
+	background: linear-gradient(180deg, #fff, #fff6f6); min-height: 92px; }
+body.sk-pc .sk-dec.ok { border-color: #bfe3c9; border-left-color: var(--green); background: linear-gradient(180deg, #fff, #f3fbf5); }
+body.sk-pc .sk-dec b { font-size: 28px; min-width: 84px; letter-spacing: -.5px; }
+body.sk-pc .sk-dec span { flex: 1; font-size: 14px; font-weight: 700; color: var(--ink); }
+body.sk-pc .sk-dec small { position: absolute; left: 116px; bottom: 10px; font-size: 12px; }
+body.sk-pc .sk-dec .sk-go { display: inline-flex; align-items: center; gap: 4px; font-style: normal; font-size: 12.5px; font-weight: 700; color: #fff; padding: 7px 12px; white-space: nowrap;
+	background: linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,.1) 48%, rgba(255,255,255,0) 52%), linear-gradient(180deg, #ec5361, #c42232 60%, #a01826); text-shadow: 0 1px 1px rgba(0,0,0,.3); }
+body.sk-pc .sk-dec .sk-go.b { background: linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,.1) 48%, rgba(255,255,255,0) 52%), linear-gradient(180deg, #3fa8de, #1673a3 60%, #0f5c84); }
+
+/* icons: large glossy icon bubble */
+body.sk-pc .sk-tile { background: linear-gradient(180deg, #ffffff 0%, #f5f8fb 70%, #e9eff5 100%); border: 1px solid #e0e7ef; border-radius: 6px; }
+body.sk-pc .sk-tile .sk-tile-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 34px !important;
+	background: radial-gradient(circle at 35% 28%, #fff 0%, #e6f1f8 40%, #b9d6ea 100%); box-shadow: inset 0 -3px 6px rgba(24,120,168,.25), 0 3px 6px rgba(16,40,70,.22); }
+body.sk-pc .sk-tile.c-red { border-color: #f1c2c6; background: linear-gradient(180deg, #fff, #fff4f5 70%, #fde6e8); }
+body.sk-pc .sk-tile.c-red .sk-tile-icon { background: radial-gradient(circle at 35% 28%, #fff 0%, #fde8ea 40%, #f2b3b9 100%); }
+body.sk-pc .sk-home2 .sk-own .sk-tile { padding: 16px 6px; font-size: 15px; }
+body.sk-pc .sk-home2 .sk-common .sk-tile, body.sk-pc .sk-home2 .sk-bottom .sk-tile { padding: 10px 6px; font-size: 14px; }
+body.sk-pc .sk-home2 .sk-common .sk-tile-icon { width: 48px; height: 48px; font-size: 26px !important; }
+body.sk-pc .sk-home2 .sk-bottom .sk-tile { flex-direction: row; justify-content: flex-start; padding: 8px 14px; gap: 10px; }
+body.sk-pc .sk-home2 .sk-bottom .sk-tile-icon { width: 42px; height: 42px; font-size: 22px !important; }
+body.sk-pc .sk-dot { z-index: 3; min-width: 24px; height: 24px; line-height: 20px; border-radius: 12px; border: 2px solid #fff; font-size: 12px; font-weight: 800; top: -9px; right: -9px;
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 3px 0 rgba(0,0,0,.35), 0 5px 6px rgba(0,0,0,.3); }
+
+/* Call / WhatsApp / Mail */
+body.sk-pc .sk-home2 .sk-contact { gap: 16px; }
+body.sk-pc .sk-cbig { border-radius: 4px; padding: 14px 6px !important; font-size: 16px; border: 1.5px solid rgba(0,0,0,.28); text-shadow: 0 1px 1px rgba(0,0,0,.3); }
+body.sk-pc .sk-cbig.c-calls { background: linear-gradient(180deg, rgba(255,255,255,.4) 0%, rgba(255,255,255,.08) 48%, rgba(255,255,255,0) 52%), linear-gradient(180deg, #4cc06f, #2a8a45 60%, #1f6f37); }
+body.sk-pc .sk-cbig.c-whatsapp { background: linear-gradient(180deg, rgba(255,255,255,.4) 0%, rgba(255,255,255,.08) 48%, rgba(255,255,255,0) 52%), linear-gradient(180deg, #49e08a, #20b25e 60%, #18914c); }
+body.sk-pc .sk-cbig.c-mail { background: linear-gradient(180deg, rgba(255,255,255,.4) 0%, rgba(255,255,255,.08) 48%, rgba(255,255,255,0) 52%), linear-gradient(180deg, #5ea3ea, #2c6fbe 60%, #22599c); }
+
+/* My Day · next on Home */
+body.sk-pc .sk-mdl { display: grid; gap: 10px; }
+body.sk-pc .sk-mdrow { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 7px 10px; border: 1px solid #e3e9f0; border-radius: 5px;
+	background: linear-gradient(180deg, #fff, #f6f9fc); color: var(--ink); font-size: 14px; font-weight: 700; }
+body.sk-pc .sk-mdrow.late { border-left: 4px solid var(--red); }
+body.sk-pc .sk-mdt { font-size: 12.5px; font-weight: 800; color: #135f86; background: #e1eff8; border-radius: 4px; padding: 3px 8px; min-width: 54px; text-align: center; }
+body.sk-pc .sk-mdrow.late .sk-mdt { color: #fff; background: linear-gradient(#e94b59, #b81c2b); }
+body.sk-pc .sk-mdx { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.sk-pc .sk-mdx small { font-size: 12px; font-weight: 600; color: var(--muted); margin-left: 6px; }
+body.sk-pc .sk-mdst { font-size: 12px; font-weight: 700; color: #fff; padding: 3px 10px; border: 1.5px solid rgba(0,0,0,.28); text-shadow: 0 1px 1px rgba(0,0,0,.35); }
+body.sk-pc .sk-mdst.r { background: linear-gradient(180deg, rgba(255,255,255,.45) 0%, rgba(255,255,255,0) 52%), linear-gradient(#ec5361, #c42232 60%, #a01826); }
+body.sk-pc .sk-mdst.a { background: linear-gradient(180deg, rgba(255,255,255,.45) 0%, rgba(255,255,255,0) 52%), linear-gradient(#ffb33d, #d98300 60%, #b26b00); }
+
+/* buttons and chips: gloss + bevel */
+body.sk-pc .sk-btn { border-radius: 4px; border: 1.5px solid rgba(0,0,0,.14); background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 50%, #dfe6ee 100%); }
+body.sk-pc .sk-btn.go, body.sk-pc .sk-btn.ok, body.sk-pc .sk-btn.bad { border-color: rgba(0,0,0,.28); text-shadow: 0 1px 1px rgba(0,0,0,.3); }
+body.sk-pc .sk-btn.go { background: linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,.1) 48%, rgba(255,255,255,0) 52%), linear-gradient(180deg, #3aa3d8, #1673a3 60%, #0f5c84); }
+body.sk-pc .sk-btn.ok { background: linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,.1) 48%, rgba(255,255,255,0) 52%), linear-gradient(180deg, #46c46c, #23903f 60%, #1a7432); }
+body.sk-pc .sk-btn.bad { background: linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,.1) 48%, rgba(255,255,255,0) 52%), linear-gradient(180deg, #ec5361, #c42232 60%, #a01826); }
+body.sk-pc .sk-chip, body.sk-pc .sk-kact { border-radius: 3px; border: 1.5px solid #b6c2cf; background: linear-gradient(180deg, #fff, #eef3f8); }
+body.sk-pc .sk-chip.on { border-color: #8e1420; background: linear-gradient(180deg, rgba(255,255,255,.4) 0%, rgba(255,255,255,0) 52%), linear-gradient(#e0414f, #b81c2b); text-shadow: 0 1px 1px rgba(0,0,0,.3); }
+body.sk-pc .sk-ktabs .sk-chip.on { border-color: #0e4c6c; background: linear-gradient(180deg, rgba(255,255,255,.4) 0%, rgba(255,255,255,0) 52%), linear-gradient(#2a8fc2, #1670a0); }
+body.sk-pc .sk-kact.on { border-color: #b98a14; background: linear-gradient(180deg, rgba(255,255,255,.6) 0%, rgba(255,255,255,0) 55%), linear-gradient(#ffe7a8, #f7c650); }
+body.sk-pc .sk-item { border-radius: 5px; border: 1px solid #e3e9f0; background: linear-gradient(180deg, #fff, #f6f9fc); }
+
+/* ---- the one 3D pattern (as the arrows): ::before = lit top face, ::after = dark right side ---- */
+body.sk-pc .sk-kcard, body.sk-pc .sk-flowbox, body.sk-pc .sk-decide, body.sk-pc .sk-mydaybox, body.sk-pc .sk-card, body.sk-pc .sk-dash-card, body.sk-pc .sk-mgroup, body.sk-pc .sk-vm-grp,
+body.sk-pc .sk-tile, body.sk-pc .sk-dec, body.sk-pc .sk-item, body.sk-pc .sk-mdrow, body.sk-pc .sk-cbig, body.sk-pc .sk-btn, body.sk-pc .sk-chip, body.sk-pc .sk-kact, body.sk-pc .sk-dec .sk-go, body.sk-pc .sk-mdst {
+	--d: 5px; --tf: #ffffff; --sf: #a3b1c1; position: relative; }
+body.sk-pc .sk-kcard, body.sk-pc .sk-flowbox, body.sk-pc .sk-decide, body.sk-pc .sk-mydaybox, body.sk-pc .sk-card, body.sk-pc .sk-dash-card, body.sk-pc .sk-mgroup, body.sk-pc .sk-vm-grp { --d: 9px; box-shadow: inset 0 1px 0 #fff, 7px 8px 10px rgba(11,30,51,.22); }
+body.sk-pc .sk-tile { --d: 8px; box-shadow: inset 0 1px 0 #fff, 6px 7px 8px rgba(11,30,51,.24); }
+body.sk-pc .sk-dec, body.sk-pc .sk-item { --d: 6px; box-shadow: inset 0 1px 0 #fff, 6px 7px 8px rgba(11,30,51,.22); }
+body.sk-pc .sk-mdrow { --d: 4px; box-shadow: inset 0 1px 0 #fff, 4px 5px 6px rgba(11,30,51,.18); }
+body.sk-pc .sk-cbig { --d: 7px; box-shadow: inset 0 2px 0 rgba(255,255,255,.55), 6px 7px 8px rgba(11,30,51,.32); }
+body.sk-pc .sk-btn { --d: 5px; box-shadow: inset 0 2px 0 rgba(255,255,255,.55), 5px 6px 6px rgba(11,30,51,.28); }
+body.sk-pc .sk-chip, body.sk-pc .sk-kact, body.sk-pc .sk-mdst { --d: 3px; box-shadow: inset 0 2px 0 rgba(255,255,255,.55), 4px 5px 5px rgba(11,30,51,.22); }
+body.sk-pc .sk-dec .sk-go { --d: 4px; box-shadow: inset 0 2px 0 rgba(255,255,255,.55), 4px 5px 6px rgba(11,30,51,.3); }
+body.sk-pc .sk-kcard::before, body.sk-pc .sk-flowbox::before, body.sk-pc .sk-decide::before, body.sk-pc .sk-mydaybox::before, body.sk-pc .sk-card::before, body.sk-pc .sk-dash-card::before,
+body.sk-pc .sk-mgroup::before, body.sk-pc .sk-vm-grp::before, body.sk-pc .sk-tile::before, body.sk-pc .sk-dec::before, body.sk-pc .sk-item::before, body.sk-pc .sk-mdrow::before,
+body.sk-pc .sk-cbig::before, body.sk-pc .sk-btn::before, body.sk-pc .sk-chip::before, body.sk-pc .sk-kact::before, body.sk-pc .sk-dec .sk-go::before, body.sk-pc .sk-mdst::before {
+	content: ""; position: absolute; left: -1px; right: -1px; top: calc(-1px - var(--d)); height: var(--d); background: var(--tf);
+	transform: skewX(-45deg); transform-origin: bottom left; pointer-events: none; }
+body.sk-pc .sk-kcard::after, body.sk-pc .sk-flowbox::after, body.sk-pc .sk-decide::after, body.sk-pc .sk-mydaybox::after, body.sk-pc .sk-card::after, body.sk-pc .sk-dash-card::after,
+body.sk-pc .sk-mgroup::after, body.sk-pc .sk-vm-grp::after, body.sk-pc .sk-tile:not(.sk-seq > .sk-tile)::after, body.sk-pc .sk-dec::after, body.sk-pc .sk-item::after, body.sk-pc .sk-mdrow::after,
+body.sk-pc .sk-cbig::after, body.sk-pc .sk-btn::after, body.sk-pc .sk-chip::after, body.sk-pc .sk-kact::after, body.sk-pc .sk-dec .sk-go::after, body.sk-pc .sk-mdst::after {
+	content: ""; position: absolute; top: -1px; bottom: -1px; right: calc(-1px - var(--d)); width: var(--d); background: var(--sf);
+	transform: skewY(-45deg); transform-origin: top left; pointer-events: none; }
+/* face colours = the arrow palette */
+body.sk-pc .sk-tile.c-red, body.sk-pc .sk-dec { --tf: #fff3f4; --sf: #c47d84; }
+body.sk-pc .sk-dec.ok { --tf: #f1fbf4; --sf: #7fb58f; }
+body.sk-pc .sk-cbig.c-calls, body.sk-pc .sk-btn.ok { --tf: #a8f0bd; --sf: #0d5a22; }
+body.sk-pc .sk-cbig.c-whatsapp { --tf: #b2f5cc; --sf: #0b6631; }
+body.sk-pc .sk-cbig.c-mail, body.sk-pc .sk-btn.go, body.sk-pc .sk-dec .sk-go.b, body.sk-pc .sk-ktabs .sk-chip.on { --tf: #b4e1f7; --sf: #0b4565; }
+body.sk-pc .sk-btn.bad, body.sk-pc .sk-chip.on, body.sk-pc .sk-dec .sk-go, body.sk-pc .sk-mdst.r { --tf: #ffb0b7; --sf: #7c111c; }
+body.sk-pc .sk-mdst.a, body.sk-pc .sk-kact.on { --tf: #ffe2a8; --sf: #8f5300; }
+/* the hover ring of 29-Oct is replaced by a lift (the faces carry the 3D) */
+@media (hover: hover) and (pointer: fine) {
+	body.sk-pc .sk-tile:hover, body.sk-pc .sk-dash-card:hover, body.sk-pc .sk-dec:hover { box-shadow: inset 0 1px 0 #fff, 0 0 0 2px var(--navy), 7px 8px 10px rgba(11,30,51,.26); }
+}
+
+/* More + View Member: bigger icons and fuller member rows (SK 1-Nov 09:40 "more open space, optimise icon size") */
+body.sk-pc main.sk-more { gap: 24px; }
+body.sk-pc .sk-mgroup .sk-tiles.small { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+body.sk-pc .sk-mgroup .sk-tile { padding: 14px 6px; font-size: 14px; }
+body.sk-pc .sk-vm-grp .sk-list { gap: 12px; }
+body.sk-pc .sk-vm-grp .sk-item { padding: 10px 12px; font-size: 15px; }
+body.sk-pc .sk-kplot .sk-kact { position: absolute; left: auto; right: 4px; top: -2px; }
+body.sk-pc .sk-home2 .sk-tiles.small.sk-bottom { grid-template-columns: repeat(3, 1fr); }
+body.sk-pc .sk-dec small { left: 108px; bottom: 8px; }
