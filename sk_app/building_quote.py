@@ -166,6 +166,7 @@ def ensure_setup():
 
 
 def make(user: str, req: dict, deal=None, lead=None, customer=None, revise=None, contact=None) -> dict:
+	frappe.flags.sk_quote_in_hand = True  # no design / AI quote for a deal quoted here (quote_pickup)
 	rc = cq.rate_card()
 	b = card(rc)
 	p = price(req, rc, may_override=cq.max_discount(user) >= 100)
