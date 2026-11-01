@@ -208,8 +208,15 @@ def ready_to_dispatch() -> list:
 	"""Finished cabins not yet dispatched (SK 1-Nov logic check B6, one list for Factory and Store): a completed Work Order
 	whose order (by the Work Order, else by its Project) is not fully delivered. A Work Order with no order at all only
 	stays 30 days, so an old stock / sample job does not sit in the box for ever."""
-	done = frappe.get_all("Work Order", filters={"docstatus": 1, "status": "Completed"},
-		fields=["name", "item_name", "sales_order", "project", "modified", "actual_end_date"], limit=0)
+	# a cabin is finished when its Work Order is completed or every job card of it is done (same as the Ready to
+	# dispatch tile, production.ready_to_dispatch; regression check 1-Nov: job cards are closed, Work Orders seldom are)
+	wos = frappe.get_all("Work Order", filters={"docstatus": 1, "status": ["not in", ["Cancelled", "Stopped", "Closed"]]},
+		fields=["name", "item_name", "sales_order", "project", "modified", "actual_end_date", "status"], limit=0)
+	cards = {}
+	for j in frappe.get_all("Job Card", filters={"work_order": ["in", [w.name for w in wos] or [""]], "docstatus": ["<", 2]},
+			fields=["work_order", "status", "docstatus"], limit=0):
+		cards.setdefault(j.work_order, []).append(j.status == "Completed" or j.docstatus == 1)
+	done = [w for w in wos if w.status == "Completed" or (cards.get(w.name) and all(cards[w.name]))]
 	by_project = {}
 	projects = [w.project for w in done if w.project and not w.sales_order]
 	if projects:
