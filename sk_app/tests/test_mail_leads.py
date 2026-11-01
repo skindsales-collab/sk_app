@@ -26,6 +26,10 @@ Area : MIDC Chakan
 City : Pune
 Category : Machine Shifting Services
 """
+# SK 1-Nov: the real JustDial instant mail (text part); 88888 88888 is JustDial's helpline, not the buyer
+JUSTDIAL_INSTANT = ("Dear Mr Sunil Mohanrao Khapake (Ceo) Dhanaji Mahadev Mote enquired for Portable Cabin Manufacturers. "
+	"User Area : Vittalvadi User City : Pune User State : Maharashtra Search Date & Time : 2026-11-01 19:39:21 View Contact Details "
+	"Improve your search ranking Get More Leads Contact Us 88888 88888 customerservice@justdial.com Privacy Policy")
 GEM = """Bid Number: GEM/2026/B/5551234
 Item Category: Prefabricated Portable Cabin (Q3)
 Ministry: Ministry of Defence
@@ -53,6 +57,15 @@ class TestMailLeads(IntegrationTestCase):
 		j = lead_sources.parse_mail("JD lead", JUSTDIAL, "JustDial")
 		self.assertEqual((j["first_name"], j["mobile_no"]), ("Suresh", "9822012345"))
 		self.assertEqual(lead_sources.segment_of(j["requirement"]), "Machine Shifting")
+		jd = lead_sources.parse_mail("Enquiry for Sk Ind Tech Solutions Pvt Ltd (Wagholi, Pune)", JUSTDIAL_INSTANT, "JustDial")
+		self.assertEqual(jd["first_name"], "Dhanaji Mahadev Mote")
+		self.assertIsNone(jd["mobile_no"])  # not the 88888 88888 helpline
+		self.assertIsNone(jd["email"])
+		self.assertEqual(jd["requirement"], "Portable Cabin Manufacturers")
+		self.assertEqual(jd["city"], "Vittalvadi, Pune")
+		from sk_app.gate_rules import is_portal_enquiry
+
+		self.assertTrue(is_portal_enquiry(jd, "Enquiry for Sk Ind Tech Solutions Pvt Ltd (Wagholi, Pune)"))
 		g = lead_sources.parse_mail("GeM bid alert", GEM, "GeM")
 		self.assertEqual(g["first_name"], "GeM bid GEM/2026/B/5551234")
 		self.assertEqual(g["organization"], "Ministry of Defence")
@@ -69,7 +82,15 @@ class TestMailLeads(IntegrationTestCase):
 	def test_team_mailbox_take_once_and_only_its_people(self):
 		self.assertIn("cabin@skind.tech", mailbox.boxes_for(SALES1))
 		self.assertEqual(mailbox.boxes_for(ACC), ["acc@skind.tech"])
-		self.assertIn("9970960806@staff.skind.local", mailbox.team_boxes()["prod@skind.tech"])  # SK 27-Oct: Yogesh
+		self.assertNotIn("prod@skind.tech", mailbox.team_boxes())  # SK 1-Nov: no such mail ID, added by mistake
+		old = frappe.db.get_single_value("SK App Settings", "mailbox_map")
+		frappe.db.set_single_value("SK App Settings", "mailbox_map", "prod@skind.tech: Production")
+		frappe.clear_document_cache("SK App Settings", "SK App Settings")
+		try:
+			self.assertNotIn("prod@skind.tech", mailbox.team_boxes())
+		finally:
+			frappe.db.set_single_value("SK App Settings", "mailbox_map", old)
+			frappe.clear_document_cache("SK App Settings", "SK App Settings")
 		self.assertIn("cabin@skind.tech", mailbox.boxes_for("Administrator"))  # SK 27-Oct: the CEO sees every team box
 		comm = self._mail()
 		box = mailbox.inbox(SALES1)
@@ -141,3 +162,15 @@ class TestMailLeads(IntegrationTestCase):
 		BUY = "sk_test_m_buy@example.com"
 		_app_user(BUY, "Purchase", ["Purchase User"])
 		self.assertIn(comm, [m["name"] for m in mailbox.inbox(BUY)["mails"]])
+
+	def test_each_justdial_buyer_is_own_lead(self):
+		"""SK 1-Nov: two JustDial buyers went onto one old 'Enquiry' lead through JustDial's 88888 88888 helpline."""
+		if not frappe.db.exists("DocType", "CRM Lead"):
+			self.skipTest("Frappe CRM not installed")
+		a = lead_sources.parse_mail("JD", JUSTDIAL_INSTANT.replace("Dhanaji Mahadev Mote", "Zz Test Buyer One"), "JustDial")
+		b = lead_sources.parse_mail("JD", JUSTDIAL_INSTANT.replace("Dhanaji Mahadev Mote", "Zz Test Buyer Two"), "JustDial")
+		ra, rb = lead_sources.make_lead(a, "JustDial"), lead_sources.make_lead(b, "JustDial")
+		self.assertTrue(ra["new"] and rb["new"])
+		self.assertNotEqual(ra["lead"], rb["lead"])
+		again = lead_sources.make_lead(a, "JustDial")  # the same buyer searching again: a note on the first lead
+		self.assertEqual((again["lead"], again["new"]), (ra["lead"], False))

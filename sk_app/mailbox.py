@@ -14,21 +14,21 @@ from sk_app.logic import parse_lines
 STATUSES = ("New", "Taken", "Replied", "Lead made", "Not a lead", "Complaint")
 DEFAULT_MAP = ("cabin@skind.tech: Sales, Marketing\nservice@skind.tech: Machine Shifting, service@skind.tech\n"
 	"acc@skind.tech: Accounts\nsales@skind.tech: Management\ninfo@skind.tech: HR\n"
-	# SK 27-Oct: prod@ for Production (Babasaheb) and Store (Yogesh)
-	"prod@skind.tech: 9730517277@staff.skind.local, 9970960806@staff.skind.local\n"
 	# SK 27-Oct: supplier mails (any box) go to Purchase; an app-only box until a real purchase@ mail ID is added
 	"purchase@skind.tech: Purchase")
 PURCHASE_BOX = "purchase@skind.tech"
+# SK 1-Nov: prod@ was added by mistake, no such mail ID exists; never show it, even if it is in SK App Settings
+REMOVED_BOXES = {"prod@skind.tech"}
 
 
 def team_boxes() -> dict:
 	"""{mailbox: [functions or logins]} from SK App Settings."""
 	text = frappe.get_cached_doc("SK App Settings").get("mailbox_map") or ""
 	out = {}
-	# a box set in SK App Settings wins; a box only in the default list (added later, e.g. prod@) still shows
+	# a box set in SK App Settings wins; a box only in the default list (added later) still shows
 	for line in parse_lines(DEFAULT_MAP) + parse_lines(text):
 		box, sep, who = line.partition(":")
-		if sep and "@" in box:
+		if sep and "@" in box and box.strip().lower() not in REMOVED_BOXES:
 			out[box.strip().lower()] = [w.strip() for w in who.split(",") if w.strip()]
 	return out
 
