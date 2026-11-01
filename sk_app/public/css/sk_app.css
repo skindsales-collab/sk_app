@@ -857,3 +857,4 @@ body.sk-pc .sk-vm-grp .sk-item { padding: 10px 12px; font-size: 15px; }
 body.sk-pc .sk-kplot .sk-kact { position: absolute; left: auto; right: 4px; top: -2px; }
 body.sk-pc .sk-home2 .sk-tiles.small.sk-bottom { grid-template-columns: repeat(3, 1fr); }
 body.sk-pc .sk-dec small { left: 108px; bottom: 8px; }
+.sk-autofilled { background: #eaf7ee !important; border-color: #7fc396 !important; }

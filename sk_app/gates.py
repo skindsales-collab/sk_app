@@ -199,6 +199,11 @@ def complete_customer(customer: str, gstin=None, unregistered=0, gst_note=None, 
 		if doc.meta.has_field(GST_NOTE):
 			doc.set(GST_NOTE, gst_note.strip())
 	doc.save()
+	# SK 1-Nov minimum input: the state comes from the GSTIN (first 2 digits) when it is not given
+	if not (state or "").strip():
+		from sk_app.auto_fill import state_from_gstin
+
+		state = state_from_gstin(gstin or doc.get("gstin")) or state
 	if (state or "").strip() and (address or "").strip():
 		have = _billing(customer)
 		a = frappe.get_doc("Address", have["name"]) if have else frappe.new_doc("Address")
