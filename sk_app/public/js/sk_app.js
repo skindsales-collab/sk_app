@@ -1637,7 +1637,7 @@
 
 	function fitHead() {
 		const h = root.querySelector(".sk-head");
-		if (h) document.body.style.paddingTop = h.offsetHeight + "px";
+		if (h) { document.body.style.paddingTop = h.offsetHeight + "px"; document.body.style.setProperty("--hh", h.offsetHeight + "px"); }
 	}
 	new MutationObserver(() => { fitHead(); addMics(root); }).observe(root, { childList: true, subtree: true });
 	window.addEventListener("resize", fitHead);
@@ -1694,21 +1694,34 @@
 		const row = (keys, cls) => keys.length ? `<div class="sk-tiles small ${cls}">${keys.map(tile).join("")}</div>` : "";
 		const contact = `<div class="sk-contact">${(S2.main_contact || []).map((k) => `<button class="sk-cbig c-${k}" data-go="${k}">${ICON[k]} ${t(k)}${redCount(badge[k]) ? `<b class="sk-dot red">${redCount(badge[k])}</b>` : ""}</button>`).join("")}</div>`;
 		const bottom = `<div class="sk-tiles small sk-bottom">${(S2.main_shared || ["my_day"]).map(tile).join("")}${moreTile}</div>`;
-		let middle;
+		let middle, flowPart = "", ownPart = "";
 		if (sects.length === 1) {
 			const x = sects[0];
-			middle = `<div class="sk-flowbox sk-f3" data-fn="${esc(x.function)}" data-mode="3d">${flow3dHtml(x.function)}</div>${row(x.main || x.tiles, "sk-own")}`;
+			flowPart = `<div class="sk-flowbox sk-f3" data-fn="${esc(x.function)}" data-mode="3d">${flow3dHtml(x.function)}</div>`;
+			ownPart = row(x.main || x.tiles, "sk-own");
+			middle = flowPart + ownPart;
 		} else {
 			// several functions: one big icon per function (level 2 = its page with its flow)
 			middle = `<div class="sk-tiles small sk-fns sk-own">${sects.map((x) => {
 				const red = (x.tiles || []).reduce((n, k) => n + redCount(badge[k]), 0);
 				return `<button class="sk-tile ${red ? "c-red" : ""}" data-fnpage="${esc(x.function)}"><span class="sk-tile-icon">${FN_ICON[x.function] || "📁"}</span><span>${esc(fnLabel(x.label))}</span>${red ? `<b class="sk-dot red">${red}</b>` : ""}</button>`;
 			}).join("")}</div>`;
+			ownPart = middle;
+		}
+		if (isPc()) {
+			// SK 1-Nov "make as per pdf": PC Home = two columns with fixed shares that end on one line and fit one screen
+			const n = (ownPart.match(/class="sk-tile[ "]/g) || []).length;
+			root.innerHTML = header("SK App") + `<main class="sk-l1 sk-home2 sk-pchome"><div class="sk-pcl"><div class="sk-kpibox">${kpiHtml()}</div>${flowPart}
+				<div class="sk-decide">${decideHtml()}</div></div><div class="sk-pcr ${n <= 4 ? "own-2c" : "own-4c"}">${ownPart}${row(S2.main_common || [], "sk-common")}${contact}
+				<div class="sk-mydaybox">${homeDayHtml()}</div>${bottom}</div></main>`;
+			loadHomeDay();
+			loadKpi();
+			loadFlows();
+			return;
 		}
 		root.innerHTML = header("SK App") + `<main class="sk-l1 sk-home2"><div class="sk-kpibox">${kpiHtml()}</div>${middle}
-			<div class="sk-decide">${decideHtml()}</div>${row(S2.main_common || [], "sk-common")}${contact}${isPc() ? `<div class="sk-mydaybox">${homeDayHtml()}</div>` : ""}${bottom}</main>`;
+			<div class="sk-decide">${decideHtml()}</div>${row(S2.main_common || [], "sk-common")}${contact}${bottom}</main>`;
 		fitHome();
-		if (isPc()) loadHomeDay();
 		loadKpi();
 		loadFlows();
 	}
@@ -1725,14 +1738,19 @@
 	}
 	function paintHomeDay() {
 		const b = state.view === "home" && root.querySelector(".sk-mydaybox");
-		if (b) b.innerHTML = homeDayHtml();
+		if (!b) return;
+		b.innerHTML = homeDayHtml();
+		// only whole rows: a row that does not fit the box is left out (no half-cut row)
+		const l = b.querySelector(".sk-mdl");
+		if (l) { const lim = l.getBoundingClientRect().bottom + 1; l.querySelectorAll(".sk-mdrow").forEach((r) => { if (r.getBoundingClientRect().bottom > lim) r.remove(); }); }
 	}
 	function homeDayHtml() {
 		if (!homeDay) return `<div class="sk-h">☀️ ${t("my_day")} · ${t("md_next")}</div><p class="sk-note">… ${t("fl_loading")}</p>`;
 		const now = new Date().toISOString().slice(0, 16).replace("T", " ");
 		const rows = (homeDay.items || []).slice(0, 7).map((i) => {
 			const late = i.due && i.due.slice(0, 16) < now;
-			const tm = i.due ? esc(i.due.slice(11, 16) || i.due.slice(5, 10)) : "—";
+			const hhmm = i.due ? i.due.slice(11, 16) : "";
+			const tm = !i.due ? "—" : hhmm && hhmm !== "00:00" ? esc(hhmm) : esc(new Date(i.due.slice(0, 10) + "T00:00").toLocaleDateString("en-IN", { day: "2-digit", month: "short" }));
 			const open = i.doctype && i.doctype.startsWith("CRM ") && i.name ? `data-open="${esc(i.doctype)}" data-name="${esc(i.name)}"`
 				: i.kind === "day_report" ? `data-go="day_report"` : `data-go="my_day"`;
 			return `<button class="sk-mdrow ${late ? "late" : ""}" ${open}><span class="sk-mdt">${tm}</span><span class="sk-mdx">${esc(i.title)}<small>${esc(String(i.kind || "").replace("_", " "))}${i.customer && i.customer !== i.title ? " · " + esc(i.customer) : ""}</small></span><span class="sk-mdst ${late ? "r" : "a"}">${t(late ? "md_late" : "md_today")}</span></button>`;
@@ -1820,6 +1838,8 @@
 		kpiData = d; kpiAt = Date.now(); kpiLoading = false;
 		paintKpi();
 	}
+	let pcResizeT = 0;
+	window.addEventListener("resize", () => { clearTimeout(pcResizeT); pcResizeT = setTimeout(() => { if (isPc() && root.querySelector(".sk-pchome")) paintKpi(); }, 200); });
 	function paintKpi() {
 		if (state.view !== "home") return;
 		const b = root.querySelector(".sk-kpibox");
@@ -1878,8 +1898,8 @@
 	// amount up the side, weeks (running total this month) or months along the bottom (SK 26-Oct)
 	function moneySvg(c) {
 		const v = c[kpiView] || c.week;
-		const pc = isPc();
-		const W = pc ? 800 : 320, H = pc ? 236 : 150, L = pc ? 46 : 34, B = pc ? 24 : 18, T = pc ? 26 : 12;
+		const pc = isPc(), sz = pcChartSize();
+		const W = pc ? sz.W : 320, H = pc ? sz.H : 150, L = pc ? 46 : 34, B = pc ? 24 : 18, T = pc ? 26 : 12;
 		const tgt = kpiView === "month" ? v.labels.map(() => c.target) : v.target;
 		const all = [...v.lines.flatMap((l) => l.points), ...(c.target ? tgt : [])];
 		const mx = Math.max(1, ...all) * 1.1, n = v.labels.length;
@@ -1922,8 +1942,8 @@
 	}
 	// month by month against target: green dot = on target, red = not (SK 26-Oct: "trend monitoring")
 	function trendSvg(c) {
-		const pc = isPc();
-		const W = pc ? 800 : 320, H = pc ? 236 : 150, L = pc ? 42 : 30, B = pc ? 24 : 18, T = pc ? 30 : 20;
+		const pc = isPc(), sz = pcChartSize();
+		const W = pc ? sz.W : 320, H = pc ? sz.H : 150, L = pc ? 42 : 30, B = pc ? 24 : 18, T = pc ? 30 : 20;
 		const points = (kpiView !== "month" && c[kpiView]) || c.points;
 		const tg = (p) => (p.t != null ? p.t : c.target);
 		const vals = points.map((p) => p.v).filter((x) => x != null);
@@ -1960,6 +1980,14 @@
 		return `<svg viewBox="0 0 ${W} ${H}" class="sk-ksvg">${g}</svg>`;
 	}
 	// ---------- SK 1-Nov PC Rev 2 (PC only, phone unchanged): line charts with trend, 3D block arrows ----------
+	// the chart is drawn at the real pixel size of its box, so its text stays 12 px and it never overflows (SK 1-Nov)
+	function pcChartSize() {
+		const box = root.querySelector(".sk-pchome .sk-kpibox");
+		if (!box || !box.clientWidth) return { W: 800, H: 236 };
+		const head = box.querySelector(".sk-khead"), sub = box.querySelector(".sk-kcard > small");
+		const used = 12 + 8 + (head ? head.offsetHeight : 26) + (sub ? sub.offsetHeight : 18) + 26;
+		return { W: Math.max(320, box.clientWidth - 34), H: Math.max(120, Math.min(420, box.clientHeight - used)) };
+	}
 	const KC = { b: "#1878a8", g: "#1e8e3e", o: "#e07b00", r: "#c82030", n: "#5a6472" };
 	const PC_DEFS = `<defs><filter id="skls" x="-5%" y="-20%" width="110%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#0b1e33" flood-opacity=".28"/></filter>
 		<radialGradient id="skgdot" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="#ff8a95"/><stop offset="1" stop-color="#b3101f"/></radialGradient>
@@ -2028,7 +2056,7 @@
 			if (f.error) return `<p class="sk-note">⚠️ ${t("fl_error")}: ${esc(f.error)}</p>`;
 			arrows = f.stages.map((st, si) => `<button class="sk-ar3 ${col(st.c)}" data-flow="${fi}:${si}">${isPc() ? ar3Svg(col(st.c), si === 0) : ""}<b>${st.count}</b><span>${esc(st.label)}</span>${isPc() && st.late ? `<em>${st.late} ${t("fl_late")}</em>` : ""}</button>`);
 		}
-		return `<div class="sk-flow3d">${arrows.join("")}</div>`;
+		return `<div class="sk-flow3d" style="--n:${arrows.length}" data-many="${arrows.length > 7 ? 1 : 0}">${arrows.join("")}</div>`;
 	}
 	// "Decide now" (SK 26-Oct: data needed for taking decisions on the main screen): the gap to target and the three
 	// most delayed stages of the person's flows; each opens its list
