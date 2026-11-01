@@ -465,8 +465,16 @@ def badges(user: str, functions: list[str]) -> dict:
 	out = {}
 	company = _company()
 	if ACCOUNTS in functions:
-		out["to_collect"] = frappe.db.count("Sales Invoice", {"docstatus": 1, "outstanding_amount": [">", 0], "due_date": ["<", nowdate()], "company": company})
-		out["to_pay"] = frappe.db.count("Purchase Invoice", {"docstatus": 1, "outstanding_amount": [">", 0], "due_date": ["<=", add_days(nowdate(), 3)], "company": company})
+		# SK 1-Nov logic check C3: from the same ledger dues as the Receivables / Bills to pay arrows (Tally bills too),
+		# so the badge never says 0 while the arrow shows lakhs: customers with a bill over 30 days, suppliers due in 3 days
+		dues = frappe.cache.get_value("sk_fin_due_badges")
+		if dues is None:
+			from sk_app import dashboards
+
+			dues = {"to_collect": sum(1 for d in dashboards._party_dues("Customer") if d.late > 30),
+				"to_pay": sum(1 for d in dashboards._party_dues("Supplier") if d.late >= 27)}
+			frappe.cache.set_value("sk_fin_due_badges", dues, expires_in_sec=300)
+		out.update(dues)
 		out["bills_to_post"] = frappe.db.count("Purchase Invoice", {"docstatus": 0, "company": company}) \
 			+ frappe.db.count("ToDo", {"reference_type": "Supplier", "status": "Open", "allocated_to": user})
 		out["invoices"] = frappe.db.count("Delivery Note", {"docstatus": 1, "per_billed": ["<", 100], "status": ["not in", ["Closed", "Cancelled"]],

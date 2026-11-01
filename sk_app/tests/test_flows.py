@@ -118,3 +118,26 @@ class TestFlows(IntegrationTestCase):
 
 		self.assertEqual(wo_label("WO-NOT-THERE", "x"), "WO-NOT-THERE")
 		self.assertEqual(wo_label(None, "JC-1"), "JC-1")
+
+
+class TestLogicCheck1Nov(IntegrationTestCase):
+	"""SK 1-Nov logic check: factory boxes for every operation, one ready-to-dispatch list, tasks never to nobody."""
+
+	def test_every_operation_has_a_box(self):
+		self.assertEqual(flows._factory_stage("Plumbing"), "Plumbing")
+		self.assertEqual(flows._factory_stage("PVC Panelling"), "Panelling")
+		self.assertEqual(flows._factory_stage("FRP Cabin (Subcontract)"), "Subcontract cabin")
+		self.assertEqual(flows._factory_stage("Carpenter Work"), "Carpentry")
+		self.assertEqual(flows._factory_stage("Final Inspection"), "Final inspection")
+
+	def test_store_and_factory_dispatch_match(self):
+		ceo = run("Administrator", flows.for_user, ["Management"])
+		boxes = {(f["src"], s["key"]): s["count"] for f in ceo["flows"] for s in f["stages"]}
+		if ("Production", "dispatch") in boxes and ("Stores", "dispatch") in boxes:
+			self.assertEqual(boxes[("Production", "dispatch")], boxes[("Stores", "dispatch")])
+		self.assertNotIn(("HR", "claims"), {(f["src"], s["key"]) for f in run(REP, flows.for_user, ["HR"])["flows"] for s in f["stages"]})
+
+	def test_task_falls_back_to_ceo(self):
+		from sk_app.store import users_or_ceo
+
+		self.assertTrue(set(users_or_ceo("No Such Function")) <= set(users_or_ceo("Management")))

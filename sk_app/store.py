@@ -486,6 +486,12 @@ def _users_with_function(function: str) -> list[str]:
 	return list(dict.fromkeys(main + other))
 
 
+def users_or_ceo(function: str) -> list[str]:
+	"""People of a function, else the CEO (SK 1-Nov logic check A1/A2: a QC check or "make the PO" task that found nobody
+	with the function went to nobody; now it reaches the CEO, who sees the gap)."""
+	return _users_with_function(function) or _users_with_function("Management")
+
+
 def _todo(user: str, doctype: str, name: str, text: str):
 	frappe.get_doc({"doctype": "ToDo", "allocated_to": user, "reference_type": doctype, "reference_name": name,
 		"description": text, "priority": "High", "date": nowdate()}).insert(ignore_permissions=True)
@@ -587,6 +593,12 @@ def item_options(user: str) -> dict:
 		"warehouses": warehouses(user)}
 
 
+def _ready() -> list:
+	from sk_app.flows import ready_to_dispatch
+
+	return ready_to_dispatch()
+
+
 def badges(user: str, functions: list[str]) -> dict:
 	"""Red counts on the Store icons (cheap counts only)."""
 	if STORE not in functions:
@@ -594,6 +606,6 @@ def badges(user: str, functions: list[str]) -> dict:
 	out = {"store_requests": len(material_requests(user)), "low_stock": len(low_stock(user)),
 		"receive": frappe.db.count("Purchase Order", {"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]],
 			"schedule_date": ["<=", nowdate()], **material_pos()}),
-		"dispatch": frappe.db.count("Sales Order", {"docstatus": 1, "status": ["in", ["To Deliver and Bill", "To Deliver"]],
-			"delivery_date": ["<=", nowdate()]})}
+		# SK 1-Nov logic check B6: finished cabins not yet dispatched (same list as the Factory and Store arrows)
+		"dispatch": len(_ready())}
 	return {k: v for k, v in out.items() if cint(v)}

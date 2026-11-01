@@ -22,10 +22,13 @@ ROWS = 60
 # SK's proposal (change list page 45): days a stage may take before it turns red
 # days a lead may stay in one of SK's steps without any update before it turns red
 STEP_DAYS = {"Qualified": 3, "Drawing": 2, "Quotation": 2, "Negotiations": 7}
-TARGET_DAYS = {"lead": 1, "quote": 2, "Fabrication": 5, "Electrical": 2, "Carpentry": 2, "Painting": 2, "Final inspection": 1}
+TARGET_DAYS = {"lead": 1, "quote": 2, "Fabrication": 5, "Electrical": 2, "Plumbing": 2, "Carpentry": 2, "Panelling": 2, "Painting": 2,
+	"Final inspection": 1, "Subcontract cabin": 15}
 # factory stages in SK's order (26-Oct: carpentry after wiring); words found in the ERPNext operation names
-FACTORY = [("Fabrication", "🔩", ("fabric", "weld")), ("Electrical", "💡", ("electric", "wiring")),
-	("Carpentry", "🪚", ("carpen", "wood", "floor")), ("Painting", "🎨", ("paint",)), ("Final inspection", "🔍", ("inspect", "qc", "quality"))]
+# SK 1-Nov logic check A5: Plumbing and PVC panelling job cards were in no box; an FRP / subcontracted cabin is its own box
+FACTORY = [("Fabrication", "🔩", ("fabric", "weld")), ("Electrical", "💡", ("electric", "wiring")), ("Plumbing", "🚰", ("plumb",)),
+	("Carpentry", "🪚", ("carpen", "wood", "floor")), ("Panelling", "🧱", ("panel",)), ("Painting", "🎨", ("paint",)),
+	("Final inspection", "🔍", ("inspect", "qc", "quality")), ("Subcontract cabin", "🏭", ("frp", "subcontract"))]
 
 
 def _stage(key, label, icon, rows, value=None, go=None, kind="count", late_rows=None) -> dict:
@@ -120,14 +123,18 @@ def sales(user: str, segment=None, only_self=False) -> list[dict]:
 	# SK 27-Oct "All status shows in flow chart": the three closing steps too, closed this month
 	done = {"Deal Won": [], "Junk Lead": [], "Deal Loss": []}
 	if _has("CRM Lead"):
-		for l in frappe.get_all("CRM Lead", filters={"status": ["in", list(done)], "modified": [">=", start], **seg, **_in("lead_owner", owners)},
+		# SK 1-Nov logic check B7: a lead that became a deal is counted on its deal only (no double count)
+		for l in frappe.get_all("CRM Lead", filters={"status": ["in", list(done)], "converted": 0, "modified": [">=", start], **seg, **_in("lead_owner", owners)},
 				fields=["name", "first_name", "organization", "status", "lead_owner", "modified"], limit=0):
 			done[l.status].append(_row(l.organization or l.first_name or l.name, f"{str(l.modified)[:10]} · {_name(l.lead_owner)}", None, "CRM Lead", l.name))
 	if _has("CRM Deal"):
 		kinds = {r.name: r.type for r in frappe.get_all("CRM Deal Status", fields=["name", "type"])}
 		closed_st = [k for k, v in kinds.items() if v in ("Won", "Lost")]
+		has_closed = frappe.get_meta("CRM Deal").has_field("closed_date")
 		for d in frappe.get_all("CRM Deal", filters={"status": ["in", closed_st or [""]], "modified": [">=", start], **seg, **_in("deal_owner", owners)},
-				fields=["name", "organization", "status", "deal_value", "deal_owner", "modified", "sk_customer_name"], limit=0):
+				fields=["name", "organization", "status", "deal_value", "deal_owner", "modified", "sk_customer_name"] + (["closed_date"] if has_closed else []), limit=0):
+			if d.get("closed_date") and getdate(d.closed_date) < start:
+				continue  # closed in an earlier month, only edited now (B7)
 			done["Deal Won" if kinds.get(d.status) == "Won" else "Deal Loss"].append(_row(d.get("sk_customer_name") or d.organization or d.name,
 				f"{str(d.modified)[:10]} · {_name(d.deal_owner)}", d.deal_value, "CRM Deal", d.name))
 	for key, icon in (("Deal Won", "🏆"), ("Junk Lead", "🗑️"), ("Deal Loss", "❌")):
@@ -193,13 +200,38 @@ def factory(user: str, go="job_cards", workstation=None) -> list[dict]:
 			rows.append(r)
 		stages.append(_stage(name.lower().replace(" ", "_"), name, icon, rows, go=go))
 	if not workstation:
-		done = frappe.get_all("Work Order", filters={"docstatus": 1, "status": "Completed"}, fields=["name", "item_name", "sales_order", "modified"], limit=0)
-		delivered = set(frappe.get_all("Delivery Note Item", filters={"docstatus": 1, "against_sales_order": ["in", [w.sales_order for w in done if w.sales_order] or [""]]},
-			pluck="against_sales_order"))
-		ready = [w for w in done if not w.sales_order or w.sales_order not in delivered]
-		stages.append(_stage("dispatch", "Ready to dispatch", "🚚", [_late_row(wo_label(w.name, w.item_name), f"{w.name} · {w.sales_order or ''}", None, "Work Order", w.name,
-			w.modified, 2) for w in ready], go="ready_dispatch"))
+		stages.append(_stage("dispatch", "Ready to dispatch", "🚚", _ready_rows(), go="ready_dispatch"))
 	return stages
+
+
+def ready_to_dispatch() -> list:
+	"""Finished cabins not yet dispatched (SK 1-Nov logic check B6, one list for Factory and Store): a completed Work Order
+	whose order (by the Work Order, else by its Project) is not fully delivered. A Work Order with no order at all only
+	stays 30 days, so an old stock / sample job does not sit in the box for ever."""
+	done = frappe.get_all("Work Order", filters={"docstatus": 1, "status": "Completed"},
+		fields=["name", "item_name", "sales_order", "project", "modified", "actual_end_date"], limit=0)
+	by_project = {}
+	projects = [w.project for w in done if w.project and not w.sales_order]
+	if projects:
+		for so in frappe.get_all("Sales Order", filters={"project": ["in", projects], "docstatus": ["<", 2]}, fields=["name", "project"], limit=0):
+			by_project.setdefault(so.project, so.name)
+	sos = {w.sales_order or by_project.get(w.project) for w in done} - {None}
+	open_so = {s.name: s for s in frappe.get_all("Sales Order", filters={"name": ["in", list(sos) or [""]], "docstatus": ["<", 2],
+		"per_delivered": ["<", 100], "status": ["not in", ["Closed", "Completed"]]}, fields=["name", "customer_name", "delivery_date"], limit=0)}
+	out = []
+	for w in done:
+		so = w.sales_order or by_project.get(w.project)
+		if so:
+			if so in open_so:
+				out.append(frappe._dict(w, so=so, customer=open_so[so].customer_name, delivery_date=open_so[so].delivery_date))
+		elif date_diff(nowdate(), w.actual_end_date or w.modified) <= 30:
+			out.append(frappe._dict(w, so=None, customer="", delivery_date=None))
+	return out
+
+
+def _ready_rows() -> list:
+	return [_late_row(wo_label(w.name, w.item_name), " · ".join(x for x in (w.customer, w.so or "no order", f"due {w.delivery_date}" if w.delivery_date else "") if x),
+		None, "Work Order", w.name, w.actual_end_date or w.modified, 2) for w in ready_to_dispatch()]
 
 
 def subcontractor(user: str) -> list[dict]:
@@ -207,7 +239,8 @@ def subcontractor(user: str) -> list[dict]:
 	if not ws:
 		return []
 	jobs = frappe.get_all("Job Card", filters={"workstation": ws, "docstatus": ["<", 2]},
-		fields=["name", "operation", "status", "work_order", "expected_end_date", "creation", "modified", "docstatus"], order_by="creation asc", limit=0)
+		fields=["name", "operation", "status", "work_order", "expected_end_date", "creation", "modified", "docstatus"]
+		+ (["actual_end_date"] if frappe.get_meta("Job Card").has_field("actual_end_date") else []), order_by="creation asc", limit=0)
 	start = get_first_day(getdate())
 
 	def rows(items, target=None):
@@ -219,7 +252,8 @@ def subcontractor(user: str) -> list[dict]:
 
 	waiting = [j for j in jobs if j.docstatus == 0 and j.status in ("Open", "Material Transferred")]
 	working = [j for j in jobs if j.docstatus == 0 and j.status in ("Work In Progress", "On Hold")]
-	done = [j for j in jobs if (j.docstatus == 1 or j.status == "Completed") and getdate(j.modified) >= start]
+	# SK 1-Nov logic check C4: the month the job was finished, not the last edit
+	done = [j for j in jobs if (j.docstatus == 1 or j.status == "Completed") and getdate(j.get("actual_end_date") or j.modified) >= start]
 	return [_stage("waiting", "My jobs waiting", "⏳", rows(waiting, 2), go="my_jobs"),
 		_stage("working", "In progress", "🛠️", rows(working, 3), go="my_jobs"),
 		_stage("done", "Done this month (photo)", "✅", [_row(wo_label(j.work_order, j.name), f"{j.work_order or j.name} · {j.operation or ''}") for j in done], go="my_jobs")]
@@ -234,12 +268,14 @@ def stores(user: str) -> list[dict]:
 
 	to_receive = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]], **material_pos()},
 		fields=["name", "supplier_name", "schedule_date", "grand_total", "transaction_date"], order_by="schedule_date asc", limit=0)
-	moved = frappe.get_all("Stock Entry", filters={"posting_date": nowdate(), "docstatus": ["<", 2]}, fields=["name", "stock_entry_type", "total_outgoing_value"])
+	# SK 1-Nov logic check B5: draft = not done
+	moved = frappe.get_all("Stock Entry", filters={"posting_date": nowdate(), "docstatus": 1}, fields=["name", "stock_entry_type", "total_outgoing_value"])
 	low = _safe(lambda: low_stock(user), []) or []
-	reorder = frappe.get_all("Material Request", filters={"docstatus": ["<", 2], "material_request_type": "Purchase", "status": ["in", ["Draft", "Pending", "Partially Ordered"]]},
-		fields=["name", "schedule_date", "transaction_date"], order_by="transaction_date asc", limit=0)
-	dispatch = frappe.get_all("Sales Order", filters={"docstatus": 1, "status": ["in", ["To Deliver and Bill", "To Deliver"]]},
-		fields=["name", "customer_name", "delivery_date", "base_net_total", "transaction_date"], order_by="delivery_date asc", limit=0)
+	# SK 1-Nov logic check B3: a requisition goes to the CEO first, to Purchase only after his OK
+	reqs = frappe.get_all("Material Request", filters={"docstatus": ["<", 2], "material_request_type": "Purchase", "status": ["in", ["Draft", "Pending", "Partially Ordered"]]},
+		fields=["name", "schedule_date", "transaction_date", "docstatus"], order_by="transaction_date asc", limit=0)
+	wait_ceo = [m for m in reqs if m.docstatus == 0]
+	reorder = [m for m in reqs if m.docstatus == 1]
 	return [
 		_stage("requests", "Requests to issue", "📋", [_late_row(m.name, _name(m.owner), None, "Material Request", m.name, m.schedule_date, 0, opened=m.transaction_date) for m in issue], go="store_requests"),
 		_stage("receive", "To receive", "🚚", [_late_row(p.supplier_name, f"due {p.schedule_date}", p.grand_total, "Purchase Order", p.name, p.schedule_date, 0, opened=p.transaction_date)
@@ -247,16 +283,17 @@ def stores(user: str) -> list[dict]:
 		_stage("issued", "Issued / moved today", "📤", [_row(m.stock_entry_type, "", m.total_outgoing_value, "Stock Entry", m.name) for m in moved], go="issue"),
 		_stage("low", "Low stock", "⚠️", [_row(r["item_name"] or r["item_code"], f"{r['warehouse']} · have {r['qty']} / level {r['level']}", None,
 			"Item", r["item_code"], "red") for r in low], go="low_stock"),
-		_stage("reorder", "Sent to Purchase", "🛒", [_late_row(m.name, str(m.schedule_date or ""), None, "Material Request", m.name, m.transaction_date, 2)
+		_stage("wait_ceo", "Waiting CEO OK", "⏳", [_late_row(m.name, str(m.schedule_date or ""), None, "Material Request", m.name, m.transaction_date, 1)
+			for m in wait_ceo], go="store_requests"),
+		_stage("reorder", "With Purchase (approved)", "🛒", [_late_row(m.name, str(m.schedule_date or ""), None, "Material Request", m.name, m.transaction_date, 2)
 			for m in reorder], go="store_requests"),
-		_stage("dispatch", "To dispatch", "🚛", [_late_row(s.customer_name, f"due {s.delivery_date}", s.base_net_total, "Sales Order", s.name, s.delivery_date, 0, opened=s.transaction_date)
-			for s in dispatch], go="dispatch"),
+		# B6: the same finished cabins as the factory's "Ready to dispatch"
+		_stage("dispatch", "To dispatch", "🚛", _ready_rows(), go="dispatch"),
 	]
 
 
 def purchase(user: str) -> list[dict]:
 	from sk_app.logins import profile_functions
-	from sk_app.purchase import po_limit
 
 	reqs = frappe.get_all("Material Request", filters={"docstatus": 1, "material_request_type": "Purchase", "status": ["in", ["Pending", "Partially Ordered"]]},
 		fields=["name", "schedule_date", "transaction_date"], order_by="transaction_date asc", limit=0)
@@ -265,18 +302,19 @@ def purchase(user: str) -> list[dict]:
 	from sk_app.store import material_pos
 
 	mat = material_pos()  # labour POs: own chain (Rushi → CEO → GRN when the job is done)
-	draft = frappe.get_all("Purchase Order", filters={"docstatus": 0, **mat}, fields=["name", "supplier_name", "grand_total", "creation"], order_by="creation asc", limit=0)
+	po_fields = ["name", "supplier_name", "grand_total", "creation"] + (["sk_needs_ceo"] if frappe.get_meta("Purchase Order").has_field("sk_needs_ceo") else [])
+	draft = frappe.get_all("Purchase Order", filters={"docstatus": 0, **mat}, fields=po_fields, order_by="creation asc", limit=0)
 	sent = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]], **mat},
 		fields=["name", "supplier_name", "grand_total", "schedule_date", "transaction_date"], order_by="schedule_date asc", limit=0)
-	got = frappe.get_all("Purchase Receipt", filters={"docstatus": ["<", 2], "posting_date": [">=", get_first_day(getdate())], **material_pos("Purchase Receipt")},
+	got = frappe.get_all("Purchase Receipt", filters={"docstatus": 1, "posting_date": [">=", get_first_day(getdate())], **material_pos("Purchase Receipt")},
 		fields=["name", "supplier_name", "grand_total", "posting_date", "per_billed"], limit=0)
 	bills = frappe.get_all("Purchase Invoice", filters={"docstatus": 0}, fields=["name", "supplier_name", "grand_total", "creation"], limit=0)
-	limit = po_limit()
 	ceo = user == "Administrator" or "Management" in profile_functions(user)
 	return [
 		_stage("requests", "Buy requests", "📋", [_late_row(m.name, f"need by {m.schedule_date}", None, "Material Request", m.name, m.transaction_date, 2) for m in reqs], go="buy_requests"),
 		_stage("rates", "Rates (30 days)", "💬", [_row(q.supplier_name, f"{q.status} · {q.transaction_date}", q.grand_total, "Supplier Quotation", q.name) for q in rfq], go="compare"),
-		_stage("approval", "PO to approve", "✅", [_late_row(p.supplier_name, "needs CEO OK" if flt(p.grand_total) > limit else "draft", p.grand_total,
+		# SK 1-Nov logic check B2: "needs CEO OK" by the same flag as the CEO's approval screen (over 10% above the approved requisition)
+		_stage("approval", "PO to approve", "✅", [_late_row(p.supplier_name, "needs CEO OK" if p.get("sk_needs_ceo") else "draft", p.grand_total,
 			"Purchase Order", p.name, p.creation, 1) for p in draft], sum(flt(p.grand_total) for p in draft), go="po_approvals" if ceo else "po_follow_up", kind="money"),
 		_stage("sent", "PO sent, to come", "📦", [_late_row(p.supplier_name, f"due {p.schedule_date}", p.grand_total, "Purchase Order", p.name, p.schedule_date, 0, opened=p.transaction_date)
 			for p in sent], sum(flt(p.grand_total) for p in sent), go="po_follow_up", kind="money"),
@@ -338,17 +376,23 @@ def hr(user: str) -> list[dict]:
 		return [_row(x.get("name") or x.get("employee"), x.get("in") or x.get("leave_type") or "", None, "Employee", x.get("employee"), c) for x in g.get(key) or []]
 
 	leave = frappe.get_all("Leave Application", filters={"status": "Open", "docstatus": 0}, fields=["name", "employee_name", "from_date", "creation"]) if _has("Leave Application") else []
-	claims = frappe.get_all("Expense Claim", filters={"approval_status": "Draft", "docstatus": 0}, fields=["name", "employee_name", "total_claimed_amount", "creation"]) if _has("Expense Claim") else []
+	from sk_app.requisition import _is_ceo
+
+	# SK 1-Nov logic check B4: every cash voucher waits for the CEO only, so the box is his (HR cannot act on it)
+	claims = frappe.get_all("Expense Claim", filters={"approval_status": "Draft", "docstatus": 0}, fields=["name", "employee_name", "total_claimed_amount", "creation"]) \
+		if _has("Expense Claim") and _is_ceo(user) else []
 	fixes = _safe(lambda: hr_mod.fix_requests(user), []) or []
-	return [
+	stages = [
 		_stage("present", "Present today", "🕘", people("present"), go="attendance"),
 		_stage("late", "Late today", "⏰", people("late", "amber"), go="attendance"),
 		_stage("absent", "No check-in yet", "❔", people("no_checkin", "red"), go="attendance"),
 		_stage("leave", "Leave to approve", "🌴", [_late_row(l.employee_name, f"from {l.from_date}", None, "Leave Application", l.name, l.creation, 1) for l in leave], go="leave_expense"),
-		_stage("claims", "Expense claims", "🧾", [_late_row(c.employee_name, "claim", c.total_claimed_amount, "Expense Claim", c.name, c.creation, 2) for c in claims],
-			sum(flt(c.total_claimed_amount) for c in claims), go="leave_expense"),
 		_stage("fixes", "Attendance fixes asked", "🔧", [_row(f.get("text") or "", str(f.get("date") or ""), None, "Employee", f.get("employee"), "amber") for f in fixes], go="attendance"),
 	]
+	if _is_ceo(user):
+		stages.insert(4, _stage("claims", "Cash vouchers to approve", "🧾", [_late_row(c.employee_name, "cash voucher", c.total_claimed_amount, "Expense Claim", c.name, c.creation, 2)
+			for c in claims], sum(flt(c.total_claimed_amount) for c in claims), go="leave_expense"))
+	return stages
 
 
 def ai(user: str) -> list[dict]:
