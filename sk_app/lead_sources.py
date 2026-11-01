@@ -33,10 +33,21 @@ LABELS = {
 }
 
 
+# portal helplines printed in every mail (JustDial "Contact Us 88888 88888"): never the buyer's mobile (SK 1-Nov)
+PORTAL_NUMBERS = {"8888888888", "9696969696", "9999999999"}
+
+
 def _clean_mobile(text: str) -> str | None:
 	for m in re.finditer(r"(?:\+?91[\s-]*)?([6-9]\d{4})[\s-]*(\d{5})", text or ""):
-		return m.group(1) + m.group(2)
+		number = m.group(1) + m.group(2)
+		if number not in PORTAL_NUMBERS and len(set(number)) > 1:
+			return number
 	return None
+
+
+# JustDial instant mail: "<b>Name</b> enquired for Portable Cabin Manufacturers. User Area : X User City : Pune ..."
+JD_ENQUIRY = re.compile(r"([A-Z][A-Za-z.' ]{1,60}?)\s+enquired for\s+([^.\n]{2,120})")
+JD_FIELD = r"{}\s*:\s*(.+?)(?=\s+(?:User Area|User City|User State|Search Date)\b|\s+View Contact|\n|$)"
 
 
 def source_of(sender: str | None, subject: str | None = None) -> str | None:
@@ -79,6 +90,21 @@ def parse_mail(subject: str | None, body: str | None, source: str | None = None)
 		"city": found.get("city"),
 		"requirement": found.get("requirement") or (subject or "").strip(),
 	}
+	if source == "JustDial" and not out["mobile_no"]:
+		m = JD_ENQUIRY.search(text)
+		if m:
+			# SK 1-Nov: each JustDial enquiry is its own lead; the buyer's mobile is behind "View Contact Details"
+			out["first_name"] = out["first_name"] or m.group(1).strip()[:80]
+			out["requirement"] = m.group(2).strip()
+			for field, label in (("city", "User City"), ("area", "User Area")):
+				f = re.search(JD_FIELD.format(label), text)
+				if f:
+					out[field] = f.group(1).strip()[:80]
+			if out.get("area") and out.get("city"):
+				out["city"] = f"{out.pop('area')}, {out['city']}"
+			out.pop("area", None)
+			out["enquiry"] = True
+			out["note"] = "JustDial gives the mobile number only in JustDial: open the mail, tap View Contact Details."
 	if source == "GeM":
 		bid = re.search(r"GEM/\d{4}/[A-Z]/\d+", text + " " + (subject or ""), re.I)
 		out["first_name"] = out["first_name"] or (f"GeM bid {bid.group(0)}" if bid else "GeM bid")
@@ -132,9 +158,16 @@ def _ensure_source(name: str | None):
 		frappe.get_doc({"doctype": "CRM Lead Source", "source_name": name}).insert(ignore_permissions=True)
 
 
-def find_duplicate(mobile: str | None, email: str | None = None) -> str | None:
-	"""A lead from the same mobile (or e-mail) in the last 90 days."""
+def find_duplicate(mobile: str | None, email: str | None = None, name: str | None = None, source: str | None = None) -> str | None:
+	"""A lead from the same mobile (or e-mail) in the last 90 days; with neither, the same name from the same portal."""
 	since = add_days(now_datetime(), -DUPLICATE_DAYS)
+	if not mobile and not email:
+		from sk_app.gate_rules import is_placeholder_name
+
+		if not name or not source or is_placeholder_name(name):
+			return None
+		return frappe.db.get_value("CRM Lead", {"first_name": name, "source": source, "creation": [">=", since]}, "name",
+			order_by="creation desc")
 	for field, value in (("mobile_no", mobile), ("email", email)):
 		if value:
 			like = f"%{value[-10:]}" if field == "mobile_no" else value
@@ -152,8 +185,9 @@ def make_lead(data: dict, source: str | None, owner: str | None = None, note: st
 	from sk_app.segments import sub_of
 
 	segment = sub_of(data.get("segment")) or segment_of(text)
-	requirement = "\n".join(p for p in (data.get("requirement"), data.get("city") and f"City: {data['city']}", note) if p)
-	old = find_duplicate(data.get("mobile_no"), data.get("email"))
+	requirement = "\n".join(p for p in (data.get("requirement"), data.get("city") and f"City: {data['city']}", data.get("note"), note)
+		if p)
+	old = find_duplicate(data.get("mobile_no"), data.get("email"), data.get("first_name"), source)
 	if old:
 		frappe.get_doc({"doctype": "FCRM Note", "title": f"Again from {source or 'mail'}"[:80], "content": requirement or text,
 			"reference_doctype": "CRM Lead", "reference_docname": old}).insert(ignore_permissions=True)

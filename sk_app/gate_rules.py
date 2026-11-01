@@ -66,6 +66,8 @@ def is_portal_enquiry(data: dict, subject=None) -> bool:
 		return False
 	if mobile_ok(data.get("mobile_no")):
 		return True
+	if data.get("enquiry") and not is_placeholder_name(data.get("first_name")):
+		return True  # JustDial "<name> enquired for ...": a real buyer, mobile only in JustDial
 	return not blank(data.get("email")) and not (is_placeholder_name(data.get("first_name")) and is_placeholder_name(data.get("organization")))
 
 
