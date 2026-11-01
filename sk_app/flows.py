@@ -332,7 +332,10 @@ def quality(user: str) -> list[dict]:
 		ncs = frappe.get_all("Non Conformance", filters={"status": "Open"}, fields=["name", "subject", "creation"], order_by="creation asc", limit=0)
 		stages.append(_stage("nc", "Problems to fix", "❗", [_late_row(n.subject, "Non Conformance", None, "Non Conformance", n.name, n.creation, 7) for n in ncs], go="non_conformance"))
 	if _has("Issue"):
-		issues = frappe.get_all("Issue", filters={"status": ["in", ["Open", "Replied"]]}, fields=["name", "subject", "customer", "opening_date"], limit=0)
+		# SK 1-Nov: staff Problem / Question / Suggestion (Help desk, Issue.sk_kind) are not customer complaints
+		only_customer = {"sk_kind": ["is", "not set"]} if frappe.db.has_column("Issue", "sk_kind") else {}
+		issues = frappe.get_all("Issue", filters={"status": ["in", ["Open", "Replied"]], **only_customer},
+			fields=["name", "subject", "customer", "opening_date"], limit=0)
 		stages.append(_stage("complaints", "Customer complaints", "🛠️", [_late_row(i.subject, i.customer or "", None, "Issue", i.name, i.opening_date, 3) for i in issues], go="complaints"))
 	return stages
 
