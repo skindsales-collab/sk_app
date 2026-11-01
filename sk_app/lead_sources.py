@@ -195,6 +195,12 @@ def scan(since=None) -> dict:
 			continue
 		try:
 			data = parse_mail(r.subject, r.text_content or r.content, source)
+			from sk_app.gate_rules import is_portal_enquiry
+
+			if not is_portal_enquiry(data, r.subject):
+				# a portal notice (BuyLeads allocated, weekly performance, feedback ...): no buyer, so no lead
+				frappe.db.set_value("Communication", r.name, "sk_mail_status", "Not a lead", update_modified=False)
+				continue
 			res = make_lead(data, source)
 			frappe.db.set_value("Communication", r.name, {"reference_doctype": "CRM Lead", "reference_name": res["lead"],
 				"sk_mail_status": "Lead made"}, update_modified=False)

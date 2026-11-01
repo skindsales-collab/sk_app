@@ -30,7 +30,7 @@ sunil@kulkarniinfra.com`);
 
 test("nothing readable gives empty fields, no crash", () => {
 	const r = parseCard("~~ ## ..\n\n");
-	assert.deepStrictEqual(r, { first_name: "", organization: "", mobile_no: "", email: "", requirement: "", source: "", segment: "", invoice: null });
+	assert.deepStrictEqual(r, { first_name: "", organization: "", mobile_no: "", email: "", requirement: "", source: "", segment: "", invoice: null, person: null });
 });
 
 test("two mobiles on one line takes the first mobile", () => {
@@ -108,7 +108,7 @@ Mob: 98220 99887`);
 	assert.strictEqual(r.invoice.number, "MST/245/26-27");
 	assert.strictEqual(r.invoice.date, "18/10/2026");
 	assert.match(r.invoice.gstin, /27AABCM1234F1Z5/);
-	assert.match(r.invoice.gstin, /27AAKCS5678P1ZQ/);
+	assert.doesNotMatch(r.invoice.gstin, /27AAKCS5678P1ZQ/);  // the buyer's (our own) GSTIN is never taken as the seller's
 	assert.strictEqual(r.invoice.total, "125906.00");
 	assert.strictEqual(r.invoice.items.length, 2);
 	assert.match(r.requirement, /^Invoice · No MST\/245\/26-27 · Date 18\/10\/2026/);

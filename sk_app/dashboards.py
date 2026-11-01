@@ -308,7 +308,9 @@ def _not_contacted():
 	"""Leads more than a day old that nobody has called / written yet."""
 	if not _has("CRM Lead"):
 		return []
-	closed = frappe.get_all("CRM Lead Status", filters={"type": ["in", ["Won", "Lost", "Junk"]]}, pluck="name")
+	from sk_app.lead_status import closed_lead_statuses
+
+	closed = closed_lead_statuses()
 	from sk_app.cold_calls import not_cold
 
 	return frappe.get_all("CRM Lead", filters={"first_responded_on": ["is", "not set"], "status": ["not in", closed or [""]],

@@ -17,6 +17,25 @@ MOVE = {"Contacted": "New", "Nurture": "Qualified", "Unqualified": "Junk Lead", 
 DEAL_WORDS = [("Negotiations", ("negotiat", "ready to close")), ("Quotation", ("quot", "proposal")), ("Drawing", ("draw", "demo", "making"))]
 
 
+CLOSED_WORDS = ("won", "junk", "lost", "loss", "converted", "unqualified")
+
+
+def is_closed(name: str | None, typ: str | None = None) -> bool:
+	"""SK's flow decides first: Qualified is open work even where old Frappe CRM gave it type Won, and Junk Lead is
+	closed even though the CRM has no 'Junk' type (it was saved as Open). Other statuses: by type, or by their name."""
+	flow = {n: t for n, t, _c in FLOW}
+	if name in flow:
+		return flow[name] in ("Won", "Lost", "Junk")
+	return typ in ("Won", "Lost", "Junk") or any(w in (name or "").lower() for w in CLOSED_WORDS)
+
+
+def closed_lead_statuses() -> list[str]:
+	"""Lead statuses that are not open work (Deal Won, Junk Lead, Deal Loss and old Converted / Unqualified / Junk)."""
+	if not frappe.db.exists("DocType", "CRM Lead Status"):
+		return []
+	return [r.name for r in frappe.get_all("CRM Lead Status", fields=["name", "type"]) if is_closed(r.name, r.type)]
+
+
 def step_of(status: str | None, deal: bool = False) -> str:
 	if status in STEPS:
 		return status
@@ -37,8 +56,8 @@ def ensure_statuses():
 		if not frappe.db.exists("CRM Lead Status", name):
 			doc = frappe.new_doc("CRM Lead Status")
 			doc.lead_status = name
-			if df and typ in types:
-				doc.type = typ
+			if df and (typ in types or (typ == "Junk" and "Lost" in types)):
+				doc.type = typ if typ in types else "Lost"
 			cf = meta.get_field("color")
 			if cf and (cf.fieldtype != "Select" or colour in (cf.options or "").split("\n")):
 				doc.color = colour
@@ -48,8 +67,12 @@ def ensure_statuses():
 			except Exception:
 				frappe.log_error(f"SK lead status {name}")  # never stop a deploy for this
 				continue
-		elif meta.get_field("position"):
-			frappe.db.set_value("CRM Lead Status", name, "position", pos, update_modified=False)
+		else:
+			want = typ if typ in types else ("Lost" if typ == "Junk" and "Lost" in types else None)
+			if df and want and frappe.db.get_value("CRM Lead Status", name, "type") != want:
+				frappe.db.set_value("CRM Lead Status", name, "type", want, update_modified=False)
+			if meta.get_field("position"):
+				frappe.db.set_value("CRM Lead Status", name, "position", pos, update_modified=False)
 	for old, new in MOVE.items():
 		if frappe.db.exists("CRM Lead Status", new):
 			frappe.db.sql("update `tabCRM Lead` set status = %s where status = %s", (new, old))

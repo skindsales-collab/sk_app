@@ -51,6 +51,24 @@ def is_placeholder_name(name) -> bool:
 	return all(w in filler for w in words)
 
 
+# portal mails that are not a buyer's enquiry (SK 1-Nov "check proper data update": 70+ empty "Enquiry" leads came
+# from IndiaMART / JustDial notices such as "10 BuyLeads allocated", "Confirmed ... Deal?", "performed last week")
+NOTICE_WORDS = ("allocated", "performed", "performance", "feedback", "deal ?", "deal?", "subscription", "renew", "payment",
+	"invoice", "webinar", "newsletter", "tips", "offer for you", "your listing", "your catalog", "rating", "review", "otp",
+	"password", "account", "verify", "statement", "report", "last week", "this week", "congratulations", "welcome")
+
+
+def is_portal_enquiry(data: dict, subject=None) -> bool:
+	"""True when a portal mail is a real buyer enquiry: it has the buyer's mobile, or a real name and e-mail, and the
+	subject is not a portal notice. Anything else is marked 'Not a lead' instead of becoming an empty lead."""
+	subj = str(subject or "").lower()
+	if any(w in subj for w in NOTICE_WORDS):
+		return False
+	if mobile_ok(data.get("mobile_no")):
+		return True
+	return not blank(data.get("email")) and not (is_placeholder_name(data.get("first_name")) and is_placeholder_name(data.get("organization")))
+
+
 def mobile_ok(v) -> bool:
 	digits = re.sub(r"\D", "", str(v or ""))
 	return len(digits) >= 10

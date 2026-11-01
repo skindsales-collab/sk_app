@@ -4,10 +4,10 @@ import frappe
 from frappe.utils import add_to_date, get_datetime, getdate
 
 from sk_app.cold_calls import not_cold
+from sk_app.lead_status import is_closed  # SK flow: Qualified is open work, Junk Lead is closed
 from sk_app.logic import WorkItem
 
 OPEN_TASK_STATUSES = ["Open", "Working", "Overdue", "Pending Review"]
-CLOSED_LEAD_TYPES = ["Won", "Lost", "Junk"]
 
 
 def open_tasks(user: str) -> list[WorkItem]:
@@ -82,7 +82,7 @@ def open_leads(user: str) -> list[WorkItem]:
 	)
 	items = []
 	for r in rows:
-		if types.get(r.status) in CLOSED_LEAD_TYPES:
+		if is_closed(r.status, types.get(r.status)):
 			continue
 		title = _label("CRM Lead", r.name)
 		if not r.first_responded_on:

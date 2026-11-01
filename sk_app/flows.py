@@ -87,7 +87,7 @@ def sales(user: str, segment=None, only_self=False) -> list[dict]:
 	# SK 27-Oct: arrows follow his steps New → Qualified → Drawing → Quotation → Negotiations (→ won = orders)
 	by = {step: [] for step in lead_status.STEPS}
 	if _has("CRM Lead"):
-		closed = frappe.get_all("CRM Lead Status", filters={"type": ["in", ["Won", "Lost", "Junk"]]}, pluck="name")
+		closed = lead_status.closed_lead_statuses()
 		from sk_app.cold_calls import not_cold
 
 		leads = frappe.get_all("CRM Lead", filters={"converted": 0, "status": ["not in", closed or [""]], **seg, **_in("lead_owner", owners), **not_cold()},
