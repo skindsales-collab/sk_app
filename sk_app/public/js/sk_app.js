@@ -1701,12 +1701,15 @@
 			ownPart = row(x.main || x.tiles, "sk-own");
 			middle = flowPart + ownPart;
 		} else {
-			// several functions: one big icon per function (level 2 = its page with its flow)
+			// several functions: the main function's 3D arrows stay on Home (SK 1-Nov "why arrow is gone from Aditya & Aarti":
+			// adding a second function took them away), then one big icon per function (level 2 = its page with its flow)
+			flowPart = `<div class="sk-flowbox sk-f3" data-fn="${esc(sects[0].function)}" data-mode="3d">${flow3dHtml(sects[0].function)}</div>`;
 			middle = `<div class="sk-tiles small sk-fns sk-own">${sects.map((x) => {
 				const red = (x.tiles || []).reduce((n, k) => n + redCount(badge[k]), 0);
 				return `<button class="sk-tile ${red ? "c-red" : ""}" data-fnpage="${esc(x.function)}"><span class="sk-tile-icon">${FN_ICON[x.function] || "📁"}</span><span>${esc(fnLabel(x.label))}</span>${red ? `<b class="sk-dot red">${red}</b>` : ""}</button>`;
 			}).join("")}</div>`;
 			ownPart = middle;
+			middle = flowPart + ownPart;
 		}
 		if (isPc()) {
 			// SK 1-Nov "make as per pdf": PC Home = two columns with fixed shares that end on one line and fit one screen
