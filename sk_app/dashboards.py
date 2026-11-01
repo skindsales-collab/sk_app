@@ -653,7 +653,8 @@ def _manufacturing(start, end, ps, pe, segment):
 	for j in jobs:
 		load[j.workstation or "Not set"] = load.get(j.workstation or "Not set", 0) + 1
 	# SK 1-Nov logic check C4: finished in the month = its end date, not the last edit
-	done = frappe.db.count("Work Order", {"status": "Completed", "actual_end_date": ["between", [f"{start} 00:00:00", f"{end} 23:59:59"]]})
+	done = sum(1 for w in frappe.get_all("Work Order", filters={"status": "Completed", "modified": [">=", f"{start} 00:00:00"]},
+		fields=["actual_end_date", "modified"], limit=0) if getdate(start) <= getdate(w.actual_end_date or w.modified) <= getdate(end))
 	return [
 		_safe(lambda: _count_chart("wo_chart", "Cabins / jobs finished", "Work Order", "actual_end_date", {"status": "Completed"})),
 		_safe(lambda: _count_chart("dn_chart", "Dispatches", "Delivery Note", "posting_date", {"docstatus": 1})),

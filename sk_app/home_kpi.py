@@ -513,9 +513,12 @@ def subcontractor(user: str) -> dict:
 	def value(start, end):
 		if not ws:
 			return None
-		# SK 1-Nov logic check C4: counted in the month the job was finished, not the month it was last edited
-		field = "actual_end_date" if frappe.get_meta("Job Card").has_field("actual_end_date") else "modified"
-		return frappe.db.count("Job Card", {"workstation": ws, "status": "Completed", field: ["between", [f"{start} 00:00:00", f"{end} 23:59:59"]]}) or None
+		# SK 1-Nov logic check C4: counted in the month the job was finished; most job cards have no end time (no time
+		# log), so those count by their last change, as before (regression check 1-Nov: the graph fell to 0)
+		has_end = frappe.get_meta("Job Card").has_field("actual_end_date")
+		rows = frappe.get_all("Job Card", filters={"workstation": ws, "status": "Completed", "modified": [">=", f"{start} 00:00:00"]},
+			fields=["modified"] + (["actual_end_date"] if has_end else []), limit=0)
+		return sum(1 for j in rows if getdate(start) <= getdate(j.get("actual_end_date") or j.modified) <= getdate(end)) or None
 	return _trend("Subcontractor", "Jobs finished", "", TARGETS["Subcontractor"], value, need="Mark your jobs done with a photo.", count=True)
 
 
