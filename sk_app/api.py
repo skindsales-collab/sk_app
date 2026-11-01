@@ -1029,7 +1029,7 @@ def store_similar(name):
 
 
 @frappe.whitelist(methods=["POST"])
-def store_new_item(item_name, item_group, uom, warehouse=None, photo=None):
+def store_new_item(item_name, item_group=None, uom=None, warehouse=None, photo=None):
 	return store.new_item(_me().user, item_name, item_group, uom, warehouse, photo)
 
 

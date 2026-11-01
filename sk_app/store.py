@@ -543,11 +543,18 @@ def similar_items(user: str, name: str) -> list[dict]:
 	return sorted(rows, key=score, reverse=True)[:5]
 
 
-def new_item(user: str, item_name: str, item_group: str, uom: str, warehouse=None, photo=None) -> dict:
+def new_item(user: str, item_name: str, item_group: str | None = None, uom: str | None = None, warehouse=None, photo=None) -> dict:
 	"""Item made from a photo + voice; kept disabled until the owner (Samir / Store owner) enables it, so no duplicates
-	slip into use."""
+	slip into use. SK 1-Nov minimum input: group and unit come from similar items when not given."""
 	need(user, STORE, "Purchase")
 	item_name = (item_name or "").strip()
+	if item_name and (not item_group or not uom):
+		from sk_app.auto_fill import guess_item_defaults
+
+		guess = guess_item_defaults(item_name, frappe.get_all("Item", filters={"disabled": 0}, fields=["item_name", "item_group", "stock_uom"],
+			limit_page_length=5000, as_list=True))
+		item_group = item_group or (guess["item_group"] if guess["item_group"] and frappe.db.exists("Item Group", guess["item_group"]) else None)
+		uom = uom or (guess["uom"] if guess["uom"] and frappe.db.exists("UOM", guess["uom"]) else ("Nos" if frappe.db.exists("UOM", "Nos") else None))
 	if not item_name or not item_group or not uom:
 		frappe.throw(_("Please give the name, group and unit"))
 	if frappe.db.exists("Item", {"item_name": item_name}):

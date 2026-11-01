@@ -946,9 +946,9 @@
 		ex_no_bill_tag: "बिल नाही", lv_approve: "✓ मंजूर", lv_reject: "✗ नामंजूर", ex_posted: "मंजूर: अकाउंट्स पैसे देईल",
 		no_employee: "तुमचे लॉगिन अजून ERPNext कर्मचाऱ्याशी जोडलेले नाही. कृपया HR ला सांगा." });
 	Object.assign(T.English, { k_trend: "Trend", k_rising: "rising", k_falling: "falling", k_actual: "Actual", k_met: "Target met", k_missed: "Missed",
-		fl_late: "late", d_fix: "Fix", d_plan: "Plan", d_open: "Open", md_next: "next", md_late: "Late", md_today: "Today" });
+		auto_blank: "leave blank: app fills", auto_gstin: "from GSTIN if blank", fl_late: "late", d_fix: "Fix", d_plan: "Plan", d_open: "Open", md_next: "next", md_late: "Late", md_today: "Today" });
 	Object.assign(T.Marathi, { k_trend: "कल", k_rising: "वाढत आहे", k_falling: "कमी होत आहे", k_actual: "प्रत्यक्ष", k_met: "लक्ष्य पूर्ण", k_missed: "लक्ष्य चुकले",
-		fl_late: "उशीर", d_fix: "पूर्ण करा", d_plan: "नियोजन", d_open: "उघडा", md_next: "पुढील", md_late: "उशीर", md_today: "आज" });
+		auto_blank: "रिकामे ठेवा: ॲप भरेल", auto_gstin: "रिकामे असल्यास GSTIN वरून", fl_late: "उशीर", d_fix: "पूर्ण करा", d_plan: "नियोजन", d_open: "उघडा", md_next: "पुढील", md_late: "उशीर", md_today: "आज" });
 	Object.assign(T.English, { send_design: "Send to design (AI drawing)", design_sent: "Sent to design as deal", design_not_sent: "Not sent to design:" });
 	Object.assign(T.Marathi, { send_design: "डिझाईनला पाठवा (AI ड्रॉइंग)", design_sent: "डिझाईनला डील म्हणून पाठवले", design_not_sent: "डिझाईनला पाठवले नाही:" });
 	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";
@@ -2760,7 +2760,7 @@
 			<div ${want("gstin") ? "" : "hidden"}>${formField("gc-gstin", t("g_gstin"))}
 			<label class="sk-check"><input id="gc-unreg" type="checkbox"> ${t("g_unreg")}</label>${formField("gc-why", t("g_unreg_why"))}</div>
 			<div ${want("address") ? "" : "hidden"}>${formField("gc-addr", t("g_addr"), true)}${formField("gc-city", t("g_city"))}
-			<label class="sk-field"><span>${t("g_state")}</span><select id="gc-state" class="sk-select"><option value=""></option>${GST_STATES.map((x) => `<option>${esc(x)}</option>`).join("")}</select></label>
+			<label class="sk-field"><span>${t("g_state")} <small>(${t("auto_gstin")})</small></span><select id="gc-state" class="sk-select"><option value=""></option>${GST_STATES.map((x) => `<option>${esc(x)}</option>`).join("")}</select></label>
 			<label class="sk-field"><span>${t("g_pin")}</span><div class="sk-input-row"><input id="gc-pin" type="tel" maxlength="6"></div></label></div>
 			<div ${want("mobile_no") ? "" : "hidden"}><label class="sk-field"><span>${t("g_cmobile")}</span><div class="sk-input-row"><input id="gc-mobile" type="tel" value="${esc(mob)}"></div></label></div>
 			<button class="sk-btn go wide" data-act="gate-customer" data-deal="${esc(d.deal)}">${t("g_save")}</button></div>`;
@@ -4477,7 +4477,7 @@
 	async function renderNewItem() {
 		const o = await call("store_item_options");
 		root.innerHTML = header(t("new_item")) + `<main class="sk-form">${photoField("n-photo", "📷 " + t("item_photo"))}${formField("n-name", t("item_name"))}
-			<div id="n-similar"></div>${pick("n-group", t("group"), o.groups)}${pick("n-uom", t("unit"), o.uoms)}${pick("n-wh", t("store_name"), o.warehouses)}
+			<div id="n-similar"></div>${pick("n-group", `${t("group")} (${t("auto_blank")})`, o.groups)}${pick("n-uom", `${t("unit")} (${t("auto_blank")})`, o.uoms)}${pick("n-wh", t("store_name"), o.warehouses)}
 			<button class="sk-btn go wide" data-act="st-new-item">${t("send_approval")}</button></main>`;
 		document.getElementById("n-name").addEventListener("change", async () => {
 			const rows = await call("store_similar", { name: val("n-name") });
@@ -6479,7 +6479,7 @@
 				const shown = (id) => !document.getElementById(id).closest("[hidden]");
 				if (!mustFill([["gc-gstin", t("g_gstin"), !shown("gc-gstin") || unreg || /^[0-9]{2}[A-Z0-9]{10}[0-9A-Z]{3}$/.test(val("gc-gstin").toUpperCase())],
 					["gc-why", t("g_unreg_why"), !shown("gc-why") || !unreg || !!val("gc-why")], ["gc-addr", t("g_addr"), !shown("gc-addr") || !!val("gc-addr")],
-					["gc-state", t("g_state"), !shown("gc-state") || !!val("gc-state")],
+					["gc-state", t("g_state"), !shown("gc-state") || !!val("gc-state") || (!unreg && /^[0-9]{2}[A-Z0-9]{10}[0-9A-Z]{3}$/.test(val("gc-gstin").toUpperCase()))],
 					["gc-pin", t("g_pin"), !shown("gc-pin") || /^\d{6}$/.test(val("gc-pin"))], ["gc-mobile", t("g_cmobile"), !shown("gc-mobile") || val("gc-mobile").replace(/\D/g, "").length >= 10]])) return;
 				el.disabled = true;
 				try {
