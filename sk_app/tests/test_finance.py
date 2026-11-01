@@ -3,7 +3,7 @@ from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, flt, nowdate
 
 from sk_app import finance
-from sk_app.tests.test_store_purchase import BOSS, CUSTOMER, RAW, SUPPLIER, TestStorePurchase, app_user, run
+from sk_app.tests.test_store_purchase import BOSS, CUSTOMER, RAW, SUPPLIER, TestStorePurchase, app_user, run, submit_ungated
 
 ACC = "sk_test_shraddha@example.com"
 SALES = "sk_test_fin_rep@example.com"
@@ -24,7 +24,7 @@ class TestFinance(IntegrationTestCase):
 			"set_posting_time": 1, "due_date": due or nowdate(), "items": [{"item_code": RAW, "qty": 1, "rate": rate}]})
 		si.flags.ignore_permissions = True
 		si.insert()
-		si.submit()
+		submit_ungated(si)
 		return si
 
 	def _bill(self, rate):
@@ -69,13 +69,17 @@ class TestFinance(IntegrationTestCase):
 		dn = frappe.get_doc({"doctype": "Delivery Note", "customer": CUSTOMER, "company": self.company, "posting_date": nowdate(),
 			"items": [{"item_code": RAW, "qty": 1, "rate": 900, "warehouse": TestStorePurchase.stores}]})
 		dn.insert()
-		dn.submit()
+		submit_ungated(dn)
 		self.assertIn(dn.name, [d["name"] for d in run(ACC, finance.invoices)["to_bill"]])
 		r = run(ACC, finance.make_invoice, dn.name)
 		si = frappe.get_doc("Sales Invoice", r["name"])
 		self.assertEqual(si.items[0].delivery_note, dn.name)
 		self.assertIn(si.name, [d["name"] for d in run(ACC, finance.invoices)["drafts"]])
-		p = run(ACC, finance.post, "Sales Invoice", si.name)
+		frappe.flags.sk_no_gate = True  # the test customer has no GSTIN / address; gates.py has its own tests
+		try:
+			p = run(ACC, finance.post, "Sales Invoice", si.name)
+		finally:
+			frappe.flags.sk_no_gate = False
 		self.assertTrue(p["posted"], p.get("reason"))
 		self.assertNotIn(dn.name, [d["name"] for d in run(ACC, finance.invoices)["to_bill"]])
 

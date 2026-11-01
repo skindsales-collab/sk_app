@@ -46,7 +46,7 @@ class TestRequisition(IntegrationTestCase):
 		self.assertTrue(run(STORE_U, store.post_receipt, pr["name"])["posted"])
 
 	def test_po_far_above_approved_value_goes_back_to_ceo(self):
-		r = run(STORE_U, requisition.raise_request, [{"item_code": RAW, "qty": 2}], "Planned")
+		r = run(STORE_U, requisition.raise_request, [{"item_code": RAW, "qty": 2}], "Planned", note="test")
 		run(BOSS, requisition.decide, r["name"], 1)
 		est = flt(frappe.db.get_value("Material Request Item", {"parent": r["name"]}, "rate")) or 100
 		po = run(BUY_U, requisition.po_from_request, r["name"], SUPPLIER, {RAW: est * 2 + 50})

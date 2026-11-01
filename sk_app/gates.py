@@ -160,7 +160,8 @@ def _billing(customer: str) -> dict | None:
 	addr = frappe.db.get_value("Customer", customer, "customer_primary_address")
 	if not addr:
 		addr = frappe.db.get_value("Dynamic Link", {"link_doctype": "Customer", "link_name": customer, "parenttype": "Address"}, "parent")
-	return frappe.db.get_value("Address", addr, ["name", "state", "pincode", "gstin"], as_dict=True) if addr else None
+	fields = ["name", "state", "pincode"] + (["gstin"] if frappe.db.has_column("Address", "gstin") else [])
+	return frappe.db.get_value("Address", addr, fields, as_dict=True) if addr else None
 
 
 def customer_data(customer: str) -> dict:

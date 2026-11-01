@@ -42,6 +42,12 @@ class TestHr(IntegrationTestCase):
 		cls.staff = employee("SKTestRanjit", "9876511111", STAFF, reports_to=cls.boss)
 		cls.other = employee("SKTestBabu", None)
 		cls.d1, cls.d2 = add_days(nowdate(), -2), add_days(nowdate(), -1)
+		for emp in (cls.staff, cls.other):  # a run on an earlier day leaves attendance on these dates
+			for a in frappe.get_all("Attendance", filters={"employee": emp, "attendance_date": [">=", cls.d1]}, fields=["name", "docstatus"]):
+				if a.docstatus == 1:
+					frappe.get_doc("Attendance", a.name).cancel()
+				frappe.delete_doc("Attendance", a.name, force=True, ignore_permissions=True)
+			frappe.db.delete("Employee Checkin", {"employee": emp, "time": [">=", cls.d1]})
 		csv = "\n".join([
 			"Basic Report — test,,,,,,,,,",
 			"Date,Day,Emp ID,Name,Mobile No.,In Time,Out Time,Total Work,Overtime Duration,Status",
@@ -77,7 +83,7 @@ class TestHr(IntegrationTestCase):
 		day = run(HR_U, hr.today, self.d2)
 		self.assertIn(self.staff, [x["employee"] for x in day["groups"]["late"]])
 		m = {x["employee"]: x for x in run(HR_U, hr.month, self.d2)["rows"]}
-		self.assertGreaterEqual(m[self.staff]["present"], 2)
+		self.assertGreaterEqual(m[self.staff]["present"] + m[self.staff]["half_day"], 2)  # test_fix_request may make d1 a half day
 		self.assertIn(getdate(self.d2).day, m[self.staff]["late_days"])
 		with self.assertRaises(frappe.PermissionError):
 			run(STAFF, hr.today)

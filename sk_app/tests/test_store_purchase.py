@@ -26,6 +26,15 @@ def app_user(email, home, roles):
 		frappe.get_doc({"doctype": "SK App User", "user": email, "home": home}).insert(ignore_permissions=True)
 
 
+def submit_ungated(doc):
+	"""Submit a fixture document past the data gates (gates.py has its own tests); used by flow tests."""
+	frappe.flags.sk_no_gate = True
+	try:
+		doc.submit()
+	finally:
+		frappe.flags.sk_no_gate = False
+
+
 def run(user, fn, *args, **kw):
 	"""Call a screen function the way the phone does: logged in as that person."""
 	with set_user(user):
@@ -107,7 +116,7 @@ class TestStorePurchase(IntegrationTestCase):
 			item.save()
 
 	def _approved(self, qty=10):
-		r = run(STORE_U, requisition.raise_request, [{"item_code": RAW, "qty": qty}], "Planned")
+		r = run(STORE_U, requisition.raise_request, [{"item_code": RAW, "qty": qty}], "Planned", note="test")
 		run(BOSS, requisition.decide, r["name"], 1)
 		return r["name"]
 
@@ -157,7 +166,7 @@ class TestStorePurchase(IntegrationTestCase):
 		so = frappe.get_doc({"doctype": "Sales Order", "customer": CUSTOMER, "company": self.company, "delivery_date": add_days(nowdate(), 1),
 			"items": [{"item_code": FG, "qty": 1, "rate": 900000, "warehouse": self.fgw, "delivery_date": add_days(nowdate(), 1)}]})
 		so.insert()
-		so.submit()
+		submit_ungated(so)
 		self.assertTrue(any(o.name == so.name for o in run(STORE_U, store.orders_to_dispatch)))
 		r = run(STORE_U, store.dispatch, so.name, vehicle_no="mh 46 ab 1234", driver_mobile="9876500001")
 		dn = frappe.get_doc("Delivery Note", r["name"])
@@ -171,7 +180,7 @@ class TestStorePurchase(IntegrationTestCase):
 		so = frappe.get_doc({"doctype": "Sales Order", "customer": CUSTOMER, "company": self.company, "delivery_date": add_days(nowdate(), 5),
 			"items": [{"item_code": FG, "qty": 2, "rate": 500000, "warehouse": self.fgw, "delivery_date": add_days(nowdate(), 5)}]})
 		so.insert()
-		so.submit()
+		submit_ungated(so)
 		rows = [r for r in run(BOSS, erp_flow.orders_to_plan) if r["sales_order"] == so.name]
 		self.assertEqual(len(rows), 1)
 		self.assertTrue(rows[0]["bom"])

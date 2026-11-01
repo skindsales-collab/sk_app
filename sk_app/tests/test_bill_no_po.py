@@ -21,7 +21,8 @@ class TestBillNoPo(IntegrationTestCase):
 
 	def _receipt(self, qty, rate=120, bill_no=None):
 		"""Material came without PO → urgent requisition → CEO → PO → received against it."""
-		r = run(STORE_U, requisition.raise_request, [{"item_code": RAW, "qty": qty}], without_po=1, supplier=SUPPLIER, bill_no=bill_no)
+		r = run(STORE_U, requisition.raise_request, [{"item_code": RAW, "qty": qty}], without_po=1, supplier=SUPPLIER, bill_no=bill_no,
+			note="came without PO")
 		run(BOSS, requisition.decide, r["name"], 1)
 		po = run(BUY_U, requisition.po_from_request, r["name"], SUPPLIER, {RAW: rate})
 		if po["needs_approval"]:
