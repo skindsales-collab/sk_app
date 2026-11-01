@@ -11,7 +11,7 @@ from sk_app.tests.test_change_list_a import _app_user
 
 STAFF = "sk_test_fp_staff@example.com"
 CEO = "sk_test_fp_ceo@example.com"
-MOBILE = "9876500011"
+MOBILE = "9876500022"
 
 
 class TestForgotPin(IntegrationTestCase):

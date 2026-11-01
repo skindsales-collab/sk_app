@@ -1,6 +1,7 @@
 """Endpoints used by the SK App phone screens. Every call works on the logged-in ERPNext user only."""
 
 import json
+from contextlib import contextmanager
 
 import frappe
 from frappe import _
@@ -349,6 +350,26 @@ def new_lead(first_name, mobile_no=None, organization=None, email=None, source=N
 	return crm.new_lead(_me().user, first_name, mobile_no, organization, email, source, segment, requirement, photo, product, status)
 
 
+@contextmanager
+def _quote_log(what, ref):
+	"""SK 1-Nov: a quote that cannot be made leaves its reason in ERPNext (Error Log), so the cause is seen next time.
+	The person still gets the plain message on the phone."""
+	try:
+		yield
+	except Exception as e:
+		frappe.log_error(f"SK App {what} failed: {ref or ''} ({frappe.session.user})"[:140], frappe.get_traceback() + "\n\n" + str(e))
+		raise
+
+
+@frappe.whitelist(methods=["POST"])
+def lead_route(name):
+	"""SK 1-Nov minimum input: after Save the lead goes for its quote by itself (rate-card quote / design / quote AI)."""
+	from sk_app import quote_pickup
+
+	with _quote_log("lead routing", name):
+		return quote_pickup.route_lead(_me().user, name)
+
+
 @frappe.whitelist(methods=["POST"])
 def lead_to_design(name):
 	"""New Lead "Send to design" switch: the lead becomes a deal that the AI design pickup reads."""
@@ -369,6 +390,14 @@ def add_crm_note(doctype, name, text=None, photo=None):
 @frappe.whitelist(methods=["POST"])
 def log_contact(doctype, name, channel, outcome=None, text=None, photo=None, duration=None):
 	return crm.log_contact(_me().user, doctype, name, channel, outcome, text, photo, cint(duration))
+
+
+@frappe.whitelist(methods=["POST"])
+def read_doc_photo(file_url, kind):
+	"""SK 1-Nov minimum input: Claude reads a bill (cash voucher) or customer PO photo into its form. Empty when off."""
+	profile = _me()
+	content, media = crm.own_file_content(profile.user, file_url)
+	return claude.read_doc_photo(kind, content, media) or {}
 
 
 @frappe.whitelist(methods=["POST"])
@@ -1029,7 +1058,7 @@ def store_similar(name):
 
 
 @frappe.whitelist(methods=["POST"])
-def store_new_item(item_name, item_group, uom, warehouse=None, photo=None):
+def store_new_item(item_name, item_group=None, uom=None, warehouse=None, photo=None):
 	return store.new_item(_me().user, item_name, item_group, uom, warehouse, photo)
 
 
@@ -1882,7 +1911,8 @@ def flow_submit_quotation(quotation):
 def flow_make_quotation(deal=None, items=None, valid_days=15, note=None, lead=None):
 	from sk_app import erp_flow
 
-	return erp_flow.make_quotation(_me().user, deal, _list(items), int(valid_days or 15), note, lead)
+	with _quote_log("other quotation", deal or lead):
+		return erp_flow.make_quotation(_me().user, deal, _list(items), int(valid_days or 15), note, lead)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -1966,8 +1996,9 @@ def deal_quote_amount(deal, amount):
 def cabin_quote_make(req, deal=None, lead=None, discount_pct=0, revise=None):
 	from sk_app import cabin_quote
 
-	return cabin_quote.make(_cabin_user(), json.loads(req) if isinstance(req, str) else req, deal or None, lead or None,
-		discount_pct=discount_pct, revise=revise or None)
+	with _quote_log("cabin quotation", deal or lead):
+		return cabin_quote.make(_cabin_user(), json.loads(req) if isinstance(req, str) else req, deal or None, lead or None,
+			discount_pct=discount_pct, revise=revise or None)
 
 
 @frappe.whitelist()
@@ -2005,7 +2036,8 @@ def building_quote_price(req):
 def building_quote_make(req, deal=None, lead=None, revise=None):
 	from sk_app import building_quote
 
-	return building_quote.make(_cabin_user(), json.loads(req) if isinstance(req, str) else req, deal or None, lead or None, revise=revise or None)
+	with _quote_log("building quotation", deal or lead):
+		return building_quote.make(_cabin_user(), json.loads(req) if isinstance(req, str) else req, deal or None, lead or None, revise=revise or None)
 
 
 # SK 27-Oct: new product + vendor from one spoken / typed line (Shraddha), checked, then added in ERPNext

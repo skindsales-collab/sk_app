@@ -41,7 +41,8 @@ doc_events = {
 	"SK Library Item": {"validate": "sk_app.library.make_public"},
 	# SK 28-Oct mandatory gate: a lead / deal moves on only with its data and the step's ERPNext document (sk_app.gates)
 	"CRM Lead": {"validate": ["sk_app.segments.set_main", "sk_app.gates.check_crm"]},
-	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.crm.set_deal_customer", "sk_app.gates.check_crm"],
+	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.crm.set_deal_customer", "sk_app.quote_pickup.on_deal_validate",
+		"sk_app.gates.check_crm"],
 		"on_update": "sk_app.deal_quotes.on_deal_update"},
 	"Quotation": {"before_submit": "sk_app.gates.check_quotation"},
 	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal", "on_update": "sk_app.segments.on_customer_update"},

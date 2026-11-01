@@ -120,6 +120,12 @@ def make_login(by: str, mobile, functions, employee=None, full_name=None, manage
 	_check_manager(by)
 	mobile = clean_mobile(mobile)
 	functions = [f for f in (functions or []) if f in FUNCTIONS]
+	if not functions and employee:
+		# SK 1-Nov minimum input: functions from the Employee's designation / department when none is picked
+		from sk_app.auto_fill import functions_from_role
+
+		e = frappe.db.get_value("Employee", employee, ["designation", "department"], as_dict=True) or {}
+		functions = [f for f in functions_from_role(e.get("designation"), e.get("department"), set(FUNCTIONS)) if f not in ADMIN_FUNCTIONS]
 	if not functions:
 		frappe.throw(_("Please pick at least one function"))
 	if ADMIN_FUNCTIONS & set(functions) and "System Manager" not in frappe.get_roles(by):

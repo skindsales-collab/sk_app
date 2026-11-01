@@ -196,14 +196,22 @@ KIND = {  # doctype: title, number label, date field, total label
 }
 
 
+def _party_gstin(doctype: str, name: str | None) -> str | None:
+	"""GSTIN field comes from India Compliance; fall back to the core tax_id when it is not installed."""
+	if not name:
+		return None
+	field = "gstin" if frappe.db.has_column(doctype, "gstin") else "tax_id"
+	return frappe.db.get_value(doctype, name, field)
+
+
 def invoice_html(doc) -> str:
 	bill, ship, same = parties(doc)
 	po = doc.doctype == "Purchase Order"
 	title, no_label, date_field, total_label = KIND.get(doc.doctype, KIND["Sales Invoice"])
 	if po:
-		gstin_buyer = doc.get("supplier_gstin") or frappe.db.get_value("Supplier", doc.supplier, "gstin")
+		gstin_buyer = doc.get("supplier_gstin") or _party_gstin("Supplier", doc.supplier)
 	else:
-		gstin_buyer = doc.get("billing_address_gstin") or (frappe.db.get_value("Customer", doc.customer, "gstin") if doc.customer else None)
+		gstin_buyer = doc.get("billing_address_gstin") or _party_gstin("Customer", doc.customer)
 	g = _gst(doc)
 	heads = g["heads"]
 	label = {"igst": "IGST", "cgst": "CGST", "sgst": "SGST", "cess": "Cess"}

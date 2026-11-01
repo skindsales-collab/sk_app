@@ -44,7 +44,7 @@ class TestHelpQuestions(IntegrationTestCase):
 		with patch("sk_app.training._ceos", return_value=[CEO]), patch("frappe.enqueue"):
 			r = training.ask(STORE, "Where is low stock?", "Stores", None, "Home · home")
 		with patch("sk_app.training._ceos", return_value=[CEO]):
-			out = training.answer(CEO, r["todo"], "Store → Low Stock tile.", 1)
+			out = training.answer(CEO, r["todo"], "Open Store, then tap the Low Stock tile on the home screen.", 1)
 		self.assertEqual(frappe.db.get_value("SK Library Item", out["faq"], "title"), "Where is low stock?")
 
 	def test_send_for_development_goes_to_it_desk(self):

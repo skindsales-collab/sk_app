@@ -160,7 +160,8 @@ def _billing(customer: str) -> dict | None:
 	addr = frappe.db.get_value("Customer", customer, "customer_primary_address")
 	if not addr:
 		addr = frappe.db.get_value("Dynamic Link", {"link_doctype": "Customer", "link_name": customer, "parenttype": "Address"}, "parent")
-	return frappe.db.get_value("Address", addr, ["name", "state", "pincode", "gstin"], as_dict=True) if addr else None
+	fields = ["name", "state", "pincode"] + (["gstin"] if frappe.db.has_column("Address", "gstin") else [])
+	return frappe.db.get_value("Address", addr, fields, as_dict=True) if addr else None
 
 
 def customer_data(customer: str) -> dict:
@@ -199,6 +200,11 @@ def complete_customer(customer: str, gstin=None, unregistered=0, gst_note=None, 
 		if doc.meta.has_field(GST_NOTE):
 			doc.set(GST_NOTE, gst_note.strip())
 	doc.save()
+	# SK 1-Nov minimum input: the state comes from the GSTIN (first 2 digits) when it is not given
+	if not (state or "").strip():
+		from sk_app.auto_fill import state_from_gstin
+
+		state = state_from_gstin(gstin or doc.get("gstin")) or state
 	if (state or "").strip() and (address or "").strip():
 		have = _billing(customer)
 		a = frappe.get_doc("Address", have["name"]) if have else frappe.new_doc("Address")
@@ -250,11 +256,22 @@ def check_sales_order(doc, method=None):
 		return
 	missing = R.order_missing({"transaction_date": doc.transaction_date, "delivery_date": doc.delivery_date, "po_no": doc.po_no,
 		"po_file": _has_file("Sales Order", doc.name), "items": _rows(doc), "grand_total": doc.grand_total})
-	missing += [(k, _("Customer: {0}").format(t)) for k, t in customer_missing(doc.customer)]
+	cust = [(k, _("Customer: {0}").format(t)) for k, t in customer_missing(doc.customer)]
 	if doc.customer:
 		fill_addresses(doc)  # SK 29-Oct: the order acknowledgement prints Bill to and Ship to
+	if cust and not missing and _ceo_old_order(doc):
+		# SK 31-Oct: old order submitted by the CEO with customer data pending; the gap stays on record for later
+		doc.add_comment("Comment", _("Submitted by CEO with customer data pending (old order): {0}").format(R.words(cust)))
+		return
+	missing += cust
 	if missing:
 		stop(_("Sales Order {0} cannot be submitted").format(doc.name), missing)
+
+
+def _ceo_old_order(doc) -> bool:
+	from sk_app.requisition import _is_ceo
+
+	return R.old_order_data_pending(doc.transaction_date, _is_ceo(frappe.session.user))
 
 
 INVOICE_CUSTOMER_KEYS = ("customer_name", "gstin", "address")  # a tax invoice needs these; the mobile is the order's gate

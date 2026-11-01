@@ -222,7 +222,7 @@ class TestProductionQuality(IntegrationTestCase):
 		self.assertEqual(r["stage"], sub_bills.APPROVED)
 		self.assertTrue(r["posted"], frappe.get_all("Comment", filters={"reference_name": name}, pluck="content"))
 		self.assertEqual(frappe.db.get_value("Purchase Order", name, "docstatus"), 1)
-		self.assertNotIn(name, [p.name for p in frappe.get_all("Purchase Order", filters={"docstatus": 1, **store.material_pos()}, pluck="name")])
+		self.assertNotIn(name, frappe.get_all("Purchase Order", filters={"docstatus": 1, **store.material_pos()}, pluck="name"))
 		# job done → GRN; Quality passed → bill payable
 		self.assertFalse(sub_bills.receipt_of(jcs[0]))
 		run(self.ranjit, production.done, jcs[0], checks=OK)
