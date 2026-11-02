@@ -11,6 +11,7 @@ from sk_app.tests.test_sk_app_api import make_user
 STORE_U = "sk_test_store@example.com"
 BUY_U = "sk_test_buyer@example.com"
 BOSS = "sk_test_boss@example.com"
+ACC_U = "sk_test_accounts_rcv@example.com"
 RAW = "SK Test Pipe 40x40"
 FG = "SK Test Cabin 10x8"
 SUPPLIER = "SK Test Steel Traders"
@@ -54,6 +55,7 @@ def setup_data(cls):
 	app_user(STORE_U, "Stores", ["Stock User"])
 	app_user(BUY_U, "Purchase", ["Purchase User"])
 	app_user(BOSS, "Management", ["System Manager"])
+	app_user(ACC_U, "Accounts", ["Accounts User"])
 	for code, stock in ((RAW, 1), (FG, 1)):
 		if not frappe.db.exists("Item", code):
 			frappe.get_doc({"doctype": "Item", "item_code": code, "item_name": code, "item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"), "stock_uom": "Nos", "is_stock_item": stock,
@@ -94,6 +96,20 @@ class TestStorePurchase(IntegrationTestCase):
 		self.assertRaises(frappe.PermissionError, run, BUY_U, store.issue, "x", [{"item_code": RAW, "qty": 1}])
 		self.assertRaises(frappe.PermissionError, run, STORE_U, purchase.make_po, "x")
 		self.assertRaises(frappe.PermissionError, run, BUY_U, purchase.approvals)
+
+	def test_accounts_receives_like_store(self):
+		"""SK 2-Nov: Accounts has the Receive screen; without a PO it raises the urgent requisition for the CEO."""
+		from sk_app.functions import FUNCTIONS
+
+		self.assertIn("receive", FUNCTIONS["Accounts"]["tiles"])
+		self.assertIsInstance(run(ACC_U, store.open_purchase_orders), list)
+		self.assertIsInstance(run(ACC_U, store.receipts_to_post), list)
+		r = run(ACC_U, requisition.raise_request, [{"item_code": RAW, "qty": 2}], "Planned", None, None, None,
+			without_po=1, supplier=SUPPLIER, bill_no="ACC-1")
+		mr = frappe.get_doc("Material Request", r["name"])
+		self.assertEqual((mr.sk_priority, mr.sk_approval, mr.sk_without_po), ("Urgent", requisition.WAITING, 1))
+		# Accounts still cannot issue material or count stock
+		self.assertRaises(frappe.PermissionError, run, ACC_U, store.issue, "x", [{"item_code": RAW, "qty": 1}])
 
 	def test_low_stock_goes_to_purchase_requests(self):
 		item = frappe.get_doc("Item", RAW)

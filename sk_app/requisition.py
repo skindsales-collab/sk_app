@@ -16,7 +16,8 @@ from sk_app.store import STORE, _company, _default_store, _todo, _users_with_fun
 
 MANAGEMENT = "Management"
 MAX_ITEMS = 20
-RAISERS = (STORE, "Purchase", MANAGEMENT, "HR")  # SK 28-Oct: Aarti (HR, acting purchase manager)
+RAISERS = (STORE, "Purchase", MANAGEMENT, "HR", "Accounts")  # SK 28-Oct: Aarti (HR, acting purchase manager)
+# SK 2-Nov: Accounts receives material; without a PO it raises the urgent requisition, the CEO approves, a PO is made
 WAITING, APPROVED, REJECTED = "Waiting CEO", "Approved", "Rejected"
 PRIORITIES = ("Planned", "Urgent")
 

@@ -170,7 +170,7 @@ def material_pos(doctype: str = "Purchase Order") -> dict:
 
 
 def open_purchase_orders(user: str) -> list[dict]:
-	need(user, STORE, "Purchase")
+	need(user, STORE, "Purchase", "Accounts")  # SK 2-Nov: Accounts receives material too (Receive screen)
 	pos = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]], **material_pos()},
 		fields=["name", "supplier", "supplier_name", "schedule_date", "grand_total"], order_by="schedule_date asc", limit=0)
 	for po in pos:
@@ -187,7 +187,7 @@ def receive(user: str, purchase_order: str | None, items: list[dict], challan_ph
 		supplier=None, reason=None, bill_no=None) -> dict:
 	"""Material at the gate: a draft Purchase Receipt from the PO with the challan photo. Store posts it after checking.
 	Material without a PO is not received here: it goes through an urgent requisition first (SK 27-Oct)."""
-	need(user, STORE)
+	need(user, STORE, "Accounts")  # SK 2-Nov: Accounts receives material like Store
 	qty = {i.get("po_detail") or i.get("item_code"): flt(i.get("qty")) for i in items or []}
 	if purchase_order:
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
@@ -220,7 +220,7 @@ def receive(user: str, purchase_order: str | None, items: list[dict], challan_ph
 
 def receipts_to_post(user: str) -> list[dict]:
 	"""Draft receipts waiting for the store's check and Post (stock goes up only when posted)."""
-	need(user, STORE)
+	need(user, STORE, "Accounts")  # SK 2-Nov: Accounts receives material like Store
 	rows = frappe.get_all("Purchase Receipt", filters={"docstatus": 0, **material_pos("Purchase Receipt")}, fields=["name", "supplier", "supplier_name", "posting_date",
 		"owner", "supplier_delivery_note", "grand_total", "remarks"], order_by="creation desc", limit=50)
 	for r in rows:
@@ -236,7 +236,7 @@ def receipts_to_post(user: str) -> list[dict]:
 def post_receipt(user: str, name: str, rates: dict | None = None) -> dict:
 	"""Store checked the material: post the receipt (stock goes up). A rate missing on a receipt without PO is taken from
 	the supplier's bill, as ERPNext needs it to value the stock."""
-	need(user, STORE)
+	need(user, STORE, "Accounts")  # SK 2-Nov: Accounts receives material like Store
 	doc = frappe.get_doc("Purchase Receipt", name)
 	if doc.docstatus != 0:
 		frappe.throw(_("{0} is already posted").format(name))
@@ -254,7 +254,7 @@ def post_receipt(user: str, name: str, rates: dict | None = None) -> dict:
 
 def drop_receipt(user: str, name: str) -> dict:
 	"""A receipt saved twice by mistake: delete the extra draft (only drafts; a posted one is cancelled in ERPNext)."""
-	need(user, STORE)
+	need(user, STORE, "Accounts")  # SK 2-Nov: Accounts receives material like Store
 	if frappe.db.get_value("Purchase Receipt", name, "docstatus") != 0:
 		frappe.throw(_("Only a draft can be removed"))
 	frappe.delete_doc("Purchase Receipt", name, ignore_permissions=True)
