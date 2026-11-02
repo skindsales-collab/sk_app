@@ -1095,6 +1095,8 @@
 	Object.assign(T.Marathi, { to_submit: "तपासा व सबमिट करा", ds_why: "तुमच्याकडे बाकी ड्राफ्ट. तपासा दाबा, आकडे पहा, मग सबमिट करा.", ds_check: "तपासा",
 		ds_none: "सबमिट करायला काही बाकी नाही ✓", ds_item: "आयटम", ds_old: "जुना साठा", ds_new: "मोजलेला", ds_diff: "फरक", ds_qty: "नग", ds_total: "एकूण",
 		ds_submit: "ERPNext मध्ये सबमिट करा", ds_sure: "आता सबमिट करायचे? नंतर बदलता येणार नाही.", ds_done: "सबमिट झाले" });
+	Object.assign(T.English, { rp_retry: "Try again", rp_login: "Please log in again", rp_unreadable: "Could not load from ERPNext. Tap Try again; if it stays, send this screen to the CEO" });
+	Object.assign(T.Marathi, { rp_retry: "पुन्हा प्रयत्न करा", rp_login: "कृपया पुन्हा लॉगिन करा", rp_unreadable: "ERPNext मधून माहिती आली नाही. पुन्हा प्रयत्न करा दाबा; तसेच राहिल्यास ही स्क्रीन CEO ला पाठवा" });
 	Object.assign(T.English, { lk_forgot: "Forgot PIN?", lk_f_mail: "Send a code to my e-mail", lk_f_ceo: "Ask the CEO for a new PIN", lk_f_relogin: "Log in again" });
 	Object.assign(T.Marathi, { lk_forgot: "पिन विसरलात?", lk_f_mail: "माझ्या ईमेलवर कोड पाठवा", lk_f_ceo: "CEO कडे नवीन पिन मागा", lk_f_relogin: "पुन्हा लॉगिन करा" });
 	Object.assign(T.English, { nav_back: "Back", nav_fwd: "Forward", mode_pc: "PC view", mode_phone: "Phone view" });
@@ -1139,8 +1141,18 @@
 			// a null / undefined value would go as the text "null" (the mail search then found nothing): leave it out
 			url += "?" + new URLSearchParams(Object.entries(args).filter(([, v]) => v !== null && v !== undefined));
 		}
-		const res = await fetch(url, opts);
-		const data = await res.json().catch(() => ({}));
+		let res = await fetch(url, opts);
+		let data = await readReply(res);
+		// SK 2-Nov (Shraddha's PC: blank "reading 'language'"): a reply that is not readable is tried once more (reads only)
+		if (res.ok && data === null && !post) {
+			res = await fetch(url, opts);
+			data = await readReply(res);
+		}
+		if (res.ok && data === null) {
+			if (res.redirected && /\/login/.test(res.url)) { location.href = "/login?redirect-to=/sk"; throw new Error(t("rp_login")); }
+			throw new Error(`${t("rp_unreadable")} (${method}, ${res.status})`);
+		}
+		data = data || {};
 		if (!res.ok) {
 			let msg = serverError(data, "Error");
 			if (String(msg).includes("SK_LOCKED")) { if (!post && !background) lockHit = true; showLock(); throw new Error(t("lk_locked")); }
@@ -1150,6 +1162,19 @@
 	}
 
 	// SK 28-Oct (Rushi's quote): ERPNext sends small notes ("Item Price added …") before the real error; show the error
+	// the server's reply as JSON, or null when it cannot be read (an HTML page, a cut-off reply).
+	// Python writes NaN / Infinity for a bad number, which a browser cannot read: those become empty (null).
+	async function readReply(res) {
+		const text = await res.text().catch(() => "");
+		if (!text) return res.ok ? null : {};
+		try { return JSON.parse(text); } catch (e) { /* below */ }
+		try {
+			const fixed = JSON.parse(text.replace(/([:\[,]\s*)(-?Infinity|NaN)(?=\s*[,\]}])/g, "$1null"));
+			console.warn("SK App: the server sent NaN / Infinity, shown as empty");
+			return fixed;
+		} catch (e) { return res.ok ? null : {}; }
+	}
+
 	function serverError(data, fallback) {
 		try {
 			const msgs = JSON.parse(data._server_messages || "[]").map((m) => JSON.parse(m));
@@ -5952,7 +5977,7 @@
 			if (view === "home") {
 				renderHome();
 				// red counts change as jobs are done and checks are saved: refresh them quietly
-				return call("home").then((h) => { if (reloadIfNew(h)) return; state.home = h; if (state.view === "home" && !document.querySelector(".sk-sheet")) renderHome(); }).catch(() => {});
+				return call("home").then((h) => { if (!h || reloadIfNew(h)) return; state.home = h; if (state.view === "home" && !document.querySelector(".sk-sheet")) renderHome(); }).catch(() => {});
 			}
 			const fn = LIVE_VIEWS[view];
 			return fn ? await fn() : renderSoon(view);
@@ -6948,6 +6973,7 @@
 	async function start() {
 		try {
 			state.home = await call("home");
+			if (!state.home) throw new Error(t("rp_unreadable") + " (home)");
 			state.lang = state.home.language || "English";
 			state.card = state.home.card;
 			renderHome();
@@ -6960,7 +6986,12 @@
 				if (state.view === "home") renderHome();
 			}
 		} catch (e) {
-			root.innerHTML = `<div class="sk-loading">${esc(e.message)}</div>`;
+			// SK 2-Nov: never only a blank error: the reason, Try again, and Log in again
+			state.home = null;
+			root.innerHTML = `<div class="sk-loading">${esc(e.message)}<p class="sk-gap"><button class="sk-btn go" id="sk-retry">↻ ${t("rp_retry")}</button>
+				<a class="sk-btn" href="/login?redirect-to=/sk">↩ ${t("lk_f_relogin")}</a></p></div>`;
+			const r = document.getElementById("sk-retry");
+			if (r) r.onclick = () => location.reload();
 		}
 	}
 
@@ -6986,6 +7017,7 @@
 		if (document.hidden || !state.home) return;
 		try {
 			const h = await call("home", null, false, true);
+			if (!h || !state.home) return; // Home never loaded: the Try again screen stays
 			if (reloadIfNew(h)) return;
 			const known = new Set((state.home.new_files || []).map((f) => f.name));
 			const fresh = (h.new_files || []).filter((f) => !known.has(f.name));
