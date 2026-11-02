@@ -1,4 +1,6 @@
+/* SK 2-Nov (Aditya): one fixed light look on every device; dark-mode phones/PCs had near-white text on white cards */
 :root {
+	color-scheme: light;
 	/* SK 29-Oct brand: colours of the SK Tech logo (blue gear, red SK ring) and the steel of the 3D reference */
 	--navy: #1878a8;
 	--red: #c82030;
@@ -6,14 +8,11 @@
 	--steel2: #8a95a3;
 	--light: #e3ebf3;
 	--ink: #1b2430;
-	--muted: #5a6472;
+	--muted: #4a5563;
 	--bg: #eef2f7;
 	--card: #ffffff;
 	--green: #1e8e3e;
 	--yellow: #e0a100;
-}
-@media (prefers-color-scheme: dark) {
-	:root { --ink: #e8edf3; --muted: #a9b4c2; --bg: #0f1722; --card: #182333; --light: #22324a; }
 }
 * { box-sizing: border-box; }
 body { margin: 0; font-family: system-ui, -apple-system, "Noto Sans Devanagari", sans-serif; background: var(--bg); color: var(--ink); font-size: 17px; }
@@ -286,16 +285,6 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 .sk-atttable td.bad { color: var(--red); font-weight: 700; }
 .sk-h.k-amber { color: #b36b00; }
 .sk-chip.ok { color: #16692d; border-color: #2e9e4f; }
-/* SK 26-Oct: phones / PCs in dark mode showed light text on the light red / amber icons; keep every highlight readable */
-@media (prefers-color-scheme: dark) {
-	.sk-tile.c-red { background: #4a1820; color: #ffe3e7; }
-	.sk-tile.c-amber { background: #4a3810; color: #fff1d0; }
-	@keyframes sk-blink { 50% { background: #7a2430; } }
-	.sk-attline { background: #22324a; color: #e8edf3; }
-	.sk-attline.green { background: #173d26; color: #d6f5e0; }
-	.sk-attline.amber { background: #4a3810; color: #fff1d0; }
-	.sk-attline.red { background: #4a1820; color: #ffe3e7; }
-}
 
 /* point 20: app lock (face / finger), covers the screen; the work under it stays */
 .sk-lock { position: fixed; inset: 0; z-index: 1000; background: var(--bg); color: var(--ink); display: flex; align-items: center; justify-content: center; padding: 16px; }
@@ -303,7 +292,6 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 .sk-lock-icon { font-size: 56px; }
 .sk-lock-box h2 { margin: 8px 0 4px; }
 .sk-lock-msg { color: #b42318; min-height: 1.4em; }
-@media (prefers-color-scheme: dark) { .sk-lock-msg { color: #ff8a80; } }
 
 /* point 17: live process flow (stage boxes joined by arrows) and the function's icons in work order */
 .sk-flow-name { font-weight: 600; margin: 10px 0 4px; font-size: 15px; }
@@ -321,13 +309,6 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 .sk-flow-box.c-green { border-color: #12b76a; background: #ecfdf3; color: #1d2939; }
 .sk-seq .sk-tile { position: relative; }
 .sk-seq .sk-tile:not(:last-child)::after { content: "➜"; position: absolute; right: -9px; top: 38%; font-size: 12px; color: var(--muted, #667085); }
-@media (prefers-color-scheme: dark) {
-	.sk-flow-box { background: #1b2230; border-color: #3a4456; color: #e8ecf3; }
-	.sk-flow-box.c-red { background: #4a1f1c; border-color: #f97066; color: #fff; }
-	.sk-flow-box.c-amber { background: #4a3510; border-color: #fdb022; color: #fff; }
-	.sk-flow-box.c-green { background: #0f3b27; border-color: #32d583; color: #fff; }
-	.sk-flow-late { color: #fda29b; }
-}
 /* SK 26-Oct: month-wise charts on the dashboards */
 .sk-chart { width: 100%; height: auto; display: block; }
 .sk-chart-leg { font-size: 11px; color: #667; }
@@ -360,14 +341,6 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 .sk-plan-row div { flex: 1; text-align: center; border-radius: 10px; padding: 6px 2px; background: #fff4df; }
 .sk-plan-row div.c-green { background: #e3f6ea; }
 .sk-plan-row b { display: block; font-size: 18px; }
-@media (prefers-color-scheme: dark) {
-	.sk-l1 .sk-flow-box { background: #23314a; color: #e8ecf3; }
-	.sk-l1 .sk-flow-box.c-red { background: #5a2420; }
-	.sk-l1 .sk-flow-box.c-amber { background: #4a3510; }
-	.sk-l1 .sk-flow-box.c-green { background: #0f3b27; }
-	.sk-plan-row div { background: #4a3810; }
-	.sk-plan-row div.c-green { background: #0f3b27; }
-}
 
 /* main screen Rev 2 (SK 26-Oct): the whole phone screen, decision data first */
 .sk-home2 { display: flex; flex-direction: column; gap: 8px; min-height: calc(100vh - 86px); padding-bottom: 8px; }
@@ -650,7 +623,6 @@ body.sk-pc .sk-pstrip { flex-wrap: wrap; overflow: visible; }
 	border-radius: 18px; box-shadow: 0 4px 18px rgba(24,120,168,.15); border-top: 4px solid var(--navy); }
 .sk-login { margin-top: 24px; }
 .sk-brand-logo { width: 96px; height: 96px; border-radius: 18px; object-fit: contain; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
-@media (prefers-color-scheme: dark) { .sk-h { color: #6fb7dc; } }
 
 /* new screen parts of this batch: lock screen, Check & Submit table, small text links */
 .sk-lock-box { width: 100%; max-width: 400px; padding: 24px 20px; text-align: center; }
