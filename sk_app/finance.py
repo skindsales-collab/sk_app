@@ -12,6 +12,7 @@ from frappe.utils import add_days, cint, date_diff, flt, fmt_money, get_first_da
 
 from sk_app.purchase import po_limit
 from sk_app.store import _company, _todo, _users_with_function, attach, material_pos, draft_reason, need, try_submit
+from sk_app.core.switch import use_new
 
 ACCOUNTS = "Accounts"
 MANAGEMENT = "Management"
@@ -115,13 +116,19 @@ def receive_payment(user: str, reference_doctype: str, reference_name: str, amou
 	amount = flt(amount)
 	if amount <= 0:
 		frappe.throw(_("Please give the amount received"))
-	from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+	if use_new("Finance", user):  # rebuild: the one Payment Entry writer (linear flow map, Flow 6)
+		from sk_app.writers import payment as pw
 
-	pe = get_payment_entry(reference_doctype, reference_name, party_amount=amount)
-	_fill_payment(pe, mode, reference_no, reference_date)
-	pe.insert()
-	attach(photo, "Payment Entry", pe.name, user)
-	posted = try_submit(pe)
+		pe, posted = pw.write(user, reference_doctype, reference_name, amount, mode, reference_no, reference_date, photo,
+			fill=_fill_payment, attach=attach, try_submit=try_submit)
+	else:
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+
+		pe = get_payment_entry(reference_doctype, reference_name, party_amount=amount)
+		_fill_payment(pe, mode, reference_no, reference_date)
+		pe.insert()
+		attach(photo, "Payment Entry", pe.name, user)
+		posted = try_submit(pe)
 	reason = draft_reason()
 	# the salesperson of the order hears that the money came (F06 link Finance -> Sales)
 	owner = frappe.db.get_value(reference_doctype, reference_name, "owner")
@@ -239,13 +246,19 @@ def pay(user: str, purchase_invoice: str, amount=None, mode=None, reference_no=N
 	is_boss = MANAGEMENT in _functions(user)
 	if amount > po_limit() and not is_boss and not _approved(pi.name):
 		frappe.throw(_("Above {0}: waiting for SK's OK").format(_money(po_limit())))
-	from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+	if use_new("Finance", user):  # rebuild: the one Payment Entry writer (linear flow map, Flow 6)
+		from sk_app.writers import payment as pw
 
-	pe = get_payment_entry("Purchase Invoice", pi.name, party_amount=amount)
-	_fill_payment(pe, mode, reference_no, reference_date)
-	pe.insert()
-	attach(photo, "Payment Entry", pe.name, user)
-	posted = try_submit(pe)
+		pe, posted = pw.write(user, "Purchase Invoice", pi.name, amount, mode, reference_no, reference_date, photo,
+			fill=_fill_payment, attach=attach, try_submit=try_submit)
+	else:
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, party_amount=amount)
+		_fill_payment(pe, mode, reference_no, reference_date)
+		pe.insert()
+		attach(photo, "Payment Entry", pe.name, user)
+		posted = try_submit(pe)
 	frappe.db.set_value("ToDo", {"reference_type": "Purchase Invoice", "reference_name": pi.name, "status": "Open"}, "status", "Closed")
 	return {"name": pe.name, "posted": posted, "reason": draft_reason()}
 

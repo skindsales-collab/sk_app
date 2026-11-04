@@ -13,6 +13,7 @@ from frappe import _
 from frappe.utils import add_days, flt, getdate, nowdate
 
 from sk_app import crm, store
+from sk_app.core.switch import use_new
 
 
 def _deal(name: str) -> dict:
@@ -116,6 +117,13 @@ def make_quotation(user: str, deal: str | None, items: list[dict], valid_days: i
 		rows.append(row)
 	if not rows:
 		frappe.throw(_("Please add at least one item"))
+	if use_new("Sales", user):  # rebuild: the one Quotation writer (linear flow map, Flow 1 step 6)
+		from sk_app.writers import quotation as qw
+
+		if not frappe.has_permission("Quotation", "create"):
+			frappe.throw(_("You may not make quotations"), frappe.PermissionError)
+		doc = qw.write(user, customer=customer, items=rows, deal=deal, terms=note, valid_days=int(valid_days or 15))
+		return {"name": doc.name, "grand_total": doc.grand_total, "pdf": crm._pdf("Quotation", doc.name), **submit_quotation(user, doc.name, quiet=True)}
 	doc = frappe.get_doc({"doctype": "Quotation", "quotation_to": "Customer", "party_name": customer, "transaction_date": nowdate(),
 		"valid_till": add_days(nowdate(), int(valid_days or 15)), "items": rows})
 	if doc.meta.has_field("crm_deal"):

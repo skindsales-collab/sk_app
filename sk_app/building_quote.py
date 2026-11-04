@@ -18,6 +18,7 @@ from frappe import _
 from frappe.utils import add_days, cint, flt, formatdate, nowdate
 
 from sk_app import cabin_quote as cq
+from sk_app.core.switch import use_new
 
 FLOORS = ["G+0", "G+1", "G+2"]
 BUILDING_ITEM, ADDON_ITEM = "SK-BUILDING", "SK-BUILDING-ADDON"
@@ -174,6 +175,24 @@ def make(user: str, req: dict, deal=None, lead=None, customer=None, revise=None,
 	old = frappe.get_doc("Quotation", revise) if revise else None
 	if old and old.party_name != customer:
 		frappe.throw(_("That quotation is for another customer"))
+	if use_new("Sales", user):  # rebuild: the one Quotation writer (linear flow map, Flow 1 step 6)
+		from sk_app.writers import quotation as qw
+
+		items = [{"item_code": BUILDING_ITEM, "qty": round(x["area"], 2), "rate": x["total_rate"],
+			"description": f"{x['name']}{' (' + x['code'] + ')' if x['code'] else ''}, {x['floors_label']}, {x['L']:g} x {x['W']:g} x {x['H']:g} m, "
+			f"{x['nos']} no(s), {p['panel']} panel"} for x in p["blocks"]]
+		items += [{"item_code": ADDON_ITEM, "qty": a["qty"], "rate": a["rate"], "uom": "Nos", "description": f"{a['item']} ({a['size']})"}
+			for a in p["addons"]]
+		keep = {k: v for k, v in p.items() if k not in ("cost", "margin", "min_rate")}
+		keep.update({"delivery": req.get("delivery") or b["delivery"][0], "payment": req.get("payment") or b["payment"][0], "req": req})
+		need_ok = bool(p["approval"])
+		doc = qw.write(user, customer=customer, items=items, deal=deal, kind="BLD", valid_days=cint(b["validity_days"]) or 10,
+			revise=revise, contact=contact, extra={"sk_rate_card": p["rate_card"], "sk_cabin_request": json.dumps(keep), "sk_discount_pct": 0,
+				"additional_discount_percentage": 0, "sk_discount_status": "Requested" if need_ok else ""})
+		if need_ok:
+			cq._ask_discount(user, doc, None, "; ".join(p["approval"]))
+		return {"name": doc.name, "ref": doc.sk_quote_ref, "rev": doc.sk_rev, "net_total": doc.net_total, "grand_total": doc.grand_total,
+			"discount_waiting": need_ok, "approval": p["approval"], "pdf": cq._pdf(doc.name), "rate_card": p["rate_card"]}
 	if old and old.docstatus == 0:
 		doc = old
 		doc.set("items", [])

@@ -48,7 +48,8 @@ doc_events = {
 		"sk_app.gates.check_crm"],
 		# SK 4-Nov: no deal from a lead that is still New (call not connected): the lead is Qualified first (sk_app.gates)
 		"before_insert": ["sk_app.doubles.check_deal", "sk_app.gates.check_new_deal"], "on_update": "sk_app.deal_quotes.on_deal_update"},
-	"Quotation": {"before_submit": "sk_app.gates.check_quotation"},
+	# SK 4-Nov: members also work in ERPNext or through Claude: the quote / payment checks run on the record, whatever the route
+	"Quotation": {"before_submit": "sk_app.gates.check_quotation", "validate": "sk_app.writers.quotation.on_validate"},
 	# SK 4-Nov rebuild (S3): the customer's salesperson is set at save, not the next night (the nightly run stays as a safety net)
 	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal",
 		"on_update": ["sk_app.segments.on_customer_update", "sk_app.sales_owner.on_customer_save"]},
@@ -81,7 +82,7 @@ doc_events = {
 	"Purchase Invoice": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check"], "before_submit": "sk_app.sub_bills.check_submit"},
 	"Item Price": {"validate": "sk_app.sub_bills.check_rate_edit"},
 	# SK 4-Nov (Shraddha): a Net Banking / IMPS payment booked from Cash never shows in Bank Reconciliation: stopped
-	"Payment Entry": {"validate": "sk_app.doubles.check"},
+	"Payment Entry": {"validate": ["sk_app.doubles.check", "sk_app.writers.payment.on_validate"]},
 	"Journal Entry": {"validate": "sk_app.doubles.check"},
 	# SK 4-Nov "make it foolproof": the money masters only by the CEO / System Manager; a Bank mode needs Bank accounts (sk_app.masters)
 	"Mode of Payment": {"validate": ["sk_app.masters.guard", "sk_app.masters.check_mode"]},
