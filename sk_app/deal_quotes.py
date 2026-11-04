@@ -35,10 +35,9 @@ def ensure_setup():
 		return
 	from sk_app.cabin_quote import hsn_fields
 
-	group = frappe.db.get_value("Item Group", {"is_group": 0}, "name") or "All Item Groups"
-	frappe.get_doc({"doctype": "Item", "item_code": SERVICE_ITEM, "item_name": "Job / service (as per quotation)", "item_group": group,
-		"stock_uom": "Nos", "is_stock_item": 0, "include_item_in_manufacturing": 0, "description": "Job / service (as per quotation)",
-		**hsn_fields("job")}).insert(ignore_permissions=True)
+	from sk_app.writers.item import get_or_make
+
+	get_or_make(SERVICE_ITEM, "Job / service (as per quotation)", hsn_like="job")
 
 
 def is_quote_file(file_name: str | None) -> bool:
