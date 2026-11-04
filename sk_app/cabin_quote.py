@@ -18,7 +18,8 @@ import os
 import frappe
 from frappe import _
 from frappe.utils import add_days, cint, flt, formatdate, getdate, nowdate
-from sk_app.core.people import is_ceo as _shared_is_ceo  # one CEO check for every screen (rebuild Phase 0)
+from sk_app.core.people import is_ceo as _shared_is_ceo
+from sk_app.core.switch import use_new  # one CEO check for every screen (rebuild Phase 0)
 
 RATE_CARD = "SK Cabin Rate Card"
 PRINT_FORMAT = "SK Cabin Quotation"
@@ -278,6 +279,19 @@ def make(user: str, req: dict, deal=None, lead=None, customer=None, discount_pct
 	for r in rows:
 		if not r["uom"]:
 			r.pop("uom")
+	need_ok = disc > allowed
+	if use_new("Sales", user):  # rebuild: the one Quotation writer (linear flow map, Flow 1 step 6)
+		from sk_app.writers import quotation as qw
+
+		doc = qw.write(user, customer=customer, items=rows, deal=deal, kind="CAB", terms=_terms(rc),
+			valid_days=cint(rc["terms"].get("validity_days")) or 15, revise=revise, contact=contact, extra={
+				"sk_rate_card": rc["version"], "sk_cabin_request": json.dumps(req), "sk_discount_pct": disc,
+				"additional_discount_percentage": 0 if need_ok else disc, "apply_discount_on": "Net Total",
+				"sk_discount_status": "Requested" if need_ok else ("Approved" if disc else "")})
+		if need_ok:
+			_ask_discount(user, doc, disc)
+		return {"name": doc.name, "ref": doc.sk_quote_ref, "rev": doc.sk_rev, "net_total": doc.net_total, "grand_total": doc.grand_total,
+			"discount_waiting": need_ok, "pdf": _pdf(doc.name), "rate_card": rc["version"]}
 	if old and old.docstatus == 0:
 		doc = old
 		doc.set("items", [])

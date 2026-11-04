@@ -20,6 +20,8 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, flt, now_datetime, nowdate
 
+from sk_app.core.switch import use_new
+
 VALUE_FIELD = "custom_design_quote_value"  # set by the AI design team's bom-push (--quote-value, ex-GST)
 # SK 28-Oct "all quote ... cabin or machine shifting or job work or any other should be routed through ERP": the
 # machine-shifting quote tool keeps its ex-GST total on the deal too
@@ -108,6 +110,15 @@ def make_for_deal(deal: str, amount: float | None = None, by: str | None = None)
 		non_cabin = d.get("sk_main_segment") == segments.NON_CABIN
 		item = SERVICE_ITEM if non_cabin and frappe.db.exists("Item", SERVICE_ITEM) else cabin_quote.CABIN_ITEM
 		what = files[-1].file_name if files else _("the design team's quote")
+		owner = by or d.get("deal_owner")
+		if use_new("Sales", owner if owner and frappe.db.exists("User", owner) else current):  # rebuild: the one Quotation writer
+			from sk_app.writers import quotation as qw
+
+			doc = qw.write(owner or current, customer=customer, deal=deal, kind="JOB" if non_cabin else "CAB", owner=owner,
+				items=[{"item_code": item, "qty": 1, "rate": value, "description": _("As per the attached quotation: {0}").format(what)}])
+			_attach(doc.name, files)
+			_close_tasks(deal)
+			return doc.name
 		doc = frappe.new_doc("Quotation")
 		doc.update({"quotation_to": "Customer", "party_name": customer, "crm_deal": deal, "transaction_date": nowdate(),
 			"valid_till": add_days(nowdate(), 15), "ignore_pricing_rule": 1})
