@@ -74,6 +74,11 @@ def measures(day=None) -> list[dict]:
 		add("Speed", f"Average screen time ({device})", perf[device]["avg_ms"], "ms", f"SK Perf Log, {device}, weighted by calls, this day")
 		add("Speed", f"Screen errors ({device})", perf[device]["errors"], "errors / day", f"SK Perf Log, {device}, failed calls, this day")
 		add("Ease", f"Taps per save ({device})", perf[device]["taps"], "taps", f"SK Perf Log, {device}, taps between two saves, this day")
+	from sk_app.core.facts import asked_again_on
+
+	add("Users", "Repeat questions to SK", asked_again_on(day), "questions / day",
+		"SK Hub Log 'asked again' (save_fact asked_again=true when SK says it was already given), this day")
+	add("Users", "Known facts saved", _count("SK Known Fact", {"status": "Active"}), "facts", "SK Known Fact, Active")
 	add("Users", "Problems reported", _count("Issue", {"creation": span, "customer": ["is", "not set"]}), "issues / day",
 		"Issue (internal desk: no customer), this day")
 	return out

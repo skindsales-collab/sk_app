@@ -307,9 +307,23 @@ CHECKS = {"lead": check_lead, "receipt": check_receipt, "supplier": check_suppli
 	"voucher": check_voucher, "quote": check_quote, "receive": check_receive}
 
 
+def _known_rows(kind: str, values: dict) -> list:
+	"""SK 4-Nov "how am I sure the input is right": a rule SK already gave that fits what was typed shows as an amber line
+	before saving (e.g. a Non-Cabin lead: its owner is Aditya). Never more than 2, never blocks."""
+	try:
+		from sk_app.core.facts import find
+
+		text = " ".join(str(v) for v in values.values() if v and not str(v).startswith("/"))
+		found = find(f"{kind} {text}", limit=2) if text.strip() else []
+	except Exception:
+		return []
+	return [_row("known_fact", f"SK rule: {f['topic']}", "", "amber", f["fact"][:200]) for f in found]
+
+
 def check(user: str, kind: str, values: dict) -> dict:
 	fn = CHECKS.get(kind)
 	if not fn:
 		frappe.throw(frappe._("Unknown check"))
 	rows = fn(values or {})
+	rows += _known_rows(kind, values or {})
 	return {"rows": rows, "red": sum(1 for r in rows if r["state"] == "red"), "amber": sum(1 for r in rows if r["state"] == "amber")}
