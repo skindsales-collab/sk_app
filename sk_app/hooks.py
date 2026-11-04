@@ -26,7 +26,7 @@ scheduler_events = {
 	# IndiaMART / JustDial / GeM mails to the team mailboxes become CRM leads (free route, point 14)
 	"cron": {"*/5 * * * *": ["sk_app.lead_sources.scan", "sk_app.mailbox.link_known", "sk_app.mailbox.route_suppliers", "sk_app.mailbox.auto_leads"],
 		# SK 27-Oct: the AI's actions to lift each graph, every morning before work
-		"0 7 * * *": ["sk_app.ai_actions.morning"],
+		"0 7 * * *": ["sk_app.ai_actions.morning", "sk_app.doubles.morning"],  # SK 4-Nov: possible doubles to Shraddha and SK
 		# SK 28-Oct: customers tagged Cabin / Non-Cabin and every order and customer given its salesperson
 		"30 1 * * *": ["sk_app.sales_owner.nightly"],
 		# SK 29-Oct: a solved desk request the person did not answer for 3 days is closed
@@ -40,10 +40,11 @@ doc_events = {
 	"File": {"after_insert": ["sk_app.crm.on_file_attached", "sk_app.deal_quotes.on_file"]},  # SK 28-Oct: a quote file → Quotation
 	"SK Library Item": {"validate": "sk_app.library.make_public"},
 	# SK 28-Oct mandatory gate: a lead / deal moves on only with its data and the step's ERPNext document (sk_app.gates)
-	"CRM Lead": {"validate": ["sk_app.segments.set_main", "sk_app.gates.check_crm"]},
+	# SK 4-Nov: no double entry anywhere: same party + amount within 7 days, same reference / bill no, a 2nd deal of a lead (sk_app.doubles)
+	"CRM Lead": {"validate": ["sk_app.segments.set_main", "sk_app.gates.check_crm"], "before_insert": "sk_app.doubles.check_lead"},
 	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.crm.set_deal_customer", "sk_app.quote_pickup.on_deal_validate",
 		"sk_app.gates.check_crm"],
-		"on_update": "sk_app.deal_quotes.on_deal_update"},
+		"before_insert": "sk_app.doubles.check_deal", "on_update": "sk_app.deal_quotes.on_deal_update"},
 	"Quotation": {"before_submit": "sk_app.gates.check_quotation"},
 	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal", "on_update": "sk_app.segments.on_customer_update"},
 	# SK 28-Oct: every order has its salesperson; income ledger and Non-Cabin sub-group cost centre from the customer
@@ -51,7 +52,7 @@ doc_events = {
 		"before_submit": "sk_app.gates.check_sales_order",
 		"on_submit": ["sk_app.won_deals.on_submit", "sk_app.lead_time.on_sales_order_submit"]},  # SK 28-Oct: its lead / deal shows Won in the CRM at once
 	# SK 29-Oct (Shraddha): a tax invoice is submitted only with the buyer's Bill to address (Ship to defaults to it)
-	"Sales Invoice": {"validate": ["sk_app.segment_accounts.set_segment", "sk_app.cabin_projects.set_cost_centre"],
+	"Sales Invoice": {"validate": ["sk_app.segment_accounts.set_segment", "sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check"],
 		"before_submit": "sk_app.gates.check_sales_invoice", "on_submit": "sk_app.lead_time.on_sales_invoice_submit"},
 	# SK 29-Oct: PO date → invoice date per cabin, days per 100 sq ft for Production (sk_app.lead_time)
 	"Project": {"validate": "sk_app.lead_time.on_project_validate"},
@@ -72,8 +73,17 @@ doc_events = {
 		"before_submit": ["sk_app.requisition.check_po", "sk_app.sub_bills.check_submit"], "on_submit": "sk_app.sub_bills.on_po_submit"},
 	"Purchase Receipt": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.requisition.check_receipt"},
 	# SK 28/29-Oct: labour bill only from the service GRN of a PO Rushi + CEO approved; only CEO / Accounts change the rates
-	"Purchase Invoice": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.sub_bills.check_submit"},
+	"Purchase Invoice": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check"], "before_submit": "sk_app.sub_bills.check_submit"},
 	"Item Price": {"validate": "sk_app.sub_bills.check_rate_edit"},
+	# SK 4-Nov (Shraddha): a Net Banking / IMPS payment booked from Cash never shows in Bank Reconciliation: stopped
+	"Payment Entry": {"validate": "sk_app.doubles.check"},
+	"Journal Entry": {"validate": "sk_app.doubles.check"},
+	# SK 4-Nov "make it foolproof": the money masters only by the CEO / System Manager; a Bank mode needs Bank accounts (sk_app.masters)
+	"Mode of Payment": {"validate": ["sk_app.masters.guard", "sk_app.masters.check_mode"]},
+	"Accounts Settings": {"validate": "sk_app.masters.guard"},
+	"Company": {"validate": "sk_app.masters.guard"},
+	"Bank Account": {"validate": "sk_app.masters.guard"},
+	"Account": {"validate": "sk_app.masters.guard"},
 	# SK 29-Oct: a desk request set to Resolved (app or ERPNext) sends the reply and joins the role's FAQ at once
 	"Issue": {"on_update": "sk_app.issue_desk.on_issue_update"},
 }

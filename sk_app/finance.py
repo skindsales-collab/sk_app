@@ -102,10 +102,57 @@ def receive_payment(user: str, reference_doctype: str, reference_name: str, amou
 	return {"name": pe.name, "posted": posted}
 
 
+def bank_account(company: str, mode: str | None = None) -> str | None:
+	"""SK 4-Nov: all payments go through net banking, none in cash. The mode's own Bank account, else the company's default
+	bank account, else the bank ledger used most."""
+	if mode:
+		acc = frappe.db.get_value("Mode of Payment Account", {"parent": mode, "company": company}, "default_account")
+		if acc and frappe.db.get_value("Account", acc, "account_type") == "Bank":
+			return acc
+	acc = frappe.get_cached_value("Company", company, "default_bank_account")
+	if acc:
+		return acc
+	used = frappe.db.sql("""select acc.name from `tabAccount` acc left join `tabGL Entry` gl on gl.account = acc.name and gl.is_cancelled = 0
+		where acc.company = %s and acc.account_type = 'Bank' and acc.is_group = 0 and acc.disabled = 0
+		group by acc.name order by count(gl.name) desc, acc.name limit 1""", company)
+	return used[0][0] if used else None
+
+
+def payment_modes(user: str) -> list[str]:
+	need(user, ACCOUNTS, MANAGEMENT)
+	modes = frappe.get_all("Mode of Payment", filters={"enabled": 1}, pluck="name", order_by="name asc")
+	first = [m for m in ("Net Banking", "Cash") if m in modes]
+	return first + [m for m in modes if m not in first]
+
+
+def cash_account(company: str, mode: str | None = None) -> str | None:
+	acc = frappe.db.get_value("Mode of Payment Account", {"parent": mode, "company": company}, "default_account") if mode else None
+	if acc and frappe.db.get_value("Account", acc, "account_type") == "Cash":
+		return acc
+	return frappe.get_cached_value("Company", company, "default_cash_account")
+
+
 def _fill_payment(pe, mode, reference_no, reference_date):
-	if mode and frappe.db.exists("Mode of Payment", mode):
+	# SK 4-Nov: payments are net banking with their UTR (unique: sk_app.doubles stops a second entry of the same UTR);
+	# a cash payment (some cabins) goes to the Cash account with its reason typed in the same box
+	mode = mode if mode and frappe.db.exists("Mode of Payment", mode) else "Net Banking"
+	if frappe.db.exists("Mode of Payment", mode):
 		pe.mode_of_payment = mode
-	pe.reference_no = reference_no or pe.get("reference_no") or _("SK App {0}").format(nowdate())
+	text = (reference_no or "").strip()
+	is_cash = frappe.db.get_value("Mode of Payment", mode, "type") == "Cash"
+	if not text:
+		frappe.throw(_("Please write why it was paid in cash") if is_cash else _("Please type the UTR / bank reference number of this payment"),
+			title=_("Data missing"))
+	acc = cash_account(pe.company, mode) if is_cash else bank_account(pe.company, pe.mode_of_payment)
+	if acc:
+		if pe.payment_type == "Pay":
+			pe.paid_from = acc
+		else:
+			pe.paid_to = acc
+	if is_cash:
+		pe.sk_cash_reason = text
+		text = _("Cash {0}").format(nowdate())
+	pe.reference_no = text
 	pe.reference_date = getdate(reference_date or nowdate())
 	pe.flags.ignore_permissions = True
 
@@ -270,8 +317,9 @@ def done_bill_photo(user: str, todo: str) -> dict:
 PHOTO_KINDS = {
 	"supplier_bill": ("Supplier bill / e-invoice", None),
 	"expense": ("Expense bill / petty cash voucher", "/app/journal-entry/new?voucher_type=Cash%20Entry"),
-	"money_in": ("Payment received (cheque / UTR)", "/app/payment-entry/new?payment_type=Receive"),
-	"money_out": ("Payment made (bank slip / UTR)", "/app/payment-entry/new?payment_type=Pay"),
+	# SK 4-Nov: payments are net banking: the ERPNext form opens with Net Banking (its bank account comes with it)
+	"money_in": ("Payment received (cheque / UTR)", "/app/payment-entry/new?payment_type=Receive&mode_of_payment=Net%20Banking"),
+	"money_out": ("Payment made (bank slip / UTR)", "/app/payment-entry/new?payment_type=Pay&mode_of_payment=Net%20Banking"),
 	"other": ("Other document", None),
 }
 PHOTO_TAG = "Photo entry"
@@ -377,8 +425,9 @@ def voucher_options(user: str) -> dict:
 	company = _company()
 	return {"expense_accounts": frappe.get_all("Account", filters={"company": company, "is_group": 0, "root_type": "Expense", "disabled": 0},
 			pluck="name", order_by="account_name asc"),
+		# SK 4-Nov: bank first (most money moves by net banking), then Cash
 		"cash_accounts": frappe.get_all("Account", filters={"company": company, "is_group": 0, "account_type": ["in", ["Cash", "Bank"]],
-			"disabled": 0}, pluck="name", order_by="account_type desc, account_name asc"),
+			"disabled": 0}, pluck="name", order_by="account_type asc, account_name asc"),
 		"cost_centers": frappe.get_all("Cost Center", filters={"company": company, "is_group": 0, "disabled": 0}, pluck="name", order_by="name asc")}
 
 
@@ -396,7 +445,8 @@ def petty_cash(user: str, expense_account: str, amount, cash_account: str, cost_
 	je.posting_date = nowdate()
 	je.user_remark = narration
 	if je.voucher_type == "Bank Entry":
-		je.cheque_no, je.cheque_date = _("SK App {0}").format(nowdate()), nowdate()
+		# one reference per voucher (the same text on every voucher of a day looked like a double)
+		je.cheque_no, je.cheque_date = _("SK App {0}").format(frappe.generate_hash(length=8).upper()), nowdate()
 	je.append("accounts", {"account": expense_account, "debit_in_account_currency": amount, "cost_center": cost_center})
 	je.append("accounts", {"account": cash_account, "credit_in_account_currency": amount, "cost_center": cost_center})
 	je.flags.ignore_permissions = True

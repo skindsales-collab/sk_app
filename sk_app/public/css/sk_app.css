@@ -75,6 +75,10 @@ body { padding-top: 64px; }
 .sk-soon { color: var(--muted); }
 .sk-toast { position: fixed; left: 16px; right: 16px; bottom: 24px; background: var(--green); color: #fff; padding: 14px; border-radius: 10px; text-align: center; z-index: 9; }
 .sk-toast.bad { background: var(--red); }
+/* SK 4-Nov: a save button waits for ERPNext after the first tap; a possible double shows the entries already there */
+.sk-busy { opacity: .55; pointer-events: none; cursor: progress; }
+.sk-dbl { border: 2px solid var(--red); border-radius: 10px; padding: 10px; margin-bottom: 12px; }
+.sk-dbl .sk-link, .sk-sheet .sk-link { color: var(--blue, #1878A8); text-decoration: underline; font-weight: 600; word-break: break-all; }
 .sk-banner { display: block; width: 100%; text-align: left; border: 0; border-radius: 10px; padding: 12px; margin-bottom: 10px; background: var(--light); color: var(--ink); font-size: 15px; font-weight: 600; }
 .sk-banner.bad { background: var(--red); color: #fff; }
 .sk-gap { margin-top: 12px; }
