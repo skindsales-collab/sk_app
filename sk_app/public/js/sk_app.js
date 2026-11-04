@@ -1124,14 +1124,6 @@
 
 	// while the CEO views a member's app every reading screen runs as the member (their own permissions); saving is blocked
 	const VIEW_OWN = new Set(["view_members", "view_suggest", "report_screen_error"]);
-	// SK 4-Nov rebuild (Phase 0): dropdown choices come from ERPNext (Customize Form / masters) and each module's Old / New
-	// path from SK Path Switch, read once at start. The fixed lists in this file are only the fall-back if that read fails.
-	const CONFIG = { options: {}, paths: {} };
-	const opts = (key, fallback) => (CONFIG.options[key] && CONFIG.options[key].length ? CONFIG.options[key] : fallback);
-	const newPath = (module) => CONFIG.paths[module] === "New";
-	async function loadConfig() {
-		try { Object.assign(CONFIG, (await call("app_config", null, false, true)) || {}); } catch (e) { /* old lists stay */ }
-	}
 	async function call(method, args, post, background) {
 		if (state.viewAs && !VIEW_OWN.has(method)) {
 			if (post) throw new Error(t("view_only"));
@@ -6804,6 +6796,15 @@
 		"Karnataka", "Kerala", "Ladakh", "Lakshadweep Islands", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
 		"Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"];
 
+
+	// SK 4-Nov rebuild (Phase 0): dropdown choices come from ERPNext (Customize Form / masters) and each module's Old / New
+	// path from SK Path Switch, read once at start. The fixed lists in this file are only the fall-back if that read fails.
+	const CONFIG = { options: {}, paths: {} };
+	const opts = (key, fallback) => (CONFIG.options[key] && CONFIG.options[key].length ? CONFIG.options[key] : fallback);
+	const newPath = (module) => CONFIG.paths[module] === "New";
+	async function loadConfig() {
+		try { Object.assign(CONFIG, (await call("app_config", null, false, true)) || {}); } catch (e) { /* old lists stay */ }
+	}
 
 	// ---------- App lock (point 20, SK 26-Oct): face / finger only after set-up, locks after 30 min without use ----------
 	const b64u = {
