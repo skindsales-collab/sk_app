@@ -31,15 +31,48 @@ def refs(so) -> list[str]:
 
 
 def on_submit(doc, method=None):
+	"""SK 4-Nov rebuild (S1, S2): before this a failure here was only logged, so orders stayed submitted while their deal
+	never turned Won (4-Nov: 66 won leads, 56 won deals, 111 orders). Now every gap goes to SK Rule Log with its link;
+	with Sales rules on Enforce the submit itself is stopped with the reason, so it is never half done."""
+	from sk_app.core.rules import report
+
 	if not frappe.db.exists("DocType", "CRM Deal"):
 		return
-	for ref in refs(doc):
+	found = refs(doc)
+	problems = []
+	if not found:
+		found, problem = deals_by_customer(doc)
+		if problem:
+			problems.append(problem)
+	for ref in found:
 		try:
 			frappe.db.savepoint("sk_won_deal")
 			won_from_order(ref, doc)
-		except Exception:
-			frappe.db.rollback(save_point="sk_won_deal")  # a half-made deal never stays behind; the order still submits
+		except Exception as e:
+			frappe.db.rollback(save_point="sk_won_deal")  # a half-made deal never stays behind
 			frappe.log_error(f"SK App won deal from {doc.name} ({ref})")
+			problems.append(("won_deal_failed", f"Order {doc.name}: {ref} could not be marked Won: "
+				+ frappe.utils.strip_html(str(e) or type(e).__name__)[:200]))
+	report("Sales", doc, problems, title="Deal not marked Won")
+
+
+def deals_by_customer(so) -> tuple[list[str], tuple | None]:
+	"""An order with no CRM reference: the customer's one open deal. Two or more open deals, or none, is a gap to look at."""
+	meta = frappe.get_meta("CRM Deal")
+	if not meta.has_field("erpnext_customer") or not so.get("customer"):
+		return [], ("order_without_deal", f"Order {so.name} ({so.get('customer_name') or so.get('customer')}) has no CRM lead or deal")
+	closed = frappe.get_all("CRM Deal Status", filters={"type": ["in", ["Won", "Lost"]]}, pluck="name") or ["Won", "Lost"]
+	won = frappe.get_all("CRM Deal Status", filters={"type": "Won"}, pluck="name") or ["Won"]
+	open_deals = frappe.get_all("CRM Deal", filters={"erpnext_customer": so.customer, "status": ["not in", closed]},
+		pluck="name", order_by="modified desc")
+	if len(open_deals) == 1:
+		return open_deals, None
+	if open_deals:
+		return [], ("order_many_deals", f"Order {so.name}: customer {so.customer} has {len(open_deals)} open deals "
+			f"({', '.join(open_deals[:5])}); please put the right deal number in the order")
+	if frappe.db.exists("CRM Deal", {"erpnext_customer": so.customer, "status": ["in", won]}):
+		return [], None  # the customer's deal is already Won (repeat order): nothing to change
+	return [], ("order_without_deal", f"Order {so.name} ({so.get('customer_name') or so.customer}) has no CRM lead or deal")
 
 
 def won_from_order(ref: str, so) -> str | None:

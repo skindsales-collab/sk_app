@@ -29,6 +29,6 @@ jobs:
       - name: Screen file syntax
         run: node --check sk_app/public/js/sk_app.js
       - name: Screen logic tests
-        run: node --test tests/js
+        run: node --test tests/js/*.test.js
       - name: Python files compile
         run: python -m compileall -q sk_app

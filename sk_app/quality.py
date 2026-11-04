@@ -13,7 +13,7 @@ from frappe import _
 from frappe.utils import add_days, cint, flt, nowdate
 
 from sk_app.production import wo_customer
-from sk_app.store import _todo, _users_with_function, attach, material_pos, need, try_submit
+from sk_app.store import _todo, _users_with_function, attach, material_pos, draft_reason, need, try_submit
 
 QUALITY = "Quality"
 FINAL_WORDS = ("final", "inspection", "qc")
@@ -131,7 +131,7 @@ def save(user: str, reference_type: str, reference_name: str, item_code: str, po
 	for p in photos or []:
 		attach(p, "Quality Inspection", qi.name, user)
 	posted = try_submit(qi)
-	out = {"name": qi.name, "status": qi.status, "posted": posted}
+	out = {"name": qi.name, "status": qi.status, "posted": posted, "reason": draft_reason()}
 	if reference_type == "Job Card" and not bad and posted:
 		from sk_app.sub_bills import on_qc_pass
 

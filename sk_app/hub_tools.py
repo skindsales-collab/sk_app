@@ -437,6 +437,26 @@ _FILTERS = {
 	"description": 'Frappe filters: {"status": "Open"} or [["grand_total", ">", 100000], ["status", "=", "Draft"]]',
 	"anyOf": [{"type": "object"}, {"type": "array"}, {"type": "string"}],
 }
+# ---- tools: known facts (SK 4-Nov: never ask SK twice) -----------------------------------------------
+def find_facts(query: str, area: str | None = None) -> dict:
+	from sk_app.core import facts
+
+	found = facts.find(query, area)
+	return {"found": found, "looked_in": "SK Known Fact" + (f" ({area})" if area else ""),
+		"next": "Use these. If nothing fits, also search the ERPNext records, project memory, the sk-* skills and the project files "
+			"before asking; when you ask, say where you looked."}
+
+
+def save_fact(topic: str, fact: str, area: str = "Company", given_by: str = "SK", source: str | None = None,
+		replaces: str | None = None, asked_again: bool = False, project: str | None = None) -> dict:
+	from sk_app.core import facts
+
+	out = facts.save(topic, fact, area, given_by, source, replaces, bool(asked_again))
+	action = "asked again" if asked_again else "fact conflict" if out.get("conflict") else "fact saved"
+	_log(action, "SK Known Fact", out.get("name") or out.get("conflict"), {"topic": topic}, project)
+	return out
+
+
 READ = {"readOnlyHint": True, "openWorldHint": False}
 WRITE = {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False}
 
@@ -458,6 +478,14 @@ TOOLS = {
 	t["spec"]["name"]: t
 	for t in (
 		_tool(hub_overview, "Who am I / my team", "Who you are signed in as, your team and roles, and how many handoffs are open for your team. Call this first."),
+		_tool(
+			find_facts,
+			"Find what SK already told",
+			"CHECK BEFORE ASK: every master, rule and decision SK or staff already gave (owners, rates, accounts, staff, customer facts, app rules). Call this before asking SK or staff anything.",
+			{"query": {"type": "string", "description": "a few words, e.g. 'non cabin owner' or 'cash payments'"},
+				"area": {"type": "string", "description": "optional: Company, Sales, Finance, Store, Purchase, Production, HR, Design, Machine Shifting, App rules"}},
+			["query"],
+		),
 		_tool(
 			describe_doctype,
 			"Fields of a document type",
@@ -504,6 +532,16 @@ TOOLS = {
 			"Add a comment to a record's timeline, visible to staff in ERPNext / CRM.",
 			{"doctype": {"type": "string"}, "name": {"type": "string"}, "text": {"type": "string"}, "project": _PROJECT},
 			["doctype", "name", "text"],
+			WRITE,
+		),
+		_tool(
+			save_fact,
+			"Save what SK told",
+			"Save an answer / rule / decision from SK or staff at once, so it is never asked again. A changed answer: pass replaces (the old KF- name). If SK says it was already given, call with asked_again=true (it counts on the scorecard).",
+			{"topic": {"type": "string"}, "fact": {"type": "string"}, "area": {"type": "string", "default": "Company"},
+				"given_by": {"type": "string", "default": "SK"}, "source": {"type": "string", "description": "thread / file / record where it was given"},
+				"replaces": {"type": "string"}, "asked_again": {"type": "boolean", "default": False}, "project": _PROJECT},
+			["topic", "fact"],
 			WRITE,
 		),
 		_tool(

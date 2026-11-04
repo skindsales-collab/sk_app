@@ -11,7 +11,7 @@ from frappe import _
 from frappe.utils import cint, flt, getdate, now_datetime, nowdate, time_diff_in_seconds
 
 from sk_app import cabin_projects
-from sk_app.store import _todo, _users_with_function, attach, need, try_submit, uom, users_or_ceo
+from sk_app.store import _todo, _users_with_function, attach, draft_reason, need, try_submit, uom, users_or_ceo
 
 PRODUCTION = "Production"
 SUB = "Subcontractor"
@@ -199,7 +199,7 @@ def done(user: str, job_card: str, photos=None, workers=None, remark=None, check
 	for q in users_or_ceo("Quality"):  # SK 1-Nov: never to nobody
 		_todo(q, "Job Card", jc.name, _("Stage done, self-checked ({0} Not OK), please check: {1} · {2}").format(bad, jc.operation,
 			jc.item_name or jc.production_item))
-	return {"name": jc.name, "posted": posted, "self_check": self_check}
+	return {"name": jc.name, "posted": posted, "reason": draft_reason(), "self_check": self_check}
 
 
 def need_material(user: str, items: list[dict], job_card=None, work_order=None, needed_by=None, spoken=None) -> dict:

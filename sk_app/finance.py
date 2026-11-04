@@ -11,7 +11,7 @@ from frappe import _
 from frappe.utils import add_days, cint, date_diff, flt, fmt_money, get_first_day, getdate, nowdate
 
 from sk_app.purchase import po_limit
-from sk_app.store import _company, _todo, _users_with_function, attach, material_pos, need, try_submit
+from sk_app.store import _company, _todo, _users_with_function, attach, material_pos, draft_reason, need, try_submit
 
 ACCOUNTS = "Accounts"
 MANAGEMENT = "Management"
@@ -45,6 +45,27 @@ def cash_today(user: str) -> dict:
 
 # ---------- To Collect ----------
 
+PROMISE_DATE, PROMISE_NOTE = "sk_promise_date", "sk_promise_note"
+
+
+def ensure_fields():
+	"""SK 4-Nov rebuild (F3): the customer's payment promise is kept on the invoice itself (before it was found by searching
+	comments for the word 'Promise', which missed a promise saved in Marathi)."""
+	from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
+	create_custom_fields({"Sales Invoice": [
+		{"fieldname": PROMISE_DATE, "label": "Payment promised on", "fieldtype": "Date", "insert_after": "due_date",
+			"allow_on_submit": 1, "no_copy": 1},
+		{"fieldname": PROMISE_NOTE, "label": "What the customer promised", "fieldtype": "Small Text", "insert_after": PROMISE_DATE,
+			"allow_on_submit": 1, "no_copy": 1}]}, update=True)
+
+
+def _promise(r) -> str | None:
+	if r.get(PROMISE_DATE) or r.get(PROMISE_NOTE):
+		return f"{r.get(PROMISE_DATE) or '-'}: {r.get(PROMISE_NOTE) or ''}".strip()
+	return frappe.db.get_value("Comment", {"reference_doctype": "Sales Invoice", "reference_name": r.name,
+		"comment_type": "Comment", "content": ["like", "%Promise%"]}, "content", order_by="creation desc")  # before 4-Nov
+
 def _bucket(days_late: int) -> str:
 	return "not_due" if days_late <= 0 else "d0_30" if days_late <= 30 else "d31_60" if days_late <= 60 else "d60_plus"
 
@@ -52,15 +73,18 @@ def _bucket(days_late: int) -> str:
 def to_collect(user: str) -> list[dict]:
 	"""Customer dues, oldest first, with the customer's mobile for Call / WhatsApp and the last promise."""
 	need(user, ACCOUNTS, MANAGEMENT, "Sales")
+	fields = ["name", "customer", "customer_name", "posting_date", "due_date", "grand_total", "outstanding_amount", "owner"]
+	meta = frappe.get_meta("Sales Invoice")
+	fields += [f for f in (PROMISE_DATE, PROMISE_NOTE) if meta.has_field(f)]
 	rows = frappe.get_all("Sales Invoice", filters={"docstatus": 1, "outstanding_amount": [">", 0], "company": _company()},
-		fields=["name", "customer", "customer_name", "posting_date", "due_date", "grand_total", "outstanding_amount", "owner"],
-		order_by="due_date asc, posting_date asc")
+		fields=fields, order_by="due_date asc, posting_date asc")
 	for r in rows:
 		late = date_diff(nowdate(), r.due_date or r.posting_date)
 		r.update({"days_late": late, "bucket": _bucket(late), "mobile": frappe.db.get_value("Customer", r.customer, "mobile_no"),
 			"due_date": str(r.due_date or ""), "posting_date": str(r.posting_date),
-			"promise": frappe.db.get_value("Comment", {"reference_doctype": "Sales Invoice", "reference_name": r.name,
-				"comment_type": "Comment", "content": ["like", "%Promise%"]}, "content", order_by="creation desc")})
+			"promise": _promise(r)})
+		for f in (PROMISE_DATE, PROMISE_NOTE):
+			r.pop(f, None)
 	return rows
 
 
@@ -72,6 +96,9 @@ def promise(user: str, sales_invoice: str, text: str, promised_on=None) -> dict:
 	si = frappe.get_doc("Sales Invoice", sales_invoice)
 	note = _("Promise {0}: {1}").format(promised_on or "-", text or "")
 	si.add_comment("Comment", note)
+	if frappe.get_meta("Sales Invoice").has_field(PROMISE_DATE):
+		frappe.db.set_value("Sales Invoice", si.name, {PROMISE_DATE: getdate(promised_on) if promised_on else None,
+			PROMISE_NOTE: (text or "").strip()[:500]})
 	if promised_on:
 		frappe.get_doc({"doctype": "ToDo", "allocated_to": user, "reference_type": "Sales Invoice", "reference_name": si.name,
 			"description": _("Payment promised today by {0}: {1}").format(si.customer_name, _money(si.outstanding_amount)),
@@ -95,11 +122,12 @@ def receive_payment(user: str, reference_doctype: str, reference_name: str, amou
 	pe.insert()
 	attach(photo, "Payment Entry", pe.name, user)
 	posted = try_submit(pe)
+	reason = draft_reason()
 	# the salesperson of the order hears that the money came (F06 link Finance -> Sales)
 	owner = frappe.db.get_value(reference_doctype, reference_name, "owner")
 	if owner and owner != user and owner in _users_with_function("Sales"):
 		_todo(owner, reference_doctype, reference_name, _("Payment received: {0} from {1}").format(_money(amount), pe.party_name))
-	return {"name": pe.name, "posted": posted}
+	return {"name": pe.name, "posted": posted, "reason": reason}
 
 
 def bank_account(company: str, mode: str | None = None) -> str | None:
@@ -135,7 +163,11 @@ def cash_account(company: str, mode: str | None = None) -> str | None:
 def _fill_payment(pe, mode, reference_no, reference_date):
 	# SK 4-Nov: payments are net banking with their UTR (unique: sk_app.doubles stops a second entry of the same UTR);
 	# a cash payment (some cabins) goes to the Cash account with its reason typed in the same box
-	mode = mode if mode and frappe.db.exists("Mode of Payment", mode) else "Net Banking"
+	# SK 4-Nov rebuild (F1): blank = Net Banking (SK's rule), but a mode ERPNext does not know is refused, never swapped quietly
+	if mode and not frappe.db.get_value("Mode of Payment", {"name": mode, "enabled": 1}):
+		valid = frappe.get_all("Mode of Payment", filters={"enabled": 1}, pluck="name", order_by="name asc")
+		frappe.throw(_("Payment mode {0} is not in ERPNext. Please pick one of: {1}").format(mode, ", ".join(valid)), title=_("Wrong payment mode"))
+	mode = mode or "Net Banking"
 	if frappe.db.exists("Mode of Payment", mode):
 		pe.mode_of_payment = mode
 	text = (reference_no or "").strip()
@@ -215,7 +247,7 @@ def pay(user: str, purchase_invoice: str, amount=None, mode=None, reference_no=N
 	attach(photo, "Payment Entry", pe.name, user)
 	posted = try_submit(pe)
 	frappe.db.set_value("ToDo", {"reference_type": "Purchase Invoice", "reference_name": pi.name, "status": "Open"}, "status", "Closed")
-	return {"name": pe.name, "posted": posted}
+	return {"name": pe.name, "posted": posted, "reason": draft_reason()}
 
 
 def _functions(user: str) -> list[str]:
@@ -417,7 +449,8 @@ def pay_expense(user: str, expense_claim: str) -> dict:
 	je.cheque_date = je.get("cheque_date") or nowdate()
 	je.flags.ignore_permissions = True
 	je.insert()
-	return {"name": je.name, "posted": try_submit(je)}
+	posted = try_submit(je)
+	return {"name": je.name, "posted": posted, "reason": draft_reason()}
 
 
 def voucher_options(user: str) -> dict:
@@ -452,7 +485,8 @@ def petty_cash(user: str, expense_account: str, amount, cash_account: str, cost_
 	je.flags.ignore_permissions = True
 	je.insert()
 	attach(photo, "Journal Entry", je.name, user)
-	return {"name": je.name, "posted": try_submit(je)}
+	posted = try_submit(je)
+	return {"name": je.name, "posted": posted, "reason": draft_reason()}
 
 
 # ---------- Segment P&L ----------

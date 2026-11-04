@@ -294,6 +294,12 @@ def check_sales_order(doc, method=None):
 	missing += cust
 	if missing:
 		stop(_("Sales Order {0} cannot be submitted").format(doc.name), missing)
+	if R.is_placeholder_po(doc.po_no) and not _has_file("Sales Order", doc.name):
+		# SK 4-Nov rebuild (S5): Warn only first (SK Rule Log); Sales rules on Enforce stop it
+		from sk_app.core.rules import report
+
+		report("Sales", doc, [("po_placeholder", _("Sales Order {0}: '{1}' is not a customer PO number; please type the real PO "
+			"number or attach the PO copy").format(doc.name, doc.po_no))], title=_("Customer PO number"))
 
 
 def _ceo_old_order(doc) -> bool:

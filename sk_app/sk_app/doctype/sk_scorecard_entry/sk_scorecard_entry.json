@@ -1,0 +1,102 @@
+{
+ "doctype": "DocType",
+ "name": "SK Scorecard Entry",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-11-04 18:30:00.000000",
+ "modified": "2026-11-04 18:30:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "states": [],
+ "links": [],
+ "actions": [],
+ "index_web_pages_for_search": 0,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "in_create": 1,
+ "autoname": "format:SC-{YYYY}-{#######}",
+ "naming_rule": "Expression",
+ "title_field": "measure",
+ "description": "Before / after rebuild scorecard (SK 4-Nov): one number per measure per day, with its unit and source, the same way on the old and the new path.",
+ "field_order": [
+  "day",
+  "measure",
+  "value",
+  "unit",
+  "column_1",
+  "area",
+  "paths",
+  "source"
+ ],
+ "fields": [
+  {
+   "fieldname": "day",
+   "fieldtype": "Date",
+   "label": "Day",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "measure",
+   "fieldtype": "Data",
+   "label": "Measure",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "value",
+   "fieldtype": "Float",
+   "label": "Value",
+   "read_only": 1,
+   "in_list_view": 1,
+   "precision": "2"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Data",
+   "label": "Unit",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "column_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "area",
+   "fieldtype": "Data",
+   "label": "Area",
+   "read_only": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "paths",
+   "fieldtype": "Data",
+   "label": "New path modules",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Small Text",
+   "label": "Source (how it was counted)",
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "Desk User",
+   "read": 1,
+   "report": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "delete": 1
+  }
+ ]
+}

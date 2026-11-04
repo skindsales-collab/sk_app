@@ -101,3 +101,12 @@ def test_ceo_may_submit_old_order_with_customer_data_pending():
 	assert not old_order_data_pending("2026-11-01", True)  # new orders: full gate
 	assert not old_order_data_pending("2026-07-20", False)  # only the CEO
 	assert not old_order_data_pending(None, True)
+
+
+def test_placeholder_po_numbers():
+	from sk_app.gate_rules import is_placeholder_po
+
+	for po in ["From CRM-LEAD-2026-00012", "NA", "N/A", "-", "PO awaited", "Pending", "TBA", "0", "crm-deal-2026-00001"]:
+		assert is_placeholder_po(po), po
+	for po in ["4500123456", "25940227", "PO/2026/118", "Verbal / WhatsApp order", "", None]:
+		assert not is_placeholder_po(po), po

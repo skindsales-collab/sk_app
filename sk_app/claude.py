@@ -286,8 +286,15 @@ def help_draft(question: str, function: str, screen: str, asker: str, context: s
 	client = anthropic.Anthropic(api_key=_api_key(), timeout=90.0, max_retries=1)
 	content = [{"type": "image", "source": {"type": "base64", "media_type": m, "data": base64.standard_b64encode(b).decode()}}
 		for b, m in images]
+	# SK 4-Nov: check before ask: what SK already told (SK Known Fact) goes with every question, so it is used, not asked
+	try:
+		from sk_app.core.facts import find
+
+		known = "\n".join(f"- {f['topic']}: {f['fact']}" for f in find(question, limit=8)) or "none found"
+	except Exception:
+		known = "not available"
 	content.append({"type": "text", "text": f"Function: {function}\nScreen: {screen or 'not given'}\nAsked by: {asker}\n"
-		f"Question: {question}\n\nCompany FAQ and lessons:\n{context}"})
+		f"Question: {question}\n\nAlready decided by SK (use these, never ask them again):\n{known}\n\nCompany FAQ and lessons:\n{context}"})
 	try:
 		response = client.beta.messages.create(
 			model=settings.claude_model or "claude-opus-5-5",

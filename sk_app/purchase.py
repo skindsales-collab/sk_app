@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, flt, fmt_money, getdate, nowdate
 
-from sk_app.store import _company, _todo, _users_with_function, attach, material_pos, material_requests, need, try_submit, uom
+from sk_app.store import _company, _todo, _users_with_function, attach, material_pos, material_requests, draft_reason, need, try_submit, uom
 
 PURCHASE = "Purchase"
 # SK 26-Oct-2026: Rs 5,000 (draft F02 had proposed Rs 50,000); can be changed in site config "sk_po_approval_limit"
@@ -206,7 +206,8 @@ def place_po(po, user: str) -> dict:
 				_todo(a, "Purchase Order", po.name, _("Approve PO {0}: {1} for {2} ({3})").format(po.name, po.supplier_name,
 					fmt_money(po.grand_total, currency=po.currency), why))
 		return {"name": po.name, "posted": False, "needs_approval": True, "grand_total": po.grand_total, "why": why}
-	return {"name": po.name, "posted": try_submit(po), "needs_approval": False, "grand_total": po.grand_total}
+	posted = try_submit(po)
+	return {"name": po.name, "posted": posted, "reason": draft_reason(), "needs_approval": False, "grand_total": po.grand_total}
 
 
 def approvals(user: str) -> list[dict]:
@@ -231,7 +232,8 @@ def decide(user: str, purchase_order: str, approve: bool, reason=None) -> dict:
 		po.flags.ignore_permissions = True
 		frappe.flags.sk_ceo_po = True
 		try:
-			return {"name": po.name, "posted": try_submit(po)}
+			posted = try_submit(po)
+			return {"name": po.name, "posted": posted, "reason": draft_reason()}
 		finally:
 			frappe.flags.sk_ceo_po = False
 	po.add_comment("Comment", _("Rejected in SK App: {0}").format(reason or "-"))

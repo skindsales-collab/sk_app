@@ -1,0 +1,150 @@
+{
+ "doctype": "DocType",
+ "name": "SK Known Fact",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-11-04 19:00:00.000000",
+ "modified": "2026-11-04 19:00:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "autoname": "format:KF-{#####}",
+ "naming_rule": "Expression",
+ "title_field": "topic",
+ "track_changes": 1,
+ "search_fields": "topic,area,keywords",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "links": [],
+ "actions": [],
+ "index_web_pages_for_search": 0,
+ "description": "SK 4-Nov-2026: every master, rule and decision SK or staff have already given, in one place. Claude (every project, through SK Hub), the app and every thread read this FIRST and ask only what is not here. Each answer is saved here at once, so nothing is asked twice.",
+ "field_order": [
+  "topic",
+  "area",
+  "status",
+  "column_1",
+  "given_by",
+  "given_on",
+  "source",
+  "section_1",
+  "fact",
+  "keywords",
+  "section_2",
+  "times_asked_again",
+  "last_asked_again",
+  "replaced_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "topic",
+   "fieldtype": "Data",
+   "label": "Topic",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Short: e.g. 'Owner of non-cabin data'"
+  },
+  {
+   "fieldname": "area",
+   "fieldtype": "Select",
+   "label": "Area",
+   "options": "Company\nSales\nFinance\nStore\nPurchase\nProduction\nHR\nDesign\nMachine Shifting\nApp rules\nOther",
+   "default": "Company",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Active\nReplaced",
+   "default": "Active",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "column_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "given_by",
+   "fieldtype": "Data",
+   "label": "Given by",
+   "default": "SK"
+  },
+  {
+   "fieldname": "given_on",
+   "fieldtype": "Date",
+   "label": "Given on",
+   "default": "Today"
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Data",
+   "label": "Source",
+   "description": "Thread, file or ERPNext record where it was given"
+  },
+  {
+   "fieldname": "section_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "fact",
+   "fieldtype": "Long Text",
+   "label": "Fact / answer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "keywords",
+   "fieldtype": "Small Text",
+   "label": "Search words",
+   "description": "Other words people may use for it (English / Marathi)"
+  },
+  {
+   "fieldname": "section_2",
+   "fieldtype": "Section Break",
+   "label": "Asked again"
+  },
+  {
+   "fieldname": "times_asked_again",
+   "fieldtype": "Int",
+   "label": "Times asked again",
+   "default": "0",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "last_asked_again",
+   "fieldtype": "Datetime",
+   "label": "Last asked again",
+   "read_only": 1
+  },
+  {
+   "fieldname": "replaced_by",
+   "fieldtype": "Link",
+   "label": "Replaced by",
+   "options": "SK Known Fact",
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "Desk User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1
+  }
+ ]
+}
