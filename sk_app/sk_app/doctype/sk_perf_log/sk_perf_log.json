@@ -1,0 +1,135 @@
+{
+ "doctype": "DocType",
+ "name": "SK Perf Log",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-11-04 18:30:00.000000",
+ "modified": "2026-11-04 18:30:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "states": [],
+ "links": [],
+ "actions": [],
+ "index_web_pages_for_search": 0,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "in_create": 1,
+ "autoname": "hash",
+ "naming_rule": "Random",
+ "title_field": "method",
+ "description": "SK App speed and taps, sent by each phone / PC every 2 minutes (before / after rebuild scorecard).",
+ "field_order": [
+  "day",
+  "user",
+  "device",
+  "paths",
+  "column_1",
+  "method",
+  "calls",
+  "avg_ms",
+  "max_ms",
+  "errors",
+  "saves",
+  "avg_taps"
+ ],
+ "fields": [
+  {
+   "fieldname": "day",
+   "fieldtype": "Date",
+   "label": "Day",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "User",
+   "read_only": 1,
+   "options": "User",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "device",
+   "fieldtype": "Data",
+   "label": "Device",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "paths",
+   "fieldtype": "Data",
+   "label": "New path modules",
+   "read_only": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "column_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "method",
+   "fieldtype": "Data",
+   "label": "Screen call",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "calls",
+   "fieldtype": "Int",
+   "label": "Calls",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "avg_ms",
+   "fieldtype": "Int",
+   "label": "Average time (ms)",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "max_ms",
+   "fieldtype": "Int",
+   "label": "Slowest (ms)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "errors",
+   "fieldtype": "Int",
+   "label": "Errors",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "saves",
+   "fieldtype": "Int",
+   "label": "Saves",
+   "read_only": 1
+  },
+  {
+   "fieldname": "avg_taps",
+   "fieldtype": "Float",
+   "label": "Taps per save",
+   "read_only": 1,
+   "precision": "1"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "Desk User",
+   "read": 1,
+   "report": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "delete": 1
+  }
+ ]
+}

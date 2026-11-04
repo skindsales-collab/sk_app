@@ -40,6 +40,9 @@ def after_migrate():
 	setup_site()
 	from sk_app.core.switch import ensure_rows
 
+	from sk_app.finance import ensure_fields as finance_fields
+
+	finance_fields()  # SK 4-Nov rebuild F3: payment promise on the invoice
 	ensure_rows()  # SK 4-Nov rebuild: one SK Path Switch row per module, all Old + Warn only (nothing changes until SK switches)
 	ensure_crm_fields()
 	ensure_mail_fields()

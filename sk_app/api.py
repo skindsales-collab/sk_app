@@ -53,6 +53,41 @@ def app_config():
 	return {"options": options.app_options(), "paths": switch.my_paths(user)}
 
 
+@frappe.whitelist(methods=["POST", "GET"])
+def replay_check(since=None):
+	"""SK 4-Nov rebuild: all records since 1-Apr through the new rules (nothing changed); gaps go to SK Rule Log. CEO only.
+	Runs in the background; the result comes as an app notification and in SK Rule Log (mode Replay)."""
+	from sk_app.core.people import is_ceo
+
+	user = _me(unlocked=False).user
+	if not is_ceo(user):
+		frappe.throw(_("Only the CEO can run the replay check"), frappe.PermissionError)
+	frappe.enqueue("sk_app.core.replay.run_and_tell", queue="long", timeout=3600, since=since or "2026-04-01", user=user)
+	return {"started": True, "see": "/app/sk-rule-log?mode=Replay"}
+
+
+@frappe.whitelist(methods=["POST"])
+def perf_log(rows, device=None):
+	"""SK 4-Nov scorecard: the phone / PC sends its screen times, errors and taps per save every 2 minutes."""
+	from sk_app.core.scorecard import log_perf
+
+	user = _me(unlocked=False).user
+	data = json.loads(rows) if isinstance(rows, str) else (rows or [])
+	log_perf(user, data if isinstance(data, list) else [], device)
+	return {"ok": True}
+
+
+@frappe.whitelist()
+def scorecard(day=None):
+	"""SK 4-Nov: the before / after numbers (today live, and old-path days vs new-path days). CEO only."""
+	from sk_app.core import scorecard as sc
+	from sk_app.core.people import is_ceo
+
+	if not is_ceo(_me(unlocked=False).user):
+		frappe.throw(_("Only the CEO can see the scorecard"), frappe.PermissionError)
+	return {"today": sc.measures(day), "new_modules": sc.new_modules(), "compare": sc.compare()}
+
+
 @frappe.whitelist()
 def home():
 	profile = _me()

@@ -79,7 +79,9 @@ def submit_for(doc, user: str) -> bool:
 
 
 def try_submit(doc) -> bool:
-	"""Post the document if ERPNext accepts it (stock available, accounts set); else keep the draft."""
+	"""Post the document if ERPNext accepts it (stock available, accounts set); else keep the draft.
+	SK 4-Nov rebuild (F2): ERPNext's reason is kept for the screen too (draft_reason), not only in a comment."""
+	frappe.flags.sk_draft_reason = None
 	frappe.db.savepoint("sk_submit")
 	try:
 		doc.flags.ignore_permissions = True
@@ -89,8 +91,15 @@ def try_submit(doc) -> bool:
 		frappe.db.rollback(save_point="sk_submit")
 		frappe.clear_messages()
 		doc.reload()
-		doc.add_comment("Comment", _("Kept as draft by SK App: {0}").format((str(e) or type(e).__name__)[:200]))
+		reason = frappe.utils.strip_html(str(e) or type(e).__name__)[:200]
+		frappe.flags.sk_draft_reason = reason
+		doc.add_comment("Comment", _("Kept as draft by SK App: {0}").format(reason))
 		return False
+
+
+def draft_reason() -> str | None:
+	"""Why the last try_submit kept its draft (None when it posted)."""
+	return frappe.flags.get("sk_draft_reason")
 
 
 def uom(item_code: str) -> dict:

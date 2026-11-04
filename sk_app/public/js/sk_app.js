@@ -1125,7 +1125,7 @@
 	const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 	// while the CEO views a member's app every reading screen runs as the member (their own permissions); saving is blocked
-	const VIEW_OWN = new Set(["view_members", "view_suggest", "report_screen_error"]);
+	const VIEW_OWN = new Set(["view_members", "view_suggest", "report_screen_error", "perf_log"]);
 
 	// SK 4-Nov layer 3 (Catalyst: two deals 17 s apart): a save is sent once. The button tapped for it is locked until
 	// ERPNext answers, a second tap on a locked button does nothing, and the same save already on its way is not sent again.
@@ -1137,6 +1137,7 @@
 		if (!b) return;
 		if (b.classList.contains("sk-busy")) { ev.preventDefault(); ev.stopImmediatePropagation(); return; }
 		lastTap = { el: b, at: Date.now() };
+		perfTaps++;
 	}, true);
 	function lockTapped() {
 		const tap = lastTap;
@@ -1146,12 +1147,35 @@
 		if ("disabled" in el) el.disabled = true;
 		return () => { el.classList.remove("sk-busy"); if ("disabled" in el && !was) el.disabled = false; };
 	}
+	// SK 4-Nov before / after scorecard: every server call's time (ms), errors, and the taps from one save to the next are
+	// counted in the phone / PC and sent every 2 minutes (SK Perf Log), the same way on the old and the new path
+	const PERF = {};
+	let perfTaps = 0;
+	function perfNote(method, ms, ok, save) {
+		if (method === "perf_log") return;
+		const p = PERF[method] || (PERF[method] = { calls: 0, ms: 0, max: 0, errors: 0, saves: 0, taps: 0 });
+		p.calls++; p.ms += ms; p.max = Math.max(p.max, ms);
+		if (!ok) p.errors++;
+		if (save && ok) { p.saves++; p.taps += perfTaps; perfTaps = 0; }
+	}
+	async function perfFlush() {
+		const rows = Object.entries(PERF).map(([method, p]) => ({ method, ...p, ms: Math.round(p.ms), max: Math.round(p.max) }));
+		if (!rows.length) return;
+		for (const k of Object.keys(PERF)) delete PERF[k];
+		try { await send("perf_log", { rows: JSON.stringify(rows), device: isPc() ? "PC" : "Mobile" }, true, true); } catch (e) { /* next time */ }
+	}
+	setInterval(perfFlush, 2 * 60 * 1000);
+	function timed(method, promise, save) {
+		const t0 = performance.now();
+		return promise.then((r) => { perfNote(method, performance.now() - t0, true, save); return r; },
+			(e) => { perfNote(method, performance.now() - t0, false, save); throw e; });
+	}
 	async function call(method, args, post, background) {
-		if (!post || background) return send(method, args, post, background);
+		if (!post || background) return timed(method, send(method, args, post, background), false);
 		const key = method + "|" + JSON.stringify(args || {});
 		if (inFlight.has(key)) return inFlight.get(key);
 		const unlock = lockTapped();
-		const p = send(method, args, post, background).finally(() => { inFlight.delete(key); unlock(); });
+		const p = timed(method, send(method, args, post, background), true).finally(() => { inFlight.delete(key); unlock(); });
 		inFlight.set(key, p);
 		return p;
 	}
@@ -5068,10 +5092,10 @@
 				const items = S.wo.items.map((r, k) => ({ item_code: r.item_code, qty: val("i-q" + k) })).filter((x) => Number(x.qty) > 0);
 				if (val("i-extra") && Number(val("i-extra-q")) > 0) items.push({ item_code: val("i-extra"), qty: val("i-extra-q") });
 				const r = await call("store_issue", { work_order: S.wo.name, items: JSON.stringify(items), taken_by: val("i-who"), job_card: val("i-jc") || null, photo: await photoUrl("i-photo") }, true);
-				saved(r.posted ? `${t("issued_ok")}: ${r.name}` : `${t("kept_draft")}: ${r.name}`);
+				saved(r.posted ? `${t("issued_ok")}: ${r.name}` : `${r.reason || t("kept_draft")}: ${r.name}`);
 				return go("issue");
 			}
-			case "st-req-issue": { const r = await call("store_request_issue", { request: S.reqs[i].request }, true); saved(r.posted ? `${t("issued_ok")}: ${r.name}` : `${t("kept_draft")}: ${r.name}`); return go("store_requests"); }
+			case "st-req-issue": { const r = await call("store_request_issue", { request: S.reqs[i].request }, true); saved(r.posted ? `${t("issued_ok")}: ${r.name}` : `${r.reason || t("kept_draft")}: ${r.name}`); return go("store_requests"); }
 			case "st-req-buy": { const r = await call("store_request_to_purchase", { request: S.reqs[i].request }, true); saved(`${t("sent_purchase")}: ${r.name}`); return go("store_requests"); }
 			case "st-so": return dispatchForm(i);
 			case "st-dispatch": {
@@ -5134,7 +5158,7 @@
 			case "pu-po": {
 				el.disabled = true;
 				const r = await call("buy_make_po", { supplier_quotation: el.dataset.sq }, true);
-				saved(r.needs_approval ? `${r.name}: ${t("sent_sk")}` : r.posted ? `${t("po_placed")}: ${r.name}` : `${t("kept_draft")}: ${r.name}`);
+				saved(r.needs_approval ? `${r.name}: ${t("sent_sk")}` : r.posted ? `${t("po_placed")}: ${r.name}` : `${r.reason || t("kept_draft")}: ${r.name}`);
 				return;
 			}
 			case "pu-note": {
@@ -5757,7 +5781,7 @@
 				el.disabled = true;
 				const r = await call("fin_receive", { reference_doctype: "Sales Invoice", reference_name: S.inv.name, amount: val("fr-amt"), mode: val("fr-mode") || null,
 					reference_no: val("fr-ref") || null, reference_date: val("fr-date"), photo: await photoUrl("fr-photo") }, true);
-				closeSheet(); toast(r.posted ? `✓ ${r.name}` : `${r.name}: ${t("kept_draft")}`, !r.posted); return go("to_collect");
+				closeSheet(); toast(r.posted ? `✓ ${r.name}` : `${r.name}: ${r.reason || t("kept_draft")}`, !r.posted); return go("to_collect");
 			}
 			case "fin-ask": await call("fin_ask_approval", { purchase_invoice: S.bills[i].name }, true); return toast(t("asked_sk"));
 			case "fin-approve": await call("fin_approve_payment", { purchase_invoice: S.bills[i].name }, true); toast(t("approved")); return go("pay_approvals");
@@ -5768,7 +5792,7 @@
 				el.disabled = true;
 				const r = await call("fin_pay", { purchase_invoice: S.bill.name, amount: val("fy-amt"), mode: val("fy-mode") || null, reference_no: val("fy-ref") || null,
 					reference_date: val("fy-date"), photo: await photoUrl("fy-photo") }, true);
-				closeSheet(); toast(r.posted ? `✓ ${r.name}` : `${r.name}: ${t("kept_draft")}`, !r.posted); return go("to_pay");
+				closeSheet(); toast(r.posted ? `✓ ${r.name}` : `${r.name}: ${r.reason || t("kept_draft")}`, !r.posted); return go("to_pay");
 			}
 			case "fin-bill": S.photo = S.fb.photos[i];
 				return sheet(`<h3 class="sk-h">🧾 ${esc(S.photo.supplier_name || "")}</h3><p class="sk-note">${esc(S.photo.description)}</p>
@@ -5813,7 +5837,7 @@
 				return go(act === "fin-post-pi" ? "bills_to_post" : "invoices");
 			}
 			case "fin-make-inv": { el.disabled = true; const r = await call("fin_make_invoice", { delivery_note: S.fi.to_bill[i].name }, true); toast(`${r.name}: ${t("draft_made")}`); return go("invoices"); }
-			case "fin-pay-claim": { el.disabled = true; const r = await call("fin_pay_expense", { expense_claim: S.claims[i].name }, true); toast(r.posted ? `✓ ${r.name}` : `${r.name}: ${t("kept_draft")}`, !r.posted); return go("expenses"); }
+			case "fin-pay-claim": { el.disabled = true; const r = await call("fin_pay_expense", { expense_claim: S.claims[i].name }, true); toast(r.posted ? `✓ ${r.name}` : `${r.name}: ${r.reason || t("kept_draft")}`, !r.posted); return go("expenses"); }
 			case "fin-voucher": {
 				const o = await call("fin_voucher_options");
 				return sheet(`<h3 class="sk-h">📷 ${t("petty_cash")}</h3>${photoField("pv-photo", "📷 " + t("voucher_photo"))}${formField("pv-text", t("spent_on"), true)}
@@ -5825,7 +5849,7 @@
 				el.disabled = true;
 				const r = await call("fin_petty_cash", { expense_account: val("pv-exp"), amount: val("pv-amt"), cash_account: val("pv-cash"), cost_center: val("pv-cc") || null,
 					narration: val("pv-text"), photo: await photoUrl("pv-photo") }, true);
-				closeSheet(); toast(r.posted ? `✓ ${r.name}` : `${r.name}: ${t("kept_draft")}`, !r.posted); return go("expenses");
+				closeSheet(); toast(r.posted ? `✓ ${r.name}` : `${r.name}: ${r.reason || t("kept_draft")}`, !r.posted); return go("expenses");
 			}
 			case "fin-tick": { const c = S.close[i]; await call("fin_tick_close", { key: c.key, done: c.done ? 0 : 1 }, true); return go("month_close"); }
 		}

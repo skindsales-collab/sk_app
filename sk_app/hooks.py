@@ -30,7 +30,9 @@ scheduler_events = {
 		# SK 28-Oct: customers tagged Cabin / Non-Cabin and every order and customer given its salesperson
 		"30 1 * * *": ["sk_app.sales_owner.nightly"],
 		# SK 29-Oct: a solved desk request the person did not answer for 3 days is closed
-		"0 2 * * *": ["sk_app.issue_desk.auto_close"]},
+		"0 2 * * *": ["sk_app.issue_desk.auto_close"],
+		# SK 4-Nov before / after rebuild scorecard: the day's numbers saved once, the same way on the old and the new path
+		"45 23 * * *": ["sk_app.core.scorecard.nightly"]},
 }
 
 doc_events = {
@@ -47,7 +49,9 @@ doc_events = {
 		# SK 4-Nov: no deal from a lead that is still New (call not connected): the lead is Qualified first (sk_app.gates)
 		"before_insert": ["sk_app.doubles.check_deal", "sk_app.gates.check_new_deal"], "on_update": "sk_app.deal_quotes.on_deal_update"},
 	"Quotation": {"before_submit": "sk_app.gates.check_quotation"},
-	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal", "on_update": "sk_app.segments.on_customer_update"},
+	# SK 4-Nov rebuild (S3): the customer's salesperson is set at save, not the next night (the nightly run stays as a safety net)
+	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal",
+		"on_update": ["sk_app.segments.on_customer_update", "sk_app.sales_owner.on_customer_save"]},
 	# SK 28-Oct: every order has its salesperson; income ledger and Non-Cabin sub-group cost centre from the customer
 	"Sales Order": {"validate": ["sk_app.sales_owner.fill_order_team", "sk_app.segment_accounts.set_segment"],
 		"before_submit": "sk_app.gates.check_sales_order",

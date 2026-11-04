@@ -122,25 +122,35 @@ def sales(user: str, segment=None, only_self=False) -> list[dict]:
 		stages.append(_stage(step.lower(), step, icons[step], rows, value or None, go=go[step]))
 	# SK 27-Oct "All status shows in flow chart": the three closing steps too, closed this month
 	done = {"Deal Won": [], "Junk Lead": [], "Deal Loss": []}
+	# SK 4-Nov rebuild (S6), New path only: closed arrows count all months, and the old CRM statuses (Unqualified,
+	# Converted) count under their new step, so the arrow totals equal ERPNext's own totals
+	from sk_app.core.switch import use_new
+
+	all_time = use_new("Sales", user)
+	since = {} if all_time else {"modified": [">=", start]}
+	lead_closed = {st: st for st in done}
+	if all_time:
+		lead_closed.update({old: new for old, new in lead_status.MOVE.items() if new in done})
 	if _has("CRM Lead"):
 		# SK 1-Nov logic check B7: a lead that became a deal is counted on its deal only (no double count)
-		for l in frappe.get_all("CRM Lead", filters={"status": ["in", list(done)], "converted": 0, "modified": [">=", start], **seg, **_in("lead_owner", owners)},
+		for l in frappe.get_all("CRM Lead", filters={"status": ["in", list(lead_closed)], "converted": 0, **since, **seg, **_in("lead_owner", owners)},
 				fields=["name", "first_name", "organization", "status", "lead_owner", "modified"], limit=0):
-			done[l.status].append(_row(l.organization or l.first_name or l.name, f"{str(l.modified)[:10]} · {_name(l.lead_owner)}", None, "CRM Lead", l.name))
+			done[lead_closed[l.status]].append(_row(l.organization or l.first_name or l.name, f"{str(l.modified)[:10]} · {_name(l.lead_owner)}", None, "CRM Lead", l.name))
 	if _has("CRM Deal"):
 		kinds = {r.name: r.type for r in frappe.get_all("CRM Deal Status", fields=["name", "type"])}
 		closed_st = [k for k, v in kinds.items() if v in ("Won", "Lost")]
 		has_closed = frappe.get_meta("CRM Deal").has_field("closed_date")
-		for d in frappe.get_all("CRM Deal", filters={"status": ["in", closed_st or [""]], "modified": [">=", start], **seg, **_in("deal_owner", owners)},
+		for d in frappe.get_all("CRM Deal", filters={"status": ["in", closed_st or [""]], **since, **seg, **_in("deal_owner", owners)},
 				fields=["name", "organization", "status", "deal_value", "deal_owner", "modified", "sk_customer_name"] + (["closed_date"] if has_closed else []), limit=0):
-			if d.get("closed_date") and getdate(d.closed_date) < start:
+			if not all_time and d.get("closed_date") and getdate(d.closed_date) < start:
 				continue  # closed in an earlier month, only edited now (B7)
 			done["Deal Won" if kinds.get(d.status) == "Won" else "Deal Loss"].append(_row(d.get("sk_customer_name") or d.organization or d.name,
 				f"{str(d.modified)[:10]} · {_name(d.deal_owner)}", d.deal_value, "CRM Deal", d.name))
 	for key, icon in (("Deal Won", "🏆"), ("Junk Lead", "🗑️"), ("Deal Loss", "❌")):
 		rows = done[key]
 		value = sum(flt(r["value"]) for r in rows if r.get("value"))
-		stages.append(_stage(key.lower().replace(" ", "_"), f"{key} (month)", icon, rows, value or None, go="my_leads", late_rows=[]))
+		stages.append(_stage(key.lower().replace(" ", "_"), f"{key} ({'all' if all_time else 'month'})", icon, rows, value or None,
+			go="my_leads", late_rows=[]))
 	if segment == segments.NON_CABIN:
 		# SK 28-Oct (Rev 1 point 9): the Non-Cabin jobs (Rothe Erde etc.) taken off the factory board are Aditya's to run
 		jobs = frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "per_delivered": ["<", 100], "status": ["not in", ["Closed", "Completed"]],

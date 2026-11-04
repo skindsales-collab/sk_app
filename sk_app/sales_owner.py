@@ -195,6 +195,18 @@ def link_customer(customer: str) -> str | None:
 	return person
 
 
+def on_customer_save(doc, method=None):
+	"""Customer on_update (SK 4-Nov rebuild, S3): live, like every other SK update. Never stops the save."""
+	if frappe.flags.in_import or frappe.flags.in_install:
+		return
+	try:
+		frappe.db.savepoint("sk_customer_person")
+		link_customer(doc.name)
+	except Exception:
+		frappe.db.rollback(save_point="sk_customer_person")
+		frappe.log_error(f"SK App salesperson for customer {doc.name}")
+
+
 def order_person(so) -> str | None:
 	"""The salesperson of an order: the customer's salesperson, else the order's maker when they sell, else the deal owner."""
 	team = _team_of("Customer", so.customer) if so.customer else []

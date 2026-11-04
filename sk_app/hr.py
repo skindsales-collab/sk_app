@@ -695,7 +695,7 @@ def claim_expense(user: str, expense_type: str, amount, expense_date=None, note:
 
 def decide_expense(user: str, name: str, ok, note: str | None = None) -> dict:
 	"""CEO approves (sanctioned = claimed) or rejects with a reason. ERPNext posts it if the accounts are set; Accounts pays it."""
-	from sk_app.store import try_submit
+	from sk_app.store import draft_reason, try_submit
 
 	doc = frappe.get_doc("Expense Claim", name)
 	if not _is_ceo(user):
@@ -711,6 +711,7 @@ def decide_expense(user: str, name: str, ok, note: str | None = None) -> dict:
 	doc.flags.ignore_mandatory = True
 	doc.save()
 	posted = try_submit(doc)
+	reason = draft_reason()
 	if note:
 		doc.add_comment("Comment", note.strip()[:300])
 	_close_todos("Expense Claim", name)
@@ -721,7 +722,7 @@ def decide_expense(user: str, name: str, ok, note: str | None = None) -> dict:
 	emp_user = frappe.db.get_value("Employee", doc.employee, "user_id")
 	if emp_user and emp_user != user:
 		_todo(emp_user, "Expense Claim", name, f"Your cash voucher Rs {flt(doc.total_claimed_amount):,.0f}: {doc.approval_status}{' · ' + note if note else ''}")
-	return {"status": doc.approval_status, "posted": posted}
+	return {"status": doc.approval_status, "posted": posted, "reason": reason}
 
 
 def _close_todos(doctype: str, name: str):

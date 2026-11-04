@@ -160,6 +160,15 @@ def order_missing(d: dict) -> list[tuple[str, str]]:
 	return out
 
 
+PLACEHOLDER_PO = re.compile(r"^(from\s+crm-|crm-(lead|deal)-|n/?a$|nil$|none$|-+$|0+$|tba$|tbd$|awaited|pending|later|po\s*(no)?\s*awaited|to\s+come)", re.I)
+
+
+def is_placeholder_po(po_no) -> bool:
+	"""SK 4-Nov rebuild (S5): 'From CRM-LEAD-…' (old CRM drafts), 'NA', '-', 'awaited' … are not a customer PO number."""
+	text = str(po_no or "").strip()
+	return bool(text) and bool(PLACEHOLDER_PO.match(text))
+
+
 OLD_ORDER_CUTOFF = "2026-11-01"  # SK 31-Oct: orders before this date came from Tally / old CRM
 
 
