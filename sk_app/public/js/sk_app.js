@@ -5513,8 +5513,13 @@
 	// ---------- Finance (SK draft F06, 26-Oct-2026) ----------
 	// SK 4-Nov: Net Banking was missing here (Shraddha). Blank = Net Banking; Cash goes to the Cash account with its reason
 	const MODES = ["Net Banking", "Cash", "Cheque", "Wire Transfer", "Bank Draft"];
-	const payFields = (pre, amount) => `<label class="sk-field"><span>${t("amount")}</span>${qtyBox(pre + "-amt", amount)}</label>
-		${pick(pre + "-mode", t("pay_mode"), MODES).replace("<option>Net Banking</option>", "<option selected>Net Banking</option>")}${formField(pre + "-ref", t("utr_no"))}
+	let payModes = null; // the enabled modes in ERPNext, read once (MODES only if that fails)
+	async function loadPayModes() {
+		if (!payModes) payModes = await call("fin_modes").catch(() => null);
+		return payModes && payModes.length ? payModes : MODES;
+	}
+	const payFields = (pre, amount, modes) => `<label class="sk-field"><span>${t("amount")}</span>${qtyBox(pre + "-amt", amount)}</label>
+		${pick(pre + "-mode", t("pay_mode"), modes || payModes || MODES).replace("<option>Net Banking</option>", "<option selected>Net Banking</option>")}${formField(pre + "-ref", t("utr_no"))}
 		<label class="sk-field"><span>${t("pay_date")}</span><input id="${pre}-date" type="date" class="sk-select" value="${new Date().toISOString().slice(0, 10)}"></label>
 		${photoField(pre + "-photo", "📷 " + t("pay_proof"))}`;
 	async function renderCash() {
@@ -5745,7 +5750,7 @@
 				await call("fin_promise", { sales_invoice: S.inv.name, text: val("fp-text"), promised_on: val("fp-date") || null }, true);
 				closeSheet(); toast(t("saved")); return go("to_collect");
 			case "fin-recv": S.inv = S.dues[i];
-				return sheet(`<h3 class="sk-h">₹ ${esc(S.inv.customer_name)} · ${esc(S.inv.name)}</h3>${payFields("fr", S.inv.outstanding_amount)}
+				return sheet(`<h3 class="sk-h">₹ ${esc(S.inv.customer_name)} · ${esc(S.inv.name)}</h3>${payFields("fr", S.inv.outstanding_amount, await loadPayModes())}
 					<button class="sk-btn ok wide" data-act="fin-recv-save">${t("save_payment")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
 			case "fin-recv-save": {
 				el.disabled = true;
@@ -5756,7 +5761,7 @@
 			case "fin-ask": await call("fin_ask_approval", { purchase_invoice: S.bills[i].name }, true); return toast(t("asked_sk"));
 			case "fin-approve": await call("fin_approve_payment", { purchase_invoice: S.bills[i].name }, true); toast(t("approved")); return go("pay_approvals");
 			case "fin-pay": S.bill = S.bills[i];
-				return sheet(`<h3 class="sk-h">₹ ${esc(S.bill.supplier_name)} · ${esc(S.bill.name)}</h3>${payFields("fy", S.bill.outstanding_amount)}
+				return sheet(`<h3 class="sk-h">₹ ${esc(S.bill.supplier_name)} · ${esc(S.bill.name)}</h3>${payFields("fy", S.bill.outstanding_amount, await loadPayModes())}
 					<button class="sk-btn ok wide" data-act="fin-pay-save">${t("save_payment")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
 			case "fin-pay-save": {
 				el.disabled = true;

@@ -118,6 +118,13 @@ def bank_account(company: str, mode: str | None = None) -> str | None:
 	return used[0][0] if used else None
 
 
+def payment_modes(user: str) -> list[str]:
+	need(user, ACCOUNTS, MANAGEMENT)
+	modes = frappe.get_all("Mode of Payment", filters={"enabled": 1}, pluck="name", order_by="name asc")
+	first = [m for m in ("Net Banking", "Cash") if m in modes]
+	return first + [m for m in modes if m not in first]
+
+
 def cash_account(company: str, mode: str | None = None) -> str | None:
 	acc = frappe.db.get_value("Mode of Payment Account", {"parent": mode, "company": company}, "default_account") if mode else None
 	if acc and frappe.db.get_value("Account", acc, "account_type") == "Cash":
@@ -310,8 +317,9 @@ def done_bill_photo(user: str, todo: str) -> dict:
 PHOTO_KINDS = {
 	"supplier_bill": ("Supplier bill / e-invoice", None),
 	"expense": ("Expense bill / petty cash voucher", "/app/journal-entry/new?voucher_type=Cash%20Entry"),
-	"money_in": ("Payment received (cheque / UTR)", "/app/payment-entry/new?payment_type=Receive"),
-	"money_out": ("Payment made (bank slip / UTR)", "/app/payment-entry/new?payment_type=Pay"),
+	# SK 4-Nov: payments are net banking: the ERPNext form opens with Net Banking (its bank account comes with it)
+	"money_in": ("Payment received (cheque / UTR)", "/app/payment-entry/new?payment_type=Receive&mode_of_payment=Net%20Banking"),
+	"money_out": ("Payment made (bank slip / UTR)", "/app/payment-entry/new?payment_type=Pay&mode_of_payment=Net%20Banking"),
 	"other": ("Other document", None),
 }
 PHOTO_TAG = "Photo entry"

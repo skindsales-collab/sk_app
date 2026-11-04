@@ -850,6 +850,12 @@ def fin_pay_expense(expense_claim):
 
 
 @frappe.whitelist()
+def fin_modes():
+	"""SK 4-Nov: the payment modes come from ERPNext (Net Banking was missing from a fixed list), Net Banking first."""
+	return finance.payment_modes(_me().user)
+
+
+@frappe.whitelist()
 def fin_voucher_options():
 	return finance.voucher_options(_me().user)
 

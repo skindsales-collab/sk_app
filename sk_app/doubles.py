@@ -156,6 +156,11 @@ def check_bank_account(doc):
 		return
 	account = doc.paid_from if doc.payment_type == "Pay" else doc.paid_to
 	account_type = frappe.get_cached_value("Account", account, "account_type") if account else None
+	if not doc.mode_of_payment and account_type in ("Bank", "Cash"):
+		# no mode picked: Net Banking for a bank account, Cash for the cash account, so every payment carries its mode
+		mode = "Net Banking" if account_type == "Bank" else "Cash"
+		if frappe.db.exists("Mode of Payment", mode):
+			doc.mode_of_payment = mode
 	mode_type = frappe.get_cached_value("Mode of Payment", doc.mode_of_payment, "type") if doc.mode_of_payment else None
 	if mode_type == "Cash" and account_type == "Bank":
 		frappe.throw(_("Mode of payment is {0} (cash) but {1} is a bank account. Please pick Net Banking (or the right bank mode) "
