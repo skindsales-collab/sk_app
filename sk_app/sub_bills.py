@@ -102,9 +102,9 @@ def service_item(operation: str) -> str:
 
 
 def _new_item(code: str, name: str, uom: str, description: str):
-	group = "Services" if frappe.db.exists("Item Group", "Services") else frappe.db.get_value("Item Group", {"is_group": 0}, "name")
-	frappe.get_doc({"doctype": "Item", "item_code": code, "item_name": name[:140], "item_group": group, "stock_uom": uom,
-		"is_stock_item": 0, "is_purchase_item": 1, "is_sales_item": 0, "description": description}).insert(ignore_permissions=True)
+	from sk_app.writers.item import get_or_make
+
+	get_or_make(code, name, group="Services", uom=uom, sales=False, description=description)
 
 
 def _per_job(code: str):

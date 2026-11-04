@@ -321,6 +321,14 @@ def new_lead(user: str, first_name: str, mobile_no: str | None = None, organizat
 		"sk_segment": segment, "source": source if source and frappe.db.exists("CRM Lead Source", source) else None, "lead_owner": user})
 	if missing:
 		gates.stop(_("Lead cannot be saved"), missing)
+	from sk_app.core.switch import use_new
+
+	if use_new("Sales", user):  # rebuild: the one CRM Lead writer (linear flow map, Flow 1 step 1)
+		from sk_app.writers import lead as lw
+
+		return lw.write(user, {"first_name": first_name, "mobile_no": mobile_no, "organization": organization, "email": email,
+			"source": source, "segment": segment, "product": product, "owner": user, "status": status}, stop_on_missing=True,
+			requirement=requirement, photo=photo, no_gstin=no_gstin).name
 	# SK 27-Oct: the status is picked on the form (New by default)
 	status = [status] if status and frappe.db.exists("CRM Lead Status", status) else frappe.get_all("CRM Lead Status", order_by="position asc", pluck="name", limit=1)
 	doc = frappe.get_doc({

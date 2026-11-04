@@ -574,20 +574,28 @@ def new_item(user: str, item_name: str, item_group: str | None = None, uom: str 
 		frappe.throw(_("Please give the name, group and unit"))
 	if frappe.db.exists("Item", {"item_name": item_name}):
 		frappe.throw(_("{0} is already in the item list").format(item_name))
-	item = frappe.new_doc("Item")
-	item.item_name = item_name
-	item.item_code = item_name
-	item.item_group = item_group
-	item.stock_uom = uom
-	item.is_stock_item = 1
-	item.disabled = 1
-	item.description = _("Made from SK App, waiting for approval")
-	if warehouse:
-		item.append("item_defaults", {"company": frappe.db.get_value("Warehouse", warehouse, "company"), "default_warehouse": warehouse})
-	if photo:
-		item.image = photo
-	item.flags.ignore_permissions = True
-	item.insert()
+	from sk_app.core.switch import use_new
+
+	if use_new("Store", user):  # rebuild: the one Item writer
+		from sk_app.writers.item import get_or_make
+
+		item = frappe.get_doc("Item", get_or_make(item_name, item_name, group=item_group, uom=uom, stock=True, disabled=True,
+			description=_("Made from SK App, waiting for approval"), warehouse=warehouse, extra={"image": photo} if photo else None))
+	else:
+		item = frappe.new_doc("Item")
+		item.item_name = item_name
+		item.item_code = item_name
+		item.item_group = item_group
+		item.stock_uom = uom
+		item.is_stock_item = 1
+		item.disabled = 1
+		item.description = _("Made from SK App, waiting for approval")
+		if warehouse:
+			item.append("item_defaults", {"company": frappe.db.get_value("Warehouse", warehouse, "company"), "default_warehouse": warehouse})
+		if photo:
+			item.image = photo
+		item.flags.ignore_permissions = True
+		item.insert()
 	attach(photo, "Item", item.name, user)
 	for who in _users_with_function("IT / ERP") + _users_with_function("Management")[:1]:
 		if who != user:

@@ -189,10 +189,11 @@ def ensure_setup():
 			"read_only": 1, "hidden": 1},
 	]}, update=True)
 	group = frappe.db.get_value("Item Group", {"is_group": 0, "name": ["like", "%Service%"]}) or frappe.db.get_value("Item Group", {"is_group": 0})
+	from sk_app.writers.item import get_or_make
+
 	for code, name in SERVICE_ITEMS.items():
-		if not frappe.db.exists("Item", code) and group:
-			frappe.get_doc({"doctype": "Item", "item_code": code, "item_name": name, "item_group": group, "is_stock_item": 0,
-				"include_item_in_manufacturing": 0, "stock_uom": "Nos", "description": name, **hsn_fields()}).insert(ignore_permissions=True)
+		if group:
+			get_or_make(code, name, group=group)
 	if not frappe.db.exists("Print Format", PRINT_FORMAT):
 		frappe.get_doc({"doctype": "Print Format", "name": PRINT_FORMAT, "doc_type": "Quotation", "module": "SK App", "custom_format": 1,
 			"print_format_type": "Jinja", "standard": "No", "html": "{{ sk_cabin_quote_html(doc) }}", "margin_top": 0, "margin_left": 0,

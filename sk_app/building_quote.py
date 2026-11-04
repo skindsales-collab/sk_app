@@ -160,10 +160,11 @@ def ensure_setup():
 		return
 	uom = "Square Foot" if frappe.db.exists("UOM", "Square Foot") else "Nos"
 	group = frappe.db.get_value("Item Group", {"is_group": 0, "name": ["like", "%Service%"]}) or frappe.db.get_value("Item Group", {"is_group": 0})
+	from sk_app.writers.item import get_or_make
+
 	for code, name in ITEMS.items():
-		if not frappe.db.exists("Item", code) and group:
-			frappe.get_doc({"doctype": "Item", "item_code": code, "item_name": name, "item_group": group, "is_stock_item": 0,
-				"include_item_in_manufacturing": 0, "stock_uom": uom if code == BUILDING_ITEM else "Nos", "description": name, **cq.hsn_fields()}).insert(ignore_permissions=True)
+		if group:
+			get_or_make(code, name, group=group, uom=uom if code == BUILDING_ITEM else "Nos")
 
 
 def make(user: str, req: dict, deal=None, lead=None, customer=None, revise=None, contact=None) -> dict:

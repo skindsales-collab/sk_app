@@ -146,11 +146,19 @@ def sales(user: str, segment=None, only_self=False) -> list[dict]:
 				continue  # closed in an earlier month, only edited now (B7)
 			done["Deal Won" if kinds.get(d.status) == "Won" else "Deal Loss"].append(_row(d.get("sk_customer_name") or d.organization or d.name,
 				f"{str(d.modified)[:10]} · {_name(d.deal_owner)}", d.deal_value, "CRM Deal", d.name))
+	months = None
+	if all_time:
+		# SK 4-Nov: every salesperson tracks their own performance from 1-Apr (Swati's orders showed only under Rushi):
+		# Won = the person's own submitted Sales Orders since 1-Apr, credited by the order's Sales Team, else its maker;
+		# a won deal or lead without an order counts once more, never twice. months = month-wise count and value for the graph.
+		done["Deal Won"], months = won_orders(owners, segment, done["Deal Won"])
 	for key, icon in (("Deal Won", "🏆"), ("Junk Lead", "🗑️"), ("Deal Loss", "❌")):
 		rows = done[key]
 		value = sum(flt(r["value"]) for r in rows if r.get("value"))
-		stages.append(_stage(key.lower().replace(" ", "_"), f"{key} ({'all' if all_time else 'month'})", icon, rows, value or None,
-			go="my_leads", late_rows=[]))
+		st = _stage(key.lower().replace(" ", "_"), f"{key} ({'all' if all_time else 'month'})", icon, rows, value or None, go="my_leads", late_rows=[])
+		if key == "Deal Won" and months is not None:
+			st["months"] = months
+		stages.append(st)
 	if segment == segments.NON_CABIN:
 		# SK 28-Oct (Rev 1 point 9): the Non-Cabin jobs (Rothe Erde etc.) taken off the factory board are Aditya's to run
 		jobs = frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "per_delivered": ["<", 100], "status": ["not in", ["Closed", "Completed"]],
@@ -160,6 +168,34 @@ def sales(user: str, segment=None, only_self=False) -> list[dict]:
 			+ (" · draft order" if s.docstatus == 0 else ""), s.base_net_total, "Sales Order", s.name, s.delivery_date, 0, opened=s.transaction_date)
 			for s in jobs], sum(flt(s.base_net_total) for s in jobs), kind="money"))
 	return stages
+
+
+def won_orders(owners, segment, deal_rows: list) -> tuple[list, list]:
+	"""Rows for the Won arrow since 1-Apr: submitted Sales Orders credited to these people (Sales Team on the order, else
+	the maker), then the won deals / leads that have no counted order. Returns (rows, month-wise [{month, count, value}])."""
+	from sk_app.core.dates import by_month, fy_start
+	from sk_app.kpi import user_sales_orders
+
+	start, today = fy_start(getdate()), getdate()
+	names = set()
+	if owners is None:
+		names.update(frappe.get_all("Sales Order", filters={"docstatus": 1, "transaction_date": [">=", start]}, pluck="name", limit=0))
+	else:
+		for o in owners:
+			names.update(user_sales_orders(o, start, today))
+	orders = frappe.get_all("Sales Order", filters={"name": ["in", list(names) or [""]], "docstatus": 1, **dashboards._seg_filter(segment)},
+		fields=["name", "customer", "customer_name", "transaction_date", "base_net_total", "owner"], order_by="transaction_date asc", limit=0) if names else []
+	rows, customers = [], set()
+	for so in orders:
+		team = frappe.get_all("Sales Team", filters={"parenttype": "Sales Order", "parent": so.name}, pluck="sales_person")
+		rows.append(_row(so.customer_name or so.customer, f"{so.transaction_date} · {', '.join(team) or _name(so.owner)}", so.base_net_total, "Sales Order", so.name))
+		customers.add(so.customer)
+	for r in deal_rows:  # a won deal / lead whose customer has no counted order (orders before Sales Orders were entered)
+		cust = frappe.db.get_value("CRM Deal", r["name"], "erpnext_customer") if r.get("doctype") == "CRM Deal" else None
+		if cust and cust in customers:
+			continue
+		rows.append(r)
+	return rows, by_month(orders, lambda so: getdate(so.transaction_date), lambda so: so.base_net_total)
 
 
 def _job_cards(workstation=None) -> list:

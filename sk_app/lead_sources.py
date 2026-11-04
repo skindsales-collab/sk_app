@@ -192,11 +192,21 @@ def make_lead(data: dict, source: str | None, owner: str | None = None, note: st
 		frappe.get_doc({"doctype": "FCRM Note", "title": f"Again from {source or 'mail'}"[:80], "content": requirement or text,
 			"reference_doctype": "CRM Lead", "reference_docname": old}).insert(ignore_permissions=True)
 		return {"lead": old, "new": False}
+	from sk_app.core.switch import use_new
+
+	owner = owner or owner_for(source, segment)
+	if use_new("Sales", owner or frappe.session.user):  # rebuild: the one CRM Lead writer; gaps logged, not skipped
+		from sk_app.writers import lead as lw
+
+		doc = lw.write(None, {"first_name": data.get("first_name"), "mobile_no": data.get("mobile_no"), "email": data.get("email"),
+			"organization": data.get("organization"), "source": source, "segment": segment, "owner": owner},
+			stop_on_missing=False, requirement=requirement)
+		return {"lead": doc.name, "new": True}
 	_ensure_source(source)
 	status = frappe.get_all("CRM Lead Status", order_by="position asc", pluck="name", limit=1)
 	doc = frappe.get_doc({"doctype": "CRM Lead", "first_name": data.get("first_name") or "Enquiry",
 		"mobile_no": data.get("mobile_no"), "email": data.get("email"), "organization": data.get("organization") or None,
-		"source": source, "lead_owner": owner or owner_for(source, segment), "status": status[0] if status else "New"})
+		"source": source, "lead_owner": owner, "status": status[0] if status else "New"})
 	if doc.meta.has_field("sk_segment"):
 		doc.sk_segment = segment
 	doc.flags.ignore_permissions = True

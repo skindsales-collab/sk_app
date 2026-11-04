@@ -50,8 +50,9 @@ doc_events = {
 		"before_insert": ["sk_app.doubles.check_deal", "sk_app.gates.check_new_deal"], "on_update": "sk_app.deal_quotes.on_deal_update"},
 	# SK 4-Nov: members also work in ERPNext or through Claude: the quote / payment checks run on the record, whatever the route
 	"Quotation": {"before_submit": "sk_app.gates.check_quotation", "validate": "sk_app.writers.quotation.on_validate"},
+	"Item": {"validate": "sk_app.writers.item.on_validate"},
 	# SK 4-Nov rebuild (S3): the customer's salesperson is set at save, not the next night (the nightly run stays as a safety net)
-	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal",
+	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal", "after_insert": "sk_app.writers.customer.after_insert",
 		"on_update": ["sk_app.segments.on_customer_update", "sk_app.sales_owner.on_customer_save"]},
 	# SK 28-Oct: every order has its salesperson; income ledger and Non-Cabin sub-group cost centre from the customer
 	"Sales Order": {"validate": ["sk_app.sales_owner.fill_order_team", "sk_app.segment_accounts.set_segment"],

@@ -169,6 +169,12 @@ def _variant(template: str, length, width, height) -> str:
 
 
 def _new_item(code: str, name: str, group: str | None) -> str:
+	from sk_app.core.switch import use_new
+
+	if use_new("Store", frappe.session.user):  # rebuild: the one Item writer
+		from sk_app.writers.item import get_or_make
+
+		return get_or_make(code, name, group=group, stock=True)
 	it = frappe.new_doc("Item")
 	it.update({"item_code": code, "item_name": name, "item_group": group or frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
 		"stock_uom": "Nos", "is_stock_item": 1, "is_sales_item": 1, "is_purchase_item": 1, "description": name, **hsn_fields()})
