@@ -11,6 +11,7 @@ from frappe.utils import flt
 
 from sk_app import gate_rules as R
 from sk_app import lead_status
+from sk_app.core.people import is_ceo as _shared_is_ceo  # one CEO check for every screen (rebuild Phase 0)
 
 GST_NOTE = "sk_gst_note"
 
@@ -329,7 +330,6 @@ def pending(user: str, rows: bool = False) -> dict:
 	"""SK 28-Oct (main screen decision-first): records the person (manager: team, CEO: all) must still complete.
 	rows=False: counts only, for Home; rows=True: the records, for the Data missing screen."""
 	from sk_app.flows import _owners
-	from sk_app.logins import profile_functions
 
 	owners = _owners(user)
 	own = lambda field: {} if owners is None else {field: ["in", owners or [""]]}  # noqa: E731
@@ -363,7 +363,7 @@ def pending(user: str, rows: bool = False) -> dict:
 			for r in frappe.get_all(doctype, filters={"docstatus": 0, **own("owner")}, fields=["name", title, "transaction_date", "grand_total"],
 				order_by="transaction_date asc", limit=0)]
 		add(doctype.lower().replace(" ", "_"), label, items)
-	if user == "Administrator" or "Management" in profile_functions(user):
+	if _shared_is_ceo(user):
 		items = [{"doctype": "Material Request", "name": r.name, "title": r.name, "meta": f"Waiting CEO · need by {r.schedule_date}"}
 			for r in frappe.get_all("Material Request", filters={"docstatus": 0, "material_request_type": "Purchase", "sk_approval": "Waiting CEO"},
 				fields=["name", "schedule_date"], limit=0)]

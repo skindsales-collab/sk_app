@@ -1,0 +1,89 @@
+{
+ "doctype": "DocType",
+ "name": "SK Path Switch",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-11-04 17:00:00.000000",
+ "modified": "2026-11-04 17:00:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "states": [],
+ "links": [],
+ "actions": [],
+ "index_web_pages_for_search": 0,
+ "autoname": "field:module",
+ "naming_rule": "By fieldname",
+ "track_changes": 1,
+ "title_field": "module",
+ "description": "SK App rebuild (SK 4-Nov-2026): which path each module runs. Old = the screens as before. New = the rebuilt screens, only for the pilot users listed (empty list = everyone). Rules: Warn only writes SK Rule Log without stopping anyone; Enforce stops the save. Flip back to Old at any time: no deploy needed.",
+ "field_order": [
+  "module",
+  "path",
+  "rules",
+  "column_1",
+  "pilot_users",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "module",
+   "fieldtype": "Select",
+   "label": "Module",
+   "options": "Finance\nSales\nStore\nPurchase\nProduction\nHR\nHome",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "path",
+   "fieldtype": "Select",
+   "label": "Path",
+   "options": "Old\nNew",
+   "default": "Old",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "rules",
+   "fieldtype": "Select",
+   "label": "New rules",
+   "options": "Warn only\nEnforce",
+   "default": "Warn only",
+   "reqd": 1,
+   "in_list_view": 1,
+   "description": "Warn only: a broken rule is written to SK Rule Log, the save goes on. Enforce: the save is stopped with the reason."
+  },
+  {
+   "fieldname": "column_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pilot_users",
+   "fieldtype": "Small Text",
+   "label": "Pilot users (e-mail, one per line)",
+   "description": "Only these people get the New path. Empty = everyone."
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1
+  },
+  {
+   "role": "Desk User",
+   "read": 1,
+   "report": 1
+  }
+ ]
+}

@@ -57,9 +57,9 @@ def ensure_setup():
 
 
 def _is_ceo(user: str) -> bool:
-	from sk_app.logins import profile_functions
+	from sk_app.core.people import is_ceo  # one shared check (rebuild Phase 0)
 
-	return user == "Administrator" or MANAGEMENT in profile_functions(user)
+	return is_ceo(user)
 
 
 # ---------- the form ----------
@@ -168,8 +168,9 @@ def raise_request(user: str, items: list[dict], priority: str = "Planned", need_
 
 
 def _ceos() -> list[str]:
-	return _users_with_function(MANAGEMENT) or [u for u in frappe.get_all("Has Role",
-		filters={"role": "System Manager", "parenttype": "User"}, pluck="parent") if u != "Administrator"]
+	from sk_app.core.people import ceo_users
+
+	return ceo_users()
 
 
 def _value(mr) -> float:

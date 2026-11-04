@@ -12,6 +12,7 @@ from frappe import _
 from frappe.utils.password import check_password, update_password
 
 from sk_app.functions import FUNCTIONS
+from sk_app.core.people import is_ceo as _shared_is_ceo  # one CEO check for every screen (rebuild Phase 0)
 
 HIDDEN_DOMAIN = "staff.skind.local"
 LOGIN_ROLES = {"HR Manager", "HR User", "System Manager"}
@@ -44,7 +45,7 @@ def check_pin(pin) -> str:
 
 def _can_manage(user: str) -> bool:
 	"""Point 20 (SK 26-Oct): only the CEO (Sunil = SK) makes logins and resets PIN / face / finger, no longer HR."""
-	return user == "Administrator" or "Management" in profile_functions(user)
+	return _shared_is_ceo(user)
 
 
 def _check_manager(user: str):

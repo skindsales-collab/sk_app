@@ -80,13 +80,15 @@ def _functions(user: str) -> list[str]:
 
 
 def _ceos() -> list[str]:
-	from sk_app.requisition import _ceos
+	from sk_app.core.people import ceo_users
 
-	return _ceos()
+	return ceo_users()
 
 
 def is_ceo(user: str) -> bool:
-	return user == "Administrator" or user in _ceos()
+	from sk_app.core.people import is_ceo as shared  # one shared check (rebuild Phase 0)
+
+	return shared(user)
 
 
 def _desk_staff(user: str) -> bool:

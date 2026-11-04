@@ -16,9 +16,9 @@ NEVER = {"view_as", "view_members", "view_suggest", "login_methods", "my_pin", "
 
 
 def _is_ceo(user: str) -> bool:
-	from sk_app.logins import profile_functions
+	from sk_app.core.people import is_ceo  # one shared check (rebuild Phase 0)
 
-	return user == "Administrator" or "Management" in profile_functions(user)
+	return is_ceo(user)
 
 
 def _team_users(user: str) -> set[str]:

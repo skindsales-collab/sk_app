@@ -45,6 +45,15 @@ def _latest_card(user):
 
 
 @frappe.whitelist()
+def app_config():
+	"""SK 4-Nov rebuild (Phase 0): the dropdown choices from ERPNext and this person's Old / New path per module, once at start."""
+	from sk_app.core import options, switch
+
+	user = _me(unlocked=False).user
+	return {"options": options.app_options(), "paths": switch.my_paths(user)}
+
+
+@frappe.whitelist()
 def home():
 	profile = _me()
 	me = frappe.db.get_value("User", profile.user, ["mobile_no", "phone"], as_dict=True) or {}
