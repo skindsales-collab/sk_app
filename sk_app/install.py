@@ -122,6 +122,9 @@ def after_migrate():
 	_safe(deal_quotes_setup, "job / service item for quotations")
 	from sk_app.gates import ensure_setup as gates_setup
 
+	from sk_app.doubles import ensure_setup as doubles_setup
+
+	_safe(doubles_setup, "double entry check")  # SK 4-Nov: 'Not a double (checked)' on payments, bills, invoices, journals
 	_safe(gates_setup, "mandatory gate fields")  # SK 28-Oct: no next step until the screen's data is filled
 	_safe(deal_quotes_sync, "quotes on deals → ERPNext Quotations")  # SK 28-Oct: every quote goes through ERPNext
 	from sk_app.training import seed_lessons

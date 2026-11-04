@@ -562,7 +562,7 @@
 		segment_pnl: "Segment P&L",
 		month_close: "Month Close",
 		pay_mode: "Mode",
-		utr_no: "UTR / cheque no.",
+		utr_no: "UTR / cheque no. (cash: why cash)",
 		pay_date: "Payment date",
 		pay_proof: "Payment screenshot / photo",
 		bank_cash_now: "Bank + cash now",
@@ -638,7 +638,7 @@
 		segment_pnl: "विभागवार नफा",
 		month_close: "महिना बंद",
 		pay_mode: "प्रकार",
-		utr_no: "UTR / चेक नं.",
+		utr_no: "UTR / चेक नं. (रोख: रोख का)",
 		pay_date: "पेमेंट तारीख",
 		pay_proof: "पेमेंट स्क्रीनशॉट / फोटो",
 		bank_cash_now: "आता बँक + रोकड",
@@ -1095,6 +1095,8 @@
 	Object.assign(T.Marathi, { to_submit: "तपासा व सबमिट करा", ds_why: "तुमच्याकडे बाकी ड्राफ्ट. तपासा दाबा, आकडे पहा, मग सबमिट करा.", ds_check: "तपासा",
 		ds_none: "सबमिट करायला काही बाकी नाही ✓", ds_item: "आयटम", ds_old: "जुना साठा", ds_new: "मोजलेला", ds_diff: "फरक", ds_qty: "नग", ds_total: "एकूण",
 		ds_submit: "ERPNext मध्ये सबमिट करा", ds_sure: "आता सबमिट करायचे? नंतर बदलता येणार नाही.", ds_done: "सबमिट झाले" });
+	Object.assign(T.English, { dbl_title: "Already in ERPNext: possible double entry" });
+	Object.assign(T.Marathi, { dbl_title: "ERPNext मध्ये आधीच आहे: दुहेरी नोंद असू शकते" });
 	Object.assign(T.English, { rp_retry: "Try again", rp_login: "Please log in again", rp_unreadable: "Could not load from ERPNext. Tap Try again; if it stays, send this screen to the CEO" });
 	Object.assign(T.Marathi, { rp_retry: "पुन्हा प्रयत्न करा", rp_login: "कृपया पुन्हा लॉगिन करा", rp_unreadable: "ERPNext मधून माहिती आली नाही. पुन्हा प्रयत्न करा दाबा; तसेच राहिल्यास ही स्क्रीन CEO ला पाठवा" });
 	Object.assign(T.English, { lk_forgot: "Forgot PIN?", lk_f_mail: "Send a code to my e-mail", lk_f_ceo: "Ask the CEO for a new PIN", lk_f_relogin: "Log in again" });
@@ -1124,7 +1126,65 @@
 
 	// while the CEO views a member's app every reading screen runs as the member (their own permissions); saving is blocked
 	const VIEW_OWN = new Set(["view_members", "view_suggest", "report_screen_error"]);
+
+	// SK 4-Nov layer 3 (Catalyst: two deals 17 s apart): a save is sent once. The button tapped for it is locked until
+	// ERPNext answers, a second tap on a locked button does nothing, and the same save already on its way is not sent again.
+	// For every screen, phone and PC, because every save goes through call(..., post).
+	let lastTap = null;
+	const inFlight = new Map();
+	window.addEventListener("click", (ev) => {
+		const b = ev.target.closest && ev.target.closest("button, .sk-btn, .sk-chip, [data-act]");
+		if (!b) return;
+		if (b.classList.contains("sk-busy")) { ev.preventDefault(); ev.stopImmediatePropagation(); return; }
+		lastTap = { el: b, at: Date.now() };
+	}, true);
+	function lockTapped() {
+		const tap = lastTap;
+		if (!tap || Date.now() - tap.at > 1500 || !tap.el.isConnected) return () => {};
+		const el = tap.el, was = el.disabled;
+		el.classList.add("sk-busy");
+		if ("disabled" in el) el.disabled = true;
+		return () => { el.classList.remove("sk-busy"); if ("disabled" in el && !was) el.disabled = false; };
+	}
 	async function call(method, args, post, background) {
+		if (!post || background) return send(method, args, post, background);
+		const key = method + "|" + JSON.stringify(args || {});
+		if (inFlight.has(key)) return inFlight.get(key);
+		const unlock = lockTapped();
+		const p = send(method, args, post, background).finally(() => { inFlight.delete(key); unlock(); });
+		inFlight.set(key, p);
+		return p;
+	}
+
+	// SK 4-Nov layer 2: ERPNext stopped a possible double entry; its message carries the links of the entries already there
+	function doubleSheet(msg) {
+		const safe = String(msg).split(/<br\s*\/?>/i).map((line) => {
+			let out = "", last = 0;
+			const re = /<a href="([^"]+)">([^<]*)<\/a>/g;
+			let m;
+			while ((m = re.exec(line))) {
+				out += esc(line.slice(last, m.index).replace(/<[^>]*>/g, ""));
+				const url = /^(https?:\/\/[^/]*)?\//.test(m[1]) ? m[1] : "#";
+				out += `<a class="sk-link" target="_blank" rel="noopener" href="${esc(url)}">${esc(m[2])}</a>`;
+				last = re.lastIndex;
+			}
+			return out + esc(line.slice(last).replace(/<[^>]*>/g, ""));
+		}).join("<br>");
+		const box = `<h3 class="sk-h">⚠️ ${t("dbl_title")}</h3><div class="sk-libtext">${safe}</div>`;
+		// a form open in a pop-up keeps what was typed: the warning goes on top of it
+		const open = root.querySelector(".sk-sheet");
+		if (open) {
+			const old = open.querySelector(".sk-dbl");
+			if (old) old.remove();
+			const el = document.createElement("div");
+			el.className = "sk-dbl";
+			el.innerHTML = box;
+			open.prepend(el);
+			el.scrollIntoView({ block: "start" });
+		} else sheet(box + `<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+	}
+
+	async function send(method, args, post, background) {
 		if (state.viewAs && !VIEW_OWN.has(method)) {
 			if (post) throw new Error(t("view_only"));
 			args = { member: state.viewAs.user, method, args: JSON.stringify(args || {}), view: state.view };
@@ -1156,6 +1216,9 @@
 		if (!res.ok) {
 			let msg = serverError(data, "Error");
 			if (String(msg).includes("SK_LOCKED")) { if (!post && !background) lockHit = true; showLock(); throw new Error(t("lk_locked")); }
+			if (post && /<a href=/.test(String(msg)) && /double entry|already has a deal|same customer/i.test(String(msg))) {
+				try { doubleSheet(msg); } catch (e) { /* the toast below still shows it */ }
+			}
 			throw new Error(String(msg).replace(/<[^>]*>/g, "")); // ERPNext messages carry <strong> tags
 		}
 		return data.message;
@@ -5448,9 +5511,10 @@
 	}
 
 	// ---------- Finance (SK draft F06, 26-Oct-2026) ----------
-	const MODES = ["Bank Draft", "Wire Transfer", "Cheque", "Cash", "UPI"];
+	// SK 4-Nov: Net Banking was missing here (Shraddha). Blank = Net Banking; Cash goes to the Cash account with its reason
+	const MODES = ["Net Banking", "Cash", "Cheque", "Wire Transfer", "Bank Draft"];
 	const payFields = (pre, amount) => `<label class="sk-field"><span>${t("amount")}</span>${qtyBox(pre + "-amt", amount)}</label>
-		${pick(pre + "-mode", t("pay_mode"), MODES)}${formField(pre + "-ref", t("utr_no"))}
+		${pick(pre + "-mode", t("pay_mode"), MODES).replace("<option>Net Banking</option>", "<option selected>Net Banking</option>")}${formField(pre + "-ref", t("utr_no"))}
 		<label class="sk-field"><span>${t("pay_date")}</span><input id="${pre}-date" type="date" class="sk-select" value="${new Date().toISOString().slice(0, 10)}"></label>
 		${photoField(pre + "-photo", "📷 " + t("pay_proof"))}`;
 	async function renderCash() {
