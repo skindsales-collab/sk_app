@@ -763,6 +763,14 @@ def tally_day_book(date=None):
 	return {"date": str(frappe.utils.getdate(date or frappe.utils.nowdate())), "rows": tally.day_book(date, date)}
 
 
+@frappe.whitelist(methods=["POST"])
+def fin_bank_statement(file, bank_account=None):
+	"""SK 4-Nov: the bank statement PDF fills ERPNext: bank lines, reconciliation and UTRs (sk_app.bank_statement)."""
+	from sk_app import bank_statement
+
+	return bank_statement.process(_me().user, file, bank_account)
+
+
 @frappe.whitelist()
 def fin_cash():
 	return finance.cash_today(_me().user)

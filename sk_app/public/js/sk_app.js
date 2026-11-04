@@ -1097,6 +1097,12 @@
 		ds_submit: "ERPNext मध्ये सबमिट करा", ds_sure: "आता सबमिट करायचे? नंतर बदलता येणार नाही.", ds_done: "सबमिट झाले" });
 	Object.assign(T.English, { dbl_title: "Already in ERPNext: possible double entry" });
 	Object.assign(T.Marathi, { dbl_title: "ERPNext मध्ये आधीच आहे: दुहेरी नोंद असू शकते" });
+	Object.assign(T.English, { bs_title: "Bank statement", bs_help: "Upload the SBI statement PDF: every bank line goes into ERPNext, is matched with its payment and the UTR is filled. You see what does not match.",
+		bs_file: "Statement PDF", bs_go: "Read statement", bs_lines: "bank lines", bs_matched: "matched with ERPNext", bs_already: "already matched earlier",
+		bs_not_erp: "In the bank, not in ERPNext", bs_not_bank: "In ERPNext, not in the bank", bs_reco: "Open Bank Reconciliation Tool (Create Voucher fills UTR)" });
+	Object.assign(T.Marathi, { bs_title: "बँक स्टेटमेंट", bs_help: "SBI स्टेटमेंट PDF अपलोड करा: प्रत्येक बँक नोंद ERPNext मध्ये जाते, तिच्या पेमेंटशी जुळते आणि UTR भरला जातो. न जुळणाऱ्या नोंदी दिसतात.",
+		bs_file: "स्टेटमेंट PDF", bs_go: "स्टेटमेंट वाचा", bs_lines: "बँक नोंदी", bs_matched: "ERPNext शी जुळल्या", bs_already: "आधीच जुळलेल्या",
+		bs_not_erp: "बँकेत आहे, ERPNext मध्ये नाही", bs_not_bank: "ERPNext मध्ये आहे, बँकेत नाही", bs_reco: "Bank Reconciliation Tool उघडा (Create Voucher ने UTR भरतो)" });
 	Object.assign(T.English, { rp_retry: "Try again", rp_login: "Please log in again", rp_unreadable: "Could not load from ERPNext. Tap Try again; if it stays, send this screen to the CEO" });
 	Object.assign(T.Marathi, { rp_retry: "पुन्हा प्रयत्न करा", rp_login: "कृपया पुन्हा लॉगिन करा", rp_unreadable: "ERPNext मधून माहिती आली नाही. पुन्हा प्रयत्न करा दाबा; तसेच राहिल्यास ही स्क्रीन CEO ला पाठवा" });
 	Object.assign(T.English, { lk_forgot: "Forgot PIN?", lk_f_mail: "Send a code to my e-mail", lk_f_ceo: "Ask the CEO for a new PIN", lk_f_relogin: "Log in again" });
@@ -5530,8 +5536,30 @@
 			<ul class="sk-list">${c.accounts.map((a) => li(esc(a.account_name), esc(a.account_type), `<b>${money(a.balance)}</b>`)).join("") || empty()}</ul>
 			<h3 class="sk-h">${t("today_payments")}</h3><ul class="sk-list">${c.today.map((p) => li(esc(p.party_name || ""), `${esc(p.name)} · ${esc(p.mode_of_payment || "")} ${esc(p.reference_no || "")}`,
 				`<b>${p.payment_type === "Pay" ? "⬆" : "⬇"} ${money(p.paid_amount)}</b>`)).join("") || empty()}</ul>
-			${c.accounts.length ? "" : `<p class="sk-note">⚠ ${t("no_bank_yet")}</p>`}</main>`;
+			${c.accounts.length ? "" : `<p class="sk-note">⚠ ${t("no_bank_yet")}</p>`}
+			<h3 class="sk-h">🏦 ${t("bs_title")}</h3><p class="sk-note">${t("bs_help")}</p>
+			<div class="sk-form">${photoField("bs-file", "📄 " + t("bs_file"), true)}<button class="sk-btn ok wide" data-act="bs-go">${t("bs_go")}</button></div></main>`;
 	}
+	// SK 4-Nov: the SBI statement PDF fills ERPNext (bank lines, reconciliation, UTRs) and shows what does not match
+	document.addEventListener("click", async (ev) => {
+		const b = ev.target.closest("[data-act='bs-go']");
+		if (!b || !root.contains(b)) return;
+		ev.stopPropagation();
+		const file = await photoUrl("bs-file");
+		if (!file) return toast(t("bs_file"), true);
+		try {
+			const r = await call("fin_bank_statement", { file }, true);
+			const row = (x, extra) => `<li class="sk-item"><div class="sk-grow"><div class="sk-item-title">${x.out === false ? "⬇" : "⬆"} ${money(x.amount)} · ${esc(x.date)}</div>
+				<div class="sk-item-meta">${x.link ? `<a class="sk-link" target="_blank" rel="noopener" href="${esc(x.link)}">${esc(x.name || x.bank_transaction)}</a> · ` : ""}${esc(x.party || x.bank_name || "")} ${x.utr ? "· " + esc(x.utr) : ""}${extra ? " · " + esc(extra) : ""}</div></div></li>`;
+			sheet(`<h3 class="sk-h">🏦 ${esc(r.from)} – ${esc(r.to)} · ${r.lines} ${t("bs_lines")}</h3>
+				<p class="sk-note">✓ ${r.matched.length} ${t("bs_matched")}${r.already ? ` · ${r.already} ${t("bs_already")}` : ""}</p>
+				<h3 class="sk-h">⚠ ${t("bs_not_erp")} (${r.not_in_erp.length})</h3><ul class="sk-list">${r.not_in_erp.map((x) => row(x, x.why)).join("") || empty()}</ul>
+				${r.not_in_erp.length ? `<a class="sk-btn wide" target="_blank" rel="noopener" href="${esc(r.reco_tool)}">${t("bs_reco")}</a>` : ""}
+				<h3 class="sk-h">⚠ ${t("bs_not_bank")} (${r.not_in_bank.length})</h3><ul class="sk-list">${r.not_in_bank.map((x) => row(x, x.why)).join("") || empty()}</ul>
+				<h3 class="sk-h">✓ ${t("bs_matched")} (${r.matched.length})</h3><ul class="sk-list">${r.matched.map((x) => row(x, x.why)).join("") || empty()}</ul>
+				<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+		} catch (e) { toast(e.message, true); }
+	}, true);
 	async function renderCollect() {
 		S.dues = await call("fin_collect");
 		const groups = [["d60_plus", t("over_60")], ["d31_60", t("d31_60")], ["d0_30", t("d0_30")], ["not_due", t("not_due")]];
