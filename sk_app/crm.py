@@ -308,7 +308,8 @@ def _attach(file_url: str | None, doctype: str, name: str, user: str):
 
 def new_lead(user: str, first_name: str, mobile_no: str | None = None, organization: str | None = None,
 		email: str | None = None, source: str | None = None, segment: str | None = None,
-		requirement: str | None = None, photo: str | None = None, product: str | None = None, status: str | None = None) -> str:
+		requirement: str | None = None, photo: str | None = None, product: str | None = None, status: str | None = None,
+		no_gstin=0) -> str:
 	if not installed():
 		frappe.throw(_("Frappe CRM is not installed"))
 	# point 2 + SK 28-Oct mandatory gate: the lead is saved only with a real name, contact person, mobile, segment and
@@ -331,6 +332,8 @@ def new_lead(user: str, first_name: str, mobile_no: str | None = None, organizat
 		doc.sk_segment = segment
 	if product and doc.meta.has_field("sk_product"):
 		doc.sk_product = product[:140]
+	if frappe.utils.cint(no_gstin) and doc.meta.has_field(gates.NO_GSTIN):
+		doc.set(gates.NO_GSTIN, 1)  # SK 4-Nov: non-GST customer; its ERPNext customer is made Unregistered, no GSTIN asked
 	doc.insert()
 	if (requirement or "").strip():
 		frappe.get_doc({"doctype": "FCRM Note", "title": _("Requirement"), "content": requirement.strip(),
@@ -347,6 +350,12 @@ def set_status(doctype: str, name: str, status: str) -> str:
 	doc = frappe.get_doc(doctype, name)
 	doc.status = status
 	doc.save()
+	if doctype == "CRM Lead" and not frappe.db.exists("CRM Deal", {"lead": name}):
+		from sk_app import gates, quote_pickup
+
+		if gates.lead_qualified(name):
+			# SK 4-Nov: the lead goes for its quote (deal + rate-card quote / design) once it is Qualified, not on save
+			quote_pickup.after_input(frappe.session.user, doctype, name)
 	return doc.status
 
 
@@ -487,6 +496,10 @@ def _to_deal(user: str, lead: str, seg=None) -> tuple[str | None, str | None]:
 	"""Frappe CRM's own Convert (deal.lead links back), owned by the salesperson, with the lead's segment."""
 	deal = frappe.db.get_value("CRM Deal", {"lead": lead})
 	if not deal:
+		from sk_app import gates
+
+		if not gates.lead_qualified(lead):
+			return None, _(gates.R.QUALIFY_FIRST)  # SK 4-Nov: no deal before the customer is spoken to
 		frappe.db.savepoint("sk_to_deal")
 		try:
 			deal = frappe.get_attr(CONVERT)(lead)

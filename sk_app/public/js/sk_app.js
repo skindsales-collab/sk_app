@@ -962,9 +962,9 @@
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
 	T.Marathi.mic_network = "आवाजासाठी इंटरनेट हवे. मोबाईल डेटा तपासा, किंवा कीबोर्डवरील 🎤 वापरा.";
 	Object.assign(T.English, { fl_workflow: "work flow", fl_loading: "live figures loading", fl_days: "days", fl_oldest: "oldest",
-		fl_on_time: "all on time", fl_work: "Work on it", fl_first: "Showing the first", show_more: "Show more", loading: "Loading…", fl_error: "Work flow could not load, AI team informed", ka_reason: "Why", tm_not_called: "leads not called after 24 h", tm_quotes_wait: "quotations waiting over 7 days", tm_behind: "most behind target", tm_due_today: "due by today", tm_all_leads: "All leads and deals", checked_submit: "Checked, submit", check_marked: "Read from the photo: check the coloured boxes (red = not sure), correct by typing or 🎤, then tap Checked, submit", convert_deal: "Convert to Deal", converted_ok: "Deal made ✓" });
+		fl_on_time: "all on time", fl_work: "Work on it", fl_first: "Showing the first", show_more: "Show more", loading: "Loading…", fl_error: "Work flow could not load, AI team informed", ka_reason: "Why", tm_not_called: "leads not called after 24 h", tm_quotes_wait: "quotations waiting over 7 days", tm_behind: "most behind target", tm_due_today: "due by today", tm_all_leads: "All leads and deals", checked_submit: "Checked, submit", check_marked: "Read from the photo: check the coloured boxes (red = not sure), correct by typing or 🎤, then tap Checked, submit", convert_deal: "Convert to Deal", converted_ok: "Deal made ✓", no_gstin: "Customer has no GSTIN (unregistered / person)", optional: "optional" });
 	Object.assign(T.Marathi, { fl_workflow: "कामाचा क्रम", fl_loading: "आकडे येत आहेत", fl_days: "दिवस", fl_oldest: "सर्वात जुने",
-		fl_on_time: "सर्व वेळेवर", fl_work: "काम करा", fl_first: "पहिले दाखवले", show_more: "आणखी दाखवा", loading: "येत आहे…", fl_error: "कामाचा क्रम उघडला नाही, AI टीमला कळवले", ka_reason: "कारण", tm_not_called: "24 तासांनंतरही कॉल न केलेले लीड", tm_quotes_wait: "7 दिवसांपेक्षा जास्त थांबलेली कोटेशन", tm_behind: "लक्ष्यापासून सर्वात मागे", tm_due_today: "आजपर्यंत अपेक्षित", tm_all_leads: "सर्व लीड व डील", checked_submit: "तपासले, सबमिट करा", check_marked: "फोटोवरून वाचले: रंगीत बॉक्स तपासा (लाल = खात्री नाही), टाइप किंवा 🎤 ने दुरुस्त करा, मग तपासले, सबमिट करा दाबा", convert_deal: "डील बनवा", converted_ok: "डील तयार ✓" });
+		fl_on_time: "सर्व वेळेवर", fl_work: "काम करा", fl_first: "पहिले दाखवले", show_more: "आणखी दाखवा", loading: "येत आहे…", fl_error: "कामाचा क्रम उघडला नाही, AI टीमला कळवले", ka_reason: "कारण", tm_not_called: "24 तासांनंतरही कॉल न केलेले लीड", tm_quotes_wait: "7 दिवसांपेक्षा जास्त थांबलेली कोटेशन", tm_behind: "लक्ष्यापासून सर्वात मागे", tm_due_today: "आजपर्यंत अपेक्षित", tm_all_leads: "सर्व लीड व डील", checked_submit: "तपासले, सबमिट करा", check_marked: "फोटोवरून वाचले: रंगीत बॉक्स तपासा (लाल = खात्री नाही), टाइप किंवा 🎤 ने दुरुस्त करा, मग तपासले, सबमिट करा दाबा", convert_deal: "डील बनवा", converted_ok: "डील तयार ✓", no_gstin: "ग्राहकाकडे GSTIN नाही (नोंदणी नसलेला / व्यक्ती)", optional: "ऐच्छिक" });
 	Object.assign(T.English, { lk_locked: "Locked", lk_touch: "Touch finger or look at the phone", lk_open_face: "Open with face / finger",
 		lk_ask_ceo: "Not working or new phone? Ask the CEO to reset it.", lk_pin: "Your PIN (the one you log in with)", lk_open: "Open", lk_relogin: "Forgot PIN? Log in again", lk_use_pin: "Use PIN instead",
 		lk_no_key: "Face / finger did not work on this phone: open with your PIN, then set it up again.",
@@ -2906,7 +2906,7 @@
 		return `<div class="sk-card sk-gate sk-gap"><div class="sk-item-title">🧾 ${t("g_cust")}</div>
 			${miss.length ? `<p class="sk-note">${miss.map(esc).join(" · ")}</p>` : ""}
 			<div ${want("gstin") ? "" : "hidden"}>${formField("gc-gstin", t("g_gstin"))}
-			<label class="sk-check"><input id="gc-unreg" type="checkbox"> ${t("g_unreg")}</label>${formField("gc-why", t("g_unreg_why"))}</div>
+			<label class="sk-check"><input id="gc-unreg" type="checkbox"> ${t("g_unreg")}</label>${formField("gc-why", t("g_unreg_why") + ` (${t("optional")})`)}</div>
 			<div ${want("address") ? "" : "hidden"}>${formField("gc-addr", t("g_addr"), true)}${formField("gc-city", t("g_city"))}
 			<label class="sk-field"><span>${t("g_state")} <small>(${t("auto_gstin")})</small></span><select id="gc-state" class="sk-select"><option value=""></option>${opts("gst_states", GST_STATES).map((x) => `<option>${esc(x)}</option>`).join("")}</select></label>
 			<label class="sk-field"><span>${t("g_pin")}</span><div class="sk-input-row"><input id="gc-pin" type="tel" maxlength="6"></div></label></div>
@@ -3196,6 +3196,7 @@
 		root.innerHTML = header(t("new_lead")) + `<main class="sk-form">
 			${photoField("f-card", "📷 " + t("card_photo"))}
 			${formField("f-first", t("cust_name") + " *")}${formField("f-org", t("company"))}
+			<label class="sk-check"><input id="f-nogst" type="checkbox"> ${t("no_gstin")}</label>
 			<label class="sk-field"><span>${t("mobile")} *</span><div class="sk-input-row"><input id="f-mobile" type="tel"></div></label>
 			<label class="sk-field"><span>${t("email")}</span><div class="sk-input-row"><input id="f-email" type="email"></div></label>
 			${sel("f-source", t("source") + " *", o.sources)}${segmentSelect("f-segment", o.segment_tree, o.segments)}${(o.products || []).length ? sel("f-product", t("product_asked"), o.products) : ""}
@@ -6631,7 +6632,7 @@
 				const unreg = document.getElementById("gc-unreg").checked;
 				const shown = (id) => !document.getElementById(id).closest("[hidden]");
 				if (!mustFill([["gc-gstin", t("g_gstin"), !shown("gc-gstin") || unreg || /^[0-9]{2}[A-Z0-9]{10}[0-9A-Z]{3}$/.test(val("gc-gstin").toUpperCase())],
-					["gc-why", t("g_unreg_why"), !shown("gc-why") || !unreg || !!val("gc-why")], ["gc-addr", t("g_addr"), !shown("gc-addr") || !!val("gc-addr")],
+					["gc-addr", t("g_addr"), !shown("gc-addr") || !!val("gc-addr")],
 					["gc-state", t("g_state"), !shown("gc-state") || !!val("gc-state") || (!unreg && /^[0-9]{2}[A-Z0-9]{10}[0-9A-Z]{3}$/.test(val("gc-gstin").toUpperCase()))],
 					["gc-pin", t("g_pin"), !shown("gc-pin") || /^\d{6}$/.test(val("gc-pin"))], ["gc-mobile", t("g_cmobile"), !shown("gc-mobile") || val("gc-mobile").replace(/\D/g, "").length >= 10]])) return;
 				el.disabled = true;
@@ -6810,7 +6811,8 @@
 					["f-mobile", t("mobile"), val("f-mobile").replace(/\D/g, "").length >= 10], ["f-source", t("source")], ["f-segment", t("segment")]])) return;
 				el.disabled = true;
 				const name = await call("new_lead", { first_name: val("f-first"), organization: val("f-org"), mobile_no: val("f-mobile"),
-					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl, product: val("f-product"), status: val("f-status") }, true);
+					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl, product: val("f-product"), status: val("f-status"),
+					no_gstin: document.getElementById("f-nogst") && document.getElementById("f-nogst").checked ? 1 : 0 }, true);
 				// SK 1-Nov minimum input: no switch; the lead goes for its quote by itself (rate-card quote / design / quote AI)
 				const route = await call("lead_route", { name }, true).catch((e) => ({ route: "none", reason: e.message }));
 				cardUrl = null;

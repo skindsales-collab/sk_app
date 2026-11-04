@@ -44,7 +44,8 @@ doc_events = {
 	"CRM Lead": {"validate": ["sk_app.segments.set_main", "sk_app.gates.check_crm"], "before_insert": "sk_app.doubles.check_lead"},
 	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.crm.set_deal_customer", "sk_app.quote_pickup.on_deal_validate",
 		"sk_app.gates.check_crm"],
-		"before_insert": "sk_app.doubles.check_deal", "on_update": "sk_app.deal_quotes.on_deal_update"},
+		# SK 4-Nov: no deal from a lead that is still New (call not connected): the lead is Qualified first (sk_app.gates)
+		"before_insert": ["sk_app.doubles.check_deal", "sk_app.gates.check_new_deal"], "on_update": "sk_app.deal_quotes.on_deal_update"},
 	"Quotation": {"before_submit": "sk_app.gates.check_quotation"},
 	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal", "on_update": "sk_app.segments.on_customer_update"},
 	# SK 28-Oct: every order has its salesperson; income ledger and Non-Cabin sub-group cost centre from the customer

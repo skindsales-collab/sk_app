@@ -355,8 +355,9 @@ def crm_detail(doctype, name):
 
 @frappe.whitelist(methods=["POST"])
 def new_lead(first_name, mobile_no=None, organization=None, email=None, source=None, segment=None,
-		requirement=None, photo=None, product=None, status=None):
-	return crm.new_lead(_me().user, first_name, mobile_no, organization, email, source, segment, requirement, photo, product, status)
+		requirement=None, photo=None, product=None, status=None, no_gstin=0):
+	return crm.new_lead(_me().user, first_name, mobile_no, organization, email, source, segment, requirement, photo, product, status,
+		no_gstin)
 
 
 @contextmanager
