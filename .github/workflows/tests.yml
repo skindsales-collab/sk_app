@@ -1,0 +1,34 @@
+# SK 4-Nov rebuild (Phase 0): every pull request runs the logic tests and checks the app screen file, so a broken rule
+# or a broken screen is caught on GitHub before SK merges (before this only the phone APK was built here).
+name: SK App tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Logic tests (no ERPNext needed)
+        run: |
+          pip install pytest
+          python -m pytest -q tests
+      - name: Screen file syntax
+        run: node --check sk_app/public/js/sk_app.js
+      - name: Screen logic tests
+        run: node --test tests/js
+      - name: Python files compile
+        run: python -m compileall -q sk_app

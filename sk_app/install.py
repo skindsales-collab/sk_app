@@ -38,6 +38,9 @@ def after_migrate():
 
 	settings_defaults()
 	setup_site()
+	from sk_app.core.switch import ensure_rows
+
+	ensure_rows()  # SK 4-Nov rebuild: one SK Path Switch row per module, all Old + Warn only (nothing changes until SK switches)
 	ensure_crm_fields()
 	ensure_mail_fields()
 	from sk_app import segments

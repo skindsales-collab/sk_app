@@ -2758,7 +2758,7 @@
 
 	function renderDsi() {
 		// SK 29-Oct: what the DSI saved is mandatory, so the monthly summary can add it up; a problem goes to the desk
-		const types = ["Time", "Cost", "Quality", "Safety", "Customer"];
+		const types = opts("dsi_saving", ["Time", "Cost", "Quality", "Safety", "Customer"]);
 		root.innerHTML = header(t("dsi")) + `<main class="sk-form">${formField("f-what", t("dsi_q"), true)}
 			<p class="sk-note">${t("dsi_problem")} <button class="sk-link" data-go="problem">🚩 ${t("problem")}</button></p>
 			${formField("f-before", t("before"))}${formField("f-after", t("after"))}
@@ -2769,7 +2769,7 @@
 
 	async function renderWork(kind) {
 		const problem = kind === "problem";
-		const types = ["Machine breakdown", "Material shortage", "Quality issue", "Safety", "Customer complaint", "IT / app", "Leave", "Other"];
+		const types = opts("problem_type", ["Machine breakdown", "Material shortage", "Quality issue", "Safety", "Customer complaint", "IT / app", "Leave", "Other"]);
 		const pick = problem ? `<div class="sk-chips">${types.map((p) => `<button class="sk-chip" data-ptype="${p}">${p}</button>`).join("")}</div>` : "";
 		let log = "";
 		if (!problem) {
@@ -2908,7 +2908,7 @@
 			<div ${want("gstin") ? "" : "hidden"}>${formField("gc-gstin", t("g_gstin"))}
 			<label class="sk-check"><input id="gc-unreg" type="checkbox"> ${t("g_unreg")}</label>${formField("gc-why", t("g_unreg_why"))}</div>
 			<div ${want("address") ? "" : "hidden"}>${formField("gc-addr", t("g_addr"), true)}${formField("gc-city", t("g_city"))}
-			<label class="sk-field"><span>${t("g_state")} <small>(${t("auto_gstin")})</small></span><select id="gc-state" class="sk-select"><option value=""></option>${GST_STATES.map((x) => `<option>${esc(x)}</option>`).join("")}</select></label>
+			<label class="sk-field"><span>${t("g_state")} <small>(${t("auto_gstin")})</small></span><select id="gc-state" class="sk-select"><option value=""></option>${opts("gst_states", GST_STATES).map((x) => `<option>${esc(x)}</option>`).join("")}</select></label>
 			<label class="sk-field"><span>${t("g_pin")}</span><div class="sk-input-row"><input id="gc-pin" type="tel" maxlength="6"></div></label></div>
 			<div ${want("mobile_no") ? "" : "hidden"}><label class="sk-field"><span>${t("g_cmobile")}</span><div class="sk-input-row"><input id="gc-mobile" type="tel" value="${esc(mob)}"></div></label></div>
 			<button class="sk-btn go wide" data-act="gate-customer" data-deal="${esc(d.deal)}">${t("g_save")}</button></div>`;
@@ -3547,7 +3547,7 @@
 	const dsiMonth = (p) => `${p.dsi_month || 0} / ${Math.round(p.dsi_target || 26)} ${t("dsi_this_month")}`;
 	async function renderTeamReports() {
 		const d = await call("team_day_reports", teamDay ? { day: teamDay } : {});
-		const ratings = ["Good", "OK", "Needs improvement"];
+		const ratings = opts("rating", ["Good", "OK", "Needs improvement"]);
 		const people = d.people.map((p) => {
 			const r = p.report;
 			if (!r) return `<li class="sk-item k-lead_new"><div><div class="sk-item-title">${esc(p.full_name)}</div><div class="sk-item-meta">${esc(p.function || "")} · ❌ ${t("not_sent")} · 💡 ${dsiMonth(p)}</div></div></li>`;
@@ -6866,6 +6866,15 @@
 		"Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"];
 
 
+	// SK 4-Nov rebuild (Phase 0): dropdown choices come from ERPNext (Customize Form / masters) and each module's Old / New
+	// path from SK Path Switch, read once at start. The fixed lists in this file are only the fall-back if that read fails.
+	const CONFIG = { options: {}, paths: {} };
+	const opts = (key, fallback) => (CONFIG.options[key] && CONFIG.options[key].length ? CONFIG.options[key] : fallback);
+	const newPath = (module) => CONFIG.paths[module] === "New";
+	async function loadConfig() {
+		try { Object.assign(CONFIG, (await call("app_config", null, false, true)) || {}); } catch (e) { /* old lists stay */ }
+	}
+
 	// ---------- App lock (point 20, SK 26-Oct): face / finger only after set-up, locks after 30 min without use ----------
 	const b64u = {
 		dec: (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)), (c) => c.charCodeAt(0)),
@@ -7041,8 +7050,10 @@
 
 	async function start() {
 		try {
+			const config = loadConfig();
 			state.home = await call("home");
 			if (!state.home) throw new Error(t("rp_unreadable") + " (home)");
+			await config;
 			state.lang = state.home.language || "English";
 			state.card = state.home.card;
 			renderHome();

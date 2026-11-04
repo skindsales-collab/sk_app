@@ -12,6 +12,7 @@ from frappe import _
 from frappe.utils import add_days, getdate, now_datetime, nowdate, strip_html
 
 from sk_app.store import _todo, _users_with_function, attach
+from sk_app.core.people import is_ceo as _shared_is_ceo  # one CEO check for every screen (rebuild Phase 0)
 
 # type → (function that fixes it, factory fault → Non Conformance too, workstation word for the subcontractor)
 TYPES = {
@@ -151,9 +152,8 @@ def register(user: str, customer: str, text: str, ctype: str, sales_order: str |
 
 def _can_see(user: str, issue) -> bool:
 	from sk_app.day_report import _team
-	from sk_app.logins import profile_functions
 
-	if user == "Administrator" or "Management" in profile_functions(user):
+	if _shared_is_ceo(user):
 		return True
 	if user in (issue.sk_registered_by, issue.sk_concerned_user, issue.owner):
 		return True
@@ -181,7 +181,6 @@ def _late(r) -> bool:
 def listing(user: str, tab: str = "mine") -> dict:
 	"""mine: registered by me (and my team); to_fix: sent to me; all: Management."""
 	from sk_app.day_report import _team
-	from sk_app.logins import profile_functions
 
 	if not frappe.db.exists("DocType", "Issue") or not frappe.db.has_column("Issue", "sk_stage"):
 		return {"rows": [], "types": list(TYPES)}
@@ -191,7 +190,7 @@ def listing(user: str, tab: str = "mine") -> dict:
 	if tab == "to_fix":
 		filters = {**base, "sk_stage": ["in", ["Registered", "Accepted", "Not OK"]]}
 		or_filters = [["sk_concerned_user", "=", user], ["name", "in", todo_issues or [""]]]
-	elif tab == "all" and ("Management" in profile_functions(user) or user == "Administrator"):
+	elif tab == "all" and _shared_is_ceo(user):
 		filters, or_filters = base, None
 	else:
 		filters, or_filters = {**base, "sk_registered_by": ["in", mine_users]}, None

@@ -18,6 +18,7 @@ import os
 import frappe
 from frappe import _
 from frappe.utils import add_days, cint, flt, formatdate, getdate, nowdate
+from sk_app.core.people import is_ceo as _shared_is_ceo  # one CEO check for every screen (rebuild Phase 0)
 
 RATE_CARD = "SK Cabin Rate Card"
 PRINT_FORMAT = "SK Cabin Quotation"
@@ -136,10 +137,9 @@ def options(user: str | None = None) -> dict:
 
 def max_discount(user: str) -> float:
 	from sk_app.day_report import _team
-	from sk_app.logins import profile_functions
 
 	rc = rate_card()
-	if user == "Administrator" or "Management" in profile_functions(user):
+	if _shared_is_ceo(user):
 		return 100.0
 	if _team(user):
 		return flt(rc["discount"].get("sales_manager_pct"))

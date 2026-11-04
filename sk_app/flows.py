@@ -17,6 +17,7 @@ from frappe.utils import add_days, date_diff, flt, get_first_day, getdate, now_d
 from sk_app import dashboards, lead_status, segments
 from sk_app.dashboards import _has, _name, _row, _safe
 from sk_app.production import wo_label
+from sk_app.core.people import is_ceo as _shared_is_ceo  # one CEO check for every screen (rebuild Phase 0)
 
 ROWS = 60
 # SK's proposal (change list page 45): days a stage may take before it turns red
@@ -68,9 +69,8 @@ def _late_row(title, meta, value, doctype, name, since, target, done=False, open
 def _owners(user: str) -> list[str] | None:
 	"""None = everyone (CEO / Management); otherwise the person plus their team (Rushi sees his salespeople)."""
 	from sk_app.day_report import _team
-	from sk_app.logins import profile_functions
 
-	if user == "Administrator" or "Management" in profile_functions(user):
+	if _shared_is_ceo(user):
 		return None
 	return [user] + [p.user for p in _team(user)]
 
@@ -300,8 +300,6 @@ def stores(user: str) -> list[dict]:
 
 
 def purchase(user: str) -> list[dict]:
-	from sk_app.logins import profile_functions
-
 	reqs = frappe.get_all("Material Request", filters={"docstatus": 1, "material_request_type": "Purchase", "status": ["in", ["Pending", "Partially Ordered"]]},
 		fields=["name", "schedule_date", "transaction_date"], order_by="transaction_date asc", limit=0)
 	rfq = frappe.get_all("Supplier Quotation", filters={"docstatus": ["<", 2], "transaction_date": [">=", add_days(nowdate(), -30)]},
@@ -316,7 +314,7 @@ def purchase(user: str) -> list[dict]:
 	got = frappe.get_all("Purchase Receipt", filters={"docstatus": 1, "posting_date": [">=", get_first_day(getdate())], **material_pos("Purchase Receipt")},
 		fields=["name", "supplier_name", "grand_total", "posting_date", "per_billed"], limit=0)
 	bills = frappe.get_all("Purchase Invoice", filters={"docstatus": 0}, fields=["name", "supplier_name", "grand_total", "creation"], limit=0)
-	ceo = user == "Administrator" or "Management" in profile_functions(user)
+	ceo = _shared_is_ceo(user)
 	return [
 		_stage("requests", "Buy requests", "📋", [_late_row(m.name, f"need by {m.schedule_date}", None, "Material Request", m.name, m.transaction_date, 2) for m in reqs], go="buy_requests"),
 		_stage("rates", "Rates (30 days)", "💬", [_row(q.supplier_name, f"{q.status} · {q.transaction_date}", q.grand_total, "Supplier Quotation", q.name) for q in rfq], go="compare"),
