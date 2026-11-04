@@ -14,16 +14,23 @@ from sk_app import lead_status
 from sk_app.core.people import is_ceo as _shared_is_ceo  # one CEO check for every screen (rebuild Phase 0)
 
 GST_NOTE = "sk_gst_note"
+NO_GSTIN = "sk_no_gstin"  # SK 4-Nov: a non-GST customer, ticked on the new lead; its deal's customer is made Unregistered
 
 
 def ensure_setup():
 	from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
-	create_custom_fields({
+	fields = {
 		"Customer": [{"fieldname": GST_NOTE, "label": "Why no GSTIN (unregistered)", "fieldtype": "Small Text",
 			"insert_after": "gst_category", "depends_on": "eval:doc.gst_category=='Unregistered'"}],
 		"Material Request": [{"fieldname": "sk_reason", "label": "Reason", "fieldtype": "Small Text", "insert_after": "sk_cabin"}],
-	}, update=True)
+	}
+	# same label + type on lead and deal, so Frappe CRM's Convert copies the tick onto the deal
+	no_gstin = {"fieldname": NO_GSTIN, "label": "No GSTIN (unregistered customer)", "fieldtype": "Check", "default": "0"}
+	for dt, after in (("CRM Lead", "organization"), ("CRM Deal", "organization")):
+		if frappe.db.exists("DocType", dt):
+			fields[dt] = [{**no_gstin, "insert_after": after}]
+	create_custom_fields(fields, update=True)
 
 
 def _skip() -> bool:
@@ -112,6 +119,24 @@ def check_crm(doc, method=None):
 		stop(_("{0} cannot move to {1}").format(doc.name or _("This lead"), doc.get("status")), missing)
 
 
+def lead_step(lead: str) -> str | None:
+	return _step("CRM Lead", frappe.db.get_value("CRM Lead", lead, "status"))
+
+
+def lead_qualified(lead: str) -> bool:
+	"""SK 4-Nov: the lead had its qualifying step (spoken to, marked Qualified or later), so it may become a deal."""
+	return R.lead_may_become_deal(lead_step(lead))
+
+
+def check_new_deal(doc, method=None):
+	"""CRM Deal before_insert (desk, app and API alike): a deal from a lead that is still New is stopped. Frappe CRM
+	marks the lead Qualified only after the deal is made, so the lead's status here is what the salesperson set."""
+	if _skip() or not doc.get("lead") or not frappe.db.exists("CRM Lead", doc.lead):
+		return
+	if not R.lead_may_become_deal(lead_step(doc.lead), _step("CRM Deal", doc.get("status"))):
+		frappe.throw(_(R.QUALIFY_FIRST), title=_("Lead not qualified yet"))
+
+
 def gate_for(doctype: str, doc) -> dict:
 	"""For the detail screen: what is missing on the record, and which status chips are locked and why."""
 	locked = {}
@@ -167,7 +192,7 @@ def _billing(customer: str) -> dict | None:
 
 def customer_data(customer: str) -> dict:
 	meta = frappe.get_meta("Customer")
-	fields = [f for f in ("customer_name", "gst_category", "gstin", GST_NOTE, "mobile_no") if meta.has_field(f)]
+	fields = [f for f in ("customer_name", "customer_type", "gst_category", "gstin", GST_NOTE, "mobile_no") if meta.has_field(f)]
 	d = frappe.db.get_value("Customer", customer, fields, as_dict=True) or {}
 	a = _billing(customer) or {}
 	if not d.get("mobile_no"):
@@ -195,11 +220,13 @@ def complete_customer(customer: str, gstin=None, unregistered=0, gst_note=None, 
 		if doc.get("gst_category") in (None, "", "Unregistered"):
 			doc.gst_category = "Registered Regular"
 	elif frappe.utils.cint(unregistered):
-		if not (gst_note or "").strip():
-			frappe.throw(_("Please say why the customer has no GSTIN"))
+		# SK 4-Nov: a non-GST customer is saved with no GSTIN; the reason is optional (the tick itself is the record)
 		doc.gst_category = "Unregistered"
-		if doc.meta.has_field(GST_NOTE):
-			doc.set(GST_NOTE, gst_note.strip())
+		if doc.get("gstin"):
+			doc.gstin = None
+		if doc.meta.has_field(GST_NOTE) and ((gst_note or "").strip() or not doc.get(GST_NOTE)):
+			doc.set(GST_NOTE, (gst_note or "").strip() or _("{0} (ticked by {1} on {2})").format(
+				_(R.UNREGISTERED_NOTE), frappe.session.user, frappe.utils.nowdate()))
 	doc.save()
 	# SK 1-Nov minimum input: the state comes from the GSTIN (first 2 digits) when it is not given
 	if not (state or "").strip():

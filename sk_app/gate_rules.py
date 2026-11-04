@@ -18,7 +18,8 @@ GSTIN_RE = re.compile(r"^[0-9]{2}[A-Z0-9]{10}[0-9A-Z]{3}$")
 RULES = {
 	"Lead": ["Customer / company name (not 'Enquiry')", "Contact person", "Mobile number", "Segment (Cabin / Non-Cabin)",
 		"Source", "Salesperson"],
-	"Customer": ["Legal name", "GSTIN, or 'Unregistered' with the reason", "Billing address with state and PIN", "Mobile number"],
+	"Lead to Deal": ["The customer was spoken to and the lead marked Qualified (a lead in New never becomes a deal)"],
+	"Customer": ["Legal name", "GSTIN, or 'No GSTIN (unregistered)' ticked", "Billing address with state and PIN", "Mobile number"],
 	"Quotation": ["Customer complete (above)", "Items with qty and rate", "GST rate stated (GST @ 18% extra)", "Valid-till date",
 		"Submitted in ERPNext"],
 	"Deal: Quotation step": ["A quotation made for the deal"],
@@ -100,7 +101,10 @@ def lead_missing(d: dict) -> list[tuple[str, str]]:
 
 
 def customer_missing(d: dict) -> list[tuple[str, str]]:
-	"""d: customer_name, gst_category, gstin, sk_gst_note, address_state, address_pincode, mobile_no."""
+	"""d: customer_name, customer_type, gst_category, gstin, sk_gst_note, address_state, address_pincode, mobile_no.
+	SK 4-Nov: a non-GST (unregistered) customer is complete with no GSTIN. A person (customer type Individual) needs
+	nothing more; a company marked Unregistered needs the 'No GSTIN' tick (it leaves a note), so a company's GSTIN is
+	not skipped by mistake."""
 	out = []
 	if is_placeholder_name(d.get("customer_name")):
 		out.append(("customer_name", "Customer's legal name"))
@@ -108,8 +112,8 @@ def customer_missing(d: dict) -> list[tuple[str, str]]:
 	if cat in REGISTERED_GST or not blank(d.get("gstin")):
 		if not gstin_ok(d.get("gstin")):
 			out.append(("gstin", "GSTIN (15 letters / digits)"))
-	elif blank(d.get("sk_gst_note")):
-		out.append(("gstin", "GSTIN, or tick 'Unregistered' and say why"))
+	elif blank(d.get("sk_gst_note")) and d.get("customer_type") != "Individual":
+		out.append(("gstin", "GSTIN, or tick 'No GSTIN (unregistered)'"))
 	if blank(d.get("address_state")):
 		out.append(("address", "Billing address with state"))
 	elif blank(d.get("address_pincode")):
@@ -188,6 +192,22 @@ def count_missing(warehouse, book: list[str], counted: dict) -> list[tuple[str, 
 	if left:
 		out.append(("counts", f"Counted qty on every line ({len(left)} left)"))
 	return out
+
+
+UNREGISTERED_NOTE = "No GSTIN: unregistered customer"
+
+
+def lead_may_become_deal(lead_step: str | None, deal_step: str | None = None) -> bool:
+	"""SK 4-Nov (Swati, Nishant: call not connected, lead went straight to a deal): a lead becomes a deal only after
+	its qualifying step, i.e. the salesperson spoke to the customer and moved the lead to Qualified (or later).
+	lead_step: the lead's gate step (New, Qualified, Drawing, Quotation, Negotiations, Won, or None for junk / lost).
+	deal_step: the new deal's step; a Won deal (made when the customer's order is submitted) is always allowed."""
+	if deal_step == "Won" or lead_step == "Won":
+		return True
+	return lead_step not in (None, "New")
+
+
+QUALIFY_FIRST = "Call the customer first. After you speak to them, mark the lead Qualified; then it becomes a deal"
 
 
 def deal_step_needs(step: str, quotations: list[dict], orders: list[dict]) -> list[tuple[str, str]]:

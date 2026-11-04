@@ -3,6 +3,7 @@ from sk_app.gate_rules import (
 	customer_missing,
 	deal_step_needs,
 	is_placeholder_name,
+	lead_may_become_deal,
 	lead_missing,
 	old_order_data_pending,
 	order_missing,
@@ -39,6 +40,26 @@ def test_customer_gstin_or_unregistered_with_reason():
 	assert keys(customer_missing({**base, "gst_category": "Unregistered"})) == {"gstin"}
 	assert customer_missing({**base, "gst_category": "Unregistered", "sk_gst_note": "Individual, no GST"}) == []
 	assert keys(customer_missing({**base, "gst_category": "Unregistered", "sk_gst_note": "x", "address_state": ""})) == {"address"}
+
+
+def test_non_gst_person_needs_no_gstin():
+	"""SK 4-Nov: a person (non-GST, unregistered) customer is complete with no GSTIN and no reason."""
+	base = {"customer_name": "Nishant Vinayak Jamdade", "address_state": "Maharashtra", "address_pincode": "411014", "mobile_no": "8329307905"}
+	assert customer_missing({**base, "customer_type": "Individual", "gst_category": "Unregistered"}) == []
+	assert customer_missing({**base, "customer_type": "Individual"}) == []  # no category yet = unregistered
+	# a company still says it has no GSTIN (the app's tick leaves the note), so a company GSTIN is not skipped by mistake
+	assert keys(customer_missing({**base, "customer_type": "Company", "gst_category": "Unregistered"})) == {"gstin"}
+	# a person who gave a GSTIN must give a valid one
+	assert keys(customer_missing({**base, "customer_type": "Individual", "gstin": "27AAAC"})) == {"gstin"}
+
+
+def test_lead_becomes_deal_only_after_qualifying():
+	"""SK 4-Nov (Swati / Nishant): call not connected, the lead must not turn into a deal."""
+	assert not lead_may_become_deal("New")
+	assert not lead_may_become_deal(None)  # junk / lost
+	for step in ("Qualified", "Drawing", "Quotation", "Negotiations", "Won"):
+		assert lead_may_become_deal(step), step
+	assert lead_may_become_deal("New", "Won")  # the customer's order was submitted: the won deal is made
 
 
 def test_quotation_needs_items_rate_gst_valid_till():

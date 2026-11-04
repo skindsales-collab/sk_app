@@ -19,7 +19,7 @@ def _deal(name: str) -> dict:
 	crm._check("CRM Deal", name)
 	meta = frappe.get_meta("CRM Deal")
 	fields = [f for f in ("name", "organization", "lead_name", "mobile_no", "email", "deal_owner", "erpnext_customer", "sk_customer_name",
-		"sk_segment") if f == "name" or meta.has_field(f)]
+		"sk_segment", "sk_no_gstin") if f == "name" or meta.has_field(f)]
 	return frappe.db.get_value("CRM Deal", name, fields, as_dict=True)
 
 
@@ -65,6 +65,9 @@ def make_customer(user: str, deal: str, details: dict | None = None) -> dict:
 	if not same and d.get("mobile_no"):
 		with store.as_system():
 			gates.complete_customer(name, mobile=d.mobile_no)
+	if not same and frappe.utils.cint(d.get(gates.NO_GSTIN)):
+		with store.as_system():  # SK 4-Nov: ticked 'No GSTIN' on the lead: Unregistered, no GSTIN asked again
+			gates.complete_customer(name, unregistered=1)
 	if details:
 		gates.complete_customer(name, **details)
 	return {"name": name, "new": not same, "missing": [t for _k, t in gates.customer_missing(name)]}

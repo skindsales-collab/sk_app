@@ -199,6 +199,11 @@ def route_lead(user: str, lead: str) -> dict:
 	from sk_app import crm
 
 	crm._check("CRM Lead", lead, "write")
+	from sk_app import gates
+
+	if not frappe.db.exists("CRM Deal", {"lead": lead}) and not gates.lead_qualified(lead):
+		# SK 4-Nov (Nishant: "Call busy" typed as the requirement made a deal): a New lead stays a lead
+		return {"route": "none", "reason": _(gates.R.QUALIFY_FIRST)}
 	seg = sub_of(frappe.db.get_value("CRM Lead", lead, "sk_segment")) if frappe.get_meta("CRM Lead").has_field("sk_segment") else None
 	product = frappe.db.get_value("CRM Lead", lead, "sk_product") if frappe.get_meta("CRM Lead").has_field("sk_product") else None
 	text = "\n".join(x for x in (product or "", _requirement(lead)) if x)
