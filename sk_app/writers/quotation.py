@@ -70,8 +70,17 @@ def write(user: str, *, customer: str, items: list[dict], deal: str | None = Non
 	for k, v in (extra or {}).items():
 		if doc.meta.has_field(k) or k in ("additional_discount_percentage", "apply_discount_on"):
 			doc.set(k, v)
-	_save_as_system(doc, owner or user)
-	report("Sales", doc, problems(customer, deal, items), title=_("Quotation data missing"))
+	_save_as_system(doc, owner or user)  # on_validate checks it, as for a quote made in ERPNext or by Claude
 	if deal:
 		_deal_to_quotation(deal)
 	return doc
+
+
+def on_validate(doc, method=None):
+	"""Every Quotation, from the app, ERPNext or SK Hub (SK 4-Nov), on the New path of Sales: customer, deal link, items."""
+	from sk_app.core.switch import use_new
+
+	if doc.docstatus == 1 or doc.quotation_to != "Customer" or not use_new("Sales", doc.owner or frappe.session.user):
+		return
+	items = [{"item_code": r.item_code, "qty": r.qty, "rate": r.rate} for r in doc.get("items") or []]
+	report("Sales", doc, problems(doc.party_name, doc.get("crm_deal"), items), title=_("Quotation data missing"))
