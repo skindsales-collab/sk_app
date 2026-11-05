@@ -485,6 +485,12 @@ def petty_cash(user: str, expense_account: str, amount, cash_account: str, cost_
 		frappe.throw(_("Please give the amount"))
 	if not (narration or "").strip():
 		frappe.throw(_("Please say what the money was spent on"))
+	if use_new("Finance", user):  # rebuild: the one Journal Entry writer (linear flow map, Flow 6)
+		from sk_app.writers import journal as jw
+
+		je, posted = jw.write(user, expense_account, cash_account, amount, cost_center=cost_center, narration=narration, photo=photo,
+			attach=attach, try_submit=try_submit)
+		return {"name": je.name, "posted": posted, "reason": draft_reason()}
 	je = frappe.new_doc("Journal Entry")
 	je.voucher_type = "Cash Entry" if frappe.db.get_value("Account", cash_account, "account_type") == "Cash" else "Bank Entry"
 	je.company = _company()

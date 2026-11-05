@@ -87,6 +87,17 @@ def _finance(since: str) -> dict:
 			fields=["name", "party", "paid_amount"], limit=0):
 		out["no_reference"] += 1
 		_log("Finance", "no_reference", "Payment Entry", r.name, f"{r.party} {r.paid_amount}: no UTR / reference")
+	# Flow 6: every journal since 1-Apr through the one Journal Entry rule (narration, balance, bank reference)
+	from sk_app.writers.journal_rules import problems as journal_problems
+
+	out["journal_data"] = 0
+	for r in frappe.get_all("Journal Entry", filters={"docstatus": 1, "posting_date": [">=", since]},
+			fields=["name", "total_debit", "total_credit", "user_remark", "cheque_no"], limit=0):
+		accounts = frappe.get_all("Journal Entry Account", filters={"parent": r.name}, pluck="account")
+		has_bank = any(frappe.get_cached_value("Account", a, "account_type") == "Bank" for a in accounts if a)
+		for key, words in journal_problems(r.total_debit, r.total_credit, r.user_remark, has_bank, r.cheque_no):
+			out["journal_data"] += 1
+			_log("Finance", key, "Journal Entry", r.name, words)
 	for doctype in ("Payment Entry", "Journal Entry", "Purchase Invoice", "Sales Invoice"):
 		for r in frappe.get_all(doctype, filters={"docstatus": 0, "creation": [">=", since]}, fields=["name"], limit=0):
 			reason = frappe.db.get_value("Comment", {"reference_doctype": doctype, "reference_name": r.name,
