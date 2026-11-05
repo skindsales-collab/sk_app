@@ -83,8 +83,9 @@ doc_events = {
 	"Purchase Invoice": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check"], "before_submit": "sk_app.sub_bills.check_submit"},
 	"Item Price": {"validate": "sk_app.sub_bills.check_rate_edit"},
 	# SK 4-Nov (Shraddha): a Net Banking / IMPS payment booked from Cash never shows in Bank Reconciliation: stopped
-	"Payment Entry": {"validate": ["sk_app.doubles.check", "sk_app.writers.payment.on_validate"]},
-	"Journal Entry": {"validate": "sk_app.doubles.check"},
+	"Payment Entry": {"validate": ["sk_app.doubles.check", "sk_app.writers.payment.on_validate"],
+		"on_submit": "sk_app.writers.bank_match.on_submit"},  # rebuild Flow 6: matched with its bank line at once (New path)
+	"Journal Entry": {"validate": ["sk_app.doubles.check", "sk_app.writers.journal.on_validate"]},
 	# SK 4-Nov "make it foolproof": the money masters only by the CEO / System Manager; a Bank mode needs Bank accounts (sk_app.masters)
 	"Mode of Payment": {"validate": ["sk_app.masters.guard", "sk_app.masters.check_mode"]},
 	"Accounts Settings": {"validate": "sk_app.masters.guard"},
