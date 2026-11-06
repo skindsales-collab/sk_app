@@ -1180,7 +1180,7 @@
 	function timed(method, promise, save) {
 		const t0 = performance.now();
 		return promise.then((r) => { perfNote(method, performance.now() - t0, true, save); return r; },
-			(e) => { perfNote(method, performance.now() - t0, false, save); throw e; });
+			(e) => { perfNote(method, performance.now() - t0, !!(e && e.locked), save); throw e; }); // a locked app is not a screen error (6-Nov scorecard: all 37 "errors" were the lock)
 	}
 	async function call(method, args, post, background) {
 		if (!post || background) return timed(method, send(method, args, post, background), false);
@@ -1251,7 +1251,7 @@
 		data = data || {};
 		if (!res.ok) {
 			let msg = serverError(data, "Error");
-			if (String(msg).includes("SK_LOCKED")) { if (!post && !background) lockHit = true; showLock(); throw new Error(t("lk_locked")); }
+			if (String(msg).includes("SK_LOCKED")) { if (!post && !background) lockHit = true; showLock(); const le = new Error(t("lk_locked")); le.locked = true; throw le; }
 			if (post && /<a href=/.test(String(msg)) && /double entry|already has a deal|same customer/i.test(String(msg))) {
 				try { doubleSheet(msg); } catch (e) { /* the toast below still shows it */ }
 			}
