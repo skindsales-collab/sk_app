@@ -116,7 +116,7 @@ def _purchase(since: str) -> dict:
 	out = {"po_data": 0}
 	for name in frappe.get_all("Purchase Order", filters={"docstatus": 1, "transaction_date": [">=", since]}, pluck="name", limit=0):
 		po = frappe.get_doc("Purchase Order", name)
-		for key, words in problems(_rows(po), po.supplier, po.schedule_date, _is_ceo(po.owner)):
+		for key, words in problems(_rows(po), po.supplier, po.schedule_date, _is_ceo(po.owner), bool(po.get("sk_sales_order"))):
 			out["po_data"] += 1
 			_log("Purchase", key, "Purchase Order", name, words)
 	return out

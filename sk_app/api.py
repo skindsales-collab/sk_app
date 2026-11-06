@@ -1018,6 +1018,39 @@ def store_drop_receipt(name):
 	return store.drop_receipt(_me().user, name)
 
 
+# ---------- subcontractor service jobs (Flow sheet 6-Nov: PO with payment term → bill → owner approval → service GRN) ----------
+
+@frappe.whitelist(methods=["POST"])
+def service_order(sales_order, supplier, items, payment_term, note=None, schedule_date=None):
+	from sk_app.writers import service_job
+
+	store.need(_me().user, "Purchase", "Machine Shifting", "Management")
+	return service_job.order(_me().user, sales_order, supplier, _list(items), payment_term, note=note, schedule_date=schedule_date)
+
+
+@frappe.whitelist(methods=["POST"])
+def service_bill(purchase_order, bill_no, bill_date, photo=None, note=None):
+	from sk_app.writers import service_job
+
+	store.need(_me().user, "Subcontractor", "Accounts", "Machine Shifting", "Management")
+	return service_job.bill(_me().user, purchase_order, bill_no, bill_date, photo=photo, note=note)
+
+
+@frappe.whitelist(methods=["POST"])
+def service_approve(purchase_invoice, note=None):
+	from sk_app.writers import service_job
+
+	return service_job.approve(_me().user, purchase_invoice, note=note)
+
+
+@frappe.whitelist()
+def service_jobs(supplier=None, since=None):
+	from sk_app.writers import service_job
+
+	_me()
+	return service_job.jobs(supplier, since)
+
+
 @frappe.whitelist(methods=["POST"])
 def store_receive(items, purchase_order=None, challan_photo=None, goods_photo=None, note=None, supplier=None, reason=None, bill_no=None):
 	return store.receive(_me().user, purchase_order, _list(items), challan_photo, goods_photo, note, supplier, reason, bill_no)
