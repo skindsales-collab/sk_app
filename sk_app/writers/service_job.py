@@ -25,10 +25,6 @@ from sk_app.writers.service_job_rules import OWNER_FUNCTION, TERMS, advance_due,
 
 ORDER_FIELD = "sk_sales_order"  # on Purchase Order / Purchase Invoice: the customer order the subcontract is for
 REPORT_FIELD = "sk_service_report"  # on Purchase Order: the customer-signed service report (photo / PDF), before the bill
-SOP_TEMPLATE = "Machine Shifting SOP"  # Quality Inspection Template: SK edits the points in ERPNext
-SOP_POINTS = ["Survey and lifting plan", "Match-marking and photo record", "Oil / coolant drained, pipes capped", "Electrical disconnected",
-	"Dismantled into sub-assemblies", "Packed", "Lifted and loaded", "Transported and unloaded", "Manual shifting", "Placed and levelled",
-	"Re-assembled", "Electrical reconnected", "Power-on and trial"]
 RATE_FILE = "service_rates_draft.json"
 GROUP = "Services"
 
@@ -44,9 +40,6 @@ def ensure_setup():
 		"allow_on_submit": 1}
 	create_custom_fields({"Purchase Order": [link, report_file], "Purchase Invoice": [dict(link)], "Purchase Receipt": [dict(link)]}, update=True)
 	load_rates()
-	if frappe.db.exists("DocType", "Quality Inspection Template") and not frappe.db.exists("Quality Inspection Template", SOP_TEMPLATE):
-		frappe.get_doc({"doctype": "Quality Inspection Template", "quality_inspection_template_name": SOP_TEMPLATE,
-			"item_quality_inspection_parameter": [{"specification": p} for p in SOP_POINTS]}).insert(ignore_permissions=True)
 
 
 def load_rates():
@@ -210,7 +203,7 @@ def before_submit(doc, method=None):
 		title=_("Service bill not approved"))
 
 
-# ---------- at site: daily photo report, SOP checklist, signed service report (Flow sheet steps 8-9) ----------
+# ---------- at site: daily photo report and the signed service report (Flow sheet steps 8-9) ----------
 
 def _po(purchase_order: str):
 	po = frappe.db.get_value("Purchase Order", purchase_order, ["name", "supplier", "supplier_name", "project", ORDER_FIELD, REPORT_FIELD, "docstatus"],
@@ -242,41 +235,6 @@ def daily_report(user: str, purchase_order: str, *, photo=None, note=None) -> di
 	if doctype == "Project":
 		frappe.get_doc("Purchase Order", po.name).add_comment("Comment", text)
 	return {"name": c.name, "on": f"{doctype} {name}"}
-
-
-def sop_points(user: str, purchase_order: str) -> list[dict]:
-	"""The SOP checklist of this job as Tasks under its Project (made once from the Quality Inspection Template)."""
-	po = _po(purchase_order)
-	if not po.project:
-		return []
-	have = frappe.get_all("Task", filters={"project": po.project, "subject": ["like", "SOP: %"]}, fields=["name", "subject", "status", "description"],
-		order_by="creation asc")
-	if not have:
-		points = [r.specification for r in frappe.get_all("Item Quality Inspection Parameter", filters={"parent": SOP_TEMPLATE,
-			"parenttype": "Quality Inspection Template"}, fields=["specification"], order_by="idx asc")] or SOP_POINTS
-		for p in points:
-			frappe.get_doc({"doctype": "Task", "subject": f"SOP: {p}"[:140], "project": po.project, "status": "Open",
-				"description": _("Machine shifting SOP point for PO {0}").format(po.name)}).insert(ignore_permissions=True)
-		have = frappe.get_all("Task", filters={"project": po.project, "subject": ["like", "SOP: %"]}, fields=["name", "subject", "status", "description"],
-			order_by="creation asc")
-	return [{"task": t.name, "specification": t.subject[5:], "ok": t.status == "Completed", "status": t.status} for t in have]
-
-
-def sop_tick(user: str, task: str, ok, *, photo=None, note=None) -> dict:
-	"""OK completes the point; Not OK keeps it open with the reason and photo on the task (Project timeline)."""
-	t = frappe.get_doc("Task", task)
-	if not t.subject.startswith("SOP: "):
-		frappe.throw(_("Not an SOP point"))
-	ok = bool(int(ok or 0))
-	if not ok and not (note or "").strip():
-		frappe.throw(_("Please say what is wrong for: {0}").format(t.subject[5:]))
-	_attach_copy(photo, "Task", t.name, user)
-	t.status = "Completed" if ok else "Open"
-	t.flags.ignore_permissions = True
-	t.save()
-	t.add_comment("Comment", (_("OK") if ok else _("Not OK: {0}").format(note)) + _(" by {0}").format(frappe.utils.get_fullname(user)) +
-		(f' <a href="{photo}" target="_blank">📷</a>' if photo else ""))
-	return {"task": t.name, "ok": ok}
 
 
 def service_report(user: str, purchase_order: str, photo: str, *, note=None) -> dict:

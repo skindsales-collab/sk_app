@@ -1079,22 +1079,6 @@ def service_daily(purchase_order, photo=None, note=None):
 	return service_job.daily_report(_me().user, purchase_order, photo=photo, note=note)
 
 
-@frappe.whitelist()
-def service_sop(purchase_order):
-	from sk_app.writers import service_job
-
-	store.need(_me().user, "Subcontractor", "Machine Shifting", "Quality", "Management")
-	return service_job.sop_points(_me().user, purchase_order)
-
-
-@frappe.whitelist(methods=["POST"])
-def service_sop_tick(task, ok, photo=None, note=None):
-	from sk_app.writers import service_job
-
-	store.need(_me().user, "Subcontractor", "Machine Shifting", "Quality", "Management")
-	return service_job.sop_tick(_me().user, task, ok, photo=photo, note=note)
-
-
 @frappe.whitelist(methods=["POST"])
 def service_report(purchase_order, photo, note=None):
 	from sk_app.writers import service_job
