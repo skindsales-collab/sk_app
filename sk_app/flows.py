@@ -143,10 +143,8 @@ def sales(user: str, segment=None, only_self=False) -> list[dict]:
 		stages.append(_stage(step.lower(), step, icons[step], rows, value or None, go=go[step]))
 	# SK 27-Oct "All status shows in flow chart": the three closing steps too, closed this month
 	done = {"Deal Won": [], "Junk Lead": [], "Deal Loss": []}
-	# SK 4-Nov rebuild (S6), New path only: closed arrows count all months, and the old CRM statuses (Unqualified,
+	# SK 4-Nov rebuild (S6): cumulative = closed arrows count all months since 1-Apr, and the old CRM statuses (Unqualified,
 	# Converted) count under their new step, so the arrow totals equal ERPNext's own totals
-	from sk_app.core.switch import use_new
-
 	all_time = period() == CUMULATIVE  # SK 6-Nov: the person's choice on the screen (New path: all months since 4-Nov)
 	since = {} if all_time else {"modified": [">=", start]}
 	lead_closed = {st: st for st in done}
