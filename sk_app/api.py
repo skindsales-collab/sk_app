@@ -1018,6 +1018,15 @@ def store_drop_receipt(name):
 	return store.drop_receipt(_me().user, name)
 
 
+@frappe.whitelist()
+def gate_check(module=None):
+	"""SK 6-Nov switch gate: before/after counts per doctype and person for one module (or all on New)."""
+	from sk_app.core import gate
+
+	store.need(_me().user, "Management")
+	return gate.check(module, tell=False) if module else gate.nightly()
+
+
 # ---------- subcontractor service jobs (Flow sheet 6-Nov: PO with payment term → bill → owner approval → service GRN) ----------
 
 @frappe.whitelist(methods=["POST"])

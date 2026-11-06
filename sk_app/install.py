@@ -110,7 +110,13 @@ def after_migrate():
 	_safe(sub_bills_setup, "labour rates and POs")  # SK 29-Oct: rate sheet → service PO → Rushi → CEO → GRN → payable
 	from sk_app.writers.service_job import ensure_setup as service_job_setup
 
-	_safe(service_job_setup, "service job items and fields")  # SK 6-Nov: subcontractor service jobs (Technomech flow sheet)
+	_safe(service_job_setup, "service job items and fields")
+	from sk_app.writers.app_user import ensure_setup as app_user_setup
+
+	_safe(app_user_setup, "people rule setting")
+	from sk_app.old_crm_load import backfill as old_crm_backfill
+
+	_safe(old_crm_backfill, "SK Import rows for loads already done")  # SK 6-Nov: auto logins; subcontractor logins only when SK switches it on  # SK 6-Nov: subcontractor service jobs (Technomech flow sheet)
 	_safe(requisition_setup, "purchase requisition")  # SK 27-Oct: requisition → CEO → PO → receipt
 	_safe(marketing_list_setup, "marketing list")  # SK 27-Oct: potential customers for greetings / promotions, not leads
 	from sk_app.cold_calls import move_all_once

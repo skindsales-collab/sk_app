@@ -7,6 +7,7 @@ old CRM dates, and the result is written to SK Rule Log. Rules: sk_app/old_crm_r
 
 import csv
 import io
+import json
 
 import frappe
 
@@ -54,12 +55,15 @@ def load(file_name: str) -> dict:
 			if not lead:
 				skipped[why] = skipped.get(why, 0) + 1
 				continue
+			# a closed old lead is no work for anyone: it is inserted without an owner, so Frappe CRM makes no assignment
+			# (6-Nov live check: each assignment queued an "assigned a new task" e-mail; 1,168 mails from one load), and the
+			# owner is written straight after so the person's arrows still count it
+			closed = lead.get("status") in R.CLOSED
+			owner = lead.pop("lead_owner", None) if closed else None
 			doc = frappe.get_doc({"doctype": "CRM Lead", **lead})
 			doc.insert(ignore_permissions=True)
-			# a closed old lead is no work for anyone: the assignment Frappe CRM makes for the owner is closed at once
-			for todo in frappe.get_all("ToDo", filters={"reference_type": "CRM Lead", "reference_name": doc.name, "status": "Open"},
-					pluck="name"):
-				frappe.db.set_value("ToDo", todo, "status", "Closed" if doc.status in R.CLOSED else "Open", update_modified=False)
+			if owner:
+				frappe.db.set_value("CRM Lead", doc.name, "lead_owner", owner, update_modified=False)
 			created, closed = R.dates_of(row)
 			if created:
 				frappe.db.set_value("CRM Lead", doc.name, {"creation": f"{created} 10:00:00",
@@ -75,7 +79,23 @@ def load(file_name: str) -> dict:
 	result = {"file": f.file_name, "rows": len(rows), "loaded": len(made), "skipped": skipped,
 		"first": made[:1], "last": made[-1:]}
 	_log(result)
+	_record(f.file_name, rows, made)
 	return result
+
+
+def _record(file_name: str, rows: list, made: list):
+	"""SK 6-Nov import completeness: the load is an SK Import row, re-counted nightly (sk_app.core.imports)."""
+	from sk_app.core import imports
+
+	try:
+		by_owner = {}
+		for r in rows:
+			by_owner[r.get("lead_owner") or ""] = by_owner.get(r.get("lead_owner") or "", 0) + 1
+		filters = {"name": ["between", [made[0], made[-1]]]} if made else {"name": "none"}
+		imports.record("Old CRM (Biziverse inactive + Common Sheet quotes)", "CRM Lead", len(rows), len(made), filters, file_name=file_name,
+			record_type="Leads", by_salesperson=by_owner)
+	except Exception:
+		frappe.log_error(title="SK App import record")
 
 
 def _log(result: dict):
@@ -85,3 +105,22 @@ def _log(result: dict):
 			ignore_permissions=True)
 	except Exception:
 		frappe.log_error(frappe.as_json(result), "old CRM load")
+
+
+def backfill():
+	"""After migrate: the loads already done (SK Rule Log mode Load) get their SK Import row once."""
+	from sk_app.core import imports
+
+	if not frappe.db.table_exists(imports.DOCTYPE):
+		return
+	for log in frappe.get_all("SK Rule Log", filters={"mode": "Load", "rule": "old CRM load"}, fields=["detail"]):
+		try:
+			r = json.loads(log.detail)
+		except ValueError:
+			continue
+		if not r.get("file") or frappe.db.exists(imports.DOCTYPE, {"file_name": r["file"]}):
+			continue
+		made = (r.get("first") or []) + (r.get("last") or [])
+		filters = {"name": ["between", [made[0], made[-1]]]} if made else {"name": "none"}
+		imports.record("Old CRM (Biziverse inactive + Common Sheet quotes)", "CRM Lead", r.get("rows", 0), r.get("loaded", 0), filters,
+			file_name=r["file"], record_type="Leads")
