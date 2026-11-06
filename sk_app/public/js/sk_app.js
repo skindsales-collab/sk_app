@@ -180,7 +180,10 @@
 		bills: "Bills",
 		last_rates: "Last Rates",
 		po_approvals: "PO Approvals",
-		questions: "Questions", q_help: "Questions from Training, grouped by topic. Answer by typing or speaking: the person is told and the answer is saved in the FAQ. Or send it for development.", q_answer: "Answer", q_dev: "Send for development", q_dev_note: "Note for the AI & ERP desk (optional)", q_dev_sent: "Sent to the AI & ERP desk", q_in_dev: "In development: mark when deployed", q_dep_app: "Deployed in app", q_dep_erp: "Deployed in ERPNext", q_none: "No questions waiting", q_photo: "Screenshot or photo (optional)", sub_bills: "Labour POs", my_bills: "My labour POs", sb_help: "One service PO per job from the labour rate sheet. Rushi checks the rate first, then the CEO approves and the PO is made. When the job is done the GRN comes by itself; after Quality passes it the bill is payable.",
+		questions: "Questions", q_help: "Questions from Training, grouped by topic. Answer by typing or speaking: the person is told and the answer is saved in the FAQ. Or send it for development.", q_answer: "Answer", q_dev: "Send for development", q_dev_note: "Note for the AI & ERP desk (optional)", q_dev_sent: "Sent to the AI & ERP desk", q_in_dev: "In development: mark when deployed", q_dep_app: "Deployed in app", q_dep_erp: "Deployed in ERPNext", q_none: "No questions waiting", q_photo: "Screenshot or photo (optional)", sub_bills: "Labour POs", my_bills: "My labour POs", service_jobs: "Site jobs", sj_help: "One card per site job (service PO). The subcontractor adds the day's photo, ticks the SOP points, uploads the customer-signed report and then his bill. The owner approves the bill; the GRN is made by itself.",
+		sj_new: "New service PO", sj_order: "Customer order", sj_supplier: "Subcontractor", sj_term: "Payment term", sj_work: "Work (from rate sheet)", sj_qty: "Qty", sj_daily: "Day's photo", sj_daily_note: "What was done today", sj_sop: "SOP checklist", sj_report: "Signed report", sj_report_note: "Note (optional)",
+		sj_bill: "My bill", sj_bill_no: "Bill number", sj_bill_date: "Bill date", sj_bill_photo: "Bill photo / PDF", sj_approve: "Approve bill", sj_not_ok_why: "What is not OK", sj_no_report: "Signed report not yet added",
+		sj_st_ordered: "PO placed", sj_st_advance_paid: "Advance paid", sj_st_billed: "Bill waiting approval", sj_st_approved: "Approved, to pay", sj_st_paid: "Paid", sj_st_draft: "PO draft (not yet placed)", sb_help: "One service PO per job from the labour rate sheet. Rushi checks the rate first, then the CEO approves and the PO is made. When the job is done the GRN comes by itself; after Quality passes it the bill is payable.",
 		sb_my_help: "Your labour POs, one per job: approved rate, GRN when the job is done, and the bill once Quality passed it. Answer any question so it can move on.", sb_grn: "GRN", sb_bill: "Bill", sb_paid: "paid", sb_due: "payable", sb_discuss: "Discuss", sb_question: "Question",
 		sb_answer: "Answer", sb_qty: "Qty (cabins / points)", sb_rate: "Rate", sb_qc: "QC", sb_no_size: "Rate not in the sheet for this cabin: please put the rate",
 		sb_st_rushi: "Waiting Rushi", sb_st_ceo: "Waiting CEO", sb_st_ok: "Approved · PO made", sb_st_no: "Rejected", sb_st_paid: "Posted",
@@ -299,7 +302,10 @@
 		bills: "बिले",
 		last_rates: "मागील दर",
 		po_approvals: "PO मंजुरी",
-		questions: "प्रश्न", q_help: "ट्रेनिंगमधील प्रश्न, विषयानुसार. लिहून किंवा बोलून उत्तर द्या: त्या व्यक्तीला कळवले जाते आणि उत्तर FAQ मध्ये जाते. किंवा डेव्हलपमेंटसाठी पाठवा.", q_answer: "उत्तर", q_dev: "डेव्हलपमेंटसाठी पाठवा", q_dev_note: "AI & ERP डेस्कसाठी टीप (ऐच्छिक)", q_dev_sent: "AI & ERP डेस्ककडे पाठवले", q_in_dev: "डेव्हलपमेंटमध्ये: डिप्लॉय झाल्यावर नोंदवा", q_dep_app: "ॲपमध्ये डिप्लॉय", q_dep_erp: "ERPNext मध्ये डिप्लॉय", q_none: "कोणतेही प्रश्न बाकी नाहीत", q_photo: "स्क्रीनशॉट किंवा फोटो (ऐच्छिक)", sub_bills: "लेबर PO", my_bills: "माझे लेबर PO", sb_help: "प्रत्येक कामासाठी लेबर रेट शीटवरून एक सर्व्हिस PO. आधी रुषी रेट तपासतात, मग CEO मंजूर करतात व PO तयार होतो. काम पूर्ण झाल्यावर GRN आपोआप होतो; क्वालिटी पास झाल्यावर बिल देय होते.",
+		questions: "प्रश्न", q_help: "ट्रेनिंगमधील प्रश्न, विषयानुसार. लिहून किंवा बोलून उत्तर द्या: त्या व्यक्तीला कळवले जाते आणि उत्तर FAQ मध्ये जाते. किंवा डेव्हलपमेंटसाठी पाठवा.", q_answer: "उत्तर", q_dev: "डेव्हलपमेंटसाठी पाठवा", q_dev_note: "AI & ERP डेस्कसाठी टीप (ऐच्छिक)", q_dev_sent: "AI & ERP डेस्ककडे पाठवले", q_in_dev: "डेव्हलपमेंटमध्ये: डिप्लॉय झाल्यावर नोंदवा", q_dep_app: "ॲपमध्ये डिप्लॉय", q_dep_erp: "ERPNext मध्ये डिप्लॉय", q_none: "कोणतेही प्रश्न बाकी नाहीत", q_photo: "स्क्रीनशॉट किंवा फोटो (ऐच्छिक)", sub_bills: "लेबर PO", my_bills: "माझे लेबर PO", service_jobs: "साईट कामे", sj_help: "प्रत्येक साईट कामाचे (सर्व्हिस PO) एक कार्ड. सबकॉन्ट्रॅक्टर दिवसाचा फोटो टाकतो, SOP मुद्दे टिक करतो, ग्राहकाची सही असलेला रिपोर्ट व मग आपले बिल अपलोड करतो. मालक बिल मंजूर करतो; GRN आपोआप होतो.",
+		sj_new: "नवीन सर्व्हिस PO", sj_order: "ग्राहक ऑर्डर", sj_supplier: "सबकॉन्ट्रॅक्टर", sj_term: "पेमेंट टर्म", sj_work: "काम (रेट शीटवरून)", sj_qty: "संख्या", sj_daily: "दिवसाचा फोटो", sj_daily_note: "आज काय केले", sj_sop: "SOP चेकलिस्ट", sj_report: "सही केलेला रिपोर्ट", sj_report_note: "टीप (ऐच्छिक)",
+		sj_bill: "माझे बिल", sj_bill_no: "बिल नंबर", sj_bill_date: "बिल तारीख", sj_bill_photo: "बिल फोटो / PDF", sj_approve: "बिल मंजूर", sj_not_ok_why: "काय ठीक नाही", sj_no_report: "सही केलेला रिपोर्ट अजून नाही",
+		sj_st_ordered: "PO दिला", sj_st_advance_paid: "ॲडव्हान्स दिला", sj_st_billed: "बिल मंजुरीसाठी", sj_st_approved: "मंजूर, देणे बाकी", sj_st_paid: "दिले", sj_st_draft: "PO ड्राफ्ट (अजून दिला नाही)", sb_help: "प्रत्येक कामासाठी लेबर रेट शीटवरून एक सर्व्हिस PO. आधी रुषी रेट तपासतात, मग CEO मंजूर करतात व PO तयार होतो. काम पूर्ण झाल्यावर GRN आपोआप होतो; क्वालिटी पास झाल्यावर बिल देय होते.",
 		sb_my_help: "प्रत्येक कामाचा तुमचा लेबर PO: मंजूर रेट, काम झाल्यावर GRN, क्वालिटी पास झाल्यावर बिल. प्रश्न असल्यास उत्तर द्या म्हणजे पुढे जाईल.", sb_grn: "GRN", sb_bill: "बिल", sb_paid: "पेड", sb_due: "देय", sb_discuss: "चर्चा", sb_question: "प्रश्न",
 		sb_answer: "उत्तर", sb_qty: "नग (केबिन / पॉइंट)", sb_rate: "रेट", sb_qc: "QC", sb_no_size: "या केबिनचा रेट शीटमध्ये नाही: रेट टाका",
 		sb_st_rushi: "रुषीकडे बाकी", sb_st_ceo: "CEO कडे बाकी", sb_st_ok: "मंजूर · PO तयार", sb_st_no: "नामंजूर", sb_st_paid: "पोस्ट झाले",
@@ -1031,7 +1037,7 @@
 		calendar: "📅", follow_up: "🔔", new_lead: "➕", training: "🎓", day_report: "📝", team_reports: "🗂️",
 		calls: "📞", whatsapp: "💬", mail: "✉️", reminders: "⏰", library: "🏢", logins: "🔑", team_leads: "👥",
 		stock_check: "📦", receive: "🚚", issue: "📤", store_requests: "📋", dispatch: "🚛", low_stock: "⚠️", stock_count: "🔢", new_item: "🆕", to_submit: "✅",
-		requisition: "📝", buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅", questions: "❓", sub_bills: "🧾", my_bills: "🧾",
+		requisition: "📝", buy_requests: "📋", get_rates: "💬", compare: "⚖️", po_follow_up: "📞", suppliers: "🏭", bills: "📷", last_rates: "💹", po_approvals: "✅", questions: "❓", sub_bills: "🧾", my_bills: "🧾", service_jobs: "🏗️",
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", lead_time: "⏱️", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁", el_points: "🔌",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
@@ -3449,7 +3455,7 @@
 	}, true);
 
 	// Proof photos: where it goes, and a warning if it is too dark or blurred to read later
-	const RECORD_OF = { receive: "Purchase Receipt (draft)", issue: "Stock Entry", dispatch: "Delivery Note", stock_count: "Stock Reconciliation",
+	const RECORD_OF = { service_jobs: "Purchase Order (service)", receive: "Purchase Receipt (draft)", issue: "Stock Entry", dispatch: "Delivery Note", stock_count: "Stock Reconciliation",
 		new_item: "Item", job_cards: "Job Card", my_jobs: "Job Card", progress_photos: "Work Order", non_conformance: "Non Conformance", my_fixes: "Non Conformance",
 		inspect: "Quality Inspection", final_check: "Quality Inspection", dsi: "SK DSI Entry", problem: "SK Work Log", day_report: "SK Day Report",
 		detail: "CRM note / file", new_lead: "CRM Lead", complaints: "Issue (complaint)", bills: "Purchase Invoice (draft)", suppliers: "Supplier",
@@ -5420,6 +5426,104 @@
 		}
 	}
 
+	// ---------- Site jobs (Flow sheet 6-Nov): service PO → daily photo → SOP → signed report → bill → approval ----------
+	const SJ_STAGE = { ordered: "yel", advance_paid: "yel", billed: "yel", approved: "green", paid: "green", draft: "" };
+	async function renderServiceJobs() {
+		S.sj = await call("service_jobs");
+		const chip = (j) => { const st = j.docstatus === 1 ? j.stage : "draft"; return `<span class="sk-chip ${SJ_STAGE[st] || ""}">${t("sj_st_" + st)}</span>`; };
+		const btn = (act, i, label, cls) => `<button class="sk-chip ${cls || ""}" data-act="${act}" data-i="${i}">${label}</button>`;
+		const card = (j, i) => {
+			const site = j.docstatus === 1 && j.stage !== "paid";
+			const acts = [];
+			if (site && (S.sj.mine || S.sj.can_order)) acts.push(btn("sj-daily", i, "📷 " + t("sj_daily")), btn("sj-sop", i, "☑ " + t("sj_sop")));
+			if (site && !j.signed_report && (S.sj.mine || S.sj.can_order)) acts.push(btn("sj-report", i, "📄 " + t("sj_report")));
+			if (site && !j.bills.length && S.sj.mine) acts.push(btn("sj-bill", i, "🧾 " + t("sj_bill"), j.signed_report ? "on" : ""));
+			if (j.stage === "billed" && j.draft_bill && S.sj.can_approve) acts.push(btn("sj-approve", i, "✓ " + t("sj_approve"), "on"));
+			const meta = [esc(j.customer || ""), esc(j.work || ""), money(j.grand_total), j.signed_report ? "📄" : (site ? `⚠ ${t("sj_no_report")}` : ""), esc(j.payment_terms_template || "")].filter(Boolean).join(" · ");
+			return li(`${esc(j.supplier_name)} · ${esc(j.name)}`, `${meta}<br>${chip(j)}`, `<div class="sk-chips">${acts.join("")}</div>`);
+		};
+		root.innerHTML = header(t("service_jobs")) + `<main><p class="sk-note">${t("sj_help")}</p>
+			${S.sj.can_order ? `<button class="sk-btn go wide" data-act="sj-new">+ ${t("sj_new")}</button>` : ""}
+			<ul class="sk-list sk-gap">${S.sj.jobs.map(card).join("") || empty()}</ul></main>`;
+	}
+	async function serviceJobAct(act, el) {
+		const i = Number(el.dataset.i);
+		const j = S.sj && S.sj.jobs[i];
+		const head = j ? `<h3 class="sk-h">${esc(j.supplier_name)} · ${esc(j.customer || "")}</h3><p class="sk-note">${esc(j.name)} · ${esc(j.work || "")}</p>` : "";
+		const back = `<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`;
+		const done = async (msg) => { closeSheet(); toast(`✓ ${msg || t("saved")}`); return renderServiceJobs(); };
+		switch (act) {
+			case "sj-new": {
+				const o = S.sj.options || {};
+				S.sjItems = o.items || [];
+				sheet(`<h3 class="sk-h">${t("sj_new")}</h3>${pick("sj-so", t("sj_order"), o.orders)}${pick("sj-sup", t("sj_supplier"), o.suppliers)}${pick("sj-term", t("sj_term"), o.terms)}
+					<span class="sk-field"><span>${t("sj_work")}</span></span>
+					${S.sjItems.map((x, k) => `<div class="sk-row"><label class="sk-field" style="flex:1"><span>${esc(x.item_name)} · ${money(x.rate)}/${esc(x.uom)}</span>${qtyBox("sj-q-" + k, "", t("sj_qty"))}</label></div>`).join("")}
+					${formField("sj-note", t("note_q"))}<button class="sk-btn go wide" data-act="sj-new-save">${t("save")}</button>${back}`);
+				return;
+			}
+			case "sj-new-save": {
+				const items = S.sjItems.map((x, k) => ({ item_code: x.item_code, qty: Number(val("sj-q-" + k) || 0), rate: x.rate })).filter((r) => r.qty > 0);
+				el.disabled = true;
+				const r = await call("service_order", { sales_order: val("sj-so"), supplier: val("sj-sup"), payment_term: val("sj-term"), items: JSON.stringify(items), note: val("sj-note") }, true).catch((e) => { el.disabled = false; throw e; });
+				return done(r && r.name);
+			}
+			case "sj-daily": return sheet(`${head}${photoField("sj-photo", "📷 " + t("sj_daily"))}${formField("sj-text", t("sj_daily_note"), true)}
+				<button class="sk-btn go wide" data-act="sj-daily-save" data-i="${i}">${t("save")}</button>${back}`);
+			case "sj-daily-save": {
+				el.disabled = true;
+				await call("service_daily", { purchase_order: j.name, photo: await photoUrl("sj-photo"), note: val("sj-text") }, true).catch((e) => { el.disabled = false; throw e; });
+				return done();
+			}
+			case "sj-sop": {
+				const pts = await call("service_sop", { purchase_order: j.name });
+				S.sjPts = pts;
+				sheet(`${head}<h3 class="sk-h">${t("sj_sop")} (${pts.filter((p) => p.ok).length}/${pts.length})</h3><ul class="sk-list">${pts.map((p, k) => li(esc(p.specification), p.ok ? "✓" : "",
+					p.ok ? "" : `<div class="sk-chips"><button class="sk-chip on" data-act="sj-sop-ok" data-i="${i}" data-k="${k}">✓ OK</button><button class="sk-chip bad" data-act="sj-sop-no" data-i="${i}" data-k="${k}">✗</button></div>`)).join("")}</ul>${back}`);
+				return;
+			}
+			case "sj-sop-ok": {
+				el.disabled = true;
+				await call("service_sop_tick", { task: S.sjPts[Number(el.dataset.k)].task, ok: 1 }, true).catch((e) => { el.disabled = false; throw e; });
+				toast(`✓ ${t("saved")}`);
+				return serviceJobAct("sj-sop", el);
+			}
+			case "sj-sop-no": {
+				const p = S.sjPts[Number(el.dataset.k)];
+				return sheet(`${head}<h3 class="sk-h">${esc(p.specification)}</h3>${formField("sj-text", t("sj_not_ok_why"), true)}${photoField("sj-photo", "📷 " + t("photo"))}
+					<button class="sk-btn bad wide" data-act="sj-sop-no-save" data-i="${i}" data-k="${el.dataset.k}">${t("save")}</button>${back}`);
+			}
+			case "sj-sop-no-save": {
+				el.disabled = true;
+				await call("service_sop_tick", { task: S.sjPts[Number(el.dataset.k)].task, ok: 0, note: val("sj-text"), photo: await photoUrl("sj-photo") }, true).catch((e) => { el.disabled = false; throw e; });
+				toast(`✓ ${t("saved")}`);
+				return serviceJobAct("sj-sop", el);
+			}
+			case "sj-report": return sheet(`${head}${photoField("sj-photo", "📄 " + t("sj_report"), true)}${formField("sj-text", t("sj_report_note"))}
+				<button class="sk-btn go wide" data-act="sj-report-save" data-i="${i}">${t("save")}</button>${back}`);
+			case "sj-report-save": {
+				el.disabled = true;
+				await call("service_report", { purchase_order: j.name, photo: await photoUrl("sj-photo"), note: val("sj-text") }, true).catch((e) => { el.disabled = false; throw e; });
+				return done();
+			}
+			case "sj-bill": return sheet(`${head}${j.signed_report ? "" : `<p class="sk-note">⚠ ${t("sj_no_report")}</p>`}${formField("sj-bno", t("sj_bill_no"))}
+				<label class="sk-field"><span>${t("sj_bill_date")}</span><input id="sj-bdate" type="date" value="${new Date().toISOString().slice(0, 10)}"></label>
+				${photoField("sj-photo", "📷 " + t("sj_bill_photo"), true)}${formField("sj-text", t("note_q"))}
+				<button class="sk-btn go wide" data-act="sj-bill-save" data-i="${i}">${t("save")}</button>${back}`);
+			case "sj-bill-save": {
+				el.disabled = true;
+				const r = await call("service_bill", { purchase_order: j.name, bill_no: val("sj-bno"), bill_date: val("sj-bdate"), photo: await photoUrl("sj-photo"), note: val("sj-text") }, true).catch((e) => { el.disabled = false; throw e; });
+				return done(r && r.name);
+			}
+			case "sj-approve": {
+				el.disabled = true;
+				const r = await call("service_approve", { purchase_invoice: j.draft_bill }, true).catch((e) => { el.disabled = false; throw e; });
+				toast(`✓ ${(r && r.name) || t("saved")}`);
+				return renderServiceJobs();
+			}
+		}
+	}
+
 	async function renderNcs(view) {
 		S.ncs = await call("qc_open_ncs");
 		const canNew = view === "non_conformance" && (state.home.functions || []).includes("Quality");
@@ -6030,7 +6134,7 @@
 		logins: renderLogins, team_leads: renderTeamLeads, stock_check: renderStockCheck, receive: renderReceive, issue: renderIssue, store_requests: renderStoreRequests,
 		dispatch: renderDispatch, low_stock: renderLowStock, stock_count: renderStockCount, to_submit: renderToSubmit, new_item: renderNewItem,
 		buy_requests: renderBuyRequests, get_rates: renderGetRates, compare: renderCompare, po_follow_up: renderFollowUpPo,
-		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals, questions: renderQuestions, sub_bills: () => renderSubBills("sub_bills"), my_bills: () => renderSubBills("my_bills"), requisition: () => renderRequisition(),
+		suppliers: renderSuppliers, bills: renderBills, last_rates: renderLastRates, po_approvals: renderApprovals, questions: renderQuestions, sub_bills: () => renderSubBills("sub_bills"), my_bills: () => renderSubBills("my_bills"), service_jobs: renderServiceJobs, requisition: () => renderRequisition(),
 		order_board: renderOrderBoard, job_cards: () => renderJobs("job_cards"), my_jobs: () => renderJobs("my_jobs"), need_material: renderNeedMaterial,
 		progress_photos: renderProgressPhotos, ready_dispatch: renderReadyDispatch, lead_time: renderLeadTime, non_conformance: () => renderNcs("non_conformance"),
 		my_fixes: () => renderNcs("my_fixes"), inspect: () => renderInspect("inspect"), final_check: () => renderInspect("final_check"),
@@ -6297,6 +6401,7 @@
 			if (act && (act.startsWith("st-") || act.startsWith("pu-") || act.startsWith("fl-") || act.startsWith("np-"))) return await storeAct(act, el);
 			if (act && (act.startsWith("pr-") || act.startsWith("qc-"))) return await prodAct(act, el);
 			if (act && act.startsWith("sb-")) return await subBillAct(act, el);
+			if (act && act.startsWith("sj-")) return await serviceJobAct(act, el);
 			if (act && act.startsWith("q-")) return await questionAct(act, el);
 			if (act && act.startsWith("fin-")) return await finAct(act, el);
 			if (el.dataset.qok !== undefined) {

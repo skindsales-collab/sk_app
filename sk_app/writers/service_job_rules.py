@@ -29,8 +29,10 @@ def order_problems(rows: list[dict], supplier, payment_term, sales_order, projec
 	return found
 
 
-def bill_problems(bill_no, bill_date, po_placed: bool) -> list:
+def bill_problems(bill_no, bill_date, po_placed: bool, signed_report: bool = True) -> list:
 	found = []
+	if not signed_report:
+		found.append(("bill_no_service_report", "The customer-signed service report is not on the PO yet; add it before the bill"))
 	if not (bill_no or "").strip():
 		found.append(("bill_no_number", "The subcontractor's invoice number is needed"))
 	if not bill_date:
