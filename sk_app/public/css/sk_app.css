@@ -883,3 +883,7 @@ body.sk-pc .sk-pchome .sk-mydaybox { display: flex; flex-direction: column; over
 body.sk-pc .sk-pchome .sk-mdl { flex: 1; min-height: 0; overflow: hidden; align-content: start; grid-auto-rows: 38px; gap: 9px; padding-right: 6px; }
 body.sk-pc .sk-pchome .sk-mdrow { height: 38px; padding: 0 10px; font-size: 13.5px; }
 body.sk-pc .sk-pchome .sk-h { margin-bottom: 8px; font-size: 15px; }
+
+/* SK 6-Nov: Present month / Cumulative above the arrows */
+.sk-period { margin: 2px 0 6px; gap: 6px; }
+.sk-period .sk-chip { padding: 4px 10px; font-size: 13px; }

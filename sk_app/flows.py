@@ -32,6 +32,27 @@ FACTORY = [("Fabrication", "🔩", ("fabric", "weld")), ("Electrical", "💡", (
 	("Final inspection", "🔍", ("inspect", "qc", "quality")), ("Subcontract cabin", "🏭", ("frp", "subcontract"))]
 
 
+# SK 6-Nov: "Present month / Cumulative" on every person's screen, so the arrows equal the review Excel. The screen sends
+# the choice with my_flow / flow_stage; cumulative = everything since 1-Apr (financial year), the default (SK 4-Nov: all
+# data from 1-Apr). The done arrows of every function count from this date; open arrows always show everything.
+CUMULATIVE, MONTH = "cumulative", "month"
+
+
+def period() -> str:
+	return MONTH if frappe.flags.get("sk_flow_period") == MONTH else CUMULATIVE
+
+
+def period_start():
+	from sk_app.core.dates import fy_start
+
+	return get_first_day(getdate()) if period() == MONTH else fy_start(getdate())
+
+
+def span() -> str:
+	"""The words on a done arrow: 'this month' or 'since Apr'."""
+	return "this month" if period() == MONTH else "since Apr"
+
+
 def _stage(key, label, icon, rows, value=None, go=None, kind="count", late_rows=None) -> dict:
 	"""One box: rows are dashboard rows (c = red when late); count = len(rows) unless the rows are only an example."""
 	late = [r for r in rows if r.get("c") == "red"] if late_rows is None else late_rows
@@ -85,7 +106,7 @@ def sales(user: str, segment=None, only_self=False) -> list[dict]:
 	"""only_self: the person's own work only (one member's arrows on the sales manager's team screen)."""
 	owners = [user] if only_self else _owners(user)
 	seg = dashboards._crm_seg(segment)
-	start = get_first_day(getdate())
+	start = period_start()
 	stages = []
 	# SK 27-Oct: arrows follow his steps New → Qualified → Drawing → Quotation → Negotiations (→ won = orders)
 	by = {step: [] for step in lead_status.STEPS}
@@ -126,7 +147,7 @@ def sales(user: str, segment=None, only_self=False) -> list[dict]:
 	# Converted) count under their new step, so the arrow totals equal ERPNext's own totals
 	from sk_app.core.switch import use_new
 
-	all_time = use_new("Sales", user)
+	all_time = period() == CUMULATIVE  # SK 6-Nov: the person's choice on the screen (New path: all months since 4-Nov)
 	since = {} if all_time else {"modified": [">=", start]}
 	lead_closed = {st: st for st in done}
 	if all_time:
@@ -155,7 +176,7 @@ def sales(user: str, segment=None, only_self=False) -> list[dict]:
 	for key, icon in (("Deal Won", "🏆"), ("Junk Lead", "🗑️"), ("Deal Loss", "❌")):
 		rows = done[key]
 		value = sum(flt(r["value"]) for r in rows if r.get("value"))
-		st = _stage(key.lower().replace(" ", "_"), f"{key} ({'all' if all_time else 'month'})", icon, rows, value or None, go="my_leads", late_rows=[])
+		st = _stage(key.lower().replace(" ", "_"), f"{key} ({'since Apr' if all_time else 'this month'})", icon, rows, value or None, go="my_leads", late_rows=[])
 		if key == "Deal Won" and months is not None:
 			st["months"] = months
 		stages.append(st)
@@ -294,7 +315,7 @@ def subcontractor(user: str) -> list[dict]:
 	jobs = frappe.get_all("Job Card", filters={"workstation": ws, "docstatus": ["<", 2]},
 		fields=["name", "operation", "status", "work_order", "expected_end_date", "creation", "modified", "docstatus"]
 		+ (["actual_end_date"] if frappe.get_meta("Job Card").has_field("actual_end_date") else []), order_by="creation asc", limit=0)
-	start = get_first_day(getdate())
+	start = period_start()
 
 	def rows(items, target=None):
 		out = []
@@ -309,7 +330,7 @@ def subcontractor(user: str) -> list[dict]:
 	done = [j for j in jobs if (j.docstatus == 1 or j.status == "Completed") and getdate(j.get("actual_end_date") or j.modified) >= start]
 	return [_stage("waiting", "My jobs waiting", "⏳", rows(waiting, 2), go="my_jobs"),
 		_stage("working", "In progress", "🛠️", rows(working, 3), go="my_jobs"),
-		_stage("done", "Done this month (photo)", "✅", [_row(wo_label(j.work_order, j.name), f"{j.work_order or j.name} · {j.operation or ''}") for j in done], go="my_jobs")]
+		_stage("done", f"Done {span()} (photo)", "✅", [_row(wo_label(j.work_order, j.name), f"{j.work_order or j.name} · {j.operation or ''}") for j in done], go="my_jobs")]
 
 
 def stores(user: str) -> list[dict]:
@@ -357,7 +378,7 @@ def purchase(user: str) -> list[dict]:
 	draft = frappe.get_all("Purchase Order", filters={"docstatus": 0, **mat}, fields=po_fields, order_by="creation asc", limit=0)
 	sent = frappe.get_all("Purchase Order", filters={"docstatus": 1, "status": ["in", ["To Receive and Bill", "To Receive"]], **mat},
 		fields=["name", "supplier_name", "grand_total", "schedule_date", "transaction_date"], order_by="schedule_date asc", limit=0)
-	got = frappe.get_all("Purchase Receipt", filters={"docstatus": 1, "posting_date": [">=", get_first_day(getdate())], **material_pos("Purchase Receipt")},
+	got = frappe.get_all("Purchase Receipt", filters={"docstatus": 1, "posting_date": [">=", period_start()], **material_pos("Purchase Receipt")},
 		fields=["name", "supplier_name", "grand_total", "posting_date", "per_billed"], limit=0)
 	bills = frappe.get_all("Purchase Invoice", filters={"docstatus": 0}, fields=["name", "supplier_name", "grand_total", "creation"], limit=0)
 	ceo = _shared_is_ceo(user)
@@ -369,7 +390,7 @@ def purchase(user: str) -> list[dict]:
 			"Purchase Order", p.name, p.creation, 1) for p in draft], sum(flt(p.grand_total) for p in draft), go="po_approvals" if ceo else "po_follow_up", kind="money"),
 		_stage("sent", "PO sent, to come", "📦", [_late_row(p.supplier_name, f"due {p.schedule_date}", p.grand_total, "Purchase Order", p.name, p.schedule_date, 0, opened=p.transaction_date)
 			for p in sent], sum(flt(p.grand_total) for p in sent), go="po_follow_up", kind="money"),
-		_stage("received", "Received this month", "🚚", [_row(r.supplier_name, f"{r.posting_date} · billed {round(flt(r.per_billed))}%", r.grand_total,
+		_stage("received", f"Received {span()}", "🚚", [_row(r.supplier_name, f"{r.posting_date} · billed {round(flt(r.per_billed))}%", r.grand_total,
 			"Purchase Receipt", r.name, None if flt(r.per_billed) >= 100 else "amber") for r in got], go="bills"),
 		_stage("bills", "Bills to match", "🧾", [_late_row(b.supplier_name, "draft bill", b.grand_total, "Purchase Invoice", b.name, b.creation, 2) for b in bills], go="bills"),
 	]
@@ -392,7 +413,7 @@ def quality(user: str) -> list[dict]:
 
 
 def accounts(user: str) -> list[dict]:
-	start = get_first_day(getdate())
+	start = period_start()
 	orders = dashboards._orders(start, getdate())
 	tally = dashboards._tally_sales(start, getdate())
 	sis = frappe.get_all("Sales Invoice", filters={"docstatus": 1, "is_return": 0, "is_opening": ["!=", "Yes"], "posting_date": [">=", start]}, fields=["name", "customer_name", "base_net_total", "posting_date"])
@@ -405,14 +426,14 @@ def accounts(user: str) -> list[dict]:
 	invoiced = [_row(s.customer_name, str(s.posting_date), s.base_net_total, "Sales Invoice", s.name) for s in sis] + \
 		[_row(t.customer_name, f"{t.posting_date} · Tally {t.voucher}", t.amount, "Journal Entry", t.name) for t in tally]
 	return [
-		_stage("orders", "Orders this month", "🧾", [_row(o.customer_name, str(o.transaction_date), o.base_net_total, o.doctype, o.name) for o in orders],
+		_stage("orders", f"Orders {span()}", "🧾", [_row(o.customer_name, str(o.transaction_date), o.base_net_total, o.doctype, o.name) for o in orders],
 			sum(flt(o.base_net_total) for o in orders), go="invoices", kind="money"),
-		_stage("invoiced", "Invoiced this month", "🧮", invoiced, sum(flt(r["value"]) for r in invoiced), go="invoices", kind="money"),
+		_stage("invoiced", f"Invoiced {span()}", "🧮", invoiced, sum(flt(r["value"]) for r in invoiced), go="invoices", kind="money"),
 		_stage("dues", "Receivables", "📥", [_row(d.customer_name, f"oldest bill {d.late} days", d.outstanding_amount, "Customer", d.name,
 			"amber" if d.late > 30 else None) for d in dues], sum(flt(d.outstanding_amount) for d in dues), go="to_collect", kind="money", late_rows=[]),
 		_stage("over60", "Over 60 days", "⏰", [{**_row(d.customer_name, f"oldest bill {d.late} days", d.ages["Over 60 days"], "Customer", d.name, "red"), "days": d.late}
 			for d in old], sum(d.ages["Over 60 days"] for d in old), go="to_collect", kind="money"),
-		_stage("collected", "Collected this month", "💰", [_row(p.party_name, str(p.posting_date), p.paid_amount, "Payment Entry", p.name) for p in got]
+		_stage("collected", f"Collected {span()}", "💰", [_row(p.party_name, str(p.posting_date), p.paid_amount, "Payment Entry", p.name) for p in got]
 			+ [_row((j.user_remark or "").split("|", 1)[-1].strip(), f"{j.posting_date} · Tally receipt", j.total_debit, "Journal Entry", j.name) for j in tally_in],
 			sum(flt(p.paid_amount) for p in got) + sum(flt(j.total_debit) for j in tally_in), go="cash_today", kind="money"),
 		_stage("to_pay", "Bills to pay", "📤", [_row(p.supplier_name, f"oldest bill {p.late} days", p.outstanding_amount, "Supplier", p.name,
@@ -456,14 +477,14 @@ def ai(user: str) -> list[dict]:
 	tasks = frappe.get_all("Task", filters={"status": ["not in", ["Cancelled"]], "project": ["is", "set"]}, fields=["name", "subject", "status", "exp_end_date", "modified", "creation"], limit=0)
 	planned = [t for t in tasks if t.status in ("Open", "Template")]
 	working = [t for t in tasks if t.status in ("Working", "Pending Review", "Overdue")]
-	done = [t for t in tasks if t.status == "Completed" and getdate(t.modified) >= get_first_day(getdate())]
+	done = [t for t in tasks if t.status == "Completed" and getdate(t.modified) >= period_start()]
 	task_row = lambda t: _late_row(t.subject, t.status, None, "Task", t.name, t.exp_end_date, 0, opened=t.creation)  # noqa: E731
 	return [
 		_stage("ideas", "New ideas / problems", "📥", [_row(i["title"], i["by"], None, i["doctype"], i["name"], "amber") for i in box["new"]], go="improvement_inbox"),
 		_stage("sorted", "Being fixed", "🔧", [_row(i["title"], i.get("category") or "", None, i["doctype"], i["name"]) for i in box["working"]], go="improvement_inbox"),
 		_stage("planned", "ERP tasks planned", "🗂️", [task_row(t) for t in planned], go="projects"),
 		_stage("in_work", "ERP tasks in work", "⚙️", [task_row(t) for t in working], go="projects"),
-		_stage("live", "Done this month", "✅", [_row(t.subject, "Completed", None, "Task", t.name) for t in done], go="projects"),
+		_stage("live", f"Done {span()}", "✅", [_row(t.subject, "Completed", None, "Task", t.name) for t in done], go="projects"),
 	]
 
 
@@ -488,8 +509,9 @@ def _flow(function: str, user: str, label=None) -> dict | None:
 	return {"function": function, "src": function, "label": label, "stages": stages}
 
 
-def for_user(user: str, functions: list[str]) -> dict:
+def for_user(user: str, functions: list[str], period_choice: str | None = None) -> dict:
 	"""Every flow of the person's functions (point 17). The CEO gets one flow per function."""
+	frappe.flags.sk_flow_period = period_choice or CUMULATIVE
 	out = []
 	if "Management" in functions:
 		out = [f for f in (_flow(fn, user, label) for fn, label in CEO_ORDER) if f]
@@ -505,11 +527,12 @@ def for_user(user: str, functions: list[str]) -> dict:
 		f = _flow(fn, user)
 		if f:
 			out.append(f)
-	return {"flows": out, "at": str(now_datetime())[:16]}
+	return {"flows": out, "at": str(now_datetime())[:16], "period": period()}
 
 
-def stage_rows(user: str, functions: list[str], src: str, key: str) -> dict:
+def stage_rows(user: str, functions: list[str], src: str, key: str, period_choice: str | None = None) -> dict:
 	"""Every record of one box (Home sends only the first ROWS; SK 27-Oct: "total leads 260 but showing 60 only")."""
+	frappe.flags.sk_flow_period = period_choice or CUMULATIVE
 	if src not in BUILDERS or not ("Management" in functions or src in functions or (src == "Marketing" and "Sales" in functions)):
 		frappe.throw("Not your flow", frappe.PermissionError)
 	frappe.flags.sk_flow_all = True

@@ -1598,10 +1598,11 @@ def view_suggest(member, text, view=None, photo=None):
 
 # point 13: CEO live dashboards
 @frappe.whitelist()
-def my_flow():
-	"""Point 17: the live process flow of each of the person's functions (the CEO: one per function)."""
+def my_flow(period=None):
+	"""Point 17: the live process flow of each of the person's functions (the CEO: one per function).
+	period (SK 6-Nov): "month" = present month, else cumulative since 1-Apr."""
 	profile = _me()
-	return flows.for_user(profile.user, logins.profile_functions(profile.user) or [profile.home])
+	return flows.for_user(profile.user, logins.profile_functions(profile.user) or [profile.home], period)
 
 
 @frappe.whitelist()
@@ -1648,10 +1649,10 @@ def convert_lead(name):
 
 
 @frappe.whitelist()
-def flow_stage(src, key):
+def flow_stage(src, key, period=None):
 	"""All records of one flow box, for the full list screen."""
 	profile = _me()
-	return flows.stage_rows(profile.user, logins.profile_functions(profile.user) or [profile.home], src, key)
+	return flows.stage_rows(profile.user, logins.profile_functions(profile.user) or [profile.home], src, key, period)
 
 
 @frappe.whitelist()
