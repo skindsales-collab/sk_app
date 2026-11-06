@@ -1,8 +1,8 @@
 """The one place app logins come from (SK 6-Nov people rule). Nightly, and after migrate:
 - every active Employee with a mobile and no enabled login gets one (functions from designation / department, PIN sent
   to the manager's screen as for a login made by hand);
-- every service supplier (submitted service PO or labour bill this year) without a login is listed; the login is made
-  only when SK App Settings "Auto-create subcontractor logins" is on (SK 6-Nov: Santosh's login waits for SK's word);
+- every service supplier (submitted service PO or labour bill this year) without a login gets one too while SK App
+  Settings "Auto-create subcontractor logins" is on (on by default: SK 6-Nov 11 PM "Santosh is still not there");
 - people who cannot be made (no mobile) are counted on the scorecard "People without app login" (target 0) and listed
   in one ToDo to HR."""
 
@@ -20,7 +20,8 @@ def ensure_setup():
 
 	if frappe.db.exists("DocType", "SK App Settings") and not frappe.get_meta("SK App Settings").has_field(SETTING):
 		create_custom_fields({"SK App Settings": [{"fieldname": SETTING, "label": "Auto-create subcontractor logins (service suppliers)",
-			"fieldtype": "Check", "default": "0", "insert_after": "sub_bill_checker"}]}, update=True)
+			"fieldtype": "Check", "default": "1", "insert_after": "sub_bill_checker"}]}, update=True)
+		frappe.db.set_single_value("SK App Settings", SETTING, 1)  # SK 6-Nov 11 PM: "Santosh is still not there" → on from the start
 
 
 def service_suppliers(since: str) -> list[dict]:
@@ -82,7 +83,16 @@ def _make_employee(person: dict, by: str) -> dict | None:
 def _make_supplier(person: dict, by: str) -> dict | None:
 	from sk_app.logins import make_login
 
-	ws = frappe.db.get_value("Workstation", {"sk_supplier": person["name"]}, "name") if frappe.get_meta("Workstation").has_field("sk_supplier") else None
+	has_field = frappe.get_meta("Workstation").has_field("sk_supplier")
+	ws = frappe.db.get_value("Workstation", {"sk_supplier": person["name"]}, "name") if has_field else None
+	if not ws:  # a workstation already named after the subcontractor (e.g. "Machine Shifting - Technomech") is his
+		words = [w for w in person["full_name"].replace(".", " ").split() if len(w) > 3 and w.lower() not in ("solutions", "enterprises", "industries", "services")]
+		for w in words:
+			ws = frappe.db.get_value("Workstation", {"name": ["like", f"%{w}%"]}, "name")
+			if ws:
+				if has_field:
+					frappe.db.set_value("Workstation", ws, "sk_supplier", person["name"])
+				break
 	if not ws:
 		ws = frappe.get_doc({"doctype": "Workstation", "workstation_name": f"{person['full_name']} (service)"[:140], "sk_supplier": person["name"]}) \
 			.insert(ignore_permissions=True).name

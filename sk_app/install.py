@@ -113,7 +113,10 @@ def after_migrate():
 	_safe(service_job_setup, "service job items and fields")
 	from sk_app.writers.app_user import ensure_setup as app_user_setup
 
-	_safe(app_user_setup, "people rule setting")
+	_safe(app_user_setup, "people rule setting")  # SK 6-Nov: auto logins for employees and service suppliers (setting, on)
+	from sk_app.writers.app_user import nightly as app_user_sync
+
+	_safe(app_user_sync, "people without app login")  # SK 6-Nov 11 PM "Santosh is still not there": made at deploy, not only at night
 	from sk_app.old_crm_load import backfill as old_crm_backfill
 
 	_safe(old_crm_backfill, "SK Import rows for loads already done")  # SK 6-Nov: auto logins; subcontractor logins only when SK switches it on  # SK 6-Nov: subcontractor service jobs (Technomech flow sheet)
