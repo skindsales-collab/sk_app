@@ -22,7 +22,8 @@ doctype_list_js = {"Sales Invoice": "public/js/sales_invoice_list.js"}
 jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html", "sk_app.tax_invoice.sk_tax_invoice_html"]}
 
 scheduler_events = {
-	"hourly": ["sk_app.deal_quotes.sync", "sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge", "sk_app.mailbox.remind"],
+	"hourly": ["sk_app.deal_quotes.sync", "sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge", "sk_app.mailbox.remind",
+		"sk_app.old_crm_load.hourly"],  # SK 6-Nov: old CRM leads SK uploads as a File are loaded once
 	# IndiaMART / JustDial / GeM mails to the team mailboxes become CRM leads (free route, point 14)
 	"cron": {"*/5 * * * *": ["sk_app.lead_sources.scan", "sk_app.mailbox.link_known", "sk_app.mailbox.route_suppliers", "sk_app.mailbox.auto_leads"],
 		# SK 27-Oct: the AI's actions to lift each graph, every morning before work
