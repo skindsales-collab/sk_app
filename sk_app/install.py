@@ -147,6 +147,9 @@ def after_migrate():
 	ensure_holiday_setup()
 	from sk_app.hr import ensure_joiner_fields
 
+	from sk_app.hr import ensure_thumb_field
+
+	ensure_thumb_field()  # SK 6-Nov: office thumb machine ID, apart from the Optick attendance_device_id
 	ensure_joiner_fields()  # SK 27-Oct: Aadhaar on the Employee for the New joiner photo form  # trial 26-Oct: leave needs a company holiday list
 
 

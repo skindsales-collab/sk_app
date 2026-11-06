@@ -806,6 +806,18 @@ def ensure_joiner_fields():
 		"insert_after": "pan_number" if frappe.get_meta("Employee").has_field("pan_number") else "date_of_birth"})
 
 
+def ensure_thumb_field():
+	"""Office thumb machine user ID on the Employee (SK 6-Nov, live thumb sync): kept apart from attendance_device_id,
+	which holds the Optick IDs, because the two machines number people differently."""
+	meta = frappe.get_meta("Employee") if frappe.db.exists("DocType", "Employee") else None
+	if not meta or meta.has_field("thumb_id"):
+		return
+	from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+
+	create_custom_field("Employee", {"fieldname": "thumb_id", "label": "Thumb machine ID", "fieldtype": "Data", "length": 20,
+		"insert_after": "attendance_device_id" if meta.has_field("attendance_device_id") else "sk_aadhaar", "in_standard_filter": 1})
+
+
 def _date(value):
 	if not value:
 		return None
