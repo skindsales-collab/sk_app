@@ -23,13 +23,14 @@ def write(po, user: str, *, is_ceo: bool, ceos: list[str], limit: float, link_re
 	"""Returns the app's result dict (name, posted, needs_approval, grand_total, why). The helpers are requisition's and
 	store's own, passed in so there is one path and the tested pieces stay where they are."""
 	link_requests(po)
-	if any(not r.material_request for r in po.items) and not is_ceo:
+	for_order = bool(po.get("sk_sales_order"))  # a service job for a customer order: the order is the request (Flow sheet 6-Nov)
+	if any(not r.material_request for r in po.items) and not is_ceo and not for_order:
 		frappe.throw(_("No CEO-approved purchase requisition for: {0}. Raise a requisition first.").format(
 			", ".join(sorted({r.item_code for r in po.items if not r.material_request}))))
 	po.flags.ignore_permissions = True
 	po.insert()  # on_validate checks it, as for a PO made in ERPNext or by Claude
 	po.calculate_taxes_and_totals()
-	why = ceo_reason(sum(1 for r in po.items if not r.material_request), approved_value(po), flt(po.net_total), flt(po.grand_total), limit)
+	why = ceo_reason(0 if for_order else sum(1 for r in po.items if not r.material_request), approved_value(po), flt(po.net_total), flt(po.grand_total), limit)
 	if why and not is_ceo:  # the CEO's own PO needs no second approval
 		po.db_set("sk_needs_ceo", 1)
 		po.add_comment("Comment", _("Waits for CEO: {0}").format(_(why)))
@@ -49,5 +50,5 @@ def on_validate(doc, method=None):
 
 	if doc.docstatus == 1 or not use_new("Purchase", doc.owner or frappe.session.user):
 		return
-	found = problems(_rows(doc), doc.supplier, doc.schedule_date, _is_ceo(doc.owner or frappe.session.user))
+	found = problems(_rows(doc), doc.supplier, doc.schedule_date, _is_ceo(doc.owner or frappe.session.user), bool(doc.get("sk_sales_order")))
 	report("Purchase", doc, found, title=_("Purchase order data missing"))

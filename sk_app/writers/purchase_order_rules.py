@@ -12,9 +12,10 @@ def ceo_reason(rows_without_request: int, approved_value: float, net_total: floa
 	return None
 
 
-def problems(items: list[dict], supplier: str | None, schedule_date, is_ceo: bool) -> list:
+def problems(items: list[dict], supplier: str | None, schedule_date, is_ceo: bool, for_order: bool = False) -> list:
 	"""items: [{item_code, qty, rate, material_request, approved}]. Every PO names its supplier and delivery date, every
-	line has qty and rate, and (unless the CEO makes it) every line comes from a CEO-approved requisition."""
+	line has qty and rate, and (unless the CEO makes it, or it is a service PO for a customer order: for_order) every line
+	comes from a CEO-approved requisition."""
 	out = []
 	if not supplier:
 		out.append(("po_no_supplier", "The purchase order has no supplier"))
@@ -25,6 +26,6 @@ def problems(items: list[dict], supplier: str | None, schedule_date, is_ceo: boo
 	if any(float(i.get("rate") or 0) <= 0 for i in items):
 		out.append(("po_zero_rate", "A line has no rate"))
 	missing = sorted({i["item_code"] for i in items if i.get("item_code") and not (i.get("material_request") and i.get("approved"))})
-	if missing and not is_ceo:
+	if missing and not is_ceo and not for_order:
 		out.append(("po_without_request", "No CEO-approved requisition for: " + ", ".join(missing)))
 	return out

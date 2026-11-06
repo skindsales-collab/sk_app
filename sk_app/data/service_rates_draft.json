@@ -1,0 +1,22 @@
+{
+ "revision": "Draft 6-Nov-2026 (rate sheet, SK to confirm in ERPNext Item Price)",
+ "price_list_buying": "Subcontract Rates",
+ "price_list_selling": "Standard Selling",
+ "note": "Service items for subcontracted site jobs (machine shifting, manpower, travel). Purchase rate = standard buying rate, sale rate = purchase x (1 + margin). Rates are loaded once; changes are made in ERPNext Item Price, never here.",
+ "items": [
+  {"code": "SR-01", "name": "Skilled manpower (fitter / rigger)", "uom": "Day", "rate": 1864, "margin": 0.529},
+  {"code": "SR-02", "name": "Maintenance manpower", "uom": "Day", "rate": 1864, "margin": 0.529},
+  {"code": "SR-03", "name": "Machine shifting expert / supervisor", "uom": "Visit", "rate": 5700, "margin": 0.3},
+  {"code": "SR-04", "name": "HMC dismantling + installation", "uom": "Nos", "rate": 140000, "margin": 0.3},
+  {"code": "SR-05", "name": "HMC dismantling + shifting (other city)", "uom": "Nos", "rate": 130000, "margin": 0.3},
+  {"code": "SR-06", "name": "HBM installation", "uom": "Nos", "rate": 250000, "margin": 0.3},
+  {"code": "SR-07", "name": "Small machine shifting (in plant)", "uom": "Nos", "rate": 3000, "margin": 0.3},
+  {"code": "SR-08", "name": "HMC shifting (in plant)", "uom": "Nos", "rate": 10000, "margin": 0.3},
+  {"code": "SR-09", "name": "Jib crane arm shifting / installation", "uom": "Nos", "rate": 25000, "margin": 0.3},
+  {"code": "SR-10", "name": "Container unloading", "uom": "Nos", "rate": 20000, "margin": 0.3},
+  {"code": "SR-11", "name": "Travel (team vehicle)", "uom": "Km", "rate": 20, "margin": 0.25},
+  {"code": "SR-12", "name": "Accommodation & food (outstation)", "uom": "Day", "rate": 540, "margin": 0.3},
+  {"code": "SR-13", "name": "Special transportation", "uom": "Nos", "rate": 3000, "margin": 0.3},
+  {"code": "SR-14", "name": "Site visit / inspection", "uom": "Visit", "rate": 16500, "margin": 0.3}
+ ]
+}
