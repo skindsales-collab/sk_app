@@ -198,6 +198,11 @@ def receive(user: str, purchase_order: str | None, items: list[dict], challan_ph
 	Material without a PO is not received here: it goes through an urgent requisition first (SK 27-Oct)."""
 	need(user, STORE, "Accounts")  # SK 2-Nov: Accounts receives material like Store
 	qty = {i.get("po_detail") or i.get("item_code"): flt(i.get("qty")) for i in items or []}
+	if purchase_order and use_new("Store", user):  # rebuild: the one Purchase Receipt writer (linear flow map, Flow 4)
+		from sk_app.writers import receipt as rw
+
+		return rw.write(user, purchase_order, qty, challan_photo=challan_photo, goods_photo=goods_photo, note=note, reason=reason,
+			bill_no=bill_no, insert_for=insert_for, attach=attach)
 	if purchase_order:
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
@@ -341,6 +346,11 @@ def issue(user: str, work_order: str, items: list[dict], taken_by=None, job_card
 	wo = frappe.get_doc("Work Order", work_order)
 	if wo.docstatus != 1:
 		frappe.throw(_("Job {0} is not open").format(work_order))
+	if use_new("Store", user):  # rebuild: the one Stock Entry writer (linear flow map, Flow 4)
+		from sk_app.writers import stock_entry as sw
+
+		return sw.issue(user, wo, items, taken_by=taken_by, job_card=job_card, photo=photo, default_store=_default_store, uom=uom,
+			insert_for=insert_for, attach=attach, submit_for=submit_for)
 	source = {r.item_code: r.source_warehouse for r in wo.required_items}
 	se = frappe.new_doc("Stock Entry")
 	se.stock_entry_type = "Material Transfer for Manufacture"

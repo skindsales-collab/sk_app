@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import add_days, flt, fmt_money, getdate, nowdate
 
 from sk_app.store import _company, _todo, _users_with_function, attach, material_pos, material_requests, draft_reason, need, try_submit, uom
+from sk_app.core.switch import use_new
 
 PURCHASE = "Purchase"
 # SK 26-Oct-2026: Rs 5,000 (draft F02 had proposed Rs 50,000); can be changed in site config "sk_po_approval_limit"
@@ -190,6 +191,12 @@ def make_po(user: str, supplier_quotation: str, schedule_date=None, terms=None) 
 def place_po(po, user: str) -> dict:
 	from sk_app import requisition
 
+	if use_new("Purchase", user):  # rebuild: the one Purchase Order writer (linear flow map, Flow 3)
+		from sk_app.writers import purchase_order as pw
+
+		return pw.write(po, user, is_ceo=requisition._is_ceo(user), ceos=requisition._ceos(), limit=po_limit(),
+			link_requests=requisition.link_requests, approved_value=requisition.approved_value, todo=_todo, try_submit=try_submit,
+			draft_reason=draft_reason)
 	requisition.link_requests(po)
 	if any(not r.material_request for r in po.items) and not requisition._is_ceo(user):
 		frappe.throw(_("No CEO-approved purchase requisition for: {0}. Raise a requisition first.").format(

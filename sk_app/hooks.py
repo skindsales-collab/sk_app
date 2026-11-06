@@ -72,13 +72,13 @@ doc_events = {
 	# and stages done before ERPNext close when the cabin's Work Order is submitted (sk_app.cabin_projects)
 	"Work Order": {"before_submit": "sk_app.sub_bills.wo_submitting",
 		"on_submit": ["sk_app.cabin_projects.close_done_stages", "sk_app.sub_bills.on_work_order_submit"]},
-	"Stock Entry": {"validate": "sk_app.cabin_projects.set_cost_centre"},
+	"Stock Entry": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.stock_entry.on_validate"]},  # rebuild Flow 4 (New path)
 	"Delivery Note": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.gates.check_sales_invoice"},
 	# SK 27-Oct purchase flow: requisition → CEO approval → PO → receipt against the PO, in ERPNext too
 	"Material Request": {"validate": ["sk_app.gates.check_request", "sk_app.cabin_projects.set_cost_centre"], "before_submit": "sk_app.requisition.check_submit"},
-	"Purchase Order": {"validate": "sk_app.cabin_projects.set_cost_centre",
+	"Purchase Order": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.purchase_order.on_validate"],  # rebuild Flow 3 (New path)
 		"before_submit": ["sk_app.requisition.check_po", "sk_app.sub_bills.check_submit"], "on_submit": "sk_app.sub_bills.on_po_submit"},
-	"Purchase Receipt": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.requisition.check_receipt"},
+	"Purchase Receipt": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.receipt.on_validate"], "before_submit": "sk_app.requisition.check_receipt"},
 	# SK 28/29-Oct: labour bill only from the service GRN of a PO Rushi + CEO approved; only CEO / Accounts change the rates
 	"Purchase Invoice": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check"], "before_submit": "sk_app.sub_bills.check_submit"},
 	"Item Price": {"validate": "sk_app.sub_bills.check_rate_edit"},
