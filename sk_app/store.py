@@ -11,6 +11,7 @@ from frappe import _
 from frappe.utils import cint, flt, getdate, nowdate
 
 from sk_app import logins
+from sk_app.core.switch import use_new
 
 STORE = "Stores"
 
@@ -584,8 +585,6 @@ def new_item(user: str, item_name: str, item_group: str | None = None, uom: str 
 		frappe.throw(_("Please give the name, group and unit"))
 	if frappe.db.exists("Item", {"item_name": item_name}):
 		frappe.throw(_("{0} is already in the item list").format(item_name))
-	from sk_app.core.switch import use_new
-
 	if use_new("Store", user):  # rebuild: the one Item writer
 		from sk_app.writers.item import get_or_make
 
