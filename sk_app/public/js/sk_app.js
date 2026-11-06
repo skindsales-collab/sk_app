@@ -946,9 +946,9 @@
 		ex_no_bill_tag: "बिल नाही", lv_approve: "✓ मंजूर", lv_reject: "✗ नामंजूर", ex_posted: "मंजूर: अकाउंट्स पैसे देईल",
 		no_employee: "तुमचे लॉगिन अजून ERPNext कर्मचाऱ्याशी जोडलेले नाही. कृपया HR ला सांगा." });
 	Object.assign(T.English, { k_trend: "Trend", k_rising: "rising", k_falling: "falling", k_actual: "Actual", k_met: "Target met", k_missed: "Missed",
-		auto_blank: "leave blank: app fills", auto_gstin: "from GSTIN if blank", fl_late: "late", d_fix: "Fix", d_plan: "Plan", d_open: "Open", md_next: "next", md_late: "Late", md_today: "Today" });
+		auto_blank: "leave blank: app fills", auto_gstin: "from GSTIN if blank", fl_late: "late", fl_month: "Present month", fl_cum: "Cumulative (from 1 Apr)", d_fix: "Fix", d_plan: "Plan", d_open: "Open", md_next: "next", md_late: "Late", md_today: "Today" });
 	Object.assign(T.Marathi, { k_trend: "कल", k_rising: "वाढत आहे", k_falling: "कमी होत आहे", k_actual: "प्रत्यक्ष", k_met: "लक्ष्य पूर्ण", k_missed: "लक्ष्य चुकले",
-		auto_blank: "रिकामे ठेवा: ॲप भरेल", auto_gstin: "रिकामे असल्यास GSTIN वरून", fl_late: "उशीर", d_fix: "पूर्ण करा", d_plan: "नियोजन", d_open: "उघडा", md_next: "पुढील", md_late: "उशीर", md_today: "आज" });
+		auto_blank: "रिकामे ठेवा: ॲप भरेल", auto_gstin: "रिकामे असल्यास GSTIN वरून", fl_late: "उशीर", fl_month: "चालू महिना", fl_cum: "एकूण (१ एप्रिल पासून)", d_fix: "पूर्ण करा", d_plan: "नियोजन", d_open: "उघडा", md_next: "पुढील", md_late: "उशीर", md_today: "आज" });
 	Object.assign(T.English, { send_design: "Send to design (AI drawing)", design_sent: "Sent to design as deal", design_not_sent: "Not sent to design:" });
 	Object.assign(T.English, { qr_quote: "Quotation made from the rate card", qr_disc: "Discount waits for approval", qr_pdf: "Open quotation PDF",
 		qr_revise: "Change options / size: open the deal and tap Make quotation", qr_design: "Sent to design: drawing, BOM and quote will come to you",
@@ -2177,7 +2177,7 @@
 			if (f.error) return `<p class="sk-note">⚠️ ${t("fl_error")}: ${esc(f.error)}</p>`;
 			arrows = f.stages.map((st, si) => `<button class="sk-ar3 ${col(st.c)}" data-flow="${fi}:${si}">${isPc() ? ar3Svg(col(st.c), si === 0) : ""}<b>${st.count}</b><span>${esc(st.label)}</span>${isPc() && st.late ? `<em>${st.late} ${t("fl_late")}</em>` : ""}</button>`);
 		}
-		return `<div class="sk-flow3d" style="--n:${arrows.length}" data-many="${arrows.length > 7 ? 1 : 0}">${arrows.join("")}</div>`;
+		return periodHtml() + `<div class="sk-flow3d" style="--n:${arrows.length}" data-many="${arrows.length > 7 ? 1 : 0}">${arrows.join("")}</div>`;
 	}
 	// "Decide now" (SK 26-Oct: data needed for taking decisions on the main screen): the gap to target and the three
 	// most delayed stages of the person's flows; each opens its list
@@ -2301,12 +2301,27 @@
 	}, true);
 	// ---------- Point 17: live process flow ----------
 	let flowData = null, flowAt = 0, flowLoading = false;
+	// SK 6-Nov: "Present month / Cumulative" on every person's screen, so the arrows equal the review Excel
+	let flowPeriod = "cumulative";
+	try { flowPeriod = localStorage.getItem("sk_flow_period") === "month" ? "month" : "cumulative"; } catch (e) { /* private window */ }
+	function periodHtml() {
+		return `<div class="sk-chips sk-period">${[["month", t("fl_month")], ["cumulative", t("fl_cum")]].map(([k, l]) =>
+			`<button class="sk-chip ${flowPeriod === k ? "on" : ""}" data-period="${k}">${l}</button>`).join("")}</div>`;
+	}
+	document.addEventListener("click", (ev) => {
+		const b = ev.target.closest("[data-period]");
+		if (!b || !root.contains(b) || b.dataset.period === flowPeriod) return;
+		ev.stopPropagation();
+		flowPeriod = b.dataset.period;
+		try { localStorage.setItem("sk_flow_period", flowPeriod); } catch (e) { /* private window */ }
+		loadFlows(true);
+	}, true);
 	const shortMoneyF = (v) => (Math.abs(v) >= 1e7 ? `₹${(v / 1e7).toFixed(2)} Cr` : Math.abs(v) >= 1e5 ? `₹${(v / 1e5).toFixed(1)} L` : `₹${Math.round(v).toLocaleString("en-IN")}`);
 	function flowHtml(fn) {
 		if (!flowData) return `<p class="sk-note">… ${t("fl_loading")}</p>`;
 		const flows = flowData.flows.map((f, i) => [f, i]).filter(([f]) => f.function === fn);
 		if (!flows.length) return "";
-		return flows.map(([f, fi]) => `${f.label ? `<div class="sk-flow-name">${esc(f.label)}</div>` : ""}<div class="sk-flow">${f.stages.map((st, si) =>
+		return periodHtml() + flows.map(([f, fi]) => `${f.label ? `<div class="sk-flow-name">${esc(f.label)}</div>` : ""}<div class="sk-flow">${f.stages.map((st, si) =>
 			`${si ? `<span class="sk-flow-arrow">➜</span>` : ""}<button class="sk-flow-box ${st.c ? "c-" + st.c : ""}" data-flow="${fi}:${si}">
 				<span class="sk-flow-icon">${st.icon}</span><span class="sk-flow-label">${esc(st.label)}</span>
 				<b class="sk-flow-n">${st.count}</b>${st.value ? `<small>${shortMoneyF(st.value)}</small>` : ""}
@@ -2319,7 +2334,7 @@
 		flowLoading = true;
 		const who = flowWho;
 		let d;
-		try { d = await call("my_flow"); } catch (e) { d = flowData || { flows: [] }; }
+		try { d = await call("my_flow", { period: flowPeriod }); } catch (e) { d = flowData || { flows: [] }; }
 		if (who !== whoKey()) return;
 		flowData = d; flowAt = Date.now(); flowLoading = false;
 		paintFlows();
@@ -2340,7 +2355,7 @@
 		state.view = "flow";
 		if (st.count > st.rows.length && !st.all) {
 			root.innerHTML = header(`${st.icon} ${st.label}`) + `<main><p class="sk-note">${t("loading")}</p></main>`;
-			try { const d = await call("flow_stage", { src: f.src || f.function, key: st.key }); st.rows = d.rows; st.all = true; } catch (e) { st.all = true; }
+			try { const d = await call("flow_stage", { src: f.src || f.function, key: st.key, period: flowPeriod }); st.rows = d.rows; st.all = true; } catch (e) { st.all = true; }
 			if (state.view !== "flow" || flowKey !== key) return;
 		}
 		const q = flowQ.toLowerCase();
@@ -5891,7 +5906,7 @@
 	let teamList = false;
 	async function renderTeamLeads() {
 		const [d, kd, fd] = await Promise.all([call("team_follow_up", teamPerson ? { person: teamPerson } : {}),
-			state.viewAs ? Promise.resolve(null) : call("my_home_kpi", {}, false, true).catch(() => null), call("my_flow").catch(() => null)]);
+			state.viewAs ? Promise.resolve(null) : call("my_home_kpi", {}, false, true).catch(() => null), call("my_flow", { period: flowPeriod }).catch(() => null)]);
 		if (kd) { kpiData = kd; kpiAt = Date.now(); kpiWho = whoKey(); }
 		if (fd) { flowData = fd; flowAt = Date.now(); flowWho = whoKey(); }
 		const dec = d.decide || {};

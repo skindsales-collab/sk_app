@@ -107,10 +107,49 @@ def _finance(since: str) -> dict:
 	return out
 
 
+def _purchase(since: str) -> dict:
+	"""Flow 3: every submitted PO since 1-Apr through the one Purchase Order rule."""
+	from sk_app.requisition import _is_ceo
+	from sk_app.writers.purchase_order import _rows
+	from sk_app.writers.purchase_order_rules import problems
+
+	out = {"po_data": 0}
+	for name in frappe.get_all("Purchase Order", filters={"docstatus": 1, "transaction_date": [">=", since]}, pluck="name", limit=0):
+		po = frappe.get_doc("Purchase Order", name)
+		for key, words in problems(_rows(po), po.supplier, po.schedule_date, _is_ceo(po.owner)):
+			out["po_data"] += 1
+			_log("Purchase", key, "Purchase Order", name, words)
+	return out
+
+
+def _store(since: str) -> dict:
+	"""Flow 4: every submitted receipt and stock entry since 1-Apr through the one Store rules."""
+	from frappe.utils import flt
+
+	from sk_app.requisition import _is_ceo
+	from sk_app.writers.receipt_rules import problems as receipt_problems
+	from sk_app.writers.stock_entry_rules import problems as issue_problems
+
+	out = {"receipt_data": 0, "issue_data": 0}
+	for name in frappe.get_all("Purchase Receipt", filters={"docstatus": 1, "posting_date": [">=", since]}, pluck="name", limit=0):
+		pr = frappe.get_doc("Purchase Receipt", name)
+		rows = [{"item_code": r.item_code, "qty": flt(r.qty), "purchase_order": r.purchase_order} for r in pr.items]
+		for key, words in receipt_problems(rows, bool(pr.is_return), _is_ceo(pr.owner), pr.supplier_delivery_note):
+			out["receipt_data"] += 1
+			_log("Store", key, "Purchase Receipt", name, words)
+	for name in frappe.get_all("Stock Entry", filters={"docstatus": 1, "posting_date": [">=", since]}, pluck="name", limit=0):
+		se = frappe.get_doc("Stock Entry", name)
+		rows = [{"item_code": r.item_code, "qty": flt(r.qty), "s_warehouse": r.s_warehouse, "t_warehouse": r.t_warehouse} for r in se.items]
+		for key, words in issue_problems(se.purpose, rows, se.work_order, se.remarks):
+			out["issue_data"] += 1
+			_log("Store", key, "Stock Entry", name, words)
+	return out
+
+
 def run(since: str = START) -> dict:
 	frappe.db.delete(LOG, {"mode": MODE})
 	started = now_datetime()
-	result = {"since": since, "Sales": _sales(since), "Finance": _finance(since)}
+	result = {"since": since, "Sales": _sales(since), "Finance": _finance(since), "Purchase": _purchase(since), "Store": _store(since)}
 	result["total"] = sum(sum(v.values()) for k, v in result.items() if isinstance(v, dict))
 	result["accuracy_check"] = "passed" if not result["total"] else "gaps listed in SK Rule Log (mode Replay)"
 	result["seconds"] = (now_datetime() - started).seconds
@@ -121,7 +160,7 @@ def run(since: str = START) -> dict:
 def run_and_tell(since: str = START, user: str | None = None) -> dict:
 	result = run(since)
 	if user:
-		lines = [f"{m}: " + ", ".join(f"{k} {v}" for k, v in result[m].items()) for m in ("Sales", "Finance")]
+		lines = [f"{m}: " + ", ".join(f"{k} {v}" for k, v in result[m].items()) for m in ("Sales", "Finance", "Purchase", "Store")]
 		frappe.get_doc({"doctype": "Notification Log", "for_user": user, "type": "Alert", "subject":
 			f"Replay check since {since}: {result['total']} gaps ({result['accuracy_check']})",
 			"email_content": "<br>".join(lines) + "<br><a href='/app/sk-rule-log?mode=Replay'>SK Rule Log</a>"}).insert(ignore_permissions=True)
