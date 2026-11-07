@@ -25,12 +25,15 @@ def ensure_setup():
 
 
 def service_suppliers(since: str) -> list[dict]:
-	"""Suppliers with a submitted service PO (non-stock items) or labour bill this year."""
+	"""Suppliers with a submitted service PO or bill this year: a row with a non-stock item, or with no item code at all
+	(Tally bills carry only the item name, e.g. "Service Charges for Skilled Manpower"; live check 7-Nov: Technomech missed)."""
 	since = since or _since()
 	names = set(frappe.db.sql_list("""select distinct po.supplier from `tabPurchase Order` po join `tabPurchase Order Item` i on i.parent = po.name
-		join `tabItem` it on it.name = i.item_code where po.docstatus = 1 and po.transaction_date >= %s and it.is_stock_item = 0""", since))
+		left join `tabItem` it on it.name = i.item_code where po.docstatus = 1 and po.transaction_date >= %s
+		and (i.item_code is null or ifnull(it.is_stock_item, 0) = 0)""", since))
 	names |= set(frappe.db.sql_list("""select distinct pi.supplier from `tabPurchase Invoice` pi join `tabPurchase Invoice Item` i on i.parent = pi.name
-		join `tabItem` it on it.name = i.item_code where pi.docstatus = 1 and pi.posting_date >= %s and it.is_stock_item = 0""", since))
+		left join `tabItem` it on it.name = i.item_code where pi.docstatus = 1 and pi.posting_date >= %s
+		and (i.item_code is null or ifnull(it.is_stock_item, 0) = 0)""", since))
 	if not names:
 		return []
 	out = []
