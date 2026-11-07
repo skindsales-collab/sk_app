@@ -72,13 +72,13 @@ doc_events = {
 	"Project": {"validate": "sk_app.lead_time.on_project_validate"},
 	"SK Path Switch": {"validate": "sk_app.core.gate.on_switch"},  # SK 6-Nov: counts saved when a module goes New; checked nightly
 	"SK App User": {"on_update": ["sk_app.segments.on_app_user_update", "sk_app.logins.set_company_default"]},
-	"Job Card": {"validate": "sk_app.store.set_job_card_cabin",  # SK 27-Oct: customer + cabin size, not just the number
+	"Job Card": {"validate": ["sk_app.store.set_job_card_cabin", "sk_app.writers.work_order.card_validate"],  # cabin label (SK 27-Oct) + rebuild Flow 5 (New path)
 		# SK 29-Oct labour: each job has its service PO from the rate sheet; done → service GRN at once (sk_app.sub_bills)
 		"after_insert": "sk_app.sub_bills.on_job_card_insert",
-		"on_update": "sk_app.sub_bills.on_job_card_change", "on_submit": "sk_app.sub_bills.on_job_card_change"},
+		"on_update": "sk_app.sub_bills.on_job_card_change", "on_submit": ["sk_app.sub_bills.on_job_card_change", "sk_app.writers.work_order.on_card_submit"]},
 	# SK 29-Oct: one Project + cost centre per cabin; its material, bills and sales rows go to that cost centre at once,
 	# and stages done before ERPNext close when the cabin's Work Order is submitted (sk_app.cabin_projects)
-	"Work Order": {"before_submit": "sk_app.sub_bills.wo_submitting",
+	"Work Order": {"validate": "sk_app.writers.work_order.on_validate", "before_submit": "sk_app.sub_bills.wo_submitting",
 		"on_submit": ["sk_app.cabin_projects.close_done_stages", "sk_app.sub_bills.on_work_order_submit"]},
 	"Stock Entry": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.stock_entry.on_validate"]},  # rebuild Flow 4 (New path)
 	"Delivery Note": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.gates.check_sales_invoice"},
