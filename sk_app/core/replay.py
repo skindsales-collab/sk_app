@@ -146,10 +146,32 @@ def _store(since: str) -> dict:
 	return out
 
 
+def _production(since: str) -> dict:
+	"""Flow 5: every posted work order and every done stage card since 1-Apr through the one Production rules."""
+	from sk_app.production import non_cabin_orders
+	from sk_app.writers.work_order import _photos
+	from sk_app.writers.work_order_rules import card_problems, wo_problems
+
+	out = {"wo_data": 0, "card_data": 0}
+	skip = non_cabin_orders()
+	for w in frappe.get_all("Work Order", filters={"docstatus": 1, "creation": [">=", since]},
+			fields=["name", "production_item", "bom_no", "qty", "sales_order", "project", "expected_delivery_date"], limit=0):
+		for key, words in wo_problems(w.production_item, w.bom_no, w.qty, w.sales_order, w.project, w.expected_delivery_date, w.sales_order in skip):
+			out["wo_data"] += 1
+			_log("Production", key, "Work Order", w.name, words)
+	for c in frappe.get_all("Job Card", filters={"docstatus": ["<", 2], "status": "Completed", "creation": [">=", since]},
+			fields=["name", "work_order", "operation", "workstation", "status"], limit=0):
+		for key, words in card_problems(c.work_order, c.operation, c.workstation, c.status, _photos(c.name)):
+			out["card_data"] += 1
+			_log("Production", key, "Job Card", c.name, words)
+	return out
+
+
 def run(since: str = START) -> dict:
 	frappe.db.delete(LOG, {"mode": MODE})
 	started = now_datetime()
-	result = {"since": since, "Sales": _sales(since), "Finance": _finance(since), "Purchase": _purchase(since), "Store": _store(since)}
+	result = {"since": since, "Sales": _sales(since), "Finance": _finance(since), "Purchase": _purchase(since), "Store": _store(since),
+		"Production": _production(since)}
 	result["total"] = sum(sum(v.values()) for k, v in result.items() if isinstance(v, dict))
 	result["accuracy_check"] = "passed" if not result["total"] else "gaps listed in SK Rule Log (mode Replay)"
 	result["seconds"] = (now_datetime() - started).seconds
@@ -160,7 +182,7 @@ def run(since: str = START) -> dict:
 def run_and_tell(since: str = START, user: str | None = None) -> dict:
 	result = run(since)
 	if user:
-		lines = [f"{m}: " + ", ".join(f"{k} {v}" for k, v in result[m].items()) for m in ("Sales", "Finance", "Purchase", "Store")]
+		lines = [f"{m}: " + ", ".join(f"{k} {v}" for k, v in result[m].items()) for m in ("Sales", "Finance", "Purchase", "Store", "Production")]
 		frappe.get_doc({"doctype": "Notification Log", "for_user": user, "type": "Alert", "subject":
 			f"Replay check since {since}: {result['total']} gaps ({result['accuracy_check']})",
 			"email_content": "<br>".join(lines) + "<br><a href='/app/sk-rule-log?mode=Replay'>SK Rule Log</a>"}).insert(ignore_permissions=True)

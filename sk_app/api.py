@@ -2068,7 +2068,12 @@ def flow_orders_to_plan():
 @frappe.whitelist(methods=["POST"])
 def flow_make_work_order(sales_order, so_item):
 	from sk_app import erp_flow
+	from sk_app.core.switch import use_new
 
+	if use_new("Production", _me().user):  # rebuild Flow 5: one Production writer
+		from sk_app.writers import work_order
+
+		return work_order.make(_me().user, sales_order, so_item)
 	return erp_flow.make_work_order(_me().user, sales_order, so_item)
 
 
