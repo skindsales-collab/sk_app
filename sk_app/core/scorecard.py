@@ -78,6 +78,13 @@ def measures(day=None) -> list[dict]:
 
 	add("Users", "Repeat questions to SK", asked_again_on(day), "questions / day",
 		"SK Hub Log 'asked again' (save_fact asked_again=true when SK says it was already given), this day")
+	from sk_app.core.imports import total_gap
+	from sk_app.writers.app_user import count_missing
+
+	add("Data accuracy", "Import gaps", total_gap(), "rows", "SK Import: source rows minus rows now in ERPNext, all imports (SK 6-Nov, target 0)")
+
+	add("Users", "People without app login", count_missing(), "people",
+		"Active Employees and service suppliers (service PO / labour bill this year) with no enabled SK App User (SK 6-Nov, target 0)")
 	add("Users", "Known facts saved", _count("SK Known Fact", {"status": "Active"}), "facts", "SK Known Fact, Active")
 	add("Users", "Problems reported", _count("Issue", {"creation": span, "customer": ["is", "not set"]}), "issues / day",
 		"Issue (internal desk: no customer), this day")

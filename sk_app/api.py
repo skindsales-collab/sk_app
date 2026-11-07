@@ -1018,6 +1018,15 @@ def store_drop_receipt(name):
 	return store.drop_receipt(_me().user, name)
 
 
+@frappe.whitelist()
+def gate_check(module=None):
+	"""SK 6-Nov switch gate: before/after counts per doctype and person for one module (or all on New)."""
+	from sk_app.core import gate
+
+	store.need(_me().user, "Management")
+	return gate.check(module, tell=False) if module else gate.nightly()
+
+
 # ---------- subcontractor service jobs (Flow sheet 6-Nov: PO with payment term → bill → owner approval → service GRN) ----------
 
 @frappe.whitelist(methods=["POST"])
@@ -1045,10 +1054,37 @@ def service_approve(purchase_invoice, note=None):
 
 @frappe.whitelist()
 def service_jobs(supplier=None, since=None):
+	"""Site jobs screen: a subcontractor sees only his own jobs (the supplier of his workstation); the owner,
+	Purchase and the CEO see all."""
+	from sk_app.core.people import functions
 	from sk_app.writers import service_job
 
-	_me()
-	return service_job.jobs(supplier, since)
+	user = _me().user
+	mine = service_job.my_supplier(user)
+	have = set(functions(user))
+	if not (have & {"Purchase", "Accounts", "Machine Shifting", "Management"}):
+		supplier = mine
+		if not supplier:
+			return {"jobs": [], "mine": None, "can_order": False, "can_approve": False}
+	jobs = service_job.jobs(supplier, since)
+	return {"jobs": jobs, "mine": mine, "can_order": bool(have & {"Purchase", "Machine Shifting", "Management"}),
+		"can_approve": service_job.is_owner(user), "options": service_job.options() if have & {"Purchase", "Machine Shifting", "Management"} else None}
+
+
+@frappe.whitelist(methods=["POST"])
+def service_daily(purchase_order, photo=None, note=None):
+	from sk_app.writers import service_job
+
+	store.need(_me().user, "Subcontractor", "Machine Shifting", "Management")
+	return service_job.daily_report(_me().user, purchase_order, photo=photo, note=note)
+
+
+@frappe.whitelist(methods=["POST"])
+def service_report(purchase_order, photo, note=None):
+	from sk_app.writers import service_job
+
+	store.need(_me().user, "Subcontractor", "Machine Shifting", "Management")
+	return service_job.service_report(_me().user, purchase_order, photo, note=note)
 
 
 @frappe.whitelist(methods=["POST"])

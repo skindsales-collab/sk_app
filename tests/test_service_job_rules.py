@@ -15,6 +15,7 @@ def test_order_problems():
 def test_bill_and_submit_problems():
 	assert bill_problems("PUR/NC/070", "2026-11-06", True) == []
 	assert keys(bill_problems("", None, False)) == ["bill_no_number", "bill_no_date", "bill_po_not_placed"]
+	assert keys(bill_problems("PUR/NC/070", "2026-11-06", True, signed_report=False)) == ["bill_no_service_report"]
 	assert submit_problems([{"purchase_receipt": "PR-1"}]) == []
 	assert keys(submit_problems([{"purchase_receipt": "PR-1"}, {"purchase_receipt": None}])) == ["bill_not_approved"]
 

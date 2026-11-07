@@ -341,7 +341,9 @@ ENQUIRY_WORDS = ("enquiry", "inquiry", "quotation", "quote", "requirement", "req
 	"rigging", "dismantl", "relocation", "job work", "machining", "price", "budget")
 NOT_LEAD_WORDS = ("invoice", "payment", "statement", "newsletter", "unsubscribe", "otp", "password", "offer for you",
 	"webinar", "receipt", "order confirmation", "job application", "resume", "cv ")
-NOT_LEAD_SENDERS = ("noreply", "no-reply", "donotreply", "mailer-daemon", "notification", "alerts@", "@skind.tech")
+NOT_LEAD_SENDERS = ("noreply", "no-reply", "donotreply", "mailer-daemon", "notification", "alerts@", "@skind.tech",
+	# hosting / software / bank system mails are never enquiries (6-Nov: a Hostinger mail became lead CRM-LEAD-2026-03392)
+	"hostinger", "@google.com", "@frappe", "@razorpay", "support@", "billing@", "hello@", "team@", "newsletter", "mailer@")
 
 
 COMPLAINT_WORDS = ("complaint", "complain", "leak", "seepage", "damage", "broken", "not working", "defect", "rust", "crack",
@@ -408,7 +410,11 @@ def auto_leads() -> int:
 			continue
 		try:
 			data = lead_sources.parse_mail(r.subject, text, "Email")
+			if "@skind.tech" in (data.get("email") or "").lower():
+				data["email"] = None  # our own address printed in the mail is not the customer's
 			data["email"] = data.get("email") or r.sender.strip()
+			if any(w in data["email"].lower() for w in NOT_LEAD_SENDERS):
+				continue
 			data["first_name"] = r.sender_full_name or data["first_name"]
 			box = _box_of(r, boxes, box_of)
 			owner = None

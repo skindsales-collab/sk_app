@@ -93,7 +93,7 @@ FUNCTIONS = {
 	"Machine Shifting": {
 		"label": {"English": "Machine Shifting", "Marathi": "मशीन शिफ्टिंग"},
 		# SK 28-Oct: Aditya sees the Non-Cabin P&L month by month (Month Wise Report, Non-Cabin only)
-		"tiles": COMMON_TILES + ["to_submit", "my_deals", "customers", "complaints", "site_checklist", "mail", "month_close"],
+		"tiles": COMMON_TILES + ["to_submit", "my_deals", "service_jobs", "customers", "complaints", "site_checklist", "mail", "month_close"],
 		"live": False,
 		"erpnext_roles": ["Projects User", "Sales User"],
 		"desk": "/crm",
@@ -108,7 +108,7 @@ FUNCTIONS = {
 	"Subcontractor": {
 		"label": {"English": "Production (job card worker)", "Marathi": "उत्पादन (जॉब कार्ड कामगार)"},
 		# very simple screen (SK): own jobs only; job tiles come with the Production screens
-		"tiles": ["my_day", "my_jobs", "el_points", "need_material", "my_fixes", "my_bills", "problem", "training", "day_report", "dsi", "my_kpi"],
+		"tiles": ["my_day", "service_jobs", "my_jobs", "el_points", "need_material", "my_fixes", "my_bills", "problem", "training", "day_report", "dsi", "my_kpi"],
 		"live": True,
 		"erpnext_roles": ["SK Subcontractor"],
 		"desk": "/sk",
@@ -193,7 +193,7 @@ MAIN_TILES = {
 	# main screen Rev 2 (SK 26-Oct): four own icons; a sales manager gets Team Leads in place of My Deals
 	"Sales": ["new_lead", "my_leads", "follow_up", "team_leads", "my_deals"],
 	"Marketing": ["new_lead", "my_leads", "follow_up", "my_deals"],
-	"Machine Shifting": ["my_deals", "customers", "site_checklist", "complaints"],
+	"Machine Shifting": ["my_deals", "service_jobs", "customers", "site_checklist"],
 	"Production": ["to_plan", "job_cards", "need_material", "order_board", "lead_time"],
 	"Quality": ["inspect", "final_check", "non_conformance", "el_points"],
 	"Stores": ["requisition", "store_requests", "receive", "issue"],
@@ -201,7 +201,7 @@ MAIN_TILES = {
 	"Accounts": ["gateway", "to_collect", "to_pay", "day_book"],
 	# SK 26-Oct: attendance is not on the main screen (it is in More)
 	"HR": ["leave_expense", "team_scorecards", "requisition"],
-	"Subcontractor": ["my_jobs", "el_points", "need_material", "my_fixes"],
+	"Subcontractor": ["service_jobs", "my_jobs", "el_points", "need_material"],
 	"AI": ["improvement_inbox", "erp_gaps", "app_users", "dept_visits"],
 	# the CEO's first screen = overview, approvals, team; the other dashboards and Leadership are in More (SK 26-Oct)
 	"Management": ["dash_overview", "po_approvals", "pay_approvals", "view_member"],

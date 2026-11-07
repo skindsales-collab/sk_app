@@ -5,7 +5,7 @@
  "custom": 0,
  "engine": "InnoDB",
  "creation": "2026-11-04 17:00:00.000000",
- "modified": "2026-11-04 17:00:00.000000",
+ "modified": "2026-11-06 22:30:00.000000",
  "owner": "Administrator",
  "modified_by": "Administrator",
  "states": [],
@@ -23,7 +23,11 @@
   "rules",
   "column_1",
   "pilot_users",
-  "note"
+  "note",
+  "section_gate",
+  "switched_on",
+  "gate_result",
+  "gate_snapshot"
  ],
  "fields": [
   {
@@ -69,6 +73,30 @@
    "fieldname": "note",
    "fieldtype": "Small Text",
    "label": "Note"
+  },
+  {
+   "fieldname": "section_gate",
+   "fieldtype": "Section Break",
+   "label": "Switch gate (no missing after rebuild, SK 6-Nov)"
+  },
+  {
+   "fieldname": "switched_on",
+   "fieldtype": "Datetime",
+   "label": "Switched to New on",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gate_result",
+   "fieldtype": "Small Text",
+   "label": "Gate result (nightly: before vs now per doctype)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gate_snapshot",
+   "fieldtype": "Long Text",
+   "label": "Counts saved at the switch (JSON)",
+   "read_only": 1,
+   "hidden": 1
   }
  ],
  "permissions": [

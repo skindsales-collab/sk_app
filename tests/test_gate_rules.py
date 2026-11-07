@@ -31,6 +31,11 @@ def test_lead_needs_name_mobile_segment_source():
 	assert keys(lead_missing(bad)) == {"organization", "first_name", "mobile_no", "sk_segment", "source", "lead_owner"}
 	# a deal carries deal_owner instead of lead_owner
 	assert lead_missing({**full, "lead_owner": None, "deal_owner": "rushi@x"}) == []
+	# no mobile but a way to reach: JustDial (number only inside JustDial) or a mail enquiry with the sender's e-mail
+	assert lead_missing({**full, "mobile_no": None, "source": "JustDial"}) == []
+	assert lead_missing({**full, "mobile_no": None, "source": "Email", "email": "a@b.com"}) == []
+	assert keys(lead_missing({**full, "mobile_no": None, "source": "Email"})) == {"mobile_no"}
+	assert keys(lead_missing({**full, "mobile_no": None, "source": "IndiaMART", "email": "a@b.com"})) == {"mobile_no"}
 
 
 def test_customer_gstin_or_unregistered_with_reason():

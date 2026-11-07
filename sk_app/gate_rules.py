@@ -89,7 +89,10 @@ def lead_missing(d: dict) -> list[tuple[str, str]]:
 		out.append(("organization", "Real customer / company name (not 'Enquiry')"))
 	if is_placeholder_name(person):
 		out.append(("first_name", "Contact person's name"))
-	if not (mobile_ok(d.get("mobile_no")) or mobile_ok(d.get("phone"))):
+	# a way to reach the customer: mobile; or the e-mail of a mail enquiry; JustDial shows the number only inside JustDial
+	# (SK 1-Nov), so its leads are not flagged every save (6-Nov log: all lead_mobile_no rows were JustDial / Email leads)
+	if not (mobile_ok(d.get("mobile_no")) or mobile_ok(d.get("phone")) or (d.get("source") in ("Email", "JustDial") and d.get("email"))
+			or d.get("source") == "JustDial"):
 		out.append(("mobile_no", "Mobile number (10 digits)"))
 	if blank(d.get("sk_segment")):
 		out.append(("sk_segment", "Segment (Cabin / Non-Cabin)"))

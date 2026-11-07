@@ -18,11 +18,13 @@ import frappe
 from frappe import _
 from frappe.utils import flt, fmt_money, getdate, nowdate
 
+from sk_app.core.dates import fy_start
 from sk_app.core.rules import report
 from sk_app.writers.service_job_rules import OWNER_FUNCTION, TERMS, advance_due, bill_problems, order_problems, sale_rate, \
 	stage, submit_problems
 
 ORDER_FIELD = "sk_sales_order"  # on Purchase Order / Purchase Invoice: the customer order the subcontract is for
+REPORT_FIELD = "sk_service_report"  # on Purchase Order: the customer-signed service report (photo / PDF), before the bill
 RATE_FILE = "service_rates_draft.json"
 GROUP = "Services"
 
@@ -34,7 +36,9 @@ def ensure_setup():
 
 	link = {"fieldname": ORDER_FIELD, "label": "For customer order", "fieldtype": "Link", "options": "Sales Order",
 		"insert_after": "supplier", "read_only": 1, "in_standard_filter": 1}
-	create_custom_fields({"Purchase Order": [link], "Purchase Invoice": [dict(link)], "Purchase Receipt": [dict(link)]}, update=True)
+	report_file = {"fieldname": REPORT_FIELD, "label": "Customer-signed service report", "fieldtype": "Attach", "insert_after": ORDER_FIELD,
+		"allow_on_submit": 1}
+	create_custom_fields({"Purchase Order": [link, report_file], "Purchase Invoice": [dict(link)], "Purchase Receipt": [dict(link)]}, update=True)
 	load_rates()
 
 
@@ -124,10 +128,11 @@ def bill(user: str, purchase_order: str, bill_no: str, bill_date, *, photo=None,
 
 	from sk_app.store import attach, insert_for
 
-	po = frappe.db.get_value("Purchase Order", purchase_order, ["name", "docstatus", "supplier_name", ORDER_FIELD, "grand_total", "project"], as_dict=True)
+	po = frappe.db.get_value("Purchase Order", purchase_order, ["name", "docstatus", "supplier_name", ORDER_FIELD, "grand_total", "project", REPORT_FIELD],
+		as_dict=True)
 	if not po:
 		frappe.throw(_("Service PO {0} not found").format(purchase_order))
-	found = bill_problems(bill_no, bill_date, po.docstatus == 1)
+	found = bill_problems(bill_no, bill_date, po.docstatus == 1, bool(po.get(REPORT_FIELD)))
 	report("Purchase", None, found, title=_("Bill data missing"))
 	if po.docstatus != 1:
 		frappe.throw(_("Place the service PO {0} first").format(po.name))
@@ -198,6 +203,85 @@ def before_submit(doc, method=None):
 		title=_("Service bill not approved"))
 
 
+# ---------- at site: daily photo report and the signed service report (Flow sheet steps 8-9) ----------
+
+def _po(purchase_order: str):
+	po = frappe.db.get_value("Purchase Order", purchase_order, ["name", "supplier", "supplier_name", "project", ORDER_FIELD, REPORT_FIELD, "docstatus"],
+		as_dict=True)
+	if not po:
+		frappe.throw(_("Service PO {0} not found").format(purchase_order))
+	return po
+
+
+def _attach_copy(file_url: str | None, doctype: str, name: str, user: str):
+	from sk_app.crm import _attach
+
+	_attach(file_url, doctype, name, user)
+
+
+def daily_report(user: str, purchase_order: str, *, photo=None, note=None) -> dict:
+	"""One entry per day per job: a Comment with the photo on the Project (else the PO), so the customer's project
+	timeline holds the site record."""
+	po = _po(purchase_order)
+	if not photo and not (note or "").strip():
+		frappe.throw(_("Please add the day's photo or a line on the work"))
+	doctype, name = ("Project", po.project) if po.project else ("Purchase Order", po.name)
+	_attach_copy(photo, doctype, name, user)
+	text = _("Daily site report {0} by {1}: {2}").format(nowdate(), frappe.utils.get_fullname(user), (note or "").strip() or _("photo"))
+	if photo:
+		text += f' <a href="{photo}" target="_blank">📷</a>'
+	c = frappe.get_doc({"doctype": "Comment", "comment_type": "Comment", "reference_doctype": doctype, "reference_name": name, "content": text,
+		"comment_email": user, "comment_by": frappe.utils.get_fullname(user)}).insert(ignore_permissions=True)
+	if doctype == "Project":
+		frappe.get_doc("Purchase Order", po.name).add_comment("Comment", text)
+	return {"name": c.name, "on": f"{doctype} {name}"}
+
+
+def service_report(user: str, purchase_order: str, photo: str, *, note=None) -> dict:
+	"""The customer-signed service report, on the PO (and the Project): needed before the subcontractor's bill."""
+	po = _po(purchase_order)
+	if not photo:
+		frappe.throw(_("Please add the signed report (photo or PDF)"))
+	_attach_copy(photo, "Purchase Order", po.name, user)
+	frappe.db.set_value("Purchase Order", po.name, REPORT_FIELD, photo, update_modified=False)
+	doc = frappe.get_doc("Purchase Order", po.name)
+	doc.add_comment("Comment", _("Customer-signed service report added by {0}{1}").format(frappe.utils.get_fullname(user), f": {note}" if note else "") +
+		f' <a href="{photo}" target="_blank">📄</a>')
+	if po.project:
+		frappe.get_doc("Project", po.project).add_comment("Comment", _("Service report signed by the customer (PO {0})").format(po.name) +
+			f' <a href="{photo}" target="_blank">📄</a>')
+	return {"name": po.name, "report": photo}
+
+
+def my_supplier(user: str) -> str | None:
+	"""The subcontractor behind this login: the Supplier of his workstation."""
+	from sk_app.production import my_workstation
+	from sk_app.sub_bills import supplier_of
+
+	return supplier_of(my_workstation(user))
+
+
+def _PRICE_LIST():
+	from sk_app.sub_bills import PRICE_LIST
+
+	return PRICE_LIST
+
+
+def options() -> dict:
+	"""Lists for the New service PO screen: open customer orders, service suppliers, rate items with buying price, payment terms."""
+	from sk_app.writers.app_user import service_suppliers
+
+	since = fy_start(getdate(nowdate()))
+	orders = frappe.get_all("Sales Order", filters={"docstatus": 1, "status": ["not in", ["Closed", "Completed"]], "transaction_date": [">=", since]},
+		fields=["name", "customer_name", "project"], order_by="transaction_date desc", limit=200)
+	suppliers = set(service_suppliers(since)) | set(frappe.get_all("Workstation", filters={"sk_supplier": ["is", "set"]}, pluck="sk_supplier"))
+	prices = {r.item_code: r.price_list_rate for r in frappe.get_all("Item Price", filters={"price_list": _PRICE_LIST()}, fields=["item_code", "price_list_rate"])}
+	items = [{"item_code": i.name, "item_name": i.item_name, "uom": i.stock_uom, "rate": prices.get(i.name, 0)} for i in
+		frappe.get_all("Item", filters={"item_group": GROUP, "disabled": 0}, fields=["name", "item_name", "stock_uom"], order_by="name asc")]
+	return {"orders": [{"value": o.name, "label": f"{o.name} · {o.customer_name}"} for o in orders], "suppliers": sorted(x for x in suppliers if x),
+		"items": items, "terms": list(TERMS)}
+
+
 # ---------- the list for the screens and arrows ----------
 
 def jobs(supplier: str | None = None, since: str | None = None) -> list[dict]:
@@ -208,7 +292,7 @@ def jobs(supplier: str | None = None, since: str | None = None) -> list[dict]:
 	if since:
 		filters["transaction_date"] = [">=", since]
 	fields = ["name", "docstatus", "supplier", "supplier_name", "transaction_date", "grand_total", "advance_paid", "per_received",
-		"per_billed", "payment_terms_template", ORDER_FIELD, "status"]
+		"per_billed", "payment_terms_template", ORDER_FIELD, "status", REPORT_FIELD]
 	if frappe.get_meta("Purchase Order").has_field("project"):
 		fields.append("project")
 	out = []
@@ -217,6 +301,9 @@ def jobs(supplier: str | None = None, since: str | None = None) -> list[dict]:
 		paid = bool(billed) and all(frappe.db.get_value("Purchase Invoice", b, ["docstatus", "outstanding_amount"]) == (1, 0) for b in billed)
 		po["bills"] = billed
 		po["customer"] = frappe.db.get_value("Sales Order", po.get(ORDER_FIELD), "customer_name") if po.get(ORDER_FIELD) else None
+		po["work"] = ", ".join(frappe.get_all("Purchase Order Item", filters={"parent": po.name}, pluck="item_name", order_by="idx asc")[:3])
+		po["signed_report"] = bool(po.get(REPORT_FIELD))
+		po["draft_bill"] = frappe.db.get_value("Purchase Invoice", {"name": ["in", billed or [""]], "docstatus": 0}, "name") if billed else None
 		po["stage"] = stage(placed=po.docstatus == 1, advance_paid=flt(po.advance_paid) > 0, billed=bool(billed),
 			approved=flt(po.per_received) >= 100, paid=paid)
 		out.append(po)
