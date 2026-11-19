@@ -78,7 +78,7 @@ def ensure_setup():
 # ---------- rate sheet ----------
 
 def _is_electrical(operation: str | None) -> bool:
-	from sk_app.production import _is_electrical
+	from sk_app.production_screens import _is_electrical
 
 	return _is_electrical(operation)
 
@@ -279,7 +279,7 @@ def supplier_of(workstation: str | None) -> str | None:
 
 
 def _cabin_text(jc) -> str:
-	from sk_app.store import job_card_cabin
+	from sk_app.store_screens import job_card_cabin
 
 	wo = frappe.db.get_value("Work Order", jc.work_order, ["item_name", "production_item"], as_dict=True) or {}
 	for text in (jc.get("sk_cabin"), wo.get("item_name"), wo.get("production_item"), job_card_cabin(jc.work_order)):
@@ -579,11 +579,13 @@ def to_approve(user: str) -> list[dict]:
 
 def my_bills(user: str) -> list[dict]:
 	"""The subcontractor's own labour POs, newest first: rate stage, GRN, bill, and any question waiting for him."""
-	from sk_app.production import my_workstation
+	from sk_app.production_screens import my_workstation
 
 	ws = my_workstation(user)
 	jcs = frappe.get_all("Job Card", filters={"workstation": ws}, pluck="name", limit=0) if ws else []
-	rows = frappe.get_all("Purchase Order", filters={"sk_job_card": ["in", jcs or [""]], "docstatus": ["<", 2]}, fields=FIELDS,
+	if not jcs:  # SK 9-Nov (Santosh): "in ['']" matched every PO with an empty job card, so he saw other suppliers' POs
+		return []
+	rows = frappe.get_all("Purchase Order", filters={"sk_job_card": ["in", jcs], "docstatus": ["<", 2]}, fields=FIELDS,
 		order_by="transaction_date desc", limit=50)
 	return [_row(r) for r in rows]
 

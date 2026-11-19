@@ -8,8 +8,13 @@ from sk_app.logic import OFF_CARD, guide_prompt, is_work_slot, parse_lines, rule
 
 
 def app_user(user: str):
-	return frappe.db.get_value("SK App User", {"user": user, "enabled": 1},
-		["name", "user", "full_name", "home", "language"], as_dict=True)
+	profile = frappe.db.get_value("SK App User", {"user": user, "enabled": 1},
+		["name", "user", "full_name", "home", "language", "workstation"], as_dict=True)
+	# SK 9-Nov: a Machine Shifting person with a workstation does the site jobs (Santosh); the Machine Shifting screen
+	# (Non-Cabin sales, built for the owner) is not his work, so his Home is the subcontractor one.
+	if profile and profile.home == "Machine Shifting" and profile.workstation:
+		profile.home = "Subcontractor"
+	return profile
 
 
 def make_card(user: str, use_claude: bool = True) -> dict:

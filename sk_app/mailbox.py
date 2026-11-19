@@ -247,7 +247,7 @@ def reply(user: str, comm: str, message: str) -> dict:
 		sender_full_name=frappe.utils.get_fullname(user), recipients=row.sender, send_email=1, in_reply_to=comm)
 	_set(comm, sk_mail_status="Replied", sk_taken_by=user)
 	if row.reference_doctype in ("CRM Lead", "CRM Deal"):
-		from sk_app.crm import _mark_first_response
+		from sk_app.writers.lead import _mark_first_response
 
 		_mark_first_response(row.reference_doctype, row.reference_name)
 	return {"name": res.get("name") if isinstance(res, dict) else res}
@@ -326,6 +326,20 @@ def _known(email: str):
 	return ("CRM Lead", d[0], d[1]) if d else None
 
 
+def _known_today(email: str):
+	"""For a new enquiry mail (SK 7-Nov, KF-04801): an open deal of this e-mail any time, else only a lead made TODAY;
+	a lead from another date is not reused, the mail becomes a new lead."""
+	from sk_app.double_rules import day_window
+
+	if frappe.get_meta("CRM Deal").has_field("email"):
+		d = frappe.db.get_value("CRM Deal", {"email": email}, ["name", "deal_owner"], order_by="modified desc")
+		if d:
+			return ("CRM Deal", d[0], d[1])
+	d = frappe.db.get_value("CRM Lead", {"email": email, "creation": ["between", list(day_window(now_datetime()))]}, ["name", "lead_owner"],
+		order_by="modified desc")
+	return ("CRM Lead", d[0], d[1]) if d else None
+
+
 def remind():
 	"""Hourly: a mail still New after 2 hours reminds its team (ERPNext bell + the app's Mail badge)."""
 	for box, c in counts(list(team_boxes())).items():
@@ -397,7 +411,7 @@ def auto_leads() -> int:
 		if r.reference_doctype in ("CRM Lead", "CRM Deal") or lead_sources.source_of(r.sender, r.subject) \
 				or _box_of(r, boxes, box_of) not in boxes:
 			continue  # on a lead already, a portal mail (lead_sources.scan), or moved to another team (supplier → Purchase)
-		text = r.text_content or strip_html(r.content or "")
+		text = lead_sources.mail_text(r.text_content, r.content)  # PR D: the part that holds the mail
 		kind = mail_kind(r.sender, r.subject, text)
 		if kind == "complaint" or (kind == "lead" and _customer_of(r.sender.strip().lower())):
 			# a complaint (or a mail from an existing customer) is never a lead: the team registers it in Complaints
@@ -415,14 +429,19 @@ def auto_leads() -> int:
 			data["email"] = data.get("email") or r.sender.strip()
 			if any(w in data["email"].lower() for w in NOT_LEAD_SENDERS):
 				continue
-			data["first_name"] = r.sender_full_name or data["first_name"]
+			# PR D (SK 15-Nov): "Purchase" from purchase@gurudattaforging.com is not a person; the company comes from the domain
+			from sk_app.lead_mail_rules import sender_name
+
+			person, company = sender_name(r.sender_full_name, r.sender, data.get("organization"))
+			data["first_name"] = person or data["first_name"] or company or "Enquiry"
+			data["organization"] = data.get("organization") or company
 			box = _box_of(r, boxes, box_of)
 			owner = None
 			if box == "service@skind.tech":
 				owner = frappe.get_cached_doc("SK App Settings").get("lead_owner_noncabin")
 			# SK 27-Oct: "need to confirm that this is new lead": an existing lead / deal (any age) of the same e-mail gets
 			# the mail instead; a new one says it came by itself so the owner confirms it (else Junk Lead)
-			known = _known(data["email"].lower())
+			known = _known_today(data["email"].lower())
 			if known:
 				_set(r.name, reference_doctype=known[0], reference_name=known[1], sk_mail_status="Taken", sk_taken_by=known[2])
 				continue

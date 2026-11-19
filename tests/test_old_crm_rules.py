@@ -43,3 +43,15 @@ def test_other_status_and_zero_mobile():
 def test_dates_fall_back_to_created():
 	assert R.dates_of(row()) == (date(2026, 6, 12), date(2026, 6, 20))
 	assert R.dates_of(row(closed_date="")) == (date(2026, 6, 12), date(2026, 6, 12))
+
+
+def test_same_mobile_on_another_date_is_a_new_lead_sk_17_nov():
+	from datetime import date
+
+	known = {**KNOWN, "mobile_dates": {("9822012345", date(2026, 3, 2))}}
+	same_day = {"first_name": "Ram", "mobile_no": "9822012345", "status": "Junk Lead", "date": "2026-03-02"}
+	other_day = {**same_day, "date": "2026-07-15"}
+	assert R.lead_from_row(same_day, known)[0] is None and "same date" in R.lead_from_row(same_day, known)[1]
+	lead, why = R.lead_from_row(other_day, known)
+	assert lead and lead["mobile_no"] == "9822012345" and why == ""
+	assert R.lead_from_row({**same_day, "status": "New"}, {**known, "mobile_dates": set()})[0]["status"] == "New"

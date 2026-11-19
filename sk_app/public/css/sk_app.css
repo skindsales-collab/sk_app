@@ -248,7 +248,9 @@ li.sk-off { opacity: .6; }
 .sk-viewbar { position: sticky; top: 0; z-index: 60; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #ffd84d; color: #3a3000; font-weight: 700; }
 .sk-viewbar span { flex: 1; }
 .sk-viewbar button { border: 0; border-radius: 16px; padding: 6px 12px; font-weight: 700; background: #fff; color: #1b2430; }
-body.sk-viewing main .sk-micbox, body.sk-viewing main .sk-photo { display: none; }
+body.sk-viewing:not(.sk-working) main .sk-micbox, body.sk-viewing:not(.sk-working) main .sk-photo { display: none; }
+.sk-viewbar.work { background: #c8e6c9; color: #0f3d1a; }  /* SK 14-Nov: green = the CEO is working as the member */
+.sk-ceo { font-size: .95em; }
 /* point 13: CEO live dashboards */
 .sk-dash-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
 .sk-dash-card { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; padding: 12px; border: 0; border-radius: 12px; background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.08); min-height: 92px; font: inherit; color: inherit; }
@@ -393,6 +395,7 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 	padding: 0 10px 0 16px; clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%); }
 .sk-ar3:first-child { clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%); border-radius: 8px 0 0 8px; padding-left: 6px; }
 .sk-ar3 b { font-size: 19px; line-height: 1; text-shadow: 0 1px 0 rgba(0,0,0,.3); }
+.sk-ar3 em { font-style: normal; font-size: 9.5px; line-height: 1.2; font-weight: 700; background: rgba(0,0,0,.28); border-radius: 4px; padding: 0 4px; margin-top: 1px; white-space: nowrap; }  /* phone: "371 late" under the open total (SK 13-Nov) */
 .sk-ar3 span { font-size: 10.5px; line-height: 1.1; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sk-ar3.b { background: linear-gradient(180deg, #6aa8ee 0%, #2f6fbf 48%, #1f5aa3 52%, #2d6cbb 100%); }
 .sk-ar3.g { background: linear-gradient(180deg, #6fd197 0%, #2e9d5b 48%, #23864b 52%, #2c9858 100%); }
@@ -838,12 +841,16 @@ body.sk-pc .sk-dec small { left: 108px; bottom: 8px; }
 /* ===== SK 1-Nov 12:07 "screen size different from the PDF, check all square sizes": PC Home fits ONE screen,
    box shares as in the PDF (screen 900 high: chart 356 · arrows 124-150 · Decide fills | own icons 248 ·
    common 96 · Call/WA/Mail 56 · My Day fills · bottom 64). Phone unchanged. ===== */
+/* SK 9-Nov "many squares overlapping": (1) each half-screen column is ONE column that never grows past its half,
+   so a wide chart or an 8-arrow funnel shrinks instead of sliding under the other column; (2) the one-screen height
+   is never less than 760 px, so a short or zoomed window scrolls instead of squeezing the boxes into each other. */
 body.sk-pc main.sk-pchome { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); grid-template-areas: none; grid-template-rows: minmax(0, 1fr);
-	column-gap: 26px; row-gap: 0; height: calc(100vh - var(--hh, 64px)); min-height: 600px; padding: 24px 30px 20px; box-sizing: border-box; overflow: hidden; }
-body.sk-pc .sk-pcl, body.sk-pc .sk-pcr { display: grid; gap: 20px; min-height: 0; }
+	column-gap: 26px; row-gap: 0; height: max(calc(100vh - var(--hh, 64px)), 760px); padding: 24px 30px 20px; box-sizing: border-box; }
+body.sk-pc .sk-pcl, body.sk-pc .sk-pcr { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; min-height: 0; min-width: 0; }
 body.sk-pc .sk-pcl { grid-template-rows: minmax(0, 40fr) clamp(112px, 15vh, 140px) minmax(0, 36fr); }
 body.sk-pc .sk-pcr { grid-template-rows: minmax(0, 28fr) minmax(0, 12fr) clamp(50px, 6.5vh, 60px) minmax(0, 26fr) clamp(50px, 6.5vh, 60px); }
-body.sk-pc .sk-pcl > *, body.sk-pc .sk-pcr > * { min-height: 0; margin: 0 !important; align-self: stretch; }
+body.sk-pc .sk-pcl > *, body.sk-pc .sk-pcr > * { min-height: 0; min-width: 0; margin: 0 !important; align-self: stretch; }
+body.sk-pc .sk-pchome .sk-bottom { position: static; }  /* the My Day / DSI / More bar sits in its row, not over My Day */
 /* chart box: the SVG is drawn to the box's own size (pcChartSize) */
 body.sk-pc .sk-pchome .sk-kpibox { overflow: visible; }
 body.sk-pc .sk-pchome .sk-kcard { height: 100%; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; }
@@ -851,7 +858,8 @@ body.sk-pc .sk-pchome .sk-kplot { flex: 1; min-height: 0; }
 body.sk-pc .sk-pchome .sk-ksvg.sk-pcchart { width: 100%; height: auto; }
 body.sk-pc .sk-pchome .sk-kcard > small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* arrows fill their row */
-body.sk-pc .sk-pchome .sk-flowbox { display: flex; align-items: center; padding: 8px 14px; box-sizing: border-box; }
+body.sk-pc .sk-pchome .sk-flowbox { display: flex; align-items: center; padding: 8px 14px; box-sizing: border-box; overflow: hidden; }
+body.sk-pc .sk-pchome .sk-ar3 { flex: 1 1 0; min-width: 0; }  /* 8 funnel arrows share the box instead of running past it */
 body.sk-pc .sk-pchome .sk-flow3d { width: 100%; height: 100%; }
 body.sk-pc .sk-pchome .sk-ar3 { height: 100%; }
 body.sk-pc .sk-flow3d[data-many="1"] .sk-ar3 { margin-right: -16px; padding-right: 18px; }
@@ -887,3 +895,19 @@ body.sk-pc .sk-pchome .sk-h { margin-bottom: 8px; font-size: 15px; }
 /* SK 6-Nov: Present month / Cumulative above the arrows */
 .sk-period { margin: 2px 0 6px; gap: 6px; }
 .sk-period .sk-chip { padding: 4px 10px; font-size: 13px; }
+
+/* SK hiring 17-Nov: tablet Round 1, big and few */
+.sk-iv { padding: 12px; } .sk-iv h2 { margin: 4px 0 10px; }
+.sk-iv-big { font-size: 22px; line-height: 1.4; font-weight: 600; margin: 10px 0; }
+.sk-iv-huge { font-size: 20px; padding: 18px 16px; min-height: 64px; }
+.sk-iv textarea { width: 100%; font-size: 18px; padding: 10px; margin: 8px 0; }
+.sk-iv .sk-btn.on, #iv-mic.on { background: #d6453f; color: #fff; }
+.sk-r2-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } @media (max-width: 760px) { .sk-r2-grid { grid-template-columns: 1fr; } }
+
+/* R10 self-service tablet (kiosk): no app header or tiles, big interviewer card, camera preview, timer */
+body.sk-kiosk .sk-head, body.sk-kiosk .sk-viewbar, body.sk-kiosk .sk-bottom { display: none !important; }
+.sk-kiosk-head { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #e8f1fb; }
+.sk-sahayak { width: 72px; height: 72px; flex: 0 0 72px; }
+.sk-iv-cam { width: 160px; height: 120px; border-radius: 8px; background: #000; margin: 6px 0; }
+.sk-iv-timer { font-weight: 700; color: #d6453f; font-size: 18px; }
+.sk-call-office { margin-top: 14px; background: #2e9d5b; color: #fff; text-align: center; text-decoration: none; display: block; }

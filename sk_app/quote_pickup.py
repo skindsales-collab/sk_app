@@ -19,6 +19,7 @@ never a second quote for the same deal.
 import re
 
 import frappe
+from sk_app.writers import lead as lead_w
 from frappe import _
 from frappe.utils import add_days, get_datetime, now_datetime
 
@@ -178,7 +179,7 @@ def _send_for_quote(user: str, lead: str, seg: str | None, text: str) -> dict:
 	"""Non-Cabin: the lead becomes a deal (Frappe CRM's own convert) that the Machine Shifting quote AI picks up."""
 	from sk_app import crm
 
-	deal, reason = crm._to_deal(user, lead, seg)
+	deal, reason = lead_w._to_deal(user, lead, seg)
 	if not deal:
 		return {"route": "none", "reason": reason}
 	_copy_inputs(user, lead, deal)
@@ -222,7 +223,7 @@ def route_lead(user: str, lead: str) -> dict:
 			return {"route": "quote", "deal": frappe.db.get_value("CRM Deal", {"lead": lead}), "quotation": q["name"],
 				"ref": q.get("ref"), "grand_total": q.get("grand_total"), "pdf": q.get("pdf"), "discount_waiting": q.get("discount_waiting")}
 		failed = q and q.get("failed")
-	r = crm.send_to_design(user, lead)
+	r = lead_w.send_to_design(user, lead)
 	return {"route": "design" if r.get("sent") else "none", "deal": r.get("deal"), "reason": r.get("reason"), "quote_failed": failed}
 
 

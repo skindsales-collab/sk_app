@@ -114,7 +114,7 @@ class TestFlows(IntegrationTestCase):
 
 	def test_job_label_works_in_a_request(self):
 		"""27-Oct: wo_label raised on frappe.local, so the Production flow (and its arrows) came back empty."""
-		from sk_app.production import wo_label
+		from sk_app.production_screens import wo_label
 
 		self.assertEqual(wo_label("WO-NOT-THERE", "x"), "WO-NOT-THERE")
 		self.assertEqual(wo_label(None, "JC-1"), "JC-1")

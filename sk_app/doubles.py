@@ -26,7 +26,7 @@ OK_ROLES = {"System Manager", "Accounts Manager", "Accounts User"}
 # entries ERPNext makes by itself
 SYSTEM_JE = {"Exchange Gain Or Loss", "Exchange Rate Revaluation", "Depreciation Entry", "Deferred Revenue", "Deferred Expense",
 	"Period Closing Voucher"}
-LEAD_DAYS = 90  # same as the portal mail leads (lead_sources.DUPLICATE_DAYS)
+LEAD_DAYS = 0  # SK 7-Nov (KF-04801): the same lead on the same date is a double, on another date a new lead
 
 
 def ensure_setup():
@@ -63,7 +63,10 @@ def _ok_ticked(doc) -> bool:
 		return False
 	if not OK_ROLES & set(frappe.get_roles()):
 		frappe.throw(_("Only Accounts can tick 'Not a double (checked)'. Please ask Shraddha."))
-	if doc.is_new() or not doc.get_doc_before_save() or not doc.get_doc_before_save().get(OK_FIELD):
+	if doc.is_new():
+		return True  # the record does not exist yet, so no comment can point at it; its owner is the one who ticked
+	before = doc.get_doc_before_save()
+	if not before or not before.get(OK_FIELD):
 		doc.add_comment("Comment", _("Ticked 'Not a double (checked)' by {0}").format(frappe.session.user))
 	return True
 
@@ -74,9 +77,9 @@ def _lock(doctype: str, name: str | None):
 		frappe.db.sql(f"select name from `tab{doctype}` where name = %s for update", name)
 
 
-def _window(d):
+def _window(d, days=None):
 	d = getdate(d or nowdate())
-	return [add_days(d, -R.DAYS), add_days(d, R.DAYS)]
+	return [add_days(d, -(days or R.DAYS)), add_days(d, days or R.DAYS)]
 
 
 def _amount_range(amount):
@@ -106,19 +109,21 @@ def _same_ref(doctype: str, field: str, ref, name, extra: str = "", values: tupl
 
 def _je_party_rows(party_type, party, amount, side: str, d, name=None) -> list:
 	"""Journal entries with a row for this party of this amount on this side (debit / credit) within 7 days."""
-	got = frappe.db.sql(f"""select je.name, max(je.docstatus) as docstatus, max(je.posting_date) as date, max(a.{side}) as amount
+	got = frappe.db.sql(f"""select je.name, max(je.docstatus) as docstatus, max(je.posting_date) as date, max(a.{side}) as amount,
+			max(ifnull(nullif(je.bill_no, ''), je.cheque_no)) as ref
 		from `tabJournal Entry` je join `tabJournal Entry Account` a on a.parent = je.name
 		where je.docstatus < 2 and je.name != %s and a.party_type = %s and a.party = %s
 			and a.{side} between %s and %s and je.posting_date between %s and %s
 		group by je.name order by date desc limit 5""",
-		(name or "", party_type, party, *_amount_range(amount), *_window(d)), as_dict=True)
+		(name or "", party_type, party, *_amount_range(amount), *_window(d, R.CROSS_DAYS)), as_dict=True)
 	return [{**r, "doctype": "Journal Entry"} for r in got]
 
 
 def _pe_party_rows(party_type, party, amount, payment_type, d, name=None) -> list:
 	field = "paid_amount" if payment_type == "Pay" else "received_amount"
 	return _rows("Payment Entry", {"party_type": party_type, "party": party, "payment_type": payment_type,
-		field: ["between", _amount_range(amount)], "posting_date": ["between", _window(d)]}, "posting_date", field, name)
+		field: ["between", _amount_range(amount)], "posting_date": ["between", _window(d, R.CROSS_DAYS)]}, "posting_date", field, name,
+		["reference_no as ref"])
 
 
 # ---------- layer 2: live check on save ----------
@@ -184,8 +189,10 @@ def _check_payment(doc):
 	rows = _pe_party_rows(doc.party_type, doc.party, amount, doc.payment_type, doc.posting_date, doc.name)
 	# Tally receipts / payments were also booked as journals: a payment to a supplier is a debit on the supplier
 	rows += _je_party_rows(doc.party_type, doc.party, amount, "debit" if doc.payment_type == "Pay" else "credit", doc.posting_date)
+	# own numbers of the same kind: two real payments (SK 7-Nov); a bank number never clears a pair (checker 7-Nov)
+	rows = [r for r in rows if R.voucher_double(doc.reference_no, doc.posting_date, r.get("ref"), r.get("date"))]
 	if rows:
-		_stop(rows, _("same party and amount within {0} days").format(R.DAYS))
+		_stop(rows, _("same party and amount within {0} days").format(max(R.pair_days(doc.reference_no, r.get("ref")) for r in rows)))
 
 
 def _check_purchase(doc):
@@ -211,7 +218,9 @@ def _check_sale(doc):
 	_lock("Customer", doc.customer)
 	rows = _rows("Sales Invoice", {"customer": doc.customer, "is_return": doc.is_return or 0, "company": doc.company,
 		"grand_total": ["between", _amount_range(doc.grand_total)], "posting_date": ["between", _window(doc.posting_date)]},
-		"posting_date", "grand_total", doc.name, ["po_no", "project"])
+		"posting_date", "grand_total", doc.name, ["po_no", "project", "remarks"])
+	# two Tally invoices with their own numbers in the remarks are two real invoices (checker 7-Nov)
+	rows = [r for r in rows if not R.different_refs(R.tally_ref(doc.remarks), R.tally_ref(r.get("remarks")))]
 	# identical cabins on one order are billed one by one: another customer PO, another cabin project or other order rows
 	# make it a separate invoice
 	mine = {i.so_detail for i in doc.items if i.get("so_detail")}
@@ -244,6 +253,9 @@ def _check_journal(doc):
 				if a.party_type in ("Supplier", "Customer", "Employee"):
 					rows += _pe_party_rows(a.party_type, a.party, a.get(side), "Pay" if side == "debit" else "Receive",
 						doc.posting_date)
+	mine_ref = doc.get("bill_no") or doc.cheque_no
+	# own voucher numbers of the same kind: two real entries (SK 7-Nov); a bank number never clears a pair (checker 7-Nov)
+	rows = [r for r in rows if R.voucher_double(mine_ref, doc.posting_date, r.get("ref"), r.get("date"))]
 	if not parties and flt(doc.total_debit):
 		# no party (expenses, transfers): same accounts, same amount, same day
 		mine = sorted({a.account for a in doc.accounts})
@@ -261,14 +273,17 @@ def check_lead(doc, method=None):
 	"""CRM Lead before_insert: the same mobile or e-mail in the last 90 days, or the same name saved twice in 10 minutes."""
 	if _skip(doc):
 		return
-	since = add_days(nowdate(), -LEAD_DAYS)
+	today = ["between", list(R.day_window(nowdate()))]
 	rows = []
 	key = R.mobile_key(doc.get("mobile_no"))
 	if key:
-		rows = frappe.get_all("CRM Lead", filters={"mobile_no": ["like", f"%{key}"], "creation": [">=", since]},
+		rows = frappe.get_all("CRM Lead", filters={"mobile_no": ["like", f"%{key}"], "creation": today, "name": ["!=", doc.name or ""]},
 			fields=["name", "creation as date", "first_name", "organization"], limit=3)
 	if not rows and (doc.get("email") or "").strip():
-		rows = frappe.get_all("CRM Lead", filters={"email": doc.email.strip(), "creation": [">=", since]},
+		rows = frappe.get_all("CRM Lead", filters={"email": doc.email.strip(), "creation": today, "name": ["!=", doc.name or ""]},
+			fields=["name", "creation as date", "first_name", "organization"], limit=3)
+	if not rows and (doc.get("organization") or "").strip():
+		rows = frappe.get_all("CRM Lead", filters={"organization": doc.organization.strip(), "creation": today, "name": ["!=", doc.name or ""]},
 			fields=["name", "creation as date", "first_name", "organization"], limit=3)
 	if not rows and doc.get("first_name"):
 		rows = frappe.get_all("CRM Lead", filters={"first_name": doc.first_name, "organization": doc.get("organization") or "",
@@ -301,27 +316,57 @@ def _money_rows(since) -> list[dict]:
 	def ok(dt) -> list:
 		return [OK_FIELD] if frappe.get_meta(dt).has_field(OK_FIELD) else []
 
+	bank_accounts = set(frappe.get_all("Account", filters={"account_type": "Bank", "is_group": 0}, pluck="name"))
 	for r in frappe.get_all("Payment Entry", filters={"docstatus": ["<", 2], "posting_date": [">=", since]},
-			fields=["name", "docstatus", "payment_type", "party", "paid_amount", "received_amount", "posting_date", "reference_no", *ok("Payment Entry")]):
+			fields=["name", "docstatus", "payment_type", "party", "paid_amount", "received_amount", "posting_date", "reference_no",
+				"reference_date", "paid_from", "paid_to", *ok("Payment Entry")]):
 		pay = r.payment_type == "Pay"
+		amount = r.paid_amount if pay else r.received_amount
 		rows.append({"doctype": "Payment Entry", "kind": r.payment_type, "name": r.name, "docstatus": r.docstatus, "party": r.party,
-			"amount": r.paid_amount if pay else r.received_amount, "date": r.posting_date, "ref": r.reference_no, "ok": r.get(OK_FIELD)})
+			"amount": amount, "date": r.posting_date, "ref": r.reference_no, "ok": r.get(OK_FIELD)})
+		# checker 9-Nov (Babasaheb Rs 5,000 PE-00202 = JE-01769): the bank side too, on the bank's date, so a payment entry
+		# and a Tally journal for the same transfer meet even when the journal has no party
+		bank = r.paid_from if pay else r.paid_to
+		if bank in bank_accounts:
+			rows.append({"doctype": "Payment Entry", "kind": "bank out" if pay else "bank in", "name": r.name, "docstatus": r.docstatus, "party": bank, "payee": r.party,
+				"amount": amount, "date": r.reference_date or r.posting_date, "ref": r.reference_no, "ok": r.get(OK_FIELD)})
 	for dt, party in (("Purchase Invoice", "supplier"), ("Sales Invoice", "customer")):
-		extra = ["bill_no"] if dt == "Purchase Invoice" else []
+		extra = ["bill_no"] if dt == "Purchase Invoice" else ["remarks"]
 		for r in frappe.get_all(dt, filters={"docstatus": ["<", 2], "posting_date": [">=", since]},
 				fields=["name", "docstatus", f"{party} as party", "grand_total", "posting_date", "is_return", *ok(dt), *extra]):
+			# the bill number within its party: a supplier's bill no, or the Tally invoice no in a migrated sales invoice's remarks
+			number = r.get("bill_no") if dt == "Purchase Invoice" else R.tally_ref(r.get("remarks"))
 			rows.append({"doctype": dt, "kind": f"{dt} {r.is_return}", "name": r.name, "docstatus": r.docstatus, "party": r.party,
 				"amount": r.grand_total, "date": r.posting_date, "ok": r.get(OK_FIELD),
-				"ref": f"{r.party} {r.bill_no}" if r.get("bill_no") and R.norm_ref(r.bill_no) else None})
+				"ref": f"{r.party} {number}" if number and R.norm_ref(number) else None})
 	je_ok = "je." + OK_FIELD if ok("Journal Entry") else "0"
-	for r in frappe.db.sql(f"""select je.name, je.docstatus, je.posting_date, je.cheque_no, a.party, a.debit, a.credit, {je_ok} as ok
+	for r in frappe.db.sql(f"""select je.name, je.docstatus, je.posting_date, ifnull(nullif(je.bill_no, ''), je.cheque_no) as ref, a.party, a.debit, a.credit,
+			je.total_debit, {je_ok} as ok
 			from `tabJournal Entry` je join `tabJournal Entry Account` a on a.parent = je.name
 			where je.docstatus < 2 and je.posting_date >= %s and ifnull(a.party, '') != '' and je.voucher_type not in %s""",
 			(since, tuple(SYSTEM_JE)), as_dict=True):
 		# a journal debit on a party is a payment to it, a credit a receipt: compared with payment entries too
+		amount = flt(r.debit) or flt(r.credit)
+		if amount < 10:  # round-off / TDS lines of Rs 0, 1, 2 (checker 7-Nov: 10+ pairs at Rs 0-2) are not money movements
+			continue
 		kind = "Pay" if flt(r.debit) else "Receive"
 		rows.append({"doctype": "Journal Entry", "kind": kind, "name": r.name, "docstatus": r.docstatus, "party": r.party,
-			"amount": flt(r.debit) or flt(r.credit), "date": r.posting_date, "ref": r.cheque_no, "ok": r.ok})
+			"amount": amount, "total": flt(r.total_debit), "date": r.posting_date, "ref": r.ref, "ok": r.ok})  # Tally voucher no is in bill_no
+	# the bank line of every journal (checker 9-Nov): compared with payment entries on the same bank account
+	je_payee = {}
+	for x in rows:
+		if x["doctype"] == "Journal Entry" and x.get("party"):
+			je_payee.setdefault(x["name"], x["party"])
+	for r in frappe.db.sql(f"""select je.name, je.docstatus, je.posting_date, ifnull(nullif(je.bill_no, ''), je.cheque_no) as ref, a.account, a.debit, a.credit,
+			je.user_remark, {je_ok} as ok from `tabJournal Entry` je join `tabJournal Entry Account` a on a.parent = je.name
+			join tabAccount acc on acc.name = a.account
+			where je.docstatus < 2 and je.posting_date >= %s and acc.account_type = 'Bank' and je.voucher_type not in %s""",
+			(since, tuple(SYSTEM_JE)), as_dict=True):
+		amount = flt(r.debit) or flt(r.credit)
+		if amount < 10:
+			continue
+		rows.append({"doctype": "Journal Entry", "kind": "bank out" if flt(r.credit) else "bank in", "name": r.name, "docstatus": r.docstatus, "party": r.account,
+			"payee": je_payee.get(r.name), "hint": r.user_remark, "amount": amount, "date": r.posting_date, "ref": r.ref, "ok": r.ok})
 	return rows
 
 
@@ -335,6 +380,14 @@ def _bank_in_cash(since) -> list[dict]:
 		order by pe.posting_date desc""", (since,), as_dict=True)
 
 
+def _auto_ticked() -> list[dict]:
+	"""Records the one-time patch ticked 'Not a double (checked)' in the last 2 days (checker 7-Nov: list them in the mail)."""
+	if not frappe.db.table_exists("SK Rule Log"):
+		return []
+	return frappe.get_all("SK Rule Log", filters={"rule": "double pair ticked by patch", "creation": [">=", add_days(nowdate(), -2)]},
+		fields=["reference_doctype", "reference_name", "detail"], order_by="creation asc", limit=200)
+
+
 def possible_doubles(since=None) -> dict:
 	from erpnext.accounts.utils import get_fiscal_year
 
@@ -344,13 +397,17 @@ def possible_doubles(since=None) -> dict:
 		where ifnull(lead, '') != '' group by lead having count(*) > 1""", as_dict=True) if frappe.db.exists("DocType", "CRM Deal") else []
 	from sk_app import masters
 
-	return {"since": str(since), "pairs": pairs, "deals": deals, "bank_in_cash": _bank_in_cash(since),
+	return {"since": str(since), "pairs": pairs, "deals": deals, "bank_in_cash": _bank_in_cash(since), "auto_ticked": _auto_ticked(),
 		"masters": masters.changed_since(), "master_problems": masters.audit_masters_only()}
 
 
 def _row_html(r) -> str:
-	return "{0} {1} · {2} · ₹{3:,.0f} · {4}{5}".format(r["doctype"], _link(r["doctype"], r["name"]), r.get("party") or "",
-		flt(r.get("amount")), r.get("date") or "", " (draft)" if r.get("docstatus") == 0 else "")
+	# a journal shows its voucher total, with the party line when it differs (checker 7-Nov: JE-01718 is Rs 28,000, mail said 20,650)
+	amount = f"₹{flt(r.get('total')):,.0f}" if r.get("total") else f"₹{flt(r.get('amount')):,.0f}"
+	if r.get("total") and abs(flt(r["total"]) - flt(r.get("amount"))) >= 1:
+		amount += f" (party line ₹{flt(r.get('amount')):,.0f})"
+	return "{0} {1} · {2} · {3} · {4}{5}{6}".format(r["doctype"], _link(r["doctype"], r["name"]), r.get("party") or "", amount,
+		r.get("date") or "", f" · {r['ref']}" if r.get("ref") else "", " (draft)" if r.get("docstatus") == 0 else "")
 
 
 def report_html(found: dict) -> str:
@@ -367,6 +424,10 @@ def report_html(found: dict) -> str:
 		parts.append("<p><b>Bank payments booked through Cash</b> (they never show in Bank Reconciliation: cancel, amend and choose "
 			"the bank account):</p><ul>" + "".join("<li>{0} · {1} · ₹{2:,.0f} · {3} · {4}</li>".format(_link("Payment Entry", r.name),
 			r.party or "", flt(r.amount), r.date, r.mode_of_payment or r.reference_no or "") for r in found["bank_in_cash"]) + "</ul>")
+	if found.get("auto_ticked"):
+		parts.append("<p><b>Ticked 'Not a double' by the SK App update</b> (two entries with their own Tally / bill numbers; untick "
+			"if one is wrong):</p><ul>" + "".join("<li>{0} {1} · {2}</li>".format(r["reference_doctype"], _link(r["reference_doctype"],
+			r["reference_name"]), r["detail"] or "") for r in found["auto_ticked"]) + "</ul>")
 	if found.get("master_problems"):
 		parts.append("<p><b>Account masters set up wrong</b> (where money is booked):</p><ul>" + "".join(
 			f'<li><a href="{r["link"]}">{r["what"]}</a>: {r["problem"]}</li>' for r in found["master_problems"]) + "</ul>")
@@ -388,7 +449,7 @@ def _recipients() -> list[str]:
 def morning():
 	"""Scheduler, every morning: the list of possible doubles to Accounts (Shraddha) and the CEO (SK). Nothing found, no mail."""
 	found = possible_doubles()
-	count = sum(len(found[k]) for k in ("pairs", "deals", "bank_in_cash", "masters", "master_problems"))
+	count = sum(len(found.get(k) or []) for k in ("pairs", "deals", "bank_in_cash", "masters", "master_problems", "auto_ticked"))
 	if not count:
 		return 0
 	subject = _("SK App: {0} possible double / wrong entries to check").format(count)

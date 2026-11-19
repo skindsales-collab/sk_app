@@ -4,6 +4,9 @@ every word of the search may be anywhere, up to 20 items, and material found fro
 import json
 
 import frappe
+from sk_app.writers import requisition as req_w
+from sk_app import purchase_screens
+from sk_app import store_screens
 from frappe.tests import IntegrationTestCase
 
 from sk_app import item_input, requisition, store
@@ -21,8 +24,8 @@ class TestItemInput(IntegrationTestCase):
 
 	def test_words_anywhere(self):
 		# "SK Test Pipe 40x40": the words in another order and the size apart still find it
-		self.assertIn(RAW, [r["item_code"] for r in run(STORE_U, item_input.search, "pipe 40 test")])
-		self.assertIn(RAW, [r["item_code"] for r in run(STORE_U, store.stock_search, "test pipe 40")])
+		self.assertIn(RAW, [r["item_code"] for r in item_input.find_items("pipe 40 test")])
+		self.assertIn(RAW, [r["item_code"] for r in run(STORE_U, store_screens.stock_search, "test pipe 40")])
 
 	def test_spoken_list_becomes_rows(self):
 		self.assertEqual(item_input.split_line("C channel 100x50 20 nos"), ("C channel 100x50", 20))
@@ -38,7 +41,7 @@ class TestItemInput(IntegrationTestCase):
 
 	def test_twenty_items_at_most(self):
 		rows = [{"item_code": RAW, "qty": 1}] * 21
-		self.assertRaises(frappe.ValidationError, run, STORE_U, requisition.raise_request, rows)
+		self.assertRaises(frappe.ValidationError, run, STORE_U, req_w.raise_request, rows)
 
 	def test_photo_sample_then_match(self):
 		frappe.db.set_value("Item", RAW, item_input.FIELD, None)

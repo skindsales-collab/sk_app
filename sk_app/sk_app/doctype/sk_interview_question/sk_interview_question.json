@@ -1,0 +1,42 @@
+{
+ "doctype": "DocType",
+ "name": "SK Interview Question",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-11-17 10:00:00.000000",
+ "modified": "2026-11-17 10:00:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "autoname": "field:code",
+ "naming_rule": "By fieldname",
+ "title_field": "en",
+ "track_changes": 1,
+ "sort_field": "seq",
+ "sort_order": "ASC",
+ "states": [],
+ "links": [],
+ "actions": [],
+ "description": "SK HR hiring (17-Nov-2026): the Round 1 question bank. 6 common questions for every role, then 5 questions and 1 practical test per role family. HR edits the text here; the tablet reads it. No question about religion, caste, marriage, pregnancy, family plans, age or salary.",
+ "field_order": ["code", "family", "trait", "seq", "active", "column_1", "is_test", "look_for", "section_1", "en", "mr", "hi"],
+ "fields": [
+  {"fieldname": "code", "fieldtype": "Data", "label": "Code", "reqd": 1, "unique": 1, "in_list_view": 1, "description": "C1-C6 common; S1-S5 + ST (test) for Sales, and so on"},
+  {"fieldname": "family", "fieldtype": "Select", "label": "Role family", "options": "C\nS\nM\nD\nF\nT\nP\nA\nH\nE", "reqd": 1, "in_list_view": 1, "in_standard_filter": 1, "description": "C common · S Sales · M Marketing · D Design · F Factory & Site · T Store · P Machine shifting · A Accounts · H HR & Admin · E ERP & IT"},
+  {"fieldname": "trait", "fieldtype": "Select", "label": "Trait", "options": "Background\nFlexibility\nAttitude\nLearning\nReliability\nRole Skill\nCommunication", "in_list_view": 1},
+  {"fieldname": "seq", "fieldtype": "Int", "label": "Order"},
+  {"fieldname": "active", "fieldtype": "Check", "label": "Active", "default": "1"},
+  {"fieldname": "column_1", "fieldtype": "Column Break"},
+  {"fieldname": "is_test", "fieldtype": "Check", "label": "Practical test", "default": "0"},
+  {"fieldname": "look_for", "fieldtype": "Small Text", "label": "What to look for (for Claude and HR)"},
+  {"fieldname": "section_1", "fieldtype": "Section Break", "label": "Question text"},
+  {"fieldname": "en", "fieldtype": "Small Text", "label": "English", "reqd": 1},
+  {"fieldname": "mr", "fieldtype": "Small Text", "label": "मराठी"},
+  {"fieldname": "hi", "fieldtype": "Small Text", "label": "हिंदी"}
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "HR Manager", "read": 1, "write": 1, "create": 1},
+  {"role": "HR User", "read": 1, "write": 1},
+  {"role": "All", "read": 1}
+ ]
+}

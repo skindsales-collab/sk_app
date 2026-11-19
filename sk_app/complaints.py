@@ -74,7 +74,8 @@ def _fixer(ctype: str, by_user: str) -> tuple[str, str | None]:
 			next(iter(_users_with_function("Management")), None)
 	if word:
 		ws = frappe.get_all("Workstation", filters={"name": ["like", f"%{word}%"]}, pluck="name")
-		sub = frappe.db.get_value("SK App User", {"workstation": ["in", ws or [""]], "enabled": 1}, "user")
+		# in [''] would match every app user without a workstation and send the complaint to the wrong person
+		sub = frappe.db.get_value("SK App User", {"workstation": ["in", ws], "enabled": 1}, "user") if ws else None
 		if sub:
 			return function, sub
 	return function, next(iter(_users_with_function(function)), None)
@@ -296,8 +297,3 @@ def badge(user: str) -> dict:
 	return {"complaints": {"n": n, "c": "red"}} if n else {}
 
 
-def late_for_management() -> list:
-	if not frappe.db.exists("DocType", "Issue") or not frappe.db.has_column("Issue", "sk_stage"):
-		return []
-	return frappe.get_all("Issue", filters={"sk_fix_by": ["<", nowdate()], "sk_stage": ["in", ["Registered", "Accepted", "Not OK"]]},
-		fields=["name", "subject", "sk_concerned_function", "sk_fix_by"], order_by="sk_fix_by asc", limit=0)

@@ -146,10 +146,55 @@ def _store(since: str) -> dict:
 	return out
 
 
+def _production(since: str) -> dict:
+	"""Flow 5: every posted work order and every done stage card since 1-Apr through the one Production rules."""
+	from sk_app.production_screens import non_cabin_orders
+	from sk_app.writers.work_order import _photos
+	from sk_app.writers.work_order_rules import card_problems, wo_problems
+
+	out = {"wo_data": 0, "card_data": 0}
+	skip = non_cabin_orders()
+	for w in frappe.get_all("Work Order", filters={"docstatus": 1, "creation": [">=", since]},
+			fields=["name", "production_item", "bom_no", "qty", "sales_order", "project", "expected_delivery_date"], limit=0):
+		for key, words in wo_problems(w.production_item, w.bom_no, w.qty, w.sales_order, w.project, w.expected_delivery_date, w.sales_order in skip):
+			out["wo_data"] += 1
+			_log("Production", key, "Work Order", w.name, words)
+	for c in frappe.get_all("Job Card", filters={"docstatus": ["<", 2], "status": "Completed", "creation": [">=", since]},
+			fields=["name", "work_order", "operation", "workstation", "status"], limit=0):
+		for key, words in card_problems(c.work_order, c.operation, c.workstation, c.status, _photos(c.name)):
+			out["card_data"] += 1
+			_log("Production", key, "Job Card", c.name, words)
+	return out
+
+
+def _hr(since: str) -> dict:
+	"""Flow 6: every active Employee, every posted Attendance and every paid leave since 1-Apr through the one HR rules."""
+	from sk_app.writers import attendance, leave
+	from sk_app.writers.employee import _photos
+	from sk_app.writers.employee_rules import joiner_warnings
+
+	out = {"employee_data": 0, "attendance_data": 0, "leave_data": 0}
+	for e in frappe.get_all("Employee", filters={"status": "Active"}, fields=["name", "cell_number", "date_of_joining"], limit=0):
+		for key, words in joiner_warnings(e.cell_number, _photos(e.name), e.date_of_joining):
+			out["employee_data"] += 1
+			_log("HR", key, "Employee", e.name, words)
+	for name in frappe.get_all("Attendance", filters={"docstatus": 1, "attendance_date": [">=", since]}, pluck="name", limit=0):
+		for key, words in attendance.problems(frappe.get_doc("Attendance", name)):
+			out["attendance_data"] += 1
+			_log("HR", key, "Attendance", name, words)
+	if frappe.db.exists("DocType", "Leave Application"):
+		for name in frappe.get_all("Leave Application", filters={"docstatus": ["<", 2], "from_date": [">=", since]}, pluck="name", limit=0):
+			for key, words in leave.problems(frappe.get_doc("Leave Application", name)):
+				out["leave_data"] += 1
+				_log("HR", key, "Leave Application", name, words)
+	return out
+
+
 def run(since: str = START) -> dict:
 	frappe.db.delete(LOG, {"mode": MODE})
 	started = now_datetime()
-	result = {"since": since, "Sales": _sales(since), "Finance": _finance(since), "Purchase": _purchase(since), "Store": _store(since)}
+	result = {"since": since, "Sales": _sales(since), "Finance": _finance(since), "Purchase": _purchase(since), "Store": _store(since),
+		"Production": _production(since), "HR": _hr(since)}
 	result["total"] = sum(sum(v.values()) for k, v in result.items() if isinstance(v, dict))
 	result["accuracy_check"] = "passed" if not result["total"] else "gaps listed in SK Rule Log (mode Replay)"
 	result["seconds"] = (now_datetime() - started).seconds
@@ -160,7 +205,7 @@ def run(since: str = START) -> dict:
 def run_and_tell(since: str = START, user: str | None = None) -> dict:
 	result = run(since)
 	if user:
-		lines = [f"{m}: " + ", ".join(f"{k} {v}" for k, v in result[m].items()) for m in ("Sales", "Finance", "Purchase", "Store")]
+		lines = [f"{m}: " + ", ".join(f"{k} {v}" for k, v in result[m].items()) for m in ("Sales", "Finance", "Purchase", "Store", "Production", "HR")]
 		frappe.get_doc({"doctype": "Notification Log", "for_user": user, "type": "Alert", "subject":
 			f"Replay check since {since}: {result['total']} gaps ({result['accuracy_check']})",
 			"email_content": "<br>".join(lines) + "<br><a href='/app/sk-rule-log?mode=Replay'>SK Rule Log</a>"}).insert(ignore_permissions=True)

@@ -215,6 +215,19 @@
 		};
 	}
 
+	// SK 14-Nov: New Lead for an existing customer. ERPNext's data wins where it has some; what the person typed stays
+	// where ERPNext has nothing (same rule as sk_app/writers/lead_rules.fill_from_existing, tested on both sides).
+	function fillFromExisting(typed, pick) {
+		const out = {};
+		[["organization", "customer_name"], ["first_name", "contact"], ["mobile_no", "mobile"], ["email", "email"], ["segment", "segment"]]
+			.forEach(([key, src]) => { if (pick[src]) out[key] = pick[src]; });
+		if (pick.customer_name && !pick.contact && !((typed && typed.first_name) || "").trim()) out.first_name = pick.customer_name;
+		out.no_gstin = pick.customer_name && !pick.gstin ? 1 : 0;
+		out.source = "Existing Customer";
+		return out;
+	}
+
 	root.skParseCard = parseCard;
-	if (typeof module !== "undefined") module.exports = { parseCard, phones };
+	root.skFillFromExisting = fillFromExisting;
+	if (typeof module !== "undefined") module.exports = { parseCard, phones, fillFromExisting };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -132,32 +132,7 @@ def _orders(start, end, segment=None) -> list:
 		order_by="base_net_total desc", limit=0)
 	for o in orders:
 		o.doctype = "Sales Order"
-	return sorted(orders + _safe(lambda: won_deals(start, end, segment), []), key=lambda o: -flt(o.base_net_total))
-
-
-def won_deals(start, end, segment=None) -> list:
-	"""SK 28-Oct "why no order is seen Apr to Jul ... it was available in CRM": the orders before the Sales Orders were
-	entered are won CRM deals. A won deal counts as an order on its closing date, at its deal value, unless its customer
-	already has a Sales Order (then the Sales Order counts)."""
-	if not frappe.db.exists("DocType", "CRM Deal") or _other_company():
-		return []
-	won = frappe.get_all("CRM Deal Status", filters={"type": "Won"}, pluck="name") or ["Won"]
-	meta = frappe.get_meta("CRM Deal")
-	fields = ["name", "organization", "erpnext_customer", "deal_value", "expected_deal_value", "closed_date", "expected_closure_date", "modified", "deal_owner"]
-	fields = [f for f in fields if f in ("name", "modified") or meta.has_field(f)]
-	seg = _crm_seg(segment)
-	seg = {k: v for k, v in seg.items() if meta.has_field(k)}
-	orders = frappe.get_all("Sales Order", filters={"docstatus": ["<", 2]}, fields=["customer", "customer_name"], limit=0)
-	ordered = {(n or "").strip().lower() for o in orders for n in (o.customer, o.customer_name)}
-	out = []
-	for d in frappe.get_all("CRM Deal", filters={"status": ["in", won], **seg}, fields=fields, limit=0):
-		day = getdate(d.get("closed_date") or d.get("expected_closure_date") or d.modified)
-		if not (getdate(start) <= day <= getdate(end)) or {(d.get(f) or "").strip().lower() for f in ("organization", "erpnext_customer")} & ordered - {""}:
-			continue
-		out.append(frappe._dict(name=d.name, doctype="CRM Deal", customer_name=d.get("organization") or d.name, transaction_date=day,
-			base_net_total=flt(d.get("deal_value") or d.get("expected_deal_value")), customer_group=None, delivery_date=None, docstatus=0,
-			deal_owner=d.get("deal_owner")))
-	return out
+	return orders  # SK 14-Nov (KF-05180): Won = order exists; won CRM deals without an order no longer count as orders
 
 
 def _other_company() -> bool:
@@ -722,7 +697,8 @@ def stock_accuracy(start=None, end=None) -> dict | None:
 
 def _store(start, end, ps, pe, segment, user=None):
 	value = sum(flt(v) for v in frappe.get_all("Bin", pluck="stock_value"))
-	from sk_app.store import low_stock, material_pos
+	from sk_app.store_screens import low_stock
+	from sk_app.store import material_pos
 
 	low = _safe(lambda: low_stock(user), []) or []
 	today = nowdate()

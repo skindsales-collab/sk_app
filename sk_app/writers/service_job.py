@@ -87,7 +87,7 @@ def _todo(user: str, doctype: str, name: str, text: str):
 
 def order(user: str, sales_order: str, supplier: str, rows: list[dict], payment_term: str, *, note=None, schedule_date=None) -> dict:
 	"""rows = [{"item_code", "qty", "rate", "description"?}]. Returns the Purchase Order writer's result."""
-	from sk_app.purchase import place_po
+	from sk_app.writers.purchase_order import place_po
 
 	so = frappe.db.get_value("Sales Order", sales_order, ["name", "project", "customer_name", "company", "cost_center"], as_dict=True) \
 		if sales_order else None
@@ -136,7 +136,14 @@ def bill(user: str, purchase_order: str, bill_no: str, bill_date, *, photo=None,
 	report("Purchase", None, found, title=_("Bill data missing"))
 	if po.docstatus != 1:
 		frappe.throw(_("Place the service PO {0} first").format(po.name))
-	pi = make_purchase_invoice(po.name)
+	# Mac test 9-Nov: the subcontractor's login may not read Purchase Orders, so the bill is mapped as the system (kept in
+	# his name by insert_for below), else ERPNext stops him with a blank permission error
+	current = frappe.session.user
+	frappe.set_user("Administrator")
+	try:
+		pi = make_purchase_invoice(po.name)
+	finally:
+		frappe.set_user(current)
 	pi.bill_no = (bill_no or "").strip()[:140] or None
 	pi.bill_date = getdate(bill_date) if bill_date else None
 	pi.set(ORDER_FIELD, po.get(ORDER_FIELD))
@@ -167,6 +174,24 @@ def approve(user: str, purchase_invoice: str, *, note=None) -> dict:
 	if not pos:
 		frappe.throw(_("Bill {0} is not against a service PO").format(pi.name))
 	receipts = []
+	current = frappe.session.user  # Mac test 9-Nov: the owner (a Sales login) may not read POs or accounts; the receipt
+	frappe.set_user("Administrator")  # and the bill update run as the system, in his name (insert_for / Comment below)
+	try:
+		_approve_rows(pi, pos, receipts, user, note)
+	finally:
+		frappe.set_user(current)
+	pi.add_comment("Comment", _("Work approved by {0}").format(frappe.utils.get_fullname(user)))
+	for a in users_with_function("Accounts"):
+		_todo(a, "Purchase Invoice", pi.name, _("Service approved: post bill {0} of {1} ({2}) and pay as per its term").format(
+			pi.name, pi.supplier_name, fmt_money(pi.grand_total, currency=pi.currency)))
+	return {"name": pi.name, "receipts": receipts, "approved": all(r["posted"] for r in receipts)}
+
+
+def _approve_rows(pi, pos, receipts, user, note):
+	from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+
+	from sk_app.store import insert_for, submit_for
+
 	for po_name in pos:
 		pr = make_purchase_receipt(po_name)
 		pr.posting_date = nowdate()
@@ -183,11 +208,6 @@ def approve(user: str, purchase_invoice: str, *, note=None) -> dict:
 					row.purchase_receipt, row.pr_detail = pr.name, got.name
 	pi.flags.ignore_permissions = True
 	pi.save()
-	pi.add_comment("Comment", _("Work approved by {0}").format(frappe.utils.get_fullname(user)))
-	for a in users_with_function("Accounts"):
-		_todo(a, "Purchase Invoice", pi.name, _("Service approved: post bill {0} of {1} ({2}) and pay as per its term").format(
-			pi.name, pi.supplier_name, fmt_money(pi.grand_total, currency=pi.currency)))
-	return {"name": pi.name, "receipts": receipts, "approved": all(r["posted"] for r in receipts)}
 
 
 # ---------- 5. the rule on every service bill ----------
@@ -255,7 +275,7 @@ def service_report(user: str, purchase_order: str, photo: str, *, note=None) -> 
 
 def my_supplier(user: str) -> str | None:
 	"""The subcontractor behind this login: the Supplier of his workstation."""
-	from sk_app.production import my_workstation
+	from sk_app.production_screens import my_workstation
 	from sk_app.sub_bills import supplier_of
 
 	return supplier_of(my_workstation(user))
@@ -274,12 +294,39 @@ def options() -> dict:
 	since = fy_start(getdate(nowdate()))
 	orders = frappe.get_all("Sales Order", filters={"docstatus": 1, "status": ["not in", ["Closed", "Completed"]], "transaction_date": [">=", since]},
 		fields=["name", "customer_name", "project"], order_by="transaction_date desc", limit=200)
-	suppliers = set(service_suppliers(since)) | set(frappe.get_all("Workstation", filters={"sk_supplier": ["is", "set"]}, pluck="sk_supplier"))
+	# service_suppliers returns rows (name, supplier_name, mobile) since #126; the screen needs the names
+	suppliers = {s["name"] for s in service_suppliers(since)} | set(frappe.get_all("Workstation", filters={"sk_supplier": ["is", "set"]}, pluck="sk_supplier"))
 	prices = {r.item_code: r.price_list_rate for r in frappe.get_all("Item Price", filters={"price_list": _PRICE_LIST()}, fields=["item_code", "price_list_rate"])}
 	items = [{"item_code": i.name, "item_name": i.item_name, "uom": i.stock_uom, "rate": prices.get(i.name, 0)} for i in
 		frappe.get_all("Item", filters={"item_group": GROUP, "disabled": 0}, fields=["name", "item_name", "stock_uom"], order_by="name asc")]
 	return {"orders": [{"value": o.name, "label": f"{o.name} · {o.customer_name}"} for o in orders], "suppliers": sorted(x for x in suppliers if x),
 		"items": items, "terms": list(TERMS)}
+
+
+def is_site_worker(user: str) -> bool:
+	"""SK 9-Nov (Santosh): a subcontractor whose workstation stands for a service supplier and has no factory Job Cards
+	does site jobs (service POs), so his Home shows only site-job things, never the factory or sales views."""
+	ws = frappe.db.get_value("SK App User", {"user": user}, "workstation")
+	if not ws or not frappe.get_meta("Workstation").has_field("sk_supplier"):
+		return False
+	return bool(frappe.db.get_value("Workstation", ws, "sk_supplier")) and not frappe.db.exists("Job Card", {"workstation": ws, "docstatus": ["<", 2]})
+
+
+def site_flow(user: str) -> list[dict]:
+	"""Home arrows of a site-job subcontractor: his service POs by stage (writers.service_job.jobs)."""
+	from sk_app.flows import _row, _stage, period_start, span
+
+	supplier = my_supplier(user)
+	rows = jobs(supplier) if supplier else []
+
+	def box(key, label, icon, stages, go="service_jobs", recent=False):
+		picked = [r for r in rows if r["stage"] in stages and (not recent or str(r.get("transaction_date") or "") >= str(period_start()))]
+		return _stage(key, label, icon, [_row(f"{r.get('customer') or r['supplier_name']}", f"{r['name']} · {r.get('work') or ''}") for r in picked], go=go)
+
+	return [box("ordered", "Jobs to do", "🛠️", ("ordered", "advance_paid")),
+		box("billed", "Billed, waiting approval", "🧾", ("billed",)),
+		box("approved", "Approved, waiting payment", "✅", ("approved",)),
+		box("paid", f"Paid {span()}", "💰", ("paid",), recent=True)]
 
 
 # ---------- the list for the screens and arrows ----------

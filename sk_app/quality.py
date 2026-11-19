@@ -12,7 +12,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cint, flt, nowdate
 
-from sk_app.production import wo_customer
+from sk_app.production_screens import wo_customer
 from sk_app.store import _todo, _users_with_function, attach, material_pos, draft_reason, need, try_submit
 
 QUALITY = "Quality"
@@ -253,7 +253,7 @@ def _fixer_of(name: str) -> set[str]:
 def open_ncs(user: str) -> list[dict]:
 	need(user, QUALITY, "Production", "Subcontractor")
 	filters = {"status": "Open"}
-	from sk_app.production import _is_sub_only
+	from sk_app.production_screens import _is_sub_only
 
 	if _is_sub_only(user):
 		filters["name"] = ["in", frappe.get_all("ToDo", filters={"reference_type": "Non Conformance", "allocated_to": user,
@@ -266,7 +266,7 @@ def close_nc(user: str, name: str, action: str, photo=None) -> dict:
 	"""Fixed: the person says what was done and adds an after photo; Quality sees it closed."""
 	need(user, QUALITY, "Production", "Subcontractor")
 	nc = frappe.get_doc("Non Conformance", name)
-	from sk_app.production import _is_sub_only
+	from sk_app.production_screens import _is_sub_only
 
 	if _is_sub_only(user) and user not in _fixer_of(nc.name):
 		frappe.throw(_("This is not your job"), frappe.PermissionError)

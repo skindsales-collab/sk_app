@@ -347,6 +347,60 @@ def add_comment(doctype: str, name: str, text: str, project: str | None = None) 
 	return {"comment": comment.name, "on": f"{doctype} {name}"}
 
 
+def attach_file(doctype: str, name: str, file_name: str, content_base64: str, project: str | None = None, fields: dict | None = None) -> dict:
+	"""A file (drawing, BOM, quote PDF) onto a record, private, plus optional field values on it (e.g. a deal's
+	custom_design_status / custom_drawing_rev). Design thread 7-Nov: drawings go straight onto the CRM Deal (SK rule)."""
+	import base64
+
+	_can_write(doctype)
+	doc = frappe.get_doc(doctype, name)
+	doc.check_permission("write")
+	if doc.docstatus == 2:
+		frappe.throw(frappe._("Cancelled documents cannot take files"))
+	raw = base64.b64decode(content_base64 or "")
+	if not raw or len(raw) > 15 * 1024 * 1024:
+		frappe.throw(frappe._("File is empty or over 15 MB"))
+	# PR H (SK 16-Nov KF-05549): the costing Excel never goes on a deal / lead / quotation; it lands on the deal's internal
+	# Project record when there is one, else the push is refused with the reason (the File hook refuses it too)
+	from sk_app.file_rules import allowed_on
+
+	ok, why = allowed_on(doctype, file_name)
+	if not ok:
+		internal = project if project and frappe.db.exists("Project", project) else _internal_record_of(doctype, name)
+		if not internal:
+			frappe.throw(frappe._(why) + " " + frappe._("Pass project=<name> to put it on the Project record."))
+		doctype, name = "Project", internal
+		doc = frappe.get_doc(doctype, name)
+	f = frappe.get_doc({"doctype": "File", "file_name": file_name[:140], "attached_to_doctype": doctype, "attached_to_name": name,
+		"is_private": 1, "content": raw}).insert(ignore_permissions=True)
+	if fields:
+		doc.update(_clean_data(fields))
+		doc.flags.ignore_permissions = True
+		doc.save()
+	_log("attach", doctype, name, {"file": f.file_url, "fields": list((fields or {}).keys())}, project)
+	return {"file_url": f.file_url, "on": f"{doctype} {name}", "fields": list((fields or {}).keys())}
+
+
+def _internal_record_of(doctype: str, name: str) -> str | None:
+	"""The internal Project behind a customer-facing record: deal -> its quotation -> sales order -> project."""
+	try:
+		if doctype == "Project":
+			return name
+		if doctype == "Sales Order":
+			return frappe.db.get_value("Project", {"sales_order": name}, "name")
+		if doctype == "Quotation":
+			so = frappe.db.get_value("Sales Order Item", {"prevdoc_docname": name, "docstatus": ["<", 2]}, "parent")
+			return frappe.db.get_value("Project", {"sales_order": so}, "name") if so else None
+		if doctype == "CRM Deal" and frappe.get_meta("Quotation").has_field("crm_deal"):
+			for q in frappe.get_all("Quotation", filters={"crm_deal": name, "docstatus": ["<", 2]}, pluck="name", order_by="creation desc"):
+				p = _internal_record_of("Quotation", q)
+				if p:
+					return p
+	except Exception:
+		frappe.log_error(f"SK Hub internal record of {doctype} {name}")
+	return None
+
+
 # ---- tools: coordination between Projects / teams ----------------------------------------------------
 def post_handoff(
 	to_team: str,
@@ -524,6 +578,17 @@ TOOLS = {
 			"Change fields on a record that is still a draft (or a master such as Customer, Item, CRM Lead). Submitted or cancelled documents cannot be changed here.",
 			{"doctype": {"type": "string"}, "name": {"type": "string"}, "changes": {"type": "object"}, "project": _PROJECT},
 			["doctype", "name", "changes"],
+			WRITE,
+		),
+		_tool(
+			attach_file,
+			"Attach a file",
+			"Put a file (drawing, BOM, quote PDF; base64 content) on a record as a private attachment, and set fields on the record "
+			"at the same time (e.g. a deal's custom_design_status and custom_drawing_rev). Drafts and masters, or a deal / lead.",
+			{"doctype": {"type": "string"}, "name": {"type": "string"}, "file_name": {"type": "string"},
+				"content_base64": {"type": "string", "description": "the file's bytes, base64"},
+				"fields": {"type": "object", "description": "field values to set on the record after attaching"}, "project": _PROJECT},
+			["doctype", "name", "file_name", "content_base64"],
 			WRITE,
 		),
 		_tool(

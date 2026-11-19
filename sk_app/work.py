@@ -57,7 +57,7 @@ def _lead_status_types() -> dict:
 
 
 def _label(doctype, name):
-	from sk_app.crm import label
+	from sk_app.sales_screens import label
 
 	return label(doctype, name)
 
@@ -138,7 +138,7 @@ def open_crm_tasks(user: str) -> list[WorkItem]:
 
 def files_to_send(user: str) -> list[WorkItem]:
 	"""Customer drawings / PDFs the AI or design attached to the user's leads and deals: send them to the customer."""
-	from sk_app.crm import files_to_send as pending_files
+	from sk_app.sales_screens import files_to_send as pending_files
 
 	return [
 		WorkItem("send_file", f"{f.file_name} → {f.title}", "File", f.name, due=get_datetime(f.creation),

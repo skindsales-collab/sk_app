@@ -1,0 +1,651 @@
+{
+ "rev": "0",
+ "date": "2026-11-17",
+ "questions": [
+  {
+   "code": "C1",
+   "family": "C",
+   "family_name": "Common (all roles)",
+   "trait": "Background",
+   "en": "Tell us about yourself and your last work.",
+   "mr": "स्वतःबद्दल आणि तुमच्या मागच्या कामाबद्दल सांगा.",
+   "hi": "अपने बारे में और अपने पिछले काम के बारे में बताइए.",
+   "look_for": "Clear order of jobs, what they actually did with their own hands, why they left."
+  },
+  {
+   "code": "C2",
+   "family": "C",
+   "family_name": "Common (all roles)",
+   "trait": "Flexibility",
+   "en": "Today your senior asks you to do a different job, or to go to a site in another city. What will you do?",
+   "mr": "आज तुमच्या वरिष्ठांनी वेगळे काम सांगितले, किंवा दुसऱ्या शहरात साइटवर जायला सांगितले, तर तुम्ही काय कराल?",
+   "hi": "आज आपके सीनियर आपको अलग काम दें, या दूसरे शहर में साइट पर जाने को कहें, तो आप क्या करेंगे?",
+   "look_for": "Says yes, asks sensible questions (when, what tools, who is there), shows they have done it before."
+  },
+  {
+   "code": "C3",
+   "family": "C",
+   "family_name": "Common (all roles)",
+   "trait": "Attitude",
+   "en": "Tell us about a mistake you made at work. What did you do after that?",
+   "mr": "कामात तुमच्याकडून झालेली एक चूक सांगा. त्यानंतर तुम्ही काय केले?",
+   "hi": "काम में आपसे हुई एक गलती बताइए. उसके बाद आपने क्या किया?",
+   "look_for": "Names a real mistake, owns it, tells senior, fixes it, says what they changed so it does not repeat."
+  },
+  {
+   "code": "C4",
+   "family": "C",
+   "family_name": "Common (all roles)",
+   "trait": "Learning",
+   "en": "What new thing did you learn in the last 6 months? How did you learn it?",
+   "mr": "मागच्या ६ महिन्यांत तुम्ही नवीन काय शिकलात? कसे शिकलात?",
+   "hi": "पिछले 6 महीनों में आपने नया क्या सीखा? कैसे सीखा?",
+   "look_for": "A specific skill, learned by own effort (YouTube, senior, practice), and they used it at work."
+  },
+  {
+   "code": "C5",
+   "family": "C",
+   "family_name": "Common (all roles)",
+   "trait": "Learning",
+   "en": "Listen to this small new task. Now explain it back to us in your own words.",
+   "mr": "हे छोटे नवीन काम ऐका. आता ते आम्हाला तुमच्या शब्दांत परत समजावून सांगा.",
+   "hi": "यह छोटा नया काम सुनिए. अब इसे अपने शब्दों में हमें वापस समझाइए.",
+   "look_for": "Repeats all 4 steps of the teach-back task in correct order (see TEACH_BACK). 4 steps = 5, 3 = 4, 2 = 3, 1 = 2, 0 = 1."
+  },
+  {
+   "code": "C6",
+   "family": "C",
+   "family_name": "Common (all roles)",
+   "trait": "Reliability",
+   "en": "Why do you want to join SK Ind Tech? How long do you plan to stay?",
+   "mr": "तुम्हाला SK Ind Tech मध्ये का काम करायचे आहे? किती काळ काम करण्याचा विचार आहे?",
+   "hi": "आप SK Ind Tech में क्यों काम करना चाहते हैं? कितने समय तक काम करने का सोचा है?",
+   "look_for": "Real reason (growth, near home, type of work), plans 2+ years. Flag only, not scored."
+  },
+  {
+   "code": "S1",
+   "family": "S",
+   "family_name": "Sales",
+   "trait": "Role Skill",
+   "en": "A new enquiry comes from IndiaMART or JustDial. What do you do in the first 5 minutes?",
+   "mr": "IndiaMART किंवा JustDial वरून नवीन चौकशी आली. पहिल्या ५ मिनिटांत तुम्ही काय कराल?",
+   "hi": "IndiaMART या JustDial से नई पूछताछ आई. पहले 5 मिनट में आप क्या करेंगे?",
+   "look_for": "Calls back fast, notes need/size/site/date, enters lead in CRM, fixes next follow-up date."
+  },
+  {
+   "code": "S2",
+   "family": "S",
+   "family_name": "Sales",
+   "trait": "Attitude",
+   "en": "The customer says 'your price is too high'. What do you say?",
+   "mr": "ग्राहक म्हणतो 'तुमची किंमत खूप जास्त आहे'. तुम्ही काय सांगाल?",
+   "hi": "ग्राहक कहता है 'आपकी कीमत बहुत ज्यादा है'. आप क्या कहेंगे?",
+   "look_for": "Stays calm, asks what they compare with, explains value (spec, life, delivery), does not cut price on own."
+  },
+  {
+   "code": "S3",
+   "family": "S",
+   "family_name": "Sales",
+   "trait": "Role Skill",
+   "en": "How do you find out what the customer really needs before you send a quote?",
+   "mr": "कोटेशन पाठवण्याआधी ग्राहकाची खरी गरज तुम्ही कशी समजून घेता?",
+   "hi": "कोटेशन भेजने से पहले आप ग्राहक की असली ज़रूरत कैसे समझते हैं?",
+   "look_for": "Asks use, size, number of people, site, power, delivery date, budget, decision maker."
+  },
+  {
+   "code": "S4",
+   "family": "S",
+   "family_name": "Sales",
+   "trait": "Role Skill",
+   "en": "You have 30 open leads. How do you keep every follow-up on time?",
+   "mr": "तुमच्याकडे ३० चालू लीड्स आहेत. प्रत्येक फॉलो-अप वेळेवर कसा कराल?",
+   "hi": "आपके पास 30 खुली लीड्स हैं. हर फॉलो-अप समय पर कैसे करेंगे?",
+   "look_for": "Uses CRM/app with next date, daily list, priority by value and stage."
+  },
+  {
+   "code": "S5",
+   "family": "S",
+   "family_name": "Sales",
+   "trait": "Role Skill",
+   "en": "Tell us about one order you won. What made it happen?",
+   "mr": "तुम्ही मिळवलेल्या एका ऑर्डरबद्दल सांगा. ती कशामुळे मिळाली?",
+   "hi": "आपने जीता हुआ एक ऑर्डर बताइए. वह किस वजह से मिला?",
+   "look_for": "Real customer, value, steps, own role clear."
+  },
+  {
+   "code": "ST",
+   "family": "S",
+   "family_name": "Sales",
+   "trait": "Role Skill",
+   "en": "Practical: a customer calls for a 20x10 feet site office in 15 days. Talk to them now.",
+   "mr": "प्रात्यक्षिक: ग्राहकाला १५ दिवसांत २०x१० फूट साइट ऑफिस हवे आहे. आता त्यांच्याशी बोला.",
+   "hi": "प्रैक्टिकल: ग्राहक को 15 दिन में 20x10 फीट साइट ऑफिस चाहिए. अभी उनसे बात कीजिए.",
+   "look_for": "Greets, asks needs (S3 list), confirms date is possible, promises quote with time, asks for email/WhatsApp."
+  },
+  {
+   "code": "M1",
+   "family": "M",
+   "family_name": "Marketing",
+   "trait": "Role Skill",
+   "en": "Which channels bring business leads for a factory product like cabins?",
+   "mr": "केबिनसारख्या फॅक्टरी उत्पादनासाठी व्यवसायाच्या लीड्स कोणत्या माध्यमांतून मिळतात?",
+   "hi": "केबिन जैसे फैक्ट्री प्रोडक्ट के लिए बिज़नेस लीड्स किन माध्यमों से आती हैं?",
+   "look_for": "IndiaMART, JustDial, Google Business Profile, LinkedIn, website form, WhatsApp, exhibitions, referrals."
+  },
+  {
+   "code": "M2",
+   "family": "M",
+   "family_name": "Marketing",
+   "trait": "Role Skill",
+   "en": "How do you make one good post or reel from a finished job?",
+   "mr": "पूर्ण झालेल्या कामावरून एक चांगली पोस्ट किंवा रील कशी बनवाल?",
+   "hi": "पूरे हुए काम से एक अच्छी पोस्ट या रील कैसे बनाएंगे?",
+   "look_for": "Before/after or delivery shots, short hook, one clear benefit, call to action, customer permission."
+  },
+  {
+   "code": "M3",
+   "family": "M",
+   "family_name": "Marketing",
+   "trait": "Role Skill",
+   "en": "How do you check whether a campaign worked?",
+   "mr": "मोहीम यशस्वी झाली की नाही हे तुम्ही कसे तपासता?",
+   "hi": "कैंपेन सफल हुआ या नहीं, आप कैसे जांचते हैं?",
+   "look_for": "Leads and orders counted by source, cost per lead, not only likes."
+  },
+  {
+   "code": "M4",
+   "family": "M",
+   "family_name": "Marketing",
+   "trait": "Attitude",
+   "en": "How do you keep a contact list clean and legal (duplicates, consent)?",
+   "mr": "संपर्क यादी स्वच्छ आणि कायदेशीर कशी ठेवता (डुप्लिकेट, संमती)?",
+   "hi": "कॉन्टैक्ट लिस्ट साफ और कानूनी कैसे रखते हैं (डुप्लिकेट, सहमति)?",
+   "look_for": "Removes duplicates, only opted-in contacts, honours stop/unsubscribe."
+  },
+  {
+   "code": "M5",
+   "family": "M",
+   "family_name": "Marketing",
+   "trait": "Flexibility",
+   "en": "What would you do in your first week here?",
+   "mr": "इथे पहिल्या आठवड्यात तुम्ही काय कराल?",
+   "hi": "यहाँ पहले हफ्ते में आप क्या करेंगे?",
+   "look_for": "Learns products, sees factory, checks current profiles, makes a small plan, asks sales team."
+  },
+  {
+   "code": "MT",
+   "family": "M",
+   "family_name": "Marketing",
+   "trait": "Role Skill",
+   "en": "Practical: write or speak a 3-line WhatsApp message for a new cabin model.",
+   "mr": "प्रात्यक्षिक: नवीन केबिन मॉडेलसाठी ३ ओळींचा WhatsApp संदेश लिहा किंवा बोला.",
+   "hi": "प्रैक्टिकल: नए केबिन मॉडल के लिए 3 लाइन का WhatsApp मैसेज लिखिए या बोलिए.",
+   "look_for": "Short, one benefit, clear contact/next step, no false claims."
+  },
+  {
+   "code": "D1",
+   "family": "D",
+   "family_name": "Design",
+   "trait": "Role Skill",
+   "en": "Which software do you use: AutoCAD, SketchUp, SolidWorks? Show one past drawing on your phone.",
+   "mr": "तुम्ही कोणते सॉफ्टवेअर वापरता: AutoCAD, SketchUp, SolidWorks? तुमचे एक जुने ड्रॉइंग फोनवर दाखवा.",
+   "hi": "आप कौन सा सॉफ्टवेयर इस्तेमाल करते हैं: AutoCAD, SketchUp, SolidWorks? अपनी एक पुरानी ड्रॉइंग फोन पर दिखाइए.",
+   "look_for": "Names tools with real years, shows own drawing, can explain it."
+  },
+  {
+   "code": "D2",
+   "family": "D",
+   "family_name": "Design",
+   "trait": "Role Skill",
+   "en": "How do you turn a customer's hand sketch into a drawing they can approve?",
+   "mr": "ग्राहकाच्या हाताने काढलेल्या स्केचवरून मंजुरीसाठी ड्रॉइंग कसे बनवाल?",
+   "hi": "ग्राहक के हाथ के स्केच से मंज़ूरी लायक ड्रॉइंग कैसे बनाएंगे?",
+   "look_for": "Confirms sizes/doors/windows/use, makes simple GA in feet, sends for approval, records revision."
+  },
+  {
+   "code": "D3",
+   "family": "D",
+   "family_name": "Design",
+   "trait": "Role Skill",
+   "en": "How do you make sure the BOM matches the drawing?",
+   "mr": "BOM ड्रॉइंगशी जुळते याची खात्री कशी करता?",
+   "hi": "BOM ड्रॉइंग से मेल खाता है, यह कैसे पक्का करते हैं?",
+   "look_for": "Takes quantities from drawing, cross-checks each part, second person check."
+  },
+  {
+   "code": "D4",
+   "family": "D",
+   "family_name": "Design",
+   "trait": "Flexibility",
+   "en": "The customer changes a size after approval. What do you do?",
+   "mr": "मंजुरीनंतर ग्राहकाने एखादे माप बदलले. तुम्ही काय कराल?",
+   "hi": "मंज़ूरी के बाद ग्राहक ने कोई नाप बदल दिया. आप क्या करेंगे?",
+   "look_for": "Accepts calmly, new revision, informs sales/costing/factory, gets re-approval."
+  },
+  {
+   "code": "D5",
+   "family": "D",
+   "family_name": "Design",
+   "trait": "Attitude",
+   "en": "How do you check your own drawing before you send it?",
+   "mr": "पाठवण्याआधी स्वतःचे ड्रॉइंग कसे तपासता?",
+   "hi": "भेजने से पहले अपनी ड्रॉइंग कैसे जांचते हैं?",
+   "look_for": "Checklist: dims add up, title block, revision, spec block, no internal numbers."
+  },
+  {
+   "code": "DT",
+   "family": "D",
+   "family_name": "Design",
+   "trait": "Role Skill",
+   "en": "Practical: look at this printed drawing. Tell the overall size and the number of doors and windows.",
+   "mr": "प्रात्यक्षिक: हे छापील ड्रॉइंग पहा. एकूण माप आणि दरवाजे व खिडक्यांची संख्या सांगा.",
+   "hi": "प्रैक्टिकल: यह छपी ड्रॉइंग देखिए. कुल नाप और दरवाज़ों व खिड़कियों की संख्या बताइए.",
+   "look_for": "Correct overall size and counts (answer key kept with the printed sheet)."
+  },
+  {
+   "code": "F1",
+   "family": "F",
+   "family_name": "Factory & Site",
+   "trait": "Role Skill",
+   "en": "Which jobs have you done yourself: welding, cutting, painting, wiring, site fitting?",
+   "mr": "तुम्ही स्वतः कोणती कामे केली आहेत: वेल्डिंग, कटिंग, पेंटिंग, वायरिंग, साइट फिटिंग?",
+   "hi": "आपने खुद कौन से काम किए हैं: वेल्डिंग, कटिंग, पेंटिंग, वायरिंग, साइट फिटिंग?",
+   "look_for": "Names jobs with years and machines/tools used; for supervisors, team size handled."
+  },
+  {
+   "code": "F2",
+   "family": "F",
+   "family_name": "Factory & Site",
+   "trait": "Role Skill",
+   "en": "How do you plan one day's work for 8 workers?",
+   "mr": "८ कामगारांसाठी एका दिवसाचे काम कसे नियोजन कराल?",
+   "hi": "8 कामगारों के लिए एक दिन का काम कैसे प्लान करेंगे?",
+   "look_for": "Checks job priority and material first, gives each person a clear task, checks at mid-day and end."
+  },
+  {
+   "code": "F3",
+   "family": "F",
+   "family_name": "Factory & Site",
+   "trait": "Attitude",
+   "en": "What safety things do you check before work starts?",
+   "mr": "काम सुरू करण्याआधी सुरक्षिततेच्या कोणत्या गोष्टी तपासता?",
+   "hi": "काम शुरू करने से पहले सुरक्षा की कौन सी चीज़ें जांचते हैं?",
+   "look_for": "PPE (helmet, shoes, gloves, goggles), earthing, cables, ladder, fire, height work, stops unsafe work."
+  },
+  {
+   "code": "F4",
+   "family": "F",
+   "family_name": "Factory & Site",
+   "trait": "Flexibility",
+   "en": "A job is late and material is short. What do you do?",
+   "mr": "काम उशिरा चालले आहे आणि साहित्य कमी आहे. तुम्ही काय कराल?",
+   "hi": "काम लेट है और सामान कम है. आप क्या करेंगे?",
+   "look_for": "Tells senior early, asks store/purchase, shifts team to other work, extra hours if needed."
+  },
+  {
+   "code": "F5",
+   "family": "F",
+   "family_name": "Factory & Site",
+   "trait": "Role Skill",
+   "en": "How do you check quality before a cabin leaves the factory?",
+   "mr": "केबिन फॅक्टरीतून जाण्याआधी गुणवत्ता कशी तपासता?",
+   "hi": "केबिन फैक्ट्री से निकलने से पहले क्वालिटी कैसे जांचते हैं?",
+   "look_for": "Size vs drawing, welding, paint, doors/windows, electrical test, leakage, photos, checklist."
+  },
+  {
+   "code": "FT",
+   "family": "F",
+   "family_name": "Factory & Site",
+   "trait": "Role Skill",
+   "en": "Practical: read this tape measure and this simple drawing. Electricians: which wire size for a 2 kW load?",
+   "mr": "प्रात्यक्षिक: हा मेजर टेप आणि हे साधे ड्रॉइंग वाचा. इलेक्ट्रिशियन: २ kW लोडसाठी कोणत्या साईझची वायर?",
+   "hi": "प्रैक्टिकल: यह मेज़रिंग टेप और यह सादी ड्रॉइंग पढ़िए. इलेक्ट्रीशियन: 2 kW लोड के लिए किस साइज़ की वायर?",
+   "look_for": "Reads tape correctly in mm and feet-inch; reads 2 dims from drawing. 2 kW single phase is about 9 A: 1.5 sq mm copper is acceptable, 2.5 sq mm is the safer answer."
+  },
+  {
+   "code": "T1",
+   "family": "T",
+   "family_name": "Store",
+   "trait": "Role Skill",
+   "en": "How do you keep stock correct every day?",
+   "mr": "रोजचा स्टॉक बरोबर कसा ठेवता?",
+   "hi": "रोज़ का स्टॉक सही कैसे रखते हैं?",
+   "look_for": "Every receipt and issue entered same day, bin labels, spot counts, matches system."
+  },
+  {
+   "code": "T2",
+   "family": "T",
+   "family_name": "Store",
+   "trait": "Attitude",
+   "en": "Material comes without a PO. What do you do?",
+   "mr": "PO शिवाय साहित्य आले. तुम्ही काय कराल?",
+   "hi": "बिना PO के सामान आया. आप क्या करेंगे?",
+   "look_for": "Does not accept silently; informs purchase/CEO, keeps aside, receives only after approval."
+  },
+  {
+   "code": "T3",
+   "family": "T",
+   "family_name": "Store",
+   "trait": "Role Skill",
+   "en": "How do you find a slow-moving or missing item?",
+   "mr": "हळू वापरले जाणारे किंवा हरवलेले साहित्य कसे शोधता?",
+   "hi": "धीरे चलने वाला या गायब सामान कैसे ढूंढते हैं?",
+   "look_for": "Stock ageing report, physical count vs system, checks issue slips."
+  },
+  {
+   "code": "T4",
+   "family": "T",
+   "family_name": "Store",
+   "trait": "Learning",
+   "en": "Have you used any stock software or Excel? Which one?",
+   "mr": "तुम्ही कोणते स्टॉक सॉफ्टवेअर किंवा Excel वापरले आहे? कोणते?",
+   "hi": "आपने कोई स्टॉक सॉफ्टवेयर या Excel इस्तेमाल किया है? कौन सा?",
+   "look_for": "Names Tally/ERPNext/Excel with what they did in it; if none, keen to learn mobile app."
+  },
+  {
+   "code": "T5",
+   "family": "T",
+   "family_name": "Store",
+   "trait": "Role Skill",
+   "en": "How do you issue material against a job?",
+   "mr": "एखाद्या कामासाठी साहित्य कसे देता?",
+   "hi": "किसी काम के लिए सामान कैसे देते हैं?",
+   "look_for": "Only against job/requisition, signature or app entry, quantity checked, balance updated."
+  },
+  {
+   "code": "TT",
+   "family": "T",
+   "family_name": "Store",
+   "trait": "Role Skill",
+   "en": "Practical: count the items in this photo and fill this 3-line receipt.",
+   "mr": "प्रात्यक्षिक: या फोटोतील वस्तू मोजा आणि ही ३ ओळींची पावती भरा.",
+   "hi": "प्रैक्टिकल: इस फोटो में सामान गिनिए और यह 3 लाइन की रसीद भरिए.",
+   "look_for": "Correct counts (answer key with the sheet), item names and units right."
+  },
+  {
+   "code": "P1",
+   "family": "P",
+   "family_name": "Machine Shifting & Maintenance",
+   "trait": "Role Skill",
+   "en": "Which machines have you shifted or serviced: CNC, VMC, press? What was the weight?",
+   "mr": "तुम्ही कोणती मशीन शिफ्ट किंवा सर्व्हिस केली आहेत: CNC, VMC, प्रेस? वजन किती होते?",
+   "hi": "आपने कौन सी मशीनें शिफ्ट या सर्विस की हैं: CNC, VMC, प्रेस? वज़न कितना था?",
+   "look_for": "Real machines, brands, weights, own role."
+  },
+  {
+   "code": "P2",
+   "family": "P",
+   "family_name": "Machine Shifting & Maintenance",
+   "trait": "Role Skill",
+   "en": "Which lifting tools have you used: hydraulic jack, skates, crane?",
+   "mr": "तुम्ही कोणती उचलण्याची साधने वापरली आहेत: हायड्रॉलिक जॅक, स्केट्स, क्रेन?",
+   "hi": "आपने कौन से उठाने के औज़ार इस्तेमाल किए हैं: हाइड्रोलिक जैक, स्केट्स, क्रेन?",
+   "look_for": "Names tools, capacity, checks before use (SWL, slings)."
+  },
+  {
+   "code": "P3",
+   "family": "P",
+   "family_name": "Machine Shifting & Maintenance",
+   "trait": "Attitude",
+   "en": "What safety plan do you make before a machine shift?",
+   "mr": "मशीन शिफ्टिंगआधी तुम्ही सुरक्षा नियोजन कसे करता?",
+   "hi": "मशीन शिफ्टिंग से पहले आप सुरक्षा योजना कैसे बनाते हैं?",
+   "look_for": "Weight and CG, route and floor check, lifting plan, barricade, one signal person, PPE, stop if unsafe."
+  },
+  {
+   "code": "P4",
+   "family": "P",
+   "family_name": "Machine Shifting & Maintenance",
+   "trait": "Role Skill",
+   "en": "How do you level and align a machine after shifting?",
+   "mr": "शिफ्टिंगनंतर मशीनचे लेव्हलिंग आणि अलाइनमेंट कसे करता?",
+   "hi": "शिफ्टिंग के बाद मशीन की लेवलिंग और अलाइनमेंट कैसे करते हैं?",
+   "look_for": "Precision level, levelling pads/bolts, checks at several points, records readings, trial run."
+  },
+  {
+   "code": "P5",
+   "family": "P",
+   "family_name": "Machine Shifting & Maintenance",
+   "trait": "Flexibility",
+   "en": "A machine breaks down at a customer site. What do you do in the first hour?",
+   "mr": "ग्राहकाच्या साइटवर मशीन बंद पडली. पहिल्या तासात तुम्ही काय कराल?",
+   "hi": "ग्राहक की साइट पर मशीन बंद हो गई. पहले घंटे में आप क्या करेंगे?",
+   "look_for": "Makes safe, asks what happened, checks basics, photos, informs senior and customer with time estimate."
+  },
+  {
+   "code": "PT",
+   "family": "P",
+   "family_name": "Machine Shifting & Maintenance",
+   "trait": "Role Skill",
+   "en": "Practical: look at this site photo and list the risks you see.",
+   "mr": "प्रात्यक्षिक: हा साइटचा फोटो पहा आणि दिसणारे धोके सांगा.",
+   "hi": "प्रैक्टिकल: यह साइट की फोटो देखिए और दिखने वाले खतरे बताइए.",
+   "look_for": "Finds most marked risks (answer key with the photo)."
+  },
+  {
+   "code": "A1",
+   "family": "A",
+   "family_name": "Accounts",
+   "trait": "Role Skill",
+   "en": "Which software do you use: Tally, ERPNext, Excel?",
+   "mr": "तुम्ही कोणते सॉफ्टवेअर वापरता: Tally, ERPNext, Excel?",
+   "hi": "आप कौन सा सॉफ्टवेयर इस्तेमाल करते हैं: Tally, ERPNext, Excel?",
+   "look_for": "Names with years and real tasks (entries, GST returns, reports)."
+  },
+  {
+   "code": "A2",
+   "family": "A",
+   "family_name": "Accounts",
+   "trait": "Role Skill",
+   "en": "How do you match a supplier bill with its PO and goods receipt?",
+   "mr": "पुरवठादाराचे बिल PO आणि माल पावतीशी कसे जुळवता?",
+   "hi": "सप्लायर का बिल PO और माल रसीद से कैसे मिलाते हैं?",
+   "look_for": "3-way match: item, qty, rate, tax; differences sent back before booking."
+  },
+  {
+   "code": "A3",
+   "family": "A",
+   "family_name": "Accounts",
+   "trait": "Role Skill",
+   "en": "What GST checks do you do on a purchase bill?",
+   "mr": "खरेदी बिलावर GST च्या कोणत्या तपासण्या करता?",
+   "hi": "खरीद बिल पर GST की कौन सी जांच करते हैं?",
+   "look_for": "GSTIN valid, our GSTIN right, HSN, rate, IGST vs CGST/SGST, appears in GSTR-2B."
+  },
+  {
+   "code": "A4",
+   "family": "A",
+   "family_name": "Accounts",
+   "trait": "Attitude",
+   "en": "How do you follow up an overdue customer payment?",
+   "mr": "थकलेल्या ग्राहक पेमेंटचा पाठपुरावा कसा करता?",
+   "hi": "बकाया ग्राहक पेमेंट का फॉलो-अप कैसे करते हैं?",
+   "look_for": "Polite reminder with statement, call, fixed date, escalates to sales/CEO, records each step."
+  },
+  {
+   "code": "A5",
+   "family": "A",
+   "family_name": "Accounts",
+   "trait": "Role Skill",
+   "en": "How do you do a bank reconciliation?",
+   "mr": "बँक रिकन्सिलिएशन कसे करता?",
+   "hi": "बैंक रिकंसिलिएशन कैसे करते हैं?",
+   "look_for": "Matches bank statement vs books, clears dates, lists unmatched, finds reason."
+  },
+  {
+   "code": "AT",
+   "family": "A",
+   "family_name": "Accounts",
+   "trait": "Role Skill",
+   "en": "Practical: find the 2 mistakes in this sample invoice.",
+   "mr": "प्रात्यक्षिक: या नमुना इनव्हॉइसमधील २ चुका शोधा.",
+   "hi": "प्रैक्टिकल: इस सैंपल इनवॉइस में 2 गलतियाँ ढूंढिए.",
+   "look_for": "Finds both planted mistakes (answer key with the sheet)."
+  },
+  {
+   "code": "H1",
+   "family": "H",
+   "family_name": "HR & Admin",
+   "trait": "Role Skill",
+   "en": "How do you manage attendance and leave for 20 people?",
+   "mr": "२० लोकांची हजेरी आणि रजा कशी सांभाळता?",
+   "hi": "20 लोगों की हाज़िरी और छुट्टी कैसे संभालते हैं?",
+   "look_for": "Daily check of machine/app, leave rules applied, monthly sheet, approvals recorded."
+  },
+  {
+   "code": "H2",
+   "family": "H",
+   "family_name": "HR & Admin",
+   "trait": "Role Skill",
+   "en": "How do you screen 50 resumes quickly and fairly?",
+   "mr": "५० बायोडाटा पटकन आणि निष्पक्षपणे कसे तपासाल?",
+   "hi": "50 बायोडाटा जल्दी और निष्पक्ष तरीके से कैसे जांचेंगे?",
+   "look_for": "Fixed must-have list for the job, same check for all, no bias on name/religion/gender."
+  },
+  {
+   "code": "H3",
+   "family": "H",
+   "family_name": "HR & Admin",
+   "trait": "Attitude",
+   "en": "A worker complains about his supervisor. What do you do?",
+   "mr": "एखादा कामगार त्याच्या सुपरवायझरबद्दल तक्रार करतो. तुम्ही काय कराल?",
+   "hi": "कोई कामगार अपने सुपरवाइज़र की शिकायत करता है. आप क्या करेंगे?",
+   "look_for": "Listens privately, records, hears both sides, informs CEO if serious, no gossip, follows up."
+  },
+  {
+   "code": "H4",
+   "family": "H",
+   "family_name": "HR & Admin",
+   "trait": "Attitude",
+   "en": "How do you keep staff records private?",
+   "mr": "कर्मचाऱ्यांची माहिती गोपनीय कशी ठेवता?",
+   "hi": "कर्मचारियों की जानकारी गोपनीय कैसे रखते हैं?",
+   "look_for": "Access only to those who need it, no sharing on WhatsApp groups, locked files."
+  },
+  {
+   "code": "H5",
+   "family": "H",
+   "family_name": "HR & Admin",
+   "trait": "Flexibility",
+   "en": "How do you help a new joiner in the first week?",
+   "mr": "नवीन कर्मचाऱ्याला पहिल्या आठवड्यात कशी मदत करता?",
+   "hi": "नए कर्मचारी की पहले हफ्ते में कैसे मदद करते हैं?",
+   "look_for": "Joining papers, login, safety brief, buddy, app training, day-7 check-in."
+  },
+  {
+   "code": "HT",
+   "family": "H",
+   "family_name": "HR & Admin",
+   "trait": "Role Skill",
+   "en": "Practical: write or speak a short joining message for a new worker.",
+   "mr": "प्रात्यक्षिक: नवीन कामगारासाठी लहान स्वागत संदेश लिहा किंवा बोला.",
+   "hi": "प्रैक्टिकल: नए कामगार के लिए छोटा स्वागत संदेश लिखिए या बोलिए.",
+   "look_for": "Warm, date/time/place, what to bring, whom to meet."
+  },
+  {
+   "code": "E1",
+   "family": "E",
+   "family_name": "ERP & IT",
+   "trait": "Role Skill",
+   "en": "Which systems have you used: ERPNext, Frappe, Python, SQL?",
+   "mr": "तुम्ही कोणत्या सिस्टीम वापरल्या आहेत: ERPNext, Frappe, Python, SQL?",
+   "hi": "आपने कौन से सिस्टम इस्तेमाल किए हैं: ERPNext, Frappe, Python, SQL?",
+   "look_for": "Names with real work done, can explain one thing they built or set up."
+  },
+  {
+   "code": "E2",
+   "family": "E",
+   "family_name": "ERP & IT",
+   "trait": "Role Skill",
+   "en": "A user says 'the app is not working'. How do you find the fault?",
+   "mr": "वापरकर्ता म्हणतो 'ॲप चालत नाही'. तुम्ही दोष कसा शोधाल?",
+   "hi": "यूज़र कहता है 'ऐप नहीं चल रहा'. आप गड़बड़ी कैसे ढूंढेंगे?",
+   "look_for": "Asks what exactly, screenshot, repeats it, checks network/login/error log, one change at a time."
+  },
+  {
+   "code": "E3",
+   "family": "E",
+   "family_name": "ERP & IT",
+   "trait": "Attitude",
+   "en": "How do you take and test a backup?",
+   "mr": "बॅकअप कसा घेता आणि तपासता?",
+   "hi": "बैकअप कैसे लेते हैं और जांचते हैं?",
+   "look_for": "Scheduled backup, offsite copy, test restore regularly."
+  },
+  {
+   "code": "E4",
+   "family": "E",
+   "family_name": "ERP & IT",
+   "trait": "Flexibility",
+   "en": "How do you explain a new screen to a low-skill user?",
+   "mr": "कमी शिकलेल्या वापरकर्त्याला नवीन स्क्रीन कशी समजावून सांगाल?",
+   "hi": "कम पढ़े-लिखे यूज़र को नई स्क्रीन कैसे समझाएंगे?",
+   "look_for": "Shows on their phone, in Marathi, one step at a time, lets them do it, short video."
+  },
+  {
+   "code": "E5",
+   "family": "E",
+   "family_name": "ERP & IT",
+   "trait": "Role Skill",
+   "en": "Tell us about one tool or report you built.",
+   "mr": "तुम्ही बनवलेल्या एका टूल किंवा रिपोर्टबद्दल सांगा.",
+   "hi": "आपने बनाए एक टूल या रिपोर्ट के बारे में बताइए.",
+   "look_for": "Problem, what they built, who used it, result."
+  },
+  {
+   "code": "ET",
+   "family": "E",
+   "family_name": "ERP & IT",
+   "trait": "Role Skill",
+   "en": "Practical: read this short error message and say what you will check first.",
+   "mr": "प्रात्यक्षिक: हा छोटा एरर मेसेज वाचा आणि आधी काय तपासाल ते सांगा.",
+   "hi": "प्रैक्टिकल: यह छोटा एरर मैसेज पढ़िए और पहले क्या जांचेंगे बताइए.",
+   "look_for": "Reads the key line, names the right first check (answer key with the sheet)."
+  }
+ ],
+ "teach_back": {
+  "en": "In SK App, to report a problem: 1) tap the red REPORT PROBLEM tile, 2) choose the picture of the problem type, 3) take a photo, 4) hold the mic and say what happened, then tap Send.",
+  "mr": "SK App मध्ये समस्या कळवण्यासाठी: १) लाल 'REPORT PROBLEM' टाइल दाबा, २) समस्येच्या प्रकाराचे चित्र निवडा, ३) फोटो काढा, ४) माइक दाबून काय झाले ते सांगा, मग Send दाबा.",
+  "hi": "SK App में समस्या बताने के लिए: 1) लाल 'REPORT PROBLEM' टाइल दबाइए, 2) समस्या के प्रकार की तस्वीर चुनिए, 3) फोटो लीजिए, 4) माइक दबाकर बताइए क्या हुआ, फिर Send दबाइए.",
+  "steps": [
+   "red Report Problem tile",
+   "choose problem picture",
+   "take photo",
+   "hold mic, speak, Send"
+  ]
+ },
+ "families": {
+  "C": "Common (all roles)",
+  "S": "Sales",
+  "M": "Marketing",
+  "D": "Design",
+  "F": "Factory & Site",
+  "T": "Store",
+  "P": "Machine Shifting & Maintenance",
+  "A": "Accounts",
+  "H": "HR & Admin",
+  "E": "ERP & IT"
+ },
+ "designation_family": {
+  "Sales Executive - Frontline": "S",
+  "Sales Executive - Costing & Quotation": "S",
+  "Sales Coordinator (Purchase support)": "S",
+  "Sales Representative": "S",
+  "Business Development Manager": "S",
+  "Digital Marketing Executive": "M",
+  "Marketing Specialist": "M",
+  "Marketing Manager": "M",
+  "Designer": "D",
+  "Factory / Production Manager": "F",
+  "Production / Electrical Supervisor & QC": "F",
+  "Electrician": "F",
+  "Store & Inventory Executive": "T",
+  "Machine Shifting & Maintenance Engineer": "P",
+  "Engineer": "P",
+  "Accounts & Finance Executive": "A",
+  "Accountant": "A",
+  "HR & Admin Executive": "H",
+  "ERP & System Admin (Purchase)": "E",
+  "Software Developer": "E"
+ }
+}

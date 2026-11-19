@@ -119,3 +119,72 @@ def suggest(viewer: str, member: str, view: str | None, text: str, photo: str | 
 	desc = f"💡 {who} idea on {frappe.utils.get_fullname(member)}'s app, page '{view or 'Home'}': {strip_html(text.strip())[:400]}"
 	return frappe.get_doc({"doctype": "SK Work Log", "user": viewer, "date": getdate(), "entry_type": "Problem",
 		"problem_type": "IT / app", "description": desc, "photo": photo or None}).insert(ignore_permissions=True).name
+
+
+# ---------- SK 14-Nov "Work as": the CEO works in a member's app for them (they are on site) ----------
+WORK_MODULE = "Work as"
+# records that are never marked (system rows, logs and the mark itself)
+NO_MARK = {"Comment", "Version", "Activity Log", "SK Rule Log", "Notification Log", "Communication", "File", "SK Perf Log", "Error Log",
+	"Deleted Document", "Email Queue", "Email Queue Recipient", "Route History", "Access Log", "Session Default", "DocShare", "ToDo", "Scheduled Job Log"}
+
+
+def can_work_as(user: str) -> bool:
+	"""Only the CEO (Management function) works in another person's app; managers stay view-only."""
+	return _is_ceo(user)
+
+
+def work_as(viewer: str, member: str, method: str, args: dict | None = None, view: str | None = None):
+	"""Run one screen or save of the app as the member and keep it. The record is the member's (owner, arrows, targets),
+	and every record made this way is marked "entered by <CEO> on behalf of <member>" (comment + SK Rule Log), so the
+	app shows it with the CEO badge. Nothing salary-related is in the app."""
+	_check(viewer, member)
+	if not can_work_as(viewer):
+		frappe.throw(_("Only the CEO can work in another member's app"), frappe.PermissionError)
+	if member == viewer or not frappe.db.exists("SK App User", {"user": member, "enabled": 1}):
+		frappe.throw(_("Pick a member"))
+	from sk_app import api
+
+	fn = getattr(api, method, None) if not method.startswith("_") and method not in NEVER else None
+	if not fn or fn not in frappe.whitelisted:
+		frappe.throw(_("This screen cannot be opened for another member"), frappe.PermissionError)
+	session = frappe.local.session
+	saved = {"user": session.user, "sid": session.sid, "data": session.data}
+	form_dict = frappe.local.form_dict
+	try:
+		frappe.set_user(member)
+		frappe.flags.sk_viewing = viewer
+		frappe.flags.sk_on_behalf = {"by": viewer, "for": member}
+		result = fn(**(args or {}))
+	finally:
+		frappe.flags.sk_viewing = None
+		frappe.flags.sk_on_behalf = None
+		frappe.set_user(saved["user"])
+		session.sid, session.data = saved["sid"], saved["data"]
+		frappe.local.form_dict = form_dict
+	_log(viewer, member, f"work: {view or method}")
+	return result
+
+
+def mark_on_behalf(doc, method=None):
+	"""after_insert of every doctype: a record made while the CEO works as a member gets its mark."""
+	who = frappe.flags.get("sk_on_behalf")
+	if not who or doc.doctype in NO_MARK or doc.doctype.startswith("SK Hub"):
+		return
+	by, member = frappe.utils.get_fullname(who["by"]), frappe.utils.get_fullname(who["for"])
+	try:
+		if frappe.db.table_exists("SK Rule Log"):
+			frappe.get_doc({"doctype": "SK Rule Log", "module": WORK_MODULE, "rule": "on_behalf", "mode": "Info", "reference_doctype": doc.doctype,
+				"reference_name": doc.name, "user": who["for"], "detail": f"Entered by {by} (CEO) on behalf of {member}"}).insert(ignore_permissions=True)
+		doc.add_comment("Comment", _("Entered by {0} (CEO) on behalf of {1}").format(by, member))
+	except Exception:
+		frappe.log_error(f"SK work-as mark {doc.doctype} {doc.name}")
+
+
+def on_behalf_names(doctype: str) -> set[str]:
+	"""Names of this doctype entered by the CEO for someone (for the badge in lists and cards)."""
+	if not frappe.db.table_exists("SK Rule Log"):
+		return set()
+	cache = frappe.flags.setdefault("sk_on_behalf_names", {})  # once per request
+	if doctype not in cache:
+		cache[doctype] = set(frappe.get_all("SK Rule Log", filters={"module": WORK_MODULE, "reference_doctype": doctype}, pluck="reference_name"))
+	return cache[doctype]

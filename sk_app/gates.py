@@ -6,6 +6,8 @@ the record on: lead status, quotation submit, sales order submit, deal won. Junk
 """
 
 import frappe
+from sk_app.writers import requisition as req_w
+from sk_app import purchase_screens
 from frappe import _
 from frappe.utils import flt
 
@@ -14,6 +16,7 @@ from sk_app import lead_status
 from sk_app.core.people import is_ceo as _shared_is_ceo  # one CEO check for every screen (rebuild Phase 0)
 
 GST_NOTE = "sk_gst_note"
+CUSTOMER_LINK = "sk_customer"  # SK 14-Nov PR G: Link Customer on CRM Lead and CRM Deal
 NO_GSTIN = "sk_no_gstin"  # SK 4-Nov: a non-GST customer, ticked on the new lead; its deal's customer is made Unregistered
 
 
@@ -27,9 +30,11 @@ def ensure_setup():
 	}
 	# same label + type on lead and deal, so Frappe CRM's Convert copies the tick onto the deal
 	no_gstin = {"fieldname": NO_GSTIN, "label": "No GSTIN (unregistered customer)", "fieldtype": "Check", "default": "0"}
+	# SK 14-Nov (PR G): the existing ERPNext customer a lead / deal belongs to, so nothing is typed twice and no second customer is made
+	customer = {"fieldname": CUSTOMER_LINK, "label": "ERPNext customer (existing)", "fieldtype": "Link", "options": "Customer"}
 	for dt, after in (("CRM Lead", "organization"), ("CRM Deal", "organization")):
 		if frappe.db.exists("DocType", dt):
-			fields[dt] = [{**no_gstin, "insert_after": after}]
+			fields[dt] = [{**no_gstin, "insert_after": after}, {**customer, "insert_after": NO_GSTIN}]
 	create_custom_fields(fields, update=True)
 
 
@@ -62,13 +67,30 @@ def deal_of(doctype: str, doc) -> str | None:
 	return frappe.db.get_value("CRM Deal", {"lead": doc.name}) if doc.name else None
 
 
-def erp_docs(deal: str | None) -> tuple[list, list]:
-	# a deal being made right now (not saved yet) has no quotation or order (28-Oct: a new deal saved as Won crashed here)
-	if not deal or not frappe.db.exists("CRM Deal", deal):
-		return [], []
+def orders_by_po(names) -> list:
+	"""Sales Orders whose Customer's PO names one of these leads / deals ('From CRM-LEAD-2026-00635', SK 18-Nov)."""
+	names = [n for n in names if n]
+	out = []
+	for n in names:
+		for o in frappe.get_all("Sales Order", filters={"po_no": ["like", f"%{n}%"], "docstatus": ["<", 2]},
+				fields=["name", "docstatus", "transaction_date", "po_no"]):
+			if R.po_refers_to(o.po_no, names) and o.name not in {x.name for x in out}:
+				out.append(o)
+	return out
+
+
+def erp_docs(deal: str | None, lead: str | None = None) -> tuple[list, list]:
 	cache = getattr(frappe.local, "sk_gate_docs", None)
 	if cache is None:  # frappe.local has no __dict__ (28-Oct: that error blocked every CRM Lead / Deal save)
 		cache = frappe.local.sk_gate_docs = {}
+	# a deal being made right now (not saved yet) has no quotation or order (28-Oct: a new deal saved as Won crashed here);
+	# a lead with no deal still finds its order by the Customer's PO (SK 18-Nov)
+	if not deal or not frappe.db.exists("CRM Deal", deal):
+		if not lead:
+			return [], []
+		if ("lead", lead) not in cache:
+			cache[("lead", lead)] = ([], orders_by_po([lead]))
+		return cache[("lead", lead)]
 	if deal in cache:
 		return cache[deal]
 	quotes = []
@@ -77,10 +99,23 @@ def erp_docs(deal: str | None) -> tuple[list, list]:
 	from sk_app.erp_flow import customer_of
 
 	customer = customer_of(deal)
-	since = frappe.db.get_value("CRM Deal", deal, "creation")
-	# orders of this deal's customer made since the deal (an old order of the same customer does not win a new deal)
-	orders = frappe.get_all("Sales Order", filters={"customer": customer, "docstatus": ["<", 2], "creation": [">=", since]},
-		fields=["name", "docstatus"]) if customer and since else []
+	if not customer:  # a deal with no ERPNext customer link yet: the customer of the same name (back-filled deals, Indeva 00044)
+		org = frappe.db.get_value("CRM Deal", deal, "organization")
+		customer = frappe.db.get_value("Customer", {"customer_name": org}) if org else None
+	# SK 17-Nov ("won date is SO date only"): a submitted Sales Order of the deal's customer wins the deal whatever the
+	# order's creation date or PO number (Indeva SO 00120 of 16-Sep was back-filled on 30-Oct with 'NO PO - verbal order')
+	orders = frappe.get_all("Sales Order", filters={"customer": customer, "docstatus": ["<", 2]}, fields=["name", "docstatus", "transaction_date"],
+		order_by="transaction_date desc") if customer else []
+	if frappe.get_meta("Quotation").has_field("crm_deal") and quotes:
+		for so in frappe.get_all("Sales Order Item", filters={"prevdoc_docname": ["in", [q.name for q in quotes]], "docstatus": ["<", 2]}, pluck="parent", distinct=True):
+			if so not in {o.name for o in orders}:
+				d = frappe.db.get_value("Sales Order", so, ["name", "docstatus", "transaction_date"], as_dict=True)
+				if d:
+					orders.append(d)
+	lead = lead or frappe.db.get_value("CRM Deal", deal, "lead")
+	for o in orders_by_po([deal, lead]):
+		if o.name not in {x.name for x in orders}:
+			orders.append(o)
 	cache[deal] = (quotes, orders)
 	return quotes, orders
 
@@ -100,7 +135,7 @@ def status_missing(doctype: str, doc, status: str) -> list:
 		return []
 	missing = record_missing(doctype, doc)
 	if step in ("Quotation", "Negotiations", "Won"):
-		missing += R.deal_step_needs(step, *erp_docs(deal_of(doctype, doc)))
+		missing += R.deal_step_needs(step, *erp_docs(deal_of(doctype, doc), doc.name if doctype == "CRM Lead" else None))
 	return missing
 
 
@@ -348,7 +383,7 @@ def check_request(doc, method=None):
 	if _skip() or doc.material_request_type != "Purchase" or not doc.meta.has_field("sk_reason"):
 		return
 	if not doc.is_new():
-		return  # checked when it was raised; the CEO's approval is the next gate (requisition.check_submit)
+		return  # checked when it was raised; the CEO's approval is the next gate (req_w.check_submit)
 	if not doc.get("sk_reason") and (frappe.flags.in_scheduler or frappe.session.user == "Administrator"):
 		doc.sk_reason = _("Auto re-order level (ERPNext)")  # ERPNext's own re-order run is not stopped; the CEO still approves
 	missing = R.request_missing({"items": [{"item_code": i.item_code, "qty": flt(i.qty)} for i in doc.items],
@@ -401,4 +436,11 @@ def pending(user: str, rows: bool = False) -> dict:
 			for r in frappe.get_all("Material Request", filters={"docstatus": 0, "material_request_type": "Purchase", "sk_approval": "Waiting CEO"},
 				fields=["name", "schedule_date"], limit=0)]
 		add("requests", "Purchase requests to approve", items)
+	# SK 14-Nov: last night's data check, the person's own items (link, what is wrong, one action); fixed items drop off next night
+	try:
+		from sk_app.core import night_check
+
+		add("night", "Night check: to fix", night_check.home_rows(user))
+	except Exception:
+		frappe.log_error("SK night check home rows")
 	return {"total": sum(g["n"] for g in groups), "groups": groups}

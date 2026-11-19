@@ -1,10 +1,11 @@
 """Check & Submit (SK 29-Oct: "Yogesh doesn't have submit option in app hence pending, pl give option in app & make in
 such a way that it can use to low skill person"). Each function sees the drafts it owns in ERPNext, checks the big
 numbers and submits with one tap. ERPNext's own submit runs (the mandatory gate and stock / account checks stay);
-it runs as the system because many app users may not read accounts (store.as_system), after the app's own check of
+it runs as the system because many app users may not read accounts (store_screens.as_system), after the app's own check of
 who may submit what."""
 
 import frappe
+from sk_app import store_screens
 from frappe import _
 from frappe.utils import flt
 

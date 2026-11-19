@@ -1,3 +1,7 @@
+from sk_app import sales_screens
+from sk_app.writers import requisition as req_w
+from sk_app import purchase_screens
+from sk_app import store_screens
 app_name = "sk_app"
 app_title = "SK App"
 app_publisher = "SK Ind Tech Solutions Pvt Ltd"
@@ -23,11 +27,12 @@ jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html", "sk_app.tax_invoi
 
 scheduler_events = {
 	"hourly": ["sk_app.deal_quotes.sync", "sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge", "sk_app.mailbox.remind",
+		"sk_app.hiring.hourly",  # SK 17-Nov hiring: 48 h hand-over to HR, interview reminders, 6-month and 7-day clean-ups
 		"sk_app.old_crm_load.hourly"],  # SK 6-Nov: old CRM leads SK uploads as a File are loaded once
 	# IndiaMART / JustDial / GeM mails to the team mailboxes become CRM leads (free route, point 14)
 	"cron": {"*/5 * * * *": ["sk_app.lead_sources.scan", "sk_app.mailbox.link_known", "sk_app.mailbox.route_suppliers", "sk_app.mailbox.auto_leads"],
 		# SK 27-Oct: the AI's actions to lift each graph, every morning before work
-		"0 7 * * *": ["sk_app.ai_actions.morning", "sk_app.doubles.morning"],  # SK 4-Nov: possible doubles to Shraddha and SK
+		"0 7 * * *": ["sk_app.ai_actions.morning", "sk_app.doubles.morning", "sk_app.core.night_check.morning"],  # SK 14-Nov: each owner's open items + CEO summary  # SK 4-Nov: possible doubles to Shraddha and SK
 		# SK 28-Oct: customers tagged Cabin / Non-Cabin and every order and customer given its salesperson
 		"30 1 * * *": ["sk_app.sales_owner.nightly"],
 		# SK 29-Oct: a solved desk request the person did not answer for 3 days is closed
@@ -37,20 +42,32 @@ scheduler_events = {
 		"15 23 * * *": ["sk_app.writers.payment_allocate.link_unallocated"],
 		# SK 6-Nov people rule: every active employee / service supplier in the app, nightly before the scorecard counts
 		"30 23 * * *": ["sk_app.writers.app_user.nightly", "sk_app.core.imports.check", "sk_app.core.gate.nightly"],  # SK 6-Nov: source vs ERPNext per import
-		"45 23 * * *": ["sk_app.core.scorecard.nightly"]},
+		# rebuild Flow 6 HR (New path): yesterday's punches -> Attendance once the Optick file is in (by 10 AM), one missed-punch
+		# ToDo to HR; holiday list vs SK's paid holidays
+		"30 10 * * *": ["sk_app.writers.attendance.daily", "sk_app.writers.leave.check_holidays"],
+		"20 23 * * *": ["sk_app.writers.attendance.today"],  # job J 9-Nov: today's punches (any machine) at the end of the day
+		"45 23 * * *": ["sk_app.core.scorecard.nightly"],
+		# SK 14-Nov "approve": the night check of all data since 1-Apr, after the payment linking and login runs above
+		"55 23 * * *": ["sk_app.core.night_check.nightly"],
+		# SK 17-Nov hiring: 10 AM and 4 PM Mon-Sat, the HR owners forward the WhatsApp resumes to the HR Gmail
+		"0 10,16 * * 1-6": ["sk_app.hiring.resume_forward_reminder"]},
 }
 
 doc_events = {
+	"*": {"after_insert": "sk_app.view_member.mark_on_behalf"},  # SK 14-Nov: records the CEO enters as a member carry the CEO mark
 	"SK DSI Entry": {"before_insert": ["sk_app.permissions.stamp_user", "sk_app.dsi.stamp_function"]},  # SK 29-Oct: role for the monthly summary
 	"SK Work Log": {"before_insert": "sk_app.permissions.stamp_user"},
 	"SK Day Report": {"before_insert": "sk_app.permissions.stamp_user"},
-	"File": {"after_insert": ["sk_app.crm.on_file_attached", "sk_app.deal_quotes.on_file"]},  # SK 28-Oct: a quote file → Quotation
+	"File": {"before_insert": "sk_app.files.check_file",  # PR H (SK 16-Nov KF-05549): only PDF / photos on customer-facing records, no cabin number
+		"after_insert": ["sk_app.sales_screens.on_file_attached", "sk_app.deal_quotes.on_file"]},  # SK 28-Oct: a quote file → Quotation
 	"SK Library Item": {"validate": "sk_app.library.make_public"},
 	# SK 28-Oct mandatory gate: a lead / deal moves on only with its data and the step's ERPNext document (sk_app.gates)
 	# SK 4-Nov: no double entry anywhere: same party + amount within 7 days, same reference / bill no, a 2nd deal of a lead (sk_app.doubles)
 	"CRM Lead": {"validate": ["sk_app.segments.set_main", "sk_app.gates.check_crm"], "before_insert": "sk_app.doubles.check_lead"},
-	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.crm.set_deal_customer", "sk_app.quote_pickup.on_deal_validate",
-		"sk_app.gates.check_crm"],
+	"Job Applicant": {"before_insert": "sk_app.writers.applicant.before_insert"},  # R12: e-mail from the mobile, family from the designation
+	"Comment": {"after_insert": "sk_app.writers.interview.on_comment"},  # R12: 'Slot: 18-Nov 10:30' on a Job Applicant books Round 1
+	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.sales_screens.set_deal_customer", "sk_app.quote_pickup.on_deal_validate",
+		"sk_app.gates.check_crm", "sk_app.won_deals.check_won"],  # SK 14-Nov KF-05180: Won without a Sales Order is a rule gap
 		# SK 4-Nov: no deal from a lead that is still New (call not connected): the lead is Qualified first (sk_app.gates)
 		"before_insert": ["sk_app.doubles.check_deal", "sk_app.gates.check_new_deal"], "on_update": "sk_app.deal_quotes.on_deal_update"},
 	# SK 4-Nov: members also work in ERPNext or through Claude: the quote / payment checks run on the record, whatever the route
@@ -72,21 +89,21 @@ doc_events = {
 	"Project": {"validate": "sk_app.lead_time.on_project_validate"},
 	"SK Path Switch": {"validate": "sk_app.core.gate.on_switch"},  # SK 6-Nov: counts saved when a module goes New; checked nightly
 	"SK App User": {"on_update": ["sk_app.segments.on_app_user_update", "sk_app.logins.set_company_default"]},
-	"Job Card": {"validate": "sk_app.store.set_job_card_cabin",  # SK 27-Oct: customer + cabin size, not just the number
+	"Job Card": {"validate": ["sk_app.store_screens.set_job_card_cabin", "sk_app.writers.work_order.card_validate"],  # cabin label (SK 27-Oct) + rebuild Flow 5 (New path)
 		# SK 29-Oct labour: each job has its service PO from the rate sheet; done → service GRN at once (sk_app.sub_bills)
 		"after_insert": "sk_app.sub_bills.on_job_card_insert",
-		"on_update": "sk_app.sub_bills.on_job_card_change", "on_submit": "sk_app.sub_bills.on_job_card_change"},
+		"on_update": "sk_app.sub_bills.on_job_card_change", "on_submit": ["sk_app.sub_bills.on_job_card_change", "sk_app.writers.work_order.on_card_submit"]},
 	# SK 29-Oct: one Project + cost centre per cabin; its material, bills and sales rows go to that cost centre at once,
 	# and stages done before ERPNext close when the cabin's Work Order is submitted (sk_app.cabin_projects)
-	"Work Order": {"before_submit": "sk_app.sub_bills.wo_submitting",
+	"Work Order": {"validate": "sk_app.writers.work_order.on_validate", "before_submit": "sk_app.sub_bills.wo_submitting",
 		"on_submit": ["sk_app.cabin_projects.close_done_stages", "sk_app.sub_bills.on_work_order_submit"]},
 	"Stock Entry": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.stock_entry.on_validate"]},  # rebuild Flow 4 (New path)
 	"Delivery Note": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.gates.check_sales_invoice"},
 	# SK 27-Oct purchase flow: requisition → CEO approval → PO → receipt against the PO, in ERPNext too
-	"Material Request": {"validate": ["sk_app.gates.check_request", "sk_app.cabin_projects.set_cost_centre"], "before_submit": "sk_app.requisition.check_submit"},
+	"Material Request": {"validate": ["sk_app.gates.check_request", "sk_app.cabin_projects.set_cost_centre"], "before_submit": "sk_app.writers.requisition.check_submit"},
 	"Purchase Order": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.purchase_order.on_validate"],  # rebuild Flow 3 (New path)
-		"before_submit": ["sk_app.requisition.check_po", "sk_app.sub_bills.check_submit"], "on_submit": "sk_app.sub_bills.on_po_submit"},
-	"Purchase Receipt": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.receipt.on_validate"], "before_submit": "sk_app.requisition.check_receipt"},
+		"before_submit": ["sk_app.writers.requisition.check_po", "sk_app.sub_bills.check_submit"], "on_submit": "sk_app.sub_bills.on_po_submit"},
+	"Purchase Receipt": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.receipt.on_validate"], "before_submit": "sk_app.writers.requisition.check_receipt"},
 	# SK 28/29-Oct: labour bill only from the service GRN of a PO Rushi + CEO approved; only CEO / Accounts change the rates
 	"Purchase Invoice": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check", "sk_app.writers.payment_allocate.pull_advances"],
 		"before_submit": ["sk_app.sub_bills.check_submit", "sk_app.writers.service_job.before_submit"]},  # service job bill only after approval (New path)
@@ -95,6 +112,10 @@ doc_events = {
 	"Payment Entry": {"validate": ["sk_app.doubles.check", "sk_app.writers.payment.on_validate"],
 		"on_submit": "sk_app.writers.bank_match.on_submit"},  # rebuild Flow 6: matched with its bank line at once (New path)
 	"Journal Entry": {"validate": ["sk_app.doubles.check", "sk_app.writers.journal.on_validate"]},
+	# rebuild Flow 6 HR (New path): the HR rules on every record, from the app, ERPNext or SK Hub
+	"Attendance": {"validate": "sk_app.writers.attendance.on_validate"},
+	"Leave Application": {"before_validate": "sk_app.writers.leave.ensure_allocation", "validate": "sk_app.writers.leave.on_validate"},
+	"Employee": {"validate": "sk_app.writers.employee.on_validate"},
 	# SK 4-Nov "make it foolproof": the money masters only by the CEO / System Manager; a Bank mode needs Bank accounts (sk_app.masters)
 	"Mode of Payment": {"validate": ["sk_app.masters.guard", "sk_app.masters.check_mode"]},
 	"Accounts Settings": {"validate": "sk_app.masters.guard"},

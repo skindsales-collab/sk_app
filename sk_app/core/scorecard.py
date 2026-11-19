@@ -57,7 +57,9 @@ def measures(day=None) -> list[dict]:
 	add("Data accuracy", "Submitted orders", orders, "orders", "Sales Order docstatus 1")
 	add("Data accuracy", "Won leads with no deal", leads, "leads", "CRM Lead Deal Won / Converted, not converted to a deal")
 	add("Data accuracy", "Orders minus won deals", abs(orders - deals), "orders", "Submitted orders - won deals (0 when every order has its won deal)")
-	add("Data accuracy", "Orders 0% billed", _count("Sales Order", {"docstatus": 1, "per_billed": 0}), "orders", "Sales Order docstatus 1, per_billed 0")
+	# 7-Nov live check: 81 of the 106 "0% billed" orders were Closed (billed under another name, Tally time); only open ones count
+	add("Data accuracy", "Open orders not yet billed", _count("Sales Order", {"docstatus": 1, "per_billed": 0, "status": ["not in", ["Closed", "Completed"]]}),
+		"orders", "Sales Order docstatus 1, per_billed 0, not Closed / Completed")
 	found = doubles.possible_doubles()
 	add("Data accuracy", "Possible double entries", len(found["pairs"]) + len(found["deals"]), "pairs",
 		"sk_app.doubles.possible_doubles since 1-Apr (money pairs + leads with 2 deals), ticked pairs excluded")
@@ -66,8 +68,8 @@ def measures(day=None) -> list[dict]:
 		"ERPNext Error Log with 'SK App' in its title, this day")
 	add("Silent failures", "Kept as draft", _count("Comment", {"creation": span, "content": ["like", "Kept as draft by SK App%"]}), "drafts / day",
 		"Comment 'Kept as draft by SK App', this day")
-	add("Rule gaps", "Rule gaps found", _count("SK Rule Log", {"creation": span, "mode": ["!=", "Replay"]}), "gaps / day",
-		"SK Rule Log rows (Warn only + Enforce), this day")
+	add("Rule gaps", "Rule gaps found", _count("SK Rule Log", {"creation": span, "mode": ["in", ["Warn only", "Enforce"]]}), "gaps / day",
+		"SK Rule Log rows mode Warn only / Enforce, this day (not Patch / Load / Gate / Replay rows; checker 7-Nov)")
 	add("Rule gaps", "Replay gaps open", _count("SK Rule Log", {"mode": "Replay"}), "gaps", "SK Rule Log mode Replay (last replay run)")
 	perf = _perf(day)
 	for device in ("Mobile", "PC"):

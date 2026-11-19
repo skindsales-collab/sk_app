@@ -1,6 +1,11 @@
 """Change list point 16 + HR step: Optick file upload, attendance, leave and expenses."""
 
 import frappe
+from sk_app import hr_screens
+from sk_app.writers import expense as exp_w
+from sk_app.writers import leave as leave_w
+from sk_app.writers import employee as emp_w
+from sk_app.writers import attendance as att_w
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, getdate, nowdate
 
@@ -61,7 +66,7 @@ class TestHr(IntegrationTestCase):
 		cls.file_url = f.file_url
 
 	def test_upload_today_month(self):
-		p = run(HR_U, hr.upload_preview, self.file_url)
+		p = run(HR_U, att_w.upload_preview, self.file_url)
 		self.assertEqual(p["rows"], 4)
 		self.assertEqual([m["employee"] for m in p["matched"]], [self.staff])
 		self.assertEqual(p["matched"][0]["how"], "mobile")
@@ -69,7 +74,7 @@ class TestHr(IntegrationTestCase):
 		self.assertEqual(len(p["missed_out"]), 1)
 		self.assertEqual(p["late"], 1)
 
-		r = run(HR_U, hr.upload_save, self.file_url, {"902": self.other})
+		r = run(HR_U, att_w.upload_save, self.file_url, {"902": self.other})
 		self.assertEqual(r["errors"], [])
 		self.assertEqual(r["ids_saved"], 1)
 		self.assertEqual(frappe.db.get_value("Employee", self.other, "attendance_device_id"), "902")
@@ -78,28 +83,28 @@ class TestHr(IntegrationTestCase):
 		self.assertFalse(frappe.db.exists("Attendance", {"employee": self.other, "attendance_date": self.d2}))
 		late = frappe.db.get_value("Attendance", {"employee": self.staff, "attendance_date": self.d2}, ["status", "late_entry"], as_dict=True)
 		self.assertEqual((late.status, late.late_entry), ("Present", 1))
-		self.assertEqual(run(HR_U, hr.upload_save, self.file_url, {})["checkins"], 0)  # never twice
+		self.assertEqual(run(HR_U, att_w.upload_save, self.file_url, {})["checkins"], 0)  # never twice
 
-		day = run(HR_U, hr.today, self.d2)
+		day = run(HR_U, hr_screens.today, self.d2)
 		self.assertIn(self.staff, [x["employee"] for x in day["groups"]["late"]])
-		m = {x["employee"]: x for x in run(HR_U, hr.month, self.d2)["rows"]}
+		m = {x["employee"]: x for x in run(HR_U, hr_screens.month, self.d2)["rows"]}
 		self.assertGreaterEqual(m[self.staff]["present"] + m[self.staff]["half_day"], 2)  # test_fix_request may make d1 a half day
 		self.assertIn(getdate(self.d2).day, m[self.staff]["late_days"])
 		with self.assertRaises(frappe.PermissionError):
-			run(STAFF, hr.today)
-		self.assertTrue(run(STAFF, hr.my_line))
+			run(STAFF, hr_screens.today)
+		self.assertTrue(run(STAFF, hr_screens.my_line))
 
 	def test_fix_request_and_selfie(self):
-		run(STAFF, hr.ask_fix, self.d1, "Optick did not read me")
-		req = run(HR_U, hr.fix_requests)
+		run(STAFF, att_w.ask_fix, self.d1, "Optick did not read me")
+		req = run(HR_U, att_w.fix_requests)
 		self.assertTrue(any("Optick did not read me" in x["text"] for x in req))
 		x = next(x for x in req if "Optick did not read me" in x["text"])
-		r = run(HR_U, hr.fix_attendance, self.staff, self.d1, "Half Day", "came late, told HR", x["todo"])
+		r = run(HR_U, att_w.fix_attendance, self.staff, self.d1, "Half Day", "came late, told HR", x["todo"])
 		self.assertEqual(frappe.db.get_value("Attendance", r["name"], "status"), "Half Day")
 		self.assertEqual(frappe.db.get_value("ToDo", x["todo"], "status"), "Closed")
 		photo = frappe.get_doc({"doctype": "File", "file_name": "selfie.txt", "content": b"x", "is_private": 1, "owner": STAFF}).insert(ignore_permissions=True)
 		frappe.db.set_value("File", photo.name, "owner", STAFF)
-		s = run(STAFF, hr.selfie_checkin, photo.file_url, 18.52, 73.85)
+		s = run(STAFF, att_w.selfie_checkin, photo.file_url, 18.52, 73.85)
 		self.assertEqual(frappe.db.get_value("Employee Checkin", s["name"], "device_id"), "App selfie")
 		self.assertEqual(frappe.db.get_value("File", photo.name, "attached_to_name"), s["name"])
 
@@ -117,13 +122,13 @@ class TestHr(IntegrationTestCase):
 		day = add_days(nowdate(), 30)
 		while frappe.db.exists("Holiday", {"parent": hl, "holiday_date": day}):
 			day = add_days(day, 1)
-		r = run(STAFF, hr.apply_leave, "SK Test LWP", day, day, 0, "family function")
+		r = run(STAFF, leave_w.apply_leave, "SK Test LWP", day, day, 0, "family function")
 		self.assertTrue(frappe.db.exists("ToDo", {"allocated_to": BOSS, "reference_name": r["name"], "status": "Open"}))
-		self.assertIn(r["name"], [x.name for x in run(BOSS, hr.listing)["leave_to_approve"]])
-		self.assertNotIn(r["name"], [x.name for x in run(STAFF, hr.listing)["leave_to_approve"]])
+		self.assertIn(r["name"], [x.name for x in run(BOSS, hr_screens.listing)["leave_to_approve"]])
+		self.assertNotIn(r["name"], [x.name for x in run(STAFF, hr_screens.listing)["leave_to_approve"]])
 		with self.assertRaises(frappe.PermissionError):
-			run(STAFF, hr.decide_leave, r["name"], 1)
-		self.assertEqual(run(BOSS, hr.decide_leave, r["name"], 1)["status"], "Approved")
+			run(STAFF, leave_w.decide_leave, r["name"], 1)
+		self.assertEqual(run(BOSS, leave_w.decide_leave, r["name"], 1)["status"], "Approved")
 		self.assertEqual(frappe.db.get_value("Leave Application", r["name"], "docstatus"), 1)
 
 		company = frappe.db.get_value("Employee", self.staff, "company")
@@ -132,33 +137,33 @@ class TestHr(IntegrationTestCase):
 			frappe.get_doc({"doctype": "Expense Claim Type", "expense_type": "SK Test Travel",
 				"accounts": [{"company": company, "default_account": account}]}).insert(ignore_permissions=True)
 		# SK 28-Oct: cash voucher with its details; no bill photo needs a reason; every voucher goes to the CEO only
-		hr.ensure_voucher_fields()
-		self.assertRaises(frappe.ValidationError, run, STAFF, hr.claim_expense, "SK Test Travel", 450, nowdate(), "auto to site")
-		c = run(STAFF, hr.claim_expense, "SK Test Travel", 450, nowdate(), "auto to site", None, "Auto driver", "SO-TEST-1", "auto, no bill")
+		exp_w.ensure_voucher_fields()
+		self.assertRaises(frappe.ValidationError, run, STAFF, exp_w.claim_expense, "SK Test Travel", 450, nowdate(), "auto to site")
+		c = run(STAFF, exp_w.claim_expense, "SK Test Travel", 450, nowdate(), "auto to site", None, "Auto driver", "SO-TEST-1", "auto, no bill")
 		doc = frappe.get_doc("Expense Claim", c["name"])
 		self.assertEqual((doc.sk_paid_to, doc.sk_cabin, doc.sk_no_bill), ("Auto driver", "SO-TEST-1", "auto, no bill"))
 		self.assertTrue(frappe.db.exists("ToDo", {"allocated_to": CEO, "reference_name": c["name"], "status": "Open"}))
-		self.assertNotIn(c["name"], [x.name for x in run(BOSS, hr.listing)["claims_to_approve"]])
-		self.assertNotIn(c["name"], [x.name for x in run(HR_U, hr.listing)["claims_to_approve"]])
-		self.assertRaises(frappe.PermissionError, run, BOSS, hr.decide_expense, c["name"], 1)
-		self.assertRaises(frappe.PermissionError, run, HR_U, hr.decide_expense, c["name"], 1)
-		self.assertIn(c["name"], [x.name for x in run(CEO, hr.listing)["claims_to_approve"]])
-		mine = {x.name: x for x in run(STAFF, hr.listing)["my_claims"]}
+		self.assertNotIn(c["name"], [x.name for x in run(BOSS, hr_screens.listing)["claims_to_approve"]])
+		self.assertNotIn(c["name"], [x.name for x in run(HR_U, hr_screens.listing)["claims_to_approve"]])
+		self.assertRaises(frappe.PermissionError, run, BOSS, exp_w.decide_expense, c["name"], 1)
+		self.assertRaises(frappe.PermissionError, run, HR_U, exp_w.decide_expense, c["name"], 1)
+		self.assertIn(c["name"], [x.name for x in run(CEO, hr_screens.listing)["claims_to_approve"]])
+		mine = {x.name: x for x in run(STAFF, hr_screens.listing)["my_claims"]}
 		self.assertEqual(mine[c["name"]]["stage"], "Waiting CEO")
-		self.assertRaises(frappe.ValidationError, run, CEO, hr.decide_expense, c["name"], 0)  # reject needs a reason
-		d = run(CEO, hr.decide_expense, c["name"], 1)
+		self.assertRaises(frappe.ValidationError, run, CEO, exp_w.decide_expense, c["name"], 0)  # reject needs a reason
+		d = run(CEO, exp_w.decide_expense, c["name"], 1)
 		self.assertEqual(d["status"], "Approved")
 		self.assertEqual(frappe.db.get_value("Expense Claim", c["name"], "approval_status"), "Approved")
-		mine = {x.name: x for x in run(STAFF, hr.listing)["my_claims"]}
+		mine = {x.name: x for x in run(STAFF, hr_screens.listing)["my_claims"]}
 		self.assertEqual(mine[c["name"]]["stage"], "Approved")
 
 	def test_company_holiday_list_made_once(self):
-		hr.ensure_holiday_setup()
+		leave_w.ensure_holiday_setup()
 		company = frappe.db.get_value("Employee", self.staff, "company")
 		if frappe.db.exists("DocType", "Holiday List Assignment"):
 			self.assertTrue(frappe.db.exists("Holiday List Assignment", {"assigned_to": company, "docstatus": 1}))
 		n = frappe.db.count("Holiday List")
-		hr.ensure_holiday_setup()
+		leave_w.ensure_holiday_setup()
 		self.assertEqual(frappe.db.count("Holiday List"), n)
 
 
@@ -169,19 +174,19 @@ class TestNewJoiner(IntegrationTestCase):
 		from sk_app.tests.test_change_list_a import _app_user
 		from sk_app.tests.test_store_purchase import run
 
-		hr.ensure_joiner_fields()
+		emp_w.ensure_joiner_fields()
 		_app_user("sk_test_nj_hr@example.com", "HR", ["HR User", "HR Manager", "Employee"])
 		_app_user("sk_test_nj_rep@example.com", "Sales", ["Sales User"])
 		data = {"name": "Testjoin Kumar Patil", "gender": "Male", "dob": "25/04/1994", "joining": "2026-10-27", "mobile": "98765 43219",
 			"pan": "abcde1234f", "aadhaar": "2542 7866 0585", "address": "Bhosari, Pune", "emergency_name": "Yogita", "emergency_mobile": "8080524991"}
 		with self.assertRaises(frappe.PermissionError):
-			run("sk_test_nj_rep@example.com", hr.new_joiner, data)
+			run("sk_test_nj_rep@example.com", emp_w.new_joiner, data)
 		frappe.db.delete("Employee", {"cell_number": "9876543219"})
-		r = run("sk_test_nj_hr@example.com", hr.new_joiner, data)
+		r = run("sk_test_nj_hr@example.com", emp_w.new_joiner, data)
 		e = frappe.get_doc("Employee", r["name"])
 		self.assertEqual((e.first_name, e.last_name, str(e.date_of_birth), e.cell_number), ("Testjoin", "Kumar Patil", "1994-04-25", "9876543219"))
 		self.assertEqual((e.sk_aadhaar, e.get("pan_number") or "ABCDE1234F"), ("254278660585", "ABCDE1234F"))
 		with self.assertRaises(frappe.ValidationError):
-			run("sk_test_nj_hr@example.com", hr.new_joiner, {**data, "aadhaar": "1234"})
+			run("sk_test_nj_hr@example.com", emp_w.new_joiner, {**data, "aadhaar": "1234"})
 		with self.assertRaises(frappe.ValidationError):
-			run("sk_test_nj_hr@example.com", hr.new_joiner, data)  # same mobile twice
+			run("sk_test_nj_hr@example.com", emp_w.new_joiner, data)  # same mobile twice

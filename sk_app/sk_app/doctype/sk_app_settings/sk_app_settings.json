@@ -43,6 +43,8 @@
   "gem_mail",
   "column_leads",
   "lead_owner_digital",
+  "lead_owner_indiamart",
+  "lead_owner_justdial",
   "lead_owner_cabin",
   "lead_owner_noncabin",
   "last_lead_scan",
@@ -231,8 +233,22 @@
    "fieldname": "lead_owner_digital",
    "fieldtype": "Link",
    "options": "User",
-   "label": "Owner of IndiaMART / JustDial leads",
-   "description": "Digital leads (Pranali)."
+   "label": "Owner of other portal leads (fallback)",
+   "description": "Used when the IndiaMART / JustDial owner below is empty."
+  },
+  {
+   "fieldname": "lead_owner_indiamart",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Owner of IndiaMART leads",
+   "description": "SK 16-Nov (KF-05541): IndiaMART leads go to Swati."
+  },
+  {
+   "fieldname": "lead_owner_justdial",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Owner of JustDial leads",
+   "description": "SK 16-Nov (KF-05541): JustDial leads go to Pranali."
   },
   {
    "fieldname": "lead_owner_cabin",

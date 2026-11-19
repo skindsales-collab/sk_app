@@ -89,11 +89,10 @@ def lead_missing(d: dict) -> list[tuple[str, str]]:
 		out.append(("organization", "Real customer / company name (not 'Enquiry')"))
 	if is_placeholder_name(person):
 		out.append(("first_name", "Contact person's name"))
-	# a way to reach the customer: mobile; or the e-mail of a mail enquiry; JustDial shows the number only inside JustDial
-	# (SK 1-Nov), so its leads are not flagged every save (6-Nov log: all lead_mobile_no rows were JustDial / Email leads)
-	if not (mobile_ok(d.get("mobile_no")) or mobile_ok(d.get("phone")) or (d.get("source") in ("Email", "JustDial") and d.get("email"))
-			or d.get("source") == "JustDial"):
-		out.append(("mobile_no", "Mobile number (10 digits)"))
+	# a way to reach the customer: mobile, or the e-mail of a mail enquiry. PR D (SK 15-Nov): a JustDial lead without the
+	# mobile is a gap again (Warn only, so the scan still saves it): someone must open JustDial and copy the number
+	if not (mobile_ok(d.get("mobile_no")) or mobile_ok(d.get("phone")) or (d.get("source") in ("Email", "JustDial") and d.get("email"))):
+		out.append(("mobile_no", "Mobile number (10 digits)" + (": open the JustDial mail, tap View Contact Details" if d.get("source") == "JustDial" else "")))
 	if blank(d.get("sk_segment")):
 		out.append(("sk_segment", "Segment (Cabin / Non-Cabin)"))
 	if blank(d.get("source")):
@@ -220,6 +219,16 @@ def lead_may_become_deal(lead_step: str | None, deal_step: str | None = None) ->
 
 
 QUALIFY_FIRST = "Call the customer first. After you speak to them, mark the lead Qualified; then it becomes a deal"
+
+
+PO_REF = re.compile(r"CRM-(?:LEAD|DEAL)-\d{4}-\d+", re.I)
+
+
+def po_refers_to(po_no: str | None, names) -> bool:
+	"""SK 18-Nov (leads 00635, 00571, 02489 with no deal): a Sales Order whose Customer's PO reads
+	'From CRM-LEAD-2026-00635' (or '... (order 2)') belongs to that lead / deal. Whole names only (00635 is not 006351)."""
+	found = {m.upper() for m in PO_REF.findall(po_no or "")}
+	return bool(found & {n.upper() for n in names if n})
 
 
 def deal_step_needs(step: str, quotations: list[dict], orders: list[dict]) -> list[tuple[str, str]]:

@@ -1,6 +1,15 @@
 import unittest
 
 import frappe
+from sk_app.writers import work_order as wo_writer
+from sk_app import sales_screens
+from sk_app.writers import requisition as req_w
+from sk_app import purchase_screens
+from sk_app.writers import purchase_order as po_w
+from sk_app.writers import item as item_w
+from sk_app.writers import stock_entry as se_w
+from sk_app.writers import receipt as rcpt_w
+from sk_app import store_screens
 from frappe.tests import IntegrationTestCase
 from frappe.tests.classes.context_managers import set_user
 from frappe.utils import add_days, flt, nowdate
@@ -86,30 +95,30 @@ class TestStorePurchase(IntegrationTestCase):
 		setup_data(cls)
 
 	def test_stock_check_shows_live_qty(self):
-		rows = run(STORE_U, store.stock_search, "Test Pipe")
+		rows = run(STORE_U, store_screens.stock_search, "Test Pipe")
 		row = next(r for r in rows if r["item_code"] == RAW)
 		self.assertGreaterEqual(row["qty"], 1)
 		self.assertTrue(any(w["warehouse"] == self.stores for w in row["warehouses"]))
-		self.assertEqual(run(STORE_U, store.item_detail, RAW)["item_code"], RAW)
+		self.assertEqual(run(STORE_U, store_screens.item_detail, RAW)["item_code"], RAW)
 
 	def test_only_function_members_use_screens(self):
-		self.assertRaises(frappe.PermissionError, run, BUY_U, store.issue, "x", [{"item_code": RAW, "qty": 1}])
-		self.assertRaises(frappe.PermissionError, run, STORE_U, purchase.make_po, "x")
-		self.assertRaises(frappe.PermissionError, run, BUY_U, purchase.approvals)
+		self.assertRaises(frappe.PermissionError, run, BUY_U, se_w.issue, "x", [{"item_code": RAW, "qty": 1}])
+		self.assertRaises(frappe.PermissionError, run, STORE_U, po_w.make_po, "x")
+		self.assertRaises(frappe.PermissionError, run, BUY_U, purchase_screens.approvals)
 
 	def test_accounts_receives_like_store(self):
 		"""SK 2-Nov: Accounts has the Receive screen; without a PO it raises the urgent requisition for the CEO."""
 		from sk_app.functions import FUNCTIONS
 
 		self.assertIn("receive", FUNCTIONS["Accounts"]["tiles"])
-		self.assertIsInstance(run(ACC_U, store.open_purchase_orders), list)
-		self.assertIsInstance(run(ACC_U, store.receipts_to_post), list)
-		r = run(ACC_U, requisition.raise_request, [{"item_code": RAW, "qty": 2}], "Planned", None, None, None,
+		self.assertIsInstance(run(ACC_U, store_screens.open_purchase_orders), list)
+		self.assertIsInstance(run(ACC_U, store_screens.receipts_to_post), list)
+		r = run(ACC_U, req_w.raise_request, [{"item_code": RAW, "qty": 2}], "Planned", None, None, None,
 			without_po=1, supplier=SUPPLIER, bill_no="ACC-1")
 		mr = frappe.get_doc("Material Request", r["name"])
-		self.assertEqual((mr.sk_priority, mr.sk_approval, mr.sk_without_po), ("Urgent", requisition.WAITING, 1))
+		self.assertEqual((mr.sk_priority, mr.sk_approval, mr.sk_without_po), ("Urgent", purchase_screens.WAITING, 1))
 		# Accounts still cannot issue material or count stock
-		self.assertRaises(frappe.PermissionError, run, ACC_U, store.issue, "x", [{"item_code": RAW, "qty": 1}])
+		self.assertRaises(frappe.PermissionError, run, ACC_U, se_w.issue, "x", [{"item_code": RAW, "qty": 1}])
 
 	def test_low_stock_goes_to_purchase_requests(self):
 		item = frappe.get_doc("Item", RAW)
@@ -117,14 +126,14 @@ class TestStorePurchase(IntegrationTestCase):
 			"material_request_type": "Purchase"}])
 		item.save()
 		try:
-			low = run(STORE_U, store.low_stock)
+			low = run(STORE_U, store_screens.low_stock)
 			self.assertTrue(any(r["item_code"] == RAW for r in low))
-			r = run(STORE_U, store.order_low, [RAW])
+			r = run(STORE_U, store_screens.order_low, [RAW])
 			# SK 27-Oct: low stock is a requisition too: it waits for the CEO, Purchase sees it only after approval
 			self.assertEqual(frappe.db.get_value("Material Request", r["name"], ["docstatus", "sk_approval"]), (0, "Waiting CEO"))
-			self.assertFalse(any(x["request"] == r["name"] for x in run(BUY_U, purchase.requests)))
-			run(BOSS, requisition.decide, r["name"], 1)
-			reqs = run(BUY_U, purchase.requests)
+			self.assertFalse(any(x["request"] == r["name"] for x in run(BUY_U, purchase_screens.requests)))
+			run(BOSS, req_w.decide, r["name"], 1)
+			reqs = run(BUY_U, purchase_screens.requests)
 			self.assertTrue(any(x["request"] == r["name"] and x["item_code"] == RAW for x in reqs))
 		finally:
 			item.reload()
@@ -132,36 +141,36 @@ class TestStorePurchase(IntegrationTestCase):
 			item.save()
 
 	def _approved(self, qty=10):
-		r = run(STORE_U, requisition.raise_request, [{"item_code": RAW, "qty": qty}], "Planned", note="test")
-		run(BOSS, requisition.decide, r["name"], 1)
+		r = run(STORE_U, req_w.raise_request, [{"item_code": RAW, "qty": qty}], "Planned", note="test")
+		run(BOSS, req_w.decide, r["name"], 1)
 		return r["name"]
 
 	def test_rates_quote_po_receive(self):
 		self._approved()
-		rfq = run(BUY_U, purchase.make_rfq, [{"item_code": RAW, "qty": 10}], [SUPPLIER], add_days(nowdate(), 3))
+		rfq = run(BUY_U, po_w.make_rfq, [{"item_code": RAW, "qty": 10}], [SUPPLIER], add_days(nowdate(), 3))
 		self.assertIn(RAW, rfq["text"])
 		self.assertEqual(frappe.db.get_value("Request for Quotation", rfq["name"], "docstatus"), 0)
-		q = run(BUY_U, purchase.add_quote, SUPPLIER, RAW, 10, 90, 2, rfq=rfq["name"])
-		cmp = run(BUY_U, purchase.compare, RAW)
+		q = run(BUY_U, po_w.add_quote, SUPPLIER, RAW, 10, 90, 2, rfq=rfq["name"])
+		cmp = run(BUY_U, purchase_screens.compare, RAW)
 		self.assertTrue(any(x["name"] == q["name"] for x in cmp["quotes"]))
-		po = run(BUY_U, purchase.make_po, q["name"])
+		po = run(BUY_U, po_w.make_po, q["name"])
 		self.assertFalse(po["needs_approval"])
 		self.assertTrue(po["posted"], frappe.get_all("Comment", filters={"reference_name": po["name"]}, pluck="content"))
-		pos = run(STORE_U, store.open_purchase_orders)
+		pos = run(STORE_U, store_screens.open_purchase_orders)
 		mine = next(p for p in pos if p["name"] == po["name"])
-		pr = run(STORE_U, store.receive, po["name"], [{"po_detail": mine["items"][0]["name"], "qty": 4}], note="challan 418")
+		pr = run(STORE_U, rcpt_w.receive, po["name"], [{"po_detail": mine["items"][0]["name"], "qty": 4}], note="challan 418")
 		doc = frappe.get_doc("Purchase Receipt", pr["name"])
 		self.assertEqual(doc.docstatus, 0)
 		self.assertEqual(doc.items[0].qty, 4)
 
 	def test_big_po_waits_for_sk(self):
 		self._approved()
-		q = run(BUY_U, purchase.add_quote, SUPPLIER, RAW, 10, 100000)
-		po = run(BUY_U, purchase.make_po, q["name"])
+		q = run(BUY_U, po_w.add_quote, SUPPLIER, RAW, 10, 100000)
+		po = run(BUY_U, po_w.make_po, q["name"])
 		self.assertTrue(po["needs_approval"])
-		self.assertTrue(any(p.name == po["name"] for p in run(BOSS, purchase.approvals)))
+		self.assertTrue(any(p.name == po["name"] for p in run(BOSS, purchase_screens.approvals)))
 		self.assertTrue(frappe.db.exists("ToDo", {"allocated_to": BOSS, "reference_name": po["name"]}))
-		r = run(BOSS, purchase.decide, po["name"], True)
+		r = run(BOSS, po_w.decide, po["name"], True)
 		self.assertTrue(r["posted"], frappe.get_all("Comment", filters={"reference_name": po["name"]}, pluck="content"))
 		self.assertEqual(frappe.db.get_value("Purchase Order", po["name"], "docstatus"), 1)
 
@@ -171,9 +180,9 @@ class TestStorePurchase(IntegrationTestCase):
 			"wip_warehouse": self.wip, "fg_warehouse": self.fgw, "source_warehouse": self.stores, "skip_transfer": 0})
 		wo.insert()
 		wo.submit()
-		self.assertTrue(any(w.name == wo.name for w in run(STORE_U, store.open_work_orders)))
+		self.assertTrue(any(w.name == wo.name for w in run(STORE_U, store_screens.open_work_orders)))
 		before = flt(frappe.db.get_value("Bin", {"item_code": RAW, "warehouse": self.stores}, "actual_qty"))
-		r = run(STORE_U, store.issue, wo.name, [{"item_code": RAW, "qty": 5}], taken_by="Ranjit")
+		r = run(STORE_U, se_w.issue, wo.name, [{"item_code": RAW, "qty": 5}], taken_by="Ranjit")
 		self.assertTrue(r["posted"], frappe.get_all("Comment", filters={"reference_name": r["name"]}, pluck="content"))
 		after = flt(frappe.db.get_value("Bin", {"item_code": RAW, "warehouse": self.stores}, "actual_qty"))
 		self.assertEqual(before - after, 5)
@@ -183,8 +192,8 @@ class TestStorePurchase(IntegrationTestCase):
 			"items": [{"item_code": FG, "qty": 1, "rate": 900000, "warehouse": self.fgw, "delivery_date": add_days(nowdate(), 1)}]})
 		so.insert()
 		submit_ungated(so)
-		self.assertTrue(any(o.name == so.name for o in run(STORE_U, store.orders_to_dispatch)))
-		r = run(STORE_U, store.dispatch, so.name, vehicle_no="mh 46 ab 1234", driver_mobile="9876500001")
+		self.assertTrue(any(o.name == so.name for o in run(STORE_U, store_screens.orders_to_dispatch)))
+		r = run(STORE_U, se_w.dispatch, so.name, vehicle_no="mh 46 ab 1234", driver_mobile="9876500001")
 		dn = frappe.get_doc("Delivery Note", r["name"])
 		self.assertEqual(dn.docstatus, 0)
 		self.assertEqual(dn.vehicle_no, "MH 46 AB 1234")
@@ -197,28 +206,28 @@ class TestStorePurchase(IntegrationTestCase):
 			"items": [{"item_code": FG, "qty": 2, "rate": 500000, "warehouse": self.fgw, "delivery_date": add_days(nowdate(), 5)}]})
 		so.insert()
 		submit_ungated(so)
-		rows = [r for r in run(BOSS, erp_flow.orders_to_plan) if r["sales_order"] == so.name]
+		rows = [r for r in run(BOSS, sales_screens.orders_to_plan) if r["sales_order"] == so.name]
 		self.assertEqual(len(rows), 1)
 		self.assertTrue(rows[0]["bom"])
-		wo = run(BOSS, erp_flow.make_work_order, so.name, rows[0]["so_item"])
+		wo = run(BOSS, wo_writer.make_work_order, so.name, rows[0]["so_item"])
 		self.assertEqual(frappe.db.get_value("Work Order", wo["name"], "sales_order"), so.name)
-		self.assertFalse([r for r in run(BOSS, erp_flow.orders_to_plan) if r["sales_order"] == so.name])
-		self.assertRaises(frappe.PermissionError, run, STORE_U, erp_flow.orders_to_plan)
+		self.assertFalse([r for r in run(BOSS, sales_screens.orders_to_plan) if r["sales_order"] == so.name])
+		self.assertRaises(frappe.PermissionError, run, STORE_U, sales_screens.orders_to_plan)
 
 	def test_stock_count_sends_only_differences(self):
-		rows = run(STORE_U, store.count_list, self.stores)
+		rows = run(STORE_U, store_screens.count_list, self.stores)
 		book = next(r["qty"] for r in rows if r["item_code"] == RAW)
-		r = run(STORE_U, store.stock_count, self.stores, [{"item_code": RAW, "qty": book - 2}])
+		r = run(STORE_U, se_w.stock_count, self.stores, [{"item_code": RAW, "qty": book - 2}])
 		self.assertEqual(r["differences"], 1)
 		self.assertEqual(frappe.db.get_value("Stock Reconciliation", r["name"], "docstatus"), 0)
-		self.assertIsNone(run(STORE_U, store.stock_count, self.stores, [{"item_code": RAW, "qty": book}])["name"])
+		self.assertIsNone(run(STORE_U, se_w.stock_count, self.stores, [{"item_code": RAW, "qty": book}])["name"])
 
 	def test_new_item_and_supplier_without_duplicates(self):
-		self.assertTrue(any(r.item_code == RAW for r in run(STORE_U, store.similar_items, "pipe 40x40")))
+		self.assertTrue(any(r.item_code == RAW for r in run(STORE_U, store_screens.similar_items, "pipe 40x40")))
 		name = "SK Test Apex Paint 20 L"
 		if frappe.db.exists("Item", name):
 			frappe.delete_doc("Item", name, force=True)
-		r = run(STORE_U, store.new_item, name, frappe.db.get_value("Item Group", {"is_group": 0}, "name"), "Nos")
+		r = run(STORE_U, item_w.new_item, name, frappe.db.get_value("Item Group", {"is_group": 0}, "name"), "Nos")
 		self.assertEqual(frappe.db.get_value("Item", r["name"], "disabled"), 1)
-		self.assertRaises(frappe.ValidationError, run, STORE_U, store.new_item, name, "x", "Nos")
-		self.assertRaises(frappe.ValidationError, run, BUY_U, purchase.new_supplier, SUPPLIER)
+		self.assertRaises(frappe.ValidationError, run, STORE_U, item_w.new_item, name, "x", "Nos")
+		self.assertRaises(frappe.ValidationError, run, BUY_U, po_w.new_supplier, SUPPLIER)

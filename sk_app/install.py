@@ -53,6 +53,9 @@ def after_migrate():
 
 	ensure_cost_centres()  # SK 28-Oct: Job Work next to Machine Shifting / Machine Maintenance
 	from sk_app.complaints import ensure_setup
+	from sk_app.hiring import ensure_setup as hiring_setup
+
+	hiring_setup()  # SK 17-Nov hiring: WhatsApp / WorkIndia sources, Round 1 / Round 2, 5 skills, question bank, hiring fields
 
 	ensure_setup()
 	from sk_app.issue_desk import ensure_setup as issue_desk_setup
@@ -62,7 +65,7 @@ def after_migrate():
 
 	product_fields()
 	segments.sync_user_permissions()
-	from sk_app.crm import setup_deal_customer_column
+	from sk_app.writers.lead import setup_deal_customer_column
 
 	setup_deal_customer_column()  # Swati item 8
 	from sk_app.lead_status import ensure_statuses
@@ -79,7 +82,7 @@ def after_migrate():
 	tally_names()  # SK 27-Oct: Tally words in ERPNext (Narration on every voucher)
 	from sk_app.cabin_quote import ensure_setup as cabin_quote_setup
 	from sk_app.permissions import ensure_crm_search
-	from sk_app.store import ensure_job_card_cabin
+	from sk_app.writers.stock_entry import ensure_job_card_cabin
 
 	# 27-Oct: two sk-dev updates were rolled back; one setup step that ERPNext refuses on the live data (a master it
 	# needs, a mandatory field) is now logged in Error Log for the AI team and no longer stops the whole update
@@ -93,11 +96,11 @@ def after_migrate():
 
 	_safe(cold_calling_field, "cold calling list")  # SK 27-Oct: cold-calling data out of My Leads
 	from sk_app.marketing_list import ensure_setup as marketing_list_setup
-	from sk_app.requisition import ensure_setup as requisition_setup
+	from sk_app.writers.requisition import ensure_setup as requisition_setup
 	from sk_app.quality import ensure_setup as self_check_setup
 
 	_safe(self_check_setup, "worker self-check")  # SK 28-Oct: worker check sheet before Aditya's quality check
-	from sk_app.hr import ensure_voucher_fields
+	from sk_app.writers.expense import ensure_voucher_fields
 	from sk_app.sub_bills import ensure_setup as sub_bills_setup
 
 	_safe(ensure_voucher_fields, "cash vouchers")  # SK 28-Oct: paid to, project / cabin, no-bill reason; CEO approves all
@@ -129,9 +132,6 @@ def after_migrate():
 	from sk_app.item_input import ensure_setup as item_photo_setup
 
 	_safe(item_photo_setup, "item photo samples")  # SK 28-Oct: material identified from a photo
-	from sk_app.phone_sync import ensure_setup as phone_setup
-
-	_safe(phone_setup, "SK Phone helper")  # SK 28-Oct: calls from company / personal phones into CRM
 	_safe(move_all_once, "cold calling → marketing list")  # SK 28-Oct: cold-calling data is not a lead
 	_safe(auto_tag, "customer segments")  # SK 28-Oct: Cabin / Non-Cabin from Tally vouchers and CRM deals
 	_safe(auto_link, "salesperson on customers and orders")  # SK 28-Oct: graphs had no order in anyone's name
@@ -151,12 +151,12 @@ def after_migrate():
 	from sk_app.function_faq import seed_faq
 
 	seed_faq()  # SK 27-Oct: HR, Production and Accounts FAQ in Training
-	from sk_app.hr import ensure_holiday_setup
+	from sk_app.writers.leave import ensure_holiday_setup
 
 	ensure_holiday_setup()
-	from sk_app.hr import ensure_joiner_fields
+	from sk_app.writers.employee import ensure_joiner_fields
 
-	from sk_app.hr import ensure_thumb_field
+	from sk_app.writers.employee import ensure_thumb_field
 
 	ensure_thumb_field()  # SK 6-Nov: office thumb machine ID, apart from the Optick attendance_device_id
 	ensure_joiner_fields()  # SK 27-Oct: Aadhaar on the Employee for the New joiner photo form  # trial 26-Oct: leave needs a company holiday list

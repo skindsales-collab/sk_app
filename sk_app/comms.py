@@ -3,6 +3,8 @@ time), reminders are CRM Tasks or private calendar Events, and mail goes through
 Paid parts (automatic call recording, WhatsApp Business API inbox) are only shown as locked tiles in the app."""
 
 import frappe
+from sk_app import sales_screens
+from sk_app.writers import lead as lead_w
 from frappe import _
 from frappe.utils import add_days, add_to_date, cint, get_datetime, getdate, now_datetime, strip_html
 
@@ -54,7 +56,7 @@ def my_calls(user: str, days: int = 7) -> dict:
 	for r in rows:
 		key = (r.reference_doctype, r.reference_docname)
 		if r.reference_docname and key not in titles and r.reference_doctype in crm.CRM_DOCTYPES:
-			titles[key] = crm.label(r.reference_doctype, r.reference_docname)
+			titles[key] = sales_screens.label(r.reference_doctype, r.reference_docname)
 		r["title"] = titles.get(key) or r.to
 		r["note_text"] = frappe.db.get_value("FCRM Note", r.note, "title") if r.note else ""
 	return {"today": call_totals(user, today), "week": call_totals(user, week_start, today), "calls": rows}
@@ -80,7 +82,7 @@ def add_call(user: str, doctype: str, name: str, direction: str = "Outgoing", ou
 	if direction not in ("Outgoing", "Incoming"):
 		frappe.throw(_("Unknown call type"))
 	seconds = max(0, int(float(minutes or 0) * 60))
-	return crm.log_contact(user, doctype, name, "Call", outcome, text, None, seconds, direction)
+	return lead_w.log_contact(user, doctype, name, "Call", outcome, text, None, seconds, direction)
 
 
 # ---------- Reminders ----------
@@ -193,7 +195,7 @@ def mail_ready() -> bool:
 
 def _my_records(user: str) -> dict:
 	"""{(doctype, name): title} of the user's open leads and deals."""
-	return {(r["doctype"], r["name"]): r["title"] for r in crm.follow_up(user)}
+	return {(r["doctype"], r["name"]): r["title"] for r in sales_screens.follow_up(user)}
 
 
 def my_mail(user: str, limit: int = 50) -> dict:
@@ -257,5 +259,5 @@ def send_mail(user: str, doctype: str, name: str, to: str, subject: str, message
 	html = "<br>".join(frappe.utils.escape_html(line) for line in message.strip().splitlines())
 	res = make(doctype=doctype, name=name, content=html, subject=subject.strip(), recipients=to, send_email=1,
 		sender_full_name=frappe.utils.get_fullname(user), attachments=attachments)
-	crm._mark_first_response(doctype, name)
+	lead_w._mark_first_response(doctype, name)
 	return res.get("name") if isinstance(res, dict) else res

@@ -19,7 +19,7 @@
 			work_book: "Work Book", dsi: "DSI", problem: "Problem / Suggestion", job_cards: "Job Cards",
 			inspections: "Inspections", stock_alerts: "Stock Alerts", material_requests: "Material Requests",
 			invoice_photo: "Invoice Photo", collections: "Collections", team_scorecards: "Team Scores",
-			site_checklist: "Site Checklist", ceo_view: "CEO View",
+			site_checklist: "Site Checklist", sc_deal: "Which deal?", sc_note: "Anything else seen on site", sc_yes: "Yes", sc_no: "No", sc_fill: "Answer every point and add a site photo", sc_none: "No open deal. Add the lead first.", ceo_view: "CEO View",
 			now: "What to do now", start: "Start", done: "Done", more_time: "Need more time",
 			trouble: "Problem", refresh: "New card", back: "Back", save: "Save", speak: "Speak",
 			photo: "Photo", saved: "Saved", soon: "Coming in a later phase. Use ERPNext for now:",
@@ -81,7 +81,7 @@
 			work_book: "कामाची वही", dsi: "DSI", problem: "समस्या / सूचना", job_cards: "जॉब कार्ड",
 			inspections: "तपासणी", stock_alerts: "स्टॉक सूचना", material_requests: "मटेरियल मागणी",
 			invoice_photo: "बिलाचा फोटो", collections: "वसुली", team_scorecards: "टीम स्कोअर",
-			site_checklist: "साईट चेकलिस्ट", ceo_view: "CEO दृश्य",
+			site_checklist: "साईट चेकलिस्ट", sc_deal: "कोणते डील?", sc_note: "साईटवर आणखी काय दिसले", sc_yes: "हो", sc_no: "नाही", sc_fill: "प्रत्येक मुद्द्याचे उत्तर द्या आणि साईट फोटो जोडा", sc_none: "उघडे डील नाही. आधी लीड टाका.", ceo_view: "CEO दृश्य",
 			now: "आता काय करायचे", start: "सुरू", done: "झाले", more_time: "अजून वेळ हवा",
 			trouble: "अडचण", refresh: "नवीन कार्ड", back: "मागे", save: "जतन करा", speak: "बोला",
 			photo: "फोटो", saved: "जतन झाले", soon: "हे पुढच्या टप्प्यात येईल. सध्या ERPNext वापरा:",
@@ -141,7 +141,7 @@
 	};
 	// mobile-number logins and Home for people in several functions (SK, 26-Oct-2026)
 	Object.assign(T.English, {
-		logins: "Logins", team_leads: "Team Leads", for_everyone: "For everyone", set_pin: "Set your own PIN", set_pin_why: "HR gave you a first PIN. Make your own PIN now (4 to 8 digits). Do not tell anyone.",
+		logins: "Logins", team_leads: "Team Leads", for_everyone: "For everyone", set_pin: "Set your own PIN", set_pin_why: "The CEO gave you a first PIN. Make your own PIN now (4 to 8 digits). Do not tell anyone.",
 		old_pin: "PIN from HR", new_pin: "New PIN", new_pin2: "New PIN again", pin_mismatch: "The two new PINs are not the same",
 		pin_saved: "PIN saved", no_login: "No login yet", has_login: "Have login", closed_login: "Login closed",
 		make_login: "Make login", new_login: "New login", name: "Name", functions_pick: "Function(s)", reports_to: "Reports to",
@@ -152,7 +152,7 @@
 		pin_set_pending: "PIN not set yet",
 	});
 	Object.assign(T.Marathi, {
-		logins: "लॉगिन", team_leads: "टीमचे लीड", for_everyone: "सर्वांसाठी", set_pin: "तुमचा स्वतःचा पिन ठेवा", set_pin_why: "HR ने पहिला पिन दिला आहे. आता तुमचा स्वतःचा पिन ठेवा (4 ते 8 अंक). कोणालाही सांगू नका.",
+		logins: "लॉगिन", team_leads: "टीमचे लीड", for_everyone: "सर्वांसाठी", set_pin: "तुमचा स्वतःचा पिन ठेवा", set_pin_why: "CEO ने पहिला पिन दिला आहे. आता तुमचा स्वतःचा पिन ठेवा (4 ते 8 अंक). कोणालाही सांगू नका.",
 		old_pin: "HR ने दिलेला पिन", new_pin: "नवीन पिन", new_pin2: "नवीन पिन पुन्हा", pin_mismatch: "दोन्ही नवीन पिन सारखे नाहीत",
 		pin_saved: "पिन सेव्ह झाला", no_login: "अजून लॉगिन नाही", has_login: "लॉगिन आहे", closed_login: "लॉगिन बंद",
 		make_login: "लॉगिन बनवा", new_login: "नवीन लॉगिन", name: "नाव", functions_pick: "काम (फंक्शन)", reports_to: "कोणाला रिपोर्ट",
@@ -789,12 +789,12 @@
 	});
 	// change list point 3: CEO "View Member App"
 	Object.assign(T.English, {
-		view_member: "View Member App", viewing: "Viewing", viewing_app: "app", exit_view: "Exit", view_only: "View only: nothing is saved, sent or called in the member's name",
+		view_member: "View Member App", viewing: "Viewing", viewing_app: "app", exit_view: "Exit", work_as: "Work as", working_as: "Working as", work_mark: "entries get the 👑 CEO mark", view_only_short: "View only", by_ceo: "Entered by the CEO on behalf of the member", view_only: "View only: nothing is saved, sent or called in the member's name",
 		idea_q: "💡 Your idea for this page (speak or type)", idea_sent: "Idea sent to the AI & ERP desk", last_active: "last active",
 		view_hint: "Tap a member: the app opens exactly as they see it, with their data. View only.",
 	});
 	Object.assign(T.Marathi, {
-		view_member: "सदस्याचे ॲप पहा", viewing: "पाहत आहे:", viewing_app: "यांचे ॲप", exit_view: "बाहेर", view_only: "फक्त पाहणे: सदस्याच्या नावाने काहीही सेव्ह, पाठवले किंवा कॉल होत नाही",
+		view_member: "सदस्याचे ॲप पहा", viewing: "पाहत आहे:", viewing_app: "यांचे ॲप", exit_view: "बाहेर", work_as: "यांच्या वतीने काम", working_as: "वतीने काम:", work_mark: "नोंदींना 👑 CEO खूण", view_only_short: "फक्त पाहणे", by_ceo: "CEO ने सदस्याच्या वतीने नोंदवले", view_only: "फक्त पाहणे: सदस्याच्या नावाने काहीही सेव्ह, पाठवले किंवा कॉल होत नाही",
 		idea_q: "💡 या पानासाठी तुमची कल्पना (बोला किंवा लिहा)", idea_sent: "कल्पना AI & ERP डेस्ककडे पाठवली", last_active: "शेवटचे सक्रिय",
 		view_hint: "सदस्यावर टॅप करा: ॲप त्यांना दिसते तसेच, त्यांच्या माहितीसह उघडते. फक्त पाहणे.",
 	});
@@ -828,7 +828,7 @@
 		g_addr: "Billing address", g_city: "City", g_state: "State", g_pin: "PIN code", g_cmobile: "Customer mobile", g_cust_ok: "Customer complete ✓",
 		g_qsubmit: "Submit quotation (send to customer)", g_qsubmitted: "Quotation submitted ✓", g_order_date: "Order date", g_po_date: "PO date",
 		g_po_photo: "PO copy (photo / PDF)", g_po_or_photo: "Customer PO number or PO copy", g_won: "Deal Won ✓ Sales Order submitted", g_wait_confirm: "Saved. Waiting for the manager's Confirm; the deal turns Won then",
-		g_count_all: "Count every line (0 if none)", g_reason: "Reason", dmk_leads: "leads", dmk_quotation: "quotes", dmk_sales_order: "orders", dmk_requests: "requests", g_data_missing: "Data missing",
+		g_count_all: "Count every line (0 if none)", g_reason: "Reason", dmk_leads: "leads", dmk_quotation: "quotes", dmk_sales_order: "orders", dmk_requests: "requests", dmk_night: "night check", g_data_missing: "Data missing", r2_screen: "Round 2 on the tablet", r2_feel: "Your overall feel (1-5)", r2_note: "Your note (speak)", r2_final_note: "Your decision is final; Claude only combines it with Round 1 (40 / 60) in the Final card. No video, no face analysis: your eyes, your taps.", r2_claude_q: "Claude's question", r2_own: "your own question", r2_why: "Why this question", r2_evidence: "Round 1", r2_quality: "Answer quality", r2_confidence: "Confidence", r2_attitude: "Attitude", r2_flex: "Flexibility", r2_see: "What you see (tap any)", r2_my_note: "My note (hold to speak)", r2_add_own: "Add my own question (type or speak)", r2_combined: "combined", hiring: "Hiring", round2: "Round 2 (CEO)", interview: "Interview", hr_why: "Candidates from WhatsApp, WorkIndia or walk-in become ERPNext Job Applicants. Round 1 on the tablet or by the bot; Claude scores on its schedule; you send to SK or hold. No salary anywhere.", hr_bot_on: "WhatsApp bot on", hr_bot_off: "WhatsApp bot off: you tap Send by WhatsApp on the ready messages", hr_new: "New candidates", hr_today: "Today's interviews", hr_waiting: "Waiting for SK", hr_handed_list: "Need HR (bot handed over)", hr_handed: "needs HR", hr_add: "Add candidate (resume photo + voice note)", hr_job: "Job", hr_lang: "Language", hr_resume: "Resume (photo / PDF)", hr_note: "Note (speak)", hr_workindia: "Upload WorkIndia Excel", hr_workindia_why: "Export from WorkIndia (Job > Matches > Export to Excel). Age and gender columns are never read; the same mobile is not added twice.", hr_workindia_file: "WorkIndia Excel / CSV", hr_workindia_go: "Load candidates", hr_wi_made: "added", hr_wi_skipped: "skipped (duplicate / no mobile)", hr_console: "Bot test console (Mac)", hr_send_wa: "Send by WhatsApp", hr_free_replies: "free replies this month", hr_reply_by_hand: "reply by hand in the Business app", hr_apply_links: "Apply links per job (for WhatsApp / WorkIndia)", hr_console_why: "Talk to the bot as a candidate. The real WhatsApp link goes live after the hosting move.", hr_console_msg: "Message as the candidate", hr_console_photo: "send a resume photo", hr_console_voice: "send a voice note", hr_no_job: "no job yet", hr_start: "Start Round 1", hr_years: "years", hr_applied: "applied", hr_fit: "Resume fit", hr_fit_wait: "Resume not read yet (Claude's scheduled run reads it; until then HR reads it)", hr_claims: "Claims to check in Round 1", hr_result: "Round 1 result", hr_rank: "rank", hr_reliability: "Reliability", hr_strengths: "Strengths", hr_concerns: "Concerns", hr_resume_check: "Resume check", hr_ask_r2: "Ask in Round 2", hr_not_enough: "not enough answer", hr_scoring_wait: "answers sent; Claude scores at 9:47, 13:47 or 17:47", hr_answers: "Round 1 answers", hr_actions: "Actions", hr_send_sk: "Send to SK", hr_hold: "Hold", hr_selected: "Selected", hr_not_selected: "Not selected", hr_w2: "Received message", hr_w6: "On-hold message", hr_w7: "Not-selected message", hr_book_r1: "Book Round 1", hr_book_r2: "Book Round 2", hr_no_slot: "No free slot", hr_booked: "Booked", hr_added: "Candidate added", hr_status: "Status", hr_open_wa: "Open in WhatsApp and send", hr_claude_notes: "Claude's notes", tr_Attitude: "Attitude", "tr_Role Skill": "Role skill", "tr_Learning Ability": "Learning ability", tr_Flexibility: "Flexibility", tr_Communication: "Communication", iv_consent_en: "Your answers are recorded for hiring only. Kept 6 months if not selected.", iv_consent_mr: "तुमची उत्तरे फक्त भरतीसाठी रेकॉर्ड केली जातील. निवड न झाल्यास ६ महिने ठेवली जातील.", iv_agree: "I agree", iv_q: "Question", iv_hear: "Hear question", iv_speak: "Press and speak", iv_typed: "The answer appears here (or type it)", iv_photo: "Take photo of answer sheet", iv_steps: "Steps right (HR marks)", iv_repeat: "Repeat", iv_skip: "Skip", iv_next: "Next", iv_finish: "Finish, thank you", iv_end: "Finished, thank you", iv_teach_hint: "The app explains a small task; the candidate explains it back. HR marks how many of the 4 steps were right.", iv_hr_only: "HR only: Next saves the answer. The candidate never sees scores.", r2_today: "Round 2 today", r2_waiting: "Waiting for your decision", of: "of", err_hint: "Not saved, please correct and try again · जतन झाले नाही, दुरुस्त करून पुन्हा प्रयत्न करा", ex_filled: "Filled from ERPNext (existing customer)", ex_sales: "salesperson", ex_last_order: "last order", ex_customer: "Customer", ex_old_lead: "old lead", ex_old_deal: "deal", ex_org: "CRM organization", ex_last_activity: "last activity",
 		fl_so_saved: "Sales Order saved", fl_plan_why: "Confirmed orders without a Work Order. Make one per cabin; its stages become job cards.",
 		fl_no_bom: "No BOM yet: Design makes it first", fl_make_wo: "Make Work Order", fl_wo_saved: "Work Order saved",
 		more: "More", grp_work: "My work", grp_me: "Me", grp_help: "Help", leadership: "Leadership & Strategy",
@@ -866,7 +866,7 @@
 		g_addr: "बिलिंग पत्ता", g_city: "शहर", g_state: "राज्य", g_pin: "पिन कोड", g_cmobile: "ग्राहकाचा मोबाईल", g_cust_ok: "ग्राहक माहिती पूर्ण ✓",
 		g_qsubmit: "कोटेशन सबमिट करा (ग्राहकाला पाठवा)", g_qsubmitted: "कोटेशन सबमिट झाले ✓", g_order_date: "ऑर्डर तारीख", g_po_date: "PO तारीख",
 		g_po_photo: "PO ची प्रत (फोटो / PDF)", g_po_or_photo: "ग्राहकाचा PO नंबर किंवा PO ची प्रत", g_won: "डील जिंकली ✓ सेल्स ऑर्डर सबमिट", g_wait_confirm: "सेव्ह झाले. मॅनेजरच्या Confirm ची वाट; मग डील जिंकली दिसेल",
-		g_count_all: "प्रत्येक ओळ मोजा (नसेल तर 0)", g_reason: "कारण", dmk_leads: "लीड", dmk_quotation: "कोटेशन", dmk_sales_order: "ऑर्डर", dmk_requests: "मागण्या", g_data_missing: "माहिती अपूर्ण",
+		g_count_all: "प्रत्येक ओळ मोजा (नसेल तर 0)", g_reason: "कारण", dmk_leads: "लीड", dmk_quotation: "कोटेशन", dmk_sales_order: "ऑर्डर", dmk_requests: "मागण्या", dmk_night: "रात्रीची तपासणी", g_data_missing: "माहिती अपूर्ण", r2_screen: "टॅबलेटवर दुसरी फेरी", r2_feel: "तुमची एकूण भावना (१-५)", r2_note: "तुमची टीप (बोला)", r2_final_note: "तुमचा निर्णय अंतिम; Claude फक्त पहिल्या फेरीशी (४०/६०) जोडून Final कार्ड बनवतो. व्हिडिओ नाही, चेहरा-विश्लेषण नाही: तुमची नजर, तुमचे टॅप.", r2_claude_q: "Claude चा प्रश्न", r2_own: "तुमचा स्वतःचा प्रश्न", r2_why: "हा प्रश्न का", r2_evidence: "पहिली फेरी", r2_quality: "उत्तराचा दर्जा", r2_confidence: "आत्मविश्वास", r2_attitude: "वृत्ती", r2_flex: "लवचिकता", r2_see: "तुम्हाला काय दिसते (टॅप करा)", r2_my_note: "माझी टीप (दाबून बोला)", r2_add_own: "माझा स्वतःचा प्रश्न जोडा (लिहा किंवा बोला)", r2_combined: "एकत्रित", hiring: "भरती", round2: "दुसरी फेरी (CEO)", interview: "मुलाखत", hr_why: "WhatsApp, WorkIndia किंवा प्रत्यक्ष आलेले उमेदवार ERPNext Job Applicant होतात. पहिली फेरी टॅबलेटवर किंवा बॉटने; Claude ठरलेल्या वेळी गुण देतो; तुम्ही SK कडे पाठवा किंवा थांबवा. पगार कुठेही नाही.", hr_bot_on: "WhatsApp बॉट चालू", hr_bot_off: "WhatsApp बॉट बंद (टप्पा २): तयार संदेशावर तुम्ही Send दाबा", hr_new: "नवीन उमेदवार", hr_today: "आजच्या मुलाखती", hr_waiting: "SK ची वाट", hr_handed_list: "HR हवे (बॉटने सोपवले)", hr_handed: "HR हवे", hr_add: "उमेदवार जोडा (बायोडाटा फोटो + आवाज)", hr_job: "पद", hr_lang: "भाषा", hr_resume: "बायोडाटा (फोटो / PDF)", hr_note: "टीप (बोला)", hr_workindia: "WorkIndia एक्सेल अपलोड", hr_workindia_why: "WorkIndia मधून Export करा (Job > Matches > Export to Excel). वय व लिंगाचे कॉलम वाचले जात नाहीत; एकच मोबाइल दोनदा जोडला जात नाही.", hr_workindia_file: "WorkIndia एक्सेल / CSV", hr_workindia_go: "उमेदवार लोड करा", hr_wi_made: "जोडले", hr_wi_skipped: "वगळले (दुबार / मोबाइल नाही)", hr_console: "बॉट चाचणी (Mac)", hr_send_wa: "WhatsApp ने पाठवा", hr_free_replies: "या महिन्यातील मोफत उत्तरे", hr_reply_by_hand: "Business ॲपमधून हाताने उत्तर द्या", hr_apply_links: "पदानुसार अर्जाचे दुवे (WhatsApp / WorkIndia साठी)", hr_console_why: "उमेदवार म्हणून बॉटशी बोला. खरा WhatsApp दुवा होस्टिंग बदलल्यावर चालू होईल.", hr_console_msg: "उमेदवाराचा संदेश", hr_console_photo: "बायोडाटा फोटो पाठवा", hr_console_voice: "व्हॉइस नोट पाठवा", hr_no_job: "पद अजून नाही", hr_start: "पहिली फेरी सुरू", hr_years: "वर्षे", hr_applied: "अर्ज", hr_fit: "बायोडाटा जुळणी", hr_fit_wait: "बायोडाटा अजून वाचला नाही (Claude ठरलेल्या वेळी वाचतो; तोवर HR वाचते)", hr_claims: "पहिल्या फेरीत तपासायचे दावे", hr_result: "पहिल्या फेरीचा निकाल", hr_rank: "क्रमांक", hr_reliability: "विश्वासार्हता", hr_strengths: "बलस्थाने", hr_concerns: "शंका", hr_resume_check: "बायोडाटा तपासणी", hr_ask_r2: "दुसऱ्या फेरीत विचारा", hr_not_enough: "पुरेसे उत्तर नाही", hr_scoring_wait: "उत्तरे पाठवली; Claude ९:४७, १३:४७ किंवा १७:४७ ला गुण देतो", hr_answers: "पहिल्या फेरीची उत्तरे", hr_actions: "कृती", hr_send_sk: "SK कडे पाठवा", hr_hold: "थांबवा", hr_selected: "निवड झाली", hr_not_selected: "निवड नाही", hr_w2: "अर्ज मिळाला संदेश", hr_w6: "थांबवले संदेश", hr_w7: "निवड नाही संदेश", hr_book_r1: "पहिली फेरी ठरवा", hr_book_r2: "दुसरी फेरी ठरवा", hr_no_slot: "मोकळी वेळ नाही", hr_booked: "ठरले", hr_added: "उमेदवार जोडला", hr_status: "स्थिती", hr_open_wa: "WhatsApp मध्ये उघडा व पाठवा", hr_claude_notes: "Claude च्या नोंदी", tr_Attitude: "वृत्ती", "tr_Role Skill": "कामाचे कौशल्य", "tr_Learning Ability": "शिकण्याची क्षमता", tr_Flexibility: "लवचिकता", tr_Communication: "संवाद", iv_consent_en: "Your answers are recorded for hiring only. Kept 6 months if not selected.", iv_consent_mr: "तुमची उत्तरे फक्त भरतीसाठी रेकॉर्ड केली जातील. निवड न झाल्यास ६ महिने ठेवली जातील.", iv_agree: "मला मान्य आहे", iv_q: "प्रश्न", iv_hear: "प्रश्न ऐका", iv_speak: "दाबा आणि बोला", iv_typed: "उत्तर इथे येईल (किंवा लिहा)", iv_photo: "उत्तराचा फोटो घ्या", iv_steps: "बरोबर पायऱ्या (HR ने नोंदवायच्या)", iv_repeat: "पुन्हा", iv_skip: "वगळा", iv_next: "पुढे", iv_finish: "संपले, धन्यवाद", iv_end: "संपले, धन्यवाद", iv_teach_hint: "ॲप छोटे काम समजावते; उमेदवार ते परत सांगतो. ४ पैकी किती पायऱ्या बरोबर ते HR नोंदवते.", iv_hr_only: "फक्त HR: 'पुढे' उत्तर जतन करते. उमेदवाराला गुण दिसत नाहीत.", r2_today: "आज दुसरी फेरी", r2_waiting: "तुमच्या निर्णयाची वाट", of: "पैकी", err_hint: "जतन झाले नाही, दुरुस्त करून पुन्हा प्रयत्न करा · Not saved, please correct and try again", ex_filled: "ERPNext मधून भरले (जुना ग्राहक)", ex_sales: "विक्रेता", ex_last_order: "शेवटची ऑर्डर", ex_customer: "ग्राहक", ex_old_lead: "जुनी लीड", ex_old_deal: "डील", ex_org: "CRM संस्था", ex_last_activity: "शेवटची हालचाल",
 		fl_so_saved: "सेल्स ऑर्डर जतन झाली", fl_plan_why: "वर्क ऑर्डर नसलेल्या निश्चित ऑर्डर. प्रत्येक केबिनसाठी एक बनवा; त्याचे टप्पे जॉब कार्ड होतात.",
 		fl_no_bom: "BOM अजून नाही: आधी डिझाईन बनवेल", fl_make_wo: "वर्क ऑर्डर बनवा", fl_wo_saved: "वर्क ऑर्डर जतन झाली",
 		more: "अधिक", grp_work: "माझे काम", grp_me: "मी", grp_help: "मदत", leadership: "नेतृत्व व रणनीती",
@@ -977,13 +977,13 @@
 		lk_cancelled: "Not checked. Tap the button and touch the finger sensor or look at the phone.",
 		lk_setup: "Set up face / finger", lk_setup_why: "From now on you log in and open the app with your phone's fingerprint or face lock. Your PIN stays as the backup. Your finger and face stay on the phone; nothing is sent.",
 		lk_setup_now: "Set up now", lk_setup_done: "Face / finger set up. Next time tap Login with fingerprint / face. The PIN still works as backup.",
-		lk_reset: "Reset face / finger", lk_reset_q: "Reset face / finger? The person opens with the PIN once and sets it up again.", lk_reset_done: "Face / finger reset", ph_unlink: "Unlink SK Phone", ph_unlink_q: "Unlink this person's SK Phone? Their phone stops sending calls until it is linked again.", ph_unlinked: "SK Phone unlinked" });
+		lk_reset: "Reset face / finger", lk_reset_q: "Reset face / finger? The person opens with the PIN once and sets it up again.", lk_reset_done: "Face / finger reset" });
 	Object.assign(T.Marathi, { lk_locked: "लॉक आहे", lk_touch: "बोट लावा किंवा फोनकडे पहा", lk_open_face: "चेहरा / बोटाने उघडा",
 		lk_ask_ceo: "चालत नाही किंवा नवीन फोन? CEO ला रीसेट करायला सांगा.", lk_pin: "तुमचा पिन (लॉगिनचा)", lk_open: "उघडा", lk_relogin: "पिन विसरलात? पुन्हा लॉगिन करा", lk_use_pin: "पिनने उघडा", lk_no_key: "या फोनवर चेहरा / बोट चालले नाही: पिनने उघडा, मग परत सेट करा.",
 		lk_cancelled: "तपासले नाही. बटण दाबा आणि बोट लावा किंवा फोनकडे पहा.",
 		lk_setup: "चेहरा / बोट लॉक सुरू करा", lk_setup_why: "आता पासून फोनच्या बोट / चेहरा लॉकने लॉगिन करा आणि ॲप उघडा. पिन बॅकअप म्हणून राहतो. बोट आणि चेहरा फोनवरच राहतात; काहीही पाठवले जात नाही.",
 		lk_setup_now: "आत्ता सुरू करा", lk_setup_done: "चेहरा / बोट लॉक तयार. पुढच्या वेळी 'बोट / चेहरा वापरून लॉगिन' दाबा. पिन बॅकअप म्हणून चालतो.",
-		lk_reset: "चेहरा / बोट रीसेट", lk_reset_q: "चेहरा / बोट रीसेट करायचे? ती व्यक्ती एकदा पिनने उघडून परत सुरू करेल.", lk_reset_done: "चेहरा / बोट रीसेट झाले", ph_unlink: "SK Phone काढा", ph_unlink_q: "या व्यक्तीचा SK Phone काढायचा? पुन्हा लिंक करेपर्यंत त्यांचा फोन कॉल पाठवणार नाही.", ph_unlinked: "SK Phone काढला" });
+		lk_reset: "चेहरा / बोट रीसेट", lk_reset_q: "चेहरा / बोट रीसेट करायचे? ती व्यक्ती एकदा पिनने उघडून परत सुरू करेल.", lk_reset_done: "चेहरा / बोट रीसेट झाले" });
 	// main screen Rev 2 (SK 26-Oct)
 	Object.assign(T.English, { k_of: "of", k_no_target: "target not set", k_behind: "behind by", k_on_track: "on track", k_target: "target", k_off: "off target",
 		k_no_data: "No data yet", k_day: "Day", k_per_day: "per day", k_board: "Order board", k_board_open: "1st of month", k_board_now: "now", k_week: "Week", k_month: "Month", kl_Orders: "Orders", kl_Invoices: "Invoices",
@@ -1041,7 +1041,7 @@
 		order_board: "🏗️", job_cards: "🛠️", my_jobs: "🛠️", need_material: "📦", progress_photos: "📸", ready_dispatch: "🚛", lead_time: "⏱️", non_conformance: "❗",
 		my_fixes: "🔧", inspect: "🔍", final_check: "🏁", el_points: "🔌",
 		improvement_inbox: "📥", dept_visits: "🏢", erp_gaps: "🧩", app_users: "👥", change_list: "📋", projects: "🗂️",
-		training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", sales_owner: "🧑‍💼", new_joiner: "🪪", activities: "🎯", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
+		hiring: "🧑‍💼", round2: "🏆", interview: "🎙️", training_progress: "📈", erpnext_desk: "🖥️", lead_sources: "🧲", dir_expenses: "🧾", customers: "🏠", sales_owner: "🧑‍💼", new_joiner: "🪪", activities: "🎯", view_member: "👀", complaints: "🛠️", attendance: "🕘", leave_expense: "🌴",
 		dash_overview: "🏁", dash_daily_review: "🗓️", dash_sales: "💼", dash_marketing: "📣", dash_machine_shifting: "🏗️", dash_job_work: "⚙️", dash_cr100: "🎯", dash_finance: "💰", dash_manufacturing: "🏭", dash_purchase: "🛒", dash_store: "📦", dash_quality: "✅", dash_hr: "👥", dash_ai: "🤖",
 		gateway: "🏛️", day_book: "📅", cabin_discounts: "🏷️", new_product: "🆕", photo_entry: "📷", cold_calls: "🧊", marketing_list: "📇",
 		cash_today: "💰", to_collect: "📥", to_pay: "📤", pay_approvals: "✅", bills_to_post: "🧾", invoices: "🧮", expenses: "💸", segment_pnl: "📊", month_close: "🗓️",
@@ -1133,6 +1133,8 @@
 	Object.assign(T.Marathi, { fp_btn: "पिन विसरलात? CEO ला विचारा", fp_sent: "विनंती CEO कडे गेली. नवीन पिन WhatsApp किंवा कॉलवर मिळेल.", fp_wait: "खूप प्रयत्न झाले. एक तास थांबा.",
 		fp_fail: "पाठवता आले नाही. CEO ना कॉल करा.", fp_requests: "पिन विसरल्याच्या विनंत्या", fp_from: "कुठून:", fp_lock: "लॉक स्क्रीन", fp_login: "लॉगिन पान",
 		fp_check: "आधी खरंच हीच व्यक्ती आहे याची खात्री करा (कॉल करा).", fp_give: "नवीन पिन द्या", fp_no: "मंजूर नाही", fp_no_q: "नवीन पिन न देता ही विनंती बंद करायची?" });
+	// SK 9-Nov: the status list says "Deal Lost"; the stored value stays "Deal Loss" (live CRM), only the label changes
+	function stLabel(name) { return name === "Deal Loss" ? "Deal Lost" : name; }
 	const t = (k) => (T[state.lang] || T.English)[k] || k;
 	const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -1222,9 +1224,11 @@
 
 	async function send(method, args, post, background) {
 		if (state.viewAs && !VIEW_OWN.has(method)) {
-			if (post) throw new Error(t("view_only"));
+			// SK 14-Nov "Work as": the CEO's saves run as the member (record stays theirs, marked CEO); otherwise view only
+			if (post && !state.viewAs.work) throw new Error(t("view_only"));
 			args = { member: state.viewAs.user, method, args: JSON.stringify(args || {}), view: state.view };
-			method = "view_as";
+			method = post ? "work_as" : "view_as";
+			post = true;
 		}
 		const opts = { headers: { Accept: "application/json", "X-Frappe-CSRF-Token": CSRF }, credentials: "same-origin" };
 		if (background) opts.headers["X-SK-Background"] = "1"; // the minute check does not keep the app unlocked
@@ -1737,8 +1741,9 @@
 
 	// fixed at the top on every screen: back / logo, screen title, the person's name and function, language
 	function header(title) {
-		const bar = state.viewAs ? `<div class="sk-viewbar"><span>👀 ${t("viewing")} ${esc(state.viewAs.name)} ${t("viewing_app")}</span>
-			<button data-act="view-idea">💡</button><button data-act="view-exit">✕ ${t("exit_view")}</button></div>` : "";
+		const ceo = state.own && state.own.home && (state.own.home.functions || []).includes("Management");
+		const bar = state.viewAs ? `<div class="sk-viewbar ${state.viewAs.work ? "work" : ""}"><span>${state.viewAs.work ? `✍️ ${t("working_as")} ${esc(state.viewAs.name)} · ${t("work_mark")}` : `👀 ${t("viewing")} ${esc(state.viewAs.name)} ${t("viewing_app")}`}</span>
+			${ceo ? `<button data-act="view-work">${state.viewAs.work ? "👀 " + t("view_only_short") : "✍️ " + t("work_as")}</button>` : ""}<button data-act="view-idea">💡</button><button data-act="view-exit">✕ ${t("exit_view")}</button></div>` : "";
 		return bar + `<header class="sk-head">
 			${state.view !== "home" || nav.idx > 0 ? `<button class="sk-back" data-act="nav-back" title="${t("nav_back")}">‹</button>` : `<img src="/assets/sk_app/icons/icon-192.png" class="sk-logo" alt="SK">`}
 			<button class="sk-back sk-fwd" data-act="nav-fwd" title="${t("nav_fwd")}" ${nav.idx < nav.max ? "" : "disabled"}>›</button>
@@ -1796,7 +1801,7 @@
 		const badge = homeBadges();
 		if (h.must_set_pin && !state.viewAs) return renderSetPin();
 		// never draw the last person's chart or flow (View Member App)
-		if (kpiWho !== whoKey()) { kpiWho = whoKey(); kpiData = null; kpiLoading = false; }
+		if (kpiWho !== whoKey()) { kpiWho = whoKey(); kpiData = null; kpiLoading = false; decideData = null; }
 		if (flowWho !== whoKey()) { flowWho = whoKey(); flowData = null; flowLoading = false; }
 		const tile = (k) => tileBtn(k, badge);
 		const plain = (keys) => `<div class="sk-tiles small">${keys.map(tile).join("")}</div>`;
@@ -1948,21 +1953,24 @@
 			<div class="sk-tiles small ${seq ? "sk-seq" : ""}">${keys.map((k) => tileBtn(k, badge)).join("")}</div></div>`).join("")}</main>`;
 	}
 	// ---------- main screen Rev 2 (SK 26-Oct): one KPI chart against target, 3D flow, "Decide now" ----------
-	let kpiData = null, kpiAt = 0, kpiLoading = false, kpiView = "week";
+	let kpiData = null, kpiAt = 0, kpiLoading = false, kpiView = "week", decideData = null;
 	const kAmt = (v) => (Math.abs(v) >= 1e7 ? `${(v / 1e7).toFixed(1)} Cr` : Math.abs(v) >= 1e5 ? `${(v / 1e5).toFixed(1)} L` : Math.abs(v) >= 1e3 ? `${Math.round(v / 1e3)} K` : `${Math.round(v)}`);
 	// SK 27-Oct: everyone got the Sales graph in View Member App: the chart and the flow were kept from the person
 	// viewed before. They are kept per person now (the login, or the member being viewed).
 	let kpiWho = null;
 	const whoKey = () => (state.viewAs ? state.viewAs.user : "");
 	async function loadKpi(force) {
-		if (kpiWho !== whoKey()) { kpiWho = whoKey(); kpiData = null; kpiLoading = false; }
+		if (kpiWho !== whoKey()) { kpiWho = whoKey(); kpiData = null; kpiLoading = false; decideData = null; }
 		if (kpiLoading || (!force && kpiData && Date.now() - kpiAt < 5 * 60 * 1000)) return paintKpi();
 		kpiLoading = true;
 		const who = kpiWho;
 		let d;
+		// rebuild PR B (Path Switch Home): the "Decide now" items come in one call, read live from ERPNext
+		const decP = newPath("Home") && !state.viewAs ? call("home_decide", {}, false, true).catch(() => null) : Promise.resolve(null);
 		try { d = await call("my_home_kpi", {}, false, true); } catch (e) { d = { chart: null }; }
+		const dec = await decP;
 		if (who !== whoKey()) return; // switched person while loading
-		kpiData = d; kpiAt = Date.now(); kpiLoading = false;
+		kpiData = d; kpiAt = Date.now(); kpiLoading = false; decideData = dec;
 		paintKpi();
 	}
 	let pcResizeT = 0;
@@ -2020,7 +2028,7 @@
 		const act = `<button class="sk-kact ${n ? "on" : ""}" data-go="kpi_actions">🎯 ${t("ka_short")}${n ? ` <b>${n}</b>` : ""}</button>`;
 		// SK 27-Oct: the Actions button sits inside the graph, in its open top-left corner
 		return `<div class="sk-kcard"><div class="sk-khead"><b>${esc(t("kt_" + c.title) !== "kt_" + c.title ? t("kt_" + c.title) : c.title)}</b>${tabs}</div><small>${sub}</small>
-			<div class="sk-kplot">${act}${c.kind === "money" ? moneySvg(c) : c.kind === "projects" ? projectsHtml(c) : trendSvg(c)}</div></div>`;
+			<div class="sk-kplot">${act}${c.kind === "money" ? moneySvg(c) : c.kind === "projects" ? (c.points ? trendSvg(c) : "") + projectsHtml(c) : trendSvg(c)}</div></div>`;
 	}
 	// amount up the side, weeks (running total this month) or months along the bottom (SK 26-Oct)
 	function moneySvg(c) {
@@ -2111,8 +2119,9 @@
 	function pcChartSize() {
 		const box = root.querySelector(".sk-pchome .sk-kpibox");
 		if (!box || !box.clientWidth) return { W: 800, H: 236 };
-		const head = box.querySelector(".sk-khead"), sub = box.querySelector(".sk-kcard > small");
-		const used = 12 + 8 + (head ? head.offsetHeight : 26) + (sub ? sub.offsetHeight : 18) + 26;
+		const head = box.querySelector(".sk-khead"), sub = box.querySelector(".sk-kcard > small"), leg = box.querySelector(".sk-klegend");
+		// SK 9-Nov: the legend row under the chart counts too, else it is cut off at the card's bottom
+		const used = 12 + 8 + (head ? head.offsetHeight : 26) + (sub ? sub.offsetHeight : 18) + 26 + (leg ? leg.offsetHeight + 6 : 24);
 		return { W: Math.max(320, box.clientWidth - 34), H: Math.max(120, Math.min(420, box.clientHeight - used)) };
 	}
 	const KC = { b: "#1878a8", g: "#1e8e3e", o: "#e07b00", r: "#c82030", n: "#5a6472" };
@@ -2174,9 +2183,11 @@
 		const col = (c) => ({ red: "r", amber: "a", green: "g" }[c] || "b");
 		let arrows, arrowsN = 0;
 		if (fn === "Management") {
+			// SK 13-Nov ("how 371, sub totals do not match"): big number = open total of the boxes (393), small line = late (371)
 			arrows = flows.map(([f]) => {
 				const late = f.stages.reduce((n, st) => n + (st.late || 0), 0);
-				return `<button class="sk-ar3 ${late ? "r" : "g"}" data-fnpage="Management">${isPc() ? ar3Svg(late ? "r" : "g", !arrowsN++) : ""}<b>${late}</b><span>${esc(f.label || f.function)}</span>${isPc() && late ? `<em>${late} ${t("fl_late")}</em>` : ""}</button>`;
+				const open = f.stages.reduce((n, st) => n + (st.in_total === false ? 0 : st.count || 0), 0);
+				return `<button class="sk-ar3 ${late ? "r" : "g"}" data-fnpage="Management">${isPc() ? ar3Svg(late ? "r" : "g", !arrowsN++) : ""}<b>${open}</b><span>${esc(f.label || f.function)}</span>${late ? `<em>${late} ${t("fl_late")}</em>` : ""}</button>`;
 			});
 		} else {
 			const [f, fi] = flows[0];
@@ -2192,6 +2203,10 @@
 		// SK 28-Oct mandatory gate: records with data missing / drafts not submitted come first on the main screen
 		const gp = state.home && state.home.gate_pending;
 		if (gp && gp.total) cells.push(`<button class="sk-dec bad" data-go="data_missing"><b>${gp.total}</b><span>⚠️ ${t("g_data_missing")}</span><small>${gp.groups.map((g) => `${g.n} ${t("dmk_" + g.key)}`).join(" · ")}</small><em class="sk-go">✅ ${t("d_fix")}</em></button>`);
+		if (decideData) { // New path of Home: the same cells, the items from home_decide
+			decideData.slice(0, 4 - cells.length).forEach((x) => cells.push(`<button class="sk-dec bad" data-go="${esc(x.go)}"><b>${x.n}</b><span>${esc(x.label)}</span><em class="sk-go">📂 ${t("d_open")}</em></button>`));
+			return cells.length ? `<div class="sk-h sk-dech">⚡ ${t("d_title")}</div><div class="sk-decs">${cells.join("")}</div>` : `<div class="sk-dec ok wide"><b>✓</b><span>${t("d_none")}</span></div>`;
+		}
 		const now = kpiNow();
 		if (now && now.target) {
 			cells.push(`<button class="sk-dec ${now.gap ? "bad" : "ok"}" data-go="my_kpi"><b>${now.gap ? (now.money ? "₹" + kAmt(now.gap) : Math.round(now.gap * 10) / 10 + (now.unit || "")) : "✓"}</b><span>${now.gap ? t("d_gap") : t("k_on_track")}</span>${now.gap ? `<em class="sk-go b">🗓️ ${t("d_plan")}</em>` : ""}</button>`);
@@ -2437,7 +2452,6 @@
 				: `<button class="sk-chip" data-act="login-new" data-i="${i}">✏️ ${t("edit_login")}</button>
 					<button class="sk-chip" data-act="login-reset" data-i="${i}">🔑 ${t("reset_pin")}</button>
 					<button class="sk-chip" data-act="login-face" data-i="${i}">🙂 ${t("lk_reset")}</button>
-					<button class="sk-chip" data-act="login-phone" data-i="${i}">📵 ${t("ph_unlink")}</button>
 					<button class="sk-chip bad" data-act="login-close" data-i="${i}">✕ ${t("close_login")}</button>`;
 			return `<li class="sk-item sk-person"><div><b>${esc(p.name)}</b>${warn}<div class="sk-item-meta">${esc(sub)}</div></div><div class="sk-row sk-wrap">${btn}</div></li>`;
 		};
@@ -2517,7 +2531,7 @@
 		if (i.doctype && i.doctype.startsWith("CRM ") && i.name) open = `<button class="sk-open" data-open="${esc(i.doctype)}" data-name="${esc(i.name)}">›</button>`;
 		if (i.kind === "day_report") open = `<button class="sk-open" data-go="day_report">›</button>`;
 		if (i.kind === "send_file") open = `<button class="sk-open" data-open="${esc(i.ref_doctype)}" data-name="${esc(i.ref_name)}">›</button>`;
-		return `<li class="sk-item k-${esc(i.kind)}"><div><div class="sk-item-title">${esc(i.title)}</div><div class="sk-item-meta">${i.kind === "deal" && i.customer && i.customer !== i.title ? `👤 ${esc(i.customer)} · ` : ""}${(i.kind === "deal" || i.kind.startsWith("lead_")) && i.status ? esc(i.status) + " · " : ""}${esc(i.kind.replace("_", " "))} · ${esc(i.minutes)} ${t("min")} ${due}</div>${i.doctype && i.doctype.startsWith("CRM ") && (i.mobile || i.email) ? contactButtons(i) : ""}</div>${open}</li>`;
+		return `<li class="sk-item k-${esc(i.kind)}"><div><div class="sk-item-title">${i.by_ceo ? `<span class="sk-ceo" title="${t("by_ceo")}">👑</span> ` : ""}${esc(i.title)}</div><div class="sk-item-meta">${i.kind === "deal" && i.customer && i.customer !== i.title ? `👤 ${esc(i.customer)} · ` : ""}${(i.kind === "deal" || i.kind.startsWith("lead_")) && i.status ? esc(i.status) + " · " : ""}${esc(i.kind.replace("_", " "))} · ${esc(i.minutes)} ${t("min")} ${due}</div>${i.doctype && i.doctype.startsWith("CRM ") && (i.mobile || i.email) ? contactButtons(i) : ""}</div>${open}</li>`;
 	}
 
 	async function renderMyDay() {
@@ -2805,6 +2819,20 @@
 		await go(d.view);
 		Object.entries(d.values).forEach(([id, v]) => { const el = document.getElementById(id); if (el && !el.value) el.value = v; });
 		toast(t("draft_back"));
+	}
+
+	// Machine Shifting Site Checklist (SK 10-Nov): pick the deal, 8 Yes / No points, a site photo -> one note on the deal
+	async function renderSiteChecklist() {
+		const [d, checks] = await Promise.all([leadData ? leadData : (leadData = await call("my_leads")), call("site_checks")]);
+		const deals = (d.deals || []).filter((x) => x.doctype === "CRM Deal");
+		if (!deals.length) { root.innerHTML = header(t("site_checklist")) + `<main><p class="sk-soon">${t("sc_none")}</p></main>`; return; }
+		const mr = state.lang === "Marathi";
+		root.innerHTML = header(t("site_checklist")) + `<main class="sk-form">
+			<label class="sk-field"><span>${t("sc_deal")} *</span><select id="sc-deal">${deals.map((x) => `<option value="${esc(x.name)}">${esc(x.title)}</option>`).join("")}</select></label>
+			${checks.map((c) => `<div class="sk-field"><span>${esc(mr ? c.mr : c.en)} *</span><div class="sk-chips" data-sc="${c.key}">
+				<button class="sk-chip" data-act="sc-ans" data-v="Yes">${t("sc_yes")}</button><button class="sk-chip" data-act="sc-ans" data-v="No">${t("sc_no")}</button></div></div>`).join("")}
+			${formField("f-sc-note", t("sc_note"), true)}${photoField()}
+			<button class="sk-btn ok wide" data-act="save-sc">${t("save")}</button></main>`;
 	}
 
 	function renderDsi() {
@@ -3143,8 +3171,8 @@
 		// SK 28-Oct mandatory gate: a status whose data is not there yet is locked (🔒) and says what to fill
 		const locked = (d.gate && d.gate.locked) || {};
 		const chips = statuses.map((s) => locked[s.name] && s.name !== doc.status
-			? `<button class="sk-chip sk-locked" data-act="status-locked" data-why="${esc(locked[s.name].join(" · "))}">🔒 ${esc(s.name)}</button>`
-			: `<button class="sk-chip ${s.name === doc.status ? "on" : ""}" data-act="status" data-status="${esc(s.name)}">${esc(s.name)}</button>`).join("");
+			? `<button class="sk-chip sk-locked" data-act="status-locked" data-why="${esc(locked[s.name].join(" · "))}">🔒 ${esc(stLabel(s.name))}</button>`
+			: `<button class="sk-chip ${s.name === doc.status ? "on" : ""}" data-act="status" data-status="${esc(s.name)}">${esc(stLabel(s.name))}</button>`).join("");
 		const files = d.files.map((f) => `<li class="sk-item"><div><a class="sk-item-title" href="${esc(f.file_url)}" target="_blank">📎 ${esc(f.file_name)}</a><div class="sk-item-meta">${esc(f.owner)} · ${when(f.creation)}</div></div>
 			<button class="sk-open ${f.for_customer ? "sk-send" : ""}" data-act="share-pdf" data-pdf="${esc(f.file_url)}" data-file="${esc(f.file_name)}" ${f.for_customer ? `data-fileid="${esc(f.name)}"` : ""}>${f.for_customer ? "💬 " + t("send") : "↗"}</button>
 			${f.for_customer ? `<button class="sk-open sk-fix" data-act="correction" data-fileid="${esc(f.name)}" data-file="${esc(f.file_name)}">✏️</button>` : ""}</li>`).join("");
@@ -3153,7 +3181,7 @@
 		const notes = d.notes.map((n) => `<li class="sk-item"><div><div class="sk-item-title">${esc(n.title)}</div>${n.content && n.content !== n.title ? `<div>${esc(n.content)}</div>` : ""}<div class="sk-item-meta">${esc(n.owner)} · ${when(n.creation)}</div></div></li>`).join("");
 		const sec = (title, body) => body ? `<h3 class="sk-h">${title}</h3><ul class="sk-list">${body}</ul>` : "";
 		const mobile = current.mobile;
-		root.innerHTML = header(doc.organization || doc.lead_name || name) + `<main>
+		root.innerHTML = header((d.by_ceo ? "👑 " : "") + (doc.organization || doc.lead_name || name)) + `<main>
 			<div class="sk-info"><div class="sk-item-title">${esc(doc.lead_name || "")}</div>
 				<div class="sk-item-meta">${esc(mobile || "")} ${doc.email ? "· " + esc(doc.email) : ""}</div>
 				<div class="sk-item-meta">${[doc.status, doc.source, doc.sk_segment, doc.deal_value ? "₹" + Number(doc.deal_value).toLocaleString("en-IN") : ""].filter(Boolean).map(esc).join(" · ")}</div>
@@ -3247,6 +3275,7 @@
 		root.innerHTML = header(t("new_lead")) + `<main class="sk-form">
 			${photoField("f-card", "📷 " + t("card_photo"))}
 			${formField("f-first", t("cust_name") + " *")}${formField("f-org", t("company"))}
+			<div class="sk-sugg" id="f-org-sg"></div><p class="sk-note" id="f-org-note" hidden></p>
 			<label class="sk-check"><input id="f-nogst" type="checkbox"> ${t("no_gstin")}</label>
 			<label class="sk-field"><span>${t("mobile")} *</span><div class="sk-input-row"><input id="f-mobile" type="tel"></div></label>
 			<label class="sk-field"><span>${t("email")}</span><div class="sk-input-row"><input id="f-email" type="email"></div></label>
@@ -4268,6 +4297,7 @@
 	function exitView() {
 		if (!state.viewAs) return go("home");
 		state.viewAs = null;
+		document.body.classList.remove("sk-working");
 		state.home = state.own.home; state.lang = state.own.lang;
 		crmOpts = null; contacts = null;
 		document.body.classList.remove("sk-viewing");
@@ -4285,6 +4315,222 @@
 		return { "nj-name": p.name || d.first_name, "nj-mobile": d.mobile_no, "nj-email": d.email, "nj-dob": toIso(p.dob), "nj-join": toIso(p.joining),
 			"nj-gender": p.gender, "nj-pan": p.pan, "nj-aadhaar": p.aadhaar, "nj-address": p.address, "nj-emname": p.emergency_name, "nj-emmob": p.emergency_mobile };
 	}
+	// ---------- SK hiring (17-Nov-2026): HR tiles, tablet Round 1, SK's Round 2, bot console ----------
+	let HR = { data: null, iv: null, cand: null };
+	const ivLangCode = (l) => ({ Marathi: "mr-IN", Hindi: "hi-IN", English: "en-IN" }[l] || "mr-IN");
+	const ivText = (q, l) => (l === "Marathi" ? q.mr : l === "Hindi" ? q.hi : q.en) || q.en;
+	const candRow = (c, extra) => `<li class="sk-item"><button class="sk-fu-main" data-act="hr-open" data-name="${esc(c.name)}"><div class="sk-item-title">${esc(c.applicant_name)}${c.fit ? ` · <small>${esc(c.fit)}</small>` : ""}</div>
+		<div class="sk-item-meta">${esc(c.job || t("hr_no_job"))} · ${esc(c.status)} · ${esc(c.source || "")} · ${c.days} ${t("fl_days")}${c.handed ? " · ✋ " + t("hr_handed") : ""}${c.rating ? ` · ${c.rating.toFixed(1)}/5` : ""}</div></button>${extra || ""}</li>`;
+	async function renderHiring() {
+		const d = HR.data = await call("hiring_home");
+		const jobs = `<option value=""></option>${d.jobs.map((j) => `<option value="${esc(j.name)}">${esc(j.job_title)}</option>`).join("")}`;
+		root.innerHTML = header(t("hiring")) + `<main>
+			<p class="sk-note">${t("hr_why")}${d.bot_on ? ` · 🤖 ${t("hr_bot_on")} · ${d.free_replies.sent} / ${d.free_replies.cap} ${t("hr_free_replies")}${d.free_replies.sent >= d.free_replies.cap ? " · ⚠️ " + t("hr_reply_by_hand") : ""}` : ` · ${t("hr_bot_off")}`}</p>
+			<details class="sk-gap" open><summary class="sk-h">🆕 ${t("hr_new")} (${d.new.length})</summary><ul class="sk-list">${d.new.map((c) => candRow(c)).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></details>
+			<details class="sk-gap" open><summary class="sk-h">📅 ${t("hr_today")} (${d.today.length})</summary><ul class="sk-list">${d.today.map((i) => `<li class="sk-item"><button class="sk-fu-main" data-act="hr-open" data-name="${esc(i.applicant)}"><div class="sk-item-title">${esc(i.time)} ${esc(i.applicant_name)}</div><div class="sk-item-meta">${esc(i.job || "")} · ${esc(i.round)} · ${esc(i.status)}${i.mode ? " · " + esc(i.mode) : ""}</div></button>
+				${i.round.startsWith("Round 1") ? `<button class="sk-chip" data-act="hr-interview" data-name="${esc(i.applicant)}">▶ ${t("hr_start")}</button>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></details>
+			<details class="sk-gap"><summary class="sk-h">⏳ ${t("hr_waiting")} (${d.waiting.length})</summary><ul class="sk-list">${d.waiting.map((c) => candRow(c)).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></details>
+			${d.handed.length ? `<details class="sk-gap" open><summary class="sk-h">✋ ${t("hr_handed_list")} (${d.handed.length})</summary><ul class="sk-list">${d.handed.map((c) => candRow(c)).join("")}</ul></details>` : ""}
+			<details class="sk-gap"><summary class="sk-h">🔗 ${t("hr_apply_links")} (${d.jobs.length})</summary><ul class="sk-list">${d.jobs.map((j) => `<li class="sk-item"><div><div class="sk-item-title">${esc(j.job_title)}</div><div class="sk-item-meta">${esc(location.origin + j.apply_link)}</div></div><a class="sk-chip" href="${esc(j.apply_link)}" target="_blank">↗</a></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></details>
+			<details class="sk-gap"><summary class="sk-h">➕ ${t("hr_add")}</summary><div class="sk-form">
+				${formField("hr-name", t("cust_name") + " *")}<label class="sk-field"><span>${t("mobile")} *</span><div class="sk-input-row"><input id="hr-mobile" type="tel"></div></label>
+				<label class="sk-field"><span>${t("hr_job")}</span><select id="hr-job" class="sk-select">${jobs}</select></label>${formField("hr-city", t("mk_city"))}
+				<label class="sk-field"><span>${t("hr_lang")}</span><select id="hr-lang" class="sk-select"><option>Marathi</option><option>Hindi</option><option>English</option></select></label>
+				${photoField("hr-resume", "📷 " + t("hr_resume"), true)}${formField("hr-note", t("hr_note"), true)}
+				<button class="sk-btn ok wide" data-act="hr-add">${t("save")}</button></div></details>
+			<details class="sk-gap"><summary class="sk-h">📄 ${t("hr_workindia")}</summary><div class="sk-form"><p class="sk-note">${t("hr_workindia_why")}</p>
+				<label class="sk-field"><span>${t("hr_job")}</span><select id="wi-job" class="sk-select">${jobs}</select></label>${photoField("wi-file", "📄 " + t("hr_workindia_file"), true)}
+				<button class="sk-btn go wide" data-act="wi-upload">${t("hr_workindia_go")}</button><div id="wi-out"></div></div></details>
+			<details class="sk-gap"><summary class="sk-h">🤖 ${t("hr_console")}</summary><div class="sk-form"><p class="sk-note">${t("hr_console_why")}</p>
+				<label class="sk-field"><span>${t("mobile")}</span><div class="sk-input-row"><input id="bc-mobile" type="tel" value="9000000001"></div></label>${formField("bc-text", t("hr_console_msg"))}
+				<div class="sk-row sk-wrap"><button class="sk-chip" data-act="bc-send">📨 ${t("send")}</button><button class="sk-chip" data-act="bc-send" data-media="image">📷 ${t("hr_console_photo")}</button><button class="sk-chip" data-act="bc-send" data-media="audio">🎤 ${t("hr_console_voice")}</button></div>
+				<pre id="bc-out" class="sk-note" style="white-space:pre-wrap"></pre></div></details></main>`;
+	}
+	async function renderCandidate() {
+		const d = HR.cand = await call("hiring_candidate", { name: HR.candName });
+		const stars = d.scores ? d.scores.traits.map((x) => `<div class="sk-row"><span style="flex:1">${esc(t("tr_" + x.skill) || x.skill)}</span><b>${esc(d.stars[x.skill] || "—")}</b></div>`).join("") : "";
+		const msgBtn = (key, label) => `<button class="sk-chip" data-act="hr-msg" data-key="${key}" data-name="${esc(d.name)}">💬 ${label}</button>`;
+		const slots = (HR.data && HR.data.slots) || [];
+		root.innerHTML = header((d.is_ceo && d.rank ? `#${d.rank}/${d.of} ` : "") + d.applicant_name) + `<main>
+			<section class="sk-card"><div class="sk-item-title">${esc(d.job || t("hr_no_job"))} · ${esc(d.status)} · ${esc(d.source || "")}</div>
+			<div class="sk-item-meta">📱 ${esc(d.mobile || "")} · ${esc(d.city || "")} · ${d.experience ? d.experience + " " + t("hr_years") : ""} · ${esc(d.last_employer || "")} · ${t("hr_applied")} ${esc(d.applied)}</div>
+			${d.fit ? `<p>📄 ${t("hr_fit")}: <b>${esc(d.fit)}</b> — ${esc(d.fit_reason || "")}</p>` : `<p class="sk-note">📄 ${t("hr_fit_wait")}</p>`}
+			${d.claims.length ? `<p class="sk-note">${t("hr_claims")}: ${d.claims.map(esc).join(" · ")}</p>` : ""}
+			<div class="sk-row sk-wrap">${d.files.map((f) => `<a class="sk-chip" href="${esc(f.file_url)}" target="_blank">📎 ${esc(f.file_name)}</a>`).join("")}<a class="sk-chip" href="${esc(d.link)}" target="_blank">🖥️ ERPNext</a></div></section>
+			${d.scores ? `<section class="sk-card"><h3 class="sk-h">📊 ${t("hr_result")}: <b>${d.scores.overall != null ? d.scores.overall + " / 5" : "—"}</b> · ${esc(d.scores.band)}${d.rank ? ` · ${t("hr_rank")} ${d.rank} ${t("of")} ${d.of}` : ""}</h3>${stars}
+				<pre class="sk-note" style="white-space:pre-wrap">${esc(d.scores.feedback || "")}</pre></section>` : d.waiting_claude ? `<p class="sk-note">🧠 ${t("hr_scoring_wait")}</p>` : ""}
+			${d.claude_notes && d.claude_notes.length ? `<section class="sk-card"><h3 class="sk-h">🧠 ${t("hr_claude_notes")}</h3>${d.claude_notes.map((n) => `<p>${esc(n.text)}<br><small class="sk-item-meta">${esc(n.on)}</small></p>`).join("")}</section>` : ""}
+			${d.answers.length ? `<details class="sk-gap"><summary class="sk-h">🎧 ${t("hr_answers")} (${d.answers.length})</summary>${d.answers.map((a) => `<div class="sk-item"><div><div class="sk-item-meta">${esc(a.code)} · ${esc(a.language || "")}</div><div>${esc(a.text || "")}</div>${a.voice ? `<audio controls src="${esc(a.voice)}"></audio>` : ""}${a.photo ? `<a href="${esc(a.photo)}" target="_blank">📷 ${t("photo")}</a>` : ""}</div></div>`).join("")}</details>` : ""}
+			<section class="sk-card"><h3 class="sk-h">${t("hr_actions")}</h3><div class="sk-row sk-wrap">
+				${!d.round1 || d.round1.status === "Pending" ? `<button class="sk-btn go" data-act="hr-interview" data-name="${esc(d.name)}">▶ ${t("hr_start")}</button>` : ""}
+				${["Open", "Replied", "Hold"].includes(d.status) && d.scores ? `<button class="sk-btn ok" data-act="hr-decide" data-action="send_to_sk" data-name="${esc(d.name)}">📤 ${t("hr_send_sk")}</button>` : ""}
+				${["Open", "Replied", "Shortlisted"].includes(d.status) ? `<button class="sk-btn" data-act="hr-decide" data-action="hold" data-name="${esc(d.name)}">⏸ ${t("hr_hold")}</button>` : ""}
+				${d.is_ceo && ["Shortlisted", "Hold"].includes(d.status) ? `<button class="sk-btn go" data-act="hr-r2" data-name="${esc(d.name)}">🎙️ ${t("r2_screen")}</button>` : ""}
+				${d.is_ceo && ["Shortlisted", "Hold"].includes(d.status) ? `<button class="sk-btn ok" data-act="hr-decide" data-action="selected" data-name="${esc(d.name)}">✅ ${t("hr_selected")}</button><button class="sk-btn bad" data-act="hr-decide" data-action="not_selected" data-name="${esc(d.name)}">✖ ${t("hr_not_selected")}</button>` : ""}
+			</div><div class="sk-row sk-wrap sk-gap">${msgBtn("W2", t("hr_w2"))}${msgBtn("W6", t("hr_w6"))}${d.is_ceo ? msgBtn("W7", t("hr_w7")) : ""}</div>
+			<div class="sk-row sk-wrap sk-gap"><select id="hr-slot" class="sk-select">${slots.slice(0, 12).map((s) => `<option value="${s.date}|${s.time}">${s.date} ${s.time}</option>`).join("")}</select>
+				<button class="sk-chip" data-act="hr-book" data-round="Round 1 - Tablet" data-name="${esc(d.name)}">📅 ${t("hr_book_r1")}</button>${d.status === "Shortlisted" || d.is_ceo ? `<button class="sk-chip" data-act="hr-book" data-round="Round 2 - CEO" data-name="${esc(d.name)}">📅 ${t("hr_book_r2")}</button>` : ""}</div>
+			<div id="hr-msg-out"></div></section></main>`;
+	}
+	async function renderInterview() {
+		const d = HR.cand || await call("hiring_candidate", { name: HR.candName });
+		HR.cand = d;
+		if (!HR.iv) {
+			// R10 self-service: the illustrated "SK HR Sahayak", the automated-interviewer disclosure, language, consent read aloud, two ticks and a spoken "I agree"
+			HR.ivLang = HR.ivLang || d.language || "Marathi";
+			const L = HR.ivLang, C = KIOSK_TEXT;
+			document.body.classList.add("sk-kiosk");
+			root.innerHTML = kioskHeader(d) + `<main class="sk-iv">
+				<div class="sk-row sk-wrap">${["Marathi", "Hindi", "English"].map((l) => `<button class="sk-btn sk-iv-huge ${l === L ? "ok" : ""}" data-act="iv-lang" data-lang="${l}">${l === "Marathi" ? "मराठी" : l === "Hindi" ? "हिंदी" : "English"}</button>`).join("")}</div>
+				<p class="sk-note">🤖 ${esc(C.disclosure[L])}</p>
+				<p class="sk-iv-big" id="iv-consent-text">${esc(C.consent[L])}</p>
+				<button class="sk-btn sk-iv-huge" data-act="iv-hear-consent">🔊 ${esc(C.hear[L])}</button>
+				<label class="sk-check sk-iv-big"><input id="iv-adult" type="checkbox"> ${esc(C.adult[L])}</label>
+				<label class="sk-check sk-iv-big"><input id="iv-agree-tick" type="checkbox"> ${esc(C.agree[L])}</label>
+				<button class="sk-btn ok wide sk-iv-huge" data-act="iv-agree">🎤 ${esc(C.say_agree[L])}</button>
+				<p class="sk-note" id="iv-agree-status"></p>
+				${kioskCallOffice(d)}</main>`;
+			return;
+		}
+		const iv = HR.iv, q = iv.questions[iv.i];
+		if (!q) {
+			root.innerHTML = kioskHeader(d) + `<main class="sk-iv"><p class="sk-iv-big">🙏 ${t("iv_end")}<br>संपले, धन्यवाद</p><button class="sk-btn ok wide sk-iv-huge" data-act="iv-finish">${t("iv_finish")}</button></main>`;
+			return;
+		}
+		const isTeach = q.code === "C5", tb = d.teach_back || {};
+		const text = isTeach ? (iv.lang === "Marathi" ? tb.mr : iv.lang === "Hindi" ? tb.hi : tb.en) : ivText(q, iv.lang);
+		root.innerHTML = kioskHeader(d) + `<main class="sk-iv">
+			<div class="sk-item-meta">${esc(d.applicant_name)} · ${esc(d.job || "")} · ${t("iv_q")} ${iv.i + 1} / ${iv.questions.length} · ${esc(iv.lang)}</div>
+			<p class="sk-iv-big" id="iv-qtext">${esc(text)}</p>${isTeach ? `<p class="sk-note">${t("iv_teach_hint")}</p>` : ""}
+			<div class="sk-row sk-wrap"><button class="sk-btn sk-iv-huge" data-act="iv-hear">🔊 ${t("iv_hear")} · प्रश्न ऐका</button>
+			<button class="sk-btn ok sk-iv-huge" id="iv-mic" data-act="iv-mic">🎤 ${t("iv_speak")} · ${KIOSK_TEXT.answer_now[iv.lang]}</button><span id="iv-timer" class="sk-iv-timer"></span></div>
+			<video id="iv-cam" class="sk-iv-cam" autoplay muted playsinline hidden></video>
+			<textarea id="iv-ans" rows="4" placeholder="${t("iv_typed")}">${esc(iv.answers[q.code] || "")}</textarea>
+			${q.is_test ? photoField("iv-photo", "📷 " + t("iv_photo") + " · उत्तराचा फोटो घ्या") : ""}
+			${isTeach ? `<div class="sk-row sk-wrap"><span>${t("iv_steps")}:</span>${[0, 1, 2, 3, 4].map((n) => `<button class="sk-chip ${iv.steps === n ? "on" : ""}" data-act="iv-steps" data-n="${n}">${n}</button>`).join("")}</div>` : ""}
+			<div class="sk-row sk-wrap"><button class="sk-btn sk-iv-huge" data-act="iv-repeat">🔁 ${t("iv_repeat")}</button><button class="sk-btn sk-iv-huge" data-act="iv-skip">⏭ ${t("iv_skip")}</button><button class="sk-btn ok sk-iv-huge" data-act="iv-next">➡️ ${t("iv_next")} · पुढे</button></div>
+			${kioskCallOffice(d)}</main>`;
+	}
+	// ---- R10 self-service pieces: illustrated interviewer, kiosk header, Call office, consent texts (from the server after Start) ----
+	const KIOSK_TEXT = {
+		disclosure: { English: "This is an automated interviewer of SK Ind Tech Solutions, not a live person.", Marathi: "हा SK Ind Tech Solutions चा स्वयंचलित मुलाखतकार आहे, खरी व्यक्ती नाही.", Hindi: "यह SK Ind Tech Solutions का स्वचालित इंटरव्यूअर है, कोई वास्तविक व्यक्ति नहीं." },
+		consent: { English: "Your video and voice will be recorded only for this job. The CEO may view it. Your spoken answers are turned into text and analysed by AI (Claude) and outside speech services. The video is deleted automatically after 7 days, and backup copies are removed within the backup period (up to 30 days). The written answers and scores are kept for 6 months. You may refuse; then you will be interviewed in person with no penalty. To withdraw or ask for deletion at any time, message HR WhatsApp.",
+			Marathi: "तुमचा व्हिडिओ आणि आवाज फक्त या नोकरीसाठी रेकॉर्ड केला जाईल. CEO तो पाहू शकतात. तुमची बोललेली उत्तरे मजकुरात बदलून AI (Claude) आणि बाहेरील स्पीच सेवांकडून तपासली जातात. व्हिडिओ ७ दिवसांनी आपोआप हटवला जातो, आणि बॅकअप प्रती बॅकअप कालावधीत (जास्तीत जास्त ३० दिवस) काढल्या जातात. लिखित उत्तरे आणि गुण ६ महिने ठेवले जातात. तुम्ही नकार देऊ शकता; मग तुमची मुलाखत प्रत्यक्ष होईल, कोणताही तोटा नाही. केव्हाही माघार घेण्यासाठी किंवा हटवण्यासाठी HR WhatsApp वर संदेश पाठवा.",
+			Hindi: "आपका वीडियो और आवाज़ सिर्फ इस नौकरी के लिए रिकॉर्ड होगी. CEO इसे देख सकते हैं. आपके बोले गए जवाब टेक्स्ट में बदलकर AI (Claude) और बाहरी स्पीच सेवाओं से जाँचे जाते हैं. वीडियो 7 दिन बाद अपने आप हट जाता है, और बैकअप प्रतियाँ बैकअप अवधि (अधिकतम 30 दिन) में हटा दी जाती हैं. लिखित जवाब और अंक 6 महीने रखे जाते हैं. आप मना कर सकते हैं; तब आपका इंटरव्यू आमने-सामने होगा, कोई नुकसान नहीं. कभी भी वापस लेने या हटाने के लिए HR WhatsApp पर संदेश भेजिए." },
+		hear: { English: "Hear this", Marathi: "हे ऐका", Hindi: "यह सुनिए" }, adult: { English: "I am 18 or older", Marathi: "मी १८ वर्षांचा/ची किंवा मोठा/मोठी आहे", Hindi: "मैं 18 साल या उससे बड़ा/बड़ी हूँ" },
+		agree: { English: "I agree", Marathi: "मला मान्य आहे", Hindi: "मैं सहमत हूँ" }, say_agree: { English: "Tap, then say \"I agree\"", Marathi: "दाबा, मग \"मला मान्य आहे\" म्हणा", Hindi: "दबाइए, फिर \"मैं सहमत हूँ\" कहिए" },
+		answer_now: { English: "Answer now", Marathi: "आता उत्तर द्या", Hindi: "अब जवाब दीजिए" }, call: { English: "Call office", Marathi: "ऑफिसला फोन करा", Hindi: "ऑफिस को फोन करें" },
+		thanks: { English: "Finished. Thank you! Please hand the tablet back at the office.", Marathi: "संपले. धन्यवाद! कृपया टॅबलेट ऑफिसमध्ये परत द्या.", Hindi: "पूरा हुआ. धन्यवाद! कृपया टैबलेट ऑफिस में वापस दीजिए." },
+		locked: { English: "Locked. Office: enter the PIN to continue.", Marathi: "लॉक. ऑफिस: पुढे जाण्यासाठी PIN टाका.", Hindi: "लॉक. ऑफिस: आगे बढ़ने के लिए PIN डालिए." },
+	};
+	const SAHAYAK = `<svg class="sk-sahayak" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="58" fill="#e8f1fb"/><circle cx="60" cy="46" r="22" fill="#f1c9a5"/><path d="M38 44c0-16 10-24 22-24s22 8 22 24c-4-6-10-9-22-9s-18 3-22 9z" fill="#3b2a1e"/><circle cx="52" cy="47" r="2.5" fill="#222"/><circle cx="68" cy="47" r="2.5" fill="#222"/><path d="M52 57q8 6 16 0" stroke="#a0522d" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M28 112c2-22 14-34 32-34s30 12 32 34z" fill="#2f6fbf"/><rect x="54" y="78" width="12" height="14" rx="3" fill="#fff"/></svg>`;
+	const kioskHeader = (d) => `<div class="sk-kiosk-head">${SAHAYAK}<div><b>SK HR Sahayak</b><br><small>${esc(KIOSK_TEXT.disclosure[HR.ivLang || (HR.iv && HR.iv.lang) || "Marathi"])}</small></div></div>`;
+	const kioskCallOffice = (d) => { const ph = (HR.iv && HR.iv.office_phone) || (HR.data && HR.data.office_phone) || ""; return ph ? `<a class="sk-btn wide sk-iv-huge sk-call-office" href="tel:${esc(ph)}">📞 ${esc(KIOSK_TEXT.call[HR.ivLang || (HR.iv && HR.iv.lang) || "Marathi"])}</a>` : ""; };
+	function kioskEnd() {
+		const L = (HR.iv && HR.iv.lang) || HR.ivLang || "Marathi";
+		root.innerHTML = kioskHeader() + `<main class="sk-iv"><p class="sk-iv-big">🙏 ${esc(KIOSK_TEXT.thanks[L])}</p><p class="sk-note">${esc(KIOSK_TEXT.locked[L])}</p>
+			<div class="sk-row"><input id="iv-pin" type="password" inputmode="numeric" maxlength="6" placeholder="PIN"><button class="sk-btn ok sk-iv-huge" data-act="iv-unlock">🔓</button></div>${kioskCallOffice()}</main>`;
+		if (window.speechSynthesis) { const u = new SpeechSynthesisUtterance(KIOSK_TEXT.thanks[L]); u.lang = ivLangCode(L); speechSynthesis.speak(u); }
+	}
+	// R9.4 / R10: each answer is recorded as video (360p, about 2 MB a minute, up to 2 minutes) with live speech-to-text;
+	// the speech measures (start delay, length, pace, long pauses) are information only, never a score
+	let ivRec = null, ivAudio = null, ivChunks = [], ivMeta = null, ivTimerId = null, ivVideo = false;
+	function ivListen(btn, opts) {
+		const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+		const box = document.getElementById("iv-ans");
+		if (ivRec || (ivAudio && ivAudio.state === "recording")) return ivStop(btn);
+		if (!SR) toast(t("mic_unsupported"), true);
+		ivMeta = { t0: Date.now(), first: null, last: null, pauses: 0, words: 0 };
+		if (SR) {
+			const rec = new SR(); rec.lang = ivLangCode(HR.iv ? HR.iv.lang : HR.ivLang); rec.interimResults = true; rec.continuous = true;
+			const base = box && box.value ? box.value.trim() + " " : "";
+			rec.onresult = (ev) => { let s = ""; for (let i = 0; i < ev.results.length; i++) s += ev.results[i][0].transcript + " "; const now = Date.now();
+				if (!ivMeta.first) ivMeta.first = now; else if (ivMeta.last && now - ivMeta.last > 3000) ivMeta.pauses += 1; ivMeta.last = now;
+				if (box) box.value = base + s.trim(); ivMeta.words = s.trim().split(/\s+/).filter(Boolean).length; if (opts && opts.onText) opts.onText(s); };
+			rec.onerror = () => { ivRec = null; };
+			rec.onend = () => { ivRec = null; if (btn) btn.classList.remove("on"); };
+			rec.start(); ivRec = rec;
+		}
+		if (btn) btn.classList.add("on");
+		if (navigator.mediaDevices && window.MediaRecorder) {
+			const want = (opts && opts.video === false) ? { audio: true } : { audio: true, video: { width: { ideal: 640 }, height: { ideal: 360 }, facingMode: "user" } };
+			navigator.mediaDevices.getUserMedia(want).catch(() => navigator.mediaDevices.getUserMedia({ audio: true })).then((stream) => {
+				ivVideo = stream.getVideoTracks().length > 0;
+				const cam = document.getElementById("iv-cam"); if (cam && ivVideo) { cam.srcObject = stream; cam.hidden = false; }
+				ivChunks = []; ivAudio = new MediaRecorder(stream, ivVideo ? { videoBitsPerSecond: 250000, audioBitsPerSecond: 32000 } : {});
+				ivAudio.ondataavailable = (e) => ivChunks.push(e.data); ivAudio.onstop = () => { stream.getTracks().forEach((tr) => tr.stop()); if (cam) cam.hidden = true; };
+				ivAudio.start(1000);
+				const limit = (opts && opts.maxSec) || 120, el = document.getElementById("iv-timer");
+				ivTimerId = setInterval(() => { const s = Math.round((Date.now() - ivMeta.t0) / 1000); if (el) el.textContent = `⏺ ${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")} / ${Math.floor(limit / 60)}:${String(limit % 60).padStart(2, "0")}`; if (s >= limit) ivStop(btn); }, 500);
+			}).catch(() => null);
+		}
+	}
+	function ivStop(btn) {
+		if (ivRec) { try { ivRec.stop(); } catch (e) { /* stopped */ } ivRec = null; }
+		if (ivAudio && ivAudio.state !== "inactive") ivAudio.stop();
+		if (ivTimerId) { clearInterval(ivTimerId); ivTimerId = null; }
+		if (btn) btn.classList.remove("on");
+		const el = document.getElementById("iv-timer"); if (el) el.textContent = "";
+	}
+	function ivMeasures() {
+		if (!ivMeta) return null;
+		const end = Date.now();
+		return { start_delay_s: ivMeta.first ? (ivMeta.first - ivMeta.t0) / 1000 : 0, duration_s: (end - ivMeta.t0) / 1000, long_pauses: ivMeta.pauses, words: ivMeta.words };
+	}
+	async function ivVoiceUrl() {
+		if (!ivAudio || !ivChunks.length) return null;
+		try { const blob = new Blob(ivChunks, { type: ivAudio.mimeType || (ivVideo ? "video/webm" : "audio/webm") }); ivChunks = []; const f = new File([blob], `${ivVideo ? "video" : "voice"}_${Date.now()}.webm`, { type: blob.type }); return await uploadRetry(f); } catch (e) { return null; }
+	}
+	async function renderRound2() {
+		const d = await call("hiring_round2");
+		root.innerHTML = header(t("round2")) + `<main>
+			<details class="sk-gap" open><summary class="sk-h">📅 ${t("r2_today")} (${d.today.length})</summary><ul class="sk-list">${d.today.map((c) => candRow(c)).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></details>
+			<details class="sk-gap" open><summary class="sk-h">⏳ ${t("r2_waiting")} (${d.waiting.length})</summary><ul class="sk-list">${d.waiting.map((c) => candRow(c)).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul></details>
+			${d.jobs.map((j) => `<details class="sk-gap"><summary class="sk-h">🏆 ${esc(j.title)} (${j.rows.length})</summary><ul class="sk-list">${j.rows.map((c) => `<li class="sk-item"><button class="sk-fu-main" data-act="hr-open" data-name="${esc(c.name)}"><div class="sk-item-title">#${c.rank} ${esc(c.applicant_name)} · <b>${c.overall != null ? c.overall + "/5" : "—"}</b> · ${esc(c.band || t("hr_scoring_wait"))}</div><div class="sk-item-meta">${esc(c.one_line || "")} · ${esc(c.status)}</div></button></li>`).join("")}</ul></details>`).join("")}</main>`;
+	}
+
+	// SK's Round 2 on the tablet (R8, 17-Nov): one question at a time, Round 1 evidence beside it, SK's taps on the right
+	async function renderRound2Interview() {
+		if (!HR.r2) {
+			const r = await call("hiring_r2_start", { applicant: HR.candName }, true);
+			HR.r2 = { ...r, i: 0, entries: Object.fromEntries((r.answers || []).map((x) => [x.q, x])) };
+			if (!HR.r2.questions.length) HR.r2.questions = [];
+		}
+		const r = HR.r2, q = r.questions[r.i];
+		const r1 = r.round1, lang = state.lang === "Marathi";
+		if (!q) {
+			root.innerHTML = header(t("r2_screen")) + `<main class="sk-iv"><h2>${esc(r.applicant_name)} · ${esc(r.job || "")}</h2>
+				<p class="sk-iv-big">${t("r2_feel")} · एकूण भावना</p><div class="sk-row sk-wrap" id="r2-feel">${[1, 2, 3, 4, 5].map((n) => `<button class="sk-btn sk-iv-huge" data-act="r2-feel" data-n="${n}">${"★".repeat(n)}</button>`).join("")}</div>
+				${formField("r2-final-note", t("r2_note"), true)}
+				<div class="sk-row sk-wrap"><button class="sk-btn ok sk-iv-huge" data-act="r2-finish" data-d="selected">✅ ${t("hr_selected")} · निवड</button><button class="sk-btn sk-iv-huge" data-act="r2-finish" data-d="hold">⏸ ${t("hr_hold")} · थांबवा</button><button class="sk-btn bad sk-iv-huge" data-act="r2-finish" data-d="not_selected">✖ ${t("hr_not_selected")} · निवड नाही</button></div>
+				<p class="sk-note">${t("r2_final_note")}</p></main>`;
+			return;
+		}
+		const e = r.entries[q.q] || { tags: [] };
+		const trait = (q.why || "").toLowerCase();
+		const ev = r1 ? r1.traits.map((x) => `${esc(t("tr_" + x.skill) || x.skill)} ${esc("★".repeat(x.score || 0) + "☆".repeat(5 - (x.score || 0)))}`).join(" · ") : t("hr_scoring_wait");
+		const star = (k, label) => `<div class="sk-row"><span style="flex:1">${label}</span>${[1, 2, 3, 4, 5].map((n) => `<button class="sk-chip ${e[k] === n ? "on" : ""}" data-act="r2-rate" data-k="${k}" data-n="${n}">${n}</button>`).join("")}</div>`;
+		root.innerHTML = header(t("r2_screen")) + `<main class="sk-iv sk-r2"><div class="sk-item-meta">${esc(r.applicant_name)} · ${esc(r.job || "")} · ${t("iv_q")} ${r.i + 1} / ${r.questions.length}${q.kind === "claude" ? " · 🧠 " + t("r2_claude_q") : q.kind === "own" ? " · ✍️ " + t("r2_own") : ""}</div>
+			<div class="sk-r2-grid"><section class="sk-card">
+				<p class="sk-iv-big" id="iv-qtext">${esc(lang && q.mr ? q.mr : q.q)}</p>${q.mr && !lang ? `<p class="sk-note">${esc(q.mr)}</p>` : ""}
+				${q.why ? `<p class="sk-note">💡 ${t("r2_why")}: ${esc(q.why)}</p>` : ""}
+				<p class="sk-note">📊 ${t("r2_evidence")}: ${ev}</p>${r1 && r1.feedback ? `<details><summary>${t("hr_result")}</summary><pre class="sk-note" style="white-space:pre-wrap">${esc(r1.feedback)}</pre></details>` : ""}
+				${(r.round1_answers || []).length ? `<details><summary>▶ ${t("hr_answers")} (${r.round1_answers.length})</summary>${r.round1_answers.map((a) => `<div class="sk-item"><div><div class="sk-item-meta">${esc(a.code)}${a.duration_s ? ` · ${Math.round(a.duration_s)} s` : ""}${a.wpm ? ` · ${a.wpm} wpm` : ""}</div><div>${esc(a.text || "")}</div>${a.video ? `<video controls preload="none" src="${esc(a.video)}" style="max-width:100%"></video>` : a.voice ? `<audio controls src="${esc(a.voice)}"></audio>` : ""}</div></div>`).join("")}</details>` : ""}
+				<div class="sk-row sk-wrap"><button class="sk-btn" data-act="iv-hear">🔊 ${t("iv_hear")}</button><button class="sk-btn" data-act="r2-back">◀ ${t("nav_back")}</button><button class="sk-btn" data-act="r2-skip">⏭ ${t("iv_skip")}</button><button class="sk-btn ok" data-act="r2-next">${t("iv_next")} ▶</button></div>
+				<div class="sk-row"><input id="r2-ownq" placeholder="${t("r2_add_own")}"><button class="sk-chip" data-act="r2-own">➕</button></div>
+			</section><section class="sk-card">
+				${star("quality", t("r2_quality"))}${star("confidence", t("r2_confidence"))}${star("attitude", t("r2_attitude"))}${star("flexibility", t("r2_flex"))}
+				<p><b>${t("r2_see")}</b></p><div class="sk-row sk-wrap">${r.tags.map((tag) => `<button class="sk-chip ${(e.tags || []).includes(tag) ? "on" : ""}" data-act="r2-tag" data-tag="${esc(tag)}">${esc(lang ? (r.tags_mr[tag] || tag) : tag)}</button>`).join("")}</div>
+				<label class="sk-field"><span>🎤 ${t("r2_my_note")}</span><div class="sk-input-row"><textarea id="r2-note" rows="3">${esc(e.note || "")}</textarea>${micBox("r2-note")}</div></label>
+			</section></div></main>`;
+	}
+	function r2Entry() {
+		const q = HR.r2.questions[HR.r2.i];
+		const e = HR.r2.entries[q.q] || (HR.r2.entries[q.q] = { q: q.q, tags: [] });
+		e.note = val("r2-note");
+		return e;
+	}
+
 	function renderNewJoiner() {
 		root.innerHTML = header(t("new_joiner")) + `<main class="sk-form"><p class="sk-note">${t("nj_why")}</p>
 			${photoField("nj-photo1", "📷 " + t("nj_form_photo"))}${photoField("nj-photo2", "📷 " + t("nj_id_photo"))}
@@ -4498,6 +4744,22 @@
 				}
 				const d = await call("customers", { tab: "pick", q: el.value });
 				if (dl) dl.innerHTML = d.rows.map((r) => `<option value="${esc(r.name)}">${esc(r.customer_name)}${r.segment ? " · " + esc(r.segment) : ""}</option>`).join("");
+			}, 300);
+			return;
+		}
+		if (el.id === "f-org" || el.id === "f-first" || el.id === "f-mobile") {
+			// SK 14-Nov: an existing customer's old data appears while typing; one tap fills the form (nothing typed twice)
+			clearTimeout(fuTimer);
+			fuTimer = setTimeout(async () => {
+				const sg = document.getElementById("f-org-sg");
+				if (!sg) return;
+				const q = el.value.trim();
+				if (q.length < 3 || (el.id === "f-mobile" && q.replace(/\D/g, "").length < 6)) { sg.innerHTML = ""; return; }
+				const rows = await call("lead_lookup", { q }).catch(() => []);
+				if (val(el.id).trim() !== q) return;
+				S.leadPicks = rows;
+				const kind = (r) => r.type === "Customer" ? "🏢 " + t("ex_customer") : r.type === "Lead" ? "📇 " + t("ex_old_lead") + (r.status ? " · " + r.status : "") + (r.owner ? " · " + r.owner : "") : r.type === "Deal" ? "🤝 " + t("ex_old_deal") + (r.status ? " · " + r.status : "") + (r.owner ? " · " + r.owner : "") : "🏷 " + t("ex_org");
+				sg.innerHTML = rows.map((r, i) => `<button type="button" class="sk-sg" data-leadpick="${i}"><span><b>${esc(r.customer_name)}</b><small>${esc([kind(r), r.contact, r.mobile, r.segment, r.gstin ? "GSTIN " + r.gstin : (r.customer ? t("no_gstin") : ""), r.salesperson ? t("ex_sales") + " " + r.salesperson : "", r.last_order ? t("ex_last_order") + " " + r.last_order : r.last_activity ? t("ex_last_activity") + " " + r.last_activity : ""].filter(Boolean).join(" · "))}</small></span></button>`).join("");
 			}, 300);
 			return;
 		}
@@ -6102,7 +6364,7 @@
 		document.body.prepend(a);
 	}
 
-	const LIVE_VIEWS = { data_missing: renderDataMissing, fnpage: () => renderFnPage(), more: renderMore, leadership: renderLeadership, to_plan: renderToPlan, my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), cold_calls: renderColdCalls, marketing_list: () => renderMarketing(), my_deals: () => renderLeads("my_deals"),
+	const LIVE_VIEWS = { hiring: renderHiring, hiring_cand: renderCandidate, interview: renderInterview, round2: renderRound2, r2_interview: renderRound2Interview, data_missing: renderDataMissing, fnpage: () => renderFnPage(), more: renderMore, leadership: renderLeadership, to_plan: renderToPlan, my_day: renderMyDay, my_leads: () => renderLeads("my_leads"), cold_calls: renderColdCalls, marketing_list: () => renderMarketing(), my_deals: () => renderLeads("my_deals"), site_checklist: renderSiteChecklist,
 		my_kpi: renderKpi, dsi: renderDsi, el_points: renderElPoints, kpi_actions: renderKpiActions, work_book: () => renderWork("work_book"), problem: renderDesk,
 		follow_up: renderFollowUp, new_lead: renderNewLead, training: renderTraining, day_report: renderDayReport,
 		team_reports: renderTeamReports, calendar: renderCalendar, detail: () => renderDetail(current.doctype, current.name),
@@ -6406,14 +6668,6 @@
 				toast(`✓ ${t("lk_reset_done")} (${r.reset})`);
 				return;
 			}
-			if (act === "login-phone") {
-				// SK 28-Oct: a phone lost or changed hands stops sending calls
-				const p = root._people && root._people[Number(el.dataset.i)];
-				if (!p || !confirm(`${p.name}: ${t("ph_unlink_q")}`)) return;
-				const r = await call("phone_unlink", { user: p.user }, true);
-				toast(`✓ ${t("ph_unlinked")} (${r.unlinked})`);
-				return;
-			}
 			if (act === "pin-save") {
 				if (val("p-new") !== val("p-new2")) return toast(t("pin_mismatch"), true);
 				el.disabled = true;
@@ -6483,6 +6737,20 @@
 				await call("set_language", { language: state.lang }, true);
 				state.card = await call("next_card", { force: 1 }, true);
 				return go(state.view);
+			}
+			if (act === "sc-ans") {
+				el.parentElement.querySelectorAll(".sk-chip").forEach((b) => b.classList.toggle("on", b === el));
+				return;
+			}
+			if (act === "save-sc") {
+				const answers = {};
+				root.querySelectorAll("[data-sc]").forEach((g) => { const on = g.querySelector(".sk-chip.on"); answers[g.dataset.sc] = on ? on.dataset.v : null; });
+				const photo = await photoUrl();
+				if (Object.values(answers).some((v) => !v) || !photo) return toast(t("sc_fill"));
+				el.disabled = true;
+				await call("save_site_checklist", { deal: val("sc-deal"), answers: JSON.stringify(answers), note: val("f-sc-note"), photo }, true).catch((e) => { el.disabled = false; throw e; });
+				toast(t("saved"));
+				return go("home");
 			}
 			if (act === "save-dsi") {
 				const chip = document.querySelector("#dsi-type .sk-chip.on");
@@ -6659,6 +6927,13 @@
 				return go("leave_expense");
 			}
 			if (act === "view-enter") return enterView(el.dataset.user, el.dataset.uname);
+			if (act === "view-work") {
+				if (!state.viewAs) return;
+				state.viewAs.work = !state.viewAs.work;
+				document.body.classList.toggle("sk-working", state.viewAs.work);
+				toast(state.viewAs.work ? `✍️ ${t("working_as")} ${state.viewAs.name}` : t("view_only"));
+				return go(state.view);
+			}
 			if (act === "view-exit") return exitView();
 			if (act === "view-idea") {
 				sheet(`<h3 class="sk-h">💡 ${esc(state.viewAs.name)} · ${esc(t(state.view))}</h3>${formField("vi-text", t("idea_q"), true)}
@@ -6953,6 +7228,164 @@
 				current = { doctype: "CRM Deal", name: r.deal };
 				return go("detail");
 			}
+			if (el.dataset.leadpick != null) {
+				const r = (S.leadPicks || [])[Number(el.dataset.leadpick)];
+				if (!r) return;
+				const fill = window.skFillFromExisting({ first_name: val("f-first") }, r);
+				S.leadCustomer = r.customer || null;  // the ERPNext customer goes on the lead (sk_customer): no second customer later
+				[["f-org", fill.organization], ["f-first", fill.first_name], ["f-mobile", fill.mobile_no], ["f-email", fill.email]].forEach(([id, v]) => { const i = document.getElementById(id); if (i && v) i.value = v; });
+				const seg = document.getElementById("f-segment");
+				if (seg && fill.segment && [...seg.options].some((o) => o.value === fill.segment)) seg.value = fill.segment;
+				const src = document.getElementById("f-source");
+				if (src && [...src.options].some((o) => o.value === fill.source)) src.value = fill.source;
+				const ng = document.getElementById("f-nogst");
+				if (ng) ng.checked = !!fill.no_gstin;
+				const sg = document.getElementById("f-org-sg");
+				if (sg) sg.innerHTML = "";
+				const note = document.getElementById("f-org-note");
+				if (note) { note.hidden = false; note.textContent = `✅ ${t("ex_filled")}: ${r.customer_name}${r.gstin ? " · GSTIN " + r.gstin : ""}${r.salesperson ? " · " + t("ex_sales") + " " + r.salesperson : ""}`; }
+				toast(t("ex_filled"));
+				runCheck();
+				return;
+			}
+			if (act === "hr-r2") { HR.candName = el.dataset.name; HR.r2 = null; return go("r2_interview"); }
+			if (act === "r2-rate") { const e = r2Entry(); e[el.dataset.k] = Number(el.dataset.n); el.parentElement.querySelectorAll(".sk-chip").forEach((c) => c.classList.toggle("on", c === el)); return; }
+			if (act === "r2-tag") { const e = r2Entry(); const tag = el.dataset.tag; e.tags = e.tags.includes(tag) ? e.tags.filter((x) => x !== tag) : [...e.tags, tag]; el.classList.toggle("on"); return; }
+			if (act === "r2-own") {
+				const q = val("r2-ownq"); if (!q) return toast(t("r2_add_own"), true);
+				HR.r2.questions.splice(HR.r2.i + 1, 0, { q, mr: "", why: "", kind: "own" }); document.getElementById("r2-ownq").value = ""; toast("➕ " + t("r2_own")); return;
+			}
+			if (act === "r2-next" || act === "r2-skip" || act === "r2-back") {
+				if (act === "r2-next") { const e = r2Entry(); el.disabled = true; await call("hiring_r2_save", { interview: HR.r2.interview, entry: JSON.stringify(e) }, true); }
+				HR.r2.i += act === "r2-back" ? -1 : 1; if (HR.r2.i < 0) HR.r2.i = 0;
+				return renderRound2Interview();
+			}
+			if (act === "r2-feel") { HR.r2.feel = Number(el.dataset.n); root.querySelectorAll("[data-act=r2-feel]").forEach((b) => b.classList.toggle("ok", b === el)); return; }
+			if (act === "r2-finish") {
+				if (!HR.r2.feel) return toast(t("r2_feel"), true);
+				el.disabled = true;
+				const r = await call("hiring_r2_finish", { interview: HR.r2.interview, feel: HR.r2.feel, decision: el.dataset.d, note: val("r2-final-note") }, true);
+				toast(`${t("hr_status")}: ${r.status}${r.combined ? ` · ${t("r2_combined")} ${r.combined}` : ""}`);
+				if (r.message && r.message.wa_link) window.open(r.message.wa_link, "_blank");
+				HR.r2 = null; HR.cand = null;
+				return go("hiring_cand");
+			}
+			if (act === "hr-open") { HR.candName = el.dataset.name; HR.iv = null; return go("hiring_cand"); }
+			if (act === "hr-interview") { HR.candName = el.dataset.name; HR.cand = null; HR.iv = null; return go("interview"); }
+			if (act === "hr-add") {
+				if (!mustFill([["hr-name", t("cust_name")], ["hr-mobile", t("mobile"), val("hr-mobile").replace(/\D/g, "").length >= 10]])) return;
+				el.disabled = true;
+				const r = await call("hiring_add_candidate", { applicant_name: val("hr-name"), mobile: val("hr-mobile"), job: val("hr-job"), city: val("hr-city"), language: val("hr-lang"), resume: await photoUrl("hr-resume"), note: val("hr-note") }, true);
+				toast(`${t("hr_added")}: ${r.applicant_name}`);
+				HR.candName = r.name; HR.iv = null;
+				return go("hiring_cand");
+			}
+			if (act === "hr-decide") {
+				el.disabled = true;
+				const r = await call("hiring_decide", { name: el.dataset.name, action: el.dataset.action }, true);
+				toast(`${t("hr_status")}: ${r.status}`);
+				if (r.message && r.message.wa_link) window.open(r.message.wa_link, "_blank");
+				return go(state.view);
+			}
+			if (act === "hr-msg") {
+				const m = await call("hiring_message", { name: el.dataset.name, key: el.dataset.key });
+				const out = document.getElementById("hr-msg-out");
+				if (out) out.innerHTML = `<pre class="sk-note" style="white-space:pre-wrap">${esc(m.text)}</pre>${m.wa_link ? `<a class="sk-btn go wide" href="${esc(m.wa_link)}" target="_blank">💬 ${t("hr_open_wa")}</a>` : ""}`;
+				return;
+			}
+			if (act === "hr-book") {
+				const [date, time] = (val("hr-slot") || "|").split("|");
+				if (!date) return toast(t("hr_no_slot"), true);
+				el.disabled = true;
+				const r = await call("hiring_book", { applicant: el.dataset.name, round_type: el.dataset.round, date, time }, true);
+				toast(`${t("hr_booked")} ${r.date} ${r.time}`);
+				const out = document.getElementById("hr-msg-out");
+				if (out && r.message) out.innerHTML = `<pre class="sk-note" style="white-space:pre-wrap">${esc(r.message.text)}</pre>${r.message.wa_link ? `<a class="sk-btn go wide" href="${esc(r.message.wa_link)}" target="_blank">💬 ${t("hr_open_wa")}</a>` : ""}`;
+				return;
+			}
+			if (act === "wi-upload") {
+				const url = await photoUrl("wi-file");
+				if (!url) return toast(t("hr_workindia_file"), true);
+				el.disabled = true;
+				const r = await call("hiring_upload_workindia", { file_url: url, job: val("wi-job") }, true);
+				document.getElementById("wi-out").innerHTML = `<p class="sk-note">✅ ${r.made} ${t("hr_wi_made")} · ${r.skipped} ${t("hr_wi_skipped")}</p><ul class="sk-list">${(r.first || []).map((c) => `<li class="sk-item"><div><div class="sk-item-title">${esc(c.applicant_name)}</div><div class="sk-item-meta">${esc(c.mobile)}</div></div>${c.message && c.message.wa_link ? `<a class="sk-chip" href="${esc(c.message.wa_link)}" target="_blank">💬 ${t("hr_send_wa")}</a>` : ""}</li>`).join("")}</ul>`;
+				el.disabled = false;
+				return;
+			}
+			if (act === "bc-send") {
+				const out = document.getElementById("bc-out");
+				const args = { mobile: val("bc-mobile"), text: val("bc-text") };
+				if (el.dataset.media) { args.media_kind = el.dataset.media; args.media_url = "/private/files/test." + (el.dataset.media === "image" ? "jpg" : "ogg"); }
+				const r = await call("hiring_bot_console", args, true);
+				out.textContent += `\n📥 ${args.text || args.media_kind}\n` + r.replies.map((x) => "🤖 " + x).join("\n") + "\n";
+				document.getElementById("bc-text").value = "";
+				return;
+			}
+			if (act === "iv-lang") { HR.ivLang = el.dataset.lang; root.querySelectorAll("[data-act=iv-lang]").forEach((b) => b.classList.toggle("ok", b === el)); return; }
+			if (act === "iv-hear-consent") {
+				const txt = (document.getElementById("iv-consent-text") || {}).textContent || "";
+				if (!window.speechSynthesis) return toast(t("mic_unsupported"), true);
+				const u = new SpeechSynthesisUtterance(txt); u.lang = ivLangCode(HR.ivLang); u.rate = 0.9; speechSynthesis.cancel(); speechSynthesis.speak(u);
+				return;
+			}
+			if (act === "iv-agree") {
+				const adult = document.getElementById("iv-adult"), tick = document.getElementById("iv-agree-tick"), st = document.getElementById("iv-agree-status");
+				if (!adult.checked || !tick.checked) { toast(KIOSK_TEXT.adult[HR.ivLang] + " · " + KIOSK_TEXT.agree[HR.ivLang], true); return; }
+				if (!el.dataset.listening) {
+					el.dataset.listening = "1"; el.classList.add("on"); st.textContent = "🔴 …";
+					let heard = "";
+					ivListen(null, { video: false, maxSec: 8, onText: (s) => { heard = s; } });
+					await new Promise((ok) => setTimeout(ok, 6000));
+					ivStop(null);
+					const agreed = /agree|मान्य|सहमत|\bho\b|हो|हाँ|yes/i.test(heard);
+					st.textContent = agreed ? "✅ " + heard : "🎤 " + (heard || "…");
+					el.classList.remove("on"); delete el.dataset.listening;
+					if (!agreed) { toast(KIOSK_TEXT.say_agree[HR.ivLang], true); return; }
+					el.disabled = true;
+					const consentUrl = await ivVoiceUrl();
+					const r = await call("hiring_start", { applicant: HR.candName, language: HR.ivLang || "Marathi", consent: 1, adult: 1, spoken: heard.slice(0, 80), consent_url: consentUrl }, true);
+					HR.iv = { interview: r.interview, questions: r.questions, i: 0, lang: r.language, answers: {}, steps: null, office_phone: r.office_phone };
+					await renderInterview();
+					const b = root.querySelector("[data-act=iv-hear]"); if (b) b.click();
+				}
+				return;
+			}
+			if (act === "iv-unlock") {
+				try { await call("hiring_lock_check", { pin: val("iv-pin") }, true); } catch (e) { toast(e.message, true); return; }
+				document.body.classList.remove("sk-kiosk"); HR.iv = null; HR.cand = null;
+				return go("hiring_cand");
+			}
+			if (act === "iv-hear" || act === "iv-repeat") {
+				const txt = (document.getElementById("iv-qtext") || {}).textContent || "";
+				if (!window.speechSynthesis) return toast(t("mic_unsupported"), true);
+				const u = new SpeechSynthesisUtterance(txt); u.lang = ivLangCode(HR.iv.lang); u.rate = 0.9; speechSynthesis.cancel(); speechSynthesis.speak(u);
+				return;
+			}
+			if (act === "iv-mic") return ivListen(el);
+			if (act === "iv-steps") { HR.iv.steps = Number(el.dataset.n); root.querySelectorAll("[data-act=iv-steps]").forEach((b) => b.classList.toggle("on", b === el)); return; }
+			if (act === "iv-next" || act === "iv-skip") {
+				const q = HR.iv.questions[HR.iv.i];
+				ivStop(document.getElementById("iv-mic"));
+				if (ivAudio) await new Promise((ok) => setTimeout(ok, 400));
+				if (act === "iv-next") {
+					el.disabled = true;
+					const text = val("iv-ans");
+					HR.iv.answers[q.code] = text;
+					const m = ivMeasures(); ivMeta = null;
+					const fileUrl = await ivVoiceUrl();
+					await call("hiring_answer", { interview: HR.iv.interview, code: q.code, text, voice: ivVideo ? null : fileUrl, video: ivVideo ? fileUrl : null, measures: m ? JSON.stringify(m) : null,
+						photo: q.is_test ? await photoUrl("iv-photo") : null, language: HR.iv.lang, steps_right: q.code === "C5" ? HR.iv.steps : null }, true);
+				}
+				HR.iv.i += 1; HR.iv.steps = null;
+				await renderInterview();
+				const b = root.querySelector("[data-act=iv-hear]"); if (b) b.click();
+				return;
+			}
+			if (act === "iv-finish") {
+				el.disabled = true;
+				await call("hiring_finish", { interview: HR.iv.interview, note: val("iv-note") }, true);
+				return kioskEnd();  // R10: the tablet locks itself; the office person's PIN opens it again
+			}
 			if (act === "save-lead") {
 				// SK 28-Oct mandatory gate: real name (not "Enquiry"), company, mobile, source and segment before it is saved
 				if (!mustFill([["f-first", t("cust_name"), !/^\s*(enquiry|inquiry|enq|lead|customer|sir|madam)?\s*$/i.test(val("f-first"))],
@@ -6960,7 +7393,8 @@
 				el.disabled = true;
 				const name = await call("new_lead", { first_name: val("f-first"), organization: val("f-org"), mobile_no: val("f-mobile"),
 					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl, product: val("f-product"), status: val("f-status"),
-					no_gstin: document.getElementById("f-nogst") && document.getElementById("f-nogst").checked ? 1 : 0 }, true);
+					no_gstin: document.getElementById("f-nogst") && document.getElementById("f-nogst").checked ? 1 : 0, customer: S.leadCustomer || "" }, true);
+				S.leadCustomer = null;
 				// SK 1-Nov minimum input: no switch; the lead goes for its quote by itself (rate-card quote / design / quote AI)
 				const route = await call("lead_route", { name }, true).catch((e) => ({ route: "none", reason: e.message }));
 				cardUrl = null;
@@ -6993,8 +7427,12 @@
 				return;
 			}
 		} catch (e) {
+			// SK 16-Nov (Swati, revise quote): the server's refusal is shown in both languages and the screen stays alive:
+			// every button we had put on hold is released, so nothing needs a restart
 			el.disabled = false;
-			toast(e.message, true);
+			root.querySelectorAll(".sk-busy, .sk-sheet button[disabled], .sk-sheet-wrap button[disabled]").forEach((b) => { b.classList.remove("sk-busy"); b.disabled = false; });
+			const msg = (e && e.message) || t("rp_unreadable");
+			toast(e && e.locked ? msg : `${t("err_hint")}: ${msg}`, true);
 		}
 	});
 

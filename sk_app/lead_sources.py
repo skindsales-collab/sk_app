@@ -18,7 +18,7 @@ SOURCES = {
 	"GeM": {"domains": ("gem.gov.in",), "setting": "gem_mail"},
 }
 NON_CABIN_WORDS = ("machine shifting", "shifting", "rigging", "dismantl", "relocation", "job work", "machining", "crane")
-DUPLICATE_DAYS = 90
+DUPLICATE_DAYS = 0  # SK 7-Nov (KF-04801): a duplicate only on the same date; another date is a new lead
 
 # labels used by the portals in their mails / exports (lower case, without ':')
 LABELS = {
@@ -63,6 +63,13 @@ def source_of(sender: str | None, subject: str | None = None) -> str | None:
 	if "gem bid" in subj or "gem/20" in subj:
 		return "GeM"
 	return None
+
+
+def mail_text(text_content: str | None, content: str | None) -> str:
+	"""PR D (SK 15-Nov): the part of the mail that holds the buyer's data (IndiaMART's plain part is only 'Dear User')."""
+	from sk_app.lead_mail_rules import pick_text
+
+	return pick_text(text_content, strip_html(content or ""))
 
 
 def parse_mail(subject: str | None, body: str | None, source: str | None = None) -> dict:
@@ -111,24 +118,25 @@ def parse_mail(subject: str | None, body: str | None, source: str | None = None)
 		end = re.search(r"bid end date(?:/time)?\s*:?\s*([^\n]+)", text, re.I)
 		if end:
 			out["requirement"] = f"{out['requirement']} (bid ends {end.group(1).strip()[:40]})"
+	if source == "IndiaMART":
+		# PR D (SK 15-Nov): the buyer's name, company, city, mobile, e-mail and requirement of the IndiaMART template
+		from sk_app.lead_mail_rules import parse_indiamart
+
+		for k, v in parse_indiamart(subject, text).items():
+			if v and not out.get(k):
+				out[k] = v
 	if not out["first_name"]:
 		m = re.search(r"\bfrom\s+([A-Z][\w. ]{2,40})", subject or "")
 		out["first_name"] = m.group(1).strip() if m else (out["organization"] or "Enquiry")
 	return out
 
 
-def segment_of(text: str) -> str:
-	"""Sub-segment from the enquiry words (point 2: two levels, Cabin / Non-Cabin)."""
-	low = (text or "").lower()
-	if "job work" in low or "machining" in low:
-		return "Job Work"
-	if any(w in low for w in NON_CABIN_WORDS):
-		return "Machine Shifting"
-	if "lgsf" in low or "light gauge" in low or "sgsf" in low:
-		return "LGSF"
-	if "labour camp" in low or "labor camp" in low or "modular" in low or "colony" in low:
-		return "Modular / Labour Camp"
-	return "Standard Cabin (GI / ACP)"
+def segment_of(text: str) -> str | None:
+	"""Sub-segment from the enquiry words (point 2: two levels, Cabin / Non-Cabin); None until the product is known
+	(PR D, SK 15-Nov: every mail lead used to default to Cabin)."""
+	from sk_app.lead_mail_rules import segment_or_none
+
+	return segment_or_none(text)
 
 
 def _fallback_owner() -> str | None:
@@ -145,12 +153,13 @@ def owner_for(source: str | None, segment: str) -> str | None:
 	other cabin enquiries and GeM → Rushi, who gives them to the team."""
 	s = frappe.get_cached_doc("SK App Settings")
 	from sk_app.segments import NON_CABIN, main_of
+	from sk_app.writers.lead_rules import owner_fields
 
-	if main_of(segment) == NON_CABIN and s.get("lead_owner_noncabin"):
-		return s.lead_owner_noncabin
-	if source in ("IndiaMART", "JustDial") and s.get("lead_owner_digital"):
-		return s.lead_owner_digital
-	return s.get("lead_owner_cabin") or _fallback_owner()
+	# SK 16-Nov (KF-05541): IndiaMART leads to their owner (Swati), JustDial to theirs (Pranali); names live in SK App Settings
+	for field in owner_fields(source, main_of(segment) == NON_CABIN):
+		if s.get(field):
+			return s.get(field)
+	return _fallback_owner()
 
 
 def _ensure_source(name: str | None):
@@ -158,20 +167,23 @@ def _ensure_source(name: str | None):
 		frappe.get_doc({"doctype": "CRM Lead Source", "source_name": name}).insert(ignore_permissions=True)
 
 
-def find_duplicate(mobile: str | None, email: str | None = None, name: str | None = None, source: str | None = None) -> str | None:
-	"""A lead from the same mobile (or e-mail) in the last 90 days; with neither, the same name from the same portal."""
-	since = add_days(now_datetime(), -DUPLICATE_DAYS)
-	if not mobile and not email:
+def find_duplicate(mobile: str | None, email: str | None = None, name: str | None = None, source: str | None = None,
+		organization: str | None = None, on=None) -> str | None:
+	"""SK 7-Nov (KF-04801): a lead from the same mobile, e-mail or company on the SAME DATE is a duplicate; on another
+	date it is a new lead. With no mobile / e-mail / company: the same name from the same portal that day."""
+	from sk_app.double_rules import day_window
+
+	window = ["between", list(day_window(on or now_datetime()))]
+	if not mobile and not email and not organization:
 		from sk_app.gate_rules import is_placeholder_name
 
 		if not name or not source or is_placeholder_name(name):
 			return None
-		return frappe.db.get_value("CRM Lead", {"first_name": name, "source": source, "creation": [">=", since]}, "name",
-			order_by="creation desc")
-	for field, value in (("mobile_no", mobile), ("email", email)):
+		return frappe.db.get_value("CRM Lead", {"first_name": name, "source": source, "creation": window}, "name", order_by="creation desc")
+	for field, value in (("mobile_no", mobile), ("email", email), ("organization", organization)):
 		if value:
 			like = f"%{value[-10:]}" if field == "mobile_no" else value
-			name = frappe.db.get_value("CRM Lead", {field: ["like", like], "creation": [">=", since]}, "name", order_by="creation desc")
+			name = frappe.db.get_value("CRM Lead", {field: ["like", like], "creation": window}, "name", order_by="creation desc")
 			if name:
 				return name
 	return None
@@ -187,7 +199,7 @@ def make_lead(data: dict, source: str | None, owner: str | None = None, note: st
 	segment = sub_of(data.get("segment")) or segment_of(text)
 	requirement = "\n".join(p for p in (data.get("requirement"), data.get("city") and f"City: {data['city']}", data.get("note"), note)
 		if p)
-	old = find_duplicate(data.get("mobile_no"), data.get("email"), data.get("first_name"), source)
+	old = find_duplicate(data.get("mobile_no"), data.get("email"), data.get("first_name"), source, data.get("organization"))
 	if old:
 		frappe.get_doc({"doctype": "FCRM Note", "title": f"Again from {source or 'mail'}"[:80], "content": requirement or text,
 			"reference_doctype": "CRM Lead", "reference_docname": old}).insert(ignore_permissions=True)
@@ -218,6 +230,14 @@ def make_lead(data: dict, source: str | None, owner: str | None = None, note: st
 	return {"lead": doc.name, "new": True}
 
 
+def _not_a_lead(r, source: str, data: dict):
+	frappe.db.set_value("Communication", r.name, "sk_mail_status", "Not a lead", update_modified=False)
+	if frappe.db.table_exists("SK Rule Log"):
+		frappe.get_doc({"doctype": "SK Rule Log", "module": "Sales", "rule": "lead_mail_no_contact", "mode": "Warn only", "reference_doctype": "Communication",
+			"reference_name": r.name, "detail": f"{source} mail without phone or e-mail, no lead made: {(r.subject or '')[:120]} · {data.get('first_name') or ''}"[:1000]
+			}).insert(ignore_permissions=True)
+
+
 def _settings():
 	return frappe.get_single("SK App Settings")
 
@@ -238,12 +258,17 @@ def scan(since=None) -> dict:
 		if not source or not s.get(SOURCES[source]["setting"]) or r.reference_doctype == "CRM Lead":
 			continue
 		try:
-			data = parse_mail(r.subject, r.text_content or r.content, source)
+			data = parse_mail(r.subject, mail_text(r.text_content, r.content), source)
 			from sk_app.gate_rules import is_portal_enquiry
+			from sk_app.lead_mail_rules import has_contact
 
 			if not is_portal_enquiry(data, r.subject):
 				# a portal notice (BuyLeads allocated, weekly performance, feedback ...): no buyer, so no lead
 				frappe.db.set_value("Communication", r.name, "sk_mail_status", "Not a lead", update_modified=False)
+				continue
+			if not has_contact(data) and not data.get("enquiry"):
+				# PR D: no phone and no e-mail = no lead; the mail is logged so someone can look, never an empty "Enquiry" lead
+				_not_a_lead(r, source, data)
 				continue
 			res = make_lead(data, source)
 			frappe.db.set_value("Communication", r.name, {"reference_doctype": "CRM Lead", "reference_name": res["lead"],

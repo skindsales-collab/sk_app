@@ -1,5 +1,5 @@
 # SK 4-Nov rebuild (Phase 0): every pull request runs the logic tests and checks the app screen file, so a broken rule
-# or a broken screen is caught on GitHub before SK merges (before this only the phone APK was built here).
+# or a broken screen is caught on GitHub before SK merges.
 name: SK App tests
 
 on:

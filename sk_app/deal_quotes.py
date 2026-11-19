@@ -17,6 +17,8 @@ A deal that already has a Quotation only gets the new file attached to its lates
 import re
 
 import frappe
+from sk_app.writers import order as order_w
+from sk_app.writers import customer as cust_w
 from frappe import _
 from frappe.utils import add_days, flt, now_datetime, nowdate
 
@@ -40,8 +42,7 @@ def ensure_setup():
 	get_or_make(SERVICE_ITEM, "Job / service (as per quotation)", hsn_like="job")
 
 
-def is_quote_file(file_name: str | None) -> bool:
-	return "quot" in (file_name or "").lower()
+from sk_app.file_rules import is_quote_file  # SK 16-Nov: only a PDF is the quote (pure rule, tested)
 
 
 def _ready() -> bool:
@@ -98,12 +99,12 @@ def make_for_deal(deal: str, amount: float | None = None, by: str | None = None)
 	value = flt(amount) if amount is not None else _value(deal)
 	if value <= 0:
 		if files:
-			_ask_amount(deal, files[-1].file_name)
+			_ask_amount(deal, files[-1].file_name, files[-1].file_url)
 		return None
 	current = frappe.session.user
 	frappe.set_user("Administrator")  # a background step: the customer and quotation are made for the deal owner
 	try:
-		customer = erp_flow.make_customer("Administrator", deal)["name"]
+		customer = cust_w.make_customer("Administrator", deal)["name"]
 		d = frappe.db.get_value("CRM Deal", deal, ["deal_owner", "sk_main_segment"] if frappe.get_meta("CRM Deal").has_field("sk_main_segment")
 			else ["deal_owner"], as_dict=True)
 		non_cabin = d.get("sk_main_segment") == segments.NON_CABIN
@@ -138,14 +139,18 @@ def make_for_deal(deal: str, amount: float | None = None, by: str | None = None)
 		frappe.set_user(current)
 
 
-def _ask_amount(deal: str, file_name: str):
+def _ask_amount(deal: str, file_name: str, file_url: str | None = None):
+	"""PR H (SK 16-Nov): the task links the quote PDF (never an Excel) and shows the amount when the deal already carries it."""
 	owner = frappe.db.get_value("CRM Deal", deal, "deal_owner")
 	if not owner or frappe.db.exists("ToDo", {"reference_type": "CRM Deal", "reference_name": deal, "status": "Open",
 			"description": ["like", TASK_MARK + "%"]}):
 		return
+	shown = f'<a href="{file_url}" target="_blank">{file_name}</a>' if file_url else file_name
+	value = _value(deal)
+	hint = _("The deal shows ₹{0:,.0f}: confirm it or type the right amount.").format(value) if value > 0 else _("Type the quote amount (before GST).")
 	frappe.get_doc({"doctype": "ToDo", "allocated_to": owner, "reference_type": "CRM Deal", "reference_name": deal, "priority": "High",
-		"date": nowdate(), "description": TASK_MARK + _("Quote {0} is not in ERPNext yet: open the deal in the app and type the quote amount "
-			"(before GST). The ERPNext Quotation is made from it.").format(file_name)}).insert(ignore_permissions=True)
+		"date": nowdate(), "description": TASK_MARK + _("Quote {0} is not in ERPNext yet: open the deal in the app. {1} The ERPNext Quotation is made from it.").format(shown, hint)
+		}).insert(ignore_permissions=True)
 
 
 def _close_tasks(deal: str):
@@ -208,7 +213,7 @@ def order_from_deal(deal: str) -> str | None:
 	current = frappe.session.user
 	frappe.set_user("Administrator")
 	try:
-		so = erp_flow.order_received("Administrator", q)["name"]
+		so = order_w.order_received("Administrator", q)["name"]
 	finally:
 		frappe.set_user(current)
 	if d.deal_owner and frappe.db.exists("User", d.deal_owner):

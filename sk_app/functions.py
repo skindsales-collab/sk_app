@@ -85,7 +85,7 @@ FUNCTIONS = {
 		# point 16 + HR draft Rev 2: Attendance (Optick file upload, today, month, fixes); leave and expense approvals
 		# point 20 (SK 26-Oct): Logins / Reset PIN are the CEO's only, so HR has no Logins icon any more
 		# SK 28-Oct (Aarti is acting purchase manager with HR): she raises purchase requisitions from HR too
-		"tiles": COMMON_TILES[:1] + ["attendance", "new_joiner", "requisition"] + COMMON_TILES[1:] + ["team_scorecards", "mail"],
+		"tiles": COMMON_TILES[:1] + ["attendance", "hiring", "new_joiner", "requisition"] + COMMON_TILES[1:] + ["team_scorecards", "mail"],  # SK 17-Nov: hiring
 		"live": True,
 		"erpnext_roles": ["HR User", "HR Manager"],
 		"desk": "/app/hr",
@@ -106,7 +106,7 @@ FUNCTIONS = {
 		"desk": "/app/projects",
 	},
 	"Subcontractor": {
-		"label": {"English": "Production (job card worker)", "Marathi": "उत्पादन (जॉब कार्ड कामगार)"},
+		"label": {"English": "Subcontractor", "Marathi": "उपकंत्राटदार"},  # SK 9-Nov: factory job cards or site jobs
 		# very simple screen (SK): own jobs only; job tiles come with the Production screens
 		"tiles": ["my_day", "service_jobs", "my_jobs", "el_points", "need_material", "my_fixes", "my_bills", "problem", "training", "day_report", "dsi", "my_kpi"],
 		"live": True,
@@ -131,7 +131,7 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": [*DASH_TILES, "leadership", "questions", "view_member", "attendance", "lead_sources", "customers", "sales_owner", "complaints", "to_submit", "po_approvals", "sub_bills", "pay_approvals", "cabin_discounts", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "reminders", "day_report", "my_kpi", "dsi", "problem",
+		"tiles": [*DASH_TILES, "leadership", "questions", "round2", "view_member", "attendance", "lead_sources", "customers", "sales_owner", "complaints", "to_submit", "po_approvals", "sub_bills", "pay_approvals", "cabin_discounts", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "reminders", "day_report", "my_kpi", "dsi", "problem",
 			"library", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager", "Purchase Manager", "Purchase User"],  # SK approves big POs

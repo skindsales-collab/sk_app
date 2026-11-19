@@ -6,7 +6,7 @@ import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, getdate
 
-from sk_app import cold_calls, flows, home_kpi, marketing_list, production, sales_owner, segments
+from sk_app import cold_calls, flows, home_kpi, marketing_list, production_screens, sales_owner, segments
 from sk_app.tests.test_change_list_a import _app_user
 from sk_app.tests.test_hr import employee
 
@@ -59,7 +59,7 @@ class TestRev1Batch2(IntegrationTestCase):
 		# the open order follows the customer's new segment, and the customer goes to Aditya
 		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "customer_group"), "Machine Shifting")
 		self.assertEqual(sales_owner._team_of("Customer", cust), [self.aditya])
-		self.assertIn(so.name, production.non_cabin_orders())
+		self.assertIn(so.name, production_screens.non_cabin_orders())
 		frappe.set_user("Administrator")
 		board = flows.factory("Administrator")
 		self.assertNotIn(so.name, [r["name"] for r in board[0]["rows"]])

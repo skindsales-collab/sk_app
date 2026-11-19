@@ -1,6 +1,7 @@
 """SK 27-Oct: Tally-style Accounts: Gateway sections, Tally voucher names, Day Book, Alter Ledger search, Narration."""
 
 import frappe
+from sk_app.writers import payment as pay_w
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, nowdate
 
@@ -43,7 +44,7 @@ class TestTally(IntegrationTestCase):
 	def test_day_book_and_app_gateway(self):
 		day = add_days(nowdate(), -3)
 		si = self._invoice(2500, day)
-		r = run(ACC, finance.receive_payment, "Sales Invoice", si.name, 1000, None, "UTR9")
+		r = run(ACC, pay_w.receive_payment, "Sales Invoice", si.name, 1000, None, "UTR9")
 		rows = tally.day_book(day, day)
 		sale = next(x for x in rows if x["vch_no"] == si.name)
 		self.assertEqual((sale["vch_type"], sale["particulars"]), ("Sales", CUSTOMER))

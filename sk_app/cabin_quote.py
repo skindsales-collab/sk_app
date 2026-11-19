@@ -16,6 +16,8 @@ import math
 import os
 
 import frappe
+from sk_app.writers import customer as cust_w
+from sk_app.writers import lead as lead_w
 from frappe import _
 from frappe.utils import add_days, cint, flt, formatdate, getdate, nowdate
 from sk_app.core.people import is_ceo as _shared_is_ceo
@@ -250,11 +252,11 @@ def _customer_for(user: str, deal=None, lead=None, customer=None) -> tuple[str, 
 	if lead and not deal:
 		crm._check("CRM Lead", lead, "write")
 		seg = frappe.db.get_value("CRM Lead", lead, "sk_segment") if frappe.get_meta("CRM Lead").has_field("sk_segment") else None
-		deal, reason = crm._to_deal(user, lead, seg)
+		deal, reason = lead_w._to_deal(user, lead, seg)
 		if not deal:
 			frappe.throw(reason)
 	if deal:
-		return erp_flow.make_customer(user, deal)["name"], deal
+		return cust_w.make_customer(user, deal)["name"], deal
 	if customer and frappe.db.exists("Customer", customer):
 		return customer, None
 	frappe.throw(_("Open the lead or deal to make its quotation"))
@@ -450,6 +452,9 @@ def _esc(x) -> str:
 	return frappe.utils.escape_html(str(x or ""))
 
 
+CABIN_PHONES = "+91 84325 33555 / +91 84858 33365"  # SK 16-Nov: the cabin sales numbers on every cabin quote
+
+
 def quote_html(doc) -> str:
 	"""Jinja print format body: {{ sk_cabin_quote_html(doc) }}."""
 	req = json.loads(doc.get("sk_cabin_request") or "null") or {}
@@ -491,7 +496,9 @@ def quote_html(doc) -> str:
 	if doc.terms:
 		sections.append(f"<div class=bar>{n}. Commercial terms</div><div>{doc.terms}</div>")
 	owner = frappe.db.get_value("User", doc.owner, "full_name") or doc.owner
-	header = frappe.utils.get_url("/assets/sk_app/images/sk-quote-header.png")
+	# SK 16-Nov: cabin quotes carry the cabin banner and the cabin phone numbers; Non-Cabin keeps the machine-shifting header
+	header = frappe.utils.get_url("/assets/sk_app/images/" + ("sk-cabin-quote-header.png" if cabin else "sk-quote-header.png"))
+	phones = CABIN_PHONES if cabin else "+91 97672 13521"
 	return f"""<style>{CSS}</style><div class=skq><img class=hdr src="{header}">
 <div class=band>QUOTATION &nbsp; | &nbsp; Ref: {_esc(ref)} &nbsp; | &nbsp; Date: {date} &nbsp; | &nbsp; Rev: {rev}</div>
 <table class=addr style="width:100%;margin:12px 0 8px"><tr><td>To,<br>{to}</td><td style="width:45%"><span class=k>Quotation No.</span><b>{_esc(ref)}</b><br>
@@ -500,7 +507,7 @@ def quote_html(doc) -> str:
 {"".join(sections)}
 <p>We hope our offer is in line with your requirement and look forward to your valued order.</p>
 <p><b>For SK Ind Tech Solutions Pvt Ltd</b><br><br><br><b>Authorised Signatory</b><br>{_esc(owner)}<br>
-Phone: +91 97672 13521 | E-mail: skind.sales@gmail.com | GSTIN 27ABBCS4285J1ZZ</p></div>"""
+Phone: {phones} | E-mail: skind.sales@gmail.com | GSTIN 27ABBCS4285J1ZZ</p></div>"""
 
 
 def sk_cabin_quote_html(doc) -> str:

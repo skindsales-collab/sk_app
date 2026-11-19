@@ -79,6 +79,9 @@ def on_login(login_manager=None):
 	"""hooks on_session_creation: logging in with mobile + PIN (or OTP) opens the app at once, no second check."""
 	if minutes() and getattr(frappe.local, "request", None) and frappe.session.sid:
 		_save(time.time())
+	if frappe.conf.get("sk_local"):
+		# SK 9-Nov: on the local test site every login lands in SK App, never in the ERPNext desk.
+		frappe.local.response["home_page"] = "/sk"
 
 
 def check():

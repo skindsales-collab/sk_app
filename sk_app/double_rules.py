@@ -9,6 +9,8 @@ import re
 from datetime import date, datetime
 
 DAYS = 7  # same party and same amount within 7 days is a possible double
+CROSS_DAYS = 10  # a Tally voucher and a bank transfer for the same money can be days apart (checker 7-Nov: Babasaheb, 8 days)
+BANK_DAYS = 1  # on the bank's own dates the same transfer is one day at most apart (checker 9-Nov: PE bank date = JE date)
 AMOUNT_GAP = 0.5  # rupees: a rounding difference is still the same amount
 
 # words that are not a real reference number
@@ -31,10 +33,73 @@ def looks_bank_ref(ref) -> bool:
 	return bool(_BANK_REF.match(str(ref or "").strip()))
 
 
+_TALLY_REF = re.compile(r"Tally\s+(?:invoice|voucher|bill|receipt|payment|journal|sales|purchase)?\s*(?:no\.?\s*)?([A-Z]{1,6}[A-Z0-9/\-]*\d[A-Z0-9/\-]*)", re.I)
+
+
+def tally_ref(text) -> str | None:
+	"""The Tally voucher number written in a migrated record's remarks ("Tally invoice SK/IND/0926/812 ..."), else None.
+	Sales Invoices from Tally have no bill-number field, so this is their reference (checker 7-Nov: 13 false pairs)."""
+	m = _TALLY_REF.search(str(text or ""))
+	return m.group(1).strip("/-") if m else None
+
+
+def day_window(d) -> tuple:
+	"""SK 7-Nov (KF-04801): the same mobile / company on the SAME DATE is a duplicate lead, on another date a new lead.
+	Returns the day's start and end as strings for a creation filter."""
+	day = str(d)[:10]
+	return (f"{day} 00:00:00", f"{day} 23:59:59")
+
+
 def different_refs(a, b) -> bool:
 	"""Both have a real number (bill no, PO no) and the numbers differ: two separate entries, not a double."""
 	ka, kb = norm_ref(a), norm_ref(b)
 	return bool(ka and kb and ka != kb)
+
+
+# a Tally voucher number: PAY/586/25-26, REC/12, J329, SK/IND/0926/812, PUR/NC/066/25-26 (not an ERPNext name like JE-01769)
+_TALLY_NO = re.compile(r"^(PAY|PMT|REC|RCT|RCPT|JV|J|JRN|CNTR|CON|SAL|PUR|SK|CN|DN)(?=[/\-\s]?\d|/)[A-Z0-9/\-\s]*$", re.I)
+# a bank's own transfer number: a long UTR / IMPS number, or a bank code in front (ICICR2202261)
+_BANK_NO = re.compile(r"\d{9,}|(ICIC|HDFC|SBIN|UTIB|KKBK|PUNB|BARB|CNRB|IDIB|YESB|INDB|IDFB|AXIS)[A-Z0-9]*\d{5,}")
+
+
+def ref_kind(ref) -> str | None:
+	"""What a payment / journal number is: "bank" (UTR, IMPS, NEFT, cheque), "tally" (a Tally voucher number) or "bill"."""
+	s = norm_ref(ref)
+	if not s:
+		return None
+	raw = str(ref).strip()
+	if looks_bank_ref(raw) or _BANK_NO.fullmatch(s):
+		return "bank"
+	return "tally" if _TALLY_NO.match(raw) else "bill"
+
+
+def plain_no(ref) -> str | None:
+	"""A plain Tally serial written on a migrated receipt / payment (329, 330): a voucher number too, though short."""
+	s = str(ref or "").strip()
+	return s if s.isdigit() and 2 <= len(s) <= 8 and set(s) != {"0"} else None
+
+
+def different_vouchers(a, b) -> bool:
+	"""Two payments / journals are two real entries only when both have their own number OF THE SAME KIND: two Tally voucher
+	numbers (PAY/526 and PAY/527) or two bill numbers (305 and 306). Checker 7-Nov: a bank number never clears a pair, not
+	against a Tally number (Babasaheb: JE-01769 PAY/586/25-26 vs PE-00202 IMPS62991715402) and not against another bank
+	number (Oxford Rs 17,46,400: PE-00012 ICICR2202261 vs PE-00206 469833504408, the same money booked twice).
+	Checker 9-Nov: 8 of 9 pairs left were Tally receipts with plain serials (329 vs 330): two numbers, two entries."""
+	pa, pb = plain_no(a), plain_no(b)
+	if pa and pb:
+		return pa != pb
+	ka, kb = ref_kind(a), ref_kind(b)
+	return bool(ka and ka == kb and ka != "bank" and norm_ref(a) != norm_ref(b))
+
+
+def pair_days(a, b) -> int:
+	"""Days apart two entries may be and still be one payment: a Tally voucher against a bank number gets CROSS_DAYS."""
+	return CROSS_DAYS if {ref_kind(a), ref_kind(b)} == {"tally", "bank"} else DAYS
+
+
+def voucher_double(a_ref, a_date, b_ref, b_date) -> bool:
+	"""Same party and amount already matched: is this a possible double (numbers do not clear it, dates close enough)?"""
+	return not different_vouchers(a_ref, b_ref) and near(a_date, b_date, pair_days(a_ref, b_ref))
 
 
 def same_amount(a, b) -> bool:
@@ -79,6 +144,19 @@ def bank_mode_to_cash(mode_type: str | None, account_type: str | None, reference
 	return mode_type == "Bank" or looks_bank_ref(reference_no)
 
 
+def payee_fits(a: dict, b: dict) -> bool:
+	"""Bank-side rows: two named payees must be the same; a row without a party (a Tally journal on an advance ledger) fits
+	a named payee when the payee's name is in its remark ("Tally Payment PAY/586 | BABASAHEB SIR (ADVANCE)")."""
+	pa, pb = a.get("payee"), b.get("payee")
+	if pa and pb:
+		return pa == pb
+	named, other = (a, b) if pa else (b, a) if pb else (None, None)
+	if named and other.get("hint"):
+		word = next((w for w in re.split(r"[^A-Z0-9]+", str(named["payee"]).upper()) if len(w) >= 4), None)
+		return not word or word in str(other["hint"]).upper()
+	return True
+
+
 def find_pairs(rows: list[dict], days: int = DAYS) -> list[dict]:
 	"""Possible doubles in a list of entries for the morning check.
 
@@ -105,10 +183,20 @@ def find_pairs(rows: list[dict], days: int = DAYS) -> list[dict]:
 		g.sort(key=lambda r: str(r.get("date") or ""))
 		for i, a in enumerate(g):
 			for b in g[i + 1:]:
-				if not near(a.get("date"), b.get("date"), days):
+				if not near(a.get("date"), b.get("date"), max(days, CROSS_DAYS)):
 					break
-				if same_amount(a["amount"], b["amount"]):
-					add(a, b, "same party and amount within {} days".format(days))
+				gap = pair_days(a.get("ref"), b.get("ref")) if days == DAYS else days
+				# bank-side rows (checker 9-Nov, Babasaheb PE-00202 = JE-01769): the same bank account, direction, amount and
+				# bank date (within BANK_DAYS) across doctypes is a pair unless both name different payees
+				if str(a.get("kind", "")).startswith("bank"):
+					gap = BANK_DAYS
+					if not payee_fits(a, b):
+						continue
+				if (same_amount(a["amount"], b["amount"]) and near(a.get("date"), b.get("date"), gap)
+						and not different_vouchers(a.get("ref"), b.get("ref"))):
+					# two entries with their own numbers of the same kind (Tally PAY/526 and PAY/527, bills 305 and 306) are two
+					# real entries (SK 7-Nov); a bank number never clears a pair (checker 7-Nov)
+					add(a, b, "same party and amount within {} days".format(gap))
 	refs: dict = {}
 	for r in rows:
 		key = norm_ref(r.get("ref"))

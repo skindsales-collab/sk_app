@@ -1,7 +1,7 @@
 import frappe
 from frappe.tests import IntegrationTestCase
 
-from sk_app import logins, production, quality, store, sub_bills
+from sk_app import logins, production_screens, quality, store, sub_bills
 from sk_app.tests.test_store_purchase import BOSS, FG, RAW, TestStorePurchase, app_user, run
 
 BOSS_P = "sk_test_babasaheb@example.com"
@@ -82,33 +82,33 @@ class TestProductionQuality(IntegrationTestCase):
 
 	def test_subcontractor_sees_only_own_jobs_and_finishes_one(self):
 		wo, jcs = self._work_order()
-		mine = {j.name for j in run(self.ranjit, production.job_cards)}
+		mine = {j.name for j in run(self.ranjit, production_screens.job_cards)}
 		self.assertTrue(set(jcs) <= mine)
-		self.assertFalse(set(jcs) & {j.name for j in run(self.babu, production.job_cards)})
-		self.assertRaises(frappe.PermissionError, run, self.babu, production.start, jcs[0])
-		run(self.ranjit, production.start, jcs[0])
+		self.assertFalse(set(jcs) & {j.name for j in run(self.babu, production_screens.job_cards)})
+		self.assertRaises(frappe.PermissionError, run, self.babu, production_screens.start, jcs[0])
+		run(self.ranjit, production_screens.start, jcs[0])
 		self.assertEqual(frappe.db.get_value("Job Card", jcs[0], "status"), "Work In Progress")
-		r = run(self.ranjit, production.done, jcs[0], [], 4, "Roof ridge purlin one short", OK)
+		r = run(self.ranjit, production_screens.done, jcs[0], [], 4, "Roof ridge purlin one short", OK)
 		self.assertEqual(frappe.db.get_value("Job Card", jcs[0], "status"), "Completed")
 		self.assertTrue(frappe.db.exists("ToDo", {"allocated_to": QC, "reference_name": jcs[0]}))
 		self.assertTrue(frappe.db.exists("Comment", {"reference_name": jcs[0], "content": ["like", "%Workers used: 4%"]}))
 		self.assertIn("posted", r)
-		board = {w["name"]: w for w in run(BOSS_P, production.order_board)}
+		board = {w["name"]: w for w in run(BOSS_P, production_screens.order_board)}
 		self.assertEqual(board[wo.name]["stages"][0]["state"], "done")
 		self.assertTrue(board[wo.name]["no_order"])
 
 	def test_need_material_by_item_or_by_voice(self):
 		wo, jcs = self._work_order()
-		r = run(self.ranjit, production.need_material, [{"item_code": RAW, "qty": 5}], jcs[0])
+		r = run(self.ranjit, production_screens.need_material, [{"item_code": RAW, "qty": 5}], jcs[0])
 		mr = frappe.get_doc("Material Request", r["request"])
 		self.assertEqual(mr.work_order, wo.name)
 		self.assertEqual(mr.items[0].qty, 5)
-		r = run(self.ranjit, production.need_material, [], jcs[0], spoken="ajun 5 C channel pahije")
+		r = run(self.ranjit, production_screens.need_material, [], jcs[0], spoken="ajun 5 C channel pahije")
 		self.assertTrue(r["task"])
 
 	def test_stage_check_rejects_and_opens_non_conformance(self):
 		wo, jcs = self._work_order()
-		run(self.ranjit, production.done, jcs[0], checks=OK)
+		run(self.ranjit, production_screens.done, jcs[0], checks=OK)
 		p = run(QC, quality.pending)
 		self.assertTrue(any(x["reference_name"] == jcs[0] for x in p["stage"]))
 		tpl = quality.guess_template("Job Card", OPS[0])
@@ -129,20 +129,20 @@ class TestProductionQuality(IntegrationTestCase):
 
 	def test_final_stage_goes_to_final_check(self):
 		wo, jcs = self._work_order()
-		run(self.ranjit, production.done, jcs[1], checks=OK)
+		run(self.ranjit, production_screens.done, jcs[1], checks=OK)
 		p = run(QC, quality.pending)
 		self.assertTrue(any(x["reference_name"] == jcs[1] for x in p["final"]))
 
 	def test_worker_self_check_then_quality_check(self):
 		"""SK 28-Oct: no Done without the worker's check sheet; it is a draft on the Job Card, shown to Quality, never a pass."""
 		wo, jcs = self._work_order()
-		sheet = run(self.ranjit, production._card_for, jcs[0]) and quality.self_sheet(jcs[0])
+		sheet = run(self.ranjit, production_screens._card_for, jcs[0]) and quality.self_sheet(jcs[0])
 		self.assertEqual([p.specification for p in sheet["points"]], ["Length x width", "Weld visual"])
 		self.assertEqual(len(quality.self_sheet(jcs[1])["points"]), len(quality.SELF_POINTS))  # no template: standard list
-		self.assertRaises(frappe.ValidationError, run, self.ranjit, production.done, jcs[0])
-		self.assertRaises(frappe.ValidationError, run, self.ranjit, production.done, jcs[0], checks=[{"specification": "Weld visual", "ok": 0}])
+		self.assertRaises(frappe.ValidationError, run, self.ranjit, production_screens.done, jcs[0])
+		self.assertRaises(frappe.ValidationError, run, self.ranjit, production_screens.done, jcs[0], checks=[{"specification": "Weld visual", "ok": 0}])
 		self.assertNotEqual(frappe.db.get_value("Job Card", jcs[0], "status"), "Completed")
-		r = run(self.ranjit, production.done, jcs[0], checks=[OK[0], {"specification": "Weld visual", "ok": 0, "note": "one spatter left"}])
+		r = run(self.ranjit, production_screens.done, jcs[0], checks=[OK[0], {"specification": "Weld visual", "ok": 0, "note": "one spatter left"}])
 		qi = frappe.get_doc("Quality Inspection", r["self_check"])
 		self.assertEqual((qi.sk_self_check, qi.docstatus, qi.status, qi.inspected_by), (1, 0, "Rejected", self.ranjit))
 		row = next(x for x in run(QC, quality.pending)["stage"] if x["reference_name"] == jcs[0])
@@ -155,7 +155,7 @@ class TestProductionQuality(IntegrationTestCase):
 		self.assertEqual(frappe.db.get_value("Quality Inspection", qi.name, "docstatus"), 0)
 
 	def test_others_cannot_use_production(self):
-		self.assertRaises(frappe.PermissionError, run, "sk_test_buyer@example.com", production.job_cards)
+		self.assertRaises(frappe.PermissionError, run, "sk_test_buyer@example.com", production_screens.job_cards)
 		self.assertRaises(frappe.PermissionError, run, self.ranjit, quality.pending)
 
 	def test_electrical_points(self):
@@ -165,18 +165,18 @@ class TestProductionQuality(IntegrationTestCase):
 			frappe.get_doc({"doctype": "Workstation", "workstation_name": ws}).insert()
 		wo, jcs = self._work_order()
 		frappe.db.set_value("Job Card", jcs[0], "workstation", ws)
-		listed = run(QC, production.el_jobs)
+		listed = run(QC, production_screens.el_jobs)
 		self.assertIn(jcs[0], [j["name"] for j in listed["jobs"]])
 		self.assertNotIn(jcs[1], [j["name"] for j in listed["jobs"]])
-		r = run(QC, production.save_el_points, jcs[0], {"light": 6, "fan": 2, "socket_5a": 4, "earthing": 1, "fan_bad": 9})
+		r = run(QC, production_screens.save_el_points, jcs[0], {"light": 6, "fan": 2, "socket_5a": 4, "earthing": 1, "fan_bad": 9})
 		self.assertEqual(r["total_points"], 13)
-		r = run(QC, production.save_el_points, jcs[0], {"light": 8, "fan": -3})  # same cabin again: corrected, not added
+		r = run(QC, production_screens.save_el_points, jcs[0], {"light": 8, "fan": -3})  # same cabin again: corrected, not added
 		self.assertEqual(r["total_points"], 8)
 		self.assertEqual(frappe.db.count("SK Electrical Points", {"job_card": jcs[0]}), 1)
 		self.assertEqual(frappe.db.get_value("SK Electrical Points", {"job_card": jcs[0]}, "work_order"), wo.name)
-		self.assertGreaterEqual(run(QC, production.el_jobs)["month_total"], 8)
+		self.assertGreaterEqual(run(QC, production_screens.el_jobs)["month_total"], 8)
 		with self.assertRaises(frappe.PermissionError):
-			run(self.ranjit, production.save_el_points, jcs[0], {"light": 1})
+			run(self.ranjit, production_screens.save_el_points, jcs[0], {"light": 1})
 
 	def _rate(self, supplier, value):
 		item = sub_bills.service_item(OPS[0])
@@ -225,7 +225,7 @@ class TestProductionQuality(IntegrationTestCase):
 		self.assertNotIn(name, frappe.get_all("Purchase Order", filters={"docstatus": 1, **store.material_pos()}, pluck="name"))
 		# job done → GRN; Quality passed → bill payable
 		self.assertFalse(sub_bills.receipt_of(jcs[0]))
-		run(self.ranjit, production.done, jcs[0], checks=OK)
+		run(self.ranjit, production_screens.done, jcs[0], checks=OK)
 		self.assertTrue(sub_bills.receipt_of(jcs[0]))
 		self.assertFalse(sub_bills.bill_of(jcs[0]))
 		run(QC, quality.save, "Job Card", jcs[0], CABIN, OK, "QIT-OP-SK Fabrication")
@@ -254,7 +254,7 @@ class TestProductionQuality(IntegrationTestCase):
 
 	def test_rejected_job_makes_no_bill_and_size_parse(self):
 		wo, jcs = self._work_order()
-		run(self.ranjit, production.done, jcs[0], checks=OK)
+		run(self.ranjit, production_screens.done, jcs[0], checks=OK)
 		run(QC, quality.save, "Job Card", jcs[0], CABIN, [OK[0], {"specification": "Weld visual", "ok": 0, "note": "gap"}])
 		self.assertFalse(sub_bills.bill_of(jcs[0]))
 		self.assertEqual(sub_bills.sqft("ABC · 12ft x 10ft x 8.6ft"), 120)

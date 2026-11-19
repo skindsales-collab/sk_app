@@ -3,6 +3,13 @@ and cabin size. Since SK's purchase flow (27-Oct evening) there is no receipt or
 goes through an urgent requisition → CEO → PO first."""
 
 import frappe
+from sk_app import finance_screens
+from sk_app.writers import bill as bill_w
+from sk_app.writers import requisition as req_w
+from sk_app import purchase_screens
+from sk_app.writers import purchase_order as po_w
+from sk_app.writers import receipt as rcpt_w
+from sk_app import store_screens
 from frappe.tests import IntegrationTestCase
 from frappe.utils import nowdate
 
@@ -21,14 +28,14 @@ class TestBillNoPo(IntegrationTestCase):
 
 	def _receipt(self, qty, rate=120, bill_no=None):
 		"""Material came without PO → urgent requisition → CEO → PO → received against it."""
-		r = run(STORE_U, requisition.raise_request, [{"item_code": RAW, "qty": qty}], without_po=1, supplier=SUPPLIER, bill_no=bill_no,
+		r = run(STORE_U, req_w.raise_request, [{"item_code": RAW, "qty": qty}], without_po=1, supplier=SUPPLIER, bill_no=bill_no,
 			note="came without PO")
-		run(BOSS, requisition.decide, r["name"], 1)
-		po = run(BUY_U, requisition.po_from_request, r["name"], SUPPLIER, {RAW: rate})
+		run(BOSS, req_w.decide, r["name"], 1)
+		po = run(BUY_U, req_w.po_from_request, r["name"], SUPPLIER, {RAW: rate})
 		if po["needs_approval"]:
-			run(BOSS, purchase.decide, po["name"], True)
+			run(BOSS, po_w.decide, po["name"], True)
 		item = frappe.db.get_value("Purchase Order Item", {"parent": po["name"]}, "name")
-		return run(STORE_U, store.receive, po["name"], [{"po_detail": item, "qty": qty}], bill_no=bill_no)
+		return run(STORE_U, rcpt_w.receive, po["name"], [{"po_detail": item, "qty": qty}], bill_no=bill_no)
 
 	def _photo_task(self):
 		todo = frappe.get_doc({"doctype": "ToDo", "allocated_to": tf.ACC, "reference_type": "Supplier", "reference_name": SUPPLIER,
@@ -40,36 +47,36 @@ class TestBillNoPo(IntegrationTestCase):
 		doc = frappe.get_doc("Purchase Receipt", pr["name"])
 		self.assertEqual(doc.supplier_delivery_note, "LB-9")
 		self.assertEqual((doc.owner, doc.modified_by), (STORE_U, STORE_U))  # saved by the system, kept in Yogesh's name
-		self.assertTrue(run(STORE_U, store.post_receipt, doc.name)["posted"])
+		self.assertTrue(run(STORE_U, rcpt_w.post_receipt, doc.name)["posted"])
 		todo = self._photo_task()
-		b = run(tf.ACC, finance.bills_to_post)
+		b = run(tf.ACC, finance_screens.bills_to_post)
 		photo = next(p for p in b["photos"] if p["name"] == todo)
 		self.assertIn(doc.name, [x["name"] for x in photo["receipts"]])
-		r = run(tf.ACC, finance.make_bill, None, "LB-9", nowdate(), todo, None, doc.name)
+		r = run(tf.ACC, bill_w.make_bill, None, "LB-9", nowdate(), todo, None, doc.name)
 		pi = frappe.get_doc("Purchase Invoice", r["name"])
 		self.assertEqual((pi.items[0].purchase_receipt, pi.items[0].qty, pi.bill_no), (doc.name, 3, "LB-9"))
 
 	def test_no_receipt_or_bill_without_po(self):
-		self.assertRaises(frappe.ValidationError, run, STORE_U, store.receive, None, [{"item_code": RAW, "qty": 3}], supplier=SUPPLIER, reason="x")
+		self.assertRaises(frappe.ValidationError, run, STORE_U, rcpt_w.receive, None, [{"item_code": RAW, "qty": 3}], supplier=SUPPLIER, reason="x")
 		with self.assertRaises(frappe.ValidationError):
-			run(tf.ACC, finance.make_bill, None, "TY-1", nowdate(), self._photo_task(), None, None, [{"item_code": RAW, "qty": 2, "rate": 250}])
+			run(tf.ACC, bill_w.make_bill, None, "TY-1", nowdate(), self._photo_task(), None, None, [{"item_code": RAW, "qty": 2, "rate": 250}])
 
 	def test_cabin_size_label(self):
-		self.assertEqual(store.cabin_size("Prod-0013-12ft x 10ft x 8.6ft"), "12ft x 10ft x 8.6ft")
-		self.assertEqual(store.cabin_size("Prod-0009-30ft x 10ft"), "30ft x 10ft")
-		self.assertEqual(store.cabin_size("Paint"), "Paint")
-		self.assertEqual(store.job_card_cabin(None), "")
+		self.assertEqual(store_screens.cabin_size("Prod-0013-12ft x 10ft x 8.6ft"), "12ft x 10ft x 8.6ft")
+		self.assertEqual(store_screens.cabin_size("Prod-0009-30ft x 10ft"), "30ft x 10ft")
+		self.assertEqual(store_screens.cabin_size("Paint"), "Paint")
+		self.assertEqual(store_screens.job_card_cabin(None), "")
 
 	def test_store_posts_its_receipt(self):
 		"""SK 27-Oct: Yogesh's receipt stayed a draft (no stock); Store checks and posts it in the app."""
 		pr = self._receipt(2, rate=150)
-		self.assertIn(pr["name"], [r["name"] for r in run(STORE_U, store.receipts_to_post)])
-		r = run(STORE_U, store.post_receipt, pr["name"])
+		self.assertIn(pr["name"], [r["name"] for r in run(STORE_U, store_screens.receipts_to_post)])
+		r = run(STORE_U, rcpt_w.post_receipt, pr["name"])
 		self.assertTrue(r["posted"], r.get("reason"))
 		doc = frappe.get_doc("Purchase Receipt", pr["name"])
 		self.assertEqual((doc.docstatus, doc.items[0].rate, doc.owner), (1, 150, STORE_U))
 		extra = self._receipt(2, rate=150)
-		run(STORE_U, store.drop_receipt, extra["name"])
+		run(STORE_U, rcpt_w.drop_receipt, extra["name"])
 		self.assertFalse(frappe.db.exists("Purchase Receipt", extra["name"]))
 		with self.assertRaises(frappe.ValidationError):
-			run(STORE_U, store.drop_receipt, pr["name"])
+			run(STORE_U, rcpt_w.drop_receipt, pr["name"])

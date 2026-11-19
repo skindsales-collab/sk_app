@@ -7,6 +7,7 @@ from sk_app.gate_rules import (
 	lead_missing,
 	old_order_data_pending,
 	order_missing,
+	po_refers_to,
 	quotation_missing,
 	request_missing,
 )
@@ -31,8 +32,10 @@ def test_lead_needs_name_mobile_segment_source():
 	assert keys(lead_missing(bad)) == {"organization", "first_name", "mobile_no", "sk_segment", "source", "lead_owner"}
 	# a deal carries deal_owner instead of lead_owner
 	assert lead_missing({**full, "lead_owner": None, "deal_owner": "rushi@x"}) == []
-	# no mobile but a way to reach: JustDial (number only inside JustDial) or a mail enquiry with the sender's e-mail
-	assert lead_missing({**full, "mobile_no": None, "source": "JustDial"}) == []
+	# no mobile but a way to reach: a mail enquiry with the sender's e-mail. PR D (SK 15-Nov): a JustDial lead without the
+	# mobile is a gap again (Warn only): someone opens JustDial and copies the number
+	assert keys(lead_missing({**full, "mobile_no": None, "source": "JustDial"})) == {"mobile_no"}
+	assert lead_missing({**full, "mobile_no": None, "source": "JustDial", "email": "a@b.com"}) == []
 	assert lead_missing({**full, "mobile_no": None, "source": "Email", "email": "a@b.com"}) == []
 	assert keys(lead_missing({**full, "mobile_no": None, "source": "Email"})) == {"mobile_no"}
 	assert keys(lead_missing({**full, "mobile_no": None, "source": "IndiaMART", "email": "a@b.com"})) == {"mobile_no"}
@@ -115,3 +118,13 @@ def test_placeholder_po_numbers():
 		assert is_placeholder_po(po), po
 	for po in ["4500123456", "25940227", "PO/2026/118", "Verbal / WhatsApp order", "", None]:
 		assert not is_placeholder_po(po), po
+
+
+def test_po_refers_to_lead_or_deal_name():
+	# SK 18-Nov: leads with no deal find their order by 'From <lead>' in the Customer's PO
+	assert po_refers_to("From CRM-LEAD-2026-00635", ["CRM-LEAD-2026-00635"])
+	assert po_refers_to("From CRM-LEAD-2026-00571 (order 2)", ["CRM-LEAD-2026-00571"])
+	assert po_refers_to("from crm-deal-2026-00044", [None, "CRM-DEAL-2026-00044"])
+	assert not po_refers_to("From CRM-LEAD-2026-006351", ["CRM-LEAD-2026-00635"])
+	assert not po_refers_to("PO 4500123", ["CRM-LEAD-2026-00635"])
+	assert not po_refers_to(None, ["CRM-LEAD-2026-00635"])

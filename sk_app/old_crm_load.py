@@ -33,8 +33,11 @@ def run(file: str):
 
 
 def _known() -> dict:
-	mobiles = {R.mobile_key(m) for m in frappe.get_all("CRM Lead", pluck="mobile_no")} - {None}
-	return {"mobiles": mobiles, "users": set(frappe.get_all("User", filters={"enabled": 1}, pluck="name")),
+	rows = frappe.get_all("CRM Lead", fields=["mobile_no", "creation"], limit=0)
+	mobiles = {R.mobile_key(r.mobile_no) for r in rows} - {None}
+	# SK 17-Nov: a lead is a duplicate only on the same date (KF-04801), so the key is (mobile, creation date)
+	mobile_dates = {(R.mobile_key(r.mobile_no), frappe.utils.getdate(r.creation)) for r in rows if R.mobile_key(r.mobile_no)}
+	return {"mobiles": mobiles, "mobile_dates": mobile_dates, "users": set(frappe.get_all("User", filters={"enabled": 1}, pluck="name")),
 		"sources": set(frappe.get_all("CRM Lead Source", pluck="name")),
 		"reasons": set(frappe.get_all("CRM Lost Reason", pluck="name"))}
 
@@ -70,6 +73,7 @@ def load(file_name: str) -> dict:
 					"modified": f"{closed or created} 18:00:00"}, update_modified=False)
 			if lead.get("mobile_no"):
 				known["mobiles"].add(lead["mobile_no"])
+				known["mobile_dates"].add((lead["mobile_no"], created))
 			made.append(doc.name)
 		frappe.db.set_global(DONE_KEY, "|".join(filter(None, [(frappe.db.get_global(DONE_KEY) or ""), f.file_name])))
 		frappe.db.commit()

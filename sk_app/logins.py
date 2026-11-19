@@ -66,12 +66,17 @@ def old_function_roles(user: str, keep: set) -> set:
 def profile_functions(user: str) -> list[str]:
 	from sk_app.functions import function_list
 
-	profile = frappe.db.get_value("SK App User", {"user": user}, ["name", "home"], as_dict=True)
+	profile = frappe.db.get_value("SK App User", {"user": user}, ["name", "home", "workstation"], as_dict=True)
 	if not profile:
 		return []
 	rows = frappe.get_all("SK App User Function", filters={"parent": profile.name, "parenttype": "SK App User"},
 		fields=["function"], order_by="idx asc")
-	return function_list({"home": profile.home, "functions": rows})
+	out = function_list({"home": profile.home, "functions": rows})
+	if profile.workstation and "Machine Shifting" in out:  # SK 9-Nov: the job doer never gets the owner's sales view
+		out = [f for f in out if f != "Machine Shifting"] or ["Subcontractor"]
+		if "Subcontractor" not in out:
+			out.insert(0, "Subcontractor")
+	return out
 
 
 def people(user: str) -> list[dict]:

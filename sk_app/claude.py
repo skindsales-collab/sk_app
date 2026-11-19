@@ -319,3 +319,6 @@ def help_draft(question: str, function: str, screen: str, asker: str, context: s
 	if data.get("action") not in ("how_to", "app_fix", "erp_setting", "data_fix", "need_info"):
 		data["action"] = "need_info"
 	return {k: (data.get(k) or "").strip() for k in HELP_SCHEMA["properties"]}
+
+
+# SK hiring (17-Nov-2026): resume reading and Round 1 scoring run as Claude's scheduled task (free mode, spec R7), not through an API key here.

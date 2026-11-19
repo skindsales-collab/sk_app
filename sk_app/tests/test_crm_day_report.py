@@ -1,4 +1,5 @@
 import frappe
+from sk_app.writers import lead as lead_w
 from frappe.tests import IntegrationTestCase
 from frappe.tests.classes.context_managers import set_user
 from frappe.utils import add_to_date
@@ -141,7 +142,7 @@ class TestCrmAndDayReport(IntegrationTestCase):
 		from sk_app import crm
 
 		started = frappe.utils.now_datetime()
-		crm.alert_owner(REP)
+		lead_w.alert_owner(REP)
 		self.assertEqual(frappe.session.user, "Administrator")
 		with set_user(REP):
 			self.assertEqual([f.name for f in api.home()["new_files"]], [pdf.name])

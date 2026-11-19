@@ -15,6 +15,7 @@ import io
 import re
 
 import frappe
+from sk_app.writers import lead as lead_w
 from frappe import _
 from frappe.utils import add_to_date, cint, get_datetime, getdate, now_datetime, nowdate
 
@@ -183,9 +184,16 @@ def upload_calls(user: str, file_url: str) -> dict:
 		log.set("receiver" if incoming else "caller", user)
 		log.insert(ignore_permissions=True)
 		if seconds:
-			crm._mark_first_response(ref[0], ref[1])
+			lead_w._mark_first_response(ref[0], ref[1])
 		made += 1
 	return {"made": made, "already": skipped, "not_customers": unknown, "rows": len(rows)}
+
+
+def _is_holiday(day) -> bool:
+	"""A date on the company's holiday list (SK Holidays 2026-27)."""
+	company = frappe.defaults.get_global_default("company") or frappe.db.get_value("Company", {}, "name")
+	hl = frappe.db.get_value("Company", company, "default_holiday_list") if company else None
+	return bool(hl and frappe.db.exists("Holiday", {"parent": hl, "holiday_date": day}))
 
 
 def noon_nudge(now=None):
@@ -197,6 +205,8 @@ def noon_nudge(now=None):
 	from sk_app.logins import profile_functions
 
 	day = getdate(now)
+	if _is_holiday(day):  # checker 9-Nov: fired on Diwali (8-Nov) — no calls expected on a company holiday
+		return
 	for p in frappe.get_all("SK App User", filters={"enabled": 1}, pluck="user"):
 		if not {"Sales", "Marketing"} & set(profile_functions(p)):
 			continue

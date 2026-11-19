@@ -31,12 +31,15 @@ def counts(module: str, since=None) -> dict:
 	for dt, owner in DOCTYPES.get(module, {}).items():
 		if not frappe.db.exists("DocType", dt):
 			continue
-		filters = {}
+		where, values = [], []
 		if frappe.get_meta(dt).is_submittable:
-			filters["docstatus"] = ["<", 2]
+			where.append("docstatus < 2")
 		if since:
-			filters["creation"] = [">", since]
-		rows = frappe.get_all(dt, filters=filters, fields=[f"`{owner}` as o", "count(name) as n"], group_by=owner, as_list=True)
+			where.append("creation > %s")
+			values.append(since)
+		# plain SQL: frappe 16 (Mac, Nov-2026) refuses "count(name) as n" as a get_all field string (found 9-Nov)
+		rows = frappe.db.sql(f"select ifnull(`{owner}`, '') as o, count(*) as n from `tab{dt}`"
+			+ (" where " + " and ".join(where) if where else "") + f" group by `{owner}`", values)
 		out[dt] = {"total": sum(int(r[1]) for r in rows), "by_owner": {str(r[0] or ""): int(r[1]) for r in rows}}
 	return out
 

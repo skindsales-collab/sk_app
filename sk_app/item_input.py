@@ -66,11 +66,6 @@ def _with_stock(r) -> dict:
 	return {"item_code": r.item_code, "item_name": r.item_name, "uom": r.stock_uom, "stock": flt(qty)}
 
 
-def search(user: str, q: str | None) -> list[dict]:
-	need(user, *USERS)
-	return find_items(q or "")
-
-
 # ---------- a list (typed / spoken / read from a photo) → rows ----------
 
 def _to_number(text: str) -> float | None:

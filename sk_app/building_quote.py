@@ -301,7 +301,7 @@ def quote_html(doc, d: dict) -> str:
 	sp = b.get("sales_team", {}).get(owner) or {}
 	sign = (f"<b>{esc(owner)}</b><br>{esc(sp.get('designation') or '')}<br>SK Ind Tech Solutions Pvt. Ltd.<br>"
 		f"Mail id - {esc(sp.get('email') or 'cabin@skind.tech')}<br>Phone No - {esc(sp.get('phone') or '8432533555')}")
-	header = frappe.utils.get_url("/assets/sk_app/images/sk-quote-header.png")
+	header = frappe.utils.get_url("/assets/sk_app/images/sk-cabin-quote-header.png")  # SK 16-Nov: a building is a cabin quote
 	stamp = f"<div class=band style='background:#7a0000'>{waiting}</div>" if waiting else ""
 	bar = lambda n, t: f"<div class=bar>{n}. {t}</div>"  # noqa: E731
 	return f"""<style>{cq.CSS} .skq table.p td,.skq table.p th{{font-size:8.6pt}} .skq ul{{margin:2px 0 2px 18px;padding:0}}</style><div class=skq>

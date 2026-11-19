@@ -1,7 +1,7 @@
 // Run: node --test tests/js
 const test = require("node:test");
 const assert = require("node:assert");
-const { parseCard } = require("../../sk_app/public/js/card_parse.js");
+const { parseCard, fillFromExisting } = require("../../sk_app/public/js/card_parse.js");
 
 test("typical English card", () => {
 	const r = parseCard(`PATIL ENGINEERING WORKS PVT. LTD.
@@ -115,4 +115,15 @@ Mob: 98220 99887`);
 	assert.match(r.requirement, /GI Square Pipe/);
 	assert.match(r.organization, /MAHALAXMI STEEL TRADERS/);
 	assert.strictEqual(r.mobile_no, "9822099887");
+});
+
+
+test("existing customer pick fills ERPNext data and keeps what was typed (SK 14-Nov)", () => {
+	const pick = { customer_name: "Rothe Erde India Private Limited", contact: "Mr Patil", mobile: "9876500011", email: null, gstin: "27AAAAA0000A1Z5", segment: "Machine Shifting" };
+	assert.deepStrictEqual(fillFromExisting({ first_name: "" }, pick), { organization: "Rothe Erde India Private Limited", first_name: "Mr Patil",
+		mobile_no: "9876500011", segment: "Machine Shifting", no_gstin: 0, source: "Existing Customer" });
+	const r = fillFromExisting({ first_name: "" }, { customer_name: "Sujal Enterprises", gstin: null });
+	assert.strictEqual(r.first_name, "Sujal Enterprises");
+	assert.strictEqual(r.no_gstin, 1);
+	assert.ok(!("first_name" in fillFromExisting({ first_name: "Ramesh" }, { customer_name: "Sujal Enterprises" })));
 });

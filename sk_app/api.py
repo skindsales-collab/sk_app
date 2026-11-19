@@ -4,12 +4,34 @@ import json
 from contextlib import contextmanager
 
 import frappe
+from sk_app.writers import kpi_action as kpi_w
+from sk_app.writers import quotation as qtn_w
+from sk_app.writers import order as order_w
+from sk_app.writers import customer as cust_w
+from sk_app import sales_screens
+from sk_app.writers import lead as lead_w
+from sk_app import finance_screens
+from sk_app.writers import payment as pay_w
+from sk_app.writers import bill as bill_w
+from sk_app import hr_screens
+from sk_app.writers import expense as exp_w
+from sk_app.writers import leave as leave_w
+from sk_app.writers import employee as emp_w
+from sk_app.writers import attendance as att_w
+from sk_app.writers import requisition as req_w
+from sk_app import purchase_screens
+from sk_app.writers import purchase_order as po_w
+from sk_app.writers import item as item_w
+from sk_app.writers import stock_entry as se_w
+from sk_app.writers import receipt as rcpt_w
+from sk_app import store_screens
 from frappe import _
 from frappe.rate_limiter import rate_limit
 from frappe.utils import add_to_date, cint, flt, getdate, now_datetime, strip_html
 
-from sk_app import activities, ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, issue_desk, kpi, lead_sources, ledger, logins, mailbox, otp, photocheck, production, products, purchase, quality, requisition, sales_owner, segments, store, sub_bills, training, view_member, work
+from sk_app import activities, ai_desk, applock, calendar_view, flows, claude, colours, comms, complaints, crm, dashboards, day_report, finance, guide, home_kpi, hr, issue_desk, kpi, lead_sources, ledger, logins, mailbox, otp, photocheck, production_screens, products, purchase, quality, requisition, sales_owner, segments, store, sub_bills, training, view_member, work
 from sk_app import library as lib
+from sk_app.writers import work_order as wo_writer  # Plan A step 1: the Production save actions live in the writer
 from sk_app.functions import home_for, sections_for
 from sk_app.logic import rank_items
 
@@ -36,7 +58,8 @@ def _me(unlocked=True):
 
 def _item_dict(item):
 	return {"kind": item.kind, "title": item.title, "doctype": item.doctype, "name": item.name,
-		"due": str(item.due) if item.due else None, "minutes": item.minutes, "priority": item.priority, **item.extra}
+		"due": str(item.due) if item.due else None, "minutes": item.minutes, "priority": item.priority, **item.extra,
+		"by_ceo": bool(item.doctype and item.name in view_member.on_behalf_names(item.doctype))}  # SK 14-Nov: CEO badge
 
 
 def _latest_card(user):
@@ -112,8 +135,17 @@ def home():
 		for x in sections["sections"]:
 			for k in ("tiles", "main", "more"):
 				x[k] = [t for t in x.get(k) or [] if t != "my_bills"]
+	# SK 9-Nov: a site-job subcontractor (Santosh) gets no factory tiles: things not applicable to him are not needed
+	from sk_app.writers import service_job
+
+	if "Subcontractor" in (functions or [profile.home]) and service_job.is_site_worker(profile.user):
+		factory = ("my_jobs", "el_points", "need_material", "my_fixes", "my_bills")  # his bills are on the Site jobs screen
+		main["tiles"] = [t for t in main["tiles"] if t not in factory]
+		for x in (sections or {}).get("sections") or []:
+			for k in ("tiles", "main", "more"):
+				x[k] = [t for t in x.get(k) or [] if t not in factory]
 	# Electrical points: only the electrician's workstation among the subcontractors (Quality / Production always)
-	if sections and "Subcontractor" in (functions or [profile.home]) and not production._is_electrical(production.my_workstation(profile.user)) \
+	if sections and "Subcontractor" in (functions or [profile.home]) and not production_screens._is_electrical(production_screens.my_workstation(profile.user)) \
 			and not {"Quality", "Production"} & set(functions or [profile.home]):
 		for x in sections["sections"]:
 			for k in ("tiles", "main", "more"):
@@ -130,7 +162,7 @@ def home():
 		"must_set_pin": bool(frappe.db.get_value("SK App User", profile.name, "must_set_pin")),
 		"pin_free": otp.pin_free(profile.user),
 		"card": _latest_card(profile.user),
-		"new_files": crm.files_to_send(profile.user), "day_report_sent": bool(day_report._find(profile.user, getdate())),
+		"new_files": sales_screens.files_to_send(profile.user), "day_report_sent": bool(day_report._find(profile.user, getdate())),
 		"due_reminders": comms.due_reminders(profile.user), "badges": _colours(profile, functions), "gate_pending": _gate_pending(profile.user)}
 
 
@@ -171,13 +203,22 @@ def _colours(profile, functions):
 	return out
 
 
+def _hiring_badges(user, functions):
+	try:
+		from sk_app import hiring
+
+		return hiring.badges(user, functions)
+	except Exception:
+		return {}
+
+
 def _badges(user, functions):
 	"""Red counts on Store / Purchase / approval icons; never breaks Home if ERPNext data is odd."""
 	try:
-		return {**store.badges(user, functions), **purchase.badges(user, functions), **production.badges(user, functions),
-			**quality.badges(user, functions), **finance.badges(user, functions), **ai_desk.badges(user, functions),
-			**mailbox.badges(user), **complaints.badge(user), **issue_desk.badge(user), **hr.badges(user, functions), **sub_bills.badges(user),
-			"questions": training.question_count(user), "logins": logins.pin_request_count(user)}
+		return {**store_screens.badges(user, functions), **purchase_screens.badges(user, functions), **production_screens.badges(user, functions),
+			**quality.badges(user, functions), **finance_screens.badges(user, functions), **ai_desk.badges(user, functions),
+			**mailbox.badges(user), **complaints.badge(user), **issue_desk.badge(user), **hr_screens.badges(user, functions), **sub_bills.badges(user),
+			**_hiring_badges(user, functions), "questions": training.question_count(user), "logins": logins.pin_request_count(user)}
 	except Exception:
 		frappe.log_error("SK App badges")
 		return {}
@@ -201,7 +242,7 @@ def my_day():
 def _attendance_line(user):
 	"""Point 16: today's Optick / thumb check-in on top of My Day; never breaks My Day."""
 	try:
-		return hr.my_line(user)
+		return hr_screens.my_line(user)
 	except Exception:
 		frappe.log_error("SK App attendance line")
 		return None
@@ -229,7 +270,7 @@ def respond_card(card, response):
 		frappe.throw(_("Not your card"), frappe.PermissionError)
 	doc.db_set({"response": response, "responded_on": now_datetime()})
 	if response == "Done" and doc.reference_doctype == "File" and doc.reference_name:
-		crm.mark_file_sent(profile.user, doc.reference_name)
+		lead_w.mark_file_sent(profile.user, doc.reference_name)
 	if response in ("Done", "Problem"):
 		return guide.make_card(profile.user)
 	return doc.as_dict()
@@ -269,14 +310,6 @@ def leadership():
 	from sk_app import sas
 
 	return sas.leadership(_me().user)
-
-
-@frappe.whitelist()
-def team_kpi():
-	"""Scorecards of the people whose SK App manager is the logged-in user."""
-	profile = _me()
-	team = frappe.get_all("SK App User", filters={"manager": profile.user, "enabled": 1}, fields=["user", "full_name"])
-	return [{"full_name": t.full_name, **kpi.scorecard(t.user)} for t in team]
 
 
 @frappe.whitelist(methods=["POST"])
@@ -374,25 +407,182 @@ def set_language(language):
 @frappe.whitelist()
 def crm_options():
 	_me()
-	return crm.options()
+	return sales_screens.options()
 
 
 @frappe.whitelist()
 def follow_up():
-	return crm.follow_up(_me().user)
+	return sales_screens.follow_up(_me().user)
 
 
 @frappe.whitelist()
 def crm_detail(doctype, name):
 	_me()
-	return crm.detail(doctype, name)
+	return sales_screens.detail(doctype, name)
+
+
+# ---------- SK hiring (17-Nov-2026): HR tablet, SK Round 2, WhatsApp bot ----------
+@frappe.whitelist()
+def hiring_home():
+	from sk_app import hiring
+
+	return hiring.home(_me().user)
+
+
+@frappe.whitelist()
+def hiring_candidate(name):
+	from sk_app import hiring
+
+	return hiring.candidate(_me().user, name)
+
+
+@frappe.whitelist()
+def hiring_round2():
+	from sk_app import hiring
+
+	return hiring.round2(_me().user)
+
+
+@frappe.whitelist(methods=["POST"])
+def hiring_add_candidate(applicant_name, mobile, job=None, email=None, city=None, resume=None, note=None, language=None, source="Walk In"):
+	from sk_app import hiring
+	from sk_app.writers import applicant as aw
+
+	user = _me().user
+	hiring._check(user)
+	doc = aw.write(user, {"applicant_name": applicant_name, "mobile": mobile, "job": job, "email": email, "city": city, "language": language}, source=source,
+		resume_url=resume, note=note)
+	if resume:
+		frappe.enqueue("sk_app.writers.applicant.read_resume", name=doc.name, queue="short", enqueue_after_commit=True)
+	return {"name": doc.name, "applicant_name": doc.applicant_name, "message": aw.message_for(doc.name, "W2")}
+
+
+@frappe.whitelist(methods=["POST"])
+def hiring_start(applicant, language, consent=0, adult=1, spoken=None, consent_url=None):
+	from sk_app.writers import interview as iw
+
+	return iw.start(_me().user, applicant, language, cint(consent), adult=cint(adult), spoken=spoken, consent_url=consent_url)
+
+
+@frappe.whitelist(methods=["POST"])
+def hiring_answer(interview, code, text=None, voice=None, photo=None, language=None, steps_right=None, video=None, measures=None):
+	from sk_app import hiring
+	from sk_app.writers import interview as iw
+
+	hiring._check(_me().user)
+	return iw.save_answer(interview, code, text, voice, photo, language, None if steps_right in (None, "") else cint(steps_right), video,
+		json.loads(measures) if isinstance(measures, str) and measures else measures)
+
+
+@frappe.whitelist(methods=["POST"])
+def hiring_lock_check(pin):
+	"""Hand-over lock (R10): the office person's PIN ends the kiosk mode on the tablet."""
+	from sk_app import applock
+
+	applock.unlock_pin(_me(unlocked=False).user, pin)
+	return {"ok": True}
+
+
+@frappe.whitelist(methods=["POST"])
+def hiring_finish(interview, note=None):
+	from sk_app import hiring
+	from sk_app.writers import interview as iw
+
+	hiring._check(_me().user)
+	return iw.finish(_me().user, interview, note)
+
+
+@frappe.whitelist(methods=["POST"])
+def hiring_decide(name, action, note=None):
+	from sk_app import hiring_bot
+	from sk_app.writers import applicant as aw
+
+	out = aw.decide(_me().user, name, action, note)
+	if action == "send_to_sk":
+		out["bot"] = hiring_bot.offer_round2(name)  # inside the candidate's free window the bot offers the slots; else the wa.me link
+	return out  # R11: W6 / W7 / W9 are never sent by the bot; the screen shows 'Send by WhatsApp' (wa.me) for the HR owner
+
+
+@frappe.whitelist(methods=["POST"])
+def hiring_r2_start(applicant):
+	from sk_app.writers import interview as iw
+
+	return iw.round2_start(_me().user, applicant)
+
+
+@frappe.whitelist(methods=["POST"])
+def hiring_r2_save(interview, entry):
+	from sk_app.writers import interview as iw
+
+	return iw.round2_save(_me().user, interview, json.loads(entry) if isinstance(entry, str) else entry)
+
+
+@frappe.whitelist(methods=["POST"])
+def hiring_r2_finish(interview, feel, decision, note=None, voice=None):
+	from sk_app.writers import interview as iw
+
+	return iw.round2_finish(_me().user, interview, feel, decision, note, voice)
+
+
+@frappe.whitelist(methods=["POST"])
+def hiring_book(applicant, round_type, date, time, mode="Tablet"):
+	from sk_app import hiring
+	from sk_app.writers import interview as iw
+
+	hiring._check(_me().user)
+	return iw.book(_me().user, applicant, round_type, date, time, mode)
+
+
+@frappe.whitelist()
+def hiring_message(name, key, date=None, time=None):
+	from sk_app import hiring
+	from sk_app.writers import applicant as aw
+
+	hiring._check(_me().user)
+	return aw.message_for(name, key, date=date, time=time)
+
+
+@frappe.whitelist(methods=["POST"])
+def hiring_upload_workindia(file_url, job=None):
+	from sk_app.writers import applicant as aw
+
+	return aw.upload_workindia(_me().user, file_url, job)
+
+
+@frappe.whitelist(methods=["POST"])
+def hiring_bot_console(mobile, text=None, media_kind=None, media_url=None):
+	"""Mac / test console: one message as the candidate; the bot's replies come back (HR or CEO only)."""
+	from sk_app import hiring, hiring_bot
+
+	hiring._check(_me().user)
+	incoming = {"text": text or "", "media": {"kind": media_kind, "url": media_url} if media_kind else None}
+	replies = hiring_bot.handle(mobile, incoming, lambda m, t: None)
+	return {"replies": replies}
+
+
+@frappe.whitelist(allow_guest=True, methods=["GET", "POST"])
+def whatsapp_webhook(**kwargs):
+	"""Meta's webhook: GET verifies, POST delivers messages to the bot."""
+	from sk_app import whatsapp
+
+	if frappe.request.method == "GET":
+		return whatsapp.verify(kwargs.get("hub.mode"), kwargs.get("hub.verify_token"), kwargs.get("hub.challenge"))
+	payload = json.loads(frappe.request.data or b"{}")
+	return {"handled": whatsapp.receive(payload)}
+
+
+@frappe.whitelist()
+def lead_lookup(q):
+	"""SK 14-Nov: New Lead for an existing customer: the matching customers with their old data, while typing."""
+	_me()
+	return sales_screens.existing_customers(q)
 
 
 @frappe.whitelist(methods=["POST"])
 def new_lead(first_name, mobile_no=None, organization=None, email=None, source=None, segment=None,
-		requirement=None, photo=None, product=None, status=None, no_gstin=0):
-	return crm.new_lead(_me().user, first_name, mobile_no, organization, email, source, segment, requirement, photo, product, status,
-		no_gstin)
+		requirement=None, photo=None, product=None, status=None, no_gstin=0, customer=None):
+	return lead_w.new_lead(_me().user, first_name, mobile_no, organization, email, source, segment, requirement, photo, product, status,
+		no_gstin, customer)
 
 
 @contextmanager
@@ -418,30 +608,44 @@ def lead_route(name):
 @frappe.whitelist(methods=["POST"])
 def lead_to_design(name):
 	"""New Lead "Send to design" switch: the lead becomes a deal that the AI design pickup reads."""
-	return crm.send_to_design(_me().user, name)
+	return lead_w.send_to_design(_me().user, name)
 
 
 @frappe.whitelist(methods=["POST"])
 def set_crm_status(doctype, name, status):
 	_me()
-	return crm.set_status(doctype, name, status)
+	return lead_w.set_status(doctype, name, status)
 
 
 @frappe.whitelist(methods=["POST"])
 def add_crm_note(doctype, name, text=None, photo=None):
-	return crm.add_note(_me().user, doctype, name, text, photo)
+	return lead_w.add_note(_me().user, doctype, name, text, photo)
+
+
+@frappe.whitelist(methods=["POST"])
+def save_site_checklist(deal, answers, note=None, photo=None):
+	"""Machine Shifting Site Checklist (SK 10-Nov): the 8 points + photo go on the deal as one note."""
+	return lead_w.save_site_checklist(_me().user, deal, frappe.parse_json(answers) if isinstance(answers, str) else answers, note, photo)
+
+
+@frappe.whitelist()
+def site_checks():
+	_me()
+	from sk_app.writers.lead_rules import SITE_CHECKS
+
+	return [{"key": k, "en": en, "mr": mr} for k, en, mr in SITE_CHECKS]
 
 
 @frappe.whitelist(methods=["POST"])
 def log_contact(doctype, name, channel, outcome=None, text=None, photo=None, duration=None):
-	return crm.log_contact(_me().user, doctype, name, channel, outcome, text, photo, cint(duration))
+	return lead_w.log_contact(_me().user, doctype, name, channel, outcome, text, photo, cint(duration))
 
 
 @frappe.whitelist(methods=["POST"])
 def read_doc_photo(file_url, kind):
 	"""SK 1-Nov minimum input: Claude reads a bill (cash voucher) or customer PO photo into its form. Empty when off."""
 	profile = _me()
-	content, media = crm.own_file_content(profile.user, file_url)
+	content, media = sales_screens.own_file_content(profile.user, file_url)
 	return claude.read_doc_photo(kind, content, media) or {}
 
 
@@ -449,29 +653,24 @@ def read_doc_photo(file_url, kind):
 def read_photo(file_url):
 	"""Claude reads a visiting card / enquiry photo into the new-lead form. Empty result when Claude is off."""
 	profile = _me()
-	content, media = crm.own_file_content(profile.user, file_url)
+	content, media = sales_screens.own_file_content(profile.user, file_url)
 	return claude.read_lead_photo(content, media) or {}
-
-
-@frappe.whitelist()
-def new_files():
-	return crm.new_files(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def request_correction(doctype, name, text=None, file=None, photo=None):
-	return crm.request_correction(_me().user, doctype, name, text, file, photo)
+	return lead_w.request_correction(_me().user, doctype, name, text, file, photo)
 
 
 @frappe.whitelist(methods=["POST"])
 def mark_file_sent(file, channel="WhatsApp"):
-	return crm.mark_file_sent(_me().user, file, channel)
+	return lead_w.mark_file_sent(_me().user, file, channel)
 
 
 @frappe.whitelist(methods=["POST"])
 def share_link(doctype, name):
 	_me()
-	return crm.share_link(doctype, name)
+	return sales_screens.share_link(doctype, name)
 
 
 # ---- Training ----
@@ -781,7 +980,7 @@ def tally_gateway():
 	user = _me().user
 	need(user, "Accounts", "Management")
 	out = tally.gateway(user)
-	cash = frappe._dict(finance.cash_today(user))
+	cash = frappe._dict(finance_screens.cash_today(user))
 	out["cash"] = cash.total
 	due = lambda dt: frappe.utils.flt(frappe.db.sql(f"select sum(outstanding_amount) from `tab{dt}` where docstatus = 1 and outstanding_amount > 0")[0][0])  # noqa: E731
 	out["receivable"], out["payable"] = due("Sales Invoice"), due("Purchase Invoice")
@@ -808,17 +1007,17 @@ def fin_bank_statement(file, bank_account=None):
 
 @frappe.whitelist()
 def fin_cash():
-	return finance.cash_today(_me().user)
+	return finance_screens.cash_today(_me().user)
 
 
 @frappe.whitelist()
 def fin_collect():
-	return finance.to_collect(_me().user)
+	return finance_screens.to_collect(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def fin_promise(sales_invoice, text=None, promised_on=None):
-	return finance.promise(_me().user, sales_invoice, text, promised_on)
+	return pay_w.promise(_me().user, sales_invoice, text, promised_on)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -828,22 +1027,22 @@ def fin_receive(reference_doctype, reference_name, amount, mode=None, reference_
 
 @frappe.whitelist()
 def fin_to_pay():
-	return finance.to_pay(_me().user)
+	return finance_screens.to_pay(_me().user)
 
 
 @frappe.whitelist()
 def fin_pay_approvals():
-	return finance.pay_approvals(_me().user)
+	return finance_screens.pay_approvals(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def fin_approve_payment(purchase_invoice):
-	return finance.approve_payment(_me().user, purchase_invoice)
+	return pay_w.approve_payment(_me().user, purchase_invoice)
 
 
 @frappe.whitelist(methods=["POST"])
 def fin_ask_approval(purchase_invoice):
-	return finance.ask_approval(_me().user, purchase_invoice)
+	return pay_w.ask_approval(_me().user, purchase_invoice)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -853,48 +1052,48 @@ def fin_pay(purchase_invoice, amount=None, mode=None, reference_no=None, referen
 
 @frappe.whitelist()
 def fin_bills():
-	return finance.bills_to_post(_me().user)
+	return finance_screens.bills_to_post(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def fin_photo_entry(kind, photo, supplier=None, party=None, amount=None, ref_no=None, note=None):
-	return finance.photo_entry(_me().user, kind, photo, supplier or None, party or None, amount or None, ref_no or None, note or None)
+	return bill_w.photo_entry(_me().user, kind, photo, supplier or None, party or None, amount or None, ref_no or None, note or None)
 
 
 @frappe.whitelist()
 def fin_photo_entries():
-	return finance.photo_entries(_me().user)
+	return finance_screens.photo_entries(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def fin_make_bill(bill_no, purchase_order=None, bill_date=None, todo=None, photo=None, purchase_receipt=None, items=None, supplier=None):
-	return finance.make_bill(_me().user, purchase_order or None, bill_no, bill_date, todo, photo, purchase_receipt or None,
+	return bill_w.make_bill(_me().user, purchase_order or None, bill_no, bill_date, todo, photo, purchase_receipt or None,
 		json.loads(items) if isinstance(items, str) else items, supplier or None)
 
 
 @frappe.whitelist(methods=["POST"])
 def fin_post(doctype, name):
-	return finance.post(_me().user, doctype, name)
+	return finance_screens.post(_me().user, doctype, name)
 
 
 @frappe.whitelist(methods=["POST"])
 def fin_bill_photo_done(todo):
-	return finance.done_bill_photo(_me().user, todo)
+	return bill_w.done_bill_photo(_me().user, todo)
 
 
 @frappe.whitelist()
 def fin_invoices():
-	return finance.invoices(_me().user)
+	return finance_screens.invoices(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def fin_make_invoice(delivery_note):
-	return finance.make_invoice(_me().user, delivery_note)
+	return bill_w.make_invoice(_me().user, delivery_note)
 
 
 @frappe.whitelist()
 def fin_expenses():
-	return finance.expenses(_me().user)
+	return finance_screens.expenses(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -910,7 +1109,7 @@ def fin_modes():
 
 @frappe.whitelist()
 def fin_voucher_options():
-	return finance.voucher_options(_me().user)
+	return finance_screens.voucher_options(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -920,17 +1119,17 @@ def fin_petty_cash(expense_account, amount, cash_account, cost_center=None, narr
 
 @frappe.whitelist()
 def fin_segment_pnl(month=None):
-	return finance.segment_pnl(_me().user, month)
+	return finance_screens.segment_pnl(_me().user, month)
 
 
 @frappe.whitelist()
 def fin_month_close():
-	return finance.month_close(_me().user)
+	return finance_screens.month_close(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def fin_tick_close(key, done=1):
-	return finance.tick_close(_me().user, key, done)
+	return bill_w.tick_close(_me().user, key, done)
 
 
 # ---------- Store (SK draft F01) ----------
@@ -941,17 +1140,17 @@ def _list(v):
 
 @frappe.whitelist()
 def store_search(q=None):
-	return store.stock_search(_me().user, q)
+	return store_screens.stock_search(_me().user, q)
 
 
 @frappe.whitelist()
 def store_item(item_code):
-	return store.item_detail(_me().user, item_code)
+	return store_screens.item_detail(_me().user, item_code)
 
 
 @frappe.whitelist()
 def store_open_pos():
-	return store.open_purchase_orders(_me().user)
+	return store_screens.open_purchase_orders(_me().user)
 
 
 @frappe.whitelist()
@@ -1005,17 +1204,17 @@ def marketing_lead_made(contact, lead):
 
 @frappe.whitelist()
 def store_receipts_to_post():
-	return store.receipts_to_post(_me().user)
+	return store_screens.receipts_to_post(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def store_post_receipt(name, rates=None):
-	return store.post_receipt(_me().user, name, json.loads(rates) if isinstance(rates, str) else rates)
+	return rcpt_w.post_receipt(_me().user, name, json.loads(rates) if isinstance(rates, str) else rates)
 
 
 @frappe.whitelist(methods=["POST"])
 def store_drop_receipt(name):
-	return store.drop_receipt(_me().user, name)
+	return rcpt_w.drop_receipt(_me().user, name)
 
 
 @frappe.whitelist()
@@ -1089,52 +1288,52 @@ def service_report(purchase_order, photo, note=None):
 
 @frappe.whitelist(methods=["POST"])
 def store_receive(items, purchase_order=None, challan_photo=None, goods_photo=None, note=None, supplier=None, reason=None, bill_no=None):
-	return store.receive(_me().user, purchase_order, _list(items), challan_photo, goods_photo, note, supplier, reason, bill_no)
+	return rcpt_w.receive(_me().user, purchase_order, _list(items), challan_photo, goods_photo, note, supplier, reason, bill_no)
 
 
 @frappe.whitelist()
 def store_work_orders():
-	return store.open_work_orders(_me().user)
+	return store_screens.open_work_orders(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def store_issue(work_order, items, taken_by=None, job_card=None, photo=None):
-	return store.issue(_me().user, work_order, _list(items), taken_by, job_card, photo)
+	return se_w.issue(_me().user, work_order, _list(items), taken_by, job_card, photo)
 
 
 @frappe.whitelist()
 def store_requests(kind="store"):
-	return store.material_requests(_me().user, kind)
+	return store_screens.material_requests(_me().user, kind)
 
 
 @frappe.whitelist(methods=["POST"])
 def store_request_issue(request):
-	return store.request_issue(_me().user, request)
+	return se_w.request_issue(_me().user, request)
 
 
 @frappe.whitelist(methods=["POST"])
 def store_request_to_purchase(request):
-	return store.request_to_purchase(_me().user, request)
+	return store_screens.request_to_purchase(_me().user, request)
 
 
 @frappe.whitelist()
 def store_low_stock():
-	return store.low_stock(_me().user)
+	return store_screens.low_stock(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def store_order_low(item_codes=None):
-	return store.order_low(_me().user, _list(item_codes) or None)
+	return store_screens.order_low(_me().user, _list(item_codes) or None)
 
 
 @frappe.whitelist()
 def store_dispatch_orders():
-	return store.orders_to_dispatch(_me().user)
+	return store_screens.orders_to_dispatch(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def store_dispatch(sales_order, vehicle_no=None, driver_mobile=None, cabin_photo=None, plate_photo=None, note=None):
-	return store.dispatch(_me().user, sales_order, vehicle_no, driver_mobile, cabin_photo, plate_photo, note)
+	return se_w.dispatch(_me().user, sales_order, vehicle_no, driver_mobile, cabin_photo, plate_photo, note)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -1162,64 +1361,64 @@ def item_weight(item_code):
 
 @frappe.whitelist()
 def store_warehouses():
-	return store.warehouses(_me().user)
+	return store_screens.warehouses(_me().user)
 
 
 @frappe.whitelist()
 def store_count_list(warehouse):
-	return store.count_list(_me().user, warehouse)
+	return store_screens.count_list(_me().user, warehouse)
 
 
 @frappe.whitelist(methods=["POST"])
 def store_count(warehouse, counts, photo=None):
-	return store.stock_count(_me().user, warehouse, _list(counts), photo)
+	return se_w.stock_count(_me().user, warehouse, _list(counts), photo)
 
 
 @frappe.whitelist()
 def store_item_options():
-	return store.item_options(_me().user)
+	return store_screens.item_options(_me().user)
 
 
 @frappe.whitelist()
 def store_similar(name):
-	return store.similar_items(_me().user, name)
+	return store_screens.similar_items(_me().user, name)
 
 
 @frappe.whitelist(methods=["POST"])
 def store_new_item(item_name, item_group=None, uom=None, warehouse=None, photo=None):
-	return store.new_item(_me().user, item_name, item_group, uom, warehouse, photo)
+	return item_w.new_item(_me().user, item_name, item_group, uom, warehouse, photo)
 
 
 # ---------- Purchase (SK draft F02) ----------
 
 @frappe.whitelist()
 def buy_requests():
-	return purchase.requests(_me().user)
+	return purchase_screens.requests(_me().user)
 
 
 @frappe.whitelist()
 def buy_suggest(item_code):
-	return purchase.suggest_suppliers(_me().user, item_code)
+	return purchase_screens.suggest_suppliers(_me().user, item_code)
 
 
 @frappe.whitelist()
 def buy_suppliers(q=None):
-	return purchase.suppliers(_me().user, q)
+	return purchase_screens.suppliers(_me().user, q)
 
 
 @frappe.whitelist(methods=["POST"])
 def buy_rfq(items, suppliers, need_by=None):
-	return purchase.make_rfq(_me().user, _list(items), _list(suppliers), need_by)
+	return po_w.make_rfq(_me().user, _list(items), _list(suppliers), need_by)
 
 
 @frappe.whitelist(methods=["POST"])
 def buy_quote(supplier, item_code, qty, rate, days=None, photo=None, rfq=None):
-	return purchase.add_quote(_me().user, supplier, item_code, qty, rate, days, photo, rfq)
+	return po_w.add_quote(_me().user, supplier, item_code, qty, rate, days, photo, rfq)
 
 
 @frappe.whitelist()
 def buy_compare(item_code):
-	return purchase.compare(_me().user, item_code)
+	return purchase_screens.compare(_me().user, item_code)
 
 
 @frappe.whitelist()
@@ -1233,31 +1432,24 @@ def buy_quoted_items():
 
 @frappe.whitelist(methods=["POST"])
 def buy_make_po(supplier_quotation, schedule_date=None, terms=None):
-	return purchase.make_po(_me().user, supplier_quotation, schedule_date, terms)
+	return po_w.make_po(_me().user, supplier_quotation, schedule_date, terms)
 
 
 @frappe.whitelist()
 def buy_approvals():
-	return purchase.approvals(_me().user)
+	return purchase_screens.approvals(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def buy_decide(purchase_order, approve, reason=None):
-	return purchase.decide(_me().user, purchase_order, bool(cint(approve)), reason)
+	return po_w.decide(_me().user, purchase_order, bool(cint(approve)), reason)
 
 
 # ---------- purchase requisition (SK 27-Oct): requisition → CEO → PO → receipt, all in ERPNext ----------
 
 @frappe.whitelist()
 def req_item(item_code):
-	return requisition.item_info(_me().user, item_code)
-
-
-@frappe.whitelist()
-def item_find(q=None):
-	from sk_app import item_input
-
-	return item_input.search(_me().user, q)
+	return purchase_screens.item_info(_me().user, item_code)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -1283,50 +1475,50 @@ def item_photo_save(item_code, sig, file_url=None):
 
 @frappe.whitelist()
 def req_cabins():
-	return requisition.cabins(_me().user)
+	return purchase_screens.cabins(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def req_raise(items, priority="Planned", need_by=None, cabin=None, note=None, photo=None, goods_photo=None, without_po=0,
 		supplier=None, bill_no=None):
-	return requisition.raise_request(_me().user, _list(items), priority, need_by, cabin, note, photo, goods_photo, cint(without_po),
+	return req_w.raise_request(_me().user, _list(items), priority, need_by, cabin, note, photo, goods_photo, cint(without_po),
 		supplier, bill_no)
 
 
 @frappe.whitelist()
 def req_track():
-	return requisition.track(_me().user)
+	return purchase_screens.track(_me().user)
 
 
 @frappe.whitelist()
 def req_to_approve():
-	return requisition.to_approve(_me().user)
+	return purchase_screens.to_approve(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def req_decide(name, approve, note=None):
-	return requisition.decide(_me().user, name, cint(approve), note)
+	return req_w.decide(_me().user, name, cint(approve), note)
 
 
 @frappe.whitelist(methods=["POST"])
 def req_make_po(request, supplier=None, rates=None, schedule_date=None):
 	rates = frappe.parse_json(rates) if isinstance(rates, str) else rates
-	return requisition.po_from_request(_me().user, request, supplier, rates, schedule_date)
+	return req_w.po_from_request(_me().user, request, supplier, rates, schedule_date)
 
 
 @frappe.whitelist()
 def buy_follow_up():
-	return purchase.follow_up(_me().user)
+	return purchase_screens.follow_up(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def buy_follow_up_note(purchase_order, text, promised=None):
-	return purchase.follow_up_note(_me().user, purchase_order, text, promised)
+	return po_w.follow_up_note(_me().user, purchase_order, text, promised)
 
 
 @frappe.whitelist(methods=["POST"])
 def buy_new_supplier(supplier_name, gstin=None, mobile=None, group=None, photo=None, cheque_photo=None):
-	return purchase.new_supplier(_me().user, supplier_name, gstin, mobile, group, photo, cheque_photo)
+	return po_w.new_supplier(_me().user, supplier_name, gstin, mobile, group, photo, cheque_photo)
 
 
 @frappe.whitelist()
@@ -1336,12 +1528,12 @@ def buy_supplier_groups():
 
 @frappe.whitelist(methods=["POST"])
 def buy_send_bill(supplier, photo, amount=None, bill_no=None, against=None, note=None):
-	return purchase.send_bill(_me().user, supplier, photo, amount, bill_no, against, note)
+	return po_w.send_bill(_me().user, supplier, photo, amount, bill_no, against, note)
 
 
 @frappe.whitelist()
 def buy_last_rates(q=None):
-	return purchase.last_rates(_me().user, q)
+	return purchase_screens.last_rates(_me().user, q)
 
 
 @frappe.whitelist()
@@ -1356,7 +1548,7 @@ def team_follow_up(person=None):
 		frappe.throw(_("{0} is not in your team").format(person), frappe.PermissionError)
 	summary, rows = [], []
 	for p in people:
-		items = crm.follow_up(p["user"], for_manager=p["user"] != profile.user)
+		items = sales_screens.follow_up(p["user"], for_manager=p["user"] != profile.user)
 		month = kpi.scorecard(p["user"])
 		summary.append({**p, "open": len(items), "overdue": sum(1 for r in items if r["overdue"]), "new": sum(1 for r in items if r["new"]),
 			"deal_value": sum(flt(r.get("value")) for r in items if r["doctype"] == "CRM Deal"), "score": month.get("score")})
@@ -1369,50 +1561,50 @@ def team_follow_up(person=None):
 
 @frappe.whitelist()
 def prod_board():
-	return production.order_board(_me().user)
+	return production_screens.order_board(_me().user)
 
 
 @frappe.whitelist()
 def prod_job_cards():
-	return production.job_cards(_me().user)
+	return production_screens.job_cards(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def prod_start(job_card, photo=None):
-	return production.start(_me().user, job_card, photo)
+	return wo_writer.start(_me().user, job_card, photo)
 
 
 @frappe.whitelist(methods=["POST"])
 def prod_photo(job_card, photo=None, note=None):
-	return production.add_photo(_me().user, job_card, photo, note)
+	return wo_writer.add_photo(_me().user, job_card, photo, note)
 
 
 @frappe.whitelist(methods=["POST"])
 def prod_done(job_card, photos=None, workers=None, remark=None, checks=None):
-	return production.done(_me().user, job_card, _list(photos), workers, remark, _list(checks))
+	return wo_writer.done(_me().user, job_card, _list(photos), workers, remark, _list(checks))
 
 
 @frappe.whitelist()
 def prod_self_sheet(job_card):
 	"""SK 28-Oct: the worker's own check sheet for this stage."""
 	user = _me().user
-	production._card_for(user, job_card)
+	production_screens._card_for(user, job_card)
 	return quality.self_sheet(job_card)
 
 
 @frappe.whitelist(methods=["POST"])
 def prod_need_material(items=None, job_card=None, work_order=None, needed_by=None, spoken=None):
-	return production.need_material(_me().user, _list(items), job_card, work_order, needed_by, spoken)
+	return wo_writer.need_material(_me().user, _list(items), job_card, work_order, needed_by, spoken)
 
 
 @frappe.whitelist(methods=["POST"])
 def prod_progress_photo(work_order, photo, note=None):
-	return production.progress_photo(_me().user, work_order, photo, note)
+	return wo_writer.progress_photo(_me().user, work_order, photo, note)
 
 
 @frappe.whitelist()
 def prod_ready():
-	return production.ready_to_dispatch(_me().user)
+	return production_screens.ready_to_dispatch(_me().user)
 
 
 @frappe.whitelist()
@@ -1652,6 +1844,13 @@ def view_members():
 	return view_member.members(_me().user)
 
 
+@frappe.whitelist(methods=["POST"])
+def work_as(member, method, args=None, view=None):
+	"""SK 14-Nov: the CEO works in a member's app (lead, quote ...) for them; the record stays the member's, marked CEO."""
+	profile = _me()
+	return view_member.work_as(profile.user, member, method, json.loads(args) if isinstance(args, str) else (args or {}), view)
+
+
 @frappe.whitelist()
 def view_as(member, method, args=None, view=None):
 	viewer = _me().user
@@ -1699,7 +1898,7 @@ def upload_call_list(file_url):
 def new_joiner(data, photos=None):
 	data = json.loads(data) if isinstance(data, str) else data
 	photos = json.loads(photos) if isinstance(photos, str) else photos
-	return hr.new_joiner(_me().user, data or {}, photos or [])
+	return emp_w.new_joiner(_me().user, data or {}, photos or [])
 
 
 @frappe.whitelist()
@@ -1714,7 +1913,7 @@ def sales_assign(customer, sales_person=None):
 
 @frappe.whitelist(methods=["POST"])
 def convert_lead(name):
-	return crm.convert_lead(_me().user, name)
+	return lead_w.convert_lead(_me().user, name)
 
 
 @frappe.whitelist()
@@ -1726,13 +1925,13 @@ def flow_stage(src, key, period=None):
 
 @frappe.whitelist()
 def el_jobs():
-	return production.el_jobs(_me().user)
+	return production_screens.el_jobs(_me().user)
 
 
 @frappe.whitelist()
 def save_el_points(job_card, points=None, photo=None, note=None):
 	points = json.loads(points) if isinstance(points, str) else points
-	return production.save_el_points(_me().user, job_card, points or {}, photo, note)
+	return wo_writer.save_el_points(_me().user, job_card, points or {}, photo, note)
 
 
 @frappe.whitelist()
@@ -1742,12 +1941,21 @@ def kpi_actions(member=None):
 
 @frappe.whitelist()
 def add_kpi_action(text, member=None, priority="Medium", date=None):
-	return home_kpi.add_action(_me().user, member, text, priority, date)
+	return kpi_w.add_action(_me().user, member, text, priority, date)
 
 
 @frappe.whitelist()
 def finish_kpi_action(name, note=None, photo=None):
-	return home_kpi.finish_action(_me().user, name, note, photo)
+	return kpi_w.finish_action(_me().user, name, note, photo)
+
+
+@frappe.whitelist()
+def home_decide():
+	"""Rebuild PR B (Path Switch Home): the main screen's "Decide now" items in one call, read live from ERPNext."""
+	from sk_app.core import decide
+
+	profile = _me()
+	return decide.for_user(profile.user, logins.profile_functions(profile.user) or [profile.home])
 
 
 @frappe.whitelist()
@@ -1862,38 +2070,6 @@ def ceo_question_redraft(todo):
 	return training._draft_of(todo)
 
 
-# SK 28-Oct (Rev 1 points 17-18): SK Phone, the free Android helper that sends the phone's calls to CRM
-@frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(limit=20, seconds=60 * 60)
-def phone_link(mobile, pin, device=None, mode="company"):
-	from sk_app import phone_sync
-
-	return phone_sync.link(mobile, pin, device, mode)
-
-
-@frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(limit=120, seconds=60 * 60)
-def phone_numbers(token):
-	from sk_app import phone_sync
-
-	return phone_sync.numbers(token)
-
-
-@frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(limit=120, seconds=60 * 60)
-def phone_calls(token, calls):
-	from sk_app import phone_sync
-
-	return phone_sync.upload(token, calls)
-
-
-@frappe.whitelist(methods=["POST"])
-def phone_unlink(user):
-	from sk_app import phone_sync
-
-	return phone_sync.unlink(_me().user, user)
-
-
 # SK 28-Oct (Rev 1 point 6): the CEO's Questions screen
 @frappe.whitelist()
 def ceo_questions():
@@ -1938,65 +2114,65 @@ def photo_learn(kind, read_text, chosen):
 # point 16 + HR step 5: Optick / thumb attendance, leave and expenses
 @frappe.whitelist()
 def hr_today(day=None):
-	return hr.today(_me().user, day)
+	return hr_screens.today(_me().user, day)
 
 
 @frappe.whitelist()
 def hr_month(month=None):
-	return hr.month(_me().user, month)
+	return hr_screens.month(_me().user, month)
 
 
 @frappe.whitelist(methods=["POST"])
 def hr_upload_preview(file_url, device="Optick"):
-	return hr.upload_preview(_me().user, file_url, device)
+	return att_w.upload_preview(_me().user, file_url, device)
 
 
 @frappe.whitelist(methods=["POST"])
 def hr_upload_save(file_url, matches=None, device="Optick"):
 	if isinstance(matches, str):
 		matches = json.loads(matches or "{}")
-	return hr.upload_save(_me().user, file_url, matches, device)
+	return att_w.upload_save(_me().user, file_url, matches, device)
 
 
 @frappe.whitelist(methods=["POST"])
 def hr_fix(employee, day, status, reason, todo=None):
-	return hr.fix_attendance(_me().user, employee, day, status, reason, todo)
+	return att_w.fix_attendance(_me().user, employee, day, status, reason, todo)
 
 
 @frappe.whitelist(methods=["POST"])
 def attendance_selfie(photo, lat=None, lng=None):
-	return hr.selfie_checkin(_me().user, photo, lat, lng)
+	return att_w.selfie_checkin(_me().user, photo, lat, lng)
 
 
 @frappe.whitelist(methods=["POST"])
 def attendance_ask_fix(text, day=None):
-	return hr.ask_fix(_me().user, day, text)
+	return att_w.ask_fix(_me().user, day, text)
 
 
 @frappe.whitelist()
 def leave_expense():
 	user = _me().user
-	return {**hr.options(user), **hr.listing(user)}
+	return {**hr_screens.options(user), **hr_screens.listing(user)}
 
 
 @frappe.whitelist(methods=["POST"])
 def leave_apply(leave_type, from_date, to_date=None, half_day=0, reason=None):
-	return hr.apply_leave(_me().user, leave_type, from_date, to_date, half_day, reason)
+	return leave_w.apply_leave(_me().user, leave_type, from_date, to_date, half_day, reason)
 
 
 @frappe.whitelist(methods=["POST"])
 def leave_decide(name, ok, note=None):
-	return hr.decide_leave(_me().user, name, ok, note)
+	return leave_w.decide_leave(_me().user, name, ok, note)
 
 
 @frappe.whitelist(methods=["POST"])
 def expense_claim(expense_type, amount, expense_date=None, note=None, photo=None, paid_to=None, cabin=None, no_bill=None):
-	return hr.claim_expense(_me().user, expense_type, amount, expense_date, note, photo, paid_to, cabin, no_bill)
+	return exp_w.claim_expense(_me().user, expense_type, amount, expense_date, note, photo, paid_to, cabin, no_bill)
 
 
 @frappe.whitelist(methods=["POST"])
 def expense_decide(name, ok, note=None):
-	return hr.decide_expense(_me().user, name, ok, note)
+	return exp_w.decide_expense(_me().user, name, ok, note)
 
 
 # ---- ERP flow in the app (SK 26-Oct): Customer → Quotation → Sales Order → Work Order ----
@@ -2008,16 +2184,7 @@ def flow_make_customer(deal, gstin=None, unregistered=0, gst_note=None, address=
 
 	details = {"gstin": gstin, "unregistered": unregistered, "gst_note": gst_note, "address": address, "city": city, "state": state,
 		"pincode": pincode, "mobile": mobile}
-	return erp_flow.make_customer(_me().user, deal, details if any(v not in (None, "", 0, "0") for v in details.values()) else None)
-
-
-@frappe.whitelist()
-def gate_rules():
-	"""The mandatory fields of every screen (SK 28-Oct), for the help card."""
-	_me()
-	from sk_app.gate_rules import RULES
-
-	return RULES
+	return cust_w.make_customer(_me().user, deal, details if any(v not in (None, "", 0, "0") for v in details.values()) else None)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -2033,7 +2200,7 @@ def complete_lead(doctype, name, values):
 def flow_submit_quotation(quotation):
 	from sk_app import erp_flow
 
-	return erp_flow.submit_quotation(_me().user, quotation)
+	return qtn_w.submit_quotation(_me().user, quotation)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -2041,35 +2208,40 @@ def flow_make_quotation(deal=None, items=None, valid_days=15, note=None, lead=No
 	from sk_app import erp_flow
 
 	with _quote_log("other quotation", deal or lead):
-		return erp_flow.make_quotation(_me().user, deal, _list(items), int(valid_days or 15), note, lead)
+		return qtn_w.make_quotation(_me().user, deal, _list(items), int(valid_days or 15), note, lead)
 
 
 @frappe.whitelist(methods=["POST"])
 def flow_order_received(quotation, delivery_date=None, po_no=None, po_photo=None, order_date=None, po_date=None):
 	from sk_app import erp_flow
 
-	return erp_flow.order_received(_me().user, quotation, delivery_date, po_no, po_photo, order_date, po_date)
+	return order_w.order_received(_me().user, quotation, delivery_date, po_no, po_photo, order_date, po_date)
 
 
 @frappe.whitelist(methods=["POST"])
 def flow_confirm_order(sales_order):
 	from sk_app import erp_flow
 
-	return erp_flow.confirm_order(_me().user, sales_order)
+	return order_w.confirm_order(_me().user, sales_order)
 
 
 @frappe.whitelist()
 def flow_orders_to_plan():
 	from sk_app import erp_flow
 
-	return erp_flow.orders_to_plan(_me().user)
+	return sales_screens.orders_to_plan(_me().user)
 
 
 @frappe.whitelist(methods=["POST"])
 def flow_make_work_order(sales_order, so_item):
 	from sk_app import erp_flow
+	from sk_app.core.switch import use_new
 
-	return erp_flow.make_work_order(_me().user, sales_order, so_item)
+	if use_new("Production", _me().user):  # rebuild Flow 5: one Production writer
+		from sk_app.writers import work_order
+
+		return work_order.make(_me().user, sales_order, so_item)
+	return wo_writer.make_work_order(_me().user, sales_order, so_item)
 
 
 # ---------- standard cabin quotation (SK 27-Oct): price from SK's rate card only ----------

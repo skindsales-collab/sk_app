@@ -23,6 +23,7 @@ import math
 from concurrent.futures import ThreadPoolExecutor
 
 import frappe
+from sk_app import sales_screens
 from frappe import _
 from frappe.utils import cint, flt
 
@@ -244,7 +245,7 @@ def count(user: str, file_url: str, item_code: str | None = None, screen: str | 
 	store.need(user, *FUNCTIONS)
 	if not claude.available():
 		frappe.throw(_("Photo count needs Claude, which is off or over this month's limit. Use 👆 to count by tapping."))
-	content, _media = crm.own_file_content(user, file_url)
+	content, _media = sales_screens.own_file_content(user, file_url)
 	weight = item_weight(item_code)
 	res = count_image(content, weight.get("item_name") or item_code)
 	for _i in range(res.get("calls") or 0):

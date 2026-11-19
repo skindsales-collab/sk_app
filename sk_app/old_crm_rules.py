@@ -10,7 +10,7 @@ from datetime import date
 FILE_PREFIX = "SK_Old_CRM_Load_"  # SK uploads e.g. SK_Old_CRM_Load_6Nov2026.csv as a private File
 MARKER = "[old CRM load]"         # written into lost_notes, so a second run skips rows already loaded
 CLOSED = ("Junk Lead", "Deal Loss")
-OPEN = ("Quotation",)
+OPEN = ("Quotation", "New", "Qualified")  # SK 17-Nov: the Biziverse add-load keeps each lead at its earlier stage (24 New, 6 Qualified)
 FIELDS = ("first_name", "organization", "mobile_no", "source", "lead_owner", "status", "lost_reason", "lost_notes",
 	"sk_product", "sk_segment")
 
@@ -31,9 +31,15 @@ def parse_date(text) -> date | None:
 
 def lead_from_row(row: dict, known: dict) -> tuple[dict | None, str]:
 	"""One CSV row -> the CRM Lead fields to insert, or (None, why it is skipped).
-	known: {"mobiles": set of mobile keys already in ERPNext, "users": set, "sources": set, "reasons": set}."""
+	known: {"mobiles": set of mobile keys already in ERPNext, "mobile_dates": set of (mobile key, date) already in ERPNext,
+	"users": set, "sources": set, "reasons": set}. SK 17-Nov (KF-04801): the same mobile on the SAME date is a duplicate;
+	on another date it is a new enquiry of the same person (122 'repeat - check' rows of the Biziverse add-load)."""
 	key = mobile_key(row.get("mobile_no"))
-	if key and key in known["mobiles"]:
+	created = parse_date(row.get("date"))
+	if key and known.get("mobile_dates") is not None:
+		if (key, created) in known["mobile_dates"]:
+			return None, "already in ERPNext (same mobile, same date)"
+	elif key and key in known["mobiles"]:
 		return None, "already in ERPNext (same mobile)"
 	status = (row.get("status") or "").strip()
 	if status not in CLOSED + OPEN:

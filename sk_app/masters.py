@@ -124,14 +124,20 @@ def changed_since(since=None) -> list[dict]:
 	"""(d) Money masters created or changed since yesterday morning, with who did it."""
 	since = since or add_days(nowdate(), -1)
 	out = []
+
+	def touched_by_job(dt, name, by) -> bool:
+		"""checker 9-Nov: the nightly 00:02 job touches Company.modified as Administrator; a person's edit leaves a Version row."""
+		return by == "Administrator" and not frappe.db.exists("Version", {"ref_doctype": dt, "docname": name, "creation": [">=", since]})
+
 	for dt in WATCHED:
 		if not frappe.db.exists("DocType", dt):
 			continue
 		if frappe.get_meta(dt).issingle:
 			row = frappe.db.get_value(dt, dt, ["modified", "modified_by"], as_dict=True)
-			if row and row.modified and str(row.modified)[:10] >= str(since):
+			if row and row.modified and str(row.modified)[:10] >= str(since) and not touched_by_job(dt, dt, row.modified_by):
 				out.append({"doctype": dt, "name": dt, "modified": row.modified, "by": row.modified_by})
 			continue
 		for r in frappe.get_all(dt, filters={"modified": [">=", since]}, fields=["name", "modified", "modified_by"], limit=50):
-			out.append({"doctype": dt, "name": r.name, "modified": r.modified, "by": r.modified_by})
+			if not touched_by_job(dt, r.name, r.modified_by):
+				out.append({"doctype": dt, "name": r.name, "modified": r.modified, "by": r.modified_by})
 	return out
