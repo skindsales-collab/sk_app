@@ -163,7 +163,7 @@ button.sk-open { background: none; border: 0; }
 .sk-locked { background: var(--light); color: var(--muted); border: 1px dashed var(--muted); border-radius: 10px; padding: 10px 12px; margin: 14px 0; font-size: 14px; }
 .sk-locked b { color: var(--ink); }
 .sk-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.sk-two-col input, .sk-field input[type=number], .sk-field > input { width: 100%; font-size: 17px; padding: 10px; border: 1px solid #c5cfdb; border-radius: 10px; background: var(--card); color: var(--ink); }
+.sk-two-col input, .sk-field input[type=number], .sk-field > input, .sk-field > select { width: 100%; font-size: 17px; padding: 10px; border: 1px solid #c5cfdb; border-radius: 10px; background: var(--card); color: var(--ink); }
 .sk-libtext { white-space: pre-wrap; font-size: 15px; margin: 4px 0; }
 .sk-q { background: var(--card); border-radius: 10px; padding: 10px; margin-bottom: 8px; }
 .sk-facts.three { grid-template-columns: repeat(3, 1fr); }

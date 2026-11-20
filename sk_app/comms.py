@@ -107,6 +107,11 @@ def add_reminder(user: str, title: str, when: str, repeat: str | None = None, do
 		if for_user not in {p.user for p in _team(user)}:
 			frappe.throw(_("{0} is not in your team").format(for_user), frappe.PermissionError)
 		target = for_user
+	if doctype == "CRM Lead" and name and frappe.db.get_value("CRM Lead", name, "converted"):
+		# SK 20-Nov: a note can turn the lead into a deal (quote pickup); the next call then goes on that deal
+		deal = frappe.db.get_value("CRM Deal", {"lead": name})
+		if deal:
+			doctype, name = "CRM Deal", deal
 	if doctype and name and not repeat:
 		crm._check(doctype, name, "write")
 		task = frappe.get_doc({"doctype": "CRM Task", "title": title[:140], "reference_doctype": doctype,

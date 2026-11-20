@@ -24,6 +24,9 @@ def options() -> dict:
 		"segment_tree": SEGMENT_TREE,
 		"products": _product_names(),
 		"call_outcomes": CALL_OUTCOMES,
+		# SK 20-Nov: the reasons a Deal Loss / Junk Lead / Lost status asks for (one spelling each; "Our Pries is high" was a typo copy)
+		"lost_reasons": [r for r in frappe.get_all("CRM Lost Reason", pluck="name", order_by="name asc") if r != "Our Pries is high"]
+			if frappe.db.exists("DocType", "CRM Lost Reason") else [],
 	}
 
 def label(doctype: str, name: str) -> str:
@@ -55,7 +58,7 @@ def follow_up(user: str, for_manager: bool = False) -> list[dict]:
 		lead_filters["status"] = ["not in", closed_leads]
 	for r in get("CRM Lead", filters=lead_filters, limit_page_length=0, order_by="modified desc",
 			fields=["name", "lead_name", "organization", "status", "mobile_no", "phone", "email", "source",
-				"response_by", "first_responded_on", "creation"]):
+				"response_by", "first_responded_on", "creation"] + (["sk_product"] if frappe.get_meta("CRM Lead").has_field("sk_product") else [])):
 		task = tasks.get(("CRM Lead", r.name))
 		due, why = None, None
 		if task and task.due_date:
@@ -64,19 +67,19 @@ def follow_up(user: str, for_manager: bool = False) -> list[dict]:
 			due, why = r.response_by or add_to_date(r.creation, minutes=5), _("First call")
 		rows.append({"doctype": "CRM Lead", "name": r.name, "title": r.organization or r.lead_name or r.name,
 			"person": r.lead_name, "status": r.status, "mobile": r.mobile_no or r.phone, "email": r.email,
-			"source": r.source, "due": due, "next": why, "new": not r.first_responded_on})
+			"source": r.source, "due": due, "next": why, "new": not r.first_responded_on, "product": r.get("sk_product")})
 	closed_deals = _closed("CRM Deal Status")
 	deal_filters = {"deal_owner": user}
 	if closed_deals:
 		deal_filters["status"] = ["not in", closed_deals]
 	for r in [] if not frappe.has_permission("CRM Deal", "read", user=user) else get("CRM Deal", filters=deal_filters, limit_page_length=0, order_by="modified desc",
 			fields=["name", "organization", "lead_name", "status", "mobile_no", "phone", "email", "next_step",
-				"expected_closure_date", "deal_value"]):
+				"expected_closure_date", "deal_value"] + (["sk_product"] if frappe.get_meta("CRM Deal").has_field("sk_product") else [])):
 		task = tasks.get(("CRM Deal", r.name))
 		due, why = (task.due_date, task.title) if task and task.due_date else (r.expected_closure_date, r.next_step)
 		rows.append({"doctype": "CRM Deal", "name": r.name, "title": r.organization or r.lead_name or r.name,
 			"person": r.lead_name, "status": r.status, "mobile": r.mobile_no or r.phone, "email": r.email,
-			"due": due, "next": why or r.next_step, "value": r.deal_value, "new": False})
+			"due": due, "next": why or r.next_step, "value": r.deal_value, "new": False, "product": r.get("sk_product")})
 	for dt in CRM_DOCTYPES:
 		last = _last_activity(dt, [r["name"] for r in rows if r["doctype"] == dt])
 		for r in rows:
@@ -85,7 +88,11 @@ def follow_up(user: str, for_manager: bool = False) -> list[dict]:
 	for r in rows:
 		r["overdue"] = bool(r["due"] and get_datetime(r["due"]) < now)
 	far = get_datetime("2999-12-31")
-	rows.sort(key=lambda r: (not r["overdue"], not r["new"], get_datetime(r["due"]) if r["due"] else far))
+	# SK 20-Nov "sequence is shuffling": many leads share one due time (old import 19-Oct 16:09), so the order also
+	# goes by stage, then name, then record number, and is the same on every load
+	stage = {n: i for i, n in enumerate(lead_status.NAMES)}
+	rows.sort(key=lambda r: (not r["overdue"], not r["new"], get_datetime(r["due"]) if r["due"] else far,
+		stage.get(r.get("status"), 99), (r.get("title") or "").lower(), r["name"]))
 	return rows
 
 def detail(doctype: str, name: str) -> dict:

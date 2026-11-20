@@ -32,7 +32,7 @@
 			score: "Score this month", target: "Target", actual: "Actual", not_live: "not live yet",
 			lang: "मराठी", leads: "Leads", deals: "Deals", due: "due", min: "min",
 			follow_up: "Follow-up", new_lead: "New Lead", training: "Training", day_report: "Day Report",
-			team_reports: "Team Reports", overdue: "Overdue", new_badge: "New", next: "Next", last: "Last",
+			team_reports: "Team Reports", overdue: "Overdue", new_badge: "No call yet", next: "Next", last: "Last",
 			call: "Call", whatsapp: "WhatsApp", email: "Email", status: "Status", notes: "Notes", add_note: "Add note",
 			note_q: "Note (type, speak or photo)", files: "Files & drawings", attach: "Attach photo / file",
 			tasks: "CRM tasks", calls: "Calls", quotations: "Quotations", sales_orders: "Sales Orders",
@@ -94,7 +94,7 @@
 			score: "या महिन्याचा स्कोअर", target: "लक्ष्य", actual: "प्रत्यक्ष", not_live: "अजून सुरू नाही",
 			lang: "English", leads: "लीड", deals: "डील", due: "मुदत", min: "मिनिटे",
 			follow_up: "फॉलो-अप", new_lead: "नवीन लीड", training: "प्रशिक्षण", day_report: "दिवसाचा अहवाल",
-			team_reports: "टीम अहवाल", overdue: "उशीर", new_badge: "नवीन", next: "पुढे", last: "शेवटचे",
+			team_reports: "टीम अहवाल", overdue: "उशीर", new_badge: "अजून कॉल नाही", next: "पुढे", last: "शेवटचे",
 			call: "कॉल", whatsapp: "WhatsApp", email: "ईमेल", status: "स्थिती", notes: "नोंदी", add_note: "नोंद जोडा",
 			note_q: "नोंद (टाईप, बोला किंवा फोटो)", files: "फाईल्स आणि ड्रॉइंग", attach: "फोटो / फाईल जोडा",
 			tasks: "CRM कामे", calls: "कॉल", quotations: "कोटेशन", sales_orders: "सेल्स ऑर्डर",
@@ -828,7 +828,7 @@
 		g_addr: "Billing address", g_city: "City", g_state: "State", g_pin: "PIN code", g_cmobile: "Customer mobile", g_cust_ok: "Customer complete ✓",
 		g_qsubmit: "Submit quotation (send to customer)", g_qsubmitted: "Quotation submitted ✓", g_order_date: "Order date", g_po_date: "PO date",
 		g_po_photo: "PO copy (photo / PDF)", g_po_or_photo: "Customer PO number or PO copy", g_won: "Deal Won ✓ Sales Order submitted", g_wait_confirm: "Saved. Waiting for the manager's Confirm; the deal turns Won then",
-		g_count_all: "Count every line (0 if none)", g_reason: "Reason", dmk_leads: "leads", dmk_quotation: "quotes", dmk_sales_order: "orders", dmk_requests: "requests", dmk_night: "night check", g_data_missing: "Data missing", r2_screen: "Round 2 on the tablet", r2_feel: "Your overall feel (1-5)", r2_note: "Your note (speak)", r2_final_note: "Your decision is final; Claude only combines it with Round 1 (40 / 60) in the Final card. No video, no face analysis: your eyes, your taps.", r2_claude_q: "Claude's question", r2_own: "your own question", r2_why: "Why this question", r2_evidence: "Round 1", r2_quality: "Answer quality", r2_confidence: "Confidence", r2_attitude: "Attitude", r2_flex: "Flexibility", r2_see: "What you see (tap any)", r2_my_note: "My note (hold to speak)", r2_add_own: "Add my own question (type or speak)", r2_combined: "combined", hiring: "Hiring", round2: "Round 2 (CEO)", interview: "Interview", hr_why: "Candidates from WhatsApp, WorkIndia or walk-in become ERPNext Job Applicants. Round 1 on the tablet or by the bot; Claude scores on its schedule; you send to SK or hold. No salary anywhere.", hr_bot_on: "WhatsApp bot on", hr_bot_off: "WhatsApp bot off: you tap Send by WhatsApp on the ready messages", hr_new: "New candidates", hr_today: "Today's interviews", hr_waiting: "Waiting for SK", hr_handed_list: "Need HR (bot handed over)", hr_handed: "needs HR", hr_add: "Add candidate (resume photo + voice note)", hr_job: "Job", hr_lang: "Language", hr_resume: "Resume (photo / PDF)", hr_note: "Note (speak)", hr_workindia: "Upload WorkIndia Excel", hr_workindia_why: "Export from WorkIndia (Job > Matches > Export to Excel). Age and gender columns are never read; the same mobile is not added twice.", hr_workindia_file: "WorkIndia Excel / CSV", hr_workindia_go: "Load candidates", hr_wi_made: "added", hr_wi_skipped: "skipped (duplicate / no mobile)", hr_console: "Bot test console (Mac)", hr_send_wa: "Send by WhatsApp", hr_free_replies: "free replies this month", hr_reply_by_hand: "reply by hand in the Business app", hr_apply_links: "Apply links per job (for WhatsApp / WorkIndia)", hr_console_why: "Talk to the bot as a candidate. The real WhatsApp link goes live after the hosting move.", hr_console_msg: "Message as the candidate", hr_console_photo: "send a resume photo", hr_console_voice: "send a voice note", hr_no_job: "no job yet", hr_start: "Start Round 1", hr_years: "years", hr_applied: "applied", hr_fit: "Resume fit", hr_fit_wait: "Resume not read yet (Claude's scheduled run reads it; until then HR reads it)", hr_claims: "Claims to check in Round 1", hr_result: "Round 1 result", hr_rank: "rank", hr_reliability: "Reliability", hr_strengths: "Strengths", hr_concerns: "Concerns", hr_resume_check: "Resume check", hr_ask_r2: "Ask in Round 2", hr_not_enough: "not enough answer", hr_scoring_wait: "answers sent; Claude scores at 9:47, 13:47 or 17:47", hr_answers: "Round 1 answers", hr_actions: "Actions", hr_send_sk: "Send to SK", hr_hold: "Hold", hr_selected: "Selected", hr_not_selected: "Not selected", hr_w2: "Received message", hr_w6: "On-hold message", hr_w7: "Not-selected message", hr_book_r1: "Book Round 1", hr_book_r2: "Book Round 2", hr_no_slot: "No free slot", hr_booked: "Booked", hr_added: "Candidate added", hr_status: "Status", hr_open_wa: "Open in WhatsApp and send", hr_claude_notes: "Claude's notes", tr_Attitude: "Attitude", "tr_Role Skill": "Role skill", "tr_Learning Ability": "Learning ability", tr_Flexibility: "Flexibility", tr_Communication: "Communication", iv_consent_en: "Your answers are recorded for hiring only. Kept 6 months if not selected.", iv_consent_mr: "तुमची उत्तरे फक्त भरतीसाठी रेकॉर्ड केली जातील. निवड न झाल्यास ६ महिने ठेवली जातील.", iv_agree: "I agree", iv_q: "Question", iv_hear: "Hear question", iv_speak: "Press and speak", iv_typed: "The answer appears here (or type it)", iv_photo: "Take photo of answer sheet", iv_steps: "Steps right (HR marks)", iv_repeat: "Repeat", iv_skip: "Skip", iv_next: "Next", iv_finish: "Finish, thank you", iv_end: "Finished, thank you", iv_teach_hint: "The app explains a small task; the candidate explains it back. HR marks how many of the 4 steps were right.", iv_hr_only: "HR only: Next saves the answer. The candidate never sees scores.", r2_today: "Round 2 today", r2_waiting: "Waiting for your decision", of: "of", err_hint: "Not saved, please correct and try again · जतन झाले नाही, दुरुस्त करून पुन्हा प्रयत्न करा", ex_filled: "Filled from ERPNext (existing customer)", ex_sales: "salesperson", ex_last_order: "last order", ex_customer: "Customer", ex_old_lead: "old lead", ex_old_deal: "deal", ex_org: "CRM organization", ex_last_activity: "last activity",
+		g_count_all: "Count every line (0 if none)", g_reason: "Reason", dmk_leads: "leads", dmk_quotation: "quotes", dmk_sales_order: "orders", dmk_requests: "requests", dmk_night: "night check", g_data_missing: "Data missing", r2_screen: "Round 2 on the tablet", r2_feel: "Your overall feel (1-5)", r2_note: "Your note (speak)", r2_final_note: "Your decision is final; Claude only combines it with Round 1 (40 / 60) in the Final card. No video, no face analysis: your eyes, your taps.", r2_claude_q: "Claude's question", r2_own: "your own question", r2_why: "Why this question", r2_evidence: "Round 1", r2_quality: "Answer quality", r2_confidence: "Confidence", r2_attitude: "Attitude", r2_flex: "Flexibility", r2_see: "What you see (tap any)", r2_my_note: "My note (hold to speak)", r2_add_own: "Add my own question (type or speak)", r2_combined: "combined", hiring: "Hiring", round2: "Round 2 (CEO)", interview: "Interview", hr_why: "Candidates from WhatsApp, WorkIndia or walk-in become ERPNext Job Applicants. Round 1 on the tablet or by the bot; Claude scores on its schedule; you send to SK or hold. No salary anywhere.", hr_bot_on: "WhatsApp bot on", hr_bot_off: "WhatsApp bot off: you tap Send by WhatsApp on the ready messages", hr_new: "New candidates", hr_today: "Today's interviews", hr_waiting: "Waiting for SK", hr_handed_list: "Need HR (bot handed over)", hr_handed: "needs HR", hr_add: "Add candidate (resume photo + voice note)", hr_job: "Job", hr_lang: "Language", hr_resume: "Resume (photo / PDF)", hr_note: "Note (speak)", hr_workindia: "Upload WorkIndia Excel", hr_workindia_why: "Export from WorkIndia (Job > Matches > Export to Excel). Age and gender columns are never read; the same mobile is not added twice.", hr_workindia_file: "WorkIndia Excel / CSV", hr_workindia_go: "Load candidates", hr_wi_made: "added", hr_wi_skipped: "skipped (duplicate / no mobile)", hr_console: "Bot test console (Mac)", hr_send_wa: "Send by WhatsApp", hr_free_replies: "free replies this month", hr_reply_by_hand: "reply by hand in the Business app", hr_apply_links: "Apply links per job (for WhatsApp / WorkIndia)", hr_console_why: "Talk to the bot as a candidate. The real WhatsApp link goes live after the hosting move.", hr_console_msg: "Message as the candidate", hr_console_photo: "send a resume photo", hr_console_voice: "send a voice note", hr_no_job: "no job yet", hr_start: "Start Round 1", hr_years: "years", hr_applied: "applied", hr_fit: "Resume fit", hr_fit_wait: "Resume not read yet (Claude's scheduled run reads it; until then HR reads it)", hr_claims: "Claims to check in Round 1", hr_result: "Round 1 result", hr_rank: "rank", hr_reliability: "Reliability", hr_strengths: "Strengths", hr_concerns: "Concerns", hr_resume_check: "Resume check", hr_ask_r2: "Ask in Round 2", hr_not_enough: "not enough answer", hr_scoring_wait: "answers sent; Claude scores at 9:47, 13:47 or 17:47", hr_answers: "Round 1 answers", hr_actions: "Actions", hr_send_sk: "Send to SK", hr_hold: "Hold", hr_selected: "Selected", hr_not_selected: "Not selected", hr_w2: "Received message", hr_w6: "On-hold message", hr_w7: "Not-selected message", hr_book_r1: "Book Round 1", hr_book_r2: "Book Round 2", hr_no_slot: "No free slot", hr_booked: "Booked", hr_added: "Candidate added", hr_status: "Status", hr_open_wa: "Open in WhatsApp and send", hr_claude_notes: "Claude's notes", tr_Attitude: "Attitude", "tr_Role Skill": "Role skill", "tr_Learning Ability": "Learning ability", tr_Flexibility: "Flexibility", tr_Communication: "Communication", iv_consent_en: "Your answers are recorded for hiring only. Kept 6 months if not selected.", iv_consent_mr: "तुमची उत्तरे फक्त भरतीसाठी रेकॉर्ड केली जातील. निवड न झाल्यास ६ महिने ठेवली जातील.", iv_agree: "I agree", iv_q: "Question", iv_hear: "Hear question", iv_speak: "Press and speak", iv_typed: "The answer appears here (or type it)", iv_photo: "Take photo of answer sheet", iv_steps: "Steps right (HR marks)", iv_repeat: "Repeat", iv_skip: "Skip", iv_next: "Next", iv_finish: "Finish, thank you", iv_end: "Finished, thank you", iv_teach_hint: "The app explains a small task; the candidate explains it back. HR marks how many of the 4 steps were right.", iv_hr_only: "HR only: Next saves the answer. The candidate never sees scores.", r2_today: "Round 2 today", r2_waiting: "Waiting for your decision", of: "of", rq_customer: "Customer requirement", rq_update: "Update", rq_none: "Not written yet: tap Update", rq_hint: "Size, type, qty, site, special needs. One line each. Speak or type.", read_none: "Could not read the photo, please type the boxes", nx_title: "Next call", nx_tom: "Tomorrow", nx_3d: "In 3 days", nx_1w: "In 1 week", nx_when: "Date and time", nx_stage: "Stage now", nx_same: "No change", nx_skip: "Skip", nx_pick: "Pick a date or a stage, or tap Skip", nx_task: "Next call", lost_why: "why was it lost?", lost_reason: "Reason", lost_pick: "Pick a reason", lost_note: "Note (speak or type; needed for Other)", err_hint: "Not saved, please correct and try again · जतन झाले नाही, दुरुस्त करून पुन्हा प्रयत्न करा", ex_filled: "Filled from ERPNext (existing customer)", ex_sales: "salesperson", ex_last_order: "last order", ex_customer: "Customer", ex_old_lead: "old lead", ex_old_deal: "deal", ex_org: "CRM organization", ex_last_activity: "last activity",
 		fl_so_saved: "Sales Order saved", fl_plan_why: "Confirmed orders without a Work Order. Make one per cabin; its stages become job cards.",
 		fl_no_bom: "No BOM yet: Design makes it first", fl_make_wo: "Make Work Order", fl_wo_saved: "Work Order saved",
 		more: "More", grp_work: "My work", grp_me: "Me", grp_help: "Help", leadership: "Leadership & Strategy",
@@ -866,7 +866,7 @@
 		g_addr: "बिलिंग पत्ता", g_city: "शहर", g_state: "राज्य", g_pin: "पिन कोड", g_cmobile: "ग्राहकाचा मोबाईल", g_cust_ok: "ग्राहक माहिती पूर्ण ✓",
 		g_qsubmit: "कोटेशन सबमिट करा (ग्राहकाला पाठवा)", g_qsubmitted: "कोटेशन सबमिट झाले ✓", g_order_date: "ऑर्डर तारीख", g_po_date: "PO तारीख",
 		g_po_photo: "PO ची प्रत (फोटो / PDF)", g_po_or_photo: "ग्राहकाचा PO नंबर किंवा PO ची प्रत", g_won: "डील जिंकली ✓ सेल्स ऑर्डर सबमिट", g_wait_confirm: "सेव्ह झाले. मॅनेजरच्या Confirm ची वाट; मग डील जिंकली दिसेल",
-		g_count_all: "प्रत्येक ओळ मोजा (नसेल तर 0)", g_reason: "कारण", dmk_leads: "लीड", dmk_quotation: "कोटेशन", dmk_sales_order: "ऑर्डर", dmk_requests: "मागण्या", dmk_night: "रात्रीची तपासणी", g_data_missing: "माहिती अपूर्ण", r2_screen: "टॅबलेटवर दुसरी फेरी", r2_feel: "तुमची एकूण भावना (१-५)", r2_note: "तुमची टीप (बोला)", r2_final_note: "तुमचा निर्णय अंतिम; Claude फक्त पहिल्या फेरीशी (४०/६०) जोडून Final कार्ड बनवतो. व्हिडिओ नाही, चेहरा-विश्लेषण नाही: तुमची नजर, तुमचे टॅप.", r2_claude_q: "Claude चा प्रश्न", r2_own: "तुमचा स्वतःचा प्रश्न", r2_why: "हा प्रश्न का", r2_evidence: "पहिली फेरी", r2_quality: "उत्तराचा दर्जा", r2_confidence: "आत्मविश्वास", r2_attitude: "वृत्ती", r2_flex: "लवचिकता", r2_see: "तुम्हाला काय दिसते (टॅप करा)", r2_my_note: "माझी टीप (दाबून बोला)", r2_add_own: "माझा स्वतःचा प्रश्न जोडा (लिहा किंवा बोला)", r2_combined: "एकत्रित", hiring: "भरती", round2: "दुसरी फेरी (CEO)", interview: "मुलाखत", hr_why: "WhatsApp, WorkIndia किंवा प्रत्यक्ष आलेले उमेदवार ERPNext Job Applicant होतात. पहिली फेरी टॅबलेटवर किंवा बॉटने; Claude ठरलेल्या वेळी गुण देतो; तुम्ही SK कडे पाठवा किंवा थांबवा. पगार कुठेही नाही.", hr_bot_on: "WhatsApp बॉट चालू", hr_bot_off: "WhatsApp बॉट बंद (टप्पा २): तयार संदेशावर तुम्ही Send दाबा", hr_new: "नवीन उमेदवार", hr_today: "आजच्या मुलाखती", hr_waiting: "SK ची वाट", hr_handed_list: "HR हवे (बॉटने सोपवले)", hr_handed: "HR हवे", hr_add: "उमेदवार जोडा (बायोडाटा फोटो + आवाज)", hr_job: "पद", hr_lang: "भाषा", hr_resume: "बायोडाटा (फोटो / PDF)", hr_note: "टीप (बोला)", hr_workindia: "WorkIndia एक्सेल अपलोड", hr_workindia_why: "WorkIndia मधून Export करा (Job > Matches > Export to Excel). वय व लिंगाचे कॉलम वाचले जात नाहीत; एकच मोबाइल दोनदा जोडला जात नाही.", hr_workindia_file: "WorkIndia एक्सेल / CSV", hr_workindia_go: "उमेदवार लोड करा", hr_wi_made: "जोडले", hr_wi_skipped: "वगळले (दुबार / मोबाइल नाही)", hr_console: "बॉट चाचणी (Mac)", hr_send_wa: "WhatsApp ने पाठवा", hr_free_replies: "या महिन्यातील मोफत उत्तरे", hr_reply_by_hand: "Business ॲपमधून हाताने उत्तर द्या", hr_apply_links: "पदानुसार अर्जाचे दुवे (WhatsApp / WorkIndia साठी)", hr_console_why: "उमेदवार म्हणून बॉटशी बोला. खरा WhatsApp दुवा होस्टिंग बदलल्यावर चालू होईल.", hr_console_msg: "उमेदवाराचा संदेश", hr_console_photo: "बायोडाटा फोटो पाठवा", hr_console_voice: "व्हॉइस नोट पाठवा", hr_no_job: "पद अजून नाही", hr_start: "पहिली फेरी सुरू", hr_years: "वर्षे", hr_applied: "अर्ज", hr_fit: "बायोडाटा जुळणी", hr_fit_wait: "बायोडाटा अजून वाचला नाही (Claude ठरलेल्या वेळी वाचतो; तोवर HR वाचते)", hr_claims: "पहिल्या फेरीत तपासायचे दावे", hr_result: "पहिल्या फेरीचा निकाल", hr_rank: "क्रमांक", hr_reliability: "विश्वासार्हता", hr_strengths: "बलस्थाने", hr_concerns: "शंका", hr_resume_check: "बायोडाटा तपासणी", hr_ask_r2: "दुसऱ्या फेरीत विचारा", hr_not_enough: "पुरेसे उत्तर नाही", hr_scoring_wait: "उत्तरे पाठवली; Claude ९:४७, १३:४७ किंवा १७:४७ ला गुण देतो", hr_answers: "पहिल्या फेरीची उत्तरे", hr_actions: "कृती", hr_send_sk: "SK कडे पाठवा", hr_hold: "थांबवा", hr_selected: "निवड झाली", hr_not_selected: "निवड नाही", hr_w2: "अर्ज मिळाला संदेश", hr_w6: "थांबवले संदेश", hr_w7: "निवड नाही संदेश", hr_book_r1: "पहिली फेरी ठरवा", hr_book_r2: "दुसरी फेरी ठरवा", hr_no_slot: "मोकळी वेळ नाही", hr_booked: "ठरले", hr_added: "उमेदवार जोडला", hr_status: "स्थिती", hr_open_wa: "WhatsApp मध्ये उघडा व पाठवा", hr_claude_notes: "Claude च्या नोंदी", tr_Attitude: "वृत्ती", "tr_Role Skill": "कामाचे कौशल्य", "tr_Learning Ability": "शिकण्याची क्षमता", tr_Flexibility: "लवचिकता", tr_Communication: "संवाद", iv_consent_en: "Your answers are recorded for hiring only. Kept 6 months if not selected.", iv_consent_mr: "तुमची उत्तरे फक्त भरतीसाठी रेकॉर्ड केली जातील. निवड न झाल्यास ६ महिने ठेवली जातील.", iv_agree: "मला मान्य आहे", iv_q: "प्रश्न", iv_hear: "प्रश्न ऐका", iv_speak: "दाबा आणि बोला", iv_typed: "उत्तर इथे येईल (किंवा लिहा)", iv_photo: "उत्तराचा फोटो घ्या", iv_steps: "बरोबर पायऱ्या (HR ने नोंदवायच्या)", iv_repeat: "पुन्हा", iv_skip: "वगळा", iv_next: "पुढे", iv_finish: "संपले, धन्यवाद", iv_end: "संपले, धन्यवाद", iv_teach_hint: "ॲप छोटे काम समजावते; उमेदवार ते परत सांगतो. ४ पैकी किती पायऱ्या बरोबर ते HR नोंदवते.", iv_hr_only: "फक्त HR: 'पुढे' उत्तर जतन करते. उमेदवाराला गुण दिसत नाहीत.", r2_today: "आज दुसरी फेरी", r2_waiting: "तुमच्या निर्णयाची वाट", of: "पैकी", err_hint: "जतन झाले नाही, दुरुस्त करून पुन्हा प्रयत्न करा · Not saved, please correct and try again", ex_filled: "ERPNext मधून भरले (जुना ग्राहक)", ex_sales: "विक्रेता", ex_last_order: "शेवटची ऑर्डर", ex_customer: "ग्राहक", ex_old_lead: "जुनी लीड", ex_old_deal: "डील", ex_org: "CRM संस्था", ex_last_activity: "शेवटची हालचाल",
+		g_count_all: "प्रत्येक ओळ मोजा (नसेल तर 0)", g_reason: "कारण", dmk_leads: "लीड", dmk_quotation: "कोटेशन", dmk_sales_order: "ऑर्डर", dmk_requests: "मागण्या", dmk_night: "रात्रीची तपासणी", g_data_missing: "माहिती अपूर्ण", r2_screen: "टॅबलेटवर दुसरी फेरी", r2_feel: "तुमची एकूण भावना (१-५)", r2_note: "तुमची टीप (बोला)", r2_final_note: "तुमचा निर्णय अंतिम; Claude फक्त पहिल्या फेरीशी (४०/६०) जोडून Final कार्ड बनवतो. व्हिडिओ नाही, चेहरा-विश्लेषण नाही: तुमची नजर, तुमचे टॅप.", r2_claude_q: "Claude चा प्रश्न", r2_own: "तुमचा स्वतःचा प्रश्न", r2_why: "हा प्रश्न का", r2_evidence: "पहिली फेरी", r2_quality: "उत्तराचा दर्जा", r2_confidence: "आत्मविश्वास", r2_attitude: "वृत्ती", r2_flex: "लवचिकता", r2_see: "तुम्हाला काय दिसते (टॅप करा)", r2_my_note: "माझी टीप (दाबून बोला)", r2_add_own: "माझा स्वतःचा प्रश्न जोडा (लिहा किंवा बोला)", r2_combined: "एकत्रित", hiring: "भरती", round2: "दुसरी फेरी (CEO)", interview: "मुलाखत", hr_why: "WhatsApp, WorkIndia किंवा प्रत्यक्ष आलेले उमेदवार ERPNext Job Applicant होतात. पहिली फेरी टॅबलेटवर किंवा बॉटने; Claude ठरलेल्या वेळी गुण देतो; तुम्ही SK कडे पाठवा किंवा थांबवा. पगार कुठेही नाही.", hr_bot_on: "WhatsApp बॉट चालू", hr_bot_off: "WhatsApp बॉट बंद (टप्पा २): तयार संदेशावर तुम्ही Send दाबा", hr_new: "नवीन उमेदवार", hr_today: "आजच्या मुलाखती", hr_waiting: "SK ची वाट", hr_handed_list: "HR हवे (बॉटने सोपवले)", hr_handed: "HR हवे", hr_add: "उमेदवार जोडा (बायोडाटा फोटो + आवाज)", hr_job: "पद", hr_lang: "भाषा", hr_resume: "बायोडाटा (फोटो / PDF)", hr_note: "टीप (बोला)", hr_workindia: "WorkIndia एक्सेल अपलोड", hr_workindia_why: "WorkIndia मधून Export करा (Job > Matches > Export to Excel). वय व लिंगाचे कॉलम वाचले जात नाहीत; एकच मोबाइल दोनदा जोडला जात नाही.", hr_workindia_file: "WorkIndia एक्सेल / CSV", hr_workindia_go: "उमेदवार लोड करा", hr_wi_made: "जोडले", hr_wi_skipped: "वगळले (दुबार / मोबाइल नाही)", hr_console: "बॉट चाचणी (Mac)", hr_send_wa: "WhatsApp ने पाठवा", hr_free_replies: "या महिन्यातील मोफत उत्तरे", hr_reply_by_hand: "Business ॲपमधून हाताने उत्तर द्या", hr_apply_links: "पदानुसार अर्जाचे दुवे (WhatsApp / WorkIndia साठी)", hr_console_why: "उमेदवार म्हणून बॉटशी बोला. खरा WhatsApp दुवा होस्टिंग बदलल्यावर चालू होईल.", hr_console_msg: "उमेदवाराचा संदेश", hr_console_photo: "बायोडाटा फोटो पाठवा", hr_console_voice: "व्हॉइस नोट पाठवा", hr_no_job: "पद अजून नाही", hr_start: "पहिली फेरी सुरू", hr_years: "वर्षे", hr_applied: "अर्ज", hr_fit: "बायोडाटा जुळणी", hr_fit_wait: "बायोडाटा अजून वाचला नाही (Claude ठरलेल्या वेळी वाचतो; तोवर HR वाचते)", hr_claims: "पहिल्या फेरीत तपासायचे दावे", hr_result: "पहिल्या फेरीचा निकाल", hr_rank: "क्रमांक", hr_reliability: "विश्वासार्हता", hr_strengths: "बलस्थाने", hr_concerns: "शंका", hr_resume_check: "बायोडाटा तपासणी", hr_ask_r2: "दुसऱ्या फेरीत विचारा", hr_not_enough: "पुरेसे उत्तर नाही", hr_scoring_wait: "उत्तरे पाठवली; Claude ९:४७, १३:४७ किंवा १७:४७ ला गुण देतो", hr_answers: "पहिल्या फेरीची उत्तरे", hr_actions: "कृती", hr_send_sk: "SK कडे पाठवा", hr_hold: "थांबवा", hr_selected: "निवड झाली", hr_not_selected: "निवड नाही", hr_w2: "अर्ज मिळाला संदेश", hr_w6: "थांबवले संदेश", hr_w7: "निवड नाही संदेश", hr_book_r1: "पहिली फेरी ठरवा", hr_book_r2: "दुसरी फेरी ठरवा", hr_no_slot: "मोकळी वेळ नाही", hr_booked: "ठरले", hr_added: "उमेदवार जोडला", hr_status: "स्थिती", hr_open_wa: "WhatsApp मध्ये उघडा व पाठवा", hr_claude_notes: "Claude च्या नोंदी", tr_Attitude: "वृत्ती", "tr_Role Skill": "कामाचे कौशल्य", "tr_Learning Ability": "शिकण्याची क्षमता", tr_Flexibility: "लवचिकता", tr_Communication: "संवाद", iv_consent_en: "Your answers are recorded for hiring only. Kept 6 months if not selected.", iv_consent_mr: "तुमची उत्तरे फक्त भरतीसाठी रेकॉर्ड केली जातील. निवड न झाल्यास ६ महिने ठेवली जातील.", iv_agree: "मला मान्य आहे", iv_q: "प्रश्न", iv_hear: "प्रश्न ऐका", iv_speak: "दाबा आणि बोला", iv_typed: "उत्तर इथे येईल (किंवा लिहा)", iv_photo: "उत्तराचा फोटो घ्या", iv_steps: "बरोबर पायऱ्या (HR ने नोंदवायच्या)", iv_repeat: "पुन्हा", iv_skip: "वगळा", iv_next: "पुढे", iv_finish: "संपले, धन्यवाद", iv_end: "संपले, धन्यवाद", iv_teach_hint: "ॲप छोटे काम समजावते; उमेदवार ते परत सांगतो. ४ पैकी किती पायऱ्या बरोबर ते HR नोंदवते.", iv_hr_only: "फक्त HR: 'पुढे' उत्तर जतन करते. उमेदवाराला गुण दिसत नाहीत.", r2_today: "आज दुसरी फेरी", r2_waiting: "तुमच्या निर्णयाची वाट", of: "पैकी", rq_customer: "ग्राहकाची गरज", rq_update: "बदला", rq_none: "अजून लिहिलेले नाही: बदला दाबा", rq_hint: "आकार, प्रकार, संख्या, साइट, विशेष गरज. एका ओळीत एक. बोला किंवा लिहा.", read_none: "फोटो वाचता आला नाही, कृपया बॉक्स भरा", nx_title: "पुढचा कॉल", nx_tom: "उद्या", nx_3d: "३ दिवसांनी", nx_1w: "१ आठवड्याने", nx_when: "तारीख व वेळ", nx_stage: "आताचा टप्पा", nx_same: "बदल नाही", nx_skip: "वगळा", nx_pick: "तारीख किंवा टप्पा निवडा, किंवा वगळा दाबा", nx_task: "पुढचा कॉल", lost_why: "का गमावले?", lost_reason: "कारण", lost_pick: "कारण निवडा", lost_note: "टीप (बोला किंवा लिहा; Other साठी आवश्यक)", err_hint: "जतन झाले नाही, दुरुस्त करून पुन्हा प्रयत्न करा · Not saved, please correct and try again", ex_filled: "ERPNext मधून भरले (जुना ग्राहक)", ex_sales: "विक्रेता", ex_last_order: "शेवटची ऑर्डर", ex_customer: "ग्राहक", ex_old_lead: "जुनी लीड", ex_old_deal: "डील", ex_org: "CRM संस्था", ex_last_activity: "शेवटची हालचाल",
 		fl_so_saved: "सेल्स ऑर्डर जतन झाली", fl_plan_why: "वर्क ऑर्डर नसलेल्या निश्चित ऑर्डर. प्रत्येक केबिनसाठी एक बनवा; त्याचे टप्पे जॉब कार्ड होतात.",
 		fl_no_bom: "BOM अजून नाही: आधी डिझाईन बनवेल", fl_make_wo: "वर्क ऑर्डर बनवा", fl_wo_saved: "वर्क ऑर्डर जतन झाली",
 		more: "अधिक", grp_work: "माझे काम", grp_me: "मी", grp_help: "मदत", leadership: "नेतृत्व व रणनीती",
@@ -1259,7 +1259,9 @@
 			if (post && /<a href=/.test(String(msg)) && /double entry|already has a deal|same customer/i.test(String(msg))) {
 				try { doubleSheet(msg); } catch (e) { /* the toast below still shows it */ }
 			}
-			throw new Error(String(msg).replace(/<[^>]*>/g, "")); // ERPNext messages carry <strong> tags
+			const err = new Error(String(msg).replace(/<[^>]*>/g, "")); // ERPNext messages carry <strong> tags
+			err.save = !!(post && !background); // a refused save is always shown in red, even where no screen catches it
+			throw err;
 		}
 		return data.message;
 	}
@@ -1306,10 +1308,17 @@
 		if (String(msg).includes("SK_LOCKED")) { showLock(); msg = t("lk_locked"); }
 		const el = document.createElement("div");
 		el.className = "sk-toast" + (bad ? " bad" : "");
-		el.textContent = msg;
+		// SK 20-Nov: a failed save is a clear red box that stays until tapped (or 8 s), never a quick green-sized flash
+		el.textContent = bad ? "⚠️ " + msg : msg;
+		if (bad) { el.setAttribute("role", "alert"); el.addEventListener("click", () => el.remove()); }
 		document.body.appendChild(el);
-		setTimeout(() => el.remove(), 2600);
+		setTimeout(() => el.remove(), bad ? 8000 : 2600);
 	}
+	window.addEventListener("unhandledrejection", (ev) => {
+		const e = ev.reason;
+		if (!e || e.locked || !e.save) return;
+		toast(`${t("err_hint")}: ${(e && e.message) || t("rp_unreadable")}`, true);
+	});
 
 	const micLang = {}; // per text box: "en" or "mr"; default follows the app language
 	let listening = null; // the one running recognition: { rec, input, button, base, got }
@@ -2380,7 +2389,7 @@
 			if (state.view !== "flow" || flowKey !== key) return;
 		}
 		const q = flowQ.toLowerCase();
-		const all = st.rows.filter((r) => !q || `${r.title} ${r.meta || ""}`.toLowerCase().includes(q));
+		const all = st.rows.filter((r) => hitQ(q, [r.title, r.meta, r.name, r.mobile]));
 		root._flowRows = all;
 		const rows = all.slice(0, flowShown);
 		root.innerHTML = header(`${st.icon} ${st.label}`) + `<main>
@@ -2394,7 +2403,20 @@
 			${moreBtn(all.length, rows.length, "flow")}
 			<button class="sk-btn wide" data-go="home">‹ ${t("back")}</button></main>`;
 		const inp = root.querySelector("#flow-q");
-		if (inp) inp.addEventListener("input", debounceSearch(() => { flowQ = inp.value; flowShown = PAGE; renderFlowStage(fi, si); }, "#flow-q"));
+		if (inp) inp.addEventListener("input", debounceSearch(() => { flowQ = inp.value; flowShown = PAGE; return renderFlowStage(fi, si); }, "#flow-q"));
+	}
+	// SK 20-Nov (Rushi, "Brahma" did not find Bramha Corp): every list search matches company, person, mobile, number and
+	// requirement, any case, part of a word, spaces ignored, and spelling variants (vowels / h dropped: brahma = bramha)
+	function skel(x) { return String(x || "").toLowerCase().replace(/[^a-z0-9\u0900-\u097f]/g, ""); }
+	function loose(x) { return skel(x).replace(/[aeiouhy]/g, ""); }
+	function hitQ(q, parts) {
+		if (!q) return true;
+		const h = parts.filter((v) => v !== null && v !== undefined && v !== "").join(" ");
+		if (h.toLowerCase().includes(q)) return true;
+		const a = skel(q);
+		if (a && skel(h).includes(a)) return true;
+		const b = loose(q);
+		return a.length >= 4 && b.length >= 3 && loose(h).includes(b);
 	}
 	function moreBtn(total, shown, kind) {
 		return total > shown ? `<p class="sk-note">${shown} / ${total}</p><button class="sk-btn wide" data-more="${kind}">⬇ ${t("show_more")} (${total - shown})</button>` : "";
@@ -2402,7 +2424,8 @@
 	// keep the cursor in the search box after the list re-draws
 	function debounceSearch(fn, sel) {
 		let tm;
-		return () => { clearTimeout(tm); tm = setTimeout(() => { fn(); const el = root.querySelector(sel); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 250); };
+		// SK 20-Nov: the list re-draw is async; focusing before it finished left the cursor in the old (removed) box
+		return () => { clearTimeout(tm); tm = setTimeout(async () => { try { await fn(); } finally { const el = root.querySelector(sel); if (el && el !== document.activeElement) { el.focus(); try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) { /* number input */ } } } }, 250); };
 	}
 	document.addEventListener("click", (ev) => {
 		const b = ev.target.closest("[data-more]");
@@ -2581,14 +2604,14 @@
 		}
 		// SK 27-Oct: search by name, company, status or lead number; all leads, 60 at a time
 		const q = leadQ.toLowerCase();
-		if (q) rows = rows.filter((r) => [r.title, r.status, r.customer, r.source, r.name].join(" ").toLowerCase().includes(q));
+		if (q) rows = rows.filter((r) => hitQ(q, [r.title, r.status, r.customer, r.source, r.name, r.mobile, r.email, r.product]));
 		const total = rows.length;
 		rows = rows.slice(0, leadShown);
 		root.innerHTML = header(t(which)) + `<main>${which === "my_leads" && d.cold ? `<button class="sk-btn wide" data-go="cold_calls">🧊 ${t("cold_calls")}${d.cold ? ` (${d.cold})` : ""} ›</button>` : ""}${tabs}
 			<div class="sk-input-row sk-gap"><input id="lead-q" type="search" placeholder="🔎 ${t("search")}" value="${esc(leadQ)}"></div>
 			<ul class="sk-list">${rows.map(itemRow).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>${moreBtn(total, rows.length, which)}</main>`;
 		const inp = root.querySelector("#lead-q");
-		inp.addEventListener("input", debounceSearch(() => { leadQ = inp.value; leadShown = 60; renderLeads(which, true); }, "#lead-q"));
+		inp.addEventListener("input", debounceSearch(() => { leadQ = inp.value; leadShown = 60; return renderLeads(which, true); }, "#lead-q"));
 	}
 
 	// SK 27-Oct (Pranali): call-list data in its own list, out of My Leads; tap Interested when a customer wants it
@@ -2596,7 +2619,7 @@
 	async function renderColdCalls(again) {
 		if (!again) S.cold = await call("cold_calls");
 		const q = coldQ.toLowerCase();
-		let rows = q ? S.cold.filter((r) => [r.title, r.person, r.mobile, r.source].join(" ").toLowerCase().includes(q)) : S.cold;
+		let rows = q ? S.cold.filter((r) => hitQ(q, [r.title, r.person, r.mobile, r.source, r.name])) : S.cold;
 		const total = rows.length, fresh = S.cold.filter((r) => !r.calls).length;
 		rows = rows.slice(0, coldShown);
 		root.innerHTML = header(t("cold_calls")) + `<main><p class="sk-note">${t("cold_help")}</p>
@@ -2608,7 +2631,7 @@
 				${contactButtons(r)}<button class="sk-chip on sk-gap" data-act="cold-set" data-lead="${esc(r.name)}" data-cold="0">🔥 ${t("cold_interested")}</button></div></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
 			${total > rows.length ? `<button class="sk-btn wide" data-act="cold-more">${t("show_more")} (${total - rows.length})</button>` : ""}</main>`;
 		const inp = root.querySelector("#cold-q");
-		inp.addEventListener("input", debounceSearch(() => { coldQ = inp.value; coldShown = 60; renderColdCalls(true); }, "#cold-q"));
+		inp.addEventListener("input", debounceSearch(() => { coldQ = inp.value; coldShown = 60; return renderColdCalls(true); }, "#cold-q"));
 	}
 
 	// SK 27-Oct: Marketing list = potential customers (not leads) for festival greetings and promotions. Saved as ERPNext
@@ -2618,7 +2641,7 @@
 	async function renderMarketing(again) {
 		if (!again) S.mk = await call("marketing_list");
 		const d = S.mk, q = mkQ.toLowerCase();
-		let rows = q ? d.rows.filter((r) => [r.title, r.person, r.mobile, r.city, r.email].join(" ").toLowerCase().includes(q)) : d.rows;
+		let rows = q ? d.rows.filter((r) => hitQ(q, [r.title, r.person, r.mobile, r.city, r.email, r.name])) : d.rows;
 		const total = rows.length;
 		rows = rows.slice(0, mkShown);
 		root.innerHTML = header(t("marketing_list")) + `<main><p class="sk-note">${t("mk_help")}</p>
@@ -2647,7 +2670,7 @@
 				<button class="sk-chip" data-act="mk-lead" data-c="${esc(r.name)}">🔥 ${t("mk_make_lead")}</button></div></div></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
 			${total > rows.length ? `<button class="sk-btn wide" data-act="mk-more">${t("show_more")} (${total - rows.length})</button>` : ""}</main>`;
 		const inp = root.querySelector("#mk-q");
-		inp.addEventListener("input", debounceSearch(() => { mkQ = inp.value; mkShown = 60; renderMarketing(true); }, "#mk-q"));
+		inp.addEventListener("input", debounceSearch(() => { mkQ = inp.value; mkShown = 60; return renderMarketing(true); }, "#mk-q"));
 	}
 
 	// SK 1-Nov: what happened to the lead's quote, in plain words (quote PDF / sent to design / sent for quote / why not)
@@ -2779,7 +2802,20 @@
 		if (!spec || !inp.files[0] || !/^image\//.test(inp.files[0].type)) return;
 		const [kind, map] = spec;
 		let d = {};
-		try { d = (await call("read_doc_photo", { file_url: await (inp._up || photoUrl(inp.id)), kind }, true)) || {}; } catch (e) { return; }
+		try { d = (await call("read_doc_photo", { file_url: await (inp._up || photoUrl(inp.id)), kind }, true)) || {}; } catch (e) { d = {}; }
+		// SK 20-Nov "free camera reading": no paid AI on the site, so the phone reads the photo itself (same free reader
+		// as the visiting card) and only labelled fields are taken; the person checks them
+		if (kind === "bill" && !Object.values(d).some((v) => String(v || "").trim())) return; // readPaper fills bills (free reader)
+		if (!Object.values(d).some((v) => String(v || "").trim())) {
+			const hint = document.createElement("div");
+			hint.className = "sk-listening";
+			hint.textContent = "⏳ " + t("photo_reading");
+			(inp.closest(".sk-field") || inp.parentElement).appendChild(hint);
+			try {
+				const r = await readOnPhone(inp.files[0], (st, pr) => { hint.textContent = `⏳ ${t("photo_reading")} ${Math.round(pr * 100)}%`; });
+				d = window.skParseDoc(r.text, kind);
+			} catch (e) { d = {}; } finally { hint.remove(); }
+		}
 		let n = 0;
 		Object.entries(map).forEach(([k, id]) => {
 			const box = document.getElementById(id), v = String(d[k] || "").trim();
@@ -2787,7 +2823,7 @@
 			const x = box.type === "number" ? v.replace(/[^0-9.]/g, "") : box.type === "date" ? (/^\d{4}-\d{2}-\d{2}$/.test(v) ? v : "") : v;
 			if (x) { box.value = x; box.classList.add("sk-autofilled"); n++; }
 		});
-		if (n) toast(t("read_ok"));
+		if (n) toast(t("read_ok")); else toast(t("read_none"), true);
 	}
 
 	async function photoUrl(id) {
@@ -2911,10 +2947,11 @@
 		const end = new Date(); end.setHours(23, 59, 59);
 		if (fuCalls) rows = rows.filter((r) => r.mobile && (r.new || r.overdue || (r.due && new Date(String(r.due).replace(" ", "T")) <= end)));
 		const q = fuQuery.toLowerCase();
-		if (q) rows = rows.filter((r) => [r.title, r.person, r.mobile, r.name, r.status, r.email].join(" ").toLowerCase().includes(q));
+		if (q) rows = rows.filter((r) => hitQ(q, [r.title, r.person, r.mobile, r.name, r.status, r.email, r.product]));
 		const li = rows.map((r) => `<li class="sk-fu ${r.overdue ? "late" : r.new ? "new" : ""}">
 			<button class="sk-fu-main" data-open="${esc(r.doctype)}" data-name="${esc(r.name)}">
 				<div class="sk-item-title">${esc(r.title)} ${r.new ? `<span class="sk-badge">${t("new_badge")}</span>` : ""}${r.overdue ? `<span class="sk-badge bad">${t("overdue")}</span>` : ""}</div>
+				${r.product ? `<div class="sk-item-meta sk-req">🧾 ${esc(r.product)}</div>` : ""}
 				<div class="sk-item-meta">${esc(r.person || "")} · ${esc(r.status || "")} · ${r.doctype === "CRM Deal" ? t("deals") : t("leads")}</div>
 				${r.next || r.due ? `<div class="sk-item-meta">${t("next")}: ${esc(r.next || "")} ${r.due ? "· " + when(r.due) : ""}</div>` : ""}
 				${r.last ? `<div class="sk-item-meta">${t("last")}: ${esc(r.last.text)} · ${when(r.last.on)}</div>` : ""}
@@ -3166,13 +3203,14 @@
 	async function renderDetail(doctype, name) {
 		const [d, o, mails] = await Promise.all([call("crm_detail", { doctype, name }), options(), call("mail_thread", { doctype, name }).catch(() => [])]);
 		const doc = d.doc;
+		S.detailDoc = doc;
 		current = { doctype, name, mobile: doc.mobile_no || doc.phone, email: doc.email };
 		const statuses = (doctype === "CRM Lead" ? o.lead_statuses : o.deal_statuses) || [];
 		// SK 28-Oct mandatory gate: a status whose data is not there yet is locked (🔒) and says what to fill
 		const locked = (d.gate && d.gate.locked) || {};
 		const chips = statuses.map((s) => locked[s.name] && s.name !== doc.status
 			? `<button class="sk-chip sk-locked" data-act="status-locked" data-why="${esc(locked[s.name].join(" · "))}">🔒 ${esc(stLabel(s.name))}</button>`
-			: `<button class="sk-chip ${s.name === doc.status ? "on" : ""}" data-act="status" data-status="${esc(s.name)}">${esc(stLabel(s.name))}</button>`).join("");
+			: `<button class="sk-chip ${s.name === doc.status ? "on" : ""}" data-act="status" data-status="${esc(s.name)}" ${s.type === "Lost" ? `data-lost="1"` : ""}>${esc(stLabel(s.name))}</button>`).join("");
 		const files = d.files.map((f) => `<li class="sk-item"><div><a class="sk-item-title" href="${esc(f.file_url)}" target="_blank">📎 ${esc(f.file_name)}</a><div class="sk-item-meta">${esc(f.owner)} · ${when(f.creation)}</div></div>
 			<button class="sk-open ${f.for_customer ? "sk-send" : ""}" data-act="share-pdf" data-pdf="${esc(f.file_url)}" data-file="${esc(f.file_name)}" ${f.for_customer ? `data-fileid="${esc(f.name)}"` : ""}>${f.for_customer ? "💬 " + t("send") : "↗"}</button>
 			${f.for_customer ? `<button class="sk-open sk-fix" data-act="correction" data-fileid="${esc(f.name)}" data-file="${esc(f.file_name)}">✏️</button>` : ""}</li>`).join("");
@@ -3188,6 +3226,9 @@
 				${doc.next_step ? `<div class="sk-item-meta">${t("next")}: ${esc(doc.next_step)}</div>` : ""}
 				${doc.design_status ? `<div class="sk-item-meta">📐 ${t("design_status")}: <b>${esc(doc.design_status)}</b></div>` : ""}
 				${contactButtons({ doctype, name, mobile, email: doc.email })}</div>
+			<div class="sk-card sk-gap sk-reqcard"><div class="sk-row"><b class="sk-grow">🧾 ${t("rq_customer")}</b>
+				<button class="sk-chip" data-act="req-edit">✏️ ${t("rq_update")}</button></div>
+				<div class="sk-card-text">${doc.sk_product ? esc(doc.sk_product) : `<span class="sk-due">${t("rq_none")}</span>`}</div></div>
 			${gateCard(d, o)}${customerCard(d)}
 			<h3 class="sk-h">${t("status")}</h3><div class="sk-chips">${chips}</div>
 			${doctype === "CRM Lead" && !doc.converted ? `<button class="sk-btn go wide sk-gap" data-act="convert-deal">🤝 ${t("convert_deal")}</button>` : ""}
@@ -3217,6 +3258,21 @@
 		el.innerHTML = `<div class="sk-sheet sk-form">${html}</div>`;
 		root.appendChild(el);
 		return el;
+	}
+	// SK 20-Nov (Swati: the card stayed "First call · Overdue" after her call): after a call or note, the next call date and
+	// the stage go on the lead / deal, so the card shows the real next step; Skip keeps it as it is
+	async function askNext(doctype, name, back) {
+		if (doctype !== "CRM Lead" && doctype !== "CRM Deal") return go(back);
+		const o = await options();
+		const st = ((doctype === "CRM Lead" ? o.lead_statuses : o.deal_statuses) || []).filter((x) => x.type !== "Lost" && x.type !== "Won");
+		S.next = { doctype, name, back };
+		sheet(`<h3 class="sk-h">📅 ${t("nx_title")}</h3>
+			<div class="sk-chips">${[[1, "nx_tom"], [3, "nx_3d"], [7, "nx_1w"]].map(([n, k]) => `<button class="sk-chip" data-act="nx-day" data-n="${n}">${t(k)}</button>`).join("")}</div>
+			<label class="sk-field"><span>${t("nx_when")}</span><input id="nx-when" type="datetime-local"></label>
+			<label class="sk-field"><span>${t("nx_stage")}</span><select id="nx-stage"><option value="">${t("nx_same")}</option>
+			${st.map((x) => `<option value="${esc(x.name)}">${esc(stLabel(x.name))}</option>`).join("")}</select></label>
+			<button class="sk-btn go wide" data-act="nx-save">${t("save")}</button>
+			<button class="sk-btn wide" data-act="nx-skip">${t("nx_skip")}</button>`);
 	}
 	function closeSheet() {
 		const s = root.querySelector(".sk-sheet-wrap");
@@ -3814,7 +3870,7 @@
 	async function renderWhatsApp() {
 		const [rows, tpl] = await Promise.all([myContacts(), call("library", { category: "Message Template" })]);
 		const q = waFilter.toLowerCase();
-		const list = rows.filter((r) => r.mobile && (!q || (r.title + " " + (r.person || "")).toLowerCase().includes(q)));
+		const list = rows.filter((r) => r.mobile && hitQ(q, [r.title, r.person, r.mobile, r.name]));
 		const waAll = list.length;
 		list.splice(waShown);
 		root.innerHTML = header(t("whatsapp")) + `<main>
@@ -3861,7 +3917,7 @@
 					<div class="sk-item-meta">${esc(m.preview || "")}</div></button></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
 				${team.more ? `<button class="sk-btn wide" data-act="mb-more">${t("show_more")}</button>` : ""}</main>`;
 			const inp = root.querySelector("#mb-q");
-			inp.addEventListener("input", debounceSearch(() => { mailQ = inp.value; renderMail(); }, "#mb-q"));
+			inp.addEventListener("input", debounceSearch(() => { mailQ = inp.value; return renderMail(); }, "#mb-q"));
 			return;
 		}
 		const d = await call("my_mail");
@@ -3965,7 +4021,7 @@
 		const c = dashData.cards[i];
 		if (dashI !== i) { dashI = i; dashShown = 60; dashQ = ""; }
 		const q = dashQ.toLowerCase();
-		const all = (c.rows || []).map((r, j) => [r, j]).filter(([r]) => !q || `${r.title} ${r.meta || ""}`.toLowerCase().includes(q));
+		const all = (c.rows || []).map((r, j) => [r, j]).filter(([r]) => hitQ(q, [r.title, r.meta, r.name]));
 		const rows = all.slice(0, dashShown);
 		root.innerHTML = header(c.label) + `<main><button class="sk-btn wide" data-go="${esc(state.view)}">‹ ${esc(dashData.title[state.lang] || dashData.title.English)}</button>
 			${(c.rows || []).length > 10 ? `<label class="sk-field"><span>🔍 ${t("search")}</span><input id="dash-q" value="${esc(dashQ)}"></label>` : ""}
@@ -3974,7 +4030,7 @@
 				<div class="sk-item-meta">${esc(r.meta || "")}</div></button>
 				${r.value != null && r.value !== 0 ? `<b>${typeof r.value === "number" && Math.abs(r.value) > 9999 ? shortMoney(r.value) : esc(r.value)}</b>` : ""}</li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>${moreBtn(all.length, rows.length, "dash")}</main>`;
 		const inp = root.querySelector("#dash-q");
-		if (inp) inp.addEventListener("input", debounceSearch(() => { dashQ = inp.value; dashShown = 60; renderDashList(i); }, "#dash-q"));
+		if (inp) inp.addEventListener("input", debounceSearch(() => { dashQ = inp.value; dashShown = 60; return renderDashList(i); }, "#dash-q"));
 	}
 	function openDashRow(i, j) {
 		const r = dashData.cards[i].rows[j];
@@ -4550,7 +4606,7 @@
 	async function renderSalesOwner(again) {
 		if (!again || !soData) soData = await call("sales_assign_list");
 		const d = soData, q = soQ.toLowerCase();
-		const all = d.rows.filter((r) => !q || r.title.toLowerCase().includes(q));
+		const all = d.rows.filter((r) => hitQ(q, [r.title, r.meta, r.name]));
 		const rows = all.slice(0, soShown);
 		const opts = (r) => `<option value=""></option>${d.persons.map((p) => `<option ${r.persons.includes(p) ? "selected" : ""}>${esc(p)}</option>`).join("")}`;
 		root.innerHTML = header(t("sales_owner")) + `<main><p class="sk-note">${t("so_why")}</p>
@@ -4561,7 +4617,7 @@
 				${r.customer ? `<select class="sk-select" data-so="${esc(r.customer)}">${opts(r)}</select>` : ""}</div></li>`).join("") || `<li class="sk-empty">${t("nothing")}</li>`}</ul>
 			${moreBtn(all.length, rows.length, "so")}</main>`;
 		const inp = root.querySelector("#so-q");
-		inp.addEventListener("input", debounceSearch(() => { soQ = inp.value; soShown = 60; renderSalesOwner(true); }, "#so-q"));
+		inp.addEventListener("input", debounceSearch(() => { soQ = inp.value; soShown = 60; return renderSalesOwner(true); }, "#so-q"));
 	}
 	root.addEventListener("change", async (ev) => {
 		const el = ev.target.closest("[data-so]");
@@ -4766,7 +4822,8 @@
 		if (el.id === "faq-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { faqQuery = el.value; renderTraining().then(() => { const i = document.getElementById("faq-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
 		if (el.id === "vm-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { vmQuery = el.value; renderViewMember().then(() => { const i = document.getElementById("vm-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 300); return; }
 		if (el.id === "cust-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { custQuery = el.value; renderCustomers().then(() => { const i = document.getElementById("cust-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
-		if (el.id === "fu-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { fuQuery = el.value; renderFollowUp().then(() => { const i = document.getElementById("fu-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
+		// SK 20-Nov: letters typed while the list was loading were lost (the new box showed the old text): carry them over
+		if (el.id === "fu-q") { clearTimeout(fuTimer); fuTimer = setTimeout(() => { fuQuery = el.value; renderFollowUp().then(() => { const i = document.getElementById("fu-q"); if (i) { if (el !== i && el.value !== fuQuery) { i.value = el.value; i.dispatchEvent(new Event("input", { bubbles: true })); } i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 400); return; }
 		if (el.dataset && el.dataset.filter) {
 			const q = el.value.toLowerCase();
 			const sel = document.getElementById(el.dataset.filter);
@@ -6101,7 +6158,7 @@
 			${moreBtn(all.length, Math.min(dbShown, all.length), "daybook")}
 			${d.rows.length ? `<p class="sk-note"><b>${d.rows.length}</b> · ${t("dr")} ${money(dr) || 0} · ${t("cr")} ${money(cr) || 0}</p>` : ""}</main>`;
 		const inp = root.querySelector("#db-q");
-		if (inp) inp.addEventListener("input", debounceSearch(() => { dbQ = inp.value; dbShown = PAGE; renderDayBook(true); }, "#db-q"));
+		if (inp) inp.addEventListener("input", debounceSearch(() => { dbQ = inp.value; dbShown = PAGE; return renderDayBook(true); }, "#db-q"));
 	}
 	async function renderSegmentWise() {
 		const p = await call("fin_segment_wise", finMonth ? { month: finMonth } : {});
@@ -6242,7 +6299,7 @@
 	}
 
 	// Sales manager: the whole team's leads and deals with his own (SK, 26-Oct-2026)
-	let teamPerson = "";
+	let teamPerson = "", teamScroll = false;
 	// SK 27-Oct point 7: the team screen in the standard format: team graph, team arrows, Decide now, one card per
 	// person with their own arrows ("in arrow way"); the long list of leads only after a tap
 	let teamList = false;
@@ -6262,7 +6319,8 @@
 			const p = people[m.user] || {};
 			const bar = m.target ? `<div class="sk-tbar"><i style="width:${Math.min(100, m.due ? m.actual * 100 / m.due : 0)}%" class="${m.pct != null && m.pct < 80 ? "bad" : "ok"}"></i></div>
 				<div class="sk-item-meta">₹${kAmt(m.actual)} / ₹${kAmt(m.due)} ${t("tm_due_today")} · ${t("k_target")} ₹${kAmt(m.target)}</div>` : `<div class="sk-item-meta">${t("k_no_target")}</div>`;
-			const arrows = m.steps.map((st) => `<span class="sk-mini3 ${col(st.c)}" title="${esc(st.label)}"><b>${st.count}</b><small>${esc(st.label.replace(" (month)", ""))}</small></span>`).join("");
+			// SK 20-Nov (Rushi's phone: "this screen was not functional"): each person's arrow opens that person's leads at that stage
+			const arrows = m.steps.map((st) => `<button class="sk-mini3 ${col(st.c)}" title="${esc(st.label)}" data-teamp="${esc(m.user)}" data-tname="${esc(m.full_name)}" data-tstage="${esc(st.key)}"><b>${st.count}</b><small>${esc(st.label.replace(" (month)", ""))}</small></button>`).join("");
 			return `<li class="sk-tcard"><div class="sk-row"><button class="sk-fu-main sk-grow" data-teamp="${esc(m.user)}"><div class="sk-item-title">${esc(m.full_name)}${m.pct != null ? ` · <b class="${m.pct < 80 ? "sk-due" : "sk-ok"}">${m.pct}%</b>` : ""}</div></button>
 				${state.viewAs ? "" : `<button class="sk-chip" data-act="view-enter" data-user="${esc(m.user)}" data-uname="${esc(m.full_name)}" title="${t("view_member")}">👀</button>`}</div>
 				${bar}<div class="sk-mini3row">${arrows}</div>
@@ -6270,11 +6328,12 @@
 		}).join("");
 		const rows = d.rows.map((r) => `<li class="sk-fu ${r.overdue ? "late" : r.new ? "new" : ""}"><button class="sk-fu-main" data-open="${esc(r.doctype)}" data-name="${esc(r.name)}">
 			<div class="sk-item-title">${esc(r.title)} ${r.new ? `<span class="sk-badge">${t("new_badge")}</span>` : ""}${r.overdue ? `<span class="sk-badge bad">${t("overdue")}</span>` : ""}</div>
+			${r.product ? `<div class="sk-item-meta sk-req">🧾 ${esc(r.product)}</div>` : ""}
 			<div class="sk-item-meta">👤 ${esc(r.owner_name)} · ${esc(r.status || "")} · ${r.doctype === "CRM Deal" ? t("deals") : t("leads")}</div>
 			${r.next || r.due ? `<div class="sk-item-meta">${t("next")}: ${esc(r.next || "")} ${r.due ? "· " + when(r.due) : ""}</div>` : ""}
 			${r.last ? `<div class="sk-item-meta">${t("last")}: ${esc(r.last.text)} · ${when(r.last.on)}</div>` : ""}</button>${contactButtons(r)}</li>`).join("");
 		const chip = (u, label) => `<button class="sk-chip ${teamPerson === u ? "on" : ""}" data-teamp="${esc(u)}">${esc(label)}</button>`;
-		const list = teamList || teamPerson ? `<div class="sk-row sk-wrap sk-gap">${chip("", t("all"))}${d.people.map((p) => chip(p.user, p.full_name)).join("")}</div>
+		const list = teamList || teamPerson ? `<div class="sk-row sk-wrap sk-gap" id="team-rows">${chip("", t("all"))}${d.people.map((p) => chip(p.user, p.full_name)).join("")}</div>
 			<ul class="sk-list sk-gap">${rows || `<li class="sk-empty">${t("nothing")}</li>`}</ul>`
 			: `<button class="sk-btn wide sk-gap" data-tlist="1">📋 ${t("tm_all_leads")} (${d.rows.length})</button>`;
 		root.innerHTML = header(t("team_leads")) + `<main>
@@ -6282,6 +6341,11 @@
 			${fd ? `<div class="sk-flowbox">${flow3dHtml("Sales")}</div>` : ""}
 			<div class="sk-h sk-dech">⚡ ${t("d_title")}</div><div class="sk-decs">${cells.join("")}</div>
 			<ul class="sk-list sk-gap">${cards}</ul>${list}</main>`;
+		if (teamScroll) {
+			teamScroll = false;
+			const l = root.querySelector("#team-rows");
+			if (l) l.scrollIntoView({ block: "start" });
+		}
 	}
 	document.addEventListener("click", (ev) => {
 		const b = ev.target.closest("[data-tlist]");
@@ -6494,7 +6558,15 @@
 				const ch = el.dataset.contact;
 				setPending({ channel: ch, doctype: el.dataset.doctype, name: el.dataset.name, at: Date.now() });
 				options().catch(() => null);
-				if (ch === "Call") window.location.href = "tel:" + el.dataset.mobile;
+				// SK 20-Nov (Swati: the dial pad opened without the number): a clean number (first one only, digits and +) through
+				// a real tel: link tap, which every phone browser and installed app hands to the dialer with the number in it
+				if (ch === "Call") {
+					const num = (String(el.dataset.mobile || "").match(/\+?\d[\d\s\-]{8,}\d/) || [""])[0].replace(/[\s\-]/g, "");
+					if (!num) { setPending(null); toast(t("no_number"), true); return; }
+					const a = document.createElement("a");
+					a.href = "tel:" + num; a.style.display = "none";
+					document.body.appendChild(a); a.click(); a.remove();
+				}
 				else if (ch === "WhatsApp") window.open("https://wa.me/" + waNumber(el.dataset.mobile), "_blank");
 				else { setPending(null); return mailSheet(el.dataset.doctype, el.dataset.name, el.dataset.email); }
 				return;
@@ -6633,7 +6705,20 @@
 				toast(t("saved"));
 				return el.dataset.resp === "Problem" ? go("problem") : go(state.view);
 			}
-			if (el.dataset.teamp !== undefined) { teamPerson = el.dataset.teamp; return go("team_leads"); }
+			// SK 20-Nov (Rushi's phone: "his leads not seen after click"): the leads were drawn below the charts and cards,
+			// out of sight on a phone; after a name is tapped the screen now scrolls to that person's leads
+			// a person's arrow: the same stage list as the team arrows at the top, for that person only (all stages, Won / Lost too)
+			if (el.dataset.tstage && flowData) {
+				// the person cards count Won / Junk / Lost since 1-Apr: open the list for the same period, so the numbers match
+				if (/won|junk|loss|lost/.test(el.dataset.tstage) && flowPeriod !== "cumulative") {
+					flowPeriod = "cumulative";
+					flowData = await call("my_flow", { period: flowPeriod }).catch(() => flowData);
+				}
+				const fi = flowData.flows.findIndex((f) => f.function === "Sales");
+				const si = fi >= 0 ? flowData.flows[fi].stages.findIndex((x) => x.key === el.dataset.tstage) : -1;
+				if (si >= 0) { flowKey = `${fi}:${si}`; flowShown = PAGE; flowQ = el.dataset.tname || ""; return renderFlowStage(fi, si); }
+			}
+			if (el.dataset.teamp !== undefined) { teamPerson = el.dataset.teamp; teamScroll = true; return go("team_leads"); }
 			if (el.dataset.fnpick) { el.classList.toggle("on"); return showWorkstation(); }
 			const act = el.dataset.act;
 			if (act && (act.startsWith("st-") || act.startsWith("pu-") || act.startsWith("fl-") || act.startsWith("np-"))) return await storeAct(act, el);
@@ -7067,7 +7152,43 @@
 				return go("detail");
 			}
 			if (act === "status") {
+				// SK 20-Nov: Deal Loss / Junk Lead / Lost need the reason ERPNext asks for: pick it (and a note) first
+				if (el.dataset.lost) {
+					const reasons = (await options()).lost_reasons || [];
+					sheet(`<h3 class="sk-h">${esc(stLabel(el.dataset.status))}: ${t("lost_why")}</h3>
+						<label class="sk-field"><span>${t("lost_reason")}</span><select id="f-lost"><option value="">${t("lost_pick")}</option>
+						${reasons.map((r) => `<option value="${esc(r)}">${esc(r)}</option>`).join("")}</select></label>
+						${formField("f-lostnote", t("lost_note"), true)}
+						<button class="sk-btn bad wide" data-act="status-lost" data-status="${esc(el.dataset.status)}">${t("save")}: ${esc(stLabel(el.dataset.status))}</button>
+						<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+					return;
+				}
 				await call("set_crm_status", { doctype: current.doctype, name: current.name, status: el.dataset.status }, true);
+				toast(t("saved"));
+				return go("detail");
+			}
+			// SK 20-Nov: the customer's requirement is seen and updated on every lead / deal (salesperson and manager)
+			if (act === "req-edit") {
+				sheet(`<h3 class="sk-h">🧾 ${t("rq_customer")}</h3><p class="sk-note">${t("rq_hint")}</p>
+					${formField("f-req", t("rq_customer"), true)}
+					<button class="sk-btn ok wide" data-act="req-save">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+				const box = document.getElementById("f-req");
+				if (box) box.value = (S.detailDoc && S.detailDoc.sk_product) || "";
+				return;
+			}
+			if (act === "req-save") {
+				if (!mustFill([["f-req", t("rq_customer")]])) return;
+				el.disabled = true;
+				await call("set_requirement", { doctype: current.doctype, name: current.name, text: val("f-req") }, true);
+				closeSheet(); toast(t("saved"));
+				return go("detail");
+			}
+			if (act === "status-lost") {
+				if (!mustFill([["f-lost", t("lost_reason")], ["f-lostnote", t("lost_note"), val("f-lost") !== "Other" || !!val("f-lostnote")]])) return;
+				el.disabled = true;
+				await call("set_crm_status", { doctype: current.doctype, name: current.name, status: el.dataset.status,
+					lost_reason: val("f-lost"), lost_notes: val("f-lostnote") || null }, true);
+				closeSheet();
 				toast(t("saved"));
 				return go("detail");
 			}
@@ -7075,18 +7196,37 @@
 				el.disabled = true;
 				await call("add_crm_note", { doctype: current.doctype, name: current.name, text: val("f-note"), photo: await photoUrl("f-photo") }, true);
 				toast(t("saved"));
-				return go("detail");
+				return askNext(current.doctype, current.name, "detail");
 			}
+			if (act === "nx-day") {
+				const d = new Date(); d.setDate(d.getDate() + Number(el.dataset.n)); d.setHours(10, 30, 0, 0);
+				document.getElementById("nx-when").value = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T10:30`;
+				root.querySelectorAll("[data-act='nx-day']").forEach((b) => b.classList.toggle("on", b === el));
+				return;
+			}
+			if (act === "nx-save" && S.next) {
+				const when = val("nx-when"), stage = val("nx-stage");
+				if (!when && !stage) { toast(t("nx_pick"), true); return; }
+				el.disabled = true;
+				if (when) await call("add_reminder", { title: t("nx_task"), when: when.replace("T", " ") + ":00", doctype: S.next.doctype, name: S.next.name }, true);
+				if (stage) await call("set_crm_status", { doctype: S.next.doctype, name: S.next.name, status: stage }, true);
+				const back = S.next.back; S.next = null; leadData = null;
+				closeSheet(); toast(t("saved"));
+				return go(back);
+			}
+			if (act === "nx-skip") { const back = S.next ? S.next.back : state.view; S.next = null; leadData = null; closeSheet(); return go(back); }
 			if (act === "save-contact" && pending) {
 				el.disabled = true;
 				const chip = root.querySelector(".sk-sheet .sk-chip.on");
 				await call("log_contact", { doctype: pending.doctype, name: pending.name, channel: pending.channel,
 					outcome: chip ? chip.dataset.ptype : null, text: val("f-out"), photo: await photoUrl("f-outphoto"),
 					duration: Math.round(Number(val("f-outmin") || 0) * 60) }, true);
+				const done = { doctype: pending.doctype, name: pending.name };
 				setPending(null);
 				closeSheet();
 				toast(t("saved"));
-				return go(state.view);
+				leadData = null;
+				return askNext(done.doctype, done.name, state.view);
 			}
 			if (act === "correction") {
 				sheet(`<h3 class="sk-h">✏️ ${t("correction")}</h3><div class="sk-item-meta">${esc(el.dataset.file)}</div>

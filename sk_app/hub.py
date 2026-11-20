@@ -42,7 +42,12 @@ INSTRUCTIONS = (
 	"- When work must move to another team (sales -> design -> store ...), use post_handoff; the other "
 	"team's Project sees it in list_handoffs. Close a handoff with close_handoff when it is done.\n"
 	"- Two Projects must never bulk-change the same records at the same time: check list_handoffs and "
-	"recent_activity before any bulk change."
+	"recent_activity before any bulk change.\n"
+	"- NOTES IN THE APP (SK 20-Nov): every comment or note you put on a record is read by staff on a phone in SK App. "
+	"Keep it to 3 short lines in plain words: what was done, what is needed next, and from whom. Details, tables and "
+	"options go in the attached PDF, never in the note. No HTML headings, no long lists.\n"
+	"- DESIGN (SK 20-Nov): a deal that already has a Sales Order is not a new design enquiry; do not send it for design "
+	"or mail 'for design' about it."
 )
 
 

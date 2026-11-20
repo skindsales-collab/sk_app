@@ -101,7 +101,8 @@ def rank_items(items: list[WorkItem], now: datetime) -> list[WorkItem]:
 
 	def key(item: WorkItem):
 		overdue = 0 if item.due and item.due <= now else 1
-		return (overdue, item.priority, KIND_ORDER.get(item.kind, 9), item.due or far)
+		# SK 20-Nov: ties (same due time) go by title, then record number, so the list never shuffles between loads
+		return (overdue, item.priority, KIND_ORDER.get(item.kind, 9), item.due or far, (item.title or "").lower(), item.name or "")
 
 	return sorted(items, key=key)
 

@@ -123,11 +123,28 @@ def on_deal_validate(doc, method=None):
 				and _is_new(doc) and not _has_quotation(doc.name):
 			doc.ms_quote_status = SENT_TO_QUOTE
 	elif main == CABIN and _has(doc, "custom_design_status"):
-		if (doc.get("custom_design_status") or NOT_REQUIRED) != NOT_REQUIRED or _has_quotation(doc.name):
+		# SK 20-Nov: ticks from the requirement words and the budget from "Annual Revenue", before the design reads it
+		from sk_app.writers.lead_rules import cabin_fill
+
+		for f, v in cabin_fill(doc.as_dict()).items():
+			if _has(doc, f):
+				doc.set(f, v)
+		if (doc.get("custom_design_status") or NOT_REQUIRED) != NOT_REQUIRED or _has_quotation(doc.name) or _has_order(doc.name):
 			return
 		picked = doc.get("status") == SENT_TO_DESIGN  # the CRM stage alone made nothing happen (Rushi, 30-Oct)
 		if picked or (_is_new(doc) and _has_input(doc)):
 			doc.custom_design_status = SENT_TO_DESIGN
+
+
+def _has_order(deal: str) -> bool:
+	"""SK 20-Nov: a deal whose Sales Order already exists (back-filled orders too) is not sent for design, so no
+	'for design' mail goes out for it. Same lookup as the Won gate."""
+	if not deal or not frappe.db.exists("CRM Deal", deal):
+		return False
+	from sk_app.gates import erp_docs
+
+	frappe.local.sk_gate_docs = None
+	return bool(erp_docs(deal)[1])
 
 
 # ---------- a new lead from the app ----------

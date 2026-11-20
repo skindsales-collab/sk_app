@@ -199,12 +199,14 @@ def _won_statuses() -> set:
 def order_from_deal(deal: str) -> str | None:
 	"""SK 28-Oct "won deal ... is sales order received" + "all input will need to make data entry in ERP": a deal set to
 	Won makes the draft Sales Order from its latest Quotation (made first from the deal value when it has none)."""
-	from sk_app import erp_flow
-
 	d = frappe.db.get_value("CRM Deal", deal, ["name", "deal_owner", "creation"] + (["deal_value"] if frappe.get_meta("CRM Deal").has_field("deal_value") else []),
 		as_dict=True)
-	customer = erp_flow.customer_of(deal)
-	if customer and frappe.db.exists("Sales Order", {"customer": customer, "docstatus": ["<", 2], "creation": [">=", d.creation]}):
+	# the deal's order already exists (same lookup as the Won gate: customer, quotations, Customer's PO naming the lead / deal;
+	# SK 19-Nov deals 00044 / 00135 were Won by their old back-filled orders and must not get a second one)
+	from sk_app.gates import erp_docs
+
+	frappe.local.sk_gate_docs = None
+	if erp_docs(deal)[1]:
 		return None
 	quotes = quotations_of(deal)
 	q = quotes[0] if quotes else make_for_deal(deal, flt(d.get("deal_value")) or None)

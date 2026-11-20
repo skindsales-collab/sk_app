@@ -85,7 +85,9 @@ FUNCTIONS = {
 		# point 16 + HR draft Rev 2: Attendance (Optick file upload, today, month, fixes); leave and expense approvals
 		# point 20 (SK 26-Oct): Logins / Reset PIN are the CEO's only, so HR has no Logins icon any more
 		# SK 28-Oct (Aarti is acting purchase manager with HR): she raises purchase requisitions from HR too
-		"tiles": COMMON_TILES[:1] + ["attendance", "hiring", "new_joiner", "requisition"] + COMMON_TILES[1:] + ["team_scorecards", "mail"],  # SK 17-Nov: hiring
+		# SK 20-Nov: HR is Samir now and his main HR work is recruitment: Hiring first; the purchase requisition button was
+		# Aarti's (acting purchase manager) and leaves HR with her
+		"tiles": COMMON_TILES[:1] + ["hiring", "attendance", "new_joiner"] + COMMON_TILES[1:] + ["team_scorecards", "mail"],  # SK 17-Nov: hiring
 		"live": True,
 		"erpnext_roles": ["HR User", "HR Manager"],
 		"desk": "/app/hr",

@@ -109,3 +109,44 @@ def owner_fields(source: str | None, non_cabin: bool) -> tuple[str, ...]:
 	if non_cabin:
 		return ("lead_owner_noncabin",) + OWNER_FIELDS.get(source or "", ()) + ("lead_owner_cabin",)
 	return OWNER_FIELDS.get(source or "", ()) + ("lead_owner_cabin",)
+
+
+# SK 20-Nov "CNA - no deal": a note only sends a lead for its quote (deal) when it carries a real talk or the requirement;
+# a no-answer note (CNA, busy, switched off, call back ...) never does
+import re as _re
+
+NO_TALK = _re.compile(r"\b(c\.?\s?n\.?\s?a|not\s+answer\w*|no\s+answer|did\s*n.?t\s+(pick|answer)|not\s+pick\w*|not\s+reachable|"
+	r"unreachable|switch\w*\s+off|busy|ringing|call\s*back|no\s+response|not\s+respond\w*|missed|wrong\s+number|"
+	r"out\s+of\s+(coverage|service)|voice\s*mail)\b", _re.I)
+REQUIREMENT = _re.compile(r"\d+\s*(ft|feet|')?\s*[x×*]\s*\d+|\b(cabin|container|toilet|office|security|kiosk|porta|shifting|"
+	r"machine|qty|nos?|units?|size|requirement|require|need|quotation|quote|rate|price|budget|site|drawing|puf|acp|gi\b|frp)", _re.I)
+
+
+def note_moves_to_quote(text: str | None, photo: bool = False, talked: bool = False) -> bool:
+	"""True when a note / call may send the lead for its quote: a photo, a real talk, or requirement words, and never
+	a no-answer note (CNA etc.), even when it names the product."""
+	t = (text or "").strip()
+	if t and NO_TALK.search(t) and not talked:
+		return False
+	return bool(photo or talked or (t and REQUIREMENT.search(t)))
+
+
+# SK 20-Nov (Swati, Irfan Ansari deal 00168): the cabin requirement words fill the ticks the design reads, and an amount
+# typed in "Annual Revenue" is the customer's budget. Only ever sets a tick or an empty box; never clears what was given.
+TICKS = (("custom_toilet_required", _re.compile(r"\b(toilet|wash\s*room|washroom|w\.?c\.?|bath(room)?|urinal|lavatory)\b", _re.I)),
+	("custom_ac_required", _re.compile(r"\b(a\.?c\.?|air\s*condition\w*|split\s*ac)\b", _re.I)),
+	("custom_furniture_required", _re.compile(r"\b(furniture|table|chair|workstation|cupboard|rack)\b", _re.I)))
+
+
+def cabin_fill(deal: dict) -> dict:
+	"""Fields to set on a Cabin deal from what the salesperson already wrote: ticks from the requirement text,
+	the budget (and the expected value) from an amount typed in Annual Revenue."""
+	text = " ".join(str(deal.get(f) or "") for f in ("custom_special_requirements", "sk_product", "custom_design_notes_sales"))
+	out = {f: 1 for f, rx in TICKS if not deal.get(f) and rx.search(text)}
+	amount = deal.get("annual_revenue") or 0
+	if amount and not deal.get("custom_customer_budget"):
+		out["custom_customer_budget"] = amount
+		if not deal.get("expected_deal_value"):
+			out["expected_deal_value"] = amount
+	return out
+

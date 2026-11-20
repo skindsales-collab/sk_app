@@ -227,7 +227,57 @@
 		return out;
 	}
 
+	// SK 20-Nov "free camera reading": a customer PO or a bill / petty-cash voucher read on the phone (no paid AI).
+	// Only fields with a clear label or shape are filled; the person checks them before saving.
+	const MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, sept: 9, oct: 10, nov: 11, dec: 12 };
+	const DATE_RE = /(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})|(\d{1,2})[\s\-]*([A-Za-z]{3,9})[\s\-,]*(\d{2,4})|(\d{4})-(\d{2})-(\d{2})/;
+	function isoDate(text) {
+		const m = String(text || "").match(DATE_RE);
+		if (!m) return "";
+		let d, mo, y;
+		if (m[1]) { d = +m[1]; mo = +m[2]; y = +m[3]; }
+		else if (m[4]) { d = +m[4]; mo = MONTHS[m[5].toLowerCase().slice(0, m[5].toLowerCase().startsWith("sept") ? 4 : 3)] || 0; y = +m[6]; }
+		else { y = +m[7]; mo = +m[8]; d = +m[9]; }
+		if (y < 100) y += 2000;
+		if (!(d >= 1 && d <= 31 && mo >= 1 && mo <= 12 && y >= 2000 && y <= 2100)) return "";
+		return `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+	}
+	function lines(text) { return String(text || "").split(/\r?\n/).map((l) => l.replace(/\s+/g, " ").trim()).filter(Boolean); }
+	function labelled(ls, label, pick) {
+		for (let i = 0; i < ls.length; i++) {
+			const m = ls[i].match(label);
+			if (!m) continue;
+			const after = ls[i].slice(m.index + m[0].length).replace(/^[\s:.#\-]+/, "");
+			const v = pick(after) || (i + 1 < ls.length ? pick(ls[i + 1]) : "");
+			if (v) return v;
+		}
+		return "";
+	}
+	function money(s) {
+		const nums = (String(s || "").match(/\d{1,3}(?:,\d{2,3})+(?:\.\d{1,2})?|\d+\.\d{1,2}|\d{2,}/g) || [])
+			.map((x) => Number(x.replace(/,/g, ""))).filter((n) => n > 0 && n < 1e9);
+		return nums.length ? Math.max(...nums) : 0;
+	}
+	function parseDoc(text, kind) {
+		const ls = lines(text);
+		if (kind === "po") {
+			const po_no = labelled(ls, /\b(?:p\.?\s?o\.?|purchase\s+order|order)\s*(?:no|number|#)\.?/i,
+				(s) => { const m = s.match(/[A-Z0-9][A-Z0-9\/\-]{2,}/i); return m && /\d/.test(m[0]) ? m[0] : ""; });
+			const po_date = labelled(ls, /\b(?:p\.?\s?o\.?\s*date|order\s*date|dated|date)\b/i, isoDate);
+			const delivery_date = labelled(ls, /\b(?:delivery\s*(?:date|by|schedule)?|del\.?\s*date|required\s*by|schedule\s*date|due\s*date)\b/i, isoDate);
+			return { po_no, po_date, delivery_date };
+		}
+		// bill / voucher
+		const amount = labelled(ls, /\b(?:grand\s*total|net\s*(?:amount|payable)|total\s*(?:amount|payable|rs\.?|inr)?|amount\s*payable|amount)\b/i, (s) => money(s) || "")
+			|| money(ls.filter((l) => /₹|rs\.?|inr/i.test(l)).join(" ")) || "";
+		const date = labelled(ls, /\b(?:invoice|bill|voucher)?\s*date\b/i, isoDate) || isoDate(text);
+		const party = ls.slice(0, 6).find((l) => COMPANY.test(l) && !/invoice|bill|gstin|phone|mob/i.test(l));
+		COMPANY.lastIndex = 0;
+		return { amount: amount ? String(amount) : "", date, paid_to: party || "", what: "" };
+	}
+
 	root.skParseCard = parseCard;
+	root.skParseDoc = parseDoc;
 	root.skFillFromExisting = fillFromExisting;
-	if (typeof module !== "undefined") module.exports = { parseCard, phones, fillFromExisting };
+	if (typeof module !== "undefined") module.exports = { parseCard, phones, fillFromExisting, parseDoc, isoDate };
 })(typeof window !== "undefined" ? window : globalThis);

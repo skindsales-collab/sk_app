@@ -612,9 +612,15 @@ def lead_to_design(name):
 
 
 @frappe.whitelist(methods=["POST"])
-def set_crm_status(doctype, name, status):
+def set_crm_status(doctype, name, status, lost_reason=None, lost_notes=None):
 	_me()
-	return lead_w.set_status(doctype, name, status)
+	return lead_w.set_status(doctype, name, status, lost_reason, lost_notes)
+
+
+@frappe.whitelist(methods=["POST"])
+def set_requirement(doctype, name, text):
+	"""SK 20-Nov: the customer's requirement on a lead / deal, seen and updated in the app."""
+	return lead_w.set_requirement(_me().user, doctype, name, text)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -1554,7 +1560,8 @@ def team_follow_up(person=None):
 			"deal_value": sum(flt(r.get("value")) for r in items if r["doctype"] == "CRM Deal"), "score": month.get("score")})
 		if not person or person == p["user"]:
 			rows += [{**r, "owner": p["user"], "owner_name": p["full_name"]} for r in items]
-	rows.sort(key=lambda r: (not r["overdue"], not r["new"]))
+	far = "9999"  # SK 20-Nov: same order on every load (due, then title, then record number)
+	rows.sort(key=lambda r: (not r["overdue"], not r["new"], str(r.get("due") or far), (r.get("title") or "").lower(), r["name"]))
 	return {"people": summary, "rows": rows, **day_report.team_screen(profile.user, people)}
 
 # ---------- Production + subcontractors (SK draft F03) ----------

@@ -8,3 +8,4 @@ sk_app.patches.two_level_segments
 sk_app.patches.dsi_function_and_report
 sk_app.patches.drop_old_crm_load_assignment_mails
 sk_app.patches.tick_pairs_with_own_voucher_numbers
+sk_app.patches.crm_deal_layout_cabin_first

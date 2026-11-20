@@ -137,13 +137,23 @@ def new_lead(user: str, first_name: str, mobile_no: str | None = None, organizat
 	_attach(photo, "CRM Lead", doc.name, user)
 	return doc.name
 
-def set_status(doctype: str, name: str, status: str) -> str:
+def set_status(doctype: str, name: str, status: str, lost_reason: str | None = None, lost_notes: str | None = None) -> str:
 	_check(doctype, name, "write")
 	status_dt = "CRM Lead Status" if doctype == "CRM Lead" else "CRM Deal Status"
 	if not frappe.db.exists(status_dt, status):
 		frappe.throw(_("Unknown status {0}").format(status))
 	doc = frappe.get_doc(doctype, name)
 	doc.status = status
+	# SK 20-Nov: Deal Loss / Junk Lead / Lost (status type Lost) need the reason ERPNext asks for; the app picks it with a note
+	if frappe.get_cached_value(status_dt, status, "type") == "Lost":
+		lost_reason, lost_notes = (lost_reason or "").strip(), (lost_notes or "").strip()
+		if not lost_reason or not frappe.db.exists("CRM Lost Reason", lost_reason):
+			frappe.throw(_("Pick the reason it was lost"))
+		if lost_reason == "Other" and not lost_notes:
+			frappe.throw(_("Write a short note for the reason 'Other'"))
+		doc.lost_reason = lost_reason
+		if lost_notes:
+			doc.lost_notes = lost_notes
 	doc.save()
 	if doctype == "CRM Lead" and not frappe.db.exists("CRM Deal", {"lead": name}):
 		from sk_app import gates, quote_pickup
@@ -153,7 +163,31 @@ def set_status(doctype: str, name: str, status: str) -> str:
 			quote_pickup.after_input(frappe.session.user, doctype, name)
 	return doc.status
 
-def add_note(user: str, doctype: str, name: str, text: str | None = None, photo: str | None = None) -> str | None:
+def set_requirement(user: str, doctype: str, name: str, text: str) -> dict:
+	"""SK 20-Nov: the requirement box on the lead / deal. Kept on the lead and its deal alike (sk_product), the full text
+	also as a note (history), then the lead / deal goes for its quote as with any requirement."""
+	_check(doctype, name, "write")
+	text = (text or "").strip()
+	if not text:
+		frappe.throw(_("Please write the requirement"))
+	short = " ".join(text.split())[:140]  # sk_product is a one-line field; the full text stays in the note
+	targets = [(doctype, name)]
+	if doctype == "CRM Lead":
+		deal = frappe.db.get_value("CRM Deal", {"lead": name})
+		if deal:
+			targets.append(("CRM Deal", deal))
+	else:
+		lead = frappe.db.get_value("CRM Deal", name, "lead")
+		if lead and frappe.db.exists("CRM Lead", lead):
+			targets.append(("CRM Lead", lead))
+	for dt, n in targets:
+		if frappe.get_meta(dt).has_field("sk_product"):
+			frappe.db.set_value(dt, n, "sk_product", short)
+	add_note(user, doctype, name, _("Requirement: {0}").format(text))
+	return {"requirement": short}
+
+def add_note(user: str, doctype: str, name: str, text: str | None = None, photo: str | None = None, first_response: bool = True,
+		talked: bool = False) -> str | None:
 	_check(doctype, name, "write")
 	text = (text or "").strip()
 	if not text and not photo:
@@ -163,9 +197,15 @@ def add_note(user: str, doctype: str, name: str, text: str | None = None, photo:
 	if text:
 		note = frappe.get_doc({"doctype": "FCRM Note", "title": text[:80], "content": text,
 			"reference_doctype": doctype, "reference_docname": name}).insert().name
+	if first_response:
+		# SK 20-Nov (Swati, "CNA" typed as a note stayed "No call yet"): a note on the lead is work done on it
+		_mark_first_response(doctype, name)
 	from sk_app import quote_pickup
+	from sk_app.writers.lead_rules import note_moves_to_quote
 
-	quote_pickup.after_input(user, doctype, name)  # SK 1-Nov: a requirement / photo added later also goes for its quote
+	# SK 1-Nov: a requirement / photo added later also goes for its quote; SK 20-Nov: never a "CNA" (no answer) note
+	if note_moves_to_quote(text, bool(photo), talked):
+		quote_pickup.after_input(user, doctype, name)
 	return note
 
 def _mark_first_response(doctype: str, name: str):
@@ -192,7 +232,8 @@ def log_contact(user: str, doctype: str, name: str, channel: str, outcome: str |
 	seconds = max(0, int(duration or 0)) if outcome in (None, "Talked", "Call back later") else 0
 	talk = f"{seconds // 60}:{seconds % 60:02d} min" if channel == "Call" and seconds else None
 	summary = " · ".join(p for p in (channel if direction == "Outgoing" else _("Incoming call"), outcome, talk, text) if p)
-	note = add_note(user, doctype, name, summary, photo)
+	note = add_note(user, doctype, name, summary, photo, first_response=False,  # a wrong number is not a response
+		talked=outcome == "Talked" and bool(text))  # a real talk with what was said may go for its quote
 	if channel == "Call":
 		# both are Phone fields; "0" when a number is not known (the user's own mobile may be blank in ERPNext)
 		to = frappe.db.get_value(doctype, name, "mobile_no") or frappe.db.get_value(doctype, name, "phone") or "0"
