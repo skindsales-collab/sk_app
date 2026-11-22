@@ -4,6 +4,7 @@ cabin@ for the sales team (Rushi, Swati, Pranali, Rahul), service@ for Aditya, a
 info@ for HR (SK App Settings > Team mailboxes). ERPNext's Email Accounts fetch the mails; the app shows each team
 its box, with a status per mail so two people never answer the same one: New → Taken by … → Replied / Lead made.
 """
+import json
 
 import frappe
 from frappe import _
@@ -85,14 +86,14 @@ def _box_of(row, boxes: list[str], box_of_account: dict) -> str | None:
 	return next((b for b in boxes if b in (row.recipients or "").lower()), None) or box_of_account.get(row.email_account)
 
 
-def _received(boxes: list[str], since=None, fields=None, filters=None, limit=0, start=0):
+def _received(boxes: list[str], since=None, fields=None, filters=None, limit=0, start=0, by="communication_date"):
 	acc = _accounts(boxes)
 	or_filters = [["recipients", "like", f"%{b}%"] for b in boxes] + ([["email_account", "in", acc]] if acc else [])
 	if _has_box_field():
 		or_filters.append(["sk_box", "in", boxes])
 	f = {"communication_medium": "Email", "sent_or_received": "Received", **(filters or {})}
 	if since:
-		f["communication_date"] = [">=", since]
+		f[by] = [">=", since]  # SK 21-Nov: the 5-minute scans use creation (when ERPNext got it), so an old read mail fetched late still counts
 	return frappe.get_all("Communication", filters=f, or_filters=or_filters, order_by="communication_date desc",
 		fields=["name", "recipients", "email_account", "sk_mail_status", "reference_doctype", "communication_date"]
 		+ (["sk_box"] if _has_box_field() else []) + (fields or []), limit=limit, start=start)
@@ -295,7 +296,7 @@ def link_known():
 	boxes = list(team_boxes())
 	if not boxes:
 		return 0
-	rows = _received(boxes, since=add_days(now_datetime(), -2), fields=["sender", "subject"],
+	rows = _received(boxes, since=add_days(now_datetime(), -2), by="creation", fields=["sender", "subject"],
 		filters={"sk_mail_status": ["in", ["", None, "New"]]})
 	linked = 0
 	for r in rows:
@@ -406,7 +407,7 @@ def auto_leads() -> int:
 	if not boxes:
 		return 0
 	box_of, made = _account_boxes(), 0
-	for r in _received(boxes, since=add_days(now_datetime(), -2), fields=["sender", "sender_full_name", "subject", "text_content", "content"],
+	for r in _received(boxes, since=add_days(now_datetime(), -2), by="creation", fields=["sender", "sender_full_name", "subject", "text_content", "content"],
 			filters={"sk_mail_status": ["in", ["", None, "New"]]}):
 		if r.reference_doctype in ("CRM Lead", "CRM Deal") or lead_sources.source_of(r.sender, r.subject) \
 				or _box_of(r, boxes, box_of) not in boxes:
@@ -477,7 +478,7 @@ def route_suppliers() -> int:
 	if PURCHASE_BOX not in team_boxes() or not boxes or not _has_box_field():
 		return 0
 	box_of, moved = _account_boxes(), 0
-	for r in _received(boxes, since=add_days(now_datetime(), -2), fields=["sender", "subject", "text_content", "content"],
+	for r in _received(boxes, since=add_days(now_datetime(), -2), by="creation", fields=["sender", "subject", "text_content", "content"],
 			filters={"sk_mail_status": ["in", ["", None, "New"]], "sk_box": ["is", "not set"]}):
 		if r.reference_doctype in ("CRM Lead", "CRM Deal") or not r.sender:
 			continue
@@ -497,3 +498,41 @@ def route_suppliers() -> int:
 			_notify([p.user for p in people_of("acc@skind.tech")], f"Supplier bill / payment mail: {r.subject or ''}", "Communication", r.name)
 		moved += 1
 	return moved
+
+
+# ---------- SK 21-Nov: every incoming mailbox reads ALL mails (read + unread) ----------
+
+def fetch_all_on() -> bool:
+	s = frappe.get_cached_doc("SK App Settings")
+	return bool(s.get("fetch_all_mails")) if frappe.get_meta("SK App Settings").has_field("fetch_all_mails") else False
+
+
+def ensure_fetch_all() -> list[dict]:
+	"""after_migrate + nightly: each enabled IMAP incoming Email Account is set to sync ALL mails, not only unread ones
+	(a mail opened in Outlook / Gmail first never reached ERPNext). The first switch re-reads the recent mails once
+	(uidvalidity cleared, initial_sync_count from SK App Settings); Frappe skips any mail whose Message-ID is already a
+	Communication of that account, so nothing is doubled. Off when SK App Settings "fetch_all_mails" is unticked."""
+	if not fetch_all_on():
+		return []
+	count = str(frappe.get_cached_doc("SK App Settings").get("mail_backfill_count") or "250")
+	done = []
+	for a in frappe.get_all("Email Account", filters={"enable_incoming": 1},
+			fields=["name", "use_imap", "email_sync_option", "initial_sync_count"]):
+		if not a.use_imap:
+			done.append({"account": a.name, "result": "POP: cannot read already-read mails, set IMAP"})
+			continue
+		if a.email_sync_option == "ALL":
+			continue
+		values = {"email_sync_option": "ALL", "uidvalidity": None, "uidnext": 0}
+		if count in ("100", "250", "500"):
+			values["initial_sync_count"] = count
+		frappe.db.set_value("Email Account", a.name, values, update_modified=False)
+		if frappe.db.exists("DocType", "IMAP Folder"):
+			frappe.db.sql("update `tabIMAP Folder` set uidvalidity=NULL, uidnext=0 where parent=%s", a.name)
+		done.append({"account": a.name, "result": f"ALL, re-read last {count} once"})
+	if done:
+		frappe.db.commit()
+		frappe.get_doc({"doctype": "SK Rule Log", "module": "Mail", "rule": "fetch_all_mails", "mode": "Fixed",
+			"detail": json.dumps(done)[:1000]}).insert(ignore_permissions=True) if frappe.db.exists("DocType", "SK Rule Log") else None
+		frappe.db.commit()
+	return done

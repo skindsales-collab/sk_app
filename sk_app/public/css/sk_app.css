@@ -427,7 +427,8 @@ li.k-green { box-shadow: inset 4px 0 0 #2e9e4f; }
 .sk-kact b { background: var(--red); color: #fff; border-radius: 8px; padding: 0 5px; }
 .sk-khead > b { flex: 1; min-width: 0; }
 .sk-kplot { position: relative; }
-.sk-kplot .sk-kact { position: absolute; top: 8px; left: 40px; z-index: 1; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+/* SK 21-Nov: on the phone the Actions button sits above the chart, never over a month's amount */
+.sk-kplot .sk-kact { position: static; display: block; margin: 0 0 4px auto; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
 /* SK 27-Oct: My Day / DSI / More as a slim row so Call / WhatsApp / Mail show without scrolling on every phone */
 .sk-home2 .sk-bottom .sk-tile { flex-direction: row; justify-content: center; padding: 8px 2px; font-size: 13px; gap: 6px; }
 .sk-home2 .sk-bottom .sk-tile-icon { font-size: 20px; }
@@ -718,7 +719,7 @@ body.sk-pc .sk-pcchart .sk-trendl { font-size: 12px; font-weight: 800; fill: #7b
 body.sk-pc .sk-pcchart .sk-vpill text { font-size: 12px; font-weight: 800; }
 body.sk-pc .sk-klegend { font-size: 12px; font-weight: 600; display: flex; flex-wrap: wrap; gap: 14px; margin-top: 4px; }
 body.sk-pc .sk-klegend .k-b { color: #1878a8; } body.sk-pc .sk-klegend .k-r { color: #c82030; } body.sk-pc .sk-klegend .k-t { color: #7b3fb5; }
-body.sk-pc .sk-kplot .sk-kact { left: auto; right: 8px; top: 0; }
+body.sk-pc .sk-kplot .sk-kact { position: absolute; display: inline-block; margin: 0; z-index: 1; left: auto; right: 8px; top: 0; }
 
 /* 3D block arrows (SVG drawn by flow3dHtml on PC), taller with bigger numbers (SK 1-Nov 09:33) */
 body.sk-pc .sk-flow3d { filter: none; overflow: visible; padding: 0 0 4px; }

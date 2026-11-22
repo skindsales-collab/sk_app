@@ -23,7 +23,7 @@ app_include_js = ["/assets/sk_app/js/sk_tally_keys.js", "/assets/sk_app/js/sk_he
 doctype_list_js = {"Sales Invoice": "public/js/sales_invoice_list.js"}
 
 # SK 29-Oct: GST tax invoice, delivery challan, order acknowledgement and PO prints with Bill to and Ship to, {{ sk_tax_invoice_html(doc) }}
-jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html", "sk_app.tax_invoice.sk_tax_invoice_html"]}
+jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html", "sk_app.tax_invoice.sk_tax_invoice_html", "sk_app.print_rules.sk_customer_desc"]}
 
 scheduler_events = {
 	"hourly": ["sk_app.deal_quotes.sync", "sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge", "sk_app.mailbox.remind",
@@ -36,7 +36,7 @@ scheduler_events = {
 		# SK 28-Oct: customers tagged Cabin / Non-Cabin and every order and customer given its salesperson
 		"30 1 * * *": ["sk_app.sales_owner.nightly"],
 		# SK 29-Oct: a solved desk request the person did not answer for 3 days is closed
-		"0 2 * * *": ["sk_app.issue_desk.auto_close"],
+		"0 2 * * *": ["sk_app.issue_desk.auto_close", "sk_app.mailbox.ensure_fetch_all"],  # SK 21-Nov: mailboxes stay on ALL mails
 		# SK 4-Nov before / after rebuild scorecard: the day's numbers saved once, the same way on the old and the new path
 		# SK 6-Nov KF-04447: every payment against its bill(s), nightly before the scorecard
 		"15 23 * * *": ["sk_app.writers.payment_allocate.link_unallocated"],
@@ -71,7 +71,8 @@ doc_events = {
 		# SK 4-Nov: no deal from a lead that is still New (call not connected): the lead is Qualified first (sk_app.gates)
 		"before_insert": ["sk_app.doubles.check_deal", "sk_app.gates.check_new_deal"], "on_update": "sk_app.deal_quotes.on_deal_update"},
 	# SK 4-Nov: members also work in ERPNext or through Claude: the quote / payment checks run on the record, whatever the route
-	"Quotation": {"before_submit": "sk_app.gates.check_quotation", "validate": "sk_app.writers.quotation.on_validate"},
+	"Quotation": {"before_insert": "sk_app.gates.check_quote_step", "before_submit": ["sk_app.gates.check_quote_step", "sk_app.gates.check_quotation"],
+		"validate": "sk_app.writers.quotation.on_validate", "on_submit": "sk_app.quote_pdf.attach_on_submit"},
 	"Item": {"validate": "sk_app.writers.item.on_validate"},
 	# SK 4-Nov rebuild (S3): the customer's salesperson is set at save, not the next night (the nightly run stays as a safety net)
 	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal", "after_insert": "sk_app.writers.customer.after_insert",
@@ -84,7 +85,8 @@ doc_events = {
 	# SK 29-Oct (Shraddha): a tax invoice is submitted only with the buyer's Bill to address (Ship to defaults to it)
 	"Sales Invoice": {"validate": ["sk_app.segment_accounts.set_segment", "sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check",
 		"sk_app.writers.taxes.on_validate", "sk_app.writers.payment_allocate.pull_advances"], "on_update": "sk_app.writers.taxes.after_save",
-		"before_submit": "sk_app.gates.check_sales_invoice", "on_submit": "sk_app.lead_time.on_sales_invoice_submit"},
+		"before_submit": "sk_app.gates.check_sales_invoice", "on_submit": "sk_app.lead_time.on_sales_invoice_submit",
+		"autoname": "sk_app.invoice_naming.autoname"},  # SK 21-Nov: SK/IND/MMYY/### with one running number
 	# SK 29-Oct: PO date → invoice date per cabin, days per 100 sq ft for Production (sk_app.lead_time)
 	"Project": {"validate": "sk_app.lead_time.on_project_validate"},
 	"SK Path Switch": {"validate": "sk_app.core.gate.on_switch"},  # SK 6-Nov: counts saved when a module goes New; checked nightly

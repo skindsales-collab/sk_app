@@ -118,11 +118,8 @@ def on_deal_validate(doc, method=None):
 	if frappe.flags.sk_quote_in_hand or _closed(doc.get("status")):
 		return
 	main = main_of(sub)
-	if main == NON_CABIN and _has(doc, "ms_quote_status"):
-		if (doc.get("ms_quote_status") or NOT_REQUESTED) == NOT_REQUESTED and not doc.get("ms_quote_no") \
-				and _is_new(doc) and not _has_quotation(doc.name):
-			doc.ms_quote_status = SENT_TO_QUOTE
-	elif main == CABIN and _has(doc, "custom_design_status"):
+	# SK 21-Nov: a Non-Cabin deal goes for its quote only when the salesperson sends it (lead_to_design), never by itself
+	if main == CABIN and _has(doc, "custom_design_status"):
 		# SK 20-Nov: ticks from the requirement words and the budget from "Annual Revenue", before the design reads it
 		from sk_app.writers.lead_rules import cabin_fill
 
@@ -132,7 +129,7 @@ def on_deal_validate(doc, method=None):
 		if (doc.get("custom_design_status") or NOT_REQUIRED) != NOT_REQUIRED or _has_quotation(doc.name) or _has_order(doc.name):
 			return
 		picked = doc.get("status") == SENT_TO_DESIGN  # the CRM stage alone made nothing happen (Rushi, 30-Oct)
-		if picked or (_is_new(doc) and _has_input(doc)):
+		if picked:  # SK 21-Nov: only when the salesperson picks it, never because the deal is new with a requirement
 			doc.custom_design_status = SENT_TO_DESIGN
 
 
@@ -213,7 +210,13 @@ def _send_for_quote(user: str, lead: str, seg: str | None, text: str) -> dict:
 
 
 def route_lead(user: str, lead: str) -> dict:
-	"""After the app saves a new lead: no switch, no extra box. Returns what happened, for the 'lead saved' screen."""
+	"""SK 21-Nov (Swati's trial): saving a lead no longer makes a deal, a quote or a design request. The lead stays New;
+	the next step is the call. Kept for the app's 'lead saved' screen: says what to do next."""
+	return {"route": "none", "reason": _("Lead saved. Next: call the customer, log the call, then mark the lead Qualified.")}
+
+
+def _route_lead_old(user: str, lead: str) -> dict:
+	"""Before 21-Nov: the lead was sent for its quote by itself (rate-card quote / design / quote AI). Not called."""
 	from sk_app import crm
 
 	crm._check("CRM Lead", lead, "write")
@@ -249,8 +252,7 @@ def after_input(user: str, doctype: str, name: str):
 	CRM Deal hook above). Never stops the note from saving: a problem is only logged."""
 	try:
 		if doctype == "CRM Lead":
-			if not frappe.db.exists("CRM Deal", {"lead": name}):
-				route_lead(user, name)
+			return  # SK 21-Nov: a note on a lead never sends it anywhere by itself
 		elif doctype == "CRM Deal":
 			doc = frappe.get_doc("CRM Deal", name)
 			before = (doc.get("ms_quote_status"), doc.get("custom_design_status"))

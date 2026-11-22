@@ -99,7 +99,7 @@ def bills_to_post(user: str) -> dict:
 def post(user: str, doctype: str, name: str) -> dict:
 	"""Checked and correct: post the draft bill / invoice."""
 	need(user, ACCOUNTS)
-	if doctype not in ("Purchase Invoice", "Sales Invoice"):
+	if doctype not in ("Purchase Invoice", "Sales Invoice", "Payment Entry", "Journal Entry"):  # 21-Nov: photo entry drafts too
 		frappe.throw(_("Unknown document"))
 	doc = frappe.get_doc(doctype, name)
 	if doc.docstatus != 0:

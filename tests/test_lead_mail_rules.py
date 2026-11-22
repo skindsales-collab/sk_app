@@ -60,3 +60,12 @@ def test_portal_lead_owner_by_source_sk_16_nov():
 	assert owner_fields("JustDial", False) == ("lead_owner_justdial", "lead_owner_digital", "lead_owner_cabin")
 	assert owner_fields("Email", False) == ("lead_owner_cabin",) and owner_fields(None, False) == ("lead_owner_cabin",)
 	assert owner_fields("IndiaMART", True)[0] == "lead_owner_noncabin"  # machine shifting words win over the portal
+
+
+def test_portal_owner_any_spelling_sk_21_nov():
+	# live CRM Lead Source is "Indiamart" / "India Mart": leads 04006 and 04012 went to Pranali instead of Swati
+	for name in ("Indiamart", "India Mart", "INDIAMART", "indiamart"):
+		assert owner_fields(name, False)[0] == "lead_owner_indiamart"
+	for name in ("Justdial", "Just Dial", "JUSTDIAL"):
+		assert owner_fields(name, False)[0] == "lead_owner_justdial"
+	assert owner_fields("Website", False) == ("lead_owner_cabin",)

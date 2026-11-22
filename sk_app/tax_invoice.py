@@ -26,9 +26,54 @@ ADDRESS_FIELDS = ["name", "address_title", "address_line1", "address_line2", "ci
 	"gstin", "gst_state_number", "phone", "email_id", "address_type", "is_primary_address", "is_shipping_address"]
 
 
-def ensure_setup():
+# SK 21-Nov: the Tally-style GST invoice agreed with Accounts (made on live 21-Nov) is the Sales Invoice default; the app
+# keeps a copy (data/sk_tax_invoice_tally.html, logo in data/sk_tax_invoice_tally_logo.b64, bank lines from the company's
+# Bank Account in ERPNext) and makes it only where it is missing, never over an edited one
+TALLY_FORMAT = "SK Tax Invoice Tally"
+# SK 21-Nov Rev 2 (approved): one template for invoice, order acknowledgement, purchase order and delivery challan; the
+# three desk formats only render the invoice format's html, so a change to the template shows in all four
+TALLY_DOCS = {"Sales Order": "SK Order Acknowledgement Tally", "Purchase Order": "SK Purchase Order Tally",
+	"Delivery Note": "SK Delivery Challan Tally"}
+TALLY_WRAPPER = '{{ frappe.render_template(frappe.db.get_value("Print Format", "SK Tax Invoice Tally", "html"), {"doc": doc}) }}'
+DEFAULT_FOR = {**FORMATS, "Sales Invoice": TALLY_FORMAT, **TALLY_DOCS}
+
+
+def _tally_html() -> str:
+	import os
+
+	base = frappe.get_app_path("sk_app", "data")
+	html = open(os.path.join(base, "sk_tax_invoice_tally.html")).read()
+	logo = open(os.path.join(base, "sk_tax_invoice_tally_logo.b64")).read().strip()
+	return html.replace("__SK_LOGO_B64__", logo)
+
+
+def _set_default(doctype: str, name: str):
+	"""A print format the people chose in Customize Form stays; the app only fills the default when none is set (or it
+	points to a format that no longer exists, or to the app's own older one being replaced)."""
 	from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
+	fix_default_level(doctype)
+	current = frappe.db.get_value("Property Setter", {"doc_type": doctype, "property": "default_print_format"}, "value")
+	replaceable = {None, "", FORMATS.get(doctype)} if name != FORMATS.get(doctype) else {None, ""}
+	if current and (current == "Standard" or frappe.db.exists("Print Format", current)) and current not in replaceable:
+		return
+	if current == name:
+		return
+	make_property_setter(doctype, None, "default_print_format", name, "Data", for_doctype=True, validate_fields_for_doctype=False)
+
+
+def fix_default_level(doctype: str):
+	"""SK 21-Nov: the app used to save the default print format as a field-level setting, which ERPNext ignores (prints
+	fell back to Standard). Any such row is turned into the doctype-level setting ERPNext reads, keeping its value."""
+	if frappe.db.exists("Property Setter", {"doc_type": doctype, "property": "default_print_format", "doctype_or_field": "DocType"}):
+		frappe.db.delete("Property Setter", {"doc_type": doctype, "property": "default_print_format", "doctype_or_field": "DocField"})
+	else:
+		frappe.db.sql("""update `tabProperty Setter` set doctype_or_field='DocType' where doc_type=%s and property='default_print_format'
+			and doctype_or_field='DocField' and ifnull(field_name, '')=''""", doctype)
+	frappe.clear_cache(doctype=doctype)
+
+
+def ensure_setup():
 	html = "{{ sk_tax_invoice_html(doc) }}"
 	for doctype, name in FORMATS.items():
 		if frappe.db.exists("Print Format", name):
@@ -37,17 +82,89 @@ def ensure_setup():
 			frappe.get_doc({"doctype": "Print Format", "name": name, "doc_type": doctype, "module": "SK App",
 				"custom_format": 1, "print_format_type": "Jinja", "standard": "No", "html": html, "margin_top": 0, "margin_left": 0,
 				"margin_right": 0}).insert(ignore_permissions=True)
-		make_property_setter(doctype, None, "default_print_format", name, "Data", validate_fields_for_doctype=False)
+	if not frappe.db.exists("Print Format", TALLY_FORMAT):
+		frappe.get_doc({"doctype": "Print Format", "name": TALLY_FORMAT, "doc_type": "Sales Invoice", "module": "SK App",
+			"custom_format": 1, "print_format_type": "Jinja", "standard": "No", "html": _tally_html(), "font_size": 14,
+			"margin_top": 10, "margin_bottom": 10, "margin_left": 10, "margin_right": 10, "page_number": "Hide",
+			"pdf_generator": "wkhtmltopdf"}).insert(ignore_permissions=True)
+	for doctype, name in TALLY_DOCS.items():  # made only where missing, never over an edited one
+		if not frappe.db.exists("Print Format", name):
+			frappe.get_doc({"doctype": "Print Format", "name": name, "doc_type": doctype, "module": "SK App",
+				"custom_format": 1, "print_format_type": "Jinja", "standard": "No", "html": TALLY_WRAPPER, "font_size": 14,
+				"margin_top": 10, "margin_bottom": 10, "margin_left": 10, "margin_right": 10, "page_number": "Hide",
+				"pdf_generator": "wkhtmltopdf"}).insert(ignore_permissions=True)
+	for doctype, name in DEFAULT_FOR.items():
+		_set_default(doctype, name)
 	ensure_letter_head()
+	lock_final_formats()
+	ensure_print_style()
+
+
+# SK 22-Nov "now pl final this format": the approved SK format is the only one offered for these documents, from SK App,
+# ERPNext desk and every PDF / mail attachment; every other format of the doctype is disabled (re-checked on each migrate).
+# The e-Invoice print (india_compliance, IRN) stays for e-invoicing. ERPNext's built-in "Standard" cannot be removed; it
+# prints with the SK letter head (banner + red band) so even that shows the SK header.
+FINAL_FORMATS = {"Sales Invoice": TALLY_FORMAT, "Sales Order": TALLY_DOCS["Sales Order"], "Purchase Order": TALLY_DOCS["Purchase Order"],
+	"Delivery Note": TALLY_DOCS["Delivery Note"], "Quotation": "SK Cabin Quotation"}
+KEEP_ENABLED = {"e-Invoice"}
+
+
+def lock_final_formats() -> list[str]:
+	off = []
+	for doctype, final in FINAL_FORMATS.items():
+		if not frappe.db.exists("Print Format", final):
+			continue
+		frappe.db.set_value("Print Format", final, "disabled", 0)
+		for name in frappe.get_all("Print Format", filters={"doc_type": doctype, "disabled": 0, "name": ["!=", final]}, pluck="name"):
+			if name in KEEP_ENABLED:
+				continue
+			frappe.db.set_value("Print Format", name, "disabled", 1)
+			off.append(name)
+		cur = frappe.db.get_value("Property Setter", {"doc_type": doctype, "property": "default_print_format", "doctype_or_field": "DocType"}, "value")
+		if cur != final:  # the final format is the default, even where another one had been picked
+			from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+			make_property_setter(doctype, None, "default_print_format", final, "Data", for_doctype=True, validate_fields_for_doctype=False)
+		frappe.clear_cache(doctype=doctype)
+	return off
 
 
 LETTER_HEAD = "SK Tech Logo"
 
 
+PRINT_STYLE = "SK Standard"
+STYLE_CSS = """
+/* SK 21-Nov checker: on plain ERPNext prints the unit shows once (its own column), no "Print Language" line, no big title */
+.print-format td small.pull-left{display:none !important}
+.print-format [data-fieldname="language"]{display:none !important}
+.print-format .print-heading{display:none !important}
+/* SK 22-Nov: page fills the width evenly (no wide left margin) */
+.print-format{margin-left:7mm !important;margin-right:7mm !important}
+/* SK 22-Nov checker: item tables bordered with the red header row, like the SK formats */
+.print-format table.table{border-collapse:collapse !important;border:1px solid #444 !important}
+.print-format table.table th,.print-format table.table td{border:1px solid #444 !important;padding:4px 6px !important}
+.print-format table.table thead th{background:#2A6EB4 !important;color:#fff !important;font-weight:bold !important;-webkit-print-color-adjust:exact}
+/* checker 21-Nov: Payment Entry shows Party, Mode, Reference, Amount and Narration once (fields only Payment Entry has) */
+.print-format [data-fieldname="payment_order_status"],.print-format [data-fieldname="paid_from_account_type"],.print-format [data-fieldname="paid_to_account_type"],.print-format [data-fieldname="paid_amount_after_tax"],.print-format [data-fieldname="base_paid_amount_after_tax"],.print-format [data-fieldname="received_amount_after_tax"],.print-format [data-fieldname="base_received_amount_after_tax"],.print-format [data-fieldname="received_amount"],.print-format [data-fieldname="base_received_amount"],.print-format [data-fieldname="base_paid_amount"]{display:none !important}
+"""
+
+
+def ensure_print_style():
+	"""The Redesign style (ERPNext's) plus three SK rules; set as the print style only where Redesign / nothing was chosen."""
+	base = frappe.db.get_value("Print Style", "Redesign", "css") or ""
+	css = base + STYLE_CSS
+	if frappe.db.exists("Print Style", PRINT_STYLE):
+		frappe.db.set_value("Print Style", PRINT_STYLE, {"css": css, "disabled": 0})
+	else:
+		frappe.get_doc({"doctype": "Print Style", "print_style_name": PRINT_STYLE, "css": css, "standard": "No"}).insert(ignore_permissions=True)
+	if (frappe.db.get_single_value("Print Settings", "print_style") or "Redesign") == "Redesign":
+		frappe.db.set_single_value("Print Settings", "print_style", PRINT_STYLE)
+
+
 def ensure_letter_head():
 	"""SK 29-Oct point 12: every other ERPNext print (PR, payment, MR, work order ...) gets the SK Tech logo name plate
 	instead of "Company Letterhead - Grey": one default letter head made from the same header picture as the quotes."""
-	img = "/assets/sk_app/images/sk-quote-header.png"
+	img = "/assets/sk_app/images/sk-header-v2.png"  # SK 21-Nov: one header everywhere (general segment line, company contacts)
 	meta = frappe.get_meta("Letter Head")
 	vals = {"is_default": 1, "disabled": 0}
 	if meta.has_field("source"):
@@ -56,6 +173,18 @@ def ensure_letter_head():
 			vals.update({"image_width": 190, "align": "Left"})
 	else:
 		vals["content"] = f'<img src="{img}" style="width:100%">'
+	# set_value skips the image -> content step, so the content is written here: the banner and (checker 21-Nov) the red
+	# document band "<DOCTYPE> | No | Date" on every plain ERPNext print; the big grey title steps back
+	band = ('{% if doc and doc.doctype %}<div style="background:#C82030;color:#fff;font-weight:bold;text-align:center;padding:4px 8px;'
+		'margin-top:2px;font-size:10pt;-webkit-print-color-adjust:exact">{{ doc.doctype|upper }} | No: {{ doc.name }}'
+		'{% set d = doc.get("posting_date") or doc.get("transaction_date") or doc.get("schedule_date") %}{% if d %} | Date: '
+		'{{ frappe.utils.formatdate(d, "dd-MMM-yyyy") }}{% endif %}</div>'
+		'<style>.print-heading{display:none !important}</style>{% endif %}')
+	vals["content"] = f'<div style="text-align: left;"><img src="{img}" style="width: 100%;"></div>' + band
+	# checker 21-Nov: a signature block at the end of every plain print
+	vals.update({"footer_source": "HTML", "footer": '<table style="width:100%;margin-top:10px"><tr><td></td><td style="width:45%;text-align:right;'
+		'border:1px solid #BFBFBF;padding:6px;height:60px;vertical-align:top">For <b>SK Ind Tech Solutions Pvt Ltd</b><br><br><br>'
+		'Authorised Signatory</td></tr></table>'})
 	vals = {k: v for k, v in vals.items() if meta.has_field(k)}
 	if frappe.db.exists("Letter Head", LETTER_HEAD):
 		frappe.db.set_value("Letter Head", LETTER_HEAD, vals)
@@ -221,8 +350,11 @@ def invoice_html(doc) -> str:
 	for i, d in enumerate(doc.items, 1):
 		taxable = flt(d.get("taxable_value")) or flt(d.net_amount)
 		desc = _esc(d.item_name)
-		if d.description and frappe.utils.strip_html(d.description).strip() != (d.item_name or "").strip():
-			desc += f"<div class=mut>{d.description}</div>"
+		from sk_app.print_rules import clean_description
+
+		clean = clean_description(frappe.utils.strip_html((d.description or "").replace("<br>", "\n").replace("</p>", "\n")))  # SK 22-Nov: no internal notes
+		if clean and clean != (d.item_name or "").strip():
+			desc += f"<div class=mut>{_esc(clean).replace(chr(10), '<br>')}</div>"
 		tax = "".join(f"<td class=c>{flt(d.get(f'{h}_rate')):g}</td><td class=r>{inr2(d.get(f'{h}_amount'))}</td>" for h in heads)
 		rows.append(f"<tr><td class=c>{i}</td><td>{desc}</td><td class=c>{_esc(d.get('gst_hsn_code'))}</td><td class=c>{flt(d.qty):g}</td>"
 			f"<td class=c>{_esc(d.uom)}</td><td class=r>{inr2(d.net_rate or d.rate)}</td><td class=r>{inr2(taxable)}</td>{tax}</tr>")
@@ -291,7 +423,11 @@ def invoice_html(doc) -> str:
 	else:
 		sign = "<b>Please confirm this order</b><br>Quote our order no. on every bill and delivery challan." if po else (
 			"<b>Thank you for your order</b><br>Please check the details and tell us within 2 days if anything is to be changed.")
-	header = frappe.utils.get_url("/assets/sk_app/images/sk-quote-header.png")
+	# SK 21-Nov: one header on every document; the segment line by Cabin / Non-Cabin, the general one on a PO
+	from sk_app.cabin_quote import is_noncabin
+
+	banner = "sk-header-v2.png" if po else ("sk-quote-header-v2.png" if is_noncabin(doc) else "sk-cabin-quote-header-v2.png")
+	header = frappe.utils.get_url("/assets/sk_app/images/" + banner)
 	terms = f"<div class=bar>Terms</div><div>{doc.terms}</div>" if doc.get("terms") else ""
 	return f"""<style>{CSS}</style><div class=skq><img class=hdr src="{header}">
 <div class=band>{band}</div>{irn}
@@ -319,11 +455,15 @@ def inr2(x) -> str:
 
 
 def sk_tax_invoice_html(doc) -> str:
-	"""Jinja method for the print format (hooks: jinja methods)."""
+	"""Jinja method for the print format (hooks: jinja methods). SK 21-Nov: a Sales Invoice prints the agreed Tally layout
+	from every route (the old "SK Tax Invoice" format, a link or the app), so Shraddha gets the same invoice everywhere."""
+	if getattr(doc, "doctype", None) == "Sales Invoice":
+		return frappe.render_template(_tally_html(), {"doc": doc, "frappe": frappe})
 	return invoice_html(doc)
 
 
 CSS = """
+.print-format{margin-top:5mm !important;margin-bottom:8mm !important;margin-left:7mm !important;margin-right:7mm !important;padding:0 !important}
 .skq{font-family:'Liberation Sans',Arial,sans-serif;font-size:8.8pt;color:#222}
 .skq .hdr{width:100%}
 .skq .band{background:#C82030;color:#fff;font-weight:bold;text-align:center;padding:5px;font-size:10.5pt;margin-bottom:6px}
@@ -335,7 +475,7 @@ CSS = """
 .skq .miss{color:#C82030;font-weight:bold}
 .skq .mut{color:#666;font-size:8pt}
 .skq table.p{margin-top:8px}
-.skq table.p th{background:#135F86;color:#fff;padding:3px 4px;border:1px solid #135F86;font-size:8pt}
+.skq table.p th{background:#2A6EB4;color:#fff;padding:3px 4px;border:1px solid #2A6EB4;font-size:8pt}
 .skq table.p td{border:1px solid #BFBFBF;padding:3px 4px;vertical-align:top}
 .skq .c{text-align:center}.skq .r{text-align:right}
 .skq tr.tot td{background:#FFF2CC;font-weight:bold}

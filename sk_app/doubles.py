@@ -453,6 +453,13 @@ def morning():
 	if not count:
 		return 0
 	subject = _("SK App: {0} possible double / wrong entries to check").format(count)
+	# SK 21-Nov: to the Accounts address in SK App Settings "alert_routes" (the CEO sees the count in the night summary)
+	from sk_app.core.night_check import _has_routes, _mail_to
+	from sk_app.core.night_rules import parse_routes
+
+	routes = parse_routes(frappe.db.get_single_value("SK App Settings", "alert_routes") if _has_routes() else "")
+	if routes.get("accounts"):
+		return _mail_to(routes["accounts"], subject, report_html(found))
 	users = _recipients()
 	from sk_app.mailbox import _notify
 

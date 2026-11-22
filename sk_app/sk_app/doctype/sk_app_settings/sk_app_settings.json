@@ -37,6 +37,13 @@
   "sales_manual",
   "mail_section",
   "mailbox_map",
+  "alert_routes",
+  "fetch_all_mails",
+  "mail_backfill_count",
+  "invoice_running_last",
+  "invoice_bank_name",
+  "invoice_bank_ac",
+  "invoice_bank_branch",
   "auto_leads",
   "indiamart_mail",
   "justdial_mail",
@@ -200,6 +207,49 @@
    "label": "Team mailboxes",
    "default": "cabin@skind.tech: Sales, Marketing\nservice@skind.tech: Machine Shifting, service@skind.tech\nacc@skind.tech: Accounts\nsales@skind.tech: Management\ninfo@skind.tech: HR",
    "description": "One line per mailbox: e-mail: who sees it in the app (app functions such as Sales, Accounts, or a person's login)."
+  },
+  {
+   "fieldname": "alert_routes",
+   "fieldtype": "Small Text",
+   "default": "accounts: acc@skind.tech\ncabin_sales: cabin@skind.tech\nmachine_shifting: service@skind.tech\npurchase: prod@skind.tech\nstores: prod@skind.tech",
+   "label": "Alert mails: who gets what",
+   "description": "One line each, area: e-mail. Areas: accounts, cabin_sales, machine_shifting, purchase, stores, production, hr, summary. Example line: accounts: acc@skind.tech. The night-check items that have no owner of their own, and the possible-double list, go to the area's e-mail; summary = who gets the short count summary (blank = the CEO)."
+  },
+  {
+   "fieldname": "fetch_all_mails",
+   "fieldtype": "Check",
+   "default": "1",
+   "label": "Mailboxes read all mails (read + unread)",
+   "description": "SK 21-Nov: every incoming mailbox is kept on 'All mails', so a mail opened first in Outlook / Gmail still reaches ERPNext and SK App. No mail is doubled."
+  },
+  {
+   "fieldname": "mail_backfill_count",
+   "fieldtype": "Select",
+   "options": "100\n250\n500",
+   "default": "250",
+   "label": "First switch: re-read the last ... mails once"
+  },
+  {
+   "fieldname": "invoice_running_last",
+   "fieldtype": "Int",
+   "label": "Last invoice running number used",
+   "description": "SK 21-Nov: Sales Invoices are SK/IND/MMYY/###; ### runs on across months. Put the last number already used (e.g. 848); the next invoice takes the next one. The app never goes below the highest number already used."
+  },
+  {
+   "fieldname": "invoice_bank_name",
+   "fieldtype": "Data",
+   "label": "Invoice: bank name"
+  },
+  {
+   "fieldname": "invoice_bank_ac",
+   "fieldtype": "Data",
+   "label": "Invoice: bank account no."
+  },
+  {
+   "fieldname": "invoice_bank_branch",
+   "fieldtype": "Data",
+   "label": "Invoice: branch & IFS code",
+   "description": "Printed on the SK Tax Invoice Tally (kept here, not in the app code)."
   },
   {
    "fieldname": "auto_leads",

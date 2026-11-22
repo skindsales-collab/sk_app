@@ -176,10 +176,16 @@ def gate_for(doctype: str, doc) -> dict:
 	"""For the detail screen: what is missing on the record, and which status chips are locked and why."""
 	locked = {}
 	sd = "CRM Lead Status" if doctype == "CRM Lead" else "CRM Deal Status"
+	# SK 21-Nov: a lead with no call where the customer was spoken to shows "Log a call first" on Qualified and later
+	# chips before the tap (Swati, Curesense: the error came only after tapping)
+	no_call = doctype == "CRM Lead" and not lead_had_call(doc.get("name"))
 	for status in frappe.get_all(sd, pluck="name"):
-		m = status_missing(doctype, doc, status)
+		m = [t for _k, t in status_missing(doctype, doc, status)]
+		step = _step(doctype, status)
+		if no_call and step not in (None, "New", "Won"):
+			m = [_("Log a call first (Call > Talked)")] + m
 		if m:
-			locked[status] = [t for _k, t in m]
+			locked[status] = m
 	return {"missing": [{"key": k, "text": t} for k, t in record_missing(doctype, doc)], "locked": locked, "rules": R.RULES}
 
 
@@ -295,6 +301,42 @@ def complete_customer(customer: str, gstin=None, unregistered=0, gst_note=None, 
 
 def _rows(doc) -> list[dict]:
 	return [{"qty": flt(i.qty), "rate": flt(i.rate)} for i in doc.get("items") or []]
+
+
+def _deal_of_quote(doc) -> str | None:
+	if doc.get("crm_deal"):
+		return doc.crm_deal
+	if doc.get("quotation_to") == "CRM Lead" or doc.get("quotation_to") == "Lead":
+		return frappe.db.get_value("CRM Deal", {"lead": doc.party_name}, "name")
+	return None
+
+
+def check_quote_step(doc, method=None):
+	"""Quotation before_insert and before_submit (desk, app, AI and API alike, SK 21-Nov): a quote is made / sent only
+	after the steps before it: cabin = drawing approved on the deal; Non-Cabin = the deal exists (qualified lead).
+	A quotation with no deal at all (an old customer's direct quote from the desk) is left as it was."""
+	if _skip() or frappe.flags.sk_skip_quote_step:
+		return
+	from sk_app import quote_step_rules as Q
+	from sk_app.segments import main_of, sub_of
+
+	deal = _deal_of_quote(doc)
+	if not deal:
+		if doc.get("quotation_to") in ("CRM Lead", "Lead"):
+			frappe.throw(_(Q.QUALIFY_FIRST_QUOTE), title=_("Step missing"))
+		return
+	d = frappe.db.get_value("CRM Deal", deal, ["sk_segment", "custom_design_status"], as_dict=True) if frappe.get_meta("CRM Deal").has_field("custom_design_status") \
+		else frappe._dict(sk_segment=frappe.db.get_value("CRM Deal", deal, "sk_segment"), custom_design_status=None)
+	why = Q.quote_problem(main_of(sub_of(d.sk_segment)), d.custom_design_status, True)
+	if why:
+		frappe.throw(_(why) + f" ({deal}: {d.custom_design_status or '-'})", title=_("Step missing"))
+
+
+def lead_had_call(lead: str) -> int:
+	"""Calls on the lead where the customer was spoken to (CRM Call Log Completed, logged from the app or the phone list)."""
+	if not frappe.db.exists("DocType", "CRM Call Log"):
+		return 1
+	return frappe.db.count("CRM Call Log", {"reference_doctype": "CRM Lead", "reference_docname": lead, "status": "Completed"})
 
 
 def check_quotation(doc, method=None):

@@ -117,7 +117,8 @@ def price(req: dict, rc: dict | None = None) -> dict:
 	km = flt(req.get("km"))
 	trip = tr["upto_20ft"] if L <= 20 else tr["upto_40ft"]
 	trip += max(0.0, km - tr["free_km"]) * tr["extra_per_km_per_cabin"]
-	if req.get("transport", True):
+	# SK 21-Nov: transport never comes into a standard quote by itself; only when sales ticks it
+	if req.get("transport") is True or str(req.get("transport")) in ("1", "true"):  # SK 21-Nov: optional, only when ticked
 		lines.append({"kind": "transport", "desc": f"Transportation from our Talegaon plant to your site ({km:g} km)", "qty": qty, "unit": "Trip", "rate": round(trip)})
 	if req.get("crane"):
 		lines.append({"kind": "transport", "desc": "Hydra / crane for unloading and placing at site", "qty": qty, "unit": "Trip", "rate": tr["crane_per_trip"]})
@@ -200,9 +201,9 @@ def ensure_setup():
 		frappe.get_doc({"doctype": "Print Format", "name": PRINT_FORMAT, "doc_type": "Quotation", "module": "SK App", "custom_format": 1,
 			"print_format_type": "Jinja", "standard": "No", "html": "{{ sk_cabin_quote_html(doc) }}", "margin_top": 0, "margin_left": 0,
 			"margin_right": 0}).insert(ignore_permissions=True)
-	from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+	from sk_app.tax_invoice import _set_default
 
-	make_property_setter("Quotation", None, "default_print_format", PRINT_FORMAT, "Data", validate_fields_for_doctype=False)
+	_set_default("Quotation", PRINT_FORMAT)  # SK 21-Nov: doctype-level (ERPNext reads it), never over a chosen default
 	from sk_app import building_quote
 
 	building_quote.ensure_setup()
@@ -404,7 +405,7 @@ def _boss_only(user: str):
 
 SPEC = [
 	"Structure: GI / MS base frame on 150 mm legs; floor / door sill 250 mm above ground; no steps.",
-	"Walls: outside 0.9 mm MS corrugated (trapezoidal, vertical rib) sheet, white with blue bottom band; inside MDF / board finish on GI sections.",
+	"Walls: outside 0.9 mm MS corrugated (trapezoidal, vertical rib) sheet; inside MDF / board finish on GI sections.",
 	"Roof: two-side slope, ridge 150 mm above eaves, corrugated sheet; clear internal height 2340 mm.",
 	"Floor: 18 mm cement fibre board on base frame.",
 	"Door: MS frame door clad in the same corrugated sheet, L-drop (lever) handle with lock and SS aldrop with padlock hasp.",
@@ -430,20 +431,47 @@ EXCL = [
 	"Civil work, foundation, plinth, earthing pit and external cabling.",
 	"Any change after drawing approval will be charged extra.",
 ]
+# SK 21-Nov checker: machine shifting quotes carry SK scope, customer scope and exclusions (standard text, machine-shifting SOP)
+MS_SK_SCOPE = [
+	"Joint site survey, method statement and lifting plan.",
+	"Match-marking, tagging and photo record of every machine.",
+	"Draining of oils / coolant and capping of open pipes (please provide empty oil barrels for removing the oil).",
+	"Electrical disconnection by our electrician (you isolate at source) and reconnection after placement.",
+	"Mechanical dismantling into transportable sub-assemblies, lifting, loading, shifting and unloading.",
+	"Placement, re-assembly, levelling and power-on.",
+	"All manpower, supervision, tools, tackles and consumables in our scope.",
+]
+MS_CUST_SCOPE = [
+	"Crane: your plant EOT crane with suitable wire ropes where available; mobile crane as per the price schedule.",
+	"Power: isolation at source, power supply for our tools, and power / air / coolant line extension at the new place.",
+	"Permissions: permits, gate passes and any local / union charges.",
+	"Area clear: access route and working area cleared, foundation ready and cured with anchors and grouting.",
+	"Oils, coolant and damaged seals / hoses; application or OEM engineer for trials / calibration if needed.",
+]
+MS_EXCL = [
+	"Civil, structural and fabrication work; cabling beyond the machine panel.",
+	"Repair or replacement parts, OEM engineer charges and production trials.",
+	"Transit insurance, unless quoted.",
+	"Some parts are not designed for dismantling (sheet-metal ducts, insulation covers, old fasteners) and may get damaged; their replacement is extra at actual.",
+]
 CSS = """
+.print-format{margin-top:45mm !important;margin-bottom:14mm !important;margin-left:7mm !important;margin-right:7mm !important;padding:0 !important}
+body[onload]{padding:2mm 0 0 0 !important;margin:0 !important}
+body[onload] .print-format{padding:0 !important;margin:0 !important;min-height:0 !important;max-width:none !important}
 .skq{font-family:'Liberation Sans',Arial,sans-serif;font-size:9.6pt;color:#222}
 .skq .hdr{width:100%}
 .skq .band{background:#C82030;color:#fff;font-weight:bold;text-align:center;padding:5px;font-size:10.5pt}
 .skq .addr td{border:0;vertical-align:top;padding:2px}
 .skq .k{font-style:italic;color:#777;width:95px;display:inline-block}
-.skq .subj{color:#135F86;font-weight:bold;font-size:11pt;margin:10px 0 4px}
-.skq .bar{background:#1878A8;color:#fff;font-weight:bold;padding:4px 6px;margin:12px 0 4px;text-transform:uppercase}
-.skq table.p{border-collapse:collapse;width:100%}
-.skq table.p th{background:#135F86;color:#fff;padding:4px}
-.skq table.p td{border:1px solid #BFBFBF;padding:4px}
+.skq .subj{color:#1D4F86;font-weight:bold;font-size:11pt;margin:10px 0 4px}
+.skq .bar{background:#2A6EB4;color:#fff;font-weight:bold;padding:4px 6px;margin:12px 0 4px;text-transform:uppercase}
+.skq table.p{border-collapse:collapse;width:100%;table-layout:fixed}
+.skq table.p th{background:#2A6EB4;color:#fff;padding:4px;text-align:center}
+.skq table.p td{border:1px solid #BFBFBF;padding:4px;word-wrap:break-word}
+.skq table.p .n{white-space:nowrap}
 .skq .c{text-align:center}.skq .r{text-align:right}.skq .b{font-weight:bold}
 .skq tr.tot td{background:#FFF2CC;font-weight:bold}.skq tr.gst td{background:#F2F2F2;font-weight:bold}
-.skq .words{color:#135F86;font-weight:bold;font-style:italic;margin:5px 0}
+.skq .words{color:#1D4F86;font-weight:bold;font-style:italic;margin:5px 0}
 .skq ol{margin:2px 0 2px 22px;padding:0}.skq li{margin:2px 0}
 """
 
@@ -453,6 +481,71 @@ def _esc(x) -> str:
 
 
 CABIN_PHONES = "+91 84325 33555 / +91 84858 33365"  # SK 16-Nov: the cabin sales numbers on every cabin quote
+# SK 21-Nov: wide description, narrow number columns (descriptions were wrapping word by word)
+COLS = "<colgroup><col style='width:5%'><col style='width:53%'><col style='width:7%'><col style='width:7%'><col style='width:14%'><col style='width:14%'></colgroup>"
+
+
+def is_noncabin(doc) -> bool:
+	"""True when the party's customer group is "Non-Cabin" or sits under it (machine shifting, job work ...)."""
+	group = doc.get("customer_group")
+	if not group:
+		party = doc.get("party_name") if doc.get("quotation_to", "Customer") == "Customer" else None
+		party = party or doc.get("customer")
+		group = frappe.db.get_value("Customer", party, "customer_group") if party else None
+	if not group:
+		return False
+	return group == "Non-Cabin" or frappe.db.get_value("Customer Group", group, "parent_customer_group") == "Non-Cabin"
+
+
+def _group(doc) -> str | None:
+	group = doc.get("customer_group")
+	if not group:
+		party = doc.get("party_name") if doc.get("quotation_to", "Customer") == "Customer" else None
+		party = party or doc.get("customer")
+		group = frappe.db.get_value("Customer", party, "customer_group") if party else None
+	return group
+
+
+def salutation(doc) -> tuple[str, str]:
+	"""SK 21-Nov checker: the contact's name with Sir (Mr.) or Madam (Mrs. / Ms. / Miss), never "Sir / Madam".
+	Returns (name with Sir / Madam or "", "Sir" / "Madam") for the To block and "Dear ...,"."""
+	import re
+
+	raw = (doc.get("contact_display") or "").strip()
+	title = ""
+	if doc.get("contact_person"):
+		c = frappe.db.get_value("Contact", doc.contact_person, ["salutation", "gender"], as_dict=True) or {}
+		title = (c.get("salutation") or "") + " " + (c.get("gender") or "")
+	m = re.match(r"^(mr|mrs|ms|miss|dr|shri|smt)\.?\s+", raw, re.I)
+	if m:
+		title = m.group(1) + " " + title
+		raw = raw[m.end():]
+	madam = bool(re.search(r"\b(mrs|ms|miss|smt|madam|female)\b", title, re.I))
+	word = "Madam" if madam else "Sir"
+	cust = (doc.get("customer_name") or doc.get("party_name") or "").strip().lower()
+	if not raw or raw.lower() == cust:
+		return "", "Sir"
+	return f"{raw} {word}", word
+
+
+def _desc(d) -> str:
+	"""The item text on the quote, without internal notes (SK 22-Nov) and without '(0 km)'."""
+	from sk_app.print_rules import clean_description
+
+	raw = (d.description or d.item_name or "").replace(" (0 km)", "")
+	text = clean_description(frappe.utils.strip_html(raw.replace("<br>", "\n").replace("</p>", "\n")))
+	return _esc(text or d.item_name).replace("\n", "<br>")
+
+
+def _numbered(terms: str) -> str:
+	"""Commercial terms as a numbered list (lines from the quote's terms; an existing list is kept)."""
+	import re
+
+	if re.search(r"<(ol|ul|li)\b", terms or "", re.I):
+		return terms
+	parts = [re.sub(r"^\s*\d+[.)]\s*", "", frappe.utils.strip_html(x)).strip() for x in re.split(r"<br\s*/?>|</p>|\n", terms or "")]
+	parts = [x for x in parts if x]
+	return "<ol>" + "".join(f"<li>{_esc(x)}</li>" for x in parts) + "</ol>" if parts else ""
 
 
 def quote_html(doc) -> str:
@@ -470,10 +563,11 @@ def quote_html(doc) -> str:
 	cust = doc.customer_name or doc.party_name
 	from sk_app.tax_invoice import quote_to_lines
 
-	to = (f"{_esc(contact)} Sir / Madam<br>" if contact else "") + f"<b>{_esc(cust)}</b>" + quote_to_lines(doc)
+	attn, dear = salutation(doc)
+	to = f"{_esc(cust)}" + quote_to_lines(doc) + (f"<br>Kind attn: {_esc(attn)}" if attn else "")
 	rows = "".join(
-		f"<tr><td class=c>{i}</td><td>{d.description or d.item_name}</td><td class=c>{flt(d.qty):g}</td><td class=c>{_esc(d.uom)}</td>"
-		f"<td class=r>{inr(d.rate)}</td><td class='r b'>{inr(d.amount)}</td></tr>" for i, d in enumerate(doc.items, 1))
+		f"<tr><td class=c>{i}</td><td>{_desc(d)}</td><td class='c n'>{flt(d.qty):g}</td><td class=c>{_esc(d.uom)}</td>"
+		f"<td class='r n'>{inr(d.rate)}</td><td class='r b n'>{inr(d.amount)}</td></tr>" for i, d in enumerate(doc.items, 1))
 	disc = f"<tr><td colspan=5 class=r>Discount{f' {flt(doc.additional_discount_percentage):g}%' if doc.additional_discount_percentage else ''}</td><td class=r>- {inr(doc.discount_amount)}</td></tr>" if flt(doc.discount_amount) else ""
 	li = lambda xs: "<ol>" + "".join(f"<li>{x}</li>" for x in xs) + "</ol>"  # noqa: E731
 	if cabin:
@@ -483,31 +577,48 @@ def quote_html(doc) -> str:
 	else:
 		subject = f"Quotation for {_esc(doc.items[0].item_name) if doc.items else ''}"
 		intro = "Thank you for your enquiry. Please find our offer below."
-	sections = [f"<div class=bar>1. Price schedule (INR)</div><table class=p><tr><th>Sr.</th><th>Description</th><th>Qty</th><th>Unit</th><th>Unit price</th><th>Amount</th></tr>{rows}{disc}"
+	sections = [f"<div class=bar>1. Price schedule (INR)</div><table class=p>{COLS}<tr><th>Sr.</th><th>Description</th><th>Qty</th><th>Unit</th><th>Unit price</th><th>Amount</th></tr>{rows}{disc}"
 		f"<tr class=tot><td colspan=5 class=r>Total (excl. GST)</td><td class=r>{inr(doc.net_total)}</td></tr>"
-		f"<tr class=gst><td colspan=6 class=r>GST @ 18% extra as applicable</td></tr></table>"
+		f"<tr class=gst><td colspan=5 class=r>GST @ 18%</td><td class=r>Extra</td></tr></table>"
 		f"<div class=words>Amount in words (excl. GST): Rupees {words(int(round(flt(doc.net_total))))} Only</div>"]
 	n = 2
-	if cabin:
-		short = _esc(cust.split(" ")[0] if cust else "Customer")
-		for title, xs in (("Technical specification", SPEC), ("Scope of work – SK Ind Tech", SK_SCOPE), (f"{_esc(cust)} scope" if cust else f"{short} scope", CUST_SCOPE), ("Exclusions", EXCL)):
-			sections.append(f"<div class=bar>{n}. {title}</div>{li(xs)}")
-			n += 1
-	if doc.terms:
-		sections.append(f"<div class=bar>{n}. Commercial terms</div><div>{doc.terms}</div>")
-	owner = frappe.db.get_value("User", doc.owner, "full_name") or doc.owner
-	# SK 16-Nov: cabin quotes carry the cabin banner and the cabin phone numbers; Non-Cabin keeps the machine-shifting header
-	header = frappe.utils.get_url("/assets/sk_app/images/" + ("sk-cabin-quote-header.png" if cabin else "sk-quote-header.png"))
-	phones = CABIN_PHONES if cabin else "+91 97672 13521"
-	return f"""<style>{CSS}</style><div class=skq><img class=hdr src="{header}">
-<div class=band>QUOTATION &nbsp; | &nbsp; Ref: {_esc(ref)} &nbsp; | &nbsp; Date: {date} &nbsp; | &nbsp; Rev: {rev}</div>
-<table class=addr style="width:100%;margin:12px 0 8px"><tr><td>To,<br>{to}</td><td style="width:45%"><span class=k>Quotation No.</span><b>{_esc(ref)}</b><br>
-<span class=k>Date</span><b>{date}</b><br><span class=k>Revision</span><b>{rev}</b><br><span class=k>Valid till</span><b>{formatdate(doc.valid_till, "dd-MMM-yyyy") if doc.valid_till else ""}</b></td></tr></table>
-<div class=subj>Subject: {_esc(subject)}</div><p>Dear Sir / Madam,<br>{intro}</p>
+	ms = is_noncabin(doc)
+	shifting = ms and (_group(doc) in ("Machine Shifting", "Non-Cabin") or any("shift" in (d.description or d.item_name or "").lower() for d in doc.items))
+	blocks = ((("Technical details", SPEC), ("Customer scope", CUST_SCOPE), ("Exclusions and conditions", EXCL)) if cabin
+		else (("Scope of work – SK Ind Tech", MS_SK_SCOPE), ("Customer scope", MS_CUST_SCOPE), ("Exclusions and conditions", MS_EXCL)) if shifting else ())
+	for title, xs in blocks:  # SK 21-Nov checker: the section is "Customer scope", never the customer's own name
+		sections.append(f"<div class=bar>{n}. {title}</div>{li(xs)}")
+		n += 1
+	# SK 21-Nov (as on the SK formats): the internal rate-card line is not for the customer
+	terms = "<br>".join(x for x in (doc.terms or "").split("<br>") if "rate card" not in x.lower())
+	terms = _numbered(terms)
+	if terms.strip():
+		sections.append(f"<div class=bar>{n}. Commercial terms</div><div>{terms}</div>")
+	# SK 21-Nov checker: the salesperson's name under the signature, never "Administrator"
+	owner = "" if doc.owner in ("Administrator", "Guest") else (frappe.db.get_value("User", doc.owner, "full_name") or "")
+	# SK 21-Nov: the header follows the customer group, not the quote screen: groups under "Non-Cabin" get the
+	# machine-shifting header and phone, every other customer gets the cabin banner and the cabin phones
+	# -v2 pictures: the old contact line (gmail) replaced by the company phones and @skind.tech e-mail (checker 21-Nov)
+	header = frappe.utils.get_url("/assets/sk_app/images/" + ("sk-quote-header-v2.png" if ms else "sk-cabin-quote-header-v2.png"))
+	phones = "+91 97672 13521" if ms else CABIN_PHONES
+	email = "sales@skind.tech" if ms else "cabin@skind.tech"  # SK 21-Nov: company e-mail on the quote, as on the SK formats
+	# banner on every page and "Page x of y" footer (wkhtmltopdf header / footer, checker 21-Nov)
+	band = f"QUOTATION &nbsp; | &nbsp; Ref: {_esc(ref)} &nbsp; | &nbsp; Date: {date} &nbsp; | &nbsp; Rev: {rev}"
+	head = f"""<div id="header-html" class="hidden-pdf"><div style="padding:0 7mm"><img src="{header}" style="width:100%;display:block">
+<div style="background:#C82030;color:#fff;font-weight:bold;text-align:center;padding:4px;font-size:10.5pt;font-family:'Liberation Sans',Arial,sans-serif">{band}</div><div style="height:7mm"></div></div></div>"""
+	days = (getdate(doc.valid_till) - getdate(doc.transaction_date)).days if doc.valid_till and doc.transaction_date else None
+	enquiry = "Your enquiry" + (f"; our drawing {_esc(doc.get('sk_drawing_ref'))}" if doc.get("sk_drawing_ref") else "")
+	foot = f"""<div id="footer-html" class="hidden-pdf"><div style="padding:0 7mm"><table style="width:100%;font-family:'Liberation Sans',Arial,sans-serif;font-size:8pt;color:#555;border-top:1px solid #BFBFBF">
+<tr><td>SK Ind Tech Solutions Pvt Ltd</td><td style="text-align:right">Page <span class="page"></span> of <span class="topage"></span></td></tr></table></div></div>"""
+	return f"""<style>{CSS}</style>{head}<div class=skq>
+<table class=addr style="width:100%;margin:6px 0 8px"><tr><td><b>To,</b><br>{to}</td><td style="width:48%"><span class=k>Quotation No.</span><b>{_esc(ref)}</b><br>
+<span class=k>Date</span><b>{date}</b><br><span class=k>Revision</span><b>{rev}</b><br><span class=k>Validity</span><b>{f"{days} days" if days else (formatdate(doc.valid_till, "dd-MMM-yyyy") if doc.valid_till else "")}</b><br>
+<span class=k>Enquiry</span><b>{enquiry}</b></td></tr></table>
+<div class=subj>Subject: {_esc(subject)}</div><p>Dear {dear},<br>{intro}</p>
 {"".join(sections)}
 <p>We hope our offer is in line with your requirement and look forward to your valued order.</p>
-<p><b>For SK Ind Tech Solutions Pvt Ltd</b><br><br><br><b>Authorised Signatory</b><br>{_esc(owner)}<br>
-Phone: {phones} | E-mail: skind.sales@gmail.com | GSTIN 27ABBCS4285J1ZZ</p></div>"""
+<p><b>For SK Ind Tech Solutions Pvt Ltd</b><br><br><br><b>Authorised Signatory</b><br>{(_esc(owner) + "<br>") if owner else ""}
+Phone: {phones} | E-mail: {email} | GSTIN 27ABBCS4285J1ZZ</p></div>{foot}"""
 
 
 def sk_cabin_quote_html(doc) -> str:

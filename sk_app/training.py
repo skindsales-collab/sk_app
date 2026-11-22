@@ -113,6 +113,29 @@ APP_LESSONS = [
 ]
 
 
+# SK 21-Nov: the step-by-step sales flow and the new Accounts screens as short lessons
+APP_LESSONS += [
+	("Step by step: lead to order", "टप्प्याटप्प्याने: लीड ते ऑर्डर", "Sales", 15,
+		"<ol><li><b>New Lead</b>: saved as New, nothing else is made.</li><li><b>Call</b> the customer and choose <b>Talked</b>.</li>"
+		"<li>Mark <b>Qualified</b> (locked until a call is logged).</li><li>Tap <b>Qualified: send to design / for quote</b>.</li>"
+		"<li>Cabin: the customer approves the drawing, then <b>New quote</b> on the deal (transport only if you tick it).</li>"
+		"<li><b>Submit quotation</b> and send its PDF.</li><li>PO received: <b>Order received → Sales Order</b>. The deal is Won when the order is submitted.</li></ol>",
+		"<ol><li><b>नवीन लीड</b>: New म्हणून सेव्ह, दुसरे काही बनत नाही.</li><li>ग्राहकाला <b>कॉल</b> करा आणि <b>बोललो</b> निवडा.</li>"
+		"<li><b>Qualified</b> करा (कॉल नोंदवेपर्यंत लॉक).</li><li><b>Qualified: डिझाईनला / कोटेशनसाठी पाठवा</b> दाबा.</li>"
+		"<li>केबिन: ग्राहक ड्रॉइंग मंजूर करतो, मग डीलवर <b>नवीन कोटेशन</b> (टिक केल्यासच वाहतूक).</li>"
+		"<li><b>कोटेशन सबमिट</b> करा आणि त्याची PDF पाठवा.</li><li>PO मिळाला: <b>Order received → Sales Order</b>. ऑर्डर सबमिट झाल्यावर डील जिंकलेले.</li></ol>"),
+	("Accounts: photo entry, registers and party ledger", "अकाउंट्स: फोटो एंट्री, रजिस्टर आणि पार्टी लेजर", "Accounts", 16,
+		"<ol><li><b>Photo entry</b>: pick the type, photo, <b>Read the photo</b>, check, <b>Make draft</b>, then <b>Post</b>.</li>"
+		"<li>A bill without PO goes as a draft flagged to SK; a double bill no or UTR is stopped.</li>"
+		"<li>Every register has a <b>search box</b>; paid parties leave Payables / Receivables (<b>Show settled</b> brings them back).</li>"
+		"<li>Tap a party for its <b>Party Ledger</b>: open bills with age, every voucher and the running balance.</li></ol>",
+		"<ol><li><b>फोटो एंट्री</b>: प्रकार निवडा, फोटो, <b>फोटो वाचा</b>, तपासा, <b>ड्राफ्ट बनवा</b>, मग <b>पोस्ट</b>.</li>"
+		"<li>PO शिवाय बिल ड्राफ्ट म्हणून SK ना कळवले जाते; दुबार बिल नंबर किंवा UTR थांबवले जाते.</li>"
+		"<li>प्रत्येक रजिस्टरवर <b>शोध बॉक्स</b>; पैसे पूर्ण झालेल्या पार्ट्या देणे / येणे मधून जातात (<b>भरलेले दाखवा</b> परत दाखवते).</li>"
+		"<li>पार्टीवर दाबा: <b>पार्टी लेजर</b>, बाकी बिले वयासह, प्रत्येक व्हाउचर आणि चालू बाकी.</li></ol>"),
+]
+
+
 def seed_lessons():
 	from sk_app.manual_lessons import MANUAL_LESSONS, TOPIC
 	from sk_app.manuals import FUNCTION_LESSONS

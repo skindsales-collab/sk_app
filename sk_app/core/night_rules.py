@@ -108,3 +108,41 @@ def subject(count: int, new: int) -> str:
 	if not count:
 		return "SK App night check: all clear"
 	return f"SK App night check: {count} item{'s' if count != 1 else ''} to fix" + (f" ({new} new)" if new else "")
+
+
+# SK 21-Nov: alert mails go to the person / team box concerned, read from SK App Settings "alert_routes" (no address in code)
+AREA_OF_FUNCTION = {"Accounts": "accounts", "Finance": "accounts", "Purchase": "purchase", "Stores": "stores", "Store": "stores",
+	"Production": "production", "HR": "hr", "Machine Shifting": "machine_shifting"}
+SALES_FUNCTIONS = ("Sales", "Marketing")
+
+
+def parse_routes(text: str | None) -> dict:
+	"""'accounts: acc@x.com, other@x.com' lines -> {'accounts': ['acc@x.com', 'other@x.com']}; blank / bad lines skipped."""
+	out = {}
+	for line in (text or "").splitlines():
+		area, sep, who = line.partition(":")
+		emails = [w.strip() for w in who.replace(";", ",").split(",") if "@" in w]
+		if sep and area.strip() and emails:
+			out[area.strip().lower().replace(" ", "_")] = emails
+	return out
+
+
+# SK 21-Nov: the default routes (SK named prod@skind.tech for purchase drafts and store items); a line already set is kept
+DEFAULT_ROUTES = (("accounts", "acc@skind.tech"), ("cabin_sales", "cabin@skind.tech"), ("machine_shifting", "service@skind.tech"),
+	("purchase", "prod@skind.tech"), ("stores", "prod@skind.tech"))
+
+
+def with_default_routes(text: str | None) -> str:
+	"""Adds the default line for every area that has none; never changes a line SK set."""
+	have = parse_routes(text)
+	lines = [ln for ln in (text or "").splitlines() if ln.strip()]
+	lines += [f"{area}: {email}" for area, email in DEFAULT_ROUTES if area not in have]
+	return "\n".join(lines)
+
+
+def area_of(function: str | None, segment: str | None = None) -> str | None:
+	"""Which alert area an item belongs to: sales by the record's segment (Non-Cabin = machine shifting / job work)."""
+	if function in SALES_FUNCTIONS:
+		return "machine_shifting" if (segment or "").lower().startswith("non") else "cabin_sales"
+	return AREA_OF_FUNCTION.get(function or "")
+

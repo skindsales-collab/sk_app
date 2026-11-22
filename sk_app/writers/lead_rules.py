@@ -106,9 +106,20 @@ OWNER_FIELDS = {"IndiaMART": ("lead_owner_indiamart", "lead_owner_digital"), "Ju
 def owner_fields(source: str | None, non_cabin: bool) -> tuple[str, ...]:
 	"""SK App Settings fields to try in order for the lead's owner. Non-Cabin words win over the portal; a portal lead
 	goes to that portal's owner, else the fallback digital owner; everything else to the cabin owner."""
+	portal = portal_owner_fields(source)
 	if non_cabin:
-		return ("lead_owner_noncabin",) + OWNER_FIELDS.get(source or "", ()) + ("lead_owner_cabin",)
-	return OWNER_FIELDS.get(source or "", ()) + ("lead_owner_cabin",)
+		return ("lead_owner_noncabin",) + portal + ("lead_owner_cabin",)
+	return portal + ("lead_owner_cabin",)
+
+
+def portal_owner_fields(source: str | None) -> tuple[str, ...]:
+	"""SK 21-Nov: live names the source "Indiamart" / "India Mart" (CRM Lead Source), the mail scan says "IndiaMART":
+	match any spelling, so IndiaMART leads reach Swati and JustDial leads Pranali (leads 04006 / 04012 went wrong)."""
+	key = "".join(ch for ch in (source or "").lower() if ch.isalnum())
+	for name, fields in OWNER_FIELDS.items():
+		if name.lower() == key:
+			return fields
+	return ()
 
 
 # SK 20-Nov "CNA - no deal": a note only sends a lead for its quote (deal) when it carries a real talk or the requirement;

@@ -287,6 +287,39 @@ def _mail(users: list[str], subject: str, html: str) -> int:
 	return len(emails)
 
 
+def _has_routes() -> bool:
+	return frappe.get_meta("SK App Settings").has_field("alert_routes")
+
+
+def _segment(item: dict) -> str | None:
+	"""Cabin / Non-Cabin of the item's record (sales items only need it)."""
+	dt, name = item.get("doctype"), item.get("name")
+	if not dt or not name or not frappe.db.exists(dt, name):
+		return None
+	meta = frappe.get_meta(dt)
+	if meta.has_field("sk_main_segment"):
+		return frappe.db.get_value(dt, name, "sk_main_segment")
+	if meta.has_field("customer_group"):
+		group = frappe.db.get_value(dt, name, "customer_group") or ""
+		return "Non-Cabin" if "non" in group.lower() else ("Cabin" if group else None)
+	return None
+
+
+def _mail_to(emails: list[str], subject: str, html: str) -> int:
+	"""Mail to addresses from the settings (a person or a team box); app logins with that address also get the bell."""
+	from sk_app.mailbox import _notify
+	from sk_app.otp import _sender
+
+	emails = sorted({e.strip() for e in emails or [] if "@" in e})
+	if not emails:
+		return 0
+	users = frappe.get_all("User", filters={"email": ["in", emails], "enabled": 1}, pluck="name")
+	if users:
+		_notify(users, subject)
+	frappe.sendmail(recipients=emails, sender=_sender(), subject=subject, message=html, now=False)
+	return len(emails)
+
+
 def morning() -> dict:
 	"""Scheduler, 7 AM: one mail per owner with their items; the summary to the CEO. Nothing open, only the CEO hears 'all clear'."""
 	from sk_app.core.people import ceo_users
@@ -304,10 +337,26 @@ def morning() -> dict:
 	logins = {u["user"] for u in _app_users()}
 	names = {u["user"]: u["full_name"] for u in _app_users()}
 	by = R.by_user([r for r in rows if r["user"] in logins])
+	ceos = list(ceo_users())
+	# SK 21-Nov: items that fell to the CEO only because nobody else owns them go to the area's person / team box
+	# (SK App Settings "alert_routes"); the CEO keeps the short count summary
+	routes = R.parse_routes(frappe.db.get_single_value("SK App Settings", "alert_routes") if _has_routes() else "")
+	routed: dict = {}
 	sent = 0
 	for user, items in by.items():
+		if user in ceos and routes:
+			keep = []
+			for i in items:
+				area = R.area_of(i.get("function"), _segment(i))
+				(routed.setdefault(area, []) if area and routes.get(area) else keep).append(i)
+			items = keep
+			if not items:
+				continue
 		sent += _mail([user], R.subject(len(items), sum(1 for i in items if i["new"])), person_html(items))
-	ceos = list(ceo_users())
-	sent += _mail(ceos, _("SK App night check: {0} open items, {1} people").format(len(rows), len(by)) if rows else R.subject(0, 0),
-		summary_html(by, new, fixed_by_user, names, rows))
+	for area, items in routed.items():
+		sent += _mail_to(routes[area], R.subject(len(items), sum(1 for i in items if i["new"])), person_html(items))
+	summary_to = routes.get("summary")
+	subject = _("SK App night check: {0} open items, {1} people").format(len(rows), len(by)) if rows else R.subject(0, 0)
+	html = summary_html(by, new, fixed_by_user, names, rows)
+	sent += _mail_to(summary_to, subject, html) if summary_to else _mail(ceos, subject, html)
 	return {"people": len(by), "open": len(rows), "new": len(new), "fixed": len(fixed), "mails": sent}

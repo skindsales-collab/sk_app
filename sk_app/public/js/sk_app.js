@@ -724,12 +724,12 @@
 		camera: "Camera", gallery: "Gallery / screenshot", pdf_file: "PDF / file", retake: "Retake", remove: "Remove",
 		uploading: "Sending…", uploaded: "Sent ✓", upload_retry: "Network weak, trying again…",
 		open_chrome: "Mic / camera work best in Chrome. Tap here to open the SK App in Chrome.",
-		mb_today: "today", mb_leads: "leads", mb_replied: "replied", mb_waiting_help: "Big number = mails waiting (New). Red = a mail waiting over 2 hours. Tap a box to see only its mails.", mb_move: "Move to another team mailbox", mb_moved: "Moved to", mb_late: "Mails not answered", marketing_list: "Marketing list", mk_help: "Potential customers (not leads): send festival greetings and promotions to keep in touch. When someone is interested tap Make lead.", mk_people: "people", mk_sent_today: "greetings sent by you today", mk_add: "Add person (visiting card photo or voice)", mk_city: "City", mk_greeting: "Greeting to send", mk_promo_text: "Type the promotion message", mk_mail_all: "Promotion mail to all (ERPNext Newsletter)", open_erpnext: "Open in ERPNext", mk_not_sent: "no greeting sent yet", mk_send: "Send on WhatsApp", mk_make_lead: "Interested: make lead", mk_need_name: "Please give the name", mk_need_mobile: "Please give mobile or e-mail", mk_added: "Added to Marketing list", mk_existing: "Already in ERPNext: put on the Marketing list", mk_upload: "Upload Excel list (earlier contacts)", mk_upload_help: "Excel or CSV with columns Name, Mobile (and Company, Email, City if you have them). A phone or Google Contacts export also works. The same mobile is not added twice.", mk_added_n: "added", mk_existing_n: "already in ERPNext", mkf_diwali: "Diwali", mkf_new_year: "New Year", mkf_sankranti: "Sankranti", mkf_republic: "Republic Day", mkf_holi: "Holi", mkf_gudi_padwa: "Gudi Padwa", mkf_independence: "Independence Day", mkf_ganesh: "Ganesh Chaturthi", mkf_dussehra: "Dussehra", mkf_promotion: "Promotion", gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", new_product: "New product / vendor", mails_n: "Mails", cold_calls: "Cold Calling", cold_help: "Call-list data, kept out of My Leads. Call one by one; when the customer is interested tap Interested → it moves to My Leads.", cold_total: "cold leads", cold_not_called: "not called yet", cold_never: "not called yet", cold_interested: "Interested → My Leads", cold_move: "Not a lead: move to Marketing list", cold_moved: "Moved", cold_to_mk: "Moved to Marketing list", ocr_read: "Read text from a photo", ocr_nothing: "No text could be read from the photo. Take it again, straight and in good light.", ocr_done: "Text read from the photo: please check it", pm_find: "Find item from photo", pm_looking: "Matching the photo…", pm_pick: "Closest items: tap the right one (your photo is kept as its sample)", pm_first: "First time for this material: type and pick the item; your photo is kept, next time the photo suggests it", pm_saved: "Photo kept as the item sample", tc_title: "Count from photo", tc_help: "Tap once on every piece. Each tap is numbered; ↩ removes the last one.", tc_pieces: "pieces", tc_undo: "Undo", tc_use: "Use this count", rq_list: "Many items at once: type, speak or 📷 photo a list (e.g. C channel 20 nos, MS plate 5 kg)", rq_make_rows: "Make rows from the list", rq_rows_made: "rows made: please check each item", rq_max: "Up to 20 items on one requisition", rq_more_lines: "more lines not added (20 max)", rq_photo: "Photo of material or handwritten list", rq_check: "check", goods_photo_need: "Please take the quality photo of the material", to_post: "Received: check and post", to_post_help: "Check the material, then tap Post. Stock goes up only after Post.", rate_missing: "rate missing", rate_bill: "Rate per unit (from the bill)", rate_need: "Give the rate from the supplier bill (needed to value the stock):", remove_dup: "Remove (saved twice)", tap_again: "Tap again to remove", photo_entry: "Photo entry", pe_help: "Bill, e-invoice, voucher or payment proof: take a photo (or pick the PDF) and submit. A supplier bill goes to Bills to Post (Make bill). Others wait here until you enter them in ERPNext.", pe_what: "What is it?", pe_supplier_bill: "Supplier bill / e-invoice", pe_expense: "Expense bill / petty cash voucher", pe_money_in: "Payment received (cheque / UTR)", pe_money_out: "Payment made (bank slip / UTR)", pe_other: "Other document", pe_photo: "Photo or PDF", pe_party: "Customer / party (optional)", pe_ref: "Bill / ref no (optional)", pe_submit: "Submit", pe_pending: "Photo entries to enter in ERPNext", pe_open: "Enter in ERPNext", pe_sent: "Submitted", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
+		mb_today: "today", mb_leads: "leads", mb_replied: "replied", mb_waiting_help: "Big number = mails waiting (New). Red = a mail waiting over 2 hours. Tap a box to see only its mails.", mb_move: "Move to another team mailbox", mb_moved: "Moved to", mb_late: "Mails not answered", marketing_list: "Marketing list", mk_help: "Potential customers (not leads): send festival greetings and promotions to keep in touch. When someone is interested tap Make lead.", mk_people: "people", mk_sent_today: "greetings sent by you today", mk_add: "Add person (visiting card photo or voice)", mk_city: "City", mk_greeting: "Greeting to send", mk_promo_text: "Type the promotion message", mk_mail_all: "Promotion mail to all (ERPNext Newsletter)", open_erpnext: "Open in ERPNext", mk_not_sent: "no greeting sent yet", mk_send: "Send on WhatsApp", mk_make_lead: "Interested: make lead", mk_need_name: "Please give the name", mk_need_mobile: "Please give mobile or e-mail", mk_added: "Added to Marketing list", mk_existing: "Already in ERPNext: put on the Marketing list", mk_upload: "Upload Excel list (earlier contacts)", mk_upload_help: "Excel or CSV with columns Name, Mobile (and Company, Email, City if you have them). A phone or Google Contacts export also works. The same mobile is not added twice.", mk_added_n: "added", mk_existing_n: "already in ERPNext", mkf_diwali: "Diwali", mkf_new_year: "New Year", mkf_sankranti: "Sankranti", mkf_republic: "Republic Day", mkf_holi: "Holi", mkf_gudi_padwa: "Gudi Padwa", mkf_independence: "Independence Day", mkf_ganesh: "Ganesh Chaturthi", mkf_dussehra: "Dussehra", mkf_promotion: "Promotion", gateway: "Accounts Gateway", day_book: "Day Book", cabin_discounts: "Quote discounts", new_product: "New product / vendor", mails_n: "Mails", cold_calls: "Cold Calling", cold_help: "Call-list data, kept out of My Leads. Call one by one; when the customer is interested tap Interested → it moves to My Leads.", cold_total: "cold leads", cold_not_called: "not called yet", cold_never: "not called yet", cold_interested: "Interested → My Leads", cold_move: "Not a lead: move to Marketing list", cold_moved: "Moved", cold_to_mk: "Moved to Marketing list", ocr_read: "Read text from a photo", ocr_nothing: "No text could be read from the photo. Take it again, straight and in good light.", ocr_done: "Text read from the photo: please check it", pm_find: "Find item from photo", pm_looking: "Matching the photo…", pm_pick: "Closest items: tap the right one (your photo is kept as its sample)", pm_first: "First time for this material: type and pick the item; your photo is kept, next time the photo suggests it", pm_saved: "Photo kept as the item sample", tc_title: "Count from photo", tc_help: "Tap once on every piece. Each tap is numbered; ↩ removes the last one.", tc_pieces: "pieces", tc_undo: "Undo", tc_use: "Use this count", rq_list: "Many items at once: type, speak or 📷 photo a list (e.g. C channel 20 nos, MS plate 5 kg)", rq_make_rows: "Make rows from the list", rq_rows_made: "rows made: please check each item", rq_max: "Up to 20 items on one requisition", rq_more_lines: "more lines not added (20 max)", rq_photo: "Photo of material or handwritten list", rq_check: "check", goods_photo_need: "Please take the quality photo of the material", to_post: "Received: check and post", to_post_help: "Check the material, then tap Post. Stock goes up only after Post.", rate_missing: "rate missing", rate_bill: "Rate per unit (from the bill)", rate_need: "Give the rate from the supplier bill (needed to value the stock):", remove_dup: "Remove (saved twice)", tap_again: "Tap again to remove", photo_entry: "Photo entry", pe_help: "Bill, e-invoice, voucher or payment proof: pick what it is, take the photo, tap Read the photo, check the fields and tap Make draft. The draft is made in ERPNext with the photo; post it below.", pe_what: "What is it?", pe_supplier_bill: "Supplier bill / e-invoice", pe_expense: "Expense bill / petty cash voucher", pe_money_in: "Payment received (cheque / UTR)", pe_money_out: "Payment made (bank slip / UTR)", pe_other: "Other document", pe_photo: "Photo or PDF", pe_party: "Customer / party (optional)", pe_ref: "Bill / ref no (optional)", pe_submit: "Make draft", pe_sales_invoice: "Sales invoice", pe_read: "Read the photo (on this phone)", pe_reading: "Reading the photo…", pe_pdf_type: "A PDF cannot be read on the phone: please type the details", pe_found_by: "found by", pe_without_po: "Without PO (SK will see it)", pe_source: "From PO / receipt", pe_head: "Expense head", pe_cc: "Cabin / Non-Cabin", pe_money: "Paid from / to", pe_taxable: "Taxable value", pe_total: "Bill total", pe_bill_date: "Date", pe_utr: "UTR / bank ref", pe_bought: "What was bought", pe_find_docs: "Find orders / bills", pe_dup: "Already entered", pe_not_saved: "Photos not saved yet", pe_retry: "Retry", pe_remove: "Remove", pe_drafts: "My drafts to post", pe_no_po_flag: "Bill without PO: sent to SK", pe_made: "Draft made", pe_open_bills: "Open bills", pe_sodn: "From Sales Order / Delivery Note", pe_read_note: "Check every field; correct anything wrong (your corrections are remembered)", pe_pending: "Photo entries to enter in ERPNext", pe_open: "Enter in ERPNext", pe_sent: "Submitted", gw_cash: "Cash / Bank", gw_recv: "Receivable", gw_pay: "Payable",
 		gw_masters: "Masters", gw_transactions: "Transactions", gw_utilities: "Utilities", gw_reports: "Reports", gw_more: "More reports",
 		gw_desk: "Opens in ERPNext", gw_pending: "waiting", db_particulars: "Particulars", db_none: "No vouchers on this day",
 		cash_today: "Cash / Bank", to_collect: "Receivables", to_pay: "Payables", bills_to_post: "Purchase Invoice and Debit Note",
 		invoices: "Sales Invoice and Credit Note", expenses: "Journal Voucher", dir_expenses: "Direct and Indirect Expenses",
-		segment_pnl: "Segment Wise P&L", month_close: "Month Wise Report", ledger_wise: "Ledger-wise", work_tab: "To do",
+		segment_pnl: "Segment Wise P&L", month_close: "Month Wise Report", ledger_wise: "Ledger-wise", work_tab: "To do", show_settled: "Show settled", party_ledger: "Party ledger", open_bills: "Open bills", this_month_only: "This month only", days_old: "days", bill_no_s: "Bill",
 		opening: "Opening", closing: "Closing", dr: "Dr", cr: "Cr", bills_n: "bills", returns_n: "debit / credit notes",
 		drafts_n: "drafts", net: "Net", direct: "Direct", indirect: "Indirect", gross: "Gross", net_pl: "Net P&L",
 		common_cost: "Common (not split yet)", closing_list: "Closing checklist", month_pl: "Month-wise P&L", inv_n: "invoices",
@@ -756,12 +756,12 @@
 		camera: "कॅमेरा", gallery: "गॅलरी / स्क्रीनशॉट", pdf_file: "PDF / फाईल", retake: "पुन्हा घ्या", remove: "काढा",
 		uploading: "पाठवत आहे…", uploaded: "पाठवले ✓", upload_retry: "नेटवर्क कमी, पुन्हा प्रयत्न…",
 		open_chrome: "माईक / कॅमेरा Chrome मध्ये नीट चालतात. SK App Chrome मध्ये उघडण्यासाठी येथे दाबा.",
-		mb_today: "आज", mb_leads: "लीड", mb_replied: "उत्तर", mb_waiting_help: "मोठा आकडा = थांबलेले मेल (नवीन). लाल = 2 तासांपेक्षा जास्त थांबलेला मेल. फक्त त्या बॉक्सचे मेल पाहण्यासाठी बॉक्स दाबा.", mb_move: "दुसऱ्या टीम मेलबॉक्समध्ये हलवा", mb_moved: "हलवले:", mb_late: "उत्तर न दिलेले मेल", marketing_list: "मार्केटिंग यादी", mk_help: "संभाव्य ग्राहक (लीड नाही): संपर्क टिकवण्यासाठी सणाच्या शुभेच्छा आणि प्रमोशन पाठवा. कोणाला रस असल्यास 'लीड बनवा' दाबा.", mk_people: "व्यक्ती", mk_sent_today: "आज तुम्ही पाठवलेल्या शुभेच्छा", mk_add: "व्यक्ती जोडा (व्हिजिटिंग कार्ड फोटो किंवा आवाज)", mk_city: "शहर", mk_greeting: "पाठवायच्या शुभेच्छा", mk_promo_text: "प्रमोशन मेसेज लिहा", mk_mail_all: "सर्वांना प्रमोशन मेल (ERPNext न्यूजलेटर)", open_erpnext: "ERPNext मध्ये उघडा", mk_not_sent: "अजून शुभेच्छा पाठवल्या नाहीत", mk_send: "WhatsApp वर पाठवा", mk_make_lead: "रस आहे: लीड बनवा", mk_need_name: "कृपया नाव द्या", mk_need_mobile: "कृपया मोबाइल किंवा ई-मेल द्या", mk_added: "मार्केटिंग यादीत जोडले", mk_existing: "ERPNext मध्ये आधीच आहे: मार्केटिंग यादीत टाकले", mk_upload: "एक्सेल यादी अपलोड करा (आधीचे कॉन्टॅक्ट)", mk_upload_help: "Name, Mobile (असल्यास Company, Email, City) कॉलम असलेली एक्सेल किंवा CSV. फोन किंवा Google Contacts ची फाइलही चालते. एकच मोबाइल दोनदा जोडला जात नाही.", mk_added_n: "जोडले", mk_existing_n: "ERPNext मध्ये आधीच", mkf_diwali: "दिवाळी", mkf_new_year: "नवीन वर्ष", mkf_sankranti: "संक्रांत", mkf_republic: "प्रजासत्ताक दिन", mkf_holi: "होळी", mkf_gudi_padwa: "गुढी पाडवा", mkf_independence: "स्वातंत्र्य दिन", mkf_ganesh: "गणेश चतुर्थी", mkf_dussehra: "दसरा", mkf_promotion: "प्रमोशन", gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", new_product: "नवीन प्रॉडक्ट / व्हेंडर", mails_n: "मेल", cold_calls: "कोल्ड कॉलिंग", cold_help: "कॉल-लिस्ट डेटा, माझे लीड पासून वेगळा. एक एक कॉल करा; ग्राहकाला रस असल्यास 'रस आहे' दाबा → तो माझे लीड मध्ये जातो.", cold_total: "कोल्ड लीड", cold_not_called: "अजून कॉल नाही", cold_never: "अजून कॉल नाही", cold_interested: "रस आहे → माझे लीड", cold_move: "लीड नाही: मार्केटिंग यादीत हलवा", cold_moved: "हलवले", cold_to_mk: "मार्केटिंग यादीत हलवले", ocr_read: "फोटोवरून मजकूर वाचा", ocr_nothing: "फोटोवरून काही वाचता आले नाही. सरळ आणि चांगल्या प्रकाशात पुन्हा फोटो घ्या.", ocr_done: "फोटोवरून वाचले: कृपया तपासा", pm_find: "फोटोवरून आयटम शोधा", pm_looking: "फोटो जुळवत आहे…", pm_pick: "जवळचे आयटम: योग्य आयटम दाबा (तुमचा फोटो त्याचा नमुना म्हणून ठेवला जातो)", pm_first: "हा माल पहिल्यांदा: आयटम टाइप करून निवडा; तुमचा फोटो ठेवला जातो, पुढच्या वेळी फोटो तो सुचवेल", pm_saved: "फोटो आयटमचा नमुना म्हणून ठेवला", tc_title: "फोटोवरून मोजा", tc_help: "प्रत्येक नगावर एकदा टॅप करा. प्रत्येक टॅपला नंबर येतो; ↩ शेवटचा काढतो.", tc_pieces: "नग", tc_undo: "मागे", tc_use: "ही संख्या वापरा", rq_list: "एकदम अनेक आयटम: यादी लिहा, बोला किंवा 📷 फोटो घ्या (उदा. C channel 20 नग, MS plate 5 किलो)", rq_make_rows: "यादीतून ओळी बनवा", rq_rows_made: "ओळी बनल्या: प्रत्येक आयटम तपासा", rq_max: "एका मागणीत जास्तीत जास्त 20 आयटम", rq_more_lines: "ओळी जोडल्या नाहीत (जास्तीत जास्त 20)", rq_photo: "मालाचा किंवा हाताने लिहिलेल्या यादीचा फोटो", rq_check: "तपासा", goods_photo_need: "कृपया मालाचा क्वालिटी फोटो घ्या", to_post: "आलेला माल: तपासा आणि पोस्ट करा", to_post_help: "माल तपासा, मग पोस्ट दाबा. पोस्ट केल्यावरच स्टॉक वाढतो.", rate_missing: "दर नाही", rate_bill: "प्रति नग दर (बिलावरून)", rate_need: "सप्लायर बिलावरील दर द्या (स्टॉकची किंमत लागते):", remove_dup: "काढा (दोनदा सेव्ह)", tap_again: "काढण्यासाठी पुन्हा दाबा", photo_entry: "फोटो एंट्री", pe_help: "बिल, ई-इनव्हॉइस, व्हाउचर किंवा पेमेंट पुरावा: फोटो काढा (किंवा PDF निवडा) आणि सबमिट करा. सप्लायर बिल 'बिल पोस्ट करा' मध्ये जाते. बाकी ERPNext मध्ये एंट्री होईपर्यंत इथे राहतात.", pe_what: "हे काय आहे?", pe_supplier_bill: "सप्लायर बिल / ई-इनव्हॉइस", pe_expense: "खर्च बिल / पेटी कॅश व्हाउचर", pe_money_in: "पेमेंट मिळाले (चेक / UTR)", pe_money_out: "पेमेंट केले (बँक स्लिप / UTR)", pe_other: "इतर कागद", pe_photo: "फोटो किंवा PDF", pe_party: "ग्राहक / पार्टी (ऐच्छिक)", pe_ref: "बिल / रेफ नंबर (ऐच्छिक)", pe_submit: "सबमिट", pe_pending: "ERPNext मध्ये टाकायच्या फोटो एंट्री", pe_open: "ERPNext मध्ये टाका", pe_sent: "सबमिट झाले", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
+		mb_today: "आज", mb_leads: "लीड", mb_replied: "उत्तर", mb_waiting_help: "मोठा आकडा = थांबलेले मेल (नवीन). लाल = 2 तासांपेक्षा जास्त थांबलेला मेल. फक्त त्या बॉक्सचे मेल पाहण्यासाठी बॉक्स दाबा.", mb_move: "दुसऱ्या टीम मेलबॉक्समध्ये हलवा", mb_moved: "हलवले:", mb_late: "उत्तर न दिलेले मेल", marketing_list: "मार्केटिंग यादी", mk_help: "संभाव्य ग्राहक (लीड नाही): संपर्क टिकवण्यासाठी सणाच्या शुभेच्छा आणि प्रमोशन पाठवा. कोणाला रस असल्यास 'लीड बनवा' दाबा.", mk_people: "व्यक्ती", mk_sent_today: "आज तुम्ही पाठवलेल्या शुभेच्छा", mk_add: "व्यक्ती जोडा (व्हिजिटिंग कार्ड फोटो किंवा आवाज)", mk_city: "शहर", mk_greeting: "पाठवायच्या शुभेच्छा", mk_promo_text: "प्रमोशन मेसेज लिहा", mk_mail_all: "सर्वांना प्रमोशन मेल (ERPNext न्यूजलेटर)", open_erpnext: "ERPNext मध्ये उघडा", mk_not_sent: "अजून शुभेच्छा पाठवल्या नाहीत", mk_send: "WhatsApp वर पाठवा", mk_make_lead: "रस आहे: लीड बनवा", mk_need_name: "कृपया नाव द्या", mk_need_mobile: "कृपया मोबाइल किंवा ई-मेल द्या", mk_added: "मार्केटिंग यादीत जोडले", mk_existing: "ERPNext मध्ये आधीच आहे: मार्केटिंग यादीत टाकले", mk_upload: "एक्सेल यादी अपलोड करा (आधीचे कॉन्टॅक्ट)", mk_upload_help: "Name, Mobile (असल्यास Company, Email, City) कॉलम असलेली एक्सेल किंवा CSV. फोन किंवा Google Contacts ची फाइलही चालते. एकच मोबाइल दोनदा जोडला जात नाही.", mk_added_n: "जोडले", mk_existing_n: "ERPNext मध्ये आधीच", mkf_diwali: "दिवाळी", mkf_new_year: "नवीन वर्ष", mkf_sankranti: "संक्रांत", mkf_republic: "प्रजासत्ताक दिन", mkf_holi: "होळी", mkf_gudi_padwa: "गुढी पाडवा", mkf_independence: "स्वातंत्र्य दिन", mkf_ganesh: "गणेश चतुर्थी", mkf_dussehra: "दसरा", mkf_promotion: "प्रमोशन", gateway: "अकाउंट्स गेटवे", day_book: "डे बुक", cabin_discounts: "कोटेशन सूट", new_product: "नवीन प्रॉडक्ट / व्हेंडर", mails_n: "मेल", cold_calls: "कोल्ड कॉलिंग", cold_help: "कॉल-लिस्ट डेटा, माझे लीड पासून वेगळा. एक एक कॉल करा; ग्राहकाला रस असल्यास 'रस आहे' दाबा → तो माझे लीड मध्ये जातो.", cold_total: "कोल्ड लीड", cold_not_called: "अजून कॉल नाही", cold_never: "अजून कॉल नाही", cold_interested: "रस आहे → माझे लीड", cold_move: "लीड नाही: मार्केटिंग यादीत हलवा", cold_moved: "हलवले", cold_to_mk: "मार्केटिंग यादीत हलवले", ocr_read: "फोटोवरून मजकूर वाचा", ocr_nothing: "फोटोवरून काही वाचता आले नाही. सरळ आणि चांगल्या प्रकाशात पुन्हा फोटो घ्या.", ocr_done: "फोटोवरून वाचले: कृपया तपासा", pm_find: "फोटोवरून आयटम शोधा", pm_looking: "फोटो जुळवत आहे…", pm_pick: "जवळचे आयटम: योग्य आयटम दाबा (तुमचा फोटो त्याचा नमुना म्हणून ठेवला जातो)", pm_first: "हा माल पहिल्यांदा: आयटम टाइप करून निवडा; तुमचा फोटो ठेवला जातो, पुढच्या वेळी फोटो तो सुचवेल", pm_saved: "फोटो आयटमचा नमुना म्हणून ठेवला", tc_title: "फोटोवरून मोजा", tc_help: "प्रत्येक नगावर एकदा टॅप करा. प्रत्येक टॅपला नंबर येतो; ↩ शेवटचा काढतो.", tc_pieces: "नग", tc_undo: "मागे", tc_use: "ही संख्या वापरा", rq_list: "एकदम अनेक आयटम: यादी लिहा, बोला किंवा 📷 फोटो घ्या (उदा. C channel 20 नग, MS plate 5 किलो)", rq_make_rows: "यादीतून ओळी बनवा", rq_rows_made: "ओळी बनल्या: प्रत्येक आयटम तपासा", rq_max: "एका मागणीत जास्तीत जास्त 20 आयटम", rq_more_lines: "ओळी जोडल्या नाहीत (जास्तीत जास्त 20)", rq_photo: "मालाचा किंवा हाताने लिहिलेल्या यादीचा फोटो", rq_check: "तपासा", goods_photo_need: "कृपया मालाचा क्वालिटी फोटो घ्या", to_post: "आलेला माल: तपासा आणि पोस्ट करा", to_post_help: "माल तपासा, मग पोस्ट दाबा. पोस्ट केल्यावरच स्टॉक वाढतो.", rate_missing: "दर नाही", rate_bill: "प्रति नग दर (बिलावरून)", rate_need: "सप्लायर बिलावरील दर द्या (स्टॉकची किंमत लागते):", remove_dup: "काढा (दोनदा सेव्ह)", tap_again: "काढण्यासाठी पुन्हा दाबा", photo_entry: "फोटो एंट्री", pe_help: "बिल, ई-इनव्हॉइस, व्हाउचर किंवा पेमेंट पुरावा: प्रकार निवडा, फोटो काढा, 'फोटो वाचा' दाबा, माहिती तपासा आणि 'ड्राफ्ट बनवा' दाबा. फोटोसह ERPNext मध्ये ड्राफ्ट बनतो; खाली पोस्ट करा.", pe_what: "हे काय आहे?", pe_supplier_bill: "सप्लायर बिल / ई-इनव्हॉइस", pe_expense: "खर्च बिल / पेटी कॅश व्हाउचर", pe_money_in: "पेमेंट मिळाले (चेक / UTR)", pe_money_out: "पेमेंट केले (बँक स्लिप / UTR)", pe_other: "इतर कागद", pe_photo: "फोटो किंवा PDF", pe_party: "ग्राहक / पार्टी (ऐच्छिक)", pe_ref: "बिल / रेफ नंबर (ऐच्छिक)", pe_submit: "ड्राफ्ट बनवा", pe_sales_invoice: "विक्री बिल", pe_read: "फोटो वाचा (याच फोनवर)", pe_reading: "फोटो वाचत आहे…", pe_pdf_type: "PDF फोनवर वाचता येत नाही: तपशील टाइप करा", pe_found_by: "सापडले:", pe_without_po: "PO शिवाय (SK पाहतील)", pe_source: "PO / माल पावतीवरून", pe_head: "खर्च खाते", pe_cc: "केबिन / नॉन-केबिन", pe_money: "कोणत्या खात्यातून / मध्ये", pe_taxable: "करपात्र रक्कम", pe_total: "बिल एकूण", pe_bill_date: "तारीख", pe_utr: "UTR / बँक रेफ", pe_bought: "काय घेतले", pe_find_docs: "ऑर्डर / बिले शोधा", pe_dup: "आधीच एंट्री झाली", pe_not_saved: "सेव्ह न झालेले फोटो", pe_retry: "पुन्हा करा", pe_remove: "काढा", pe_drafts: "पोस्ट करायचे माझे ड्राफ्ट", pe_no_po_flag: "PO शिवाय बिल: SK ना पाठवले", pe_made: "ड्राफ्ट बनला", pe_open_bills: "बाकी बिले", pe_sodn: "सेल्स ऑर्डर / डिलिव्हरी नोटवरून", pe_read_note: "प्रत्येक माहिती तपासा; चुकीचे दुरुस्त करा (तुमच्या दुरुस्त्या लक्षात ठेवल्या जातात)", pe_pending: "ERPNext मध्ये टाकायच्या फोटो एंट्री", pe_open: "ERPNext मध्ये टाका", pe_sent: "सबमिट झाले", gw_cash: "कॅश / बँक", gw_recv: "येणे", gw_pay: "देणे",
 		gw_masters: "मास्टर्स", gw_transactions: "व्यवहार", gw_utilities: "युटिलिटी", gw_reports: "अहवाल", gw_more: "आणखी अहवाल",
 		gw_desk: "ERPNext मध्ये उघडते", gw_pending: "बाकी", db_particulars: "तपशील", db_none: "या दिवशी व्हाउचर नाही",
 		cash_today: "कॅश / बँक", to_collect: "येणे (Receivables)", to_pay: "देणे (Payables)", bills_to_post: "खरेदी बिल आणि डेबिट नोट",
 		invoices: "विक्री बिल आणि क्रेडिट नोट", expenses: "जर्नल व्हाउचर", dir_expenses: "प्रत्यक्ष आणि अप्रत्यक्ष खर्च",
-		segment_pnl: "विभागवार नफा-तोटा", month_close: "महिनावार अहवाल", ledger_wise: "लेजरनुसार", work_tab: "करायचे",
+		segment_pnl: "विभागवार नफा-तोटा", month_close: "महिनावार अहवाल", ledger_wise: "लेजरनुसार", work_tab: "करायचे", show_settled: "भरलेले दाखवा", party_ledger: "पार्टी लेजर", open_bills: "बाकी बिले", this_month_only: "फक्त हा महिना", days_old: "दिवस", bill_no_s: "बिल",
 		opening: "सुरुवातीची शिल्लक", closing: "शिल्लक", dr: "Dr", cr: "Cr", bills_n: "बिले", returns_n: "डेबिट / क्रेडिट नोट",
 		drafts_n: "ड्राफ्ट", net: "निव्वळ", direct: "प्रत्यक्ष", indirect: "अप्रत्यक्ष", gross: "एकूण नफा", net_pl: "निव्वळ नफा-तोटा",
 		common_cost: "सामायिक (विभागले नाही)", closing_list: "क्लोजिंग यादी", month_pl: "महिनावार नफा-तोटा", inv_n: "बिले",
@@ -803,7 +803,7 @@
 		co_flow: "Company flow", all_dash: "All dashboards", to_plan: "Orders to plan", fl_order_received: "Order received → Sales Order", fl_confirm: "Confirm order (factory can plan)",
 		cq_title: "Cabin quotation", cq_why: "Price from SK's rate card: the same cabin gets the same price from anyone. You cannot type the price.",
 		cq_type: "Cabin type", cq_design: "Other (LGSF, modular, container, bigger): send to design", cq_l: "Length (ft)", cq_w: "Width (ft)", cq_h: "Height (ft)",
-		cq_opts: "Options", cq_km: "Distance from Talegaon plant (km)", cq_crane: "Crane for unloading", cq_disc: "Discount %", cq_disc_max: "you can give up to",
+		cq_opts: "Options", cq_km: "Distance from Talegaon plant (km)", cq_crane: "Crane for unloading", cq_transport: "Add transport to site", cq_disc: "Discount %", cq_disc_max: "you can give up to",
 		cq_disc_sk: "above this SK approves", cq_price: "Price (excl. GST)", cq_revise: "Revise", cq_new: "New quotation", cq_saved: "Quotation saved",
 		cq_waiting: "Discount sent to SK for approval; the quote is saved without it", cq_design_go: "This cabin is priced by design. Use “Send to design”; the price comes from the design BOM.",
 		bq_type: "Building: PUF / EPS labour camp or site office (G+0 to G+2)", bq_title: "Building quotation (PUF / EPS)",
@@ -841,7 +841,7 @@
 		co_flow: "कंपनी फ्लो", all_dash: "सर्व डॅशबोर्ड", to_plan: "प्लॅन करायच्या ऑर्डर", fl_order_received: "ऑर्डर मिळाली → सेल्स ऑर्डर", fl_confirm: "ऑर्डर निश्चित करा (फॅक्टरी प्लॅन करू शकते)",
 		cq_title: "केबिन कोटेशन", cq_why: "SK च्या रेट कार्डनुसार किंमत: एकाच केबिनला कोणीही केले तरी एकच किंमत. किंमत टाइप करता येत नाही.",
 		cq_type: "केबिन प्रकार", cq_design: "इतर (LGSF, मॉड्युलर, कंटेनर, मोठे): डिझाइनला पाठवा", cq_l: "लांबी (फूट)", cq_w: "रुंदी (फूट)", cq_h: "उंची (फूट)",
-		cq_opts: "पर्याय", cq_km: "तळेगाव प्लांटपासून अंतर (किमी)", cq_crane: "उतरवण्यासाठी क्रेन", cq_disc: "सूट %", cq_disc_max: "तुम्ही देऊ शकता",
+		cq_opts: "पर्याय", cq_km: "तळेगाव प्लांटपासून अंतर (किमी)", cq_crane: "उतरवण्यासाठी क्रेन", cq_transport: "साइटपर्यंत वाहतूक जोडा", cq_disc: "सूट %", cq_disc_max: "तुम्ही देऊ शकता",
 		cq_disc_sk: "त्यापेक्षा जास्त SK मंजूर करतात", cq_price: "किंमत (GST वगळून)", cq_revise: "सुधारणा", cq_new: "नवीन कोटेशन", cq_saved: "कोटेशन जतन झाले",
 		cq_waiting: "सूट SK कडे मंजुरीसाठी पाठवली; कोटेशन सूटशिवाय जतन झाले", cq_design_go: "या केबिनची किंमत डिझाइनकडून येते. “डिझाइनला पाठवा” वापरा.",
 		bq_type: "बिल्डिंग: PUF / EPS लेबर कॅम्प किंवा साइट ऑफिस (G+0 ते G+2)", bq_title: "बिल्डिंग कोटेशन (PUF / EPS)",
@@ -955,14 +955,14 @@
 		auto_blank: "leave blank: app fills", auto_gstin: "from GSTIN if blank", fl_late: "late", fl_month: "Present month", fl_cum: "Cumulative (from 1 Apr)", d_fix: "Fix", d_plan: "Plan", d_open: "Open", md_next: "next", md_late: "Late", md_today: "Today" });
 	Object.assign(T.Marathi, { k_trend: "कल", k_rising: "वाढत आहे", k_falling: "कमी होत आहे", k_actual: "प्रत्यक्ष", k_met: "लक्ष्य पूर्ण", k_missed: "लक्ष्य चुकले",
 		auto_blank: "रिकामे ठेवा: ॲप भरेल", auto_gstin: "रिकामे असल्यास GSTIN वरून", fl_late: "उशीर", fl_month: "चालू महिना", fl_cum: "एकूण (१ एप्रिल पासून)", d_fix: "पूर्ण करा", d_plan: "नियोजन", d_open: "उघडा", md_next: "पुढील", md_late: "उशीर", md_today: "आज" });
-	Object.assign(T.English, { send_design: "Send to design (AI drawing)", design_sent: "Sent to design as deal", design_not_sent: "Not sent to design:" });
+	Object.assign(T.English, { send_design: "Send to design (AI drawing)", cust_interaction: "Customer interaction (calls and your notes)", system_notes: "System, design and mail updates", lead_send: "Qualified: send to design (cabin) / for quote (machine shifting)", design_sent: "Sent to design as deal", design_not_sent: "Not sent to design:" });
 	Object.assign(T.English, { qr_quote: "Quotation made from the rate card", qr_disc: "Discount waits for approval", qr_pdf: "Open quotation PDF",
 		qr_revise: "Change options / size: open the deal and tap Make quotation", qr_design: "Sent to design: drawing, BOM and quote will come to you",
 		qr_ms: "Sent for quote: the quotation will come to you", qr_none: "Not sent for quote yet" });
 	Object.assign(T.Marathi, { qr_quote: "रेट कार्डवरून कोटेशन तयार", qr_disc: "डिस्काउंट मंजुरीसाठी थांबले आहे", qr_pdf: "कोटेशन PDF उघडा",
 		qr_revise: "पर्याय / साईज बदला: डील उघडा आणि Make quotation दाबा", qr_design: "डिझाईनला पाठवले: ड्रॉइंग, BOM व कोटेशन तुम्हाला येईल",
 		qr_ms: "कोटेशनसाठी पाठवले: कोटेशन तुम्हाला येईल", qr_none: "अजून कोटेशनसाठी पाठवले नाही" });
-	Object.assign(T.Marathi, { send_design: "डिझाईनला पाठवा (AI ड्रॉइंग)", design_sent: "डिझाईनला डील म्हणून पाठवले", design_not_sent: "डिझाईनला पाठवले नाही:" });
+	Object.assign(T.Marathi, { send_design: "डिझाईनला पाठवा (AI ड्रॉइंग)", cust_interaction: "ग्राहक संवाद (कॉल आणि तुमच्या नोंदी)", system_notes: "सिस्टम, डिझाईन आणि मेल अपडेट", lead_send: "Qualified: डिझाईनला (केबिन) / कोटेशनसाठी (मशीन शिफ्टिंग) पाठवा", design_sent: "डिझाईनला डील म्हणून पाठवले", design_not_sent: "डिझाईनला पाठवले नाही:" });
 	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";
 	T.Marathi.mic_blocked = "माईक / कॅमेरा बंद आहे. Chrome → ⋮ → Settings → Site settings → Microphone (किंवा Camera) → ही साईट → Allow. मग परत येऊन 🎤 दाबा.";
 	T.English.mic_network = "Voice needs internet. Check mobile data, or use the 🎤 on your phone keyboard (works offline for English).";
@@ -1101,8 +1101,8 @@
 	Object.assign(T.Marathi, { to_submit: "तपासा व सबमिट करा", ds_why: "तुमच्याकडे बाकी ड्राफ्ट. तपासा दाबा, आकडे पहा, मग सबमिट करा.", ds_check: "तपासा",
 		ds_none: "सबमिट करायला काही बाकी नाही ✓", ds_item: "आयटम", ds_old: "जुना साठा", ds_new: "मोजलेला", ds_diff: "फरक", ds_qty: "नग", ds_total: "एकूण",
 		ds_submit: "ERPNext मध्ये सबमिट करा", ds_sure: "आता सबमिट करायचे? नंतर बदलता येणार नाही.", ds_done: "सबमिट झाले" });
-	Object.assign(T.English, { dbl_title: "Already in ERPNext: possible double entry" });
-	Object.assign(T.Marathi, { dbl_title: "ERPNext मध्ये आधीच आहे: दुहेरी नोंद असू शकते" });
+	Object.assign(T.English, { dbl_newreq: "New requirement for this customer", dbl_real: "Real duplicate, cancel", dbl_newreq_help: "Same customer again? If this is a NEW requirement, save it as a new lead linked to this customer. If it is the same enquiry, cancel and add your update on the earlier lead.", lead_next_call: "Lead saved (New). Next: call the customer, log the call, then mark it Qualified.", dbl_title: "Already in ERPNext: possible double entry" });
+	Object.assign(T.Marathi, { dbl_newreq: "या ग्राहकाची नवीन गरज", dbl_real: "खरंच दुबार, रद्द करा", dbl_newreq_help: "तोच ग्राहक पुन्हा? ही नवीन गरज असल्यास या ग्राहकाशी जोडलेली नवीन लीड म्हणून सेव्ह करा. तीच चौकशी असल्यास रद्द करा आणि आधीच्या लीडवर अपडेट लिहा.", lead_next_call: "लीड सेव्ह झाली (नवीन). पुढे: ग्राहकाला कॉल करा, कॉल नोंदवा, मग Qualified करा.", dbl_title: "ERPNext मध्ये आधीच आहे: दुहेरी नोंद असू शकते" });
 	Object.assign(T.English, { bs_title: "Bank statement", bs_help: "Upload the SBI statement PDF: every bank line goes into ERPNext, is matched with its payment and the UTR is filled. You see what does not match.",
 		bs_file: "Statement PDF", bs_go: "Read statement", bs_lines: "bank lines", bs_matched: "matched with ERPNext", bs_already: "already matched earlier",
 		bs_not_erp: "In the bank, not in ERPNext", bs_not_bank: "In ERPNext, not in the bank", bs_reco: "Open Bank Reconciliation Tool (Create Voucher fills UTR)" });
@@ -1208,7 +1208,9 @@
 			}
 			return out + esc(line.slice(last).replace(/<[^>]*>/g, ""));
 		}).join("<br>");
-		const box = `<h3 class="sk-h">⚠️ ${t("dbl_title")}</h3><div class="sk-libtext">${safe}</div>`;
+		const newReq = S.dblFor === "new_lead" && /same customer/i.test(String(msg))
+			? `<p class="sk-note">${t("dbl_newreq_help")}</p><button class="sk-btn ok wide" data-act="lead-new-req">➕ ${t("dbl_newreq")}</button><button class="sk-btn wide" data-act="close-sheet">✖ ${t("dbl_real")}</button>` : "";
+		const box = `<h3 class="sk-h">⚠️ ${t("dbl_title")}</h3><div class="sk-libtext">${safe}</div>${newReq}`;
 		// a form open in a pop-up keeps what was typed: the warning goes on top of it
 		const open = root.querySelector(".sk-sheet");
 		if (open) {
@@ -1222,6 +1224,16 @@
 		} else sheet(box + `<button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
 	}
 
+	async function leadDone(name) {
+		S.leadCustomer = null;
+		const a = S.leadArgs || {};
+		cardUrl = null;
+		clearDraft();
+		if (S.mkFrom) { await call("marketing_lead_made", { contact: S.mkFrom, lead: name }, true).catch(() => null); S.mkFrom = null; }
+		// SK 21-Nov: the lead stays New; nothing is sent for a quote or design by itself
+		return leadSaved({ name, title: a.organization || a.first_name, person: a.first_name, mobile: a.mobile_no, segment: a.segment, source: a.source,
+			route: { route: "none", reason: t("lead_next_call") } });
+	}
 	async function send(method, args, post, background) {
 		if (state.viewAs && !VIEW_OWN.has(method)) {
 			// SK 14-Nov "Work as": the CEO's saves run as the member (record stays theirs, marked CEO); otherwise view only
@@ -2054,16 +2066,24 @@
 		if (pc) {
 			// SK 1-Nov PC Rev 2: line diagram, trend line, a value pill on every point, latest point big
 			g += pcTrend(v.lines[0] ? v.lines[0].points : [], X, Y);
-			v.lines.forEach((l, li) => { g += pcSeries(l.points, X, Y, l.c || "b", (x) => kAmt(x), li === 0); });
+			const all2 = v.lines.map((l) => l.points);
+			v.lines.forEach((l, li) => { g += pcSeries(l.points, X, Y, l.c || "b", (x) => kAmt(x), li === 0, null, v.lines.length > 1 ? (i) => labelSide(all2, li, i) : null); });
 			v.labels.forEach((m, i) => { g += `<text x="${X(i)}" y="${H - 6}" text-anchor="middle" class="sk-ax">${m}</text>`; });
 			const leg = `<div class="sk-klegend">${v.lines.map((l) => `<span class="k-${l.c}">● ${t("kl_" + l.label)}</span>`).join("")}<span class="k-t">··· ${t("k_trend")}</span></div>`;
 			return `<svg viewBox="0 0 ${W} ${H}" class="sk-ksvg sk-pcchart">${PC_DEFS}${g}</svg>${leg}`;
 		}
-		v.lines.forEach((l) => {
+		const allP = v.lines.map((l) => l.points);
+		v.lines.forEach((l, li) => {
 			g += `<polyline points="${l.points.map((val, i) => `${X(i)},${Y(val)}`).join(" ")}" class="sk-kline k-${l.c}"/>`;
 			l.points.forEach((val, i) => { g += `<circle cx="${X(i)}" cy="${Y(val)}" r="3.5" class="sk-kdot k-${l.c}"/>`; });
-			const last = l.points[n - 1];
-			g += `<text x="${X(n - 1) - 5}" y="${Y(last) - 6}" text-anchor="end" class="sk-kval k-${l.c}">${kAmt(last)}</text>`;
+			// SK 21-Nov: every point's amount, the higher line above its dot and the lower below (two lines never hide each other)
+			l.points.forEach((val, i) => {
+				if (val == null || (v.lines.length === 1 && i !== n - 1)) return;
+				const below = labelSide(allP, li, i) === "below";
+				const anchor = i === 0 ? "start" : i === n - 1 ? "end" : "middle";
+				const y = below ? Math.min(Y(val) + 13, H - B - 1) : Math.max(Y(val) - 6, 9);
+				g += `<text x="${X(i)}" y="${y}" text-anchor="${anchor}" class="sk-kval k-${l.c}" style="fill:${KC[l.c] || KC.b}">${kAmt(val)}</text>`;
+			});
 		});
 		v.labels.forEach((m, i) => { g += `<text x="${X(i)}" y="${H - 4}" text-anchor="middle" class="sk-ax">${m}</text>`; });
 		const legend = v.lines.length > 1 ? `<div class="sk-klegend">${v.lines.map((l) => `<span class="k-${l.c}">● ${t("kl_" + l.label)}</span>`).join("")}</div>` : "";
@@ -2149,7 +2169,15 @@
 			+ `<text x="${X(0)}" y="14" class="sk-trendl">··· ${t("k_trend")} ${k >= 0 ? "▲" : "▼"} ${t(k >= 0 ? "k_rising" : "k_falling")}</text>`;
 	}
 	// one series: shadowed line with a white core, glossy dots, a value pill on each point, the latest point big
-	function pcSeries(vals, X, Y, c, fmt, main, okAt) {
+	// SK 21-Nov ("unable to see both amounts of Nov"): with two lines, at each point the higher value's label sits above
+	// its dot and the lower one's below, so both amounts are always readable
+	function labelSide(lines, li, i) {
+		const v = lines[li][i];
+		if (v == null) return "above";
+		const others = lines.filter((_, k) => k !== li).map((l) => l[i]).filter((x) => x != null);
+		return !others.length || v > Math.max(...others) || (v === Math.max(...others) && li === 0) ? "above" : "below";
+	}
+	function pcSeries(vals, X, Y, c, fmt, main, okAt, sideAt) {
 		const col = KC[c] || KC.b;
 		const pts = vals.map((v, i) => (v == null || isNaN(v) ? null : [i, v])).filter(Boolean);
 		if (!pts.length) return "";
@@ -2161,8 +2189,9 @@
 			const big = i === last, ok = okAt ? okAt(i) : null;
 			const fill = ok === true ? "url(#skgok)" : ok === false || big ? "url(#skgdot)" : "#fff";
 			g += `<circle cx="${X(i)}" cy="${Y(v)}" r="${big ? 8 : 5.5}" fill="${fill}" stroke="${col}" stroke-width="2.2" filter="url(#skls)"/>`;
-			if (!main && !big) return;
-			const txt = fmt(v), w = String(txt).length * 7.2 + 14, y = Y(v) - (big ? 30 : 26);
+			if (!main && !big && !sideAt) return;
+			const below = sideAt && sideAt(i) === "below";
+			const txt = fmt(v), w = String(txt).length * 7.2 + 14, y = below ? Y(v) + (big ? 11 : 8) : Y(v) - (big ? 30 : 26);
 			g += `<g class="sk-vpill"><rect x="${X(i) - w / 2}" y="${y}" width="${w}" height="19" rx="9.5" fill="${big ? col : "#fff"}" stroke="${col}" stroke-width="1.6"/>`
 				+ `<text x="${X(i)}" y="${y + 13.5}" text-anchor="middle" fill="${big ? "#fff" : col}">${esc(txt)}</text></g>`;
 		});
@@ -3061,6 +3090,7 @@
 			<div class="sk-row"><label class="sk-field"><span>${t("cq_h")}</span>${qtyBox("cq-h", o.height)}</label><label class="sk-field"><span>${t("qty")}</span>${qtyBox("cq-q", 1)}</label></div>
 			<h3 class="sk-h">${t("cq_opts")}</h3>${o.options.map(opt).join("")}
 			<div class="sk-row"><label class="sk-field"><span>${t("cq_km")}</span>${qtyBox("cq-km", 0)}</label>
+			<label class="sk-check"><input type="checkbox" id="cq-tr" data-cq="1"> ${t("cq_transport")}</label>
 			<label class="sk-check"><input type="checkbox" id="cq-crane" data-cq="1"> ${t("cq_crane")}</label></div>
 			<label class="sk-field"><span>${t("cq_disc")} (${t("cq_disc_max")} ${o.max_discount}%, ${t("cq_disc_sk")})</span>${qtyBox("cq-disc", 0)}</label>
 			<div id="cq-price" class="sk-card"></div>
@@ -3077,7 +3107,8 @@
 			if (on && on.checked) { const n = document.getElementById("cq-n-" + x.key); options[x.key] = n ? Number(n.value || 1) : 1; }
 		}
 		return { type: val("cq-type"), length: Number(val("cq-l")), width: Number(val("cq-w")), height: Number(val("cq-h")) || S.cq.o.height,
-			qty: Number(val("cq-q")) || 1, options, km: Number(val("cq-km")) || 0, crane: document.getElementById("cq-crane").checked };
+			qty: Number(val("cq-q")) || 1, options, km: Number(val("cq-km")) || 0, crane: document.getElementById("cq-crane").checked,
+			transport: !!(document.getElementById("cq-tr") || {}).checked }; // SK 21-Nov: transport optional, off unless ticked
 	}
 	async function cabinPrice() {
 		const box = document.getElementById("cq-price");
@@ -3216,7 +3247,18 @@
 			${f.for_customer ? `<button class="sk-open sk-fix" data-act="correction" data-fileid="${esc(f.name)}" data-file="${esc(f.file_name)}">✏️</button>` : ""}</li>`).join("");
 		const tasks = d.tasks.map((x) => `<li class="sk-item"><div><div class="sk-item-title">${esc(x.title)}</div><div class="sk-item-meta">${esc(x.status)} · ${when(x.due_date)}</div></div></li>`).join("");
 		const calls = d.calls.map((x) => `<li class="sk-item"><div><div class="sk-item-title">📞 ${esc(x.type)} · ${esc(x.status)}</div><div class="sk-item-meta">${when(x.creation)}${x.duration ? " · " + t("talk_time") + " " + dur(x.duration) : ""}</div></div></li>`).join("");
-		const notes = d.notes.map((n) => `<li class="sk-item"><div><div class="sk-item-title">${esc(n.title)}</div>${n.content && n.content !== n.title ? `<div>${esc(n.content)}</div>` : ""}<div class="sk-item-meta">${esc(n.owner)} · ${when(n.creation)}</div></div></li>`).join("");
+		// SK 21-Nov: the salesperson's own customer interaction (manual notes + calls) first; system / design / automatic
+		// notes and mails apart, collapsed, one line each
+		const sysNote = (n) => n.owner === "Administrator" || /claude|bot|noreply|no-reply/i.test(n.owner || "")
+			|| /^\s*(design\b|drawing\b|bom\b|again from|sk app|kept as draft|photo entry|auto|system|rule|gap)/i.test(n.title || "");
+		const talk = [...d.notes.filter((n) => !sysNote(n)).map((n) => ({ on: n.creation, html: `<li class="sk-item"><div><div class="sk-item-title">📝 ${esc(n.title)}</div>${n.content && n.content !== n.title ? `<div>${esc(n.content)}</div>` : ""}<div class="sk-item-meta">${esc(n.owner)} · ${when(n.creation)}</div></div></li>` })),
+			...d.calls.map((x) => ({ on: x.creation, html: `<li class="sk-item"><div><div class="sk-item-title">📞 ${esc(x.type)} · ${esc(x.status)}</div><div class="sk-item-meta">${when(x.creation)}${x.duration ? " · " + t("talk_time") + " " + dur(x.duration) : ""}</div></div></li>` }))]
+			.sort((a, b) => String(b.on).localeCompare(String(a.on))).map((x) => x.html).join("");
+		const oneLine = (icon, title, meta) => `<li class="sk-item sk-oneline"><div><div class="sk-item-title">${icon} ${esc(String(title || "").slice(0, 90))}</div><div class="sk-item-meta">${meta}</div></div></li>`;
+		const other = [...d.notes.filter(sysNote).map((n) => ({ on: n.creation, html: oneLine("⚙️", n.title, `${esc(n.owner)} · ${when(n.creation)}`) })),
+			...mails.map((m) => ({ on: m.communication_date, html: oneLine(m.sent_or_received === "Received" ? "📥" : "📤", m.subject, `${esc(m.sender || "")} · ${when(m.communication_date)}`) }))]
+			.sort((a, b) => String(b.on).localeCompare(String(a.on)));
+		const notes = "";
 		const sec = (title, body) => body ? `<h3 class="sk-h">${title}</h3><ul class="sk-list">${body}</ul>` : "";
 		const mobile = current.mobile;
 		root.innerHTML = header((d.by_ceo ? "👑 " : "") + (doc.organization || doc.lead_name || name)) + `<main>
@@ -3231,21 +3273,23 @@
 				<div class="sk-card-text">${doc.sk_product ? esc(doc.sk_product) : `<span class="sk-due">${t("rq_none")}</span>`}</div></div>
 			${gateCard(d, o)}${customerCard(d)}
 			<h3 class="sk-h">${t("status")}</h3><div class="sk-chips">${chips}</div>
-			${doctype === "CRM Lead" && !doc.converted ? `<button class="sk-btn go wide sk-gap" data-act="convert-deal">🤝 ${t("convert_deal")}</button>` : ""}
+			${doctype === "CRM Lead" && !doc.converted && doc.status && doc.status !== "New" ? `<button class="sk-btn go wide sk-gap" data-act="convert-deal">🤝 ${t("convert_deal")}</button>` : ""}
 			${doctype === "CRM Lead" && !doc.converted && doc.sk_cold !== undefined ? `<button class="sk-btn wide sk-gap" data-act="cold-set" data-lead="${esc(name)}" data-cold="${doc.sk_cold ? 0 : 1}">${doc.sk_cold ? "🔥 " + t("cold_interested") : "🧊 " + t("cold_move")}</button>` : ""}
 			<div class="sk-form">${formField("f-note", t("note_q"), true)}${photoField("f-photo", t("attach"), true)}
 				<button class="sk-btn ok wide" data-act="save-note">${t("add_note")}</button>
 				<button class="sk-btn wide sk-gap" data-act="reminder-new" data-doctype="${esc(doctype)}" data-name="${esc(name)}">⏰ + ${t("reminder")}</button></div>
 			${(d.products || []).length ? `<h3 class="sk-h">${t("products_for")}</h3>${productStrip(d.products)}` : ""}
-			${["CRM Deal", "CRM Lead"].includes(doctype) ? `<button class="sk-btn go wide" data-act="fl-cabinq" data-dt="${esc(doctype)}" data-name="${esc(name)}">📝 ${t("fl_new_quote")}: ${t("cq_title")}</button>` : ""}
-			${["CRM Deal", "CRM Lead"].includes(doctype) ? `<button class="sk-btn wide" data-act="fl-quote" data-dt="${esc(doctype)}" data-name="${esc(name)}">📝 ${t("cq_other")}</button>` : ""}
+			${doctype === "CRM Lead" && doc.status && doc.status !== "New" ? `<button class="sk-btn go wide" data-act="lead-send" data-name="${esc(name)}">📐 ${t("lead_send")}</button>` : ""}
+			${doctype === "CRM Lead" && (!doc.status || doc.status === "New") ? `<p class="sk-note">${t("lead_next_call")}</p>` : ""}
+			${doctype === "CRM Deal" ? `<button class="sk-btn go wide" data-act="fl-cabinq" data-dt="${esc(doctype)}" data-name="${esc(name)}">📝 ${t("fl_new_quote")}: ${t("cq_title")}</button>` : ""}
+			${doctype === "CRM Deal" ? `<button class="sk-btn wide" data-act="fl-quote" data-dt="${esc(doctype)}" data-name="${esc(name)}">📝 ${t("cq_other")}</button>` : ""}
 			${d.quote_pending ? `<div class="sk-card sk-gap"><div class="sk-item-title">📄 ${t("dq_title")}</div><div class="sk-item-meta">${esc(d.quote_pending.file)}</div>
 				<div class="sk-form">${formField("dq-amount", t("dq_amount"), false, "number")}<button class="sk-btn go wide" data-act="dq-make" data-name="${esc(name)}">${t("dq_make")}</button></div></div>` : ""}
 			${sec(t("quotations"), d.quotations.map((q) => erpDocRow("Quotation", q, mobile)).join(""))}
 			${sec(t("sales_orders"), d.sales_orders.map((q) => erpDocRow("Sales Order", q, mobile)).join(""))}
-			${sec(t("files"), files)}${sec(t("tasks"), tasks)}${sec(t("emails"), mails.map((m) => `<li class="sk-item"><div><div class="sk-item-title">${m.sent_or_received === "Received" ? "📥" : "📤"} ${esc(m.subject || "")}</div>
-				<div class="sk-libtext">${esc((m.text || "").slice(0, 400))}</div><div class="sk-item-meta">${esc(m.sender || "")} · ${when(m.communication_date)}</div></div></li>`).join(""))}
-			${sec(t("notes"), notes)}${sec(t("calls"), calls)}
+			${sec("🗣 " + t("cust_interaction"), talk) || `<h3 class="sk-h">🗣 ${t("cust_interaction")}</h3><p class="sk-note">${t("nothing")}</p>`}
+			${sec(t("files"), files)}${sec(t("tasks"), tasks)}
+			${other.length ? `<details class="sk-gap"><summary class="sk-h">⚙️ ${t("system_notes")} (${other.length})</summary><ul class="sk-list">${other.map((x) => x.html).join("")}</ul></details>` : ""}
 			<a class="sk-btn wide" href="${esc(d.crm_url)}">${t("open_crm")}</a></main>`;
 	}
 
@@ -3336,7 +3380,7 @@
 			<label class="sk-field"><span>${t("mobile")} *</span><div class="sk-input-row"><input id="f-mobile" type="tel"></div></label>
 			<label class="sk-field"><span>${t("email")}</span><div class="sk-input-row"><input id="f-email" type="email"></div></label>
 			${sel("f-source", t("source") + " *", o.sources)}${segmentSelect("f-segment", o.segment_tree, o.segments)}${(o.products || []).length ? sel("f-product", t("product_asked"), o.products) : ""}
-			<label class="sk-field"><span>${t("status")}</span><select id="f-status" class="sk-select">${(o.lead_statuses || []).filter((s) => s.type !== "Won" && s.type !== "Lost").map((s) => `<option>${esc(s.name)}</option>`).join("")}</select></label>
+
 			${formField("f-req", t("requirement"), true)}
 			<button class="sk-btn ok wide" data-act="save-lead">${t("save")}</button>
 			<details class="sk-gap"><summary>📄 ${t("upload_list")}</summary>${uploadBox()}</details></main>`;
@@ -3987,7 +4031,8 @@
 			}
 			const pts = s.values.map((v, i) => (v == null ? null : [X(i), Y(v), v])).filter(Boolean);
 			g += `<polyline points="${pts.map((p) => p[0] + "," + p[1]).join(" ")}" fill="none" stroke="${col}" stroke-width="2.2"/>`;
-			pts.forEach((p) => { g += `<circle cx="${p[0]}" cy="${p[1]}" r="2.6" fill="${col}"/>${k === 1 ? `<text x="${p[0]}" y="${p[1] - 5}" font-size="8" text-anchor="middle" fill="#333">${p[2]}</text>` : ""}`; });
+			pts.forEach((p, pi) => { const i = s.values.findIndex((_, j) => X(j) === p[0]); const below = k === 2 && labelSide(c.series.map((x) => x.values), si, i) === "below";
+				g += `<circle cx="${p[0]}" cy="${p[1]}" r="2.6" fill="${col}"/>${k <= 2 ? `<text x="${p[0]}" y="${below ? p[1] + 10 : p[1] - 5}" font-size="8" text-anchor="middle" fill="${k === 2 ? col : "#333"}">${p[2]}</text>` : ""}`; });
 		});
 		const legend = c.series.map((s) => `<span style="color:${CH_COL[s.c] || s.c}">●</span> ${esc(s.name)}`).join(" &nbsp;") + (c.target ? ` &nbsp;<span style="color:#4a90d9">┅</span> ${t("target")}` : "");
 		return `<svg viewBox="0 0 ${W} ${H}" class="sk-chart" role="img">${g}</svg><small class="sk-chart-leg">${legend}${c.unit === "L" ? " · ₹ L" : ""}</small>`;
@@ -4841,6 +4886,11 @@
 		findTimer = setTimeout(async () => {
 			const sg = document.getElementById(el.id + "-sg");
 			if (!el.value.trim()) { if (sg) sg.innerHTML = ""; return; }
+			if (el.dataset.find === "customer") { // SK 21-Nov photo entry: customer picked the same way as the supplier
+				const d = await call("customers", { tab: "pick", q: el.value });
+				if (sg) sg.innerHTML = d.rows.slice(0, 8).map((r) => `<button type="button" class="sk-sg" data-sgfor="${esc(el.id)}" data-sgval="${esc(r.name)}"><span><b>${esc(r.customer_name)}</b><small>${esc(r.name)}</small></span></button>`).join("") || `<p class="sk-note">${t("nothing")}</p>`;
+				return;
+			}
 			const rows = el.dataset.find === "supplier" ? await call("buy_suppliers", { q: el.value }) : await call("store_search", { q: el.value });
 			if (rows.some((r) => (r.item_code || r.name) === el.value)) { if (sg) sg.innerHTML = ""; return; } // already picked
 			if (sg) sg.innerHTML = rows.slice(0, 8).map((r) => el.dataset.find === "supplier"
@@ -5292,6 +5342,13 @@
 			case "st-item": return itemSheet(S.items[i].item_code);
 			case "st-po": return receiveForm(i);
 			case "st-nopo": return receiveNoPo();
+			case "lead-send": { // SK 21-Nov: Qualified lead -> design (cabin) or quote (Non-Cabin), by the salesperson's tap only
+				el.disabled = true;
+				const r = await call("lead_to_design", { name: el.dataset.name }, true);
+				toast(r.sent ? `✓ ${t("design_sent")}: ${r.deal || ""}` : `${t("design_not_sent")} ${r.reason || ""}`, !r.sent);
+				if (r.deal) current = { doctype: "CRM Deal", name: r.deal };
+				return go("detail");
+			}
 			case "fl-quote": return quotationSheet(el.dataset.dt === "CRM Lead" ? null : el.dataset.name, el.dataset.dt === "CRM Lead" ? el.dataset.name : null);
 			case "fl-cabinq": return cabinQuoteSheet(el.dataset.dt, el.dataset.name);
 			case "fl-cabinq-save": {
@@ -6029,20 +6086,94 @@
 				<button class="sk-chip on" data-act="fin-post-pi" data-i="${i}">✓ ${t("post")}</button></div>`)).join("") || empty()}</ul></main>`;
 	}
 	// SK 27-Oct: Shraddha takes a photo of every bill / e-invoice / voucher / payment proof and submits; the rest follows the earlier way
-	const PE_KINDS = ["supplier_bill", "expense", "money_in", "money_out", "other"];
-	async function renderPhotoEntry() {
-		S.pe = await call("fin_photo_entries");
+	// SK 21-Nov (Shraddha list D): the photo becomes an ERPNext DRAFT. The phone reads it (bundled tesseract, nothing leaves
+	// the phone), the server matches the party by GSTIN, she checks every field and taps Make draft, then Post.
+	const PE_KINDS = ["supplier_bill", "sales_invoice", "money_in", "money_out", "expense", "other"];
+	const PE_ERR = "sk_pe_err";
+	const peErrs = () => { try { return JSON.parse(localStorage.getItem(PE_ERR) || "{}"); } catch (e) { return {}; } };
+	const peErr = (url, msg) => { try { const m = peErrs(); if (msg) m[url] = msg; else delete m[url]; localStorage.setItem(PE_ERR, JSON.stringify(m)); } catch (e) { /* private mode */ } };
+	const PE_IDS = ["pe-sup", "pe-cus", "pe-billno", "pe-date", "pe-src", "pe-sodn", "pe-head", "pe-cc", "pe-money", "pe-taxable", "pe-cgst", "pe-sgst", "pe-igst", "pe-total", "pe-what", "pe-amt", "pe-utr", "pe-note"];
+	function peCollect() { const o = {}; PE_IDS.forEach((id) => { const v = val(id); if (v) o[id] = v; }); return o; }
+	function peApply(values) { Object.entries(values || {}).forEach(([id, v]) => { const el = document.getElementById(id); if (el && v !== "" && v != null) el.value = v; }); }
+	function peForm() {
 		const kind = S.peKind || "supplier_bill";
+		const r = S.peR || {}, f = r.facts || {};
+		const num = (id, label) => `<label class="sk-field"><span>${label}</span><input id="${id}" type="number" step="0.01" inputmode="decimal"></label>`;
+		const date = `<label class="sk-field"><span>${t("pe_bill_date")}</span><input id="pe-date" type="date"></label>`;
+		const found = f.party ? `<p class="sk-note">✓ ${esc(f.party)} · ${t("pe_found_by")} ${esc(f.party_found_by)}</p>` : "";
+		const dup = r.duplicate ? `<p class="sk-due">⚠ ${t("pe_dup")}: <a href="/app/${kind === "supplier_bill" ? "purchase-invoice" : "payment-entry"}/${encodeURIComponent(r.duplicate)}" target="_blank">${esc(r.duplicate)}</a></p>` : "";
+		const findBtn = `<button type="button" class="sk-chip" data-act="fin-pe-party">🔎 ${t("pe_find_docs")}</button>`;
+		let html = "";
+		if (kind === "supplier_bill") {
+			const src = [...(r.orders || []).map((o) => ({ value: "PO|" + o.name, label: `${o.name} · ${money(o.grand_total)}` })), ...(r.receipts || []).map((o) => ({ value: "PR|" + o.name, label: `${o.name} · ${money(o.grand_total)}` }))];
+			html = `${finder("pe-sup", t("supplier"), "supplier")}${findBtn}${found}${formField("pe-billno", t("pe_ref"))}${date}
+				${pick("pe-src", t("pe_source"), [{ value: "", label: t("pe_without_po") }, ...src])}
+				${pick("pe-head", t("pe_head"), r.expense_heads || [])}${formField("pe-what", t("pe_bought"))}
+				${num("pe-taxable", t("pe_taxable"))}${num("pe-cgst", "CGST")}${num("pe-sgst", "SGST")}${num("pe-igst", "IGST")}${num("pe-total", t("pe_total"))}`;
+		} else if (kind === "sales_invoice") {
+			const src = [...(r.orders || []).map((o) => ({ value: "SO|" + o.name, label: `${o.name} · ${money(o.grand_total)}` })), ...(r.deliveries || []).map((o) => ({ value: "DN|" + o.name, label: `${o.name} · ${money(o.grand_total)}` }))];
+			html = `${finder("pe-cus", t("customer"), "customer")}${findBtn}${found}${pick("pe-sodn", t("pe_sodn"), src)}`;
+		} else if (kind === "money_in" || kind === "money_out") {
+			const bills = (r.bills || []).map((b) => `${esc(b.name)}${b.bill_no ? " (" + esc(b.bill_no) + ")" : ""} ${money(b.outstanding)}`).join(" · ");
+			html = `${kind === "money_in" ? finder("pe-cus", t("customer"), "customer") : finder("pe-sup", t("supplier"), "supplier")}${findBtn}${found}
+				${num("pe-amt", t("amount"))}${formField("pe-utr", t("pe_utr"))}${date}${formField("pe-billno", t("pe_ref"))}
+				${bills ? `<p class="sk-note">${t("pe_open_bills")}: ${bills}</p>` : ""}`;
+		} else if (kind === "expense") {
+			html = `${num("pe-amt", t("amount"))}${pick("pe-head", t("pe_head"), r.expense_heads || [])}${pick("pe-cc", t("pe_cc"), r.cost_centers || [])}
+				${pick("pe-money", t("pe_money"), r.money_accounts || [])}${formField("pe-note", t("note"))}`;
+		} else {
+			html = formField("pe-note", t("note"));
+		}
+		const box = document.getElementById("pe-form");
+		if (!box) return;
+		box.innerHTML = `${S.peR ? `<p class="sk-note">${t("pe_read_note")}</p>` : ""}${dup}${html}`;
+		peApply({ "pe-sup": f.supplier, "pe-cus": f.customer, "pe-billno": f.bill_no, "pe-date": f.bill_date, "pe-taxable": f.taxable || "", "pe-cgst": f.cgst || "",
+			"pe-sgst": f.sgst || "", "pe-igst": f.igst || "", "pe-total": f.total || "", "pe-amt": f.amount || "", "pe-utr": f.utr,
+			"pe-head": (r.expense_heads || [])[0] && kind === "supplier_bill" && f.party ? r.expense_heads[0] : "" });
+	}
+	async function peRead(withText) {
+		const kind = S.peKind || "supplier_bill";
+		const typed = peCollect();
+		let text = S.peText || "";
+		if (withText) {
+			const inp = document.getElementById("b-photo");
+			const file = inp && inp.files[0];
+			if (!file) { toast(t("pe_photo"), true); return; }
+			if (!/^image\//.test(file.type)) { toast(t("pe_pdf_type"), true); text = ""; }
+			else {
+				toast(t("pe_reading"));
+				try { text = (await readOnPhone(file, () => {})).text || ""; } catch (e) { text = ""; }
+				if (!text.trim()) toast(t("ocr_nothing"), true);
+			}
+			S.peText = text;
+		}
+		const party = typed["pe-sup"] || typed["pe-cus"] || "";
+		S.peR = await call("fin_pe_read", { kind, text, ...(withText ? {} : { party }) });
+		peForm();
+		if (!withText) peApply(typed);
+	}
+	async function renderPhotoEntry() {
+		const [todos, lists] = await Promise.all([call("fin_photo_entries"), call("fin_pe_lists")]);
+		S.pe = todos; S.peL = lists;
+		const kind = S.peKind || "supplier_bill";
+		const errs = peErrs();
+		const retry = S.peRetry ? `<p class="sk-note">📷 ${t("pe_retry")}: <a href="${esc(S.peRetry)}" target="_blank">${esc(S.peRetry.split("/").pop())}</a></p>` : "";
 		root.innerHTML = header(t("photo_entry")) + `<main class="sk-form"><p class="sk-note">${t("pe_help")}</p>
 			<div class="sk-field"><span>${t("pe_what")}</span><div class="sk-chips">${PE_KINDS.map((k) => `<button class="sk-chip ${k === kind ? "on" : ""}" data-act="fin-pe-kind" data-k="${k}">${t("pe_" + k)}</button>`).join("")}</div></div>
-			${photoField("b-photo", "📷 " + t("pe_photo"))}
-			<div id="pe-sup" ${kind === "supplier_bill" ? "" : "hidden"}>${finder("b-sup", t("supplier"), "supplier")}</div>
-			<div id="pe-party" ${kind === "supplier_bill" ? "hidden" : ""}>${formField("pe-pty", t("pe_party"))}</div>
-			${formField("b-no", t("pe_ref"))}<label class="sk-field"><span>${t("amount")}</span>${qtyBox("b-amt")}</label>${formField("pe-note", t("note"))}
+			${retry}${photoField("b-photo", "📷 " + t("pe_photo"))}
+			<button class="sk-btn go wide" data-act="fin-pe-read">🔍 ${t("pe_read")}</button>
+			<div id="pe-form"></div>
 			<button class="sk-btn ok wide" data-act="fin-pe-save">✓ ${t("pe_submit")}</button>
-			<h3 class="sk-h">📷 ${t("pe_pending")} (${S.pe.length})</h3>
-			<ul class="sk-list">${S.pe.map((p, i) => li(esc(t("pe_" + p.kind)), `${esc(p.text)}${p.photo ? ` · <a href="${esc(p.photo)}" target="_blank">📷 ${t("see_photo")}</a>` : ""}`,
-				`<div class="sk-col"><a class="sk-chip on" target="_blank" href="${esc(p.erp_url)}">₹ ${t("pe_open")}</a><button class="sk-chip" data-act="fin-pe-done" data-i="${i}">✓ ${t("already_done")}</button></div>`)).join("") || empty()}</ul></main>`;
+			${lists.not_saved.length ? `<h3 class="sk-h">⚠ ${t("pe_not_saved")} (${lists.not_saved.length})</h3><ul class="sk-list">${lists.not_saved.map((p, i) => li(esc(p.file_name || p.name),
+				`${esc(String(p.creation).slice(0, 16))}${errs[p.file_url] ? `<br><span class="sk-due">${esc(errs[p.file_url])}</span>` : ""} · <a href="${esc(p.file_url)}" target="_blank">📷 ${t("see_photo")}</a>`,
+				`<div class="sk-col"><button class="sk-chip on" data-act="fin-pe-retry" data-i="${i}">↻ ${t("pe_retry")}</button><button class="sk-chip" data-act="fin-pe-drop" data-i="${i}">✕ ${t("pe_remove")}</button></div>`)).join("")}</ul>` : ""}
+			<h3 class="sk-h">📝 ${t("pe_drafts")} (${lists.drafts.length})</h3>
+			<ul class="sk-list">${lists.drafts.map((d, i) => li(esc(d.title || d.name), `${esc(d.doctype)} · ${esc(d.name)}${d.no_po ? ` · <span class="sk-due">${t("pe_no_po_flag")}</span>` : ""}`,
+				`<div class="sk-col"><b>${money(d.amount)}</b><a class="sk-chip" href="${esc(d.url)}" target="_blank">${t("check")}</a><button class="sk-chip on" data-act="fin-pe-post" data-i="${i}">✓ ${t("post")}</button></div>`)).join("") || empty()}</ul>
+			${todos.length ? `<h3 class="sk-h">📷 ${t("pe_pending")} (${todos.length})</h3>
+			<ul class="sk-list">${todos.map((p, i) => li(esc(t("pe_" + p.kind)), `${esc(p.text)}${p.photo ? ` · <a href="${esc(p.photo)}" target="_blank">📷 ${t("see_photo")}</a>` : ""}`,
+				`<div class="sk-col"><a class="sk-chip on" target="_blank" href="${esc(p.erp_url)}">₹ ${t("pe_open")}</a><button class="sk-chip" data-act="fin-pe-done" data-i="${i}">✓ ${t("already_done")}</button></div>`)).join("")}</ul>` : ""}</main>`;
+		peForm();
 	}
 	async function renderInvoices() {
 		S.fi = await call("fin_invoices");
@@ -6075,6 +6206,19 @@
 		expenses: "journal", dir_expenses: "expenses" };
 	const finTab = {};
 	let finMonth = null; // "YYYY-MM-01"; empty = this month
+	let finSettled = false; // SK 21-Nov: paid parties are hidden; this chip shows them again
+	let finQ = ""; // SK 21-Nov: one search box on every register, filters the loaded rows as you type
+	function finFilter() {
+		const q = finQ.trim().toLowerCase();
+		let shown = 0;
+		root.querySelectorAll("main .sk-list > li").forEach((el) => {
+			const hit = !q || (el.dataset.k || el.textContent.toLowerCase()).includes(q);
+			el.style.display = hit ? "" : "none";
+			if (hit) shown += 1;
+		});
+		const n = root.querySelector("#fin-q-n");
+		if (n) n.textContent = q ? `${shown}` : "";
+	}
 	const short = (x) => String(x || "").replace(/ - [A-Z]+$/, "");
 	function monthNav() {
 		const d = finMonth ? new Date(finMonth) : new Date();
@@ -6092,7 +6236,8 @@
 			if (main) main.insertAdjacentHTML("afterbegin", tabs);
 			return;
 		}
-		const d = await call("fin_ledgers", { kind, ...(finMonth ? { month: finMonth } : {}) });
+		const d = await call("fin_ledgers", { kind, ...(finMonth ? { month: finMonth } : {}), ...(finSettled ? { show_settled: 1 } : {}) });
+		if (!S.ledger || S.ledger.view !== view) finQ = ""; // a new register starts with an empty search
 		S.ledger = { kind, rows: d.rows, view };
 		let body;
 		if (kind === "purchase" || kind === "sales") {
@@ -6109,7 +6254,17 @@
 				<ul class="sk-list">${d.rows.map((r, i) => li(esc(short(r.ledger)), `${t("opening")} ${money(r.opening)} · ${t("dr")} ${money(r.debit)} · ${t("cr")} ${money(r.credit)}`,
 					`<div class="sk-col"><b class="${r.closing < 0 ? "sk-due" : ""}">${money(r.closing)}</b><button class="sk-chip" data-ledger="${i}">›</button></div>`)).join("") || empty()}</ul>`;
 		}
-		root.innerHTML = header(t(view)) + `<main>${tabs}${monthNav()}${body}</main>`;
+		const settled = kind === "receivable" || kind === "payable" ? `<button class="sk-chip${finSettled ? " on" : ""}" data-finsettled="1">${finSettled ? "✓ " : ""}${t("show_settled")}</button>` : "";
+		const search = `<label class="sk-field"><span>🔍 ${t("search")} <b id="fin-q-n"></b></span><input id="fin-q" value="${esc(finQ)}"></label>`;
+		root.innerHTML = header(t(view)) + `<main>${tabs}${monthNav()}${search}${settled}${body}</main>`;
+		root.querySelectorAll("main .sk-list > li").forEach((el) => {
+			const b = el.querySelector("[data-ledger]");
+			const r = b ? d.rows[Number(b.dataset.ledger)] : null;
+			el.dataset.k = `${el.textContent} ${r ? `${r.ledger} ${r.title || ""} ${r.keys || ""}` : ""}`.toLowerCase();
+		});
+		finFilter();
+		const inp = root.querySelector("#fin-q");
+		if (inp) inp.addEventListener("input", () => { finQ = inp.value; finFilter(); });
 	}
 	async function renderLedgerEntries(i) {
 		const r = S.ledger.rows[i];
@@ -6119,11 +6274,36 @@
 		const rows = (kind === "purchase" || kind === "sales")
 			? d.rows.map((x) => li(`${x.is_return ? "↩ " : ""}${esc(x.name)}`, `${esc(x.posting_date)} · ${esc(x.status || "")}${x.docstatus === 0 ? ` · <span class="sk-due">${t("drafts_n")}</span>` : ""}`,
 				`<div class="sk-col"><b>${money(x.grand_total)}</b><a class="sk-chip" href="/app/${slug(x.doctype)}/${encodeURIComponent(x.name)}">›</a></div>`)).join("")
-			: d.rows.map((x) => li(`${esc(x.posting_date)} · ${esc(x.voucher_type)}`, `${esc(x.voucher_no)}${x.party ? " · " + esc(x.party) : ""}${x.remarks ? "<br>" + esc(x.remarks) : x.against ? "<br>" + esc(short(x.against)) : ""}`,
+			: d.rows.map((x) => li(`${esc(x.posting_date)} · ${esc(x.voucher_type)}`, `${esc(x.voucher_no)}${x.party ? ` · ${(x.party_type === "Customer" || x.party_type === "Supplier") ? `<a class="sk-link" data-party="${esc(x.party)}" data-ptype="${esc(x.party_type)}">${esc(x.party)}</a>` : esc(x.party)}` : ""}${x.remarks ? "<br>" + esc(x.remarks) : x.against ? "<br>" + esc(short(x.against)) : ""}`,
 				`<div class="sk-col"><b>${x.debit ? t("dr") + " " + money(x.debit) : t("cr") + " " + money(x.credit)}</b><small>${money(x.balance * (d.sign || 1))}</small><a class="sk-chip" href="/app/${slug(x.voucher_type)}/${encodeURIComponent(x.voucher_no)}">›</a></div>`)).join("");
 		state.view = "ledger_entries";
 		root.innerHTML = header(short(r.title || r.ledger)) + `<main>${d.opening !== undefined ? `<p class="sk-note">${t("opening")} ${money(d.opening)} → <b>${t("closing")} ${money(d.closing)}</b></p>` : ""}
 			<ul class="sk-list">${rows || empty()}</ul><button class="sk-btn wide" data-go="${esc(S.ledger.view)}">‹ ${t("back")}</button></main>`;
+	}
+	// SK 21-Nov (Shraddha): one Party Ledger for a customer / supplier, opened from Payables, Receivables, the Sales and
+	// Purchase registers and journal lines: open bills with age on top, then every voucher with a running balance
+	let plMonth = false, plLast = null;
+	async function renderPartyLedger(ptype, party) {
+		plLast = { ptype, party };
+		const args = { party_type: ptype, party };
+		if (plMonth) {
+			const m = finMonth ? new Date(finMonth) : new Date();
+			const first = new Date(m.getFullYear(), m.getMonth(), 1), last = new Date(m.getFullYear(), m.getMonth() + 1, 0);
+			const iso = (x) => `${x.getFullYear()}-${pad2(x.getMonth() + 1)}-${pad2(x.getDate())}`;
+			args.from_date = iso(first); args.to_date = iso(last);
+		}
+		const d = await call("fin_party_ledger", args);
+		const slug = (dt) => String(dt || "").toLowerCase().replace(/ /g, "-");
+		const bills = d.open_bills.map((b) => li(`${esc(b.name)}${b.bill_no ? ` · ${t("bill_no_s")} ${esc(b.bill_no)}` : ""}`, `${esc(b.posting_date)} · <span class="${b.age > 45 ? "sk-due" : ""}">${b.age} ${t("days_old")}</span>`,
+			`<div class="sk-col"><b>${money(b.outstanding)}</b><a class="sk-chip" href="/app/${slug(b.doctype)}/${encodeURIComponent(b.name)}">›</a></div>`)).join("");
+		const rows = d.rows.map((x) => li(`${esc(x.posting_date)} · ${esc(x.voucher_type)}`, `${esc(x.voucher_no)}${x.bill_no ? ` · ${t("bill_no_s")} ${esc(x.bill_no)}` : ""}${x.remarks ? "<br>" + esc(x.remarks) : ""}`,
+			`<div class="sk-col"><b>${x.debit ? t("dr") + " " + money(x.debit) : t("cr") + " " + money(x.credit)}</b><small>${money(x.balance * (d.sign || 1))}</small><a class="sk-chip" href="/app/${slug(x.voucher_type)}/${encodeURIComponent(x.voucher_no)}">›</a></div>`)).join("");
+		state.view = "party_ledger";
+		root.innerHTML = header(`${t("party_ledger")}: ${esc(d.title)}`) + `<main><p class="sk-note">${esc(d.from)} → ${esc(d.to)}</p>
+			<button class="sk-chip${plMonth ? " on" : ""}" data-plmonth="1">${plMonth ? "✓ " : ""}${t("this_month_only")}</button>
+			${d.open_bills.length ? `<h3 class="sk-h">${t("open_bills")} (${d.open_bills.length})</h3><ul class="sk-list">${bills}</ul>` : ""}
+			<p class="sk-note">${t("opening")} ${money(d.opening) || "Rs 0"} → <b>${t("closing")} ${money(d.closing) || "Rs 0"}</b></p>
+			<ul class="sk-list">${rows || empty()}</ul><button class="sk-btn wide" data-go="${esc(S.ledger ? S.ledger.view : "gateway")}">‹ ${t("back")}</button></main>`;
 	}
 	// SK 27-Oct: the team knows Tally, so Accounts opens like Gateway of Tally: Masters, Transactions, Utilities, Reports
 	async function renderGateway() {
@@ -6257,18 +6437,46 @@
 			case "fin-pe-kind": {
 				S.peKind = el.dataset.k;
 				root.querySelectorAll('[data-act="fin-pe-kind"]').forEach((b) => b.classList.toggle("on", b === el));
-				document.getElementById("pe-sup").hidden = S.peKind !== "supplier_bill";
-				document.getElementById("pe-party").hidden = S.peKind === "supplier_bill";
-				return;
+				S.peR = null;
+				if (S.peText) return peRead(false); // the photo was read already: the same text, read for this kind
+				return peForm();
 			}
+			case "fin-pe-read": return peRead(true);
+			case "fin-pe-party": return peRead(false);
 			case "fin-pe-save": {
 				const kind = S.peKind || "supplier_bill";
 				el.disabled = true;
+				let photo = null;
 				try {
-					const r = await call("fin_photo_entry", { kind, photo: await photoUrl("b-photo"), supplier: kind === "supplier_bill" ? val("b-sup") : null,
-						party: kind === "supplier_bill" ? null : val("pe-pty"), amount: val("b-amt"), ref_no: val("b-no"), note: val("pe-note") }, true);
-					toast(`✓ ${t("pe_sent")}`); return go(r.go === "bills_to_post" ? "bills_to_post" : "photo_entry");
+					photo = S.peRetry || await photoUrl("b-photo"); // uploaded first: a failed save never loses the photo
+					if (!photo) { toast(t("pe_photo"), true); return; }
+					const c = peCollect(), f = (S.peR && S.peR.facts) || {};
+					const [srcT, srcN] = (c["pe-src"] || "").split("|"), [soT, soN] = (c["pe-sodn"] || "").split("|");
+					const party = c["pe-sup"] || c["pe-cus"] || "";
+					const values = { supplier: c["pe-sup"], customer: c["pe-cus"], bill_no: c["pe-billno"], bill_date: c["pe-date"],
+						purchase_order: srcT === "PO" ? srcN : null, purchase_receipt: srcT === "PR" ? srcN : null,
+						sales_order: soT === "SO" ? soN : null, delivery_note: soT === "DN" ? soN : null,
+						expense_account: c["pe-head"], cost_center: c["pe-cc"], money_account: c["pe-money"], taxable: c["pe-taxable"], cgst: c["pe-cgst"],
+						sgst: c["pe-sgst"], igst: c["pe-igst"], total: c["pe-total"], what: c["pe-what"], amount: c["pe-amt"] || c["pe-total"], utr: c["pe-utr"], note: c["pe-note"],
+						text: (S.peText || "").slice(0, 2000), ...(f.gstin && party && party !== f.party ? { read_party_text: f.gstin, party_chosen: party } : {}) };
+					const r = await call("fin_pe_save", { kind, photo, values: JSON.stringify(values) }, true);
+					peErr(photo, null);
+					toast(`✓ ${t("pe_made")}: ${r.name}${r.no_po ? " · " + t("pe_no_po_flag") : ""}`);
+					S.peR = null; S.peText = ""; S.peRetry = null;
+					return go("photo_entry");
+				} catch (e) {
+					if (photo) peErr(photo, String((e && e.message) || e).replace(/<[^>]+>/g, " ").slice(0, 200));
+					throw e;
 				} finally { el.disabled = false; }
+			}
+			case "fin-pe-retry": { S.peRetry = S.peL.not_saved[i].file_url; S.peR = null; S.peText = ""; await go("photo_entry"); return toast(t("pe_read_note")); }
+			case "fin-pe-drop": { await call("fin_pe_drop", { file: S.peL.not_saved[i].name }, true); peErr(S.peL.not_saved[i].file_url, null); return go("photo_entry"); }
+			case "fin-pe-post": {
+				el.disabled = true;
+				const d = S.peL.drafts[i];
+				const r = await call("fin_post", { doctype: d.doctype, name: d.name }, true);
+				toast(r.posted ? `✓ ${r.name} ${t("posted")}` : `${r.name}: ${r.reason || t("kept_draft")}`, !r.posted);
+				return go("photo_entry");
 			}
 			case "fin-pe-done": await call("fin_bill_photo_done", { todo: S.pe[i].name }, true); return go("photo_entry");
 			case "fin-post-pi": case "fin-post-si": {
@@ -6654,7 +6862,13 @@
 			if (el.dataset.custseg !== undefined) { custSeg = el.dataset.custseg; return go("customers"); }
 			if (el.dataset.tmail !== undefined) return teamMailSheet(Number(el.dataset.tmail));
 			if (el.dataset.fintab) { finTab[el.dataset.view] = el.dataset.fintab; return go(el.dataset.view); }
-			if (el.dataset.ledger !== undefined) return renderLedgerEntries(Number(el.dataset.ledger));
+			if (el.dataset.ledger !== undefined) {
+				const pt = { receivable: "Customer", sales: "Customer", payable: "Supplier", purchase: "Supplier" }[S.ledger && S.ledger.kind];
+				if (pt) { plMonth = false; return renderPartyLedger(pt, S.ledger.rows[Number(el.dataset.ledger)].ledger); }
+				return renderLedgerEntries(Number(el.dataset.ledger));
+			}
+			if (el.dataset.party) { plMonth = false; return renderPartyLedger(el.dataset.ptype, el.dataset.party); }
+			if (el.dataset.plmonth && plLast) { plMonth = !plMonth; return renderPartyLedger(plLast.ptype, plLast.party); }
 			if (el.dataset.dbday) {
 				const d = new Date(dayBookDate || new Date());
 				d.setDate(d.getDate() + Number(el.dataset.dbday));
@@ -6662,6 +6876,7 @@
 				dbQ = "";
 				return renderDayBook();
 			}
+			if (el.dataset.finsettled) { finSettled = !finSettled; return go(state.view); }
 			if (el.dataset.finmonth) {
 				const d = finMonth ? new Date(finMonth) : new Date();
 				d.setDate(1); d.setMonth(d.getMonth() + Number(el.dataset.finmonth));
@@ -7531,17 +7746,19 @@
 				if (!mustFill([["f-first", t("cust_name"), !/^\s*(enquiry|inquiry|enq|lead|customer|sir|madam)?\s*$/i.test(val("f-first"))],
 					["f-mobile", t("mobile"), val("f-mobile").replace(/\D/g, "").length >= 10], ["f-source", t("source")], ["f-segment", t("segment")]])) return;
 				el.disabled = true;
-				const name = await call("new_lead", { first_name: val("f-first"), organization: val("f-org"), mobile_no: val("f-mobile"),
-					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl, product: val("f-product"), status: val("f-status"),
-					no_gstin: document.getElementById("f-nogst") && document.getElementById("f-nogst").checked ? 1 : 0, customer: S.leadCustomer || "" }, true);
-				S.leadCustomer = null;
-				// SK 1-Nov minimum input: no switch; the lead goes for its quote by itself (rate-card quote / design / quote AI)
-				const route = await call("lead_route", { name }, true).catch((e) => ({ route: "none", reason: e.message }));
-				cardUrl = null;
-				clearDraft();
-				if (S.mkFrom) { await call("marketing_lead_made", { contact: S.mkFrom, lead: name }, true).catch(() => null); S.mkFrom = null; }
-				return leadSaved({ name, title: val("f-org") || val("f-first"), person: val("f-first"), mobile: val("f-mobile"),
-					segment: val("f-segment"), source: val("f-source"), route });
+				S.leadArgs = { first_name: val("f-first"), organization: val("f-org"), mobile_no: val("f-mobile"),
+					email: val("f-email"), source: val("f-source"), segment: val("f-segment"), requirement: val("f-req"), photo: cardUrl, product: val("f-product"),
+					no_gstin: document.getElementById("f-nogst") && document.getElementById("f-nogst").checked ? 1 : 0, customer: S.leadCustomer || "" };
+				S.dblFor = "new_lead"; // SK 21-Nov: a "same customer" stop offers "New requirement for this customer" / "Real duplicate"
+				let name;
+				try { name = await call("new_lead", S.leadArgs, true); } finally { S.dblFor = null; el.disabled = false; }
+				return leadDone(name);
+			}
+			if (act === "lead-new-req") { // the pop-up's "New requirement for this customer"
+				el.disabled = true;
+				const name = await call("new_lead", { ...S.leadArgs, new_requirement: 1 }, true);
+				closeSheet();
+				return leadDone(name);
 			}
 			if (act === "lesson-done") {
 				const n = Number(el.dataset.n || 0);

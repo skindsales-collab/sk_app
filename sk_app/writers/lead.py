@@ -96,9 +96,14 @@ import re
 def new_lead(user: str, first_name: str, mobile_no: str | None = None, organization: str | None = None,
 		email: str | None = None, source: str | None = None, segment: str | None = None,
 		requirement: str | None = None, photo: str | None = None, product: str | None = None, status: str | None = None,
-		no_gstin=0, customer: str | None = None) -> str:
+		no_gstin=0, customer: str | None = None, new_requirement=0) -> str:
 	if not installed():
 		frappe.throw(_("Frappe CRM is not installed"))
+	# SK 21-Nov: a new lead is always New (call and qualify come after); an existing customer's new requirement is saved
+	# as its own lead after the salesperson confirmed it in the pop-up (not a double)
+	status = None
+	if frappe.utils.cint(new_requirement):
+		frappe.flags.sk_no_double = True
 	# point 2 + SK 28-Oct mandatory gate: the lead is saved only with a real name, contact person, mobile, segment and
 	# source, so the right team gets it and nothing is named "Enquiry"
 	from sk_app import gates
@@ -143,6 +148,14 @@ def set_status(doctype: str, name: str, status: str, lost_reason: str | None = N
 	if not frappe.db.exists(status_dt, status):
 		frappe.throw(_("Unknown status {0}").format(status))
 	doc = frappe.get_doc(doctype, name)
+	if doctype == "CRM Lead" and status != doc.status:
+		from sk_app import gates
+		from sk_app import quote_step_rules as Q
+
+		step = gates._step("CRM Lead", status)
+		# SK 21-Nov: lead -> call -> Qualified; a lead is qualified only after the customer was spoken to
+		if step not in (None, "New") and step != "Won" and not Q.may_qualify(gates.lead_had_call(name)):
+			frappe.throw(_(Q.CALL_FIRST), title=_("Step missing"))
 	doc.status = status
 	# SK 20-Nov: Deal Loss / Junk Lead / Lost (status type Lost) need the reason ERPNext asks for; the app picks it with a note
 	if frappe.get_cached_value(status_dt, status, "type") == "Lost":
@@ -155,12 +168,7 @@ def set_status(doctype: str, name: str, status: str, lost_reason: str | None = N
 		if lost_notes:
 			doc.lost_notes = lost_notes
 	doc.save()
-	if doctype == "CRM Lead" and not frappe.db.exists("CRM Deal", {"lead": name}):
-		from sk_app import gates, quote_pickup
-
-		if gates.lead_qualified(name):
-			# SK 4-Nov: the lead goes for its quote (deal + rate-card quote / design) once it is Qualified, not on save
-			quote_pickup.after_input(frappe.session.user, doctype, name)
+	# SK 21-Nov: nothing more happens by itself; the salesperson sends the qualified lead to design / for quote
 	return doc.status
 
 def set_requirement(user: str, doctype: str, name: str, text: str) -> dict:
@@ -428,3 +436,14 @@ def save_site_checklist(user: str, deal: str, answers: dict, note: str | None = 
 	if missing:
 		frappe.throw(_("Please fill: {0}").format(", ".join(missing)))
 	return add_note(user, "CRM Deal", deal, site_checklist_text(answers, note), photo)
+
+
+def note_new_requirement(user: str, lead: str):
+	"""The pop-up's "New requirement for this customer": the lead is linked to the earlier records by a note."""
+	from frappe.utils import nowdate
+
+	mobile = frappe.db.get_value("CRM Lead", lead, "mobile_no") or ""
+	key = mobile[-10:]
+	earlier = frappe.get_all("CRM Lead", filters={"mobile_no": ["like", f"%{key}"], "name": ["!=", lead]}, pluck="name", limit=5) if key else []
+	add_note(user, "CRM Lead", lead, _("New requirement from an existing customer (confirmed by {0} on {1}). Earlier: {2}").format(
+		frappe.utils.get_fullname(user), nowdate(), ", ".join(earlier) or "-"), first_response=False)

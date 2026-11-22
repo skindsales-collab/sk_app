@@ -20,6 +20,17 @@ def settings_defaults():
 			frappe.db.set_single_value("SK App Settings", df.fieldname, df.default)
 
 
+def _alert_routes():
+	from sk_app.core.night_rules import with_default_routes
+
+	if not frappe.get_meta("SK App Settings").has_field("alert_routes"):
+		return
+	cur = frappe.db.get_single_value("SK App Settings", "alert_routes") or ""
+	new = with_default_routes(cur)
+	if new != cur.strip():
+		frappe.db.set_single_value("SK App Settings", "alert_routes", new)
+
+
 def _safe(step, label: str):
 	"""Run one setup step; if it fails, undo it, log it and go on with the update."""
 	frappe.db.savepoint("sk_setup")
@@ -56,6 +67,17 @@ def after_migrate():
 	from sk_app.hiring import ensure_setup as hiring_setup
 
 	hiring_setup()  # SK 17-Nov hiring: WhatsApp / WorkIndia sources, Round 1 / Round 2, 5 skills, question bank, hiring fields
+	from sk_app.mailbox import ensure_fetch_all
+
+	_safe(ensure_fetch_all, "mailboxes read all mails")
+	from sk_app.writers.photo_entry import ensure_fields as photo_entry_fields
+
+	_safe(photo_entry_fields, "bill without PO flag")
+	_safe(_alert_routes, "alert mail routes")  # SK 21-Nov: purchase drafts and store items to prod@skind.tech  # SK 21-Nov: a bill without PO is a draft SK sees  # SK 21-Nov: read + unread mails reach ERPNext
+	from sk_app.invoice_naming import ensure_amend_naming, ensure_counter
+
+	_safe(ensure_counter, "invoice running number")  # SK 21-Nov: SK/IND/MMYY/### never restarts in a new month
+	_safe(ensure_amend_naming, "amended invoice takes the next number")  # GST 16-character limit
 
 	ensure_setup()
 	from sk_app.issue_desk import ensure_setup as issue_desk_setup

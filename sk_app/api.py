@@ -580,9 +580,13 @@ def lead_lookup(q):
 
 @frappe.whitelist(methods=["POST"])
 def new_lead(first_name, mobile_no=None, organization=None, email=None, source=None, segment=None,
-		requirement=None, photo=None, product=None, status=None, no_gstin=0, customer=None):
-	return lead_w.new_lead(_me().user, first_name, mobile_no, organization, email, source, segment, requirement, photo, product, status,
-		no_gstin, customer)
+		requirement=None, photo=None, product=None, status=None, no_gstin=0, customer=None, new_requirement=0):
+	user = _me().user
+	name = lead_w.new_lead(user, first_name, mobile_no, organization, email, source, segment, requirement, photo, product, status,
+		no_gstin, customer, new_requirement)
+	if frappe.utils.cint(new_requirement):
+		lead_w.note_new_requirement(user, name)
+	return name
 
 
 @contextmanager
@@ -607,7 +611,16 @@ def lead_route(name):
 
 @frappe.whitelist(methods=["POST"])
 def lead_to_design(name):
-	"""New Lead "Send to design" switch: the lead becomes a deal that the AI design pickup reads."""
+	"""SK 21-Nov: the salesperson's own step after Qualified. Cabin: the lead becomes a deal sent to design. Non-Cabin
+	(no drawing): the lead becomes a deal sent for its quote. Nothing goes by itself any more."""
+	seg = frappe.db.get_value("CRM Lead", name, "sk_segment") if frappe.get_meta("CRM Lead").has_field("sk_segment") else None
+	from sk_app.segments import NON_CABIN, main_of, sub_of
+
+	if main_of(sub_of(seg)) == NON_CABIN:
+		from sk_app import quote_pickup
+
+		r = quote_pickup._send_for_quote(_me().user, name, sub_of(seg), quote_pickup._requirement(name))
+		return {"sent": bool(r.get("deal")), "deal": r.get("deal"), "reason": r.get("reason"), "route": r.get("route")}
 	return lead_w.send_to_design(_me().user, name)
 
 
@@ -1064,6 +1077,35 @@ def fin_bills():
 @frappe.whitelist(methods=["POST"])
 def fin_photo_entry(kind, photo, supplier=None, party=None, amount=None, ref_no=None, note=None):
 	return bill_w.photo_entry(_me().user, kind, photo, supplier or None, party or None, amount or None, ref_no or None, note or None)
+
+
+@frappe.whitelist()
+def fin_pe_read(kind, text=None, party=None):
+	from sk_app.writers import photo_entry
+
+	return photo_entry.read(_me().user, kind, text or "", party or None)
+
+
+@frappe.whitelist(methods=["POST"])
+def fin_pe_save(kind, photo, values=None):
+	from sk_app.writers import photo_entry
+
+	return photo_entry.save(_me().user, kind, photo, frappe.parse_json(values) if values else {})
+
+
+@frappe.whitelist()
+def fin_pe_lists():
+	from sk_app.writers import photo_entry
+
+	user = _me().user
+	return {"not_saved": photo_entry.not_saved(user), "drafts": photo_entry.drafts(user)}
+
+
+@frappe.whitelist(methods=["POST"])
+def fin_pe_drop(file):
+	from sk_app.writers import photo_entry
+
+	return photo_entry.drop_photo(_me().user, file)
 
 
 @frappe.whitelist()
@@ -1746,8 +1788,13 @@ def ai_training():
 
 # ---------- Ledger-wise Accounts screens ----------
 @frappe.whitelist()
-def fin_ledgers(kind, month=None):
-	return ledger.ledgers(_me().user, kind, month)
+def fin_ledgers(kind, month=None, show_settled=0):
+	return ledger.ledgers(_me().user, kind, month, show_settled)
+
+
+@frappe.whitelist()
+def fin_party_ledger(party_type, party, from_date=None, to_date=None):
+	return ledger.party_ledger(_me().user, party_type, party, from_date, to_date)
 
 
 @frappe.whitelist()

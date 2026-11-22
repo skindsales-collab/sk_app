@@ -61,7 +61,17 @@ def _close(rows):
 	return rows
 
 
-def ledgers(user: str, kind: str, month=None) -> dict:
+def _balance_today(accts) -> dict:
+	"""Party balance as on today (all entries up to today), used to hide parties already settled."""
+	if not accts:
+		return {}
+	rows = frappe.db.sql("""select party, sum(debit - credit) as bal from `tabGL Entry`
+		where company=%(c)s and is_cancelled=0 and account in %(a)s and ifnull(party, '') != '' and posting_date <= %(d)s
+		group by party""", {"c": _company(), "a": tuple(accts), "d": frappe.utils.today()}, as_dict=True)
+	return {r.party: flt(r.bal) for r in rows}
+
+
+def ledgers(user: str, kind: str, month=None, show_settled=0) -> dict:
 	"""One row per ledger for the month, with totals."""
 	need(user, ACCOUNTS, MANAGEMENT)
 	if kind not in KINDS:
@@ -75,7 +85,11 @@ def ledgers(user: str, kind: str, month=None) -> dict:
 	elif kind in ("receivable", "payable"):
 		accts = _accounts(account_type="Receivable" if kind == "receivable" else "Payable")
 		rows = _close(_gl_by("party", start, end, account=accts)) if accts else []
-		rows = [r for r in rows if abs(flt(r.closing)) > 0.5 or flt(r.debit) or flt(r.credit)]
+		if frappe.utils.cint(show_settled):
+			rows = [r for r in rows if abs(flt(r.closing)) > 0.5 or flt(r.debit) or flt(r.credit)]
+		else:  # SK 21-Nov: once paid, the party leaves the list at once (balance today under Rs 1, paise ignored)
+			today = _balance_today(accts)
+			rows = [r for r in rows if abs(today.get(r.ledger, 0)) >= 1]
 		if kind == "payable":
 			for r in rows:  # suppliers: show what we owe as a plus amount
 				r["opening"], r["closing"] = -flt(r.opening), -flt(r.closing)
@@ -83,10 +97,12 @@ def ledgers(user: str, kind: str, month=None) -> dict:
 	elif kind in ("purchase", "sales"):
 		dt, party = ("Purchase Invoice", "supplier") if kind == "purchase" else ("Sales Invoice", "customer")
 		docs = frappe.get_all(dt, filters={"company": _company(), "docstatus": ["<", 2], "posting_date": ["between", [start, end]]},
-			fields=["name", party, f"{party}_name as party_name", "is_return", "grand_total", "docstatus"], limit=2000)
+			fields=["name", party, f"{party}_name as party_name", "is_return", "grand_total", "docstatus"]
+			+ (["bill_no"] if kind == "purchase" else []), limit=2000)
 		by = {}
 		for d in docs:
-			r = by.setdefault(d[party], frappe._dict(ledger=d[party], title=d.party_name, bills=0, returns=0, count=0, drafts=0))
+			r = by.setdefault(d[party], frappe._dict(ledger=d[party], title=d.party_name, bills=0, returns=0, count=0, drafts=0, keys=""))
+			r["keys"] += f" {d.name} {d.get('bill_no') or ''}"  # SK 21-Nov search bar: invoice no / supplier bill no
 			r.count += 1
 			r.drafts += 1 if d.docstatus == 0 else 0
 			if d.is_return:
@@ -99,6 +115,12 @@ def ledgers(user: str, kind: str, month=None) -> dict:
 	elif kind == "journal":
 		rows = _gl_by("account", start, end, voucher_type="Journal Entry")
 		rows = [r for r in rows if flt(r.debit) or flt(r.credit)]
+		keys = {}  # SK 21-Nov search bar: voucher no and party of each account's journal lines
+		for g in frappe.db.sql("""select account, voucher_no, party from `tabGL Entry` where company=%s and is_cancelled=0
+				and voucher_type='Journal Entry' and posting_date between %s and %s""", (_company(), start, end), as_dict=True):
+			keys[g.account] = keys.get(g.account, "") + f" {g.voucher_no} {g.party or ''}"
+		for r in rows:
+			r["keys"] = keys.get(r.ledger, "")
 	else:  # expenses: every expense ledger under Direct / Indirect Expenses
 		rows = _expense_rows(start, end)
 	return {"kind": kind, "from": str(start), "to": str(end), "rows": rows,
@@ -169,7 +191,7 @@ def entries(user: str, kind: str, ledger: str, month=None) -> dict:
 		and posting_date < %s and """ + ("party = %s and account in %s" if "party" in filters else "account = %s"),
 		(company, start, ledger, tuple(filters["account"][1])) if "party" in filters else (company, start, ledger))[0][0])
 	rows = frappe.get_all("GL Entry", filters=filters, fields=["posting_date", "voucher_type", "voucher_no", "debit", "credit",
-		"against", "remarks", "party"], order_by="posting_date asc, creation asc", limit=0)
+		"against", "remarks", "party", "party_type"], order_by="posting_date asc, creation asc", limit=0)
 	bal = opening
 	for r in rows:
 		bal += flt(r.debit) - flt(r.credit)
@@ -179,6 +201,60 @@ def entries(user: str, kind: str, ledger: str, month=None) -> dict:
 		r["remarks"] = (r.remarks or "")[:120]
 	sign = -1 if kind == "payable" else 1
 	return {"ledger": ledger, "opening": opening * sign, "closing": bal * sign, "rows": rows, "sign": sign}
+
+
+def party_ledger(user: str, party_type: str, party: str, from_date=None, to_date=None) -> dict:
+	"""SK 21-Nov (Shraddha): one Party Ledger for a customer or supplier, like Tally: opening (with the opening entries),
+	every voucher with a running balance and the bill no, closing, and the open bills with their age on top."""
+	need(user, ACCOUNTS, MANAGEMENT)
+	if party_type not in ("Customer", "Supplier"):
+		frappe.throw(_("Party type must be Customer or Supplier"))
+	company = _company()
+	accts = _accounts(account_type="Receivable" if party_type == "Customer" else "Payable")
+	if not accts:
+		return {"party": party, "party_type": party_type, "opening": 0, "closing": 0, "rows": [], "open_bills": [], "sign": 1}
+	if not from_date:
+		from erpnext.accounts.utils import get_fiscal_year
+
+		try:
+			from_date = get_fiscal_year(nowdate(), company=company)[1]
+		except Exception:
+			from_date = getdate(nowdate()).replace(month=4, day=1)
+	from_date, to_date = getdate(from_date), getdate(to_date or nowdate())
+	args = {"c": company, "pt": party_type, "p": party, "a": tuple(accts), "f": from_date, "t": to_date}
+	base = "company=%(c)s and is_cancelled=0 and party_type=%(pt)s and party=%(p)s and account in %(a)s"
+	opening = flt(frappe.db.sql(f"""select sum(debit - credit) from `tabGL Entry` where {base}
+		and (posting_date < %(f)s or (is_opening='Yes' and posting_date <= %(t)s))""", args)[0][0])
+	rows = frappe.db.sql(f"""select posting_date, voucher_type, voucher_no, sum(debit) as debit, sum(credit) as credit,
+		max(remarks) as remarks, max(against_voucher) as against_voucher from `tabGL Entry` where {base}
+		and posting_date between %(f)s and %(t)s and ifnull(is_opening, 'No') != 'Yes'
+		group by posting_date, voucher_type, voucher_no order by posting_date, min(creation)""", args, as_dict=True)
+	bills = {}
+	for dt in ("Purchase Invoice", "Journal Entry"):
+		names = [r.voucher_no for r in rows if r.voucher_type == dt]
+		if names:
+			bills.update(dict(frappe.get_all(dt, filters={"name": ["in", names]}, fields=["name", "bill_no"], as_list=True)))
+	bal = opening
+	for r in rows:
+		bal += flt(r.debit) - flt(r.credit)
+		r["balance"] = bal
+		r["bill_no"] = bills.get(r.voucher_no) or ""
+		r["remarks"] = (r.remarks or "")[:120]
+	sign = -1 if party_type == "Supplier" else 1
+	today = getdate(nowdate())
+	open_bills = frappe.db.sql("""select against_voucher_type as doctype, against_voucher_no as name, sum(amount) as outstanding,
+		min(posting_date) as posting_date from `tabPayment Ledger Entry` where company=%(c)s and party_type=%(pt)s and party=%(p)s
+		and delinked=0 group by against_voucher_type, against_voucher_no having abs(sum(amount)) >= 1
+		order by min(posting_date)""", args, as_dict=True)
+	pi = [b.name for b in open_bills if b.doctype == "Purchase Invoice"]
+	pi_bill = dict(frappe.get_all("Purchase Invoice", filters={"name": ["in", pi]}, fields=["name", "bill_no"], as_list=True)) if pi else {}
+	for b in open_bills:
+		b["outstanding"] = flt(b.outstanding)  # the Payment Ledger already keeps what is owed as a plus amount for both sides
+		b["age"] = (today - getdate(b.posting_date)).days if b.posting_date else 0
+		b["bill_no"] = pi_bill.get(b.name) or ""
+	return {"party": party, "party_type": party_type, "title": frappe.db.get_value(party_type, party,
+		"customer_name" if party_type == "Customer" else "supplier_name") or party, "from": str(from_date), "to": str(to_date),
+		"opening": opening * sign, "closing": bal * sign, "rows": rows, "open_bills": open_bills, "sign": sign}
 
 
 def _segment_of(account_segment: str | None, cost_center: str | None, cc_parents: dict, fallback: str | None = None) -> str:

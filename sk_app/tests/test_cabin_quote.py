@@ -71,8 +71,20 @@ class TestCabinQuote(IntegrationTestCase):
 	def test_print_format(self):
 		r = cabin_quote.make("Administrator", REQ, customer=CUSTOMER)
 		html = cabin_quote.quote_html(frappe.get_doc("Quotation", r["name"]))
-		for part in ("QUOTATION", r["ref"], "Rev: R0", "Two Lakh Eighty-Three Thousand", "Technical specification", "₹2,83,000", "sk-quote-header.png"):
+		for part in ("QUOTATION", r["ref"], "Rev: R0", "Two Lakh Eighty-Three Thousand", "Technical details", "₹2,83,000", "<colgroup>"):
 			self.assertIn(part, html)
+		# SK 21-Nov: the header follows the customer group: Non-Cabin groups get the machine-shifting header
+		q = frappe.get_doc("Quotation", r["name"])
+		for group, ms in (("Standard Cabin (GI / ACP)", False), ("Machine Shifting", True), ("Non-Cabin", True), (None, False)):
+			q.customer_group = group
+			if group is None:
+				frappe.db.set_value("Customer", CUSTOMER, "customer_group", "Machine Shifting")
+				q.customer_group = None
+			self.assertEqual(cabin_quote.is_noncabin(q), ms if group else True, group)
+			html = cabin_quote.quote_html(q)
+			self.assertIn("sk-quote-header-v2.png" if cabin_quote.is_noncabin(q) else "sk-cabin-quote-header-v2.png", html)
+			self.assertIn("97672 13521" if cabin_quote.is_noncabin(q) else "84325 33555", html)
+			self.assertIn("sales@skind.tech" if cabin_quote.is_noncabin(q) else "cabin@skind.tech", html)
 		self.assertTrue(frappe.db.exists("Print Format", cabin_quote.PRINT_FORMAT))
 		self.assertEqual(frappe.db.get_value("Property Setter", {"doc_type": "Quotation", "property": "default_print_format"}, "value"), cabin_quote.PRINT_FORMAT)
 		self.assertEqual(cabin_quote.max_discount(REP), 0)
