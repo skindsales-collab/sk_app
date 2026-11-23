@@ -165,9 +165,14 @@ def submit_quotation(user: str, quotation: str, quiet: bool = False) -> dict:
 	frappe.set_user("Administrator")  # the account check, as in make_quotation; who may submit is checked above
 	try:
 		q.flags.ignore_permissions = True
+		# SK 23-Nov (Swati / Pranali quotes stuck in draft): the customer's GSTIN and address are often filled AFTER the
+		# draft quote was made; the draft still held "Unregistered" and no address, so ERPNext refused the submit
+		# ("GST Category cannot be Unregistered for party with GSTIN"). The draft re-reads them from the Customer first.
+		if q.quotation_to == "Customer":
+			refresh_party(q)
 		if not q.get("taxes") and "gst" not in (q.terms or "").lower():
 			q.terms = gst_terms(q.terms)
-			q.save()
+		q.save()
 		q.submit()
 	except frappe.ValidationError:
 		frappe.set_user(current)
