@@ -285,7 +285,31 @@ def my_leads():
 	from sk_app.cold_calls import FIELD, has_field
 
 	cold = frappe.db.count("CRM Lead", {"lead_owner": profile.user, "converted": 0, FIELD: 1}) if has_field() else 0
-	return {"leads": [_item_dict(i) for i in leads], "deals": [_item_dict(i) for i in deals], "cold": cold}
+	out = {"leads": [_item_dict(i) for i in leads], "deals": [_item_dict(i) for i in deals], "cold": cold}
+	_flag_repeats(out["leads"])
+	return out
+
+
+def _flag_repeats(rows: list[dict]):
+	"""SK 17-Nov sales list (approved 23-Nov): a New lead whose mobile already had a lead / deal that was Won, Lost or
+	Converted is flagged on My Leads ("Repeat: earlier ... Won"), so it is not worked as a fresh enquiry by mistake."""
+	from sk_app.double_rules import mobile_key
+
+	done = {s for s in frappe.get_all("CRM Lead Status", filters={"type": ["in", ["Won", "Lost"]]}, pluck="name")}
+	deal_done = {s: t for s, t in frappe.get_all("CRM Deal Status", filters={"type": ["in", ["Won", "Lost"]]}, fields=["name", "type"], as_list=True)}
+	for r in rows:
+		key = mobile_key(r.get("mobile"))
+		if (r.get("status") or "New") != "New" or not key:
+			continue
+		like = f"%{key[-10:]}"
+		lead = frappe.db.get_value("CRM Lead", {"name": ["!=", r["name"]], "mobile_no": ["like", like], "status": ["in", list(done) or ["-"]]},
+			["name", "status"], order_by="modified desc", as_dict=True) \
+			or frappe.db.get_value("CRM Lead", {"name": ["!=", r["name"]], "mobile_no": ["like", like], "converted": 1}, ["name", "status"], as_dict=True)
+		deal = frappe.db.get_value("CRM Deal", {"mobile_no": ["like", like], "status": ["in", list(deal_done) or ["-"]]}, ["name", "status"],
+			order_by="modified desc", as_dict=True) if frappe.get_meta("CRM Deal").has_field("mobile_no") else None
+		hit = deal or lead
+		if hit:
+			r["repeat"] = f"{hit.name} ({hit.status})"
 
 
 @frappe.whitelist()

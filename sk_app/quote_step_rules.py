@@ -53,3 +53,12 @@ def scope_problem(items: list[dict], cabin_request: bool) -> str | None:
 		if it.get("item_code") == CABIN_ITEM and not cabin_request and len(text) < SPEC_MIN:
 			return CABIN_SCREEN
 	return None
+
+
+# SK 17-Nov sales list (approved 23-Nov "maximum possible coding for correction"): a lead never goes back to New once it
+# was Qualified or later (ADVANTEK 00518 went Qualified > Drawing > New on 2-Nov and dropped out of the follow-up).
+BACK_TO_NEW = "This lead was already {0}. It cannot go back to New: keep it at its stage, or mark it Lost / Junk with the reason"
+
+
+def back_to_new(old_status: str | None, new_status: str | None) -> bool:
+	return bool(old_status) and old_status != "New" and new_status == "New"

@@ -339,6 +339,17 @@ def check_quote_step(doc, method=None):
 				+ "\n" + "\n".join(f"• {t}" for _k, t in missing), title=_("Customer details missing"))
 
 
+def check_lead_not_back_to_new(doc, method=None):
+	"""CRM Lead validate (every route): once past New, a lead is never set back to New."""
+	if _skip() or doc.is_new():
+		return
+	from sk_app import quote_step_rules as Q
+
+	before = doc.get_doc_before_save()
+	if before and Q.back_to_new(before.get("status"), doc.get("status")):
+		frappe.throw(_(Q.BACK_TO_NEW).format(before.status), title=_("Step back not allowed"))
+
+
 def check_quote_scope(doc, method=None):
 	"""Quotation before_submit (SK 23-Nov, every route): no design / attached PDF as the quote; the scope and
 	specification lines are on the quotation, so it prints in the final SK format."""

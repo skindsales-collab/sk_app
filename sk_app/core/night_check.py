@@ -136,11 +136,22 @@ def _drafts(logins: set) -> list[dict]:
 
 
 def _unlinked_payments() -> list[dict]:
+	"""A payment not set against any bill; SK 23-Nov: the party's open bills are named in the item so Accounts can set it
+	against the right one (Payment Entry > Get Outstanding Invoices) without searching."""
 	acc = _function_owner("Accounts")
-	return [R.item("unlinked_payment", "Payment Entry", p.name, f"{p.party_name or p.party} ₹{float(p.unallocated_amount):,.0f} not against any bill · {p.posting_date}",
-		acc, days=date_diff(nowdate(), p.posting_date))
-		for p in frappe.get_all("Payment Entry", filters={"docstatus": 1, "unallocated_amount": [">", 0.5], "posting_date": [">=", _since()]},
-			fields=["name", "party", "party_name", "unallocated_amount", "posting_date"], order_by="posting_date asc", limit=0)]
+	out = []
+	for p in frappe.get_all("Payment Entry", filters={"docstatus": 1, "unallocated_amount": [">", 0.5], "posting_date": [">=", _since()]},
+			fields=["name", "party_type", "party", "party_name", "unallocated_amount", "posting_date"], order_by="posting_date asc", limit=0):
+		what = f"{p.party_name or p.party} ₹{float(p.unallocated_amount):,.0f} not against any bill · {p.posting_date}"
+		dt, field = (("Sales Invoice", "customer") if p.party_type == "Customer" else ("Purchase Invoice", "supplier") if p.party_type == "Supplier" else (None, None))
+		bills = frappe.get_all(dt, filters={field: p.party, "docstatus": 1, "outstanding_amount": [">", 0]}, fields=["name", "outstanding_amount"],
+			order_by="posting_date asc", limit=3) if dt else []
+		if bills:
+			what += " · open bills: " + ", ".join(f"{b.name} ₹{float(b.outstanding_amount):,.0f}" for b in bills)
+		else:
+			what += " · no open bill: an advance, or the bill is not entered yet"
+		out.append(R.item("unlinked_payment", "Payment Entry", p.name, what, acc, days=date_diff(nowdate(), p.posting_date)))
+	return out
 
 
 def _import_gaps() -> list[dict]:

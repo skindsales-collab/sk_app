@@ -64,7 +64,7 @@ doc_events = {
 	"SK Library Item": {"validate": "sk_app.library.make_public"},
 	# SK 28-Oct mandatory gate: a lead / deal moves on only with its data and the step's ERPNext document (sk_app.gates)
 	# SK 4-Nov: no double entry anywhere: same party + amount within 7 days, same reference / bill no, a 2nd deal of a lead (sk_app.doubles)
-	"CRM Lead": {"validate": ["sk_app.segments.set_main", "sk_app.gates.check_crm"], "before_insert": "sk_app.doubles.check_lead"},
+	"CRM Lead": {"validate": ["sk_app.segments.set_main", "sk_app.gates.check_crm", "sk_app.gates.check_lead_not_back_to_new"], "before_insert": "sk_app.doubles.check_lead"},
 	"Job Applicant": {"before_insert": "sk_app.writers.applicant.before_insert"},  # R12: e-mail from the mobile, family from the designation
 	"Comment": {"after_insert": "sk_app.writers.interview.on_comment"},  # R12: 'Slot: 18-Nov 10:30' on a Job Applicant books Round 1
 	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.sales_screens.set_deal_customer", "sk_app.quote_pickup.on_deal_validate",

@@ -23,3 +23,10 @@ def test_attached_pdf_is_not_the_quote():
 	assert scope_problem([{"item_code": "SK-CABIN", "description": "Office cabin 20x10: GI frame, 0.9 mm corrugated sheet walls, "
 		"18 mm cement fibre board floor, 2 windows, 1 door, LED lights"}], False) is None
 	assert scope_problem([{"item_code": "SK-JOB", "description": "Shifting of 3 CNC machines from Chakan to Talegaon incl. crane"}], False) is None
+
+
+def test_lead_never_back_to_new():
+	from sk_app.quote_step_rules import back_to_new
+
+	assert back_to_new("Qualified", "New") and back_to_new("Contacted", "New")
+	assert not back_to_new("New", "New") and not back_to_new(None, "New") and not back_to_new("Qualified", "Junk Lead")
