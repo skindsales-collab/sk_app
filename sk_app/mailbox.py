@@ -398,6 +398,8 @@ def remind():
 # SK 27-Oct: "need to collect all relevant lead data & other & process": an enquiry mail to a sales box becomes a lead
 # by itself; vendor offers, bank mails, newsletters and spam stay in the box for a person to mark.
 LEAD_BOXES = ("sales@skind.tech", "cabin@skind.tech", "service@skind.tech")
+# segment of a mail lead when its words do not tell (SK 23-Nov checker): cabin@ = Cabin, sales@ / service@ = Non-Cabin
+BOX_SEGMENT = {"cabin@skind.tech": "Standard Cabin (GI / ACP)", "sales@skind.tech": "Other", "service@skind.tech": "Other"}
 ENQUIRY_WORDS = ("enquiry", "inquiry", "quotation", "quote", "requirement", "required", "cabin", "container", "porta cabin", "portable",
 	"site office", "labour camp", "labor camp", "lgsf", "prefab", "modular", "toilet", "machine shifting", "shifting",
 	"rigging", "dismantl", "relocation", "job work", "machining", "price", "budget")
@@ -497,6 +499,10 @@ def auto_leads() -> int:
 			data["first_name"] = person or data["first_name"] or company or "Enquiry"
 			data["organization"] = data.get("organization") or company
 			box = _box_of(r, boxes, box_of)
+			# SK 23-Nov checker: a mail lead always has a segment: the words of the mail first, else the box it came to
+			from sk_app.segments import sub_of
+
+			data["segment"] = sub_of(data.get("segment")) or lead_sources.segment_of(f"{r.subject or ''} {text}") or BOX_SEGMENT.get(box)
 			owner = None
 			if box == "service@skind.tech":
 				owner = frappe.get_cached_doc("SK App Settings").get("lead_owner_noncabin")

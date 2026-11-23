@@ -123,6 +123,13 @@ def detail(doctype: str, name: str) -> dict:
 
 	erp = _erp_docs(deal)
 	customer = erp_flow.customer_of(deal["name"]) if deal else None
+	if customer:
+		from sk_app.writers.customer import fill_group
+
+		try:
+			fill_group(customer, deal["name"])  # SK 23-Nov: the deal's segment goes onto the customer
+		except Exception:
+			frappe.log_error(f"SK App customer group from deal {deal['name']}")
 	from sk_app import view_member
 
 	return {"by_ceo": name in view_member.on_behalf_names(doctype), 

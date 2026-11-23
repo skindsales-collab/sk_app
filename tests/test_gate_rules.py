@@ -128,3 +128,17 @@ def test_po_refers_to_lead_or_deal_name():
 	assert not po_refers_to("From CRM-LEAD-2026-006351", ["CRM-LEAD-2026-00635"])
 	assert not po_refers_to("PO 4500123", ["CRM-LEAD-2026-00635"])
 	assert not po_refers_to(None, ["CRM-LEAD-2026-00635"])
+
+
+def test_placeholder_po_and_po_date():
+	from sk_app.gate_rules import is_placeholder_po, order_missing
+
+	for bad in ("From CRM-LEAD-2026-00635", "Common Sheet", "TBA", "-", "Tally 711"):
+		assert is_placeholder_po(bad), bad
+	assert not is_placeholder_po("4500012345") and not is_placeholder_po("PO/2026/118")
+	base = {"transaction_date": "2026-11-23", "delivery_date": "2026-12-10", "items": [{"qty": 1, "rate": 1}], "grand_total": 1}
+	keys = lambda d: [k for k, _t in order_missing({**base, **d})]  # noqa: E731
+	assert "po_no" in keys({"po_no": "From CRM-LEAD-2026-00635", "po_date": "2026-11-20"})
+	assert "po_date" in keys({"po_no": "4500012345", "po_date": None})
+	assert keys({"po_no": "4500012345", "po_date": "2026-11-20"}) == []
+	assert keys({"po_no": "", "po_file": True}) == []

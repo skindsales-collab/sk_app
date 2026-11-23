@@ -152,6 +152,11 @@ def order_missing(d: dict) -> list[tuple[str, str]]:
 		out.append(("delivery_date", "Promised delivery date"))
 	if blank(d.get("po_no")) and not d.get("po_file"):
 		out.append(("po_no", "Customer PO number or PO copy"))
+	elif not d.get("po_file") and is_placeholder_po(d.get("po_no")):
+		# SK 23-Nov checker: "From CRM-LEAD-...", "Common Sheet", "No PO" are not the customer's PO number
+		out.append(("po_no", f"Real customer PO number ('{d.get('po_no')}' is not one) or the PO copy"))
+	if not blank(d.get("po_no")) and "po_date" in d and blank(d.get("po_date")) and not d.get("po_file"):
+		out.append(("po_date", "Customer PO date (date of the PO / PO mail)"))
 	items = d.get("items") or []
 	if not items:
 		out.append(("items", "Items"))
@@ -162,7 +167,8 @@ def order_missing(d: dict) -> list[tuple[str, str]]:
 	return out
 
 
-PLACEHOLDER_PO = re.compile(r"^(from\s+crm-|crm-(lead|deal)-|n/?a$|nil$|none$|-+$|0+$|tba$|tbd$|awaited|pending|later|po\s*(no)?\s*awaited|to\s+come)", re.I)
+PLACEHOLDER_PO = re.compile(r"^(from\s+crm|crm-(lead|deal)-|common\s*sheet|from\s+tally|tally|n/?a$|nil$|none$|-+$|\.+$|0+$|tba$|tbd$|awaited|"
+	r"pending|later|po\s*(no)?\s*awaited|to\s+come|test$)", re.I)  # a verbal / WhatsApp order stays allowed (SK)
 
 
 def is_placeholder_po(po_no) -> bool:

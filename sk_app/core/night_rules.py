@@ -4,6 +4,7 @@ their open items with a link, what is wrong and one action; SK gets the summary)
 No frappe here: the check module (core/night_check.py) reads ERPNext and hands plain dicts to these rules, so the
 rules are tested without a site. Nothing salary-related is ever checked (SK's limit 8)."""
 
+import re
 MODULE = "Night check"  # the SK Rule Log module every night's rows are written under
 
 # kind -> (words for the mail heading, the one action the owner takes, function that owns it unless the record says otherwise)
@@ -16,6 +17,8 @@ KINDS = {
 	"no_login": ("Person without an app login", "Make the login (People) or set the mobile number", "Management"),
 	"late": ("Late item", "Update it, or close it if it is over", None),
 	"draft": ("Draft not submitted", "Check and Submit it, or delete it if it is wrong", None),
+	"service_sac": ("Service item with a goods HSN instead of a SAC", "Set the SAC (manpower 998519, shifting / installation 998719, transport 996511; CA confirms)", "Accounts"),
+	"po_placeholder": ("Sales Order without the customer's real PO number", "Type the real PO number and PO date, or attach the PO copy", "Sales"),
 	"draft_late": ("Quote / expense still a draft after 5 days", "Ask the owner to submit it or delete it", "Management"),
 	"unlinked_payment": ("Payment not linked to a bill", "Link the payment to its bill(s)", "Accounts"),
 	"import_gap": ("Import gap (source rows not in ERPNext)", "Load the missing rows or correct the SK Import count", "Management"),
@@ -34,15 +37,26 @@ DRAFT_DOCTYPES = {
 }
 DRAFT_GRACE_DAYS = 1  # a draft made or edited today is still being worked on
 # SK 23-Nov (approved): quotes and expenses left as drafts: on the owner's list after 2 days, also on SK's list after 5
-DRAFT_WATCH = {"Quotation": "Sales", "Expense Claim": "Accounts"}
+DRAFT_WATCH = {"Quotation": "Sales", "Expense Claim": "Accounts", "Purchase Invoice": "Accounts"}
 DRAFT_OWNER_DAYS, DRAFT_CEO_DAYS = 2, 5
+# SK 23-Nov checker: a purchase bill waits 3 days (the supplier's copy, the GRN), then goes on the owner's list; never to SK
+OWNER_DAYS = {"Purchase Invoice": 3}
+TO_CEO = {"Quotation", "Expense Claim"}
 
 
 def draft_due(doctype: str, days_old: int) -> tuple[bool, bool]:
 	"""(on the owner's list, also on the CEO's list) for a draft this many days old."""
 	if doctype in DRAFT_WATCH:
-		return days_old > DRAFT_OWNER_DAYS, days_old > DRAFT_CEO_DAYS
+		return days_old > OWNER_DAYS.get(doctype, DRAFT_OWNER_DAYS), doctype in TO_CEO and days_old > DRAFT_CEO_DAYS
 	return days_old > DRAFT_GRACE_DAYS, False
+
+
+SAC = re.compile(r"^99\d{4}(00)?$")  # 6-digit SAC (some masters carry it padded to 8 with 00)
+
+
+def bad_sac(hsn: str | None) -> bool:
+	"""A service item whose code is not a service (SAC 99xxxx), e.g. the cabin goods code 940600 on manpower."""
+	return not SAC.match(str(hsn or "").strip())
 
 
 def item(kind: str, doctype: str, name: str, what: str, user: str, function: str | None = None, days: int = 0, action: str | None = None) -> dict:

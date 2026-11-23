@@ -76,7 +76,7 @@ doc_events = {
 		"validate": "sk_app.writers.quotation.on_validate", "on_submit": "sk_app.quote_pdf.attach_on_submit"},
 	"Item": {"validate": "sk_app.writers.item.on_validate"},
 	# SK 4-Nov rebuild (S3): the customer's salesperson is set at save, not the next night (the nightly run stays as a safety net)
-	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal", "after_insert": "sk_app.writers.customer.after_insert",
+	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal", "validate": "sk_app.writers.customer.check_same_gstin", "after_insert": "sk_app.writers.customer.after_insert",
 		"on_update": ["sk_app.segments.on_customer_update", "sk_app.sales_owner.on_customer_save"]},
 	# SK 28-Oct: every order has its salesperson; income ledger and Non-Cabin sub-group cost centre from the customer
 	"Sales Order": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.sales_owner.fill_order_team", "sk_app.segment_accounts.set_segment", "sk_app.writers.taxes.on_validate"],

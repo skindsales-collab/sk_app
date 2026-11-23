@@ -245,7 +245,13 @@ def customer_data(customer: str) -> dict:
 def customer_missing(customer: str | None) -> list:
 	if not customer:
 		return [("customer", "Customer")]
-	return R.customer_missing(customer_data(customer))
+	out = R.customer_missing(customer_data(customer))
+	# SK 23-Nov checker: the segment (Customer Group under Cabin / Non-Cabin) is mandatory; filled from the deal by itself
+	from sk_app.segments import all_groups
+
+	if frappe.db.get_value("Customer", customer, "customer_group") not in all_groups():
+		out.append(("segment", "Segment (Cabin / Non-Cabin): set it on the deal, the customer takes it"))
+	return out
 
 
 def complete_customer(customer: str, gstin=None, unregistered=0, gst_note=None, address=None, city=None, state=None,
@@ -348,6 +354,11 @@ def check_lead_not_back_to_new(doc, method=None):
 	before = doc.get_doc_before_save()
 	if before and Q.back_to_new(before.get("status"), doc.get("status")):
 		frappe.throw(_(Q.BACK_TO_NEW).format(before.status), title=_("Step back not allowed"))
+	# SK 23-Nov checker: only SK's 8 stages are picked (a stray "Junk" was used beside "Junk Lead"); old values stay as they are
+	from sk_app.lead_status import NAMES
+
+	if before and doc.get("status") != before.get("status") and doc.get("status") not in NAMES:
+		frappe.throw(_("Stage '{0}' is not one of SK's stages. Pick one of: {1}").format(doc.status, ", ".join(NAMES)), title=_("Stage"))
 
 
 def check_quote_scope(doc, method=None):
@@ -391,7 +402,7 @@ def check_sales_order(doc, method=None):
 	if _skip():
 		return
 	missing = R.order_missing({"transaction_date": doc.transaction_date, "delivery_date": doc.delivery_date, "po_no": doc.po_no,
-		"po_file": _has_file("Sales Order", doc.name), "items": _rows(doc), "grand_total": doc.grand_total})
+		"po_date": doc.get("po_date"), "po_file": _has_file("Sales Order", doc.name), "items": _rows(doc), "grand_total": doc.grand_total})
 	cust = [(k, _("Customer: {0}").format(t)) for k, t in customer_missing(doc.customer)]
 	if doc.customer:
 		fill_addresses(doc)  # SK 29-Oct: the order acknowledgement prints Bill to and Ship to

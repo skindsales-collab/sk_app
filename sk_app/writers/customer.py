@@ -8,6 +8,21 @@ from frappe import _
 from sk_app.core.rules import report
 
 
+def check_same_gstin(doc, method=None):
+	"""Customer validate (SK 23-Nov checker: duplicate customers with the same GSTIN): a GSTIN already on another customer
+	is refused with that customer's name, so the order goes to the existing one (merge in ERPNext if both are real)."""
+	gstin = (doc.get("gstin") or "").strip().upper()
+	if not gstin or frappe.flags.in_import or frappe.flags.in_migrate:
+		return
+	before = doc.get_doc_before_save() if not doc.is_new() else None
+	if before and (before.get("gstin") or "").strip().upper() == gstin:
+		return  # an old duplicate is listed by the checker, not stopped on every save
+	other = frappe.db.get_value("Customer", {"gstin": gstin, "name": ["!=", doc.name], "disabled": 0}, ["name", "customer_name"], as_dict=True)
+	if other:
+		frappe.throw(_("GSTIN {0} is already on customer {1} ({2}). Use that customer, or ask Accounts to merge them.").format(
+			gstin, other.customer_name, other.name), title=_("Same GSTIN"))
+
+
 def after_insert(doc, method=None):
 	from sk_app import gates
 	from sk_app.core.switch import use_new
@@ -35,6 +50,7 @@ def make_customer(user: str, deal: str, details: dict | None = None) -> dict:
 	d = _deal(deal)
 	have = customer_of(deal)
 	if have:
+		fill_group(have, deal)
 		if details:
 			gates.complete_customer(have, **details)
 		return {"name": have, "new": False, "missing": [t for _k, t in gates.customer_missing(have)]}
@@ -55,6 +71,7 @@ def make_customer(user: str, deal: str, details: dict | None = None) -> dict:
 		name = doc.name
 	if frappe.get_meta("CRM Deal").has_field("erpnext_customer"):
 		frappe.db.set_value("CRM Deal", deal, "erpnext_customer", name)
+	fill_group(name, deal)
 	# SK 29-Oct (Aditya: customer details asked 3 times): what the lead / deal already has goes onto the customer
 	if not same and d.get("mobile_no"):
 		with store_screens.as_system():
@@ -65,6 +82,20 @@ def make_customer(user: str, deal: str, details: dict | None = None) -> dict:
 	if details:
 		gates.complete_customer(name, **details)
 	return {"name": name, "new": not same, "missing": [t for _k, t in gates.customer_missing(name)]}
+
+
+def fill_group(customer: str, deal: str | None):
+	"""SK 23-Nov checker (1,594 of 1,801 customers had no Cabin / Non-Cabin group): a customer used from a deal (new or
+	existing) takes the deal's segment as its Customer Group when it has none or only an old one (Commercial, Individual
+	...). A group already under Cabin / Non-Cabin is never changed."""
+	from sk_app import segments
+
+	group = frappe.db.get_value("Customer", customer, "customer_group")
+	if group in segments.all_groups() or not deal:
+		return
+	sub = segments.sub_of(frappe.db.get_value("CRM Deal", deal, "sk_segment"))
+	if sub and frappe.db.exists("Customer Group", segments.GROUP_OF[sub]):
+		frappe.db.set_value("Customer", customer, "customer_group", segments.GROUP_OF[sub])
 
 
 def refresh_party(doc):

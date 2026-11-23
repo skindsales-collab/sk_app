@@ -5428,13 +5428,14 @@
 				return sheet(`<h3 class="sk-h">✅ ${t("fl_order_received")}</h3><p class="sk-note">${esc(el.dataset.name)} · ${t("fl_order_why")}</p>
 					<label class="sk-field"><span>${t("g_order_date")} *</span><input id="fo-odate" type="date" value="${new Date().toISOString().slice(0, 10)}"></label>
 					<label class="sk-field"><span>${t("fl_delivery")} *</span><input id="fo-date" type="date"></label>
-					${formField("fo-po", t("fl_po_no") + " *")}<label class="sk-field"><span>${t("g_po_date")}</span><input id="fo-podate" type="date"></label>
+					${formField("fo-po", t("fl_po_no") + " *")}<label class="sk-field"><span>${t("g_po_date")} *</span><input id="fo-podate" type="date"></label>
 					${photoField("fo-pophoto", "📷 " + t("g_po_photo"))}
 					<button class="sk-btn ok wide" data-act="fl-order-save">${t("save")}</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
 			case "fl-order-save": {
 				const poFile = document.getElementById("fo-pophoto");
 				if (!mustFill([["fo-odate", t("g_order_date")], ["fo-date", t("fl_delivery")],
-					["fo-po", t("g_po_or_photo"), !!val("fo-po") || !!(poFile && poFile.files[0])]])) return;
+					["fo-po", t("g_po_or_photo"), !!val("fo-po") || !!(poFile && poFile.files[0])],
+					["fo-podate", t("g_po_date"), !val("fo-po") || !!val("fo-podate") || !!(poFile && poFile.files[0])]])) return;
 				el.disabled = true;
 				try {
 					const r = await call("flow_order_received", { quotation: S.flQuote, delivery_date: val("fo-date"), po_no: val("fo-po"),

@@ -154,6 +154,30 @@ def _unlinked_payments() -> list[dict]:
 	return out
 
 
+def _service_sac() -> list[dict]:
+	"""SK 23-Nov checker: SR-01..SR-14 carried the cabin goods code 940600; a service item must carry its SAC."""
+	acc = _function_owner("Accounts")
+	groups = [g for g in frappe.get_all("Item Group", pluck="name") if "service" in g.lower()]
+	out = []
+	for it in frappe.get_all("Item", filters={"disabled": 0, "is_stock_item": 0}, fields=["name", "item_name", "item_group", "gst_hsn_code"], limit=0):
+		service = it.item_group in groups or it.name.upper().startswith(("SR-", "SK-JOB"))
+		if service and R.bad_sac(it.gst_hsn_code):
+			out.append(R.item("service_sac", "Item", it.name, f"{it.item_name} · HSN {it.gst_hsn_code or 'blank'}", acc))
+	return out
+
+
+def _placeholder_po(logins: set) -> list[dict]:
+	"""SK 23-Nov checker: orders whose PO number is "From CRM-LEAD-...", "Common Sheet" ... and no PO copy attached."""
+	from sk_app.gate_rules import is_placeholder_po
+
+	out = []
+	for so in frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "transaction_date": [">=", _since()]},
+			fields=["name", "customer_name", "po_no", "owner"], limit=0):
+		if is_placeholder_po(so.po_no) and not frappe.db.exists("File", {"attached_to_doctype": "Sales Order", "attached_to_name": so.name}):
+			out.append(R.item("po_placeholder", "Sales Order", so.name, f"{so.customer_name} · PO '{so.po_no}'", _owner_or(so.owner, "Sales", logins)))
+	return out
+
+
 def _import_gaps() -> list[dict]:
 	from sk_app.core import imports
 
@@ -205,7 +229,8 @@ def collect() -> list[dict]:
 	"""Every open item tonight, one owner each."""
 	users = _app_users()
 	logins = {u["user"] for u in users}
-	items = _safe(_doubles, logins) + _safe(_missing, logins) + _safe(_late, users) + _safe(_drafts, logins) + _safe(_unlinked_payments) + _safe(_import_gaps) + _safe(_hiring, logins)
+	items = _safe(_doubles, logins) + _safe(_missing, logins) + _safe(_late, users) + _safe(_drafts, logins) + _safe(_unlinked_payments) + _safe(_import_gaps) + _safe(_hiring, logins) \
+		+ _safe(_service_sac) + _safe(_placeholder_po, logins)
 	return R.dedupe(items)
 
 

@@ -58,3 +58,12 @@ def test_quote_and_expense_drafts_wait_two_days_then_go_to_sk_after_five():
 	assert draft_due("Quotation", 3) == (True, False)
 	assert draft_due("Expense Claim", 6) == (True, True)
 	assert draft_due("Sales Order", 2) == (True, False)  # other drafts keep the 1-day grace, never to SK
+
+
+def test_service_sac_and_purchase_bill_draft():
+	from sk_app.core.night_rules import bad_sac, draft_due
+
+	assert bad_sac("940600") and bad_sac("") and bad_sac(None) and bad_sac("9406")
+	assert not bad_sac("998519") and not bad_sac("99871900")
+	assert draft_due("Purchase Invoice", 3) == (False, False) and draft_due("Purchase Invoice", 4) == (True, False)
+	assert draft_due("Purchase Invoice", 9) == (True, False)  # bills never go to SK

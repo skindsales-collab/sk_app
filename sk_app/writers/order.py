@@ -21,7 +21,7 @@ def order_received(user: str, quotation: str, delivery_date=None, po_no: str | N
 	from sk_app import gates
 
 	missing = [m for m in gates.R.order_missing({"transaction_date": order_date or nowdate(), "delivery_date": delivery_date,
-		"po_no": po_no, "po_file": bool(po_photo), "items": [{"qty": 1, "rate": 1}], "grand_total": 1})]
+		"po_no": po_no, "po_date": po_date, "po_file": bool(po_photo), "items": [{"qty": 1, "rate": 1}], "grand_total": 1})]
 	if missing:
 		gates.stop(_("Order cannot be saved"), missing)
 	if getdate(delivery_date) < getdate(order_date or nowdate()):
