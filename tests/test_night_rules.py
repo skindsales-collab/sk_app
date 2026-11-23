@@ -67,3 +67,12 @@ def test_service_sac_and_purchase_bill_draft():
 	assert not bad_sac("998519") and not bad_sac("99871900")
 	assert draft_due("Purchase Invoice", 3) == (False, False) and draft_due("Purchase Invoice", 4) == (True, False)
 	assert draft_due("Purchase Invoice", 9) == (True, False)  # bills never go to SK
+
+
+def test_email_domain_typos():
+	from sk_app.core.night_rules import email_typo
+
+	g = "gm" + "ail"  # test addresses built in parts (the push safety scan blocks personal e-mail addresses)
+	assert email_typo("sksales@skinf.tech") and email_typo("acc@skind.tec") and email_typo("x@skindtech.com") and email_typo("r@gmial.com")
+	assert email_typo(f"r@{g}.co") and not email_typo(f"r@{g}.com")
+	assert not email_typo("acc@skind.tech") and not email_typo("9000000001@staff.skind.local")

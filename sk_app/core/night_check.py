@@ -166,13 +166,24 @@ def _service_sac() -> list[dict]:
 	return out
 
 
+def _email_typos() -> list[dict]:
+	boss = _function_owner("Management")
+	return [R.item("email_typo", "User", u.name, f"{u.full_name or u.name} · {u.email}", boss)
+		for u in frappe.get_all("User", filters={"enabled": 1, "user_type": "System User"}, fields=["name", "full_name", "email"], limit=0)
+		if R.email_typo(u.email)]
+
+
 def _placeholder_po(logins: set) -> list[dict]:
 	"""SK 23-Nov checker: orders whose PO number is "From CRM-LEAD-...", "Common Sheet" ... and no PO copy attached."""
 	from sk_app.gate_rules import is_placeholder_po
 
 	out = []
+	# drafts (still fixable before submit) and orders of the last 30 days; older back-filled orders are on the checker's list
+	recent = frappe.utils.add_days(nowdate(), -30)
 	for so in frappe.get_all("Sales Order", filters={"docstatus": ["<", 2], "transaction_date": [">=", _since()]},
-			fields=["name", "customer_name", "po_no", "owner"], limit=0):
+			fields=["name", "customer_name", "po_no", "owner", "docstatus", "transaction_date"], limit=0):
+		if so.docstatus == 1 and str(so.transaction_date) < str(recent):
+			continue
 		if is_placeholder_po(so.po_no) and not frappe.db.exists("File", {"attached_to_doctype": "Sales Order", "attached_to_name": so.name}):
 			out.append(R.item("po_placeholder", "Sales Order", so.name, f"{so.customer_name} · PO '{so.po_no}'", _owner_or(so.owner, "Sales", logins)))
 	return out
@@ -230,7 +241,7 @@ def collect() -> list[dict]:
 	users = _app_users()
 	logins = {u["user"] for u in users}
 	items = _safe(_doubles, logins) + _safe(_missing, logins) + _safe(_late, users) + _safe(_drafts, logins) + _safe(_unlinked_payments) + _safe(_import_gaps) + _safe(_hiring, logins) \
-		+ _safe(_service_sac) + _safe(_placeholder_po, logins)
+		+ _safe(_service_sac) + _safe(_placeholder_po, logins) + _safe(_email_typos)
 	return R.dedupe(items)
 
 

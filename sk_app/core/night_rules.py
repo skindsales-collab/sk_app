@@ -17,6 +17,7 @@ KINDS = {
 	"no_login": ("Person without an app login", "Make the login (People) or set the mobile number", "Management"),
 	"late": ("Late item", "Update it, or close it if it is over", None),
 	"draft": ("Draft not submitted", "Check and Submit it, or delete it if it is wrong", None),
+	"email_typo": ("Login e-mail with a mistyped domain", "Correct the e-mail in the User record (e.g. @skind.tech, @gmail.com)", "Management"),
 	"service_sac": ("Service item with a goods HSN instead of a SAC", "Set the SAC (manpower 998519, shifting / installation 998719, transport 996511; CA confirms)", "Accounts"),
 	"po_placeholder": ("Sales Order without the customer's real PO number", "Type the real PO number and PO date, or attach the PO copy", "Sales"),
 	"draft_late": ("Quote / expense still a draft after 5 days", "Ask the owner to submit it or delete it", "Management"),
@@ -52,6 +53,32 @@ def draft_due(doctype: str, days_old: int) -> tuple[bool, bool]:
 
 
 SAC = re.compile(r"^99\d{4}(00)?$")  # 6-digit SAC (some masters carry it padded to 8 with 00)
+
+
+TYPO_DOMAINS = ("gmial.", "gamil.", "gmal.", "gmail.co$", "gmai.com", "yaho.", "hotmial.", "rediff.co$")
+
+
+def _distance(a: str, b: str) -> int:
+	prev = list(range(len(b) + 1))
+	for i, ca in enumerate(a, 1):
+		cur = [i]
+		for j, cb in enumerate(b, 1):
+			cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))
+		prev = cur
+	return prev[-1]
+
+
+def email_typo(email: str | None) -> bool:
+	"""SK 23-Nov checker: a login's e-mail with a mistyped domain (skind.tech misspelt, gmial.com ...) gets no mail."""
+	e = (email or "").strip().lower()
+	if "@" not in e:
+		return False
+	dom = e.split("@", 1)[1]
+	if dom.endswith(".local") or dom == "skind.tech":
+		return False
+	if "skind" in dom or _distance(dom, "skind.tech") <= 2:  # skinf.tech, skind.tec, skindtech.com ...
+		return True
+	return any(re.search(t.replace(".", r"\.") if not t.endswith("$") else t.replace(".", r"\."), dom) for t in TYPO_DOMAINS)
 
 
 def bad_sac(hsn: str | None) -> bool:
