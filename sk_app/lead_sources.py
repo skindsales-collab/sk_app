@@ -250,7 +250,8 @@ def scan(since=None) -> dict:
 	start = get_datetime(since or s.get("last_lead_scan") or add_days(now_datetime(), -2))
 	now = now_datetime()
 	rows = frappe.get_all("Communication", filters={"communication_medium": "Email", "sent_or_received": "Received",
-		"creation": [">=", add_to_date(start, minutes=-10)], "sk_mail_status": ["in", ["", None, "New"]]},
+		"creation": [">=", add_to_date(start, minutes=-10)], "sk_mail_status": ["in", ["", None, "New"]],
+		"communication_date": [">=", add_days(now_datetime(), -3)]},  # SK 23-Nov: old mails fetched late are not new leads
 		fields=["name", "sender", "subject", "content", "text_content", "reference_doctype"], order_by="creation asc", limit=200)
 	made = 0
 	for r in rows:

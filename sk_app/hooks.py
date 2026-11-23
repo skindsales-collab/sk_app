@@ -54,6 +54,7 @@ scheduler_events = {
 }
 
 doc_events = {
+	"Notification Log": {"before_insert": "sk_app.mailbox.quiet_auto_assignment"},  # SK 23-Nov: no assignment mail flood
 	"*": {"after_insert": "sk_app.view_member.mark_on_behalf"},  # SK 14-Nov: records the CEO enters as a member carry the CEO mark
 	"SK DSI Entry": {"before_insert": ["sk_app.permissions.stamp_user", "sk_app.dsi.stamp_function"]},  # SK 29-Oct: role for the monthly summary
 	"SK Work Log": {"before_insert": "sk_app.permissions.stamp_user"},

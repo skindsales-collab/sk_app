@@ -396,6 +396,11 @@ def _customer_of(email: str) -> str | None:
 	return frappe.db.get_value("Dynamic Link", {"parenttype": "Contact", "parent": contact, "link_doctype": "Customer"}, "link_name")
 
 
+# SK 23-Nov: a mail becomes a lead only when it was written in the last 3 days. On 22-Nov the one-time re-read of the
+# last 250 mails per mailbox (read + unread fix) made ~45 leads from old mails and an assignment mail for each.
+RECENT_DAYS = 3
+
+
 def auto_leads() -> int:
 	"""Every 5 minutes, after link_known: enquiry mails from new senders to sales@ / cabin@ / service@ become CRM leads
 	with the usual owner (cabin → Rushi, digital → Pranali, non-cabin / service@ → Aditya)."""
@@ -408,7 +413,7 @@ def auto_leads() -> int:
 		return 0
 	box_of, made = _account_boxes(), 0
 	for r in _received(boxes, since=add_days(now_datetime(), -2), by="creation", fields=["sender", "sender_full_name", "subject", "text_content", "content"],
-			filters={"sk_mail_status": ["in", ["", None, "New"]]}):
+			filters={"sk_mail_status": ["in", ["", None, "New"]], "communication_date": [">=", add_days(now_datetime(), -RECENT_DAYS)]}):
 		if r.reference_doctype in ("CRM Lead", "CRM Deal") or lead_sources.source_of(r.sender, r.subject) \
 				or _box_of(r, boxes, box_of) not in boxes:
 			continue  # on a lead already, a portal mail (lead_sources.scan), or moved to another team (supplier → Purchase)
@@ -536,3 +541,12 @@ def ensure_fetch_all() -> list[dict]:
 			"detail": json.dumps(done)[:1000]}).insert(ignore_permissions=True) if frappe.db.exists("DocType", "SK Rule Log") else None
 		frappe.db.commit()
 	return done
+
+
+def quiet_auto_assignment(doc, method=None):
+	"""Notification Log before_insert (SK 23-Nov: service@ got ~40 "Administrator assigned a new task CRM Lead" mails).
+	A lead / deal given to its owner by the automatic mail scan stays a bell notice in the app and on Home, without an
+	e-mail. ("Alert" notices never e-mail; a person who assigns a lead by hand still sends the normal mail.)"""
+	if doc.get("type") == "Assignment" and doc.get("from_user") in (None, "", "Administrator") \
+			and doc.get("document_type") in ("CRM Lead", "CRM Deal"):
+		doc.type = "Alert"

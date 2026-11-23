@@ -447,7 +447,17 @@ def _recipients() -> list[str]:
 
 
 def morning():
-	"""Scheduler, every morning: the list of possible doubles to Accounts (Shraddha) and the CEO (SK). Nothing found, no mail."""
+	"""SK 23-Nov: the possible doubles now go inside the ONE morning mail per inbox (core.night_check.morning); this
+	separate 7 AM mail is kept only for a site without the night check."""
+	from sk_app.core.night_check import _run_dates
+
+	if _run_dates(1):
+		return 0
+	return _morning_mail()
+
+
+def _morning_mail():
+	"""Before 23-Nov: the list of possible doubles to Accounts (Shraddha) and the CEO (SK). Nothing found, no mail."""
 	found = possible_doubles()
 	count = sum(len(found.get(k) or []) for k in ("pairs", "deals", "bank_in_cash", "masters", "master_problems", "auto_ticked"))
 	if not count:

@@ -320,9 +320,26 @@ def _mail_to(emails: list[str], subject: str, html: str) -> int:
 	return len(emails)
 
 
+AREA_TITLE = {"accounts": "Accounts", "cabin_sales": "Cabin sales", "machine_shifting": "Machine shifting / Non-Cabin",
+	"purchase": "Purchase", "stores": "Stores", "production": "Production", "hr": "HR"}
+
+
+def area_html(items: list[dict], names: dict) -> str:
+	"""All open items of one area, person by person (the team box sees its whole team's list)."""
+	parts = []
+	for user in sorted({i["user"] for i in items}, key=lambda u: -sum(1 for i in items if i["user"] == u)):
+		mine = [i for i in items if i["user"] == user]
+		parts.append(f"<p><b>{frappe.utils.escape_html(names.get(user, user))} ({len(mine)})</b></p><ol>"
+			+ "".join(_line(r) for r in mine[:ROWS_IN_MAIL]) + (f"<li>… {len(mine) - ROWS_IN_MAIL} more on their Home</li>" if len(mine) > ROWS_IN_MAIL else "") + "</ol>")
+	return "".join(parts)
+
+
 def morning() -> dict:
-	"""Scheduler, 7 AM: one mail per owner with their items; the summary to the CEO. Nothing open, only the CEO hears 'all clear'."""
+	"""Scheduler, 7 AM. SK 23-Nov: ONE mail per inbox per day with the full summary: a person's own items, the team box's
+	whole area (all its people's items), the possible doubles for Accounts and the CEO's count summary are joined into
+	one mail when they go to the same address. Nothing open, only the summary says 'all clear'."""
 	from sk_app.core.people import ceo_users
+	from sk_app.otp import _sender, has_real_email
 
 	dates = _run_dates(2)
 	if not dates or str(dates[0]) < str(getdate(frappe.utils.add_days(nowdate(), -1))):
@@ -338,25 +355,59 @@ def morning() -> dict:
 	names = {u["user"]: u["full_name"] for u in _app_users()}
 	by = R.by_user([r for r in rows if r["user"] in logins])
 	ceos = list(ceo_users())
-	# SK 21-Nov: items that fell to the CEO only because nobody else owns them go to the area's person / team box
-	# (SK App Settings "alert_routes"); the CEO keeps the short count summary
 	routes = R.parse_routes(frappe.db.get_single_value("SK App Settings", "alert_routes") if _has_routes() else "")
-	routed: dict = {}
-	sent = 0
+	mails: dict = {}  # address -> {"sections": [(title, html)], "count": n, "users": set()}
+
+	def add(emails, title, html, count, user=None):
+		for e in {x.strip().lower() for x in emails or [] if x and "@" in x}:
+			m = mails.setdefault(e, {"sections": [], "count": 0, "users": set()})
+			m["sections"].append((title, html))
+			m["count"] += count
+			if user:
+				m["users"].add(user)
+
+	# 1. each person's own items (the CEO's own items only when no team box takes them)
+	area_of = {}
+	for i in rows:
+		area_of[R.key(i)] = R.area_of(i.get("function"), _segment(i)) if routes else None
 	for user, items in by.items():
 		if user in ceos and routes:
-			keep = []
-			for i in items:
-				area = R.area_of(i.get("function"), _segment(i))
-				(routed.setdefault(area, []) if area and routes.get(area) else keep).append(i)
-			items = keep
-			if not items:
-				continue
-		sent += _mail([user], R.subject(len(items), sum(1 for i in items if i["new"])), person_html(items))
-	for area, items in routed.items():
-		sent += _mail_to(routes[area], R.subject(len(items), sum(1 for i in items if i["new"])), person_html(items))
-	summary_to = routes.get("summary")
-	subject = _("SK App night check: {0} open items, {1} people").format(len(rows), len(by)) if rows else R.subject(0, 0)
-	html = summary_html(by, new, fixed_by_user, names, rows)
-	sent += _mail_to(summary_to, subject, html) if summary_to else _mail(ceos, subject, html)
-	return {"people": len(by), "open": len(rows), "new": len(new), "fixed": len(fixed), "mails": sent}
+			items = [i for i in items if not (area_of.get(R.key(i)) and routes.get(area_of[R.key(i)]))]
+		if not items:
+			continue
+		email = frappe.db.get_value("User", user, "email")
+		if has_real_email(email):
+			add([email], _("Your open items ({0})").format(len(items)), person_html(items), len(items), user)
+	# 2. each team box: all open items of its area
+	for area, emails in routes.items():
+		if area == "summary":
+			continue
+		items = [i for i in rows if area_of.get(R.key(i)) == area]
+		if items:
+			add(emails, _("{0}: all open items ({1})").format(_(AREA_TITLE.get(area, area)), len(items)), area_html(items, names), len(items))
+	# 3. possible doubles (Accounts)
+	try:
+		from sk_app import doubles
+
+		found = doubles.possible_doubles()
+		dcount = sum(len(found.get(k) or []) for k in ("pairs", "deals", "bank_in_cash", "masters", "master_problems", "auto_ticked"))
+		if dcount:
+			to = routes.get("accounts") or [frappe.db.get_value("User", u, "email") for u in doubles._recipients()]
+			add(to, _("Possible double / wrong entries ({0})").format(dcount), doubles.report_html(found), dcount)
+	except Exception:
+		frappe.log_error("SK App morning mail: doubles section")
+	# 4. the CEO's count summary
+	summary_to = routes.get("summary") or [frappe.db.get_value("User", u, "email") for u in ceos]
+	add(summary_to, _("Summary: {0} open items, {1} people").format(len(rows), len(by)), summary_html(by, new, fixed_by_user, names, rows), 0)
+	from sk_app.mailbox import _notify
+
+	sent = 0
+	for email, m in mails.items():
+		subject = _("SK App morning check: {0} items to act on").format(m["count"]) if m["count"] else R.subject(0, 0)
+		body = "".join(f"<h3 style='color:#2A6EB4'>{t}</h3>{h}" for t, h in m["sections"])
+		users = list(m["users"]) or frappe.get_all("User", filters={"email": email, "enabled": 1}, pluck="name")
+		if users:
+			_notify(users, subject)
+		frappe.sendmail(recipients=[email], sender=_sender(), subject=subject, message=body, now=False)
+		sent += 1
+	return {"people": len(by), "open": len(rows), "new": len(new), "fixed": len(fixed), "mails": sent, "inboxes": sorted(mails)}
