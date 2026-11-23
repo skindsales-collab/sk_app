@@ -112,6 +112,9 @@ def after_migrate():
 	from sk_app.tax_invoice import ensure_setup as tax_invoice_setup
 
 	_safe(tax_invoice_setup, "tax invoice print")  # SK 29-Oct (Shraddha): invoice print shows Bill to and Ship to
+	from sk_app.grid_columns import ensure as grid_columns_setup
+
+	_safe(grid_columns_setup, "Description column in item tables")  # SK 23-Nov: Description shows for everyone
 	_safe(ensure_job_card_cabin, "job card customer / size")  # SK 27-Oct (Yogesh): job card picker shows customer and cabin size
 	_safe(ensure_crm_search, "lead search")  # SK 27-Oct: lead search in ERPNext
 	from sk_app.cold_calls import ensure_field as cold_calling_field
