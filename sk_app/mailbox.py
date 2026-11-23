@@ -6,6 +6,8 @@ its box, with a status per mail so two people never answer the same one: New →
 """
 import json
 
+import re
+
 import frappe
 from frappe import _
 from frappe.utils import add_days, add_to_date, getdate, now_datetime, strip_html
@@ -299,9 +301,13 @@ def link_known():
 	rows = _received(boxes, since=add_days(now_datetime(), -2), by="creation", fields=["sender", "subject"],
 		filters={"sk_mail_status": ["in", ["", None, "New"]]})
 	linked = 0
+	from sk_app.lead_mail_rules import private_or_internal
+
 	for r in rows:
 		if r.reference_doctype in ("CRM Lead", "CRM Deal") or not r.sender or r.sender.lower() in boxes:
 			continue
+		if private_or_internal(r.sender, r.subject, boxes) or _staff_or_supplier(r.sender.strip().lower()):
+			continue  # SK 23-Nov: our own, staff, supplier, salary / PF / password mails never go to sales
 		ref = _known(r.sender.strip().lower())
 		if not ref:
 			continue
@@ -311,11 +317,52 @@ def link_known():
 			values.update(sk_mail_status="Taken", sk_taken_by=owner)
 		_set(r.name, **values)
 		if owner:
-			from sk_app.store import _todo
-
-			_todo(owner, doctype, name, f"Customer mail: {r.subject or ''}"[:140])
+			mail_todo(owner, doctype, name, r.subject)
 		linked += 1
 	return linked
+
+
+MAIL_TODO = "Customer mail: "
+
+
+def mail_todo(user: str, doctype: str, name: str, subject: str | None):
+	"""SK 23-Nov: ONE open "Customer mail" task per lead / deal per person (before: a new one on every mail and every
+	re-read; junk lead 01206 had 66). A newer mail updates the open task's text."""
+	text = f"{MAIL_TODO}{subject or ''}"[:140]
+	have = frappe.db.get_value("ToDo", {"allocated_to": user, "reference_type": doctype, "reference_name": name, "status": "Open",
+		"description": ["like", MAIL_TODO + "%"]})
+	if have:
+		frappe.db.set_value("ToDo", have, {"description": text, "date": frappe.utils.nowdate()}, update_modified=False)
+		return have
+	from sk_app.store import _todo
+
+	_todo(user, doctype, name, text)
+
+
+def _staff_or_supplier(email: str) -> bool:
+	"""An address of our own people (login / employee mail) or of a supplier: never a lead, never a customer task."""
+	if frappe.db.exists("User", {"email": email, "enabled": 1, "user_type": "System User"}):
+		return True
+	for f in ("personal_email", "company_email", "prefered_email"):
+		if frappe.get_meta("Employee").has_field(f) and frappe.db.exists("Employee", {f: email}):
+			return True
+	if _supplier_of(email):
+		return True
+	contact = frappe.db.get_value("Contact Email", {"email_id": email, "parenttype": "Contact"}, "parent")
+	return bool(contact and frappe.db.exists("Dynamic Link", {"parenttype": "Contact", "parent": contact, "link_doctype": ["in", ["Supplier", "Employee"]]}))
+
+
+def _same_mail_lead(email: str, subject: str | None) -> tuple | None:
+	"""SK 23-Nov duplicate check: a lead already made from a mail of this sender with the same subject (a re-read of the
+	same mail) gets the mail instead of a second lead. A new enquiry on another date still makes a new lead (KF-04801)."""
+	subj = (subject or "").strip()
+	if not subj:
+		return None
+	lead = frappe.db.get_value("Communication", {"sender": ["like", f"%{email}%"], "subject": subj, "reference_doctype": "CRM Lead",
+		"reference_name": ["is", "set"]}, "reference_name")
+	if lead and frappe.db.exists("CRM Lead", lead):
+		return ("CRM Lead", lead, frappe.db.get_value("CRM Lead", lead, "lead_owner"))
+	return None
 
 
 def _known(email: str):
@@ -417,6 +464,11 @@ def auto_leads() -> int:
 		if r.reference_doctype in ("CRM Lead", "CRM Deal") or lead_sources.source_of(r.sender, r.subject) \
 				or _box_of(r, boxes, box_of) not in boxes:
 			continue  # on a lead already, a portal mail (lead_sources.scan), or moved to another team (supplier → Purchase)
+		from sk_app.lead_mail_rules import private_or_internal
+
+		sender = (r.sender or "").strip().lower()
+		if private_or_internal(sender, r.subject, boxes) or _staff_or_supplier(sender):
+			continue  # SK 23-Nov: our own, staff, supplier, salary / PF / password mails are never leads
 		text = lead_sources.mail_text(r.text_content, r.content)  # PR D: the part that holds the mail
 		kind = mail_kind(r.sender, r.subject, text)
 		if kind == "complaint" or (kind == "lead" and _customer_of(r.sender.strip().lower())):
@@ -432,7 +484,10 @@ def auto_leads() -> int:
 			data = lead_sources.parse_mail(r.subject, text, "Email")
 			if "@skind.tech" in (data.get("email") or "").lower():
 				data["email"] = None  # our own address printed in the mail is not the customer's
-			data["email"] = data.get("email") or r.sender.strip()
+			# SK 23-Nov (live error every 4 min): a signature line "*E-mail :** x@y.com *" gave "** x@y.com *"; only the
+			# plain address is kept, else the sender's
+			found = re.findall(r"[\w.+-]+@[\w-]+\.[\w.-]+", data.get("email") or "")
+			data["email"] = (found[0].strip(".") if found else "") or r.sender.strip()
 			if any(w in data["email"].lower() for w in NOT_LEAD_SENDERS):
 				continue
 			# PR D (SK 15-Nov): "Purchase" from purchase@gurudattaforging.com is not a person; the company comes from the domain
@@ -447,7 +502,7 @@ def auto_leads() -> int:
 				owner = frappe.get_cached_doc("SK App Settings").get("lead_owner_noncabin")
 			# SK 27-Oct: "need to confirm that this is new lead": an existing lead / deal (any age) of the same e-mail gets
 			# the mail instead; a new one says it came by itself so the owner confirms it (else Junk Lead)
-			known = _known_today(data["email"].lower())
+			known = _known_today(data["email"].lower()) or _same_mail_lead(sender, r.subject)
 			if known:
 				_set(r.name, reference_doctype=known[0], reference_name=known[1], sk_mail_status="Taken", sk_taken_by=known[2])
 				continue

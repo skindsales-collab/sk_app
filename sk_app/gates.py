@@ -330,6 +330,13 @@ def check_quote_step(doc, method=None):
 	why = Q.quote_problem(main_of(sub_of(d.sk_segment)), d.custom_design_status, True)
 	if why:
 		frappe.throw(_(why) + f" ({deal}: {d.custom_design_status or '-'})", title=_("Step missing"))
+	# SK 23-Nov (approved): the customer's GSTIN (or No GSTIN), billing address and mobile are filled on the deal BEFORE a
+	# quote is made, so no quote is left as a draft that cannot be submitted
+	if doc.is_new() and doc.get("quotation_to") == "Customer" and doc.get("party_name"):
+		missing = customer_missing(doc.party_name)
+		if missing:
+			frappe.throw(_("Fill the customer details on the deal first (Customer card on the deal in SK App), then make the quote:")
+				+ "\n" + "\n".join(f"• {t}" for _k, t in missing), title=_("Customer details missing"))
 
 
 def check_quote_scope(doc, method=None):

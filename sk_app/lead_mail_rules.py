@@ -115,3 +115,18 @@ def has_contact(data: dict) -> bool:
 	"""A lead needs a way to reach the customer: a mobile or an e-mail. Without both it is not saved (logged instead)."""
 	digits = re.sub(r"\D", "", str(data.get("mobile_no") or ""))
 	return len(digits) >= 10 or "@" in str(data.get("email") or "")
+
+
+# SK 23-Nov (approved, low-orders review): mails that are never a customer enquiry and never a "Customer mail" task:
+# our own boxes, salary / PF / ESIC / payroll mails, passwords and log-in codes.
+PRIVATE_WORDS = ("salary", "payslip", "pay slip", "payroll", "provident fund", "epfo", " pf ", "pf contribution", "uan ", "esic",
+	"password", "otp", "one time password", "verification code", "login code", "bonus", "form 16", "tds certificate")
+
+
+def private_or_internal(sender: str | None, subject: str | None, own_boxes=()) -> bool:
+	"""True for our own mail and payroll / password mails (no lead, no task, nothing shown to sales)."""
+	s = (sender or "").strip().lower()
+	if not s or s.endswith("@skind.tech") or s in {b.lower() for b in own_boxes or ()}:
+		return True
+	subj = f" {(subject or '').lower()} "
+	return any(w in subj for w in PRIVATE_WORDS)

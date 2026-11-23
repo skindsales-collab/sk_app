@@ -69,3 +69,15 @@ def test_portal_owner_any_spelling_sk_21_nov():
 	for name in ("Justdial", "Just Dial", "JUSTDIAL"):
 		assert owner_fields(name, False)[0] == "lead_owner_justdial"
 	assert owner_fields("Website", False) == ("lead_owner_cabin",)
+
+
+def test_own_and_payroll_mails_are_never_leads_or_tasks():
+	from sk_app.lead_mail_rules import private_or_internal as p
+
+	assert p("sales@skind.tech", "Enquiry for cabin")
+	assert p("hr@payrollco.in", "Salary slip for October 2026")
+	assert p("noreply@epfindia.gov.in", "EPFO: PF contribution credited")
+	assert p("someone@gmail.com", "Your password was changed")
+	assert p("boxes@x.com", "Hello", own_boxes=["boxes@x.com"])
+	assert not p("purchase@tata.com", "Requirement of 2 portable cabins")
+	assert not p("ravi@abc.in", "Quotation required for site office 20x10")

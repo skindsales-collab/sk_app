@@ -49,3 +49,12 @@ def test_module_lines_and_subject():
 def test_drafts_never_include_salary_and_a_fresh_draft_waits():
 	assert "Salary Slip" not in DRAFT_DOCTYPES and "Payroll Entry" not in DRAFT_DOCTYPES and "Job Card" not in DRAFT_DOCTYPES
 	assert not draft_is_stale(0) and not draft_is_stale(1) and draft_is_stale(2)
+
+
+def test_quote_and_expense_drafts_wait_two_days_then_go_to_sk_after_five():
+	from sk_app.core.night_rules import draft_due
+
+	assert draft_due("Quotation", 2) == (False, False)
+	assert draft_due("Quotation", 3) == (True, False)
+	assert draft_due("Expense Claim", 6) == (True, True)
+	assert draft_due("Sales Order", 2) == (True, False)  # other drafts keep the 1-day grace, never to SK

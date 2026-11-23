@@ -115,6 +115,12 @@ def after_migrate():
 	from sk_app.grid_columns import ensure as grid_columns_setup
 
 	_safe(grid_columns_setup, "Description column in item tables")  # SK 23-Nov: Description shows for everyone
+	from sk_app.user_setup import ensure_profiles as sales_profiles
+
+	_safe(sales_profiles, "sales role / module profile")  # SK 23-Nov: one-click sales login
+	from sk_app.lead_owner_keep import clean_mail_todos
+
+	_safe(clean_mail_todos, "duplicate / private Customer mail tasks")  # SK 23-Nov low-orders review
 	_safe(ensure_job_card_cabin, "job card customer / size")  # SK 27-Oct (Yogesh): job card picker shows customer and cabin size
 	_safe(ensure_crm_search, "lead search")  # SK 27-Oct: lead search in ERPNext
 	from sk_app.cold_calls import ensure_field as cold_calling_field

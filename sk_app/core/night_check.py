@@ -110,6 +110,9 @@ def _late(users: list[dict]) -> list[dict]:
 
 
 def _drafts(logins: set) -> list[dict]:
+	from sk_app.core.people import ceo_users
+
+	ceos = [u for u in ceo_users() if u in logins]
 	out = []
 	for doctype, function in R.DRAFT_DOCTYPES.items():
 		if not frappe.db.table_exists(doctype):
@@ -117,10 +120,18 @@ def _drafts(logins: set) -> list[dict]:
 		title = next((f for f in ("customer_name", "supplier_name", "title") if frappe.get_meta(doctype).has_field(f)), "name")
 		for d in frappe.get_all(doctype, filters={"docstatus": 0, "creation": [">=", _since()]}, fields=["name", "owner", "modified", "creation", title], limit=0):
 			age = date_diff(nowdate(), getdate(d.modified))
-			if not R.draft_is_stale(age):
+			days = date_diff(nowdate(), getdate(d.creation))
+			to_owner, to_ceo = R.draft_due(doctype, age if doctype not in R.DRAFT_WATCH else days)
+			if not to_owner:
 				continue
-			out.append(R.item("draft", doctype, d.name, f"{d.get(title) or d.name} · draft since {str(d.creation)[:10]}", _owner_or(d.owner, function, logins),
-				function=function, days=date_diff(nowdate(), getdate(d.creation))))
+			owner = _owner_or(d.owner, function, logins)
+			what = f"{d.get(title) or d.name} · draft since {str(d.creation)[:10]}"
+			out.append(R.item("draft", doctype, d.name, what, owner, function=function, days=days))
+			if to_ceo:  # SK 23-Nov: a quote / expense still a draft after 5 days also goes to SK
+				for ceo in ceos:
+					if ceo != owner:
+						out.append(R.item("draft_late", doctype, d.name, f"{what} · owner {frappe.db.get_value('User', owner, 'full_name') or owner} · {days} days",
+							ceo, function="Management", days=days))
 	return out
 
 

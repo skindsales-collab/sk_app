@@ -16,6 +16,7 @@ KINDS = {
 	"no_login": ("Person without an app login", "Make the login (People) or set the mobile number", "Management"),
 	"late": ("Late item", "Update it, or close it if it is over", None),
 	"draft": ("Draft not submitted", "Check and Submit it, or delete it if it is wrong", None),
+	"draft_late": ("Quote / expense still a draft after 5 days", "Ask the owner to submit it or delete it", "Management"),
 	"unlinked_payment": ("Payment not linked to a bill", "Link the payment to its bill(s)", "Accounts"),
 	"import_gap": ("Import gap (source rows not in ERPNext)", "Load the missing rows or correct the SK Import count", "Management"),
 	"approval": ("Purchase request waiting for CEO", "Approve or reject it", "Management"),
@@ -29,8 +30,19 @@ ORDER = list(KINDS)
 DRAFT_DOCTYPES = {
 	"Quotation": "Sales", "Sales Order": "Sales", "Sales Invoice": "Accounts", "Payment Entry": "Accounts", "Journal Entry": "Accounts",
 	"Purchase Invoice": "Accounts", "Purchase Order": "Purchase", "Material Request": "Stores", "Stock Entry": "Stores", "Purchase Receipt": "Stores",
+	"Expense Claim": "Accounts",
 }
 DRAFT_GRACE_DAYS = 1  # a draft made or edited today is still being worked on
+# SK 23-Nov (approved): quotes and expenses left as drafts: on the owner's list after 2 days, also on SK's list after 5
+DRAFT_WATCH = {"Quotation": "Sales", "Expense Claim": "Accounts"}
+DRAFT_OWNER_DAYS, DRAFT_CEO_DAYS = 2, 5
+
+
+def draft_due(doctype: str, days_old: int) -> tuple[bool, bool]:
+	"""(on the owner's list, also on the CEO's list) for a draft this many days old."""
+	if doctype in DRAFT_WATCH:
+		return days_old > DRAFT_OWNER_DAYS, days_old > DRAFT_CEO_DAYS
+	return days_old > DRAFT_GRACE_DAYS, False
 
 
 def item(kind: str, doctype: str, name: str, what: str, user: str, function: str | None = None, days: int = 0, action: str | None = None) -> dict:

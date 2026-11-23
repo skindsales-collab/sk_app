@@ -16,7 +16,7 @@ website_route_rules = [
 ]
 
 # SK 27-Oct: Tally keys in ERPNext for the accounts team (F4-F9, Ctrl+A, Alt+D Day Book ...)
-app_include_js = ["/assets/sk_app/js/sk_tally_keys.js", "/assets/sk_app/js/sk_help_desk.js"]  # SK 28-Oct: ❓ help on every ERPNext page
+app_include_js = ["/assets/sk_app/js/sk_tally_keys.js", "/assets/sk_app/js/sk_help_desk.js", "/assets/sk_app/js/sk_safe_cancel.js", "/assets/sk_app/js/sk_bank_return.js"]  # SK 28-Oct: ❓ help on every ERPNext page
 
 # SK 27-Oct: standard cabin quotation print (SK's quote template), {{ sk_cabin_quote_html(doc) }}
 # SK 28-Oct: "Post Tally invoices" button for Accounts (sk_app.tally_invoices)
@@ -91,7 +91,9 @@ doc_events = {
 	# SK 29-Oct: PO date → invoice date per cabin, days per 100 sq ft for Production (sk_app.lead_time)
 	"Project": {"validate": "sk_app.lead_time.on_project_validate"},
 	"SK Path Switch": {"validate": "sk_app.core.gate.on_switch"},  # SK 6-Nov: counts saved when a module goes New; checked nightly
-	"SK App User": {"on_update": ["sk_app.segments.on_app_user_update", "sk_app.logins.set_company_default"]},
+	# SK 23-Nov: cancelling a task on a lead / deal keeps its owner (Frappe CRM empties it)
+	"ToDo": {"validate": "sk_app.lead_owner_keep.remember_owner", "on_update": "sk_app.lead_owner_keep.keep_owner"},
+	"SK App User": {"on_update": ["sk_app.segments.on_app_user_update", "sk_app.logins.set_company_default", "sk_app.user_setup.on_app_user_update"]},
 	"Job Card": {"validate": ["sk_app.store_screens.set_job_card_cabin", "sk_app.writers.work_order.card_validate"],  # cabin label (SK 27-Oct) + rebuild Flow 5 (New path)
 		# SK 29-Oct labour: each job has its service PO from the rate sheet; done → service GRN at once (sk_app.sub_bills)
 		"after_insert": "sk_app.sub_bills.on_job_card_insert",
@@ -112,9 +114,9 @@ doc_events = {
 		"before_submit": ["sk_app.sub_bills.check_submit", "sk_app.writers.service_job.before_submit"]},  # service job bill only after approval (New path)
 	"Item Price": {"validate": "sk_app.sub_bills.check_rate_edit"},
 	# SK 4-Nov (Shraddha): a Net Banking / IMPS payment booked from Cash never shows in Bank Reconciliation: stopped
-	"Payment Entry": {"validate": ["sk_app.doubles.check", "sk_app.writers.payment.on_validate"],
+	"Payment Entry": {"validate": ["sk_app.doubles.check", "sk_app.writers.payment.on_validate", "sk_app.bank_return.warn_date_gap"],
 		"on_submit": "sk_app.writers.bank_match.on_submit"},  # rebuild Flow 6: matched with its bank line at once (New path)
-	"Journal Entry": {"validate": ["sk_app.doubles.check", "sk_app.writers.journal.on_validate"]},
+	"Journal Entry": {"validate": ["sk_app.doubles.check", "sk_app.writers.journal.on_validate", "sk_app.bank_return.warn_date_gap"]},
 	# rebuild Flow 6 HR (New path): the HR rules on every record, from the app, ERPNext or SK Hub
 	"Attendance": {"validate": "sk_app.writers.attendance.on_validate"},
 	"Leave Application": {"before_validate": "sk_app.writers.leave.ensure_allocation", "validate": "sk_app.writers.leave.on_validate"},

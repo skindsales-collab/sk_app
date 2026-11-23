@@ -82,6 +82,17 @@ def on_login(login_manager=None):
 	if frappe.conf.get("sk_local"):
 		# SK 9-Nov: on the local test site every login lands in SK App, never in the ERPNext desk.
 		frappe.local.response["home_page"] = "/sk"
+	elif _app_first(frappe.session.user):
+		# SK 23-Nov (Swati / Pranali: "SK App does not open on the PC, mobile works"): logging in on a PC at the site's
+		# address landed in the ERPNext desk, where a sales login sees almost nothing (module profile "CRM Only").
+		# A login that works through SK App lands in SK App; the desk stays one click away (/app).
+		frappe.local.response["home_page"] = "/sk"
+
+
+def _app_first(user: str | None) -> bool:
+	if not user or user in ("Administrator", "Guest") or not frappe.db.exists("SK App User", {"user": user, "enabled": 1}):
+		return False
+	return bool(frappe.db.get_value("User", user, "module_profile"))
 
 
 def check():
