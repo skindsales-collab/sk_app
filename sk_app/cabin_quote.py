@@ -488,16 +488,79 @@ CABIN_PHONES = "+91 84325 33555 / +91 84858 33365"  # SK 16-Nov: the cabin sales
 COLS = "<colgroup><col style='width:5%'><col style='width:53%'><col style='width:7%'><col style='width:7%'><col style='width:14%'><col style='width:14%'></colgroup>"
 
 
+def _root_group(group: str | None) -> str | None:
+	"""The top group under All Customer Groups (Cabin, Non-Cabin, Commercial ...)."""
+	seen = set()
+	while group and group not in seen:
+		seen.add(group)
+		parent = frappe.db.get_value("Customer Group", group, "parent_customer_group")
+		if not parent or parent == "All Customer Groups":
+			return group
+		group = parent
+	return group
+
+
+def _deal_of(doc) -> str | None:
+	"""The CRM deal behind a quote / order / invoice / challan (directly, through the customer or the linked documents)."""
+	deal = doc.get("crm_deal")
+	if deal:
+		return deal
+	for d in doc.get("items") or []:
+		for dt, field in (("Quotation", "prevdoc_docname"), ("Sales Order", "sales_order"), ("Sales Order", "against_sales_order")):
+			name = d.get(field)
+			if not name:
+				continue
+			if dt == "Quotation" and frappe.db.exists("Quotation", name):
+				deal = frappe.db.get_value("Quotation", name, "crm_deal")
+			elif dt == "Sales Order" and frappe.db.exists("Sales Order", name):
+				q = frappe.db.get_value("Sales Order Item", {"parent": name, "prevdoc_docname": ["is", "set"]}, "prevdoc_docname")
+				deal = frappe.db.get_value("Quotation", q, "crm_deal") if q else None
+			if deal:
+				return deal
+	return None
+
+
+def _customer_deal(doc) -> str | None:
+	party = doc.get("party_name") if doc.get("quotation_to", "Customer") == "Customer" else None
+	party = party or doc.get("customer")
+	if party and frappe.get_meta("Customer").has_field("crm_deal"):
+		return frappe.db.get_value("Customer", party, "crm_deal")
+	return None
+
+
+def _segment_of(deal: str | None) -> str | None:
+	from sk_app import segments
+
+	if deal and frappe.db.exists("CRM Deal", deal) and frappe.get_meta("CRM Deal").has_field("sk_main_segment"):
+		seg = frappe.db.get_value("CRM Deal", deal, "sk_main_segment")
+		return seg if seg in (segments.NON_CABIN, segments.CABIN) else None
+	return None
+
+
 def is_noncabin(doc) -> bool:
-	"""True when the party's customer group is "Non-Cabin" or sits under it (machine shifting, job work ...)."""
-	group = doc.get("customer_group")
-	if not group:
-		party = doc.get("party_name") if doc.get("quotation_to", "Customer") == "Customer" else None
-		party = party or doc.get("customer")
-		group = frappe.db.get_value("Customer", party, "customer_group") if party else None
-	if not group:
+	"""Machine-shifting header (True) or cabin header (False). SK 23-Nov checker: the customer group decides when it is
+	under Cabin or Non-Cabin; when it says nothing (empty, Commercial, Government, Individual, Non Profit) the deal's
+	segment decides, then the items, then the customer's deal; cabin only when nothing tells."""
+	from sk_app import print_rules, segments
+
+	root = _root_group(_group(doc))
+	if root == segments.NON_CABIN:
+		return True
+	if root == segments.CABIN:
 		return False
-	return group == "Non-Cabin" or frappe.db.get_value("Customer Group", group, "parent_customer_group") == "Non-Cabin"
+	seg = _segment_of(_deal_of(doc))  # the document's own deal (quote, or the quote behind the order / invoice)
+	if seg:
+		return seg == segments.NON_CABIN
+	by_items = print_rules.items_noncabin([{"item_code": d.get("item_code"), "item_name": d.get("item_name"), "hsn": d.get("gst_hsn_code")}
+		for d in doc.get("items") or []])
+	if by_items is not None:
+		return by_items
+	return _segment_of(_customer_deal(doc)) == segments.NON_CABIN  # the customer's first deal, last
+
+
+def sk_doc_noncabin(doc) -> bool:
+	"""Jinja method for the SK print formats (same header choice as the quote)."""
+	return bool(doc) and doc.get("doctype") != "Purchase Order" and is_noncabin(doc)
 
 
 def _group(doc) -> str | None:

@@ -167,12 +167,10 @@ def ensure_letter_head():
 	img = "/assets/sk_app/images/sk-header-v2.png"  # SK 21-Nov: one header everywhere (general segment line, company contacts)
 	meta = frappe.get_meta("Letter Head")
 	vals = {"is_default": 1, "disabled": 0}
+	# SK 23-Nov checker: source HTML, not Image. With Image, a re-save in the desk rebuilds the content from the picture
+	# and drops the red band; the HTML content (picture + band) is kept as it is on every save.
 	if meta.has_field("source"):
-		vals.update({"source": "Image", "image": img})
-		if meta.has_field("image_width"):
-			vals.update({"image_width": 190, "align": "Left"})
-	else:
-		vals["content"] = f'<img src="{img}" style="width:100%">'
+		vals["source"] = "HTML"
 	# set_value skips the image -> content step, so the content is written here: the banner and (checker 21-Nov) the red
 	# document band "<DOCTYPE> | No | Date" on every plain ERPNext print; the big grey title steps back
 	band = ('{% if doc and doc.doctype %}<div style="background:#C82030;color:#fff;font-weight:bold;text-align:center;padding:4px 8px;'
@@ -190,7 +188,13 @@ def ensure_letter_head():
 		frappe.db.set_value("Letter Head", LETTER_HEAD, vals)
 	else:
 		frappe.get_doc({"doctype": "Letter Head", "letter_head_name": LETTER_HEAD, **vals}).insert(ignore_permissions=True)
-	# only one default: the grey one steps back (it stays for anyone who picks it by hand)
+	# SK 23-Nov "all ... in same format": documents saved earlier with another letter head (e.g. "Company Letterhead -
+	# Grey", picked when it was the default) print with it; every other letter head now carries the same SK banner, band
+	# and signature, so no record prints the old header (nothing on the records is changed)
+	same = {k: vals[k] for k in ("content", "footer", "footer_source", "source") if k in vals}
+	for other in frappe.get_all("Letter Head", filters={"name": ["!=", LETTER_HEAD]}, pluck="name"):
+		frappe.db.set_value("Letter Head", other, same)
+	# only one default: the others step back
 	frappe.db.sql("update `tabLetter Head` set is_default=0 where name != %s", LETTER_HEAD)
 	frappe.db.set_value("Letter Head", LETTER_HEAD, "is_default", 1)
 	frappe.db.set_default("letter_head", LETTER_HEAD)
@@ -426,7 +430,7 @@ def invoice_html(doc) -> str:
 	# SK 21-Nov: one header on every document; the segment line by Cabin / Non-Cabin, the general one on a PO
 	from sk_app.cabin_quote import is_noncabin
 
-	banner = "sk-header-v2.png" if po else ("sk-quote-header-v2.png" if is_noncabin(doc) else "sk-cabin-quote-header-v2.png")
+	banner = "sk-po-header-v2.png" if po else ("sk-quote-header-v2.png" if is_noncabin(doc) else "sk-cabin-quote-header-v2.png")
 	header = frappe.utils.get_url("/assets/sk_app/images/" + banner)
 	terms = f"<div class=bar>Terms</div><div>{doc.terms}</div>" if doc.get("terms") else ""
 	return f"""<style>{CSS}</style><div class=skq><img class=hdr src="{header}">
