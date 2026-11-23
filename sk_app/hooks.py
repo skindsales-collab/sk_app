@@ -72,19 +72,19 @@ doc_events = {
 		# SK 4-Nov: no deal from a lead that is still New (call not connected): the lead is Qualified first (sk_app.gates)
 		"before_insert": ["sk_app.doubles.check_deal", "sk_app.gates.check_new_deal"], "on_update": "sk_app.deal_quotes.on_deal_update"},
 	# SK 4-Nov: members also work in ERPNext or through Claude: the quote / payment checks run on the record, whatever the route
-	"Quotation": {"before_insert": "sk_app.gates.check_quote_step", "before_submit": ["sk_app.gates.check_quote_step", "sk_app.gates.check_quote_scope", "sk_app.gates.check_quotation"],
+	"Quotation": {"before_validate": "sk_app.party_currency.warm", "before_insert": "sk_app.gates.check_quote_step", "before_submit": ["sk_app.gates.check_quote_step", "sk_app.gates.check_quote_scope", "sk_app.gates.check_quotation"],
 		"validate": "sk_app.writers.quotation.on_validate", "on_submit": "sk_app.quote_pdf.attach_on_submit"},
 	"Item": {"validate": "sk_app.writers.item.on_validate"},
 	# SK 4-Nov rebuild (S3): the customer's salesperson is set at save, not the next night (the nightly run stays as a safety net)
 	"Customer": {"before_insert": "sk_app.segments.customer_group_from_deal", "after_insert": "sk_app.writers.customer.after_insert",
 		"on_update": ["sk_app.segments.on_customer_update", "sk_app.sales_owner.on_customer_save"]},
 	# SK 28-Oct: every order has its salesperson; income ledger and Non-Cabin sub-group cost centre from the customer
-	"Sales Order": {"validate": ["sk_app.sales_owner.fill_order_team", "sk_app.segment_accounts.set_segment", "sk_app.writers.taxes.on_validate"],
+	"Sales Order": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.sales_owner.fill_order_team", "sk_app.segment_accounts.set_segment", "sk_app.writers.taxes.on_validate"],
 		"on_update": "sk_app.writers.taxes.after_save",  # SK 6-Nov: GST filled by the app when the rows were left empty (New path)
 		"before_submit": "sk_app.gates.check_sales_order",
 		"on_submit": ["sk_app.won_deals.on_submit", "sk_app.lead_time.on_sales_order_submit"]},  # SK 28-Oct: its lead / deal shows Won in the CRM at once
 	# SK 29-Oct (Shraddha): a tax invoice is submitted only with the buyer's Bill to address (Ship to defaults to it)
-	"Sales Invoice": {"validate": ["sk_app.segment_accounts.set_segment", "sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check",
+	"Sales Invoice": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.segment_accounts.set_segment", "sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check",
 		"sk_app.writers.taxes.on_validate", "sk_app.writers.payment_allocate.pull_advances"], "on_update": "sk_app.writers.taxes.after_save",
 		"before_submit": "sk_app.gates.check_sales_invoice", "on_submit": "sk_app.lead_time.on_sales_invoice_submit",
 		"autoname": "sk_app.invoice_naming.autoname"},  # SK 21-Nov: SK/IND/MMYY/### with one running number
@@ -101,14 +101,14 @@ doc_events = {
 	"Work Order": {"validate": "sk_app.writers.work_order.on_validate", "before_submit": "sk_app.sub_bills.wo_submitting",
 		"on_submit": ["sk_app.cabin_projects.close_done_stages", "sk_app.sub_bills.on_work_order_submit"]},
 	"Stock Entry": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.stock_entry.on_validate"]},  # rebuild Flow 4 (New path)
-	"Delivery Note": {"validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.gates.check_sales_invoice"},
+	"Delivery Note": {"before_validate": "sk_app.party_currency.warm", "validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.gates.check_sales_invoice"},
 	# SK 27-Oct purchase flow: requisition → CEO approval → PO → receipt against the PO, in ERPNext too
 	"Material Request": {"validate": ["sk_app.gates.check_request", "sk_app.cabin_projects.set_cost_centre"], "before_submit": "sk_app.writers.requisition.check_submit"},
-	"Purchase Order": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.purchase_order.on_validate"],  # rebuild Flow 3 (New path)
+	"Purchase Order": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.purchase_order.on_validate"],  # rebuild Flow 3 (New path)
 		"before_submit": ["sk_app.writers.requisition.check_po", "sk_app.sub_bills.check_submit"], "on_submit": "sk_app.sub_bills.on_po_submit"},
-	"Purchase Receipt": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.receipt.on_validate"], "before_submit": "sk_app.writers.requisition.check_receipt"},
+	"Purchase Receipt": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.receipt.on_validate"], "before_submit": "sk_app.writers.requisition.check_receipt"},
 	# SK 28/29-Oct: labour bill only from the service GRN of a PO Rushi + CEO approved; only CEO / Accounts change the rates
-	"Purchase Invoice": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check", "sk_app.writers.payment_allocate.pull_advances"],
+	"Purchase Invoice": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check", "sk_app.writers.payment_allocate.pull_advances"],
 		"before_submit": ["sk_app.sub_bills.check_submit", "sk_app.writers.service_job.before_submit"]},  # service job bill only after approval (New path)
 	"Item Price": {"validate": "sk_app.sub_bills.check_rate_edit"},
 	# SK 4-Nov (Shraddha): a Net Banking / IMPS payment booked from Cash never shows in Bank Reconciliation: stopped
