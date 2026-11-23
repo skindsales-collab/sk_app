@@ -197,10 +197,13 @@ def ensure_setup():
 	for code, name in SERVICE_ITEMS.items():
 		if group:
 			get_or_make(code, name, group=group)
-	if not frappe.db.exists("Print Format", PRINT_FORMAT):
-		frappe.get_doc({"doctype": "Print Format", "name": PRINT_FORMAT, "doc_type": "Quotation", "module": "SK App", "custom_format": 1,
-			"print_format_type": "Jinja", "standard": "No", "html": "{{ sk_cabin_quote_html(doc) }}", "margin_top": 0, "margin_left": 0,
-			"margin_right": 0}).insert(ignore_permissions=True)
+	# SK 23-Nov: the code is the master for the approved quote format too (written on every migrate, never left edited)
+	values = {"doc_type": "Quotation", "custom_format": 1, "print_format_type": "Jinja", "html": "{{ sk_cabin_quote_html(doc) }}",
+		"margin_top": 0, "margin_bottom": 15, "margin_left": 0, "margin_right": 0, "disabled": 0}
+	if frappe.db.exists("Print Format", PRINT_FORMAT):
+		frappe.db.set_value("Print Format", PRINT_FORMAT, values)
+	else:
+		frappe.get_doc({"doctype": "Print Format", "name": PRINT_FORMAT, "module": "SK App", "standard": "No", **values}).insert(ignore_permissions=True)
 	from sk_app.tax_invoice import _set_default
 
 	_set_default("Quotation", PRINT_FORMAT)  # SK 21-Nov: doctype-level (ERPNext reads it), never over a chosen default

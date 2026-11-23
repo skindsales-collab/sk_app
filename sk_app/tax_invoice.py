@@ -28,7 +28,7 @@ ADDRESS_FIELDS = ["name", "address_title", "address_line1", "address_line2", "ci
 
 # SK 21-Nov: the Tally-style GST invoice agreed with Accounts (made on live 21-Nov) is the Sales Invoice default; the app
 # keeps a copy (data/sk_tax_invoice_tally.html, logo in data/sk_tax_invoice_tally_logo.b64, bank lines from the company's
-# Bank Account in ERPNext) and makes it only where it is missing, never over an edited one
+# Bank Account in ERPNext); since 23-Nov the code copy is written on every migrate (see ensure_setup)
 TALLY_FORMAT = "SK Tax Invoice Tally"
 # SK 21-Nov Rev 2 (approved): one template for invoice, order acknowledgement, purchase order and delivery challan; the
 # three desk formats only render the invoice format's html, so a change to the template shows in all four
@@ -82,17 +82,17 @@ def ensure_setup():
 			frappe.get_doc({"doctype": "Print Format", "name": name, "doc_type": doctype, "module": "SK App",
 				"custom_format": 1, "print_format_type": "Jinja", "standard": "No", "html": html, "margin_top": 0, "margin_left": 0,
 				"margin_right": 0}).insert(ignore_permissions=True)
-	if not frappe.db.exists("Print Format", TALLY_FORMAT):
-		frappe.get_doc({"doctype": "Print Format", "name": TALLY_FORMAT, "doc_type": "Sales Invoice", "module": "SK App",
-			"custom_format": 1, "print_format_type": "Jinja", "standard": "No", "html": _tally_html(), "font_size": 14,
+	# SK 23-Nov "all approved ... should come in same format": the approved template in the code is the master. Every
+	# deploy / migrate writes it (and its page settings) to the four formats, so a pasted or edited copy on the site can
+	# never differ from the approved design again (before: made only when missing, so live kept older pasted copies).
+	for doctype, name, html in [("Sales Invoice", TALLY_FORMAT, _tally_html())] + [(d, n, TALLY_WRAPPER) for d, n in TALLY_DOCS.items()]:
+		values = {"doc_type": doctype, "custom_format": 1, "print_format_type": "Jinja", "html": html, "font_size": 14,
 			"margin_top": 10, "margin_bottom": 10, "margin_left": 10, "margin_right": 10, "page_number": "Hide",
-			"pdf_generator": "wkhtmltopdf"}).insert(ignore_permissions=True)
-	for doctype, name in TALLY_DOCS.items():  # made only where missing, never over an edited one
-		if not frappe.db.exists("Print Format", name):
-			frappe.get_doc({"doctype": "Print Format", "name": name, "doc_type": doctype, "module": "SK App",
-				"custom_format": 1, "print_format_type": "Jinja", "standard": "No", "html": TALLY_WRAPPER, "font_size": 14,
-				"margin_top": 10, "margin_bottom": 10, "margin_left": 10, "margin_right": 10, "page_number": "Hide",
-				"pdf_generator": "wkhtmltopdf"}).insert(ignore_permissions=True)
+			"pdf_generator": "wkhtmltopdf", "disabled": 0}
+		if frappe.db.exists("Print Format", name):
+			frappe.db.set_value("Print Format", name, values)
+		else:
+			frappe.get_doc({"doctype": "Print Format", "name": name, "module": "SK App", "standard": "No", **values}).insert(ignore_permissions=True)
 	for doctype, name in DEFAULT_FOR.items():
 		_set_default(doctype, name)
 	ensure_letter_head()
