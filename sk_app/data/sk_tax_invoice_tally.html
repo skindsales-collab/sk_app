@@ -53,7 +53,7 @@
 {#- checker 21-Nov: internal refs (CRM lead, Tally, Common Sheet) are not the customer's order no. -#}
 {%- set po_raw = (doc.po_no or "") if not is_po else "" -%}
 {%- set ext_po = "" if (po_raw.startswith("From CRM") or po_raw.startswith("Tally") or po_raw.startswith("Common Sheet")) else po_raw -%}
-{%- set ns = namespace(lines=0) -%}{%- for d in doc.items -%}{%- set ns.lines = ns.lines + 1 + ((d.description or "")|length // 60) + (d.description or "").count("<br") + (d.description or "").count("</p>") -%}{%- endfor -%}
+{%- set ns = namespace(lines=0) -%}{%- for d in doc.items -%}{%- set ns.lines = ns.lines + 1 + (frappe.utils.strip_html(d.description or "")|length // 75) + (d.description or "").count("<br") + (d.description or "").count("</p>") -%}{%- endfor -%}
 {%- set docno = (doc.sk_quote_ref or doc.name) if is_qt else doc.name -%}
 {%- set dn = (doc.items | map(attribute="delivery_note") | select | list) if dt_ == "Sales Invoice" else [] -%}
 <style>
@@ -89,7 +89,7 @@
 {%- for d in doc.items %}
 <tr><td class="c">{{ loop.index }}</td><td><b>{{ d.item_name }}</b>{%- set desc = frappe.utils.strip_html((d.description or "").replace("</p>", "\n").replace("<br>", "\n")).replace("&nbsp;", " ").strip() -%}{%- set desc = sk_customer_desc(desc) -%}{%- if is_qt -%}{%- set desc = desc.replace(" (0 km)", "") -%}{%- endif -%}{% if desc and desc != (d.item_name or "").strip() %}<br><span class="s">{{ desc.replace("\n", "<br>") }}</span>{% endif %}</td><td class="c">{{ d.gst_hsn_code or "" }}</td><td class="r">{{ "%.2f"|format(d.qty) }} {{ d.uom }}</td><td class="r">{{ inr(d.net_rate or d.rate) }}</td><td class="c">{{ d.uom }}</td><td class="r">{{ inr(d.net_amount or d.amount) }}</td></tr>
 {%- endfor %}
-<tr style="height:{{ [6, 140 - 16 * ns.lines]|max }}px"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr style="height:{{ [6, 340 - 14 * ns.lines]|max }}px"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
 {%- for t in tax_rows|sort(attribute="o") %}{% if t.amt %}
 <tr><td></td><td class="r">{{ t.label }}{% if t.rate %} @ {{ "%g"|format(t.rate) }}%{% endif %}</td><td></td><td></td><td></td><td></td><td class="r">{{ inr(t.amt) }}</td></tr>
 {% endif %}{%- endfor %}

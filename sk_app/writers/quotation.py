@@ -74,6 +74,9 @@ def write(user: str, *, customer: str, items: list[dict], deal: str | None = Non
 	_save_as_system(doc, owner or user)  # on_validate checks it, as for a quote made in ERPNext or by Claude
 	if deal:
 		_deal_to_quotation(deal)
+		from sk_app.deal_quotes import _close_tasks
+
+		_close_tasks(deal)  # SK 23-Nov: the "make the quote in the app" task is done
 	return doc
 
 

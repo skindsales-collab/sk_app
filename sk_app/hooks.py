@@ -72,7 +72,7 @@ doc_events = {
 		# SK 4-Nov: no deal from a lead that is still New (call not connected): the lead is Qualified first (sk_app.gates)
 		"before_insert": ["sk_app.doubles.check_deal", "sk_app.gates.check_new_deal"], "on_update": "sk_app.deal_quotes.on_deal_update"},
 	# SK 4-Nov: members also work in ERPNext or through Claude: the quote / payment checks run on the record, whatever the route
-	"Quotation": {"before_insert": "sk_app.gates.check_quote_step", "before_submit": ["sk_app.gates.check_quote_step", "sk_app.gates.check_quotation"],
+	"Quotation": {"before_insert": "sk_app.gates.check_quote_step", "before_submit": ["sk_app.gates.check_quote_step", "sk_app.gates.check_quote_scope", "sk_app.gates.check_quotation"],
 		"validate": "sk_app.writers.quotation.on_validate", "on_submit": "sk_app.quote_pdf.attach_on_submit"},
 	"Item": {"validate": "sk_app.writers.item.on_validate"},
 	# SK 4-Nov rebuild (S3): the customer's salesperson is set at save, not the next night (the nightly run stays as a safety net)

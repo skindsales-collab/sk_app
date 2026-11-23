@@ -332,6 +332,19 @@ def check_quote_step(doc, method=None):
 		frappe.throw(_(why) + f" ({deal}: {d.custom_design_status or '-'})", title=_("Step missing"))
 
 
+def check_quote_scope(doc, method=None):
+	"""Quotation before_submit (SK 23-Nov, every route): no design / attached PDF as the quote; the scope and
+	specification lines are on the quotation, so it prints in the final SK format."""
+	if _skip() or doc.get("quotation_to") != "Customer":
+		return
+	from sk_app import quote_step_rules as Q
+
+	why = Q.scope_problem([{"item_code": r.item_code, "item_name": r.item_name, "description": r.description} for r in doc.get("items") or []],
+		bool(doc.get("sk_cabin_request")))
+	if why:
+		frappe.throw(_(why), title=_("Scope missing"))
+
+
 def lead_had_call(lead: str) -> int:
 	"""Calls on the lead where the customer was spoken to (CRM Call Log Completed, logged from the app or the phone list)."""
 	if not frappe.db.exists("DocType", "CRM Call Log"):

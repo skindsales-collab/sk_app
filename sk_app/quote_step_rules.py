@@ -24,3 +24,32 @@ def quote_problem(segment_main: str | None, design_status: str | None, has_deal:
 	if segment_main == "Cabin" and (design_status or "") not in DRAWING_OK:
 		return DRAWING_FIRST
 	return None
+
+
+# SK 23-Nov (Curesense quote 00067 went out with design's own PDF and another header): a PDF made outside SK App is
+# never the quote. The scope and specification lines are on the Quotation itself, so every quote prints in the final
+# SK format (patch 102), whatever made it (app, ERPNext desk, Claude / SK Hub, a quote file on a deal).
+import re as _re
+
+ATTACHED_NOT_QUOTE = ("A PDF made outside SK App is not the quote. Write the scope and specification lines on the quotation "
+	"(Make quotation in the app), so it prints in the SK format")
+CABIN_SCREEN = ("Make the cabin quote in the app cabin quote screen (type, size, options), so the specification prints on it, "
+	"or write the full specification on the line")
+_PLACEHOLDER = _re.compile(r"as\s+per\s+(?:the\s+)?(?:attached|enclosed)|as\s+per\s+(?:our\s+|the\s+)?quot", _re.I)
+CABIN_ITEM = "SK-CABIN"
+SPEC_MIN = 60  # characters of specification text a hand-written cabin line needs
+
+
+def _text(html) -> str:
+	return " ".join(_re.sub(r"<[^>]+>", " ", str(html or "")).replace("&nbsp;", " ").split())
+
+
+def scope_problem(items: list[dict], cabin_request: bool) -> str | None:
+	"""Why the quotation may not be sent (None = it may). items = [{item_code, item_name, description}]."""
+	for it in items or []:
+		text = _text(it.get("description")) or _text(it.get("item_name"))
+		if _PLACEHOLDER.search(text):
+			return ATTACHED_NOT_QUOTE
+		if it.get("item_code") == CABIN_ITEM and not cabin_request and len(text) < SPEC_MIN:
+			return CABIN_SCREEN
+	return None

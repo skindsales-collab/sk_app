@@ -5,24 +5,20 @@ Quotes made outside the app's quote screen reached ERPNext only as files on the 
 BOM / costing / quote Excel ("CabinNN_..._BOM_Costing_Quote_RevN.xlsx", quote value on the deal) and quote PDFs /
 Excels a salesperson uploads ("SK_Quotation_....pdf"). Now:
 
-- a quote file on a deal, or the design quote value set on it, makes a draft Quotation for the deal's customer at
-  once: linked to the deal (crm_deal), one line "as per the attached quotation" at the quote value, the file attached,
-  the deal moved to Quotation;
-- a quote file without a value gives the deal owner a task (and a box on the deal in the app) to type the amount once;
-  the Quotation is then made the same way;
+- SK 23-Nov: a quote file on a deal, or the design quote value set on it, gives the deal owner a task (and a note on
+  the deal in the app) to make the quote in the app with its scope and specification lines; the outside PDF is never
+  the quote and is never attached to a Quotation (before: a draft "as per the attached quotation" at the quote value);
 - every hour (and on deploy) any deal missed is caught up.
-A deal that already has a Quotation only gets the new file attached to its latest one (a revision is made in the app).
+A deal that already has a Quotation is left as it is (a revision is made in the app).
 """
 
 import re
 
 import frappe
 from sk_app.writers import order as order_w
-from sk_app.writers import customer as cust_w
 from frappe import _
 from frappe.utils import add_days, flt, now_datetime, nowdate
 
-from sk_app.core.switch import use_new
 
 VALUE_FIELD = "custom_design_quote_value"  # set by the AI design team's bom-push (--quote-value, ex-GST)
 # SK 28-Oct "all quote ... cabin or machine shifting or job work or any other should be routed through ERP": the
@@ -76,81 +72,35 @@ def _value(deal: str) -> float:
 	return next((flt(row.get(f)) for f in fields if flt(row.get(f)) > 0), 0.0)
 
 
-def _attach(quotation: str, files: list[dict]):
-	have = set(frappe.get_all("File", filters={"attached_to_doctype": "Quotation", "attached_to_name": quotation}, pluck="file_url"))
-	for f in files:
-		if f.file_url in have:
-			continue
-		frappe.get_doc({"doctype": "File", "file_name": f.file_name, "file_url": f.file_url, "is_private": f.is_private,
-			"attached_to_doctype": "Quotation", "attached_to_name": quotation}).insert(ignore_permissions=True)
-
-
 def make_for_deal(deal: str, amount: float | None = None, by: str | None = None) -> str | None:
-	"""The deal's draft Quotation from its quote (value from the design team or typed by the salesperson)."""
-	from sk_app import cabin_quote, erp_flow, segments
-
+	"""SK 23-Nov: a quote PDF made outside SK App (design's own PDF, an upload, a mailed file) or the design quote value
+	is NOT the quote any more (before: a draft Quotation "As per the attached quotation" with the PDF attached; the
+	Curesense quote 00067 went out with design's header). The deal's own Quotation is returned when it has one; else the
+	deal owner gets one task to make the quote in the app (scope and specification lines on the quotation), so every
+	quote prints in the final SK format. Nothing is attached to a Quotation from outside."""
 	if not _ready():
 		return None
-	files = quote_files(deal)
 	have = quotations_of(deal)
-	if have and amount is None:
-		_attach(have[0], files)
+	if have:
 		return have[0]
-	value = flt(amount) if amount is not None else _value(deal)
-	if value <= 0:
-		if files:
-			_ask_amount(deal, files[-1].file_name, files[-1].file_url)
-		return None
-	current = frappe.session.user
-	frappe.set_user("Administrator")  # a background step: the customer and quotation are made for the deal owner
-	try:
-		customer = cust_w.make_customer("Administrator", deal)["name"]
-		d = frappe.db.get_value("CRM Deal", deal, ["deal_owner", "sk_main_segment"] if frappe.get_meta("CRM Deal").has_field("sk_main_segment")
-			else ["deal_owner"], as_dict=True)
-		non_cabin = d.get("sk_main_segment") == segments.NON_CABIN
-		item = SERVICE_ITEM if non_cabin and frappe.db.exists("Item", SERVICE_ITEM) else cabin_quote.CABIN_ITEM
-		what = files[-1].file_name if files else _("the design team's quote")
-		owner = by or d.get("deal_owner")
-		if use_new("Sales", owner if owner and frappe.db.exists("User", owner) else current):  # rebuild: the one Quotation writer
-			from sk_app.writers import quotation as qw
-
-			doc = qw.write(owner or current, customer=customer, deal=deal, kind="JOB" if non_cabin else "CAB", owner=owner,
-				items=[{"item_code": item, "qty": 1, "rate": value, "description": _("As per the attached quotation: {0}").format(what)}])
-			_attach(doc.name, files)
-			_close_tasks(deal)
-			return doc.name
-		doc = frappe.new_doc("Quotation")
-		doc.update({"quotation_to": "Customer", "party_name": customer, "crm_deal": deal, "transaction_date": nowdate(),
-			"valid_till": add_days(nowdate(), 15), "ignore_pricing_rule": 1})
-		if doc.meta.has_field("sk_quote_ref"):
-			doc.sk_quote_ref = cabin_quote._new_ref(customer, "JOB" if non_cabin else "CAB")
-			doc.sk_rev = 0
-		doc.append("items", {"item_code": item, "qty": 1, "rate": value, "description": _("As per the attached quotation: {0}").format(what)})
-		doc.flags.ignore_permissions = True
-		doc.insert()
-		owner = by or d.get("deal_owner")
-		if owner and frappe.db.exists("User", owner):
-			frappe.db.set_value("Quotation", doc.name, "owner", owner, update_modified=False)
-		_attach(doc.name, files)
-		cabin_quote._deal_to_quotation(deal)
-		_close_tasks(deal)
-		return doc.name
-	finally:
-		frappe.set_user(current)
+	files = quote_files(deal)
+	if files or _value(deal) > 0:
+		_ask_quote(deal, files[-1].file_name if files else None, files[-1].file_url if files else None)
+	return None
 
 
-def _ask_amount(deal: str, file_name: str, file_url: str | None = None):
-	"""PR H (SK 16-Nov): the task links the quote PDF (never an Excel) and shows the amount when the deal already carries it."""
+def _ask_quote(deal: str, file_name: str | None, file_url: str | None = None):
+	"""One open task for the deal owner: make the quote in the app (the outside PDF / value is only a reference)."""
 	owner = frappe.db.get_value("CRM Deal", deal, "deal_owner")
 	if not owner or frappe.db.exists("ToDo", {"reference_type": "CRM Deal", "reference_name": deal, "status": "Open",
 			"description": ["like", TASK_MARK + "%"]}):
 		return
-	shown = f'<a href="{file_url}" target="_blank">{file_name}</a>' if file_url else file_name
+	shown = (f'<a href="{file_url}" target="_blank">{file_name}</a>' if file_url else file_name) if file_name else _("the design team's quote value")
 	value = _value(deal)
-	hint = _("The deal shows ₹{0:,.0f}: confirm it or type the right amount.").format(value) if value > 0 else _("Type the quote amount (before GST).")
+	hint = _("Reference value ₹{0:,.0f} (before GST).").format(value) if value > 0 else ""
 	frappe.get_doc({"doctype": "ToDo", "allocated_to": owner, "reference_type": "CRM Deal", "reference_name": deal, "priority": "High",
-		"date": nowdate(), "description": TASK_MARK + _("Quote {0} is not in ERPNext yet: open the deal in the app. {1} The ERPNext Quotation is made from it.").format(shown, hint)
-		}).insert(ignore_permissions=True)
+		"date": nowdate(), "description": TASK_MARK + _("Make the quote in the app: open the deal, Make quotation, and write the scope and "
+			"specification lines. {0} is only a reference and is not sent to the customer. {1}").format(shown, hint)}).insert(ignore_permissions=True)
 
 
 def _close_tasks(deal: str):
@@ -168,15 +118,12 @@ def pending(deal: str) -> dict | None:
 
 
 def enter_amount(user: str, deal: str, amount) -> dict:
-	"""The salesperson types the amount of an uploaded quote once."""
+	"""SK 23-Nov: an uploaded PDF and its amount no longer make the quote (old app versions still call this)."""
 	from sk_app import crm
 
 	crm._check("CRM Deal", deal, "write")
-	if flt(amount) <= 0:
-		frappe.throw(_("Please type the quote amount (before GST)"))
-	if quotations_of(deal):
-		frappe.throw(_("This deal already has an ERPNext quotation: revise it from the deal"))
-	return {"quotation": make_for_deal(deal, flt(amount), user)}
+	frappe.throw(_("A PDF made outside SK App is not the quote. Use Make quotation on this deal and write the scope and "
+		"specification lines, so the quote prints in the SK format"), title=_("Make the quote in the app"))
 
 
 # ---------- hooks ----------
@@ -209,7 +156,7 @@ def order_from_deal(deal: str) -> str | None:
 	if erp_docs(deal)[1]:
 		return None
 	quotes = quotations_of(deal)
-	q = quotes[0] if quotes else make_for_deal(deal, flt(d.get("deal_value")) or None)
+	q = quotes[0] if quotes else make_for_deal(deal)  # SK 23-Nov: no quote from the deal value; the owner is asked to make it
 	if not q:
 		return None
 	current = frappe.session.user
