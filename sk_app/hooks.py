@@ -26,7 +26,7 @@ doctype_list_js = {"Sales Invoice": "public/js/sales_invoice_list.js"}
 jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html", "sk_app.tax_invoice.sk_tax_invoice_html", "sk_app.print_rules.sk_customer_desc", "sk_app.cabin_quote.sk_doc_noncabin"]}
 
 scheduler_events = {
-	"hourly": ["sk_app.deal_quotes.sync", "sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge", "sk_app.mailbox.remind",
+	"hourly": ["sk_app.deal_quotes.sync", "sk_app.lead_follow.hourly", "sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge", "sk_app.mailbox.remind",
 		"sk_app.hiring.hourly",  # SK 17-Nov hiring: 48 h hand-over to HR, interview reminders, 6-month and 7-day clean-ups
 		"sk_app.old_crm_load.hourly"],  # SK 6-Nov: old CRM leads SK uploads as a File are loaded once
 	# IndiaMART / JustDial / GeM mails to the team mailboxes become CRM leads (free route, point 14)
@@ -70,7 +70,7 @@ doc_events = {
 	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.sales_screens.set_deal_customer", "sk_app.quote_pickup.on_deal_validate",
 		"sk_app.gates.check_crm", "sk_app.won_deals.check_won"],  # SK 14-Nov KF-05180: Won without a Sales Order is a rule gap
 		# SK 4-Nov: no deal from a lead that is still New (call not connected): the lead is Qualified first (sk_app.gates)
-		"before_insert": ["sk_app.doubles.check_deal", "sk_app.gates.check_new_deal"], "on_update": "sk_app.deal_quotes.on_deal_update"},
+		"before_insert": ["sk_app.doubles.check_deal", "sk_app.gates.check_new_deal"], "on_update": ["sk_app.deal_quotes.on_deal_update", "sk_app.lead_follow.on_deal_update"]},
 	# SK 4-Nov: members also work in ERPNext or through Claude: the quote / payment checks run on the record, whatever the route
 	"Quotation": {"before_validate": "sk_app.party_currency.warm", "before_insert": "sk_app.gates.check_quote_step", "before_submit": ["sk_app.gates.check_quote_step", "sk_app.gates.check_quote_scope", "sk_app.gates.check_quotation"],
 		"validate": "sk_app.writers.quotation.on_validate", "on_submit": "sk_app.quote_pdf.attach_on_submit"},
@@ -82,7 +82,7 @@ doc_events = {
 	"Sales Order": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.sales_owner.fill_order_team", "sk_app.segment_accounts.set_segment", "sk_app.writers.taxes.on_validate"],
 		"on_update": "sk_app.writers.taxes.after_save",  # SK 6-Nov: GST filled by the app when the rows were left empty (New path)
 		"before_submit": "sk_app.gates.check_sales_order",
-		"on_submit": ["sk_app.won_deals.on_submit", "sk_app.lead_time.on_sales_order_submit", "sk_app.bom_optional.tell_design"]},  # SK 28-Oct: its lead / deal shows Won in the CRM at once
+		"on_submit": ["sk_app.won_deals.on_submit", "sk_app.lead_time.on_sales_order_submit", "sk_app.bom_optional.tell_design", "sk_app.lead_follow.on_order_submit"]},  # SK 28-Oct: its lead / deal shows Won in the CRM at once
 	# SK 29-Oct (Shraddha): a tax invoice is submitted only with the buyer's Bill to address (Ship to defaults to it)
 	"Sales Invoice": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.segment_accounts.set_segment", "sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check",
 		"sk_app.writers.taxes.on_validate", "sk_app.writers.payment_allocate.pull_advances"], "on_update": "sk_app.writers.taxes.after_save",

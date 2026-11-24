@@ -2339,11 +2339,15 @@ def cabin_quote_options():
 
 
 @frappe.whitelist()
-def cabin_quote_price(req):
+def cabin_quote_price(req, deal=None, lead=None):
 	from sk_app import cabin_quote
 
 	_cabin_user()
-	return cabin_quote.price(json.loads(req) if isinstance(req, str) else req)
+	value = 0
+	if deal or lead:
+		crm._check("CRM Deal" if deal else "CRM Lead", deal or lead, "read")
+		value = cabin_quote.design_value(deal or frappe.db.get_value("CRM Deal", {"lead": lead}, "name"))
+	return cabin_quote.price(json.loads(req) if isinstance(req, str) else req, value=value)
 
 
 @frappe.whitelist()

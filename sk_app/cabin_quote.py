@@ -79,9 +79,41 @@ def ftin(ft: float) -> str:
 	return f"{f}'" + (f"-{i}\"" if i else "")
 
 
-def price(req: dict, rc: dict | None = None) -> dict:
+DESIGN = "design"
+
+
+def design_value(deal: str | None) -> float:
+	"""The design team's quote value on the deal (before GST, all cabins together). No BOM is needed (SK 24-Nov)."""
+	return flt(frappe.db.get_value("CRM Deal", deal, "custom_design_quote_value")) if deal and frappe.get_meta("CRM Deal").has_field("custom_design_quote_value") else 0.0
+
+
+def design_spec(req: dict) -> list[str]:
+	return [x.strip(" -•\t") for x in str(req.get("spec") or "").splitlines() if x.strip(" -•\t")]
+
+
+def _design_price(req: dict, rc: dict, value: float) -> dict:
+	title, L, W, H = (req.get("title") or "").strip(), flt(req.get("length")), flt(req.get("width")), flt(req.get("height"))
+	qty = cint(req.get("qty")) or 1
+	if not title:
+		frappe.throw(_("Please write what the cabin is (e.g. LGSF office, container cabin)"))
+	if L <= 0 or W <= 0:
+		frappe.throw(_("Please give the length and width"))
+	if not design_spec(req):
+		frappe.throw(_("Please write the specification, one line each: it prints on the quotation"))
+	if flt(value) <= 0:
+		frappe.throw(_("Design has not given the price on this deal yet (Design quote value). Ask design, then make the quote"))
+	size = " x ".join(ftin(x) for x in (L, W, H) if x)
+	dims = "L x W x H" if H else "L x W"
+	line = {"kind": "cabin", "desc": f"{title} {size} ({dims}), as per specification below", "qty": qty, "unit": "No.", "rate": round(flt(value) / qty, 2), "basis": "design price"}
+	line["amount"] = line["qty"] * line["rate"]
+	return {"lines": [line], "total": line["amount"], "rate_card": rc["version"], "area": L * W, "label": title, "size": size, "qty": qty}
+
+
+def price(req: dict, rc: dict | None = None, value: float = 0) -> dict:
 	"""req: type, length, width, height (ft), qty, options {key: qty}, km, crane, transport. Returns lines + total."""
 	rc = rc or rate_card()
+	if req.get("type") == DESIGN:
+		return _design_price(req, rc, value)
 	if req.get("type") not in rc["types"]:
 		frappe.throw(_("This cabin type is not in the rate card: send it to design, the price comes from the design team's cost figure"))
 	t = rc["types"][req["type"]]
@@ -270,7 +302,8 @@ def make(user: str, req: dict, deal=None, lead=None, customer=None, discount_pct
 	"""Make (or revise) the cabin quotation. The price comes from the rate card only."""
 	frappe.flags.sk_quote_in_hand = True  # no design / AI quote for a deal quoted here (quote_pickup)
 	rc = rate_card()
-	p = price(req, rc)
+	ref = deal or (frappe.db.get_value("CRM Deal", {"lead": lead}) if lead else None)
+	p = price(req, rc, design_value(ref))  # the design price is read from the deal here, never taken from the screen
 	customer, deal = _customer_for(user, deal, lead, customer)
 	disc = max(0.0, flt(discount_pct))
 	allowed = max_discount(user)
@@ -278,7 +311,7 @@ def make(user: str, req: dict, deal=None, lead=None, customer=None, discount_pct
 	if old and old.party_name != customer:
 		frappe.throw(_("That quotation is for another customer"))
 	rows = []
-	main = _cabin_item(rc, req["type"], flt(req["length"]), flt(req["width"]))
+	main = CABIN_ITEM if req["type"] == DESIGN else _cabin_item(rc, req["type"], flt(req["length"]), flt(req["width"]))
 	for ln in p["lines"]:
 		code = main if ln["kind"] == "cabin" else OPTION_ITEM if ln["kind"] == "option" else TRANSPORT_ITEM
 		rows.append({"item_code": code, "qty": ln["qty"], "rate": ln["rate"], "description": ln["desc"],
@@ -353,6 +386,9 @@ def _deal_to_quotation(deal: str):
 	status = next((s for s in frappe.get_all("CRM Deal Status", pluck="name") if "quot" in s.lower() or "proposal" in s.lower()), None)
 	if status:
 		frappe.db.set_value("CRM Deal", deal, "status", status)
+		from sk_app.lead_follow import safe_follow
+
+		safe_follow(deal)  # SK 24-Nov: written without the deal's save, so the lead is told here
 
 
 def _bosses() -> list[str]:
@@ -640,6 +676,8 @@ def quote_html(doc) -> str:
 		t = frappe._dict(req)
 		subject = f"Quotation for supply of {cint(t.qty) or 1} no. {doc.items[0].description.split(' (L x W x H)')[0] if doc.items else 'cabin'}"
 		intro = "Thank you for your enquiry. As requested, please find our offer for the portable cabin as per our standard specification."
+		if req.get("type") == DESIGN:
+			intro = "Thank you for your enquiry. As requested, please find our offer for the cabin as per the specification below."
 	else:
 		subject = f"Quotation for {_esc(doc.items[0].item_name) if doc.items else ''}"
 		intro = "Thank you for your enquiry. Please find our offer below."
@@ -650,7 +688,9 @@ def quote_html(doc) -> str:
 	n = 2
 	ms = is_noncabin(doc)
 	shifting = ms and (_group(doc) in ("Machine Shifting", "Non-Cabin") or any("shift" in (d.description or d.item_name or "").lower() for d in doc.items))
-	blocks = ((("Technical details", SPEC), ("Customer scope", CUST_SCOPE), ("Exclusions and conditions", EXCL)) if cabin
+	# a cabin outside the rate card prints the specification written for it, never the standard GI specification
+	own = [_esc(x) for x in design_spec(req)] if req.get("type") == DESIGN else None
+	blocks = ((("Technical details", own or SPEC), ("Customer scope", CUST_SCOPE), ("Exclusions and conditions", EXCL)) if cabin
 		else (("Scope of work – SK Ind Tech", MS_SK_SCOPE), ("Customer scope", MS_CUST_SCOPE), ("Exclusions and conditions", MS_EXCL)) if shifting else ())
 	for title, xs in blocks:  # SK 21-Nov checker: the section is "Customer scope", never the customer's own name
 		sections.append(f"<div class=bar>{n}. {title}</div>{li(xs)}")
