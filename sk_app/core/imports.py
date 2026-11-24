@@ -43,8 +43,10 @@ def _check_one(doc) -> int:
 			want = json.loads(doc.by_salesperson)
 		except ValueError:
 			want = {}
-		have = {r[0] or "": r[1] for r in frappe.get_all(doc.erp_doctype, filters=filters, fields=[OWNER_FIELD[doc.erp_doctype], "count(name) as n"],
-			group_by=OWNER_FIELD[doc.erp_doctype], as_list=True)}
+		# counted here: frappe 16 refuses "count(name) as n" as a field (the live night check failed on it every night)
+		have: dict = {}
+		for owner in frappe.get_all(doc.erp_doctype, filters=filters, pluck=OWNER_FIELD[doc.erp_doctype], limit=0):
+			have[owner or ""] = have.get(owner or "", 0) + 1
 		diff = {k: int(v) - int(have.get(k, 0)) for k, v in want.items() if int(v) != int(have.get(k, 0))}
 		if diff:
 			detail = json.dumps(diff)

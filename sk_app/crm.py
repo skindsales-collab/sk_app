@@ -211,5 +211,5 @@ def _customer_gaps(customer: str) -> dict:
 	"""SK 29-Oct (Aditya: details asked 3 times): the deal screen asks only what the customer still lacks."""
 	from sk_app import gates
 
-	miss = gates.customer_missing(customer)
+	miss = gates.customer_missing(customer, segment=True)
 	return {"name": customer, "missing": [t for _k, t in miss], "keys": sorted({k for k, _t in miss})}

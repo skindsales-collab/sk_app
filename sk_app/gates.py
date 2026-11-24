@@ -242,15 +242,18 @@ def customer_data(customer: str) -> dict:
 	return {**d, "address_state": a.get("state"), "address_pincode": a.get("pincode")}
 
 
-def customer_missing(customer: str | None) -> list:
+def customer_missing(customer: str | None, segment: bool = False) -> list:
+	"""What the customer still lacks. segment=True (a new quote from a deal, the deal's customer card) also asks for the
+	Cabin / Non-Cabin group, filled from the deal by itself. Submitting an existing quote / order, and the night check,
+	never ask for it: an old order with no deal would have no place to set it (found 24-Nov before the push)."""
 	if not customer:
 		return [("customer", "Customer")]
 	out = R.customer_missing(customer_data(customer))
-	# SK 23-Nov checker: the segment (Customer Group under Cabin / Non-Cabin) is mandatory; filled from the deal by itself
-	from sk_app.segments import all_groups
+	if segment:
+		from sk_app.segments import all_groups
 
-	if frappe.db.get_value("Customer", customer, "customer_group") not in all_groups():
-		out.append(("segment", "Segment (Cabin / Non-Cabin): set it on the deal, the customer takes it"))
+		if frappe.db.get_value("Customer", customer, "customer_group") not in all_groups():
+			out.append(("segment", "Segment (Cabin / Non-Cabin): set it on the deal, the customer takes it"))
 	return out
 
 
@@ -339,7 +342,7 @@ def check_quote_step(doc, method=None):
 	# SK 23-Nov (approved): the customer's GSTIN (or No GSTIN), billing address and mobile are filled on the deal BEFORE a
 	# quote is made, so no quote is left as a draft that cannot be submitted
 	if doc.is_new() and doc.get("quotation_to") == "Customer" and doc.get("party_name"):
-		missing = customer_missing(doc.party_name)
+		missing = customer_missing(doc.party_name, segment=True)
 		if missing:
 			frappe.throw(_("Fill the customer details on the deal first (Customer card on the deal in SK App), then make the quote:")
 				+ "\n" + "\n".join(f"• {t}" for _k, t in missing), title=_("Customer details missing"))
