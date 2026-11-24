@@ -15,3 +15,10 @@ def test_what_is_left_alone():
 	assert s("Lost", "Lost", None, "Deal Won", False, False) is None and s("Negotiation", "Ongoing", None, "Junk Lead", False, False) is None
 	assert s("Qualification", "Open", "Not Required", "Qualified", False, False) is None
 	assert s("Proposal/Quotation", "Ongoing", None, "Quotation", False, False) is None  # already there: nothing written
+
+
+def test_design_alone_never_pulls_a_lead_back():
+	assert s("Demo/Making", "Ongoing", "BOM & Quote Sent", "Quotation", False, False) is None
+	assert s("Qualification", "Open", "Drawing Sent", "Negotiations", False, False) is None
+	assert s("Qualification", "Open", "Drawing Sent", "Deal Loss", False, False) is None
+	assert s("Proposal/Quotation", "Ongoing", "Drawing Sent", "Negotiations", False, False) == "Quotation"  # the deal itself moved

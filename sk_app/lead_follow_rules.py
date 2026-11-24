@@ -1,6 +1,7 @@
 """SK 24-Nov (approved): the lead's stage follows its deal. Pure rules, unit tested."""
 
 DRAWING = ("Drawing Sent", "Revision Requested", "Drawing Approved", "Quote Ready", "BOM & Quote Sent", "BOM Revision Requested", "BOM Approved")
+EARLY = ("New", "Contacted", "Qualified", "Nurture")
 QUOTE_WORDS = ("quot", "proposal")
 NEGOTIATION_WORDS = ("negotiat", "ready to close")
 
@@ -19,8 +20,8 @@ def lead_stage(deal_status, deal_type, design, lead_status, order_submitted: boo
 		new = "Negotiations"
 	elif any(w in low for w in QUOTE_WORDS):
 		new = "Quotation"
-	elif (design or "") in DRAWING:
-		new = "Drawing"
+	elif (design or "") in DRAWING and lead_status in EARLY:
+		new = "Drawing"  # the design status alone only moves a lead forward (live 24-Nov: it pulled 04018 back from Quotation)
 	else:
 		new = None
 	return new if new and new != lead_status else None
