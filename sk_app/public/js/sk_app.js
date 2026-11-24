@@ -805,7 +805,7 @@
 		cq_type: "Cabin type", cq_design: "Other (LGSF, modular, container, bigger): send to design", cq_l: "Length (ft)", cq_w: "Width (ft)", cq_h: "Height (ft)",
 		cq_opts: "Options", cq_km: "Distance from Talegaon plant (km)", cq_crane: "Crane for unloading", cq_transport: "Add transport to site", cq_disc: "Discount %", cq_disc_max: "you can give up to",
 		cq_disc_sk: "above this SK approves", cq_price: "Price (excl. GST)", cq_revise: "Revise", cq_new: "New quotation", cq_saved: "Quotation saved",
-		cq_waiting: "Discount sent to SK for approval; the quote is saved without it", cq_design_go: "This cabin is priced by design. Use “Send to design”; the price comes from the design BOM.",
+		cq_waiting: "Discount sent to SK for approval; the quote is saved without it", cq_design_go: "This cabin is priced by design. Use “Send to design”; the price comes from the design team's cost figure.",
 		bq_type: "Building: PUF / EPS labour camp or site office (G+0 to G+2)", bq_title: "Building quotation (PUF / EPS)",
 		bq_why: "Same method and rates as SK's Quotation Calculator: area x rate card. You cannot type the price.",
 		bq_panel: "Panel", bq_elec: "Electrical work in SK scope", bq_trans: "Transport in SK scope", bq_zone: "Delivery zone", bq_delivery: "Delivery time",
@@ -957,10 +957,10 @@
 		auto_blank: "रिकामे ठेवा: ॲप भरेल", auto_gstin: "रिकामे असल्यास GSTIN वरून", fl_late: "उशीर", fl_month: "चालू महिना", fl_cum: "एकूण (१ एप्रिल पासून)", d_fix: "पूर्ण करा", d_plan: "नियोजन", d_open: "उघडा", md_next: "पुढील", md_late: "उशीर", md_today: "आज" });
 	Object.assign(T.English, { send_design: "Send to design (AI drawing)", cust_interaction: "Customer interaction (calls and your notes)", system_notes: "System, design and mail updates", lead_send: "Qualified: send to design (cabin) / for quote (machine shifting)", design_sent: "Sent to design as deal", design_not_sent: "Not sent to design:" });
 	Object.assign(T.English, { qr_quote: "Quotation made from the rate card", qr_disc: "Discount waits for approval", qr_pdf: "Open quotation PDF",
-		qr_revise: "Change options / size: open the deal and tap Make quotation", qr_design: "Sent to design: drawing, BOM and quote will come to you",
+		qr_revise: "Change options / size: open the deal and tap Make quotation", qr_design: "Sent to design: the drawing and the quote price will come to you",
 		qr_ms: "Sent for quote: the quotation will come to you", qr_none: "Not sent for quote yet" });
 	Object.assign(T.Marathi, { qr_quote: "रेट कार्डवरून कोटेशन तयार", qr_disc: "डिस्काउंट मंजुरीसाठी थांबले आहे", qr_pdf: "कोटेशन PDF उघडा",
-		qr_revise: "पर्याय / साईज बदला: डील उघडा आणि Make quotation दाबा", qr_design: "डिझाईनला पाठवले: ड्रॉइंग, BOM व कोटेशन तुम्हाला येईल",
+		qr_revise: "पर्याय / साईज बदला: डील उघडा आणि Make quotation दाबा", qr_design: "डिझाईनला पाठवले: ड्रॉइंग व कोटेशनची किंमत तुम्हाला येईल",
 		qr_ms: "कोटेशनसाठी पाठवले: कोटेशन तुम्हाला येईल", qr_none: "अजून कोटेशनसाठी पाठवले नाही" });
 	Object.assign(T.Marathi, { send_design: "डिझाईनला पाठवा (AI ड्रॉइंग)", cust_interaction: "ग्राहक संवाद (कॉल आणि तुमच्या नोंदी)", system_notes: "सिस्टम, डिझाईन आणि मेल अपडेट", lead_send: "Qualified: डिझाईनला (केबिन) / कोटेशनसाठी (मशीन शिफ्टिंग) पाठवा", design_sent: "डिझाईनला डील म्हणून पाठवले", design_not_sent: "डिझाईनला पाठवले नाही:" });
 	T.English.mic_blocked = "Microphone / camera is blocked. Open Chrome → ⋮ → Settings → Site settings → Microphone (or Camera) → this site → Allow. Then come back and tap 🎤 again.";

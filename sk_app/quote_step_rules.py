@@ -6,7 +6,8 @@ lead (New) -> call logged -> Qualified -> (cabin) Send to design -> drawing appr
 """
 
 # design statuses on the CRM Deal from which a cabin quotation may be made (the drawing was approved, or later)
-DRAWING_OK = ("Drawing Approved", "BOM & Quote Sent", "BOM Revision Requested", "BOM Approved", "Order Received", "Stock Checked")
+# SK 24-Nov: the BOM is optional at every stage; "Quote Ready" replaces "BOM & Quote Sent" (old value stays readable)
+DRAWING_OK = ("Drawing Approved", "Quote Ready", "BOM & Quote Sent", "BOM Revision Requested", "BOM Approved", "Order Received", "Stock Checked")
 CALL_FIRST = "Call the customer first: log the call (Talked) on the lead, then mark it Qualified"
 DRAWING_FIRST = "The drawing must be approved before the quote. Send the deal to design, get the drawing checked, then make the quote"
 QUALIFY_FIRST_QUOTE = "Qualify the lead first (call logged, marked Qualified), then make the quote from its deal"

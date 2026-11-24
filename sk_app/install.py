@@ -115,6 +115,9 @@ def after_migrate():
 	from sk_app.grid_columns import ensure as grid_columns_setup
 
 	_safe(grid_columns_setup, "Description column in item tables")  # SK 23-Nov: Description shows for everyone
+	from sk_app.bom_optional import ensure as bom_optional_setup
+
+	_safe(bom_optional_setup, "design status options")  # SK 24-Nov: BOM optional
 	from sk_app.user_setup import ensure_profiles as sales_profiles
 
 	_safe(sales_profiles, "sales role / module profile")  # SK 23-Nov: one-click sales login

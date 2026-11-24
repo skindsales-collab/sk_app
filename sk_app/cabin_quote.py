@@ -6,7 +6,7 @@ requirement different users must give the same quote; use the earlier quote as t
   (cabin-quote/source/cabin_quote.py), unchanged, so the same requirement always gives the same price.
 - The salesperson picks type, size, qty, options, km and crane; the price is worked out here and cannot be typed.
 - Discount: a salesperson none, the sales manager up to 5 %, above that SK approves (the quote waits without it).
-- Cabins outside the rate card (LGSF, modular, containers, very big) go to design; their price is the design BOM's.
+- Cabins outside the rate card (LGSF, modular, containers, very big) go to design; their price is the design team's cost figure (no BOM needed, SK 24-Nov).
 - Every quotation keeps the rate card version, the requirement, its own number SK/CAB/26-27/<CUS>-NNN and revision.
 - Print format "SK Cabin Quotation" = SK's quote template (header banner, red band, blue bars, navy table).
 """
@@ -83,14 +83,14 @@ def price(req: dict, rc: dict | None = None) -> dict:
 	"""req: type, length, width, height (ft), qty, options {key: qty}, km, crane, transport. Returns lines + total."""
 	rc = rc or rate_card()
 	if req.get("type") not in rc["types"]:
-		frappe.throw(_("This cabin type is not in the rate card: send it to design, the price comes from the design BOM"))
+		frappe.throw(_("This cabin type is not in the rate card: send it to design, the price comes from the design team's cost figure"))
 	t = rc["types"][req["type"]]
 	L, W = flt(req.get("length")), flt(req.get("width"))
 	H, qty = flt(req.get("height")) or rc["standard_height_ft"], cint(req.get("qty")) or 1
 	if L <= 0 or W <= 0:
 		frappe.throw(_("Please give the length and width"))
 	if L > 40 or W > 12:
-		frappe.throw(_("Over 40 ft long or 12 ft wide in one module: send it to design, the price comes from the design BOM"))
+		frappe.throw(_("Over 40 ft long or 12 ft wide in one module: send it to design, the price comes from the design team's cost figure"))
 	area = L * W
 	if "fixed" in t:
 		key = f"{int(L)}x{int(W)}"
