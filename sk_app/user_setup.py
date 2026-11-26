@@ -23,7 +23,7 @@ def ensure_profiles():
 			"block_modules": [{"module": m} for m in blocked]}).insert(ignore_permissions=True)
 
 
-def setup_sales_login(user: str) -> list[str]:
+def setup_sales_login(user: str, with_profile: bool = True) -> list[str]:
 	"""Gives a sales login what it needs; returns what was added."""
 	if not user or user in ("Administrator", "Guest") or not frappe.db.exists("User", user):
 		return []
@@ -38,7 +38,7 @@ def setup_sales_login(user: str) -> list[str]:
 		if r not in have and frappe.db.exists("Role", r):
 			u.append("roles", {"role": r})
 			added.append(r)
-	if not u.get("module_profile") and frappe.db.exists("Module Profile", MODULE_PROFILE):
+	if with_profile and not u.get("module_profile") and frappe.db.exists("Module Profile", MODULE_PROFILE):
 		u.module_profile = MODULE_PROFILE
 		added.append(MODULE_PROFILE)
 	if added:
@@ -48,14 +48,17 @@ def setup_sales_login(user: str) -> list[str]:
 
 
 def on_app_user_update(doc, method=None):
-	"""SK App User on_update: a Sales login (home Sales, or Sales among its functions) is set up at once."""
+	"""SK App User on_update, first save only: a Sales login (home Sales, or Sales among its functions) is set up at once."""
 	if not doc.get("enabled") or not doc.get("user"):
 		return
+	# the module profile only on a NEW sales login: one removed on purpose later (live 26-Nov: Swati, Pranali) is never
+	# put back by a later save; missing roles (Employee once HR links the record) are still added
+	new = doc.get_doc_before_save() is None
 	functions = {r.function for r in (doc.get("functions") or [])} if doc.meta.has_field("functions") else set()
 	if doc.get("home") != "Sales" and "Sales" not in functions:
 		return
 	try:
-		added = setup_sales_login(doc.user)
+		added = setup_sales_login(doc.user, with_profile=new)
 		if added:
 			frappe.msgprint(frappe._("Sales login set up for {0}: {1}").format(doc.user, ", ".join(added)), alert=True)
 	except Exception:

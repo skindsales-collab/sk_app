@@ -92,7 +92,9 @@ def on_login(login_manager=None):
 def _app_first(user: str | None) -> bool:
 	if not user or user in ("Administrator", "Guest") or not frappe.db.exists("SK App User", {"user": user, "enabled": 1}):
 		return False
-	return bool(frappe.db.get_value("User", user, "module_profile"))
+	# a login with a limited desk (module profile), or a sales login: SK App is their place (live 26-Nov: the sales
+	# logins have no module profile any more)
+	return bool(frappe.db.get_value("User", user, "module_profile")) or frappe.db.get_value("SK App User", {"user": user}, "home") == "Sales"
 
 
 def check():
