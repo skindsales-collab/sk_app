@@ -805,7 +805,7 @@
 		cq_type: "Cabin type", cq_design: "Other (LGSF, modular, container, bigger): design price", cq_l: "Length (ft)", cq_w: "Width (ft)", cq_h: "Height (ft)",
 		cq_opts: "Options", cq_km: "Distance from Talegaon plant (km)", cq_crane: "Crane for unloading", cq_transport: "Add transport to site", cq_disc: "Discount %", cq_disc_max: "you can give up to",
 		cq_disc_sk: "above this SK approves", cq_price: "Price (excl. GST)", cq_revise: "Revise", cq_new: "New quotation", cq_saved: "Quotation saved",
-		cq_waiting: "Discount sent to SK for approval; the quote is saved without it", cq_design_go: "The price comes from design (Design quote value on the deal). Write what the cabin is and its specification.", cq_design_what: "What is the cabin (LGSF office, container ...)", cq_design_spec: "Specification, one line each (prints on the quote)",
+		cq_waiting: "Discount sent to SK for approval; the quote is saved without it", cq_design_go: "The price comes from design (Design quote value on the deal). Write what the cabin is and its specification.", cq_not_saved: "The quotation was not saved in ERPNext. Please try again or send a screenshot to SK.", cq_design_what: "What is the cabin (LGSF office, container ...)", cq_design_spec: "Specification, one line each (prints on the quote)",
 		bq_type: "Building: PUF / EPS labour camp or site office (G+0 to G+2)", bq_title: "Building quotation (PUF / EPS)",
 		bq_why: "Same method and rates as SK's Quotation Calculator: area x rate card. You cannot type the price.",
 		bq_panel: "Panel", bq_elec: "Electrical work in SK scope", bq_trans: "Transport in SK scope", bq_zone: "Delivery zone", bq_delivery: "Delivery time",
@@ -843,7 +843,7 @@
 		cq_type: "केबिन प्रकार", cq_design: "इतर (LGSF, मॉड्युलर, कंटेनर, मोठे): डिझाइनची किंमत", cq_l: "लांबी (फूट)", cq_w: "रुंदी (फूट)", cq_h: "उंची (फूट)",
 		cq_opts: "पर्याय", cq_km: "तळेगाव प्लांटपासून अंतर (किमी)", cq_crane: "उतरवण्यासाठी क्रेन", cq_transport: "साइटपर्यंत वाहतूक जोडा", cq_disc: "सूट %", cq_disc_max: "तुम्ही देऊ शकता",
 		cq_disc_sk: "त्यापेक्षा जास्त SK मंजूर करतात", cq_price: "किंमत (GST वगळून)", cq_revise: "सुधारणा", cq_new: "नवीन कोटेशन", cq_saved: "कोटेशन जतन झाले",
-		cq_waiting: "सूट SK कडे मंजुरीसाठी पाठवली; कोटेशन सूटशिवाय जतन झाले", cq_design_go: "किंमत डिझाइनकडून येते (डीलवरील Design quote value). केबिन काय आहे व स्पेसिफिकेशन लिहा.", cq_design_what: "केबिन काय आहे (LGSF ऑफिस, कंटेनर ...)", cq_design_spec: "स्पेसिफिकेशन, एका ओळीत एक (कोटेशनवर छापते)",
+		cq_waiting: "सूट SK कडे मंजुरीसाठी पाठवली; कोटेशन सूटशिवाय जतन झाले", cq_design_go: "किंमत डिझाइनकडून येते (डीलवरील Design quote value). केबिन काय आहे व स्पेसिफिकेशन लिहा.", cq_not_saved: "कोटेशन ERPNext मध्ये जतन झाले नाही. पुन्हा प्रयत्न करा किंवा SK ला स्क्रीनशॉट पाठवा.", cq_design_what: "केबिन काय आहे (LGSF ऑफिस, कंटेनर ...)", cq_design_spec: "स्पेसिफिकेशन, एका ओळीत एक (कोटेशनवर छापते)",
 		bq_type: "बिल्डिंग: PUF / EPS लेबर कॅम्प किंवा साइट ऑफिस (G+0 ते G+2)", bq_title: "बिल्डिंग कोटेशन (PUF / EPS)",
 		bq_why: "SK च्या Quotation Calculator सारखीच पद्धत व दर: क्षेत्रफळ x रेट कार्ड. किंमत टाइप करता येत नाही.",
 		bq_panel: "पॅनल", bq_elec: "इलेक्ट्रिकल काम SK कडे", bq_trans: "वाहतूक SK कडे", bq_zone: "डिलिव्हरी झोन", bq_delivery: "डिलिव्हरी वेळ",
@@ -5373,7 +5373,9 @@
 					const args = { req: JSON.stringify(req), discount_pct: val("cq-disc") || 0, revise: val("cq-rev") || "" };
 					args[S.cq.doctype === "CRM Lead" ? "lead" : "deal"] = S.cq.name;
 					const r = await call("cabin_quote_make", args, true);
-					closeSheet(); saved(`${t("cq_saved")}: ${r.ref} R${r.rev}`);
+					// SK 26-Nov: never open a PDF for a quotation that is not in ERPNext; say so instead
+					if (!r || !r.name || !r.pdf) { toast(t("cq_not_saved"), true); return; }
+					closeSheet(); saved(`${t("cq_saved")}: ${r.name} · ${r.ref} R${r.rev}`);
 					if (r.discount_waiting) toast(t("cq_waiting"));
 					window.open(r.pdf, "_blank");
 				} finally { el.disabled = false; }

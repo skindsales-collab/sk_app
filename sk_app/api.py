@@ -2380,8 +2380,13 @@ def cabin_quote_make(req, deal=None, lead=None, discount_pct=0, revise=None):
 	from sk_app import cabin_quote
 
 	with _quote_log("cabin quotation", deal or lead):
-		return cabin_quote.make(_cabin_user(), json.loads(req) if isinstance(req, str) else req, deal or None, lead or None,
+		out = cabin_quote.make(_cabin_user(), json.loads(req) if isinstance(req, str) else req, deal or None, lead or None,
 			discount_pct=discount_pct, revise=revise or None)
+		# SK 26-Nov (Pranali, deal 00179: the app opened a PDF but no Quotation was in ERPNext): the answer goes back only when
+		# the Quotation is really saved; else a plain refusal, kept in the Error Log by _quote_log
+		if not (out and out.get("name") and frappe.db.exists("Quotation", out["name"])):
+			frappe.throw(_("The quotation was not saved in ERPNext. Please try again; if it repeats, send a screenshot to SK"))
+		return out  # Frappe commits it with the request (no commit here: "Work as" and the tests must be able to roll back)
 
 
 @frappe.whitelist()

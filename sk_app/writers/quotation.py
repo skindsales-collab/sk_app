@@ -31,7 +31,11 @@ def _save_as_system(doc, user: str):
 		frappe.set_user(current)
 	who = user if user and frappe.db.exists("User", user) else None
 	if who:
-		frappe.db.set_value("Quotation", doc.name, {"owner": doc.owner or who, "modified_by": who}, update_modified=False)
+		# SK 26-Nov: the person is the owner (a new quote saved as the system had owner Administrator, so the salesperson's
+		# own lists and the signature lost it); an existing quote keeps its owner
+		owner = doc.owner if doc.owner and doc.owner not in ("Administrator", "Guest") else who
+		frappe.db.set_value("Quotation", doc.name, {"owner": owner, "modified_by": who}, update_modified=False)
+		doc.owner = owner
 
 
 def write(user: str, *, customer: str, items: list[dict], deal: str | None = None, kind: str | None = None,
