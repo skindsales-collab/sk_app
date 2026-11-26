@@ -66,6 +66,12 @@ def expense_heads(company: str, supplier: str | None = None) -> list[str]:
 	return list(dict.fromkeys([h for h in used if h in heads] + heads))
 
 
+def last_head(supplier: str | None) -> str | None:
+	row = frappe.db.sql("""select pii.expense_account from `tabPurchase Invoice Item` pii join `tabPurchase Invoice` pi on pi.name = pii.parent
+		where pi.supplier = %s and pi.docstatus < 2 and pii.expense_account is not null order by pi.posting_date desc, pi.creation desc limit 1""", supplier)
+	return row[0][0] if row else None
+
+
 def _open_docs(kind: str, party: str | None) -> dict:
 	if not party:
 		return {}
@@ -123,6 +129,8 @@ def read(user: str, kind: str, text: str, party: str | None = None) -> dict:
 	out = {"facts": facts, **_open_docs(kind, party)}
 	if kind in ("supplier_bill", "expense"):
 		out["expense_heads"] = expense_heads(company, party if kind == "supplier_bill" else None)
+		# SK 26-Nov: the head of this supplier's last bill is filled in by itself (Shraddha still checks it)
+		out["suggested_head"] = last_head(party) if kind == "supplier_bill" and party else None
 	if kind == "expense":
 		out["cost_centers"] = frappe.get_all("Cost Center", filters={"company": company, "is_group": 0, "disabled": 0}, pluck="name", order_by="name asc")
 		out["money_accounts"] = frappe.get_all("Account", filters={"company": company, "is_group": 0, "account_type": ["in", ["Bank", "Cash"]], "disabled": 0},
