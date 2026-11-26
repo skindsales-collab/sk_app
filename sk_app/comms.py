@@ -13,6 +13,7 @@ from sk_app.logic import WorkItem
 
 TALKED = ("Completed",)
 NOT_CONNECTED = ("No Answer", "Busy")  # missed incoming, or customer did not pick up
+NEXT_CALL_TITLES = {"Next call", "पुढचा कॉल"}  # the app's "Next call" (English / Marathi)
 REPEATS = ("", "Daily", "Weekly", "Monthly")
 REMINDER_COLOR = "#c8102e"
 
@@ -117,6 +118,11 @@ def add_reminder(user: str, title: str, when: str, repeat: str | None = None, do
 		task = frappe.get_doc({"doctype": "CRM Task", "title": title[:140], "reference_doctype": doctype,
 			"reference_docname": name, "assigned_to": target, "due_date": at, "status": "Todo", "priority": "Medium"})
 		task.insert()
+		if title.strip() in NEXT_CALL_TITLES:
+			# SK 26-Nov (item 13): one open "Next call" per lead / deal and person; the older ones are Done (00176 had 3 open)
+			for old in frappe.get_all("CRM Task", filters={"reference_doctype": doctype, "reference_docname": name, "assigned_to": target,
+					"status": ["in", ["Backlog", "Todo", "In Progress"]], "title": ["in", list(NEXT_CALL_TITLES)], "name": ["!=", task.name]}, pluck="name"):
+				frappe.db.set_value("CRM Task", old, "status", "Done")
 		return {"doctype": "CRM Task", "name": task.name}
 	ev = frappe.get_doc({"doctype": "Event", "subject": title, "starts_on": at, "ends_on": add_to_date(at, minutes=15),
 		"event_type": "Private", "event_category": "Other", "color": REMINDER_COLOR, "status": "Open",

@@ -87,6 +87,25 @@ def _late_row(title, meta, value, doctype, name, since, target, done=False, open
 	return r
 
 
+def follow_up(doctype: str, names: list[str]) -> tuple[dict, dict]:
+	"""SK 26-Nov (item 13): ({record: due date of its latest open CRM task}, {record: last call / note time})."""
+	if not names:
+		return {}, {}
+	due = {}
+	if frappe.db.exists("DocType", "CRM Task"):
+		for r in frappe.get_all("CRM Task", filters={"reference_doctype": doctype, "reference_docname": ["in", names],
+				"status": ["in", ["Backlog", "Todo", "In Progress"]], "due_date": ["is", "set"]}, fields=["reference_docname", "due_date"],
+				order_by="due_date asc", limit=0):
+			due[r.reference_docname] = r.due_date  # ascending: the latest open date wins
+	touched = {}
+	for dt in ("CRM Call Log", "FCRM Note"):
+		if frappe.db.exists("DocType", dt):
+			for r in frappe.get_all(dt, filters={"reference_doctype": doctype, "reference_docname": ["in", names]},
+					fields=["reference_docname", "creation"], order_by="creation asc", limit=0):
+				touched[r.reference_docname] = max(r.creation, touched.get(r.reference_docname) or r.creation)
+	return due, touched
+
+
 # ---------- who sees what ----------
 
 def _owners(user: str) -> list[str] | None:
@@ -119,11 +138,17 @@ def sales(user: str, segment=None, only_self=False) -> list[dict]:
 		leads = frappe.get_all("CRM Lead", filters={"converted": 0, "status": ["not in", closed or [""]], **seg, **_in("lead_owner", owners), **not_cold()},
 			fields=["name", "first_name", "organization", "status", "lead_owner", "creation", "modified", "first_responded_on", "sk_segment"],
 			order_by="creation asc", limit=0)
+		due, touched = follow_up("CRM Lead", [l.name for l in leads])
 		for l in leads:
 			step = lead_status.step_of(l.status)
 			not_called = step == "New" and not l.first_responded_on
-			by[step].append(_late_row(l.organization or l.first_name or l.name, f"{l.status} · {_name(l.lead_owner)}" + (" · not called" if not_called else ""),
-				None, "CRM Lead", l.name, l.creation if step == "New" else l.modified,
+			meta = f"{l.status} · {_name(l.lead_owner)}" + (" · not called" if not_called else "")
+			if l.name in due:  # SK 26-Nov (item 13): the open Next call date decides
+				by[step].append(_late_row(l.organization or l.first_name or l.name, meta + " · next call", None, "CRM Lead", l.name, due[l.name], 0, opened=l.creation))
+				continue
+			last = max(x for x in (l.modified, touched.get(l.name)) if x)
+			by[step].append(_late_row(l.organization or l.first_name or l.name, meta,
+				None, "CRM Lead", l.name, l.creation if step == "New" else last,
 				(TARGET_DAYS["lead"] if not_called else None) if step == "New" else STEP_DAYS[step], opened=l.creation))
 	deals = []
 	if _has("CRM Deal"):
@@ -131,10 +156,15 @@ def sales(user: str, segment=None, only_self=False) -> list[dict]:
 		deals = frappe.get_all("CRM Deal", filters={"status": ["in", open_st or [""]], **seg, **_in("deal_owner", owners)},
 			fields=["name", "organization", "status", "deal_value", "deal_owner", "creation", "modified", "sk_customer_name"],
 			order_by="modified asc", limit=0)
+		due, touched = follow_up("CRM Deal", [d.name for d in deals])
 		for d in deals:
 			step = lead_status.step_of(d.status, deal=True)
-			r = _late_row(d.get("sk_customer_name") or d.organization or d.name, f"{d.status} · {_name(d.deal_owner)}", d.deal_value,
-				"CRM Deal", d.name, d.modified, STEP_DAYS.get(step), opened=d.creation)
+			title = d.get("sk_customer_name") or d.organization or d.name
+			if d.name in due:  # SK 26-Nov (item 13): the open Next call date decides (late only after it)
+				r = _late_row(title, f"{d.status} · {_name(d.deal_owner)} · next call", d.deal_value, "CRM Deal", d.name, due[d.name], 0, opened=d.creation)
+			else:  # else the latest of a deal change, a call or a note (a call / note is its own record)
+				last = max(x for x in (d.modified, touched.get(d.name)) if x)
+				r = _late_row(title, f"{d.status} · {_name(d.deal_owner)}", d.deal_value, "CRM Deal", d.name, last, STEP_DAYS.get(step), opened=d.creation)
 			by[step].append(r)
 	icons = {"New": "🎯", "Qualified": "✅", "Drawing": "📐", "Quotation": "📄", "Negotiations": "🤝"}
 	go = {"New": "my_leads", "Qualified": "my_leads", "Drawing": "my_deals", "Quotation": "my_deals", "Negotiations": "my_deals"}
