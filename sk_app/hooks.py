@@ -132,7 +132,7 @@ doc_events = {
 }
 
 # SK Hub's activity log only records what was done; it must never stop a wrong draft from being deleted (28-Oct)
-ignore_links_on_delete = ["SK Hub Log"]
+ignore_links_on_delete = ["SK Hub Log", "SK Rule Log"]  # SK 26-Nov: a night-check note never blocks a cancel / delete (SINV-26-00151)
 
 has_permission = {
 	"SK DSI Entry": "sk_app.permissions.own_or_manager",

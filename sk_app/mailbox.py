@@ -300,6 +300,7 @@ def link_known():
 		return 0
 	rows = _received(boxes, since=add_days(now_datetime(), -2), by="creation", fields=["sender", "subject"],
 		filters={"sk_mail_status": ["in", ["", None, "New"]]})
+	box_of = _account_boxes()
 	linked = 0
 	from sk_app.lead_mail_rules import private_or_internal
 
@@ -312,6 +313,11 @@ def link_known():
 		if not ref:
 			continue
 		doctype, name, owner = ref
+		# SK 26-Nov ("Rushi is only linked with cabin@, why other mail id data is taken with him"): the mail goes onto the
+		# lead / deal always, but to its owner only when it came to a box the owner works on
+		box = _box_of(r, boxes, box_of)
+		if owner and box and box not in boxes_for(owner):
+			owner = None
 		values = {"reference_doctype": doctype, "reference_name": name}
 		if owner:
 			values.update(sk_mail_status="Taken", sk_taken_by=owner)
@@ -397,7 +403,9 @@ def remind():
 
 # SK 27-Oct: "need to collect all relevant lead data & other & process": an enquiry mail to a sales box becomes a lead
 # by itself; vendor offers, bank mails, newsletters and spam stay in the box for a person to mark.
-LEAD_BOXES = ("sales@skind.tech", "cabin@skind.tech", "service@skind.tech")
+# SK 26-Nov: sales@ mails never become leads by themselves (a person makes the lead from the mail in the app); Rushi gets
+# only cabin@ mail leads, service@ ones go to the Non-Cabin owner
+LEAD_BOXES = ("cabin@skind.tech", "service@skind.tech")
 # segment of a mail lead when its words do not tell (SK 23-Nov checker): cabin@ = Cabin, sales@ / service@ = Non-Cabin
 BOX_SEGMENT = {"cabin@skind.tech": "Standard Cabin (GI / ACP)", "sales@skind.tech": "Other", "service@skind.tech": "Other"}
 ENQUIRY_WORDS = ("enquiry", "inquiry", "quotation", "quote", "requirement", "required", "cabin", "container", "porta cabin", "portable",
@@ -503,9 +511,8 @@ def auto_leads() -> int:
 			from sk_app.segments import sub_of
 
 			data["segment"] = sub_of(data.get("segment")) or lead_sources.segment_of(f"{r.subject or ''} {text}") or BOX_SEGMENT.get(box)
-			owner = None
-			if box == "service@skind.tech":
-				owner = frappe.get_cached_doc("SK App Settings").get("lead_owner_noncabin")
+			sks = frappe.get_cached_doc("SK App Settings")
+			owner = sks.get("lead_owner_noncabin") if box == "service@skind.tech" else sks.get("lead_owner_cabin") if box == "cabin@skind.tech" else None
 			# SK 27-Oct: "need to confirm that this is new lead": an existing lead / deal (any age) of the same e-mail gets
 			# the mail instead; a new one says it came by itself so the owner confirms it (else Junk Lead)
 			known = _known_today(data["email"].lower()) or _same_mail_lead(sender, r.subject)

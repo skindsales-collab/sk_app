@@ -2472,3 +2472,11 @@ def drafts_submit(doctype, name):
 	from sk_app import drafts
 
 	return drafts.submit(_me().user, doctype, name)
+
+
+@frappe.whitelist()
+def staff_advances():
+	"""SK 26-Nov: staff advances per person (SK and Accounts only)."""
+	from sk_app import advances
+
+	return advances.summary(_me().user)

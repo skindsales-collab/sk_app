@@ -74,7 +74,7 @@ FUNCTIONS = {
 		# SK 27-Oct: every entry can start from a photo of the bill / e-invoice / voucher / payment proof (Photo entry)
 		# SK 2-Nov: Receive material (same flow as Store: against the PO; without a PO an urgent requisition to the CEO)
 		"tiles": ["my_day", "to_submit", "gateway", "photo_entry", "day_book", "cash_today", "to_collect", "to_pay", "bills_to_post", "receive", "invoices", "expenses", "dir_expenses",
-			"segment_pnl", "month_close", "new_product", "complaints",
+			"segment_pnl", "month_close", "advances", "new_product", "complaints",
 			*CONTACT_TILES, *COMMON_TILES[1:]],
 		"live": True,
 		"erpnext_roles": ["Accounts User", "Accounts Manager"],
@@ -133,7 +133,7 @@ FUNCTIONS = {
 	},
 	"Management": {
 		"label": {"English": "Management (CEO)", "Marathi": "व्यवस्थापन (CEO)"},
-		"tiles": [*DASH_TILES, "leadership", "questions", "round2", "view_member", "attendance", "lead_sources", "customers", "sales_owner", "complaints", "to_submit", "po_approvals", "sub_bills", "pay_approvals", "cabin_discounts", "cash_today", "segment_pnl", "team_reports", "logins", "calls", "mail", "my_day", "reminders", "day_report", "my_kpi", "dsi", "problem",
+		"tiles": [*DASH_TILES, "leadership", "questions", "round2", "view_member", "attendance", "lead_sources", "customers", "sales_owner", "complaints", "to_submit", "po_approvals", "sub_bills", "pay_approvals", "cabin_discounts", "cash_today", "segment_pnl", "advances", "team_reports", "logins", "calls", "mail", "my_day", "reminders", "day_report", "my_kpi", "dsi", "problem",
 			"library", "training"],
 		"live": False,
 		"erpnext_roles": ["System Manager", "Purchase Manager", "Purchase User"],  # SK approves big POs
