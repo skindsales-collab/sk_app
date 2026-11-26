@@ -35,3 +35,13 @@ def test_header_from_items_when_group_says_nothing():
 	assert n([{"item_code": "Prod-0012-20ft x 10ft", "item_name": "Office", "hsn": ""}, {"item_code": "SK-TRANSPORT", "item_name": "Installation", "hsn": "9965"}]) is False
 	assert n([{"item_code": "Ele-0063", "item_name": "MCB", "hsn": "8536"}]) is None
 	assert n([{"item_code": "SK-JOB", "item_name": "Job / service (as per quotation)", "hsn": "94069090"}]) is True  # Tally HSN on a job
+
+
+def test_vendor_po_hides_our_customer():
+	from sk_app.print_rules import vendor_text as v
+
+	assert v("Against: GE PO 4500000001") == ""
+	assert v("FANUC Servo Cable Set (GE)") == "FANUC Servo Cable Set"
+	assert v("Supply of cables. Against GE PO 4500000001 dt 20-Nov. Delivery 10 days.") == "Supply of cables. Delivery 10 days."
+	assert v("X1 axis, 35 m: power 4C x 2.5 sqmm") == "X1 axis, 35 m: power 4C x 2.5 sqmm"
+	assert v("Payment: 50% advance, balance after completion of work.") == "Payment: 50% advance, balance after completion of work."

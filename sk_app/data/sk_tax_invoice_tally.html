@@ -38,7 +38,7 @@
 {%- if is_po -%}
 {%- set party_lbl = "Supplier" -%}{%- set party_name = doc.supplier_name or doc.supplier -%}{%- set party_addr = doc.supplier_address -%}
 {%- set bill_gstin = doc.supplier_gstin or frappe.db.get_value("Supplier", doc.supplier, "gstin") or "" -%}
-{%- set ship_lbl = "Ship to (Deliver at)" -%}{%- set ship_name = "SK Ind Tech Solutions Pvt Ltd" -%}{%- set ship_addr = doc.shipping_address or "" -%}{%- set ship_gstin = doc.company_gstin or "27ABBCS4285J1ZZ" -%}
+{%- set ship_lbl = "Ship to (Deliver at)" -%}{%- set ship_name = doc.company or "SK Ind Tech Solutions Pvt Ltd" -%}{%- set ship_addr = doc.shipping_address or "" -%}{%- set ship_gstin = doc.company_gstin or "27ABBCS4285J1ZZ" -%}
 {%- else -%}
 {%- set party_lbl = "Buyer (Bill to)" -%}{%- set party_name = doc.customer_name -%}{%- set party_addr = doc.customer_address -%}
 {%- set bill_gstin = doc.billing_address_gstin or frappe.db.get_value("Customer", doc.customer, "gstin") or "" -%}
@@ -72,7 +72,20 @@
 <div class="skt">
 {#- SK 21-Nov: one header on every document: SK Tech logo + company name the same everywhere, the segment line by Cabin / Non-Cabin (general line on a PO), correct contacts; then the red document band -#}
 {%- set banner = "sk-po-header-v2.png" if is_po else ("sk-quote-header-v2.png" if noncabin else "sk-cabin-quote-header-v2.png") -%}
+{#- SK 26-Nov: a PO of another company of the group (SK Enterprises) carries that company's own name, address and GSTIN from
+its ERPNext address record, never SK Ind Tech's picture; mail info@skind.tech -#}
+{%- set other_co = is_po and doc.company and doc.company != "SK Ind Tech Solutions Pvt Ltd" -%}
+{%- if other_co -%}
+{%- set co_addr = doc.billing_address or frappe.db.get_value("Dynamic Link", {"link_doctype": "Company", "link_name": doc.company, "parenttype": "Address"}, "parent") -%}
+{%- set ca = frappe.db.get_value("Address", co_addr, ["address_line1", "address_line2", "city", "pincode", "gstin", "phone"], as_dict=True) if co_addr else None -%}
+{%- set wds = doc.company.split(" ", 1) -%}
+<div style="border-bottom:3px solid #2A6EB4;padding:4px 2px 6px 2px;margin-bottom:4px"><div style="font-size:20pt;font-weight:bold;line-height:1.1"><span style="color:#C82030">{{ wds[0] }}</span>{% if wds|length > 1 %} <span style="color:#2A6EB4">{{ wds[1] }}</span>{% endif %}</div>
+<div class="s">{% if ca %}{{ ca.address_line1 or "" }}{% if ca.address_line2 %}, {{ ca.address_line2 }}{% endif %}, {{ ca.city or "" }} {{ ca.pincode or "" }}{% endif %}</div>
+{%- if ca and ca.phone -%}{%- set phones = ca.phone -%}{%- endif -%}
+<div class="s">GSTIN: <b>{{ doc.company_gstin or (ca and ca.gstin) or "" }}</b>{% if ca and ca.phone %} &nbsp;|&nbsp; Ph: {{ ca.phone }}{% endif %} &nbsp;|&nbsp; E-mail: info@skind.tech</div></div>
+{%- else -%}
 <img src="{{ frappe.utils.get_url('/assets/sk_app/images/' ~ banner) }}" style="width:100%;display:block">
+{%- endif -%}
 <div style="background:#C82030;color:#fff;font-weight:bold;text-align:center;padding:4px 8px;margin-bottom:6px;font-size:10pt;-webkit-print-color-adjust:exact">{{ "CREDIT NOTE" if (dt_ == "Sales Invoice" and doc.is_return) else title }} | No: {{ docno }} | Date: {{ frappe.utils.formatdate(ddate, "dd-MMM-yyyy") }}{% if dt_ == "Sales Invoice" %} | {{ doc.invoice_copy or "Original for Recipient" }}{% endif %}</div>
 <table>
 <tr><td style="width:50%" rowspan="3"><span class="lbl">{{ party_lbl }}</span><br><b>{{ party_name }}</b><br>{{ addr(party_addr) }}<br>GSTIN/UIN: <b>{{ bill_gstin or "Unregistered" }}</b><br>State: {{ state_name }}, Code {{ state_code }}{% if not is_po %}<br>Kind Attn: {% if attn_person %}{{ attn }} Sir{% if doc.contact_mobile %} ({{ doc.contact_mobile }}){% endif %}{% else %}Purchase Dept.{% endif %}{% endif %}</td>
@@ -87,7 +100,7 @@
 </table>
 <table><tr class="h"><th style="width:4%">Sr</th><th style="width:48%">Description of Goods / Services</th><th style="width:9%">HSN/SAC</th><th style="width:9%">Quantity</th><th style="width:11%">Rate</th><th style="width:5%">per</th><th style="width:14%">Amount</th></tr>
 {%- for d in doc.items %}
-<tr><td class="c">{{ loop.index }}</td><td><b>{{ sk_customer_desc(d.item_name) or d.item_name }}</b>{%- set desc = frappe.utils.strip_html((d.description or "").replace("</p>", "\n").replace("<br>", "\n")).replace("&nbsp;", " ").strip() -%}{%- set desc = sk_customer_desc(desc) -%}{%- if is_qt -%}{%- set desc = desc.replace(" (0 km)", "") -%}{%- endif -%}{% if desc and desc != (d.item_name or "").strip() %}<br><span class="s">{{ desc.replace("\n", "<br>") }}</span>{% endif %}</td><td class="c">{{ d.gst_hsn_code or "" }}</td><td class="r">{{ "%.2f"|format(d.qty) }} {{ d.uom }}</td><td class="r">{{ inr(d.net_rate or d.rate) }}</td><td class="c">{{ d.uom }}</td><td class="r">{{ inr(d.net_amount or d.amount) }}</td></tr>
+<tr><td class="c">{{ loop.index }}</td><td><b>{{ (sk_vendor_text(d.item_name) if is_po else sk_customer_desc(d.item_name)) or d.item_name }}</b>{%- set desc = frappe.utils.strip_html((d.description or "").replace("</p>", "\n").replace("<br>", "\n")).replace("&nbsp;", " ").strip() -%}{%- set desc = sk_vendor_text(sk_customer_desc(desc)) if is_po else sk_customer_desc(desc) -%}{%- if is_qt -%}{%- set desc = desc.replace(" (0 km)", "") -%}{%- endif -%}{% if desc and desc != (d.item_name or "").strip() %}<br><span class="s">{{ desc.replace("\n", "<br>") }}</span>{% endif %}</td><td class="c">{{ d.gst_hsn_code or "" }}</td><td class="r">{{ "%.2f"|format(d.qty) }} {{ d.uom }}</td><td class="r">{{ inr(d.net_rate or d.rate) }}</td><td class="c">{{ d.uom }}</td><td class="r">{{ inr(d.net_amount or d.amount) }}</td></tr>
 {%- endfor %}
 <tr style="height:{{ [6, 340 - 14 * ns.lines]|max }}px"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
 {%- for t in tax_rows|sort(attribute="o") %}{% if t.amt %}
@@ -130,10 +143,10 @@
 {%- if dt_ == "Delivery Note" %}
 <table><tr><td class="c b">For delivery only &ndash; not a tax invoice</td></tr></table>
 {%- elif terms %}
-<table><tr><td><span class="b">Terms</span><br>{{ terms }}</td></tr></table>
+<table><tr><td><span class="b">Terms</span><br>{{ sk_vendor_text(frappe.utils.strip_html(terms.replace("<br>", "\n"))).replace("\n", "<br>") if is_po else terms }}</td></tr></table>
 {%- endif %}
 <table><tr><td style="width:50%">{% if dt_ == "Sales Invoice" %}<span class="b">Declaration</span><br>We declare that this invoice shows the actual price of the goods / services described and that all particulars are true and correct.{% elif dt_ == "Sales Order" %}<span class="b">Thank you for your order</span><br>Please check the details and tell us within 2 days if anything is to be changed.{% elif is_qt %}<span class="b">Thank you for your enquiry</span><br>We hope our offer meets your need. Please send your PO to confirm.{% elif is_po %}<span class="b">Please confirm this order</span><br>Quote our PO no. on every bill and delivery challan.{% else %}<span class="b">Received in good condition</span><br>Receiver's name, signature and date{% endif %}</td>
 <td>{% if not is_po and dt_ != "Delivery Note" %}{%- set sks = frappe.get_cached_doc("SK App Settings") -%}<span class="b">Company's Bank Details</span><br>Bank Name: {{ sks.invoice_bank_name or "" }}<br>A/c No.: {{ sks.invoice_bank_ac or "" }}<br>Branch &amp; IFS Code: {{ sks.invoice_bank_branch or "" }}{% endif %}&nbsp;</td></tr>
-<tr><td class="s">{{ "Supplier's Acceptance" if is_po else "Customer's Seal and Signature" }}</td><td class="r" style="height:52px">For <b>SK Ind Tech Solutions Pvt Ltd</b><br><br><br>Authorised Signatory</td></tr>
+<tr><td class="s">{{ "Supplier's Acceptance" if is_po else "Customer's Seal and Signature" }}</td><td class="r" style="height:52px">For <b>{{ doc.company if (is_po and doc.company) else "SK Ind Tech Solutions Pvt Ltd" }}</b><br><br><br>Authorised Signatory</td></tr>
 <tr><td colspan="2" class="c s" style="border:none !important;padding-top:3px !important">This is a Computer Generated {{ "Invoice" if dt_ == "Sales Invoice" else "Document" }} | Ph: {{ phones }} | E-mail: {{ email }}</td></tr></table>
 </div>

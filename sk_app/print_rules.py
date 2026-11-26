@@ -51,3 +51,26 @@ def items_noncabin(items: list[dict]) -> bool | None:
 		elif hsn.startswith("9406"):
 			cabin = True
 	return False if cabin else (True if non else None)
+
+
+# SK 26-Nov ("Against: GE PO 4500000001 why this need to inform our vendor"): a vendor PO never shows our customer's order
+# reference or the customer's name tag on an item. Pure rule.
+CUSTOMER_REF = re.compile(r"against\s*:?\s*(?:ge\s*|customer\s*|client\s*)?(?:po|order)|\b(?:ge|customer|client)\s*po\b|\bsal-ord-\d", re.I)
+CUSTOMER_TAG = re.compile(r"\s*\((?:ge|ge vernova|ge power[^)]*)\)", re.I)
+
+
+def vendor_text(text: str | None) -> str:
+	"""Item / terms text for a supplier: sentences naming our customer's PO dropped, "(GE)" tags removed."""
+	out = []
+	for line in (text or "").split("\n"):
+		parts = re.split(r"(?<=[.;])\s+(?=[A-Z0-9])", line.strip())
+		keep = [CUSTOMER_TAG.sub("", p).strip() for p in parts if p and not CUSTOMER_REF.search(p)]
+		keep = [p for p in keep if p]
+		if keep:
+			out.append(" ".join(keep))
+	return "\n".join(out).strip()
+
+
+def sk_vendor_text(text: str | None) -> str:
+	"""Jinja method for the PO print."""
+	return vendor_text(text)

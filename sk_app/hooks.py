@@ -23,7 +23,7 @@ app_include_js = ["/assets/sk_app/js/sk_tally_keys.js", "/assets/sk_app/js/sk_he
 doctype_list_js = {"Sales Invoice": "public/js/sales_invoice_list.js"}
 
 # SK 29-Oct: GST tax invoice, delivery challan, order acknowledgement and PO prints with Bill to and Ship to, {{ sk_tax_invoice_html(doc) }}
-jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html", "sk_app.tax_invoice.sk_tax_invoice_html", "sk_app.print_rules.sk_customer_desc", "sk_app.cabin_quote.sk_doc_noncabin"]}
+jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html", "sk_app.tax_invoice.sk_tax_invoice_html", "sk_app.print_rules.sk_customer_desc", "sk_app.cabin_quote.sk_doc_noncabin", "sk_app.print_rules.sk_vendor_text"]}
 
 scheduler_events = {
 	"hourly": ["sk_app.deal_quotes.sync", "sk_app.lead_follow.hourly", "sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge", "sk_app.mailbox.remind",
