@@ -1906,7 +1906,7 @@
 			const late = i.due && i.due.slice(0, 16) < now;
 			const hhmm = i.due ? i.due.slice(11, 16) : "";
 			const tm = !i.due ? "—" : hhmm && hhmm !== "00:00" ? esc(hhmm) : esc(new Date(i.due.slice(0, 10) + "T00:00").toLocaleDateString("en-IN", { day: "2-digit", month: "short" }));
-			const open = i.doctype && i.doctype.startsWith("CRM ") && i.name ? `data-open="${esc(i.doctype)}" data-name="${esc(i.name)}"`
+			const open = (i.doctype === "CRM Lead" || i.doctype === "CRM Deal") && i.name ? `data-open="${esc(i.doctype)}" data-name="${esc(i.name)}"`
 				: i.kind === "day_report" ? `data-go="day_report"` : `data-go="my_day"`;
 			return `<button class="sk-mdrow ${late ? "late" : ""}" ${open}><span class="sk-mdt">${tm}</span><span class="sk-mdx">${esc(i.title)}<small>${esc(String(i.kind || "").replace("_", " "))}${i.customer && i.customer !== i.title ? " · " + esc(i.customer) : ""}</small></span><span class="sk-mdst ${late ? "r" : "a"}">${t(late ? "md_late" : "md_today")}</span></button>`;
 		}).join("");
@@ -2580,9 +2580,12 @@
 
 	function itemRow(i) {
 		const due = i.due ? `<span class="sk-due">${t("due")} ${esc(i.due.slice(5, 16))}</span>` : "";
-		const link = i.doctype && i.name ? (i.doctype.startsWith("CRM ") ? `/crm/${i.doctype === "CRM Lead" ? "leads" : "deals"}/${encodeURIComponent(i.name)}` : `/app/${i.doctype.toLowerCase().replace(/ /g, "-")}/${encodeURIComponent(i.name)}`) : "";
-		let open = link ? `<a class="sk-open" href="${link}">›</a>` : "";
-		if (i.doctype && i.doctype.startsWith("CRM ") && i.name) open = `<button class="sk-open" data-open="${esc(i.doctype)}" data-name="${esc(i.name)}">›</button>`;
+		// SK 26-Nov (PC: a task row opened "404 Not Found"): a lead / deal opens in the app; a task with no record behind it
+		// (an AI action, a CRM task on nothing) has nothing to open; other records open in ERPNext
+		const leadDeal = i.doctype === "CRM Lead" || i.doctype === "CRM Deal";
+		const link = i.doctype && i.name && !leadDeal && !["ToDo", "CRM Task"].includes(i.doctype) ? `/app/${i.doctype.toLowerCase().replace(/ /g, "-")}/${encodeURIComponent(i.name)}` : "";
+		let open = link ? `<a class="sk-open" href="${link}" target="_blank">›</a>` : "";
+		if (leadDeal && i.name) open = `<button class="sk-open" data-open="${esc(i.doctype)}" data-name="${esc(i.name)}">›</button>`;
 		if (i.kind === "day_report") open = `<button class="sk-open" data-go="day_report">›</button>`;
 		if (i.kind === "send_file") open = `<button class="sk-open" data-open="${esc(i.ref_doctype)}" data-name="${esc(i.ref_name)}">›</button>`;
 		return `<li class="sk-item k-${esc(i.kind)}"><div><div class="sk-item-title">${i.by_ceo ? `<span class="sk-ceo" title="${t("by_ceo")}">👑</span> ` : ""}${esc(i.title)}</div><div class="sk-item-meta">${i.kind === "deal" && i.customer && i.customer !== i.title ? `👤 ${esc(i.customer)} · ` : ""}${(i.kind === "deal" || i.kind.startsWith("lead_")) && i.status ? esc(i.status) + " · " : ""}${esc(i.kind.replace("_", " "))} · ${esc(i.minutes)} ${t("min")} ${due}</div>${i.doctype && i.doctype.startsWith("CRM ") && (i.mobile || i.email) ? contactButtons(i) : ""}</div>${open}</li>`;
@@ -3790,7 +3793,7 @@
 		const it = x.item || x;
 		let open = "";
 		if (it.kind === "send_file") open = `data-open="${esc(it.ref_doctype)}" data-name="${esc(it.ref_name)}"`;
-		else if (it.doctype && it.doctype.startsWith("CRM ") && it.name) open = `data-open="${esc(it.doctype)}" data-name="${esc(it.name)}"`;
+		else if ((it.doctype === "CRM Lead" || it.doctype === "CRM Deal") && it.name) open = `data-open="${esc(it.doctype)}" data-name="${esc(it.name)}"`;
 		else if (it.kind === "day_report") open = `data-go="day_report"`;
 		else if (it.kind === "dsi") open = `data-go="dsi"`;
 		return `<button class="ev ${KIND_CLS[x.kind || it.kind] || ""}" ${open}>${esc(x.title || it.title)}<small>${esc((it.kind || x.kind || "").replace("_", " "))}${it.minutes ? " · " + esc(it.minutes) + " " + t("min") : ""}</small></button>`;
@@ -3819,7 +3822,7 @@
 				x.events.map((e) => `<span class="chip2 yel">${e.time ? esc(e.time) + " " : ""}${esc(e.title)}</span>`).join("") +
 				(x.orders ? `<span class="chip2 green">${t("order")} ${lakh(x.orders)}</span>` : "") + (x.dsi ? `<span class="chip2 green">DSI ✓</span>` : "") +
 				(x.routine || []).map((r) => `<span class="chip2 navy">🔁 ${r.at ? esc(r.at) + " " : ""}${esc(r.title)}</span>`).join("") +
-				x.due.map((i) => `<span class="chip2 ${i.overdue ? "red" : ""}"><button class="sk-link" ${i.doctype && i.doctype.startsWith("CRM ") ? `data-open="${esc(i.doctype)}" data-name="${esc(i.name)}"` : ""}>${i.overdue ? "⚠ " : ""}${i.moved ? "↪ " : ""}${esc(i.title)}</button>
+				x.due.map((i) => `<span class="chip2 ${i.overdue ? "red" : ""}"><button class="sk-link" ${(i.doctype === "CRM Lead" || i.doctype === "CRM Deal") ? `data-open="${esc(i.doctype)}" data-name="${esc(i.name)}"` : ""}>${i.overdue ? "⚠ " : ""}${i.moved ? "↪ " : ""}${esc(i.title)}</button>
 					<button class="sk-link" data-move="${esc(i.key)}" data-title="${esc(i.title)}" title="${t("move_to")}">⇄</button></span>`).join("");
 			const h = (m) => `${Math.floor(m / 60)}h${m % 60 ? " " + pad2(m % 60) : ""}`;
 			const load = x.capacity ? `<span class="sk-item-meta ${x.over ? "sk-amber" : ""}">${t("load")} ${h(x.load)} / ${h(x.capacity)}</span>` : "";

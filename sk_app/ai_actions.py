@@ -108,7 +108,8 @@ def refresh(user: str) -> int:
 		desc = f"{ACTION_MARK}{AI} · {'Short term' if r['term'] == 'short' else 'Long term'} · {r['text']} — Why: {r['why']} [ai:{key}]"
 		due = add_days(nowdate(), r["days"])
 		if key in have:
-			frappe.db.set_value("ToDo", have[key], {"description": desc, "priority": r["priority"]})
+			# SK 26-Nov: an action still needed is moved to today's due date (a 28-Oct one showed "Late" for a month)
+			frappe.db.set_value("ToDo", have[key], {"description": desc, "priority": r["priority"], "date": due})
 		else:
 			frappe.get_doc({"doctype": "ToDo", "allocated_to": user, "assigned_by": "Administrator", "description": desc,
 				"priority": r["priority"], "date": due, "status": "Open"}).insert(ignore_permissions=True)
