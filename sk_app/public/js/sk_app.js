@@ -1018,7 +1018,7 @@
 		rq_no_last: "no last rate", rq_quote: "quote", rq_no_quote: "no second quote yet", rq_cabin: "Project / cabin code",
 		rq_why: "Why needed? (speak)", rq_send: "Send to CEO for approval", rq_sent: "sent to CEO", rq_need_item: "Please pick the item and quantity",
 		rq_need_sup: "Please pick the supplier", rq_came_no_po: "Came without PO", rq_no_po_help: "Material came without a PO: it is not received yet. Give the supplier, items and challan photo; it goes to the CEO as an urgent requisition, then a PO is made and you receive against it.",
-		rq_title: "Purchase requisitions", rq_pos: "POs above the approved value", rq_pos_help: "A PO comes here only when it is more than 10% above the value you approved on the requisition.",
+		rq_title: "Purchase requisitions", rq_to_approve: "To approve", rq_one_list: "One approval per purchase: you approve the requisition; its PO then goes without asking you again. A PO comes here only if it had no approved requisition or is more than 10% above what you approved.", rq_pos: "POs above the approved value", rq_pos_help: "A PO comes here only when it is more than 10% above the value you approved on the requisition.",
 		rq_track_help: "Every requisition and where it is: Waiting CEO → Approved → PO made → Material in.",
 		rq_st_waiting: "Waiting CEO", rq_st_approved: "Approved: PO to make", rq_st_po_draft: "PO draft", rq_st_po_ceo: "PO waiting CEO",
 		rq_st_po_made: "PO made", rq_st_in: "Material in", rq_st_rejected: "Rejected", rq_make_po: "Make PO", rq_po_to_ceo: "above the approved value, sent to CEO" });
@@ -1027,7 +1027,7 @@
 		rq_no_last: "मागील दर नाही", rq_quote: "कोटेशन", rq_no_quote: "दुसरे कोटेशन अजून नाही", rq_cabin: "प्रोजेक्ट / केबिन कोड",
 		rq_why: "का पाहिजे? (बोला)", rq_send: "मंजुरीसाठी CEO कडे पाठवा", rq_sent: "CEO कडे पाठवले", rq_need_item: "कृपया वस्तू आणि नग निवडा",
 		rq_need_sup: "कृपया सप्लायर निवडा", rq_came_no_po: "PO शिवाय माल आला", rq_no_po_help: "PO शिवाय माल आला: तो अजून घेतलेला नाही. सप्लायर, वस्तू आणि चलनाचा फोटो द्या; तातडीची मागणी म्हणून CEO कडे जाईल, मग PO होईल आणि त्या PO वर माल घ्या.",
-		rq_title: "खरेदी मागण्या", rq_pos: "मंजूर रकमेपेक्षा जास्त PO", rq_pos_help: "मागणीवर मंजूर केलेल्या रकमेपेक्षा 10% पेक्षा जास्त असेल तरच PO इथे येतो.",
+		rq_title: "खरेदी मागण्या", rq_to_approve: "मंजूर करायचे", rq_one_list: "प्रत्येक खरेदीला एकच मंजुरी: तुम्ही मागणी मंजूर करता; त्याची PO पुन्हा न विचारता जाते. मंजूर मागणी नसलेली किंवा मंजूर रकमेपेक्षा 10% पेक्षा जास्त PO फक्त इथे येते.", rq_pos: "मंजूर रकमेपेक्षा जास्त PO", rq_pos_help: "मागणीवर मंजूर केलेल्या रकमेपेक्षा 10% पेक्षा जास्त असेल तरच PO इथे येतो.",
 		rq_track_help: "प्रत्येक मागणी कुठे आहे: CEO कडे → मंजूर → PO झाला → माल आला.",
 		rq_st_waiting: "CEO कडे", rq_st_approved: "मंजूर: PO करायचा", rq_st_po_draft: "PO ड्राफ्ट", rq_st_po_ceo: "PO CEO कडे",
 		rq_st_po_made: "PO झाला", rq_st_in: "माल आला", rq_st_rejected: "नाकारली", rq_make_po: "PO बनवा", rq_po_to_ceo: "मंजूर रकमेपेक्षा जास्त, CEO कडे पाठवला" });
@@ -5191,11 +5191,13 @@
 			${(r.photos || []).map((u) => `<a class="sk-chip" target="_blank" href="${esc(u)}">📷</a>`).join("")}
 			<div class="sk-row sk-gap"><b>${r.value ? "≈ " + money(r.value) : ""}</b>
 				<button class="sk-chip on" data-act="pu-rq-ok" data-i="${i}">✓ ${t("approve")}</button><button class="sk-chip bad" data-act="pu-rq-no" data-i="${i}">✗ ${t("reject")}</button></div></div></li>`).join("");
-		root.innerHTML = header(t("po_approvals")) + `<main><h3 class="sk-h">📝 ${t("rq_title")} (${S.reqs.length})</h3><ul class="sk-list">${reqs || empty()}</ul>
-			<h3 class="sk-h">📄 ${t("rq_pos")} (${S.appr.length})</h3><p class="sk-note">${t("rq_pos_help")}</p>
-			<ul class="sk-list">${S.appr.map((p, i) => li(esc(p.supplier_name), `${esc(p.name)} · ${t("due")} ${esc(p.schedule_date || "")}${p.why ? `<br>${esc(p.why)}` : ""}`,
+		// SK 26-Nov "only one approval": one list. A purchase is approved once, on its requisition; a PO shows here only when
+		// it had no approved requisition or came more than 10% above the approved value (marked red, with the reason)
+		const pos = S.appr.map((p, i) => li(`<span class="chip2 red">📄 PO</span> ${esc(p.supplier_name)}`, `${esc(p.name)} · ${t("due")} ${esc(p.schedule_date || "")}<br>⚠ ${esc(p.why || t("rq_pos_help"))}`,
 			`<div class="sk-col"><b>${money(p.grand_total)}</b><a class="sk-chip" href="/app/purchase-order/${encodeURIComponent(p.name)}">PDF</a>
-			<button class="sk-chip on" data-act="pu-approve" data-i="${i}">✓ ${t("approve")}</button><button class="sk-chip bad" data-act="pu-reject" data-i="${i}">✗ ${t("reject")}</button></div>`)).join("") || empty()}</ul></main>`;
+			<button class="sk-chip on" data-act="pu-approve" data-i="${i}">✓ ${t("approve")}</button><button class="sk-chip bad" data-act="pu-reject" data-i="${i}">✗ ${t("reject")}</button></div>`)).join("");
+		root.innerHTML = header(t("po_approvals")) + `<main><p class="sk-note">${t("rq_one_list")}</p>
+			<h3 class="sk-h">✅ ${t("rq_to_approve")} (${S.reqs.length + S.appr.length})</h3><ul class="sk-list">${(reqs + pos) || empty()}</ul></main>`;
 	}
 
 	// ---------- Purchase requisition (SK 27-Oct): one form, Planned / Urgent, project / cabin; CEO approves; PO; receipt ----------
