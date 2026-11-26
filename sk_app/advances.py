@@ -33,8 +33,19 @@ def summary(user: str) -> dict:
 		else:
 			untagged.append({"date": str(r.posting_date), "voucher": r.voucher_no, "doctype": r.voucher_type, "amount": amount,
 				"remark": (r.remarks or "")[:160], "company": r.company})
+	# SK 26-Nov: what each person spent against the advance = their expense claims (Leave & Expense → Expense, approved by SK)
+	if frappe.db.exists("DocType", "Expense Claim"):
+		for c in frappe.get_all("Expense Claim", filters={"docstatus": ["<", 2], "approval_status": ["!=", "Rejected"]},
+				fields=["employee", "approval_status", "docstatus", "total_claimed_amount", "total_sanctioned_amount"], limit=0):
+			p = people.setdefault(("Employee", c.employee), {"party_type": "Employee", "party": c.employee, "balance": 0.0, "entries": 0, "last": None})
+			if c.approval_status == "Approved" and c.docstatus == 1:
+				p["claimed"] = p.get("claimed", 0.0) + flt(c.total_sanctioned_amount or c.total_claimed_amount)
+			else:
+				p["waiting"] = p.get("waiting", 0.0) + flt(c.total_claimed_amount)
 	for p in people.values():
 		p["name"] = frappe.db.get_value(p["party_type"], p["party"], "employee_name" if p["party_type"] == "Employee" else "name") or p["party"]
-	out = sorted(people.values(), key=lambda p: -abs(p["balance"]))
+		p["claimed"], p["waiting"] = round(p.get("claimed", 0.0), 2), round(p.get("waiting", 0.0), 2)
+		p["left"] = round(p["balance"] - p["claimed"], 2)  # advance still with the person after the approved bills
+	out = sorted(people.values(), key=lambda p: -abs(p["left"]))
 	return {"people": out, "untagged": untagged[::-1], "untagged_total": sum(u["amount"] for u in untagged),
 		"total": sum(p["balance"] for p in out) + sum(u["amount"] for u in untagged), "accounts": accs}
