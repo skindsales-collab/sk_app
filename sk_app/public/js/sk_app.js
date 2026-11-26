@@ -1257,14 +1257,19 @@
 		}
 		let res = await fetch(url, opts);
 		let data = await readReply(res);
-		// SK 2-Nov (Shraddha's PC: blank "reading 'language'"): a reply that is not readable is tried once more (reads only)
-		if (res.ok && data === null && !post) {
+		// SK 2-Nov (Shraddha's PC: blank "reading 'language'"): a reply that is not readable is tried again (reads only);
+		// SK 26-Nov (CEO's phone, "home, 200"): up to 3 tries, 1.5 s apart, for a server that is restarting or a network
+		// page in between
+		for (let k = 0; res.ok && data === null && !post && k < 3; k++) {
+			await new Promise((r) => setTimeout(r, 1500));
 			res = await fetch(url, opts);
 			data = await readReply(res);
 		}
 		if (res.ok && data === null) {
 			if (res.redirected && /\/login/.test(res.url)) { location.href = "/login?redirect-to=/sk"; throw new Error(t("rp_login")); }
-			throw new Error(`${t("rp_unreadable")} (${method}, ${res.status})`);
+			// what came instead of data (first words of the page), so a screenshot tells the cause next time
+			const peek = String(lastReplyText || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 60);
+			throw new Error(`${t("rp_unreadable")} (${method}, ${res.status}${peek ? ": " + peek : ", empty"})`);
 		}
 		data = data || {};
 		if (!res.ok) {
@@ -1283,8 +1288,10 @@
 	// SK 28-Oct (Rushi's quote): ERPNext sends small notes ("Item Price added …") before the real error; show the error
 	// the server's reply as JSON, or null when it cannot be read (an HTML page, a cut-off reply).
 	// Python writes NaN / Infinity for a bad number, which a browser cannot read: those become empty (null).
+	let lastReplyText = "";
 	async function readReply(res) {
 		const text = await res.text().catch(() => "");
+		lastReplyText = text;
 		if (!text) return res.ok ? null : {};
 		try { return JSON.parse(text); } catch (e) { /* below */ }
 		try {
