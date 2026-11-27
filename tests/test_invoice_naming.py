@@ -22,3 +22,14 @@ def test_number_of():
 	assert number_of("SK/IND/1126/849") == 849
 	assert number_of("SINV-26-00159") == 0
 	assert number_of(None) == 0
+
+
+def test_amendment_keeps_the_number_with_a_letter():
+	from sk_app.invoice_naming import amended_name
+
+	taken = {"SK/IND/1126/850A"}.__contains__
+	assert amended_name("SK/IND/1126/850", lambda n: False) == "SK/IND/1126/850A"
+	assert amended_name("SK/IND/1126/850A", taken) == "SK/IND/1126/850B"
+	assert len("SK/IND/1126/850A") == 16  # GST limit
+	assert amended_name("SINV-26-00151", lambda n: False) is None
+	assert number_of("SK/IND/1126/850A") == 850

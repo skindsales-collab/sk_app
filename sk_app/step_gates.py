@@ -152,3 +152,16 @@ def check_employee_login(employee: str, mobile: str | None = None):
 	d = frappe.db.get_value("Employee", employee, ["cell_number", "date_of_joining", "department", "designation"], as_dict=True) or {}
 	d["cell_number"] = d.get("cell_number") or mobile
 	stop(f"{_('Employee')} {employee}: {_('app login')}", R.employee_login(d), "employee_login")
+
+
+OWN_GSTIN_MSG = "Our company GSTIN is missing. Set the company address (with GSTIN) before submitting."
+
+
+def check_own_gstin(doc, method=None):
+	"""SK 27-Nov (Rothe flagged invoice 850): our own GSTIN prints on every invoice / order / delivery note / PO, so none is
+	submitted while the document's company GSTIN is empty."""
+	if _skip() or not doc.meta.has_field("company_gstin"):
+		return
+	if not (doc.get("company_gstin") or "").strip():
+		frappe.throw(_(OWN_GSTIN_MSG) + "\n" + _("Who fills it: {0} (Accounts), on the Company's address in ERPNext").format(person("Accounts") or "Accounts"),
+			title=_("Our GSTIN missing"))

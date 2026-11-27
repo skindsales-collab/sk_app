@@ -82,13 +82,13 @@ doc_events = {
 	# SK 28-Oct: every order has its salesperson; income ledger and Non-Cabin sub-group cost centre from the customer
 	"Sales Order": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.sales_owner.fill_order_team", "sk_app.segment_accounts.set_segment", "sk_app.writers.taxes.on_validate"],
 		"on_update": "sk_app.writers.taxes.after_save",  # SK 6-Nov: GST filled by the app when the rows were left empty (New path)
-		"before_submit": "sk_app.gates.check_sales_order",
+		"before_submit": ["sk_app.gates.check_sales_order", "sk_app.step_gates.check_own_gstin"],
 		"on_submit": ["sk_app.won_deals.on_submit", "sk_app.lead_time.on_sales_order_submit", "sk_app.bom_optional.tell_design", "sk_app.lead_follow.on_order_submit",
 			"sk_app.quote_learning.on_order_submit"]},  # SK 28-Oct: its lead / deal shows Won in the CRM at once
 	# SK 29-Oct (Shraddha): a tax invoice is submitted only with the buyer's Bill to address (Ship to defaults to it)
 	"Sales Invoice": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.segment_accounts.set_segment", "sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check",
 		"sk_app.writers.taxes.on_validate", "sk_app.writers.payment_allocate.pull_advances"], "on_update": "sk_app.writers.taxes.after_save",
-		"before_submit": "sk_app.gates.check_sales_invoice", "on_submit": "sk_app.lead_time.on_sales_invoice_submit",
+		"before_submit": ["sk_app.gates.check_sales_invoice", "sk_app.step_gates.check_own_gstin"], "on_submit": "sk_app.lead_time.on_sales_invoice_submit",
 		"autoname": "sk_app.invoice_naming.autoname"},  # SK 21-Nov: SK/IND/MMYY/### with one running number
 	# SK 29-Oct: PO date → invoice date per cabin, days per 100 sq ft for Production (sk_app.lead_time)
 	"Project": {"validate": ["sk_app.lead_time.on_project_validate", "sk_app.step_gates.check_project"]},
@@ -106,11 +106,11 @@ doc_events = {
 	"Work Order": {"validate": "sk_app.writers.work_order.on_validate", "before_submit": ["sk_app.sub_bills.wo_submitting", "sk_app.step_gates.check_work_order"],
 		"on_submit": ["sk_app.cabin_projects.close_done_stages", "sk_app.sub_bills.on_work_order_submit"]},
 	"Stock Entry": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.stock_entry.on_validate"], "before_submit": "sk_app.step_gates.check_stock_entry"},  # rebuild Flow 4 (New path)
-	"Delivery Note": {"before_validate": "sk_app.party_currency.warm", "validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": ["sk_app.gates.check_sales_invoice", "sk_app.step_gates.check_delivery_note"]},
+	"Delivery Note": {"before_validate": "sk_app.party_currency.warm", "validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": ["sk_app.gates.check_sales_invoice", "sk_app.step_gates.check_delivery_note", "sk_app.step_gates.check_own_gstin"]},
 	# SK 27-Oct purchase flow: requisition → CEO approval → PO → receipt against the PO, in ERPNext too
 	"Material Request": {"validate": ["sk_app.gates.check_request", "sk_app.cabin_projects.set_cost_centre"], "before_submit": "sk_app.writers.requisition.check_submit"},
 	"Purchase Order": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.purchase_order.on_validate"],  # rebuild Flow 3 (New path)
-		"before_submit": ["sk_app.writers.requisition.check_po", "sk_app.sub_bills.check_submit", "sk_app.step_gates.check_purchase_order"], "on_submit": "sk_app.sub_bills.on_po_submit"},
+		"before_submit": ["sk_app.writers.requisition.check_po", "sk_app.sub_bills.check_submit", "sk_app.step_gates.check_purchase_order", "sk_app.step_gates.check_own_gstin"], "on_submit": "sk_app.sub_bills.on_po_submit"},
 	"Purchase Receipt": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.receipt.on_validate"], "before_submit": ["sk_app.writers.requisition.check_receipt", "sk_app.step_gates.check_purchase_receipt"]},
 	# SK 28/29-Oct: labour bill only from the service GRN of a PO Rushi + CEO approved; only CEO / Accounts change the rates
 	"Purchase Invoice": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check", "sk_app.writers.payment_allocate.pull_advances"],

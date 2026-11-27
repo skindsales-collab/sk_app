@@ -4,8 +4,8 @@
 The ERPNext naming series "SK/IND/.MM.YY./.###." counts per month (it restarted at 001 in November), so the app names
 these invoices itself: a single counter (tabSeries key COUNTER), started from the higher of SK App Settings
 "invoice_running_last" (the last number already used, e.g. 848) and the highest number found in existing invoices.
-Amended invoices take the next number too (GST allows 16 characters; SK/IND/1126/849 is 15). Other series (SINV-…)
-are not touched."""
+SK 27-Nov: an amended invoice keeps its number with a letter (SK/IND/1126/850 -> 850A -> 850B): no running number is
+used up, and it stays within GST's 16 characters (850-1 would be 17). Other series (SINV-…) are not touched."""
 
 import re
 
@@ -14,12 +14,24 @@ from frappe.utils import cint, getdate
 
 PREFIX = "SK/IND/"
 COUNTER = "SK/IND/RUNNING/"
-NAME_RE = re.compile(r"^SK/IND/\d{4}/(\d+)$")
+NAME_RE = re.compile(r"^SK/IND/\d{4}/(\d+)[A-Z]?$")
+ROOT_RE = re.compile(r"^(SK/IND/\d{4}/\d+)[A-Z]?$")
 
 
 def name_for(posting_date, number: int) -> str:
 	d = getdate(posting_date)
 	return f"{PREFIX}{d:%m}{d:%y}/{int(number):03d}"
+
+
+def amended_name(amended_from: str | None, taken) -> str | None:
+	"""The amendment's name: the same number with the next free letter (taken(name) -> bool)."""
+	m = ROOT_RE.match(amended_from or "")
+	if not m:
+		return None
+	for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+		if not taken(m.group(1) + letter):
+			return m.group(1) + letter
+	return None
 
 
 def number_of(name: str | None) -> int:
@@ -33,6 +45,13 @@ def autoname(doc, method=None):
 		return
 	from frappe.model.naming import getseries
 
+	if frappe.flags.sk_invoice_name:  # the one-time "keep this number" fix (keep_number below)
+		doc.name = frappe.flags.sk_invoice_name
+		return
+	amend = amended_name(doc.get("amended_from"), lambda n: bool(frappe.db.exists("Sales Invoice", n)))
+	if amend:
+		doc.name = amend
+		return
 	ensure_counter()
 	doc.name = name_for(doc.posting_date or frappe.utils.nowdate(), cint(getseries(COUNTER, 3)))
 
@@ -69,3 +88,31 @@ def ensure_amend_naming():
 	s.flags.ignore_permissions = True
 	s.save()
 
+
+
+def keep_number(keep: str, cancelled: list[str], copy_from: str, counter: int) -> str | None:
+	"""One-time admin fix (SK 27-Nov "keep 850, no change"): the cancelled invoices get "-CXL" (their accounts are already
+	reversed; none had an IRN / e-way bill), the running counter goes back, and a DRAFT with the kept number is made as a copy
+	of the last cancelled one, for Accounts to check and submit. Does nothing unless every named invoice is cancelled."""
+	if frappe.db.exists("Sales Invoice", keep) and frappe.db.get_value("Sales Invoice", keep, "docstatus") != 2:
+		return None
+	for n in cancelled:
+		row = frappe.db.get_value("Sales Invoice", n, ["docstatus", "irn", "ewaybill"], as_dict=True)
+		if not row or row.docstatus != 2 or row.get("irn") or row.get("ewaybill"):
+			return None
+	for n in cancelled:
+		frappe.rename_doc("Sales Invoice", n, n + "-CXL", force=True)
+	src = frappe.get_doc("Sales Invoice", copy_from + "-CXL")
+	new = frappe.copy_doc(src)
+	new.amended_from = None
+	new.docstatus = 0
+	new.flags.sk_no_double = True  # it replaces the cancelled copy on purpose
+	frappe.flags.sk_invoice_name = keep
+	try:
+		new.insert(ignore_permissions=True)
+	finally:
+		frappe.flags.sk_invoice_name = None
+	frappe.db.sql("update `tabSeries` set `current` = %s where `name` = %s", (counter, COUNTER))
+	if frappe.get_meta("SK App Settings").has_field("invoice_running_last"):
+		frappe.db.set_single_value("SK App Settings", "invoice_running_last", counter)
+	return new.name
