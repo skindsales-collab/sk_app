@@ -126,6 +126,11 @@ def _drafts(logins: set) -> list[dict]:
 				continue
 			owner = _owner_or(d.owner, function, logins)
 			what = f"{d.get(title) or d.name} · draft since {str(d.creation)[:10]}"
+			from sk_app.step_gates import missing_for  # SK 27-Nov: say what the draft still lacks, so the person knows why it is stuck
+
+			miss = missing_for(doctype, d.name)
+			if miss:
+				what += " · missing: " + "; ".join(w for _k, w in miss)
 			out.append(R.item("draft", doctype, d.name, what, owner, function=function, days=days))
 			if to_ceo:  # SK 23-Nov: a quote / expense still a draft after 5 days also goes to SK
 				for ceo in ceos:

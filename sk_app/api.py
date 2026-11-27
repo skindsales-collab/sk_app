@@ -2262,7 +2262,21 @@ def flow_make_customer(deal, gstin=None, unregistered=0, gst_note=None, address=
 
 	details = {"gstin": gstin, "unregistered": unregistered, "gst_note": gst_note, "address": address, "city": city, "state": state,
 		"pincode": pincode, "mobile": mobile}
+	# SK 27-Nov (HD deal 00190): the GSTIN is already on another customer: no dead end, the app offers "Use this customer"
+	from sk_app import crm
+	from sk_app.erp_flow import customer_of
+
+	crm._check("CRM Deal", deal, "read")
+	other = cust_w.same_gstin(gstin, customer_of(deal))
+	if other:
+		return {"same_gstin": other, "gstin": (gstin or "").strip().upper()}
 	return cust_w.make_customer(_me().user, deal, details if any(v not in (None, "", 0, "0") for v in details.values()) else None)
+
+
+@frappe.whitelist(methods=["POST"])
+def flow_use_customer(deal, customer):
+	"""SK 27-Nov: one tap 'Use this customer' when the typed GSTIN is already on another customer."""
+	return cust_w.use_existing(_me().user, deal, customer)
 
 
 @frappe.whitelist(methods=["POST"])

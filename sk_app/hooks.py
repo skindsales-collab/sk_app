@@ -69,7 +69,7 @@ doc_events = {
 	"Job Applicant": {"before_insert": "sk_app.writers.applicant.before_insert"},  # R12: e-mail from the mobile, family from the designation
 	"Comment": {"after_insert": "sk_app.writers.interview.on_comment"},  # R12: 'Slot: 18-Nov 10:30' on a Job Applicant books Round 1
 	"CRM Deal": {"validate": ["sk_app.segments.set_main", "sk_app.sales_screens.set_deal_customer", "sk_app.quote_pickup.on_deal_validate",
-		"sk_app.gates.check_crm", "sk_app.won_deals.check_won"],  # SK 14-Nov KF-05180: Won without a Sales Order is a rule gap
+		"sk_app.gates.check_crm", "sk_app.won_deals.check_won", "sk_app.step_gates.check_deal_design"],  # SK 14-Nov KF-05180: Won without a Sales Order is a rule gap
 		# SK 4-Nov: no deal from a lead that is still New (call not connected): the lead is Qualified first (sk_app.gates)
 		"before_insert": ["sk_app.doubles.check_deal", "sk_app.gates.check_new_deal"], "on_update": ["sk_app.deal_quotes.on_deal_update", "sk_app.lead_follow.on_deal_update"]},
 	# SK 4-Nov: members also work in ERPNext or through Claude: the quote / payment checks run on the record, whatever the route
@@ -91,7 +91,7 @@ doc_events = {
 		"before_submit": "sk_app.gates.check_sales_invoice", "on_submit": "sk_app.lead_time.on_sales_invoice_submit",
 		"autoname": "sk_app.invoice_naming.autoname"},  # SK 21-Nov: SK/IND/MMYY/### with one running number
 	# SK 29-Oct: PO date → invoice date per cabin, days per 100 sq ft for Production (sk_app.lead_time)
-	"Project": {"validate": "sk_app.lead_time.on_project_validate"},
+	"Project": {"validate": ["sk_app.lead_time.on_project_validate", "sk_app.step_gates.check_project"]},
 	"SK Path Switch": {"validate": "sk_app.core.gate.on_switch"},  # SK 6-Nov: counts saved when a module goes New; checked nightly
 	# SK 23-Nov: cancelling a task on a lead / deal keeps its owner (Frappe CRM empties it)
 	"ToDo": {"validate": "sk_app.lead_owner_keep.remember_owner", "on_update": "sk_app.lead_owner_keep.keep_owner"},
@@ -102,25 +102,27 @@ doc_events = {
 		"on_update": "sk_app.sub_bills.on_job_card_change", "on_submit": ["sk_app.sub_bills.on_job_card_change", "sk_app.writers.work_order.on_card_submit"]},
 	# SK 29-Oct: one Project + cost centre per cabin; its material, bills and sales rows go to that cost centre at once,
 	# and stages done before ERPNext close when the cabin's Work Order is submitted (sk_app.cabin_projects)
-	"Work Order": {"validate": "sk_app.writers.work_order.on_validate", "before_submit": "sk_app.sub_bills.wo_submitting",
+	# SK 27-Nov essential-field gate (sk_app.step_gates): each step stops with what is missing, who fills it, why
+	"Work Order": {"validate": "sk_app.writers.work_order.on_validate", "before_submit": ["sk_app.sub_bills.wo_submitting", "sk_app.step_gates.check_work_order"],
 		"on_submit": ["sk_app.cabin_projects.close_done_stages", "sk_app.sub_bills.on_work_order_submit"]},
-	"Stock Entry": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.stock_entry.on_validate"]},  # rebuild Flow 4 (New path)
-	"Delivery Note": {"before_validate": "sk_app.party_currency.warm", "validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": "sk_app.gates.check_sales_invoice"},
+	"Stock Entry": {"validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.stock_entry.on_validate"], "before_submit": "sk_app.step_gates.check_stock_entry"},  # rebuild Flow 4 (New path)
+	"Delivery Note": {"before_validate": "sk_app.party_currency.warm", "validate": "sk_app.cabin_projects.set_cost_centre", "before_submit": ["sk_app.gates.check_sales_invoice", "sk_app.step_gates.check_delivery_note"]},
 	# SK 27-Oct purchase flow: requisition → CEO approval → PO → receipt against the PO, in ERPNext too
 	"Material Request": {"validate": ["sk_app.gates.check_request", "sk_app.cabin_projects.set_cost_centre"], "before_submit": "sk_app.writers.requisition.check_submit"},
 	"Purchase Order": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.purchase_order.on_validate"],  # rebuild Flow 3 (New path)
-		"before_submit": ["sk_app.writers.requisition.check_po", "sk_app.sub_bills.check_submit"], "on_submit": "sk_app.sub_bills.on_po_submit"},
-	"Purchase Receipt": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.receipt.on_validate"], "before_submit": "sk_app.writers.requisition.check_receipt"},
+		"before_submit": ["sk_app.writers.requisition.check_po", "sk_app.sub_bills.check_submit", "sk_app.step_gates.check_purchase_order"], "on_submit": "sk_app.sub_bills.on_po_submit"},
+	"Purchase Receipt": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.writers.receipt.on_validate"], "before_submit": ["sk_app.writers.requisition.check_receipt", "sk_app.step_gates.check_purchase_receipt"]},
 	# SK 28/29-Oct: labour bill only from the service GRN of a PO Rushi + CEO approved; only CEO / Accounts change the rates
 	"Purchase Invoice": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check", "sk_app.writers.payment_allocate.pull_advances"],
-		"before_submit": ["sk_app.sub_bills.check_submit", "sk_app.writers.service_job.before_submit"]},  # service job bill only after approval (New path)
+		"before_submit": ["sk_app.sub_bills.check_submit", "sk_app.writers.service_job.before_submit", "sk_app.step_gates.check_purchase_invoice"]},  # service job bill only after approval (New path)
 	"Item Price": {"validate": "sk_app.sub_bills.check_rate_edit"},
 	# SK 4-Nov (Shraddha): a Net Banking / IMPS payment booked from Cash never shows in Bank Reconciliation: stopped
 	"Payment Entry": {"validate": ["sk_app.doubles.check", "sk_app.writers.payment.on_validate", "sk_app.bank_return.warn_date_gap"],
-		"on_submit": "sk_app.writers.bank_match.on_submit"},  # rebuild Flow 6: matched with its bank line at once (New path)
+		"before_submit": "sk_app.step_gates.check_payment", "on_submit": "sk_app.writers.bank_match.on_submit"},  # rebuild Flow 6: matched with its bank line at once (New path)
 	"Journal Entry": {"validate": ["sk_app.doubles.check", "sk_app.writers.journal.on_validate", "sk_app.bank_return.warn_date_gap"]},
 	# rebuild Flow 6 HR (New path): the HR rules on every record, from the app, ERPNext or SK Hub
 	"Attendance": {"validate": "sk_app.writers.attendance.on_validate"},
+	"Expense Claim": {"before_submit": "sk_app.step_gates.check_expense_claim"},  # SK 27-Nov: bill photo or 'No bill' tick
 	"Leave Application": {"before_validate": "sk_app.writers.leave.ensure_allocation", "validate": "sk_app.writers.leave.on_validate"},
 	"Employee": {"validate": "sk_app.writers.employee.on_validate"},
 	# SK 4-Nov "make it foolproof": the money masters only by the CEO / System Manager; a Bank mode needs Bank accounts (sk_app.masters)

@@ -145,6 +145,10 @@ def make_login(by: str, mobile, functions, employee=None, full_name=None, manage
 	emp = frappe.db.get_value("Employee", employee, ["name", "employee_name", "user_id", "first_name"], as_dict=True) if employee else None
 	if employee and not emp:
 		frappe.throw(_("Employee {0} not found").format(employee))
+	if emp and not emp.user_id:  # SK 27-Nov: a new login only for a complete Employee (mobile, joining date, department, designation)
+		from sk_app.step_gates import check_employee_login
+
+		check_employee_login(employee, mobile)
 	full_name = (full_name or (emp and emp.employee_name) or "").strip()
 	if not full_name:
 		frappe.throw(_("Please give the person's name"))

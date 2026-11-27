@@ -23,6 +23,56 @@ def check_same_gstin(doc, method=None):
 			gstin, other.customer_name, other.name), title=_("Same GSTIN"))
 
 
+def same_gstin(gstin: str | None, not_this: str | None = None) -> dict | None:
+	"""SK 27-Nov (HD deal 00190): the active customer that already has this GSTIN (so the app offers 'Use this customer')."""
+	gstin = (gstin or "").strip().upper()
+	if not gstin:
+		return None
+	return frappe.db.get_value("Customer", {"gstin": gstin, "name": ["!=", not_this or ""], "disabled": 0}, ["name", "customer_name"], as_dict=True)
+
+
+def _has_business(customer: str) -> bool:
+	return any(frappe.db.exists(dt, {field: customer, "docstatus": ["<", 2]}) for dt, field in (("Quotation", "party_name"),
+		("Sales Order", "customer"), ("Sales Invoice", "customer"), ("Delivery Note", "customer"), ("Payment Entry", "party")))
+
+
+def use_existing(user: str, deal: str, customer: str) -> dict:
+	"""SK 27-Nov: the deal moves to the customer that already has the GSTIN. The organization changes too (saving a deal
+	re-picks the customer by its organization name, which made the empty CUS-03485 on live); the empty customer made for
+	the deal is disabled as a duplicate when it has no business on it."""
+	from sk_app import crm
+
+	crm._check("CRM Deal", deal, "write")
+	if not frappe.db.exists("Customer", customer) or frappe.db.get_value("Customer", customer, "disabled"):
+		frappe.throw(_("Customer {0} not found").format(customer))
+	cname = frappe.db.get_value("Customer", customer, "customer_name")
+	doc = frappe.get_doc("CRM Deal", deal)
+	old = doc.get("erpnext_customer")
+	if doc.meta.has_field("organization") and frappe.db.exists("DocType", "CRM Organization"):
+		org = frappe.db.get_value("CRM Organization", {"organization_name": cname}) or frappe.db.get_value("CRM Organization", cname)
+		if not org:
+			org = frappe.get_doc({"doctype": "CRM Organization", "organization_name": cname}).insert(ignore_permissions=True).name
+		doc.organization = org
+	doc.erpnext_customer = customer
+	from sk_app.gates import CUSTOMER_LINK
+
+	if doc.meta.has_field(CUSTOMER_LINK):
+		doc.set(CUSTOMER_LINK, customer)
+	doc.flags.ignore_permissions = True
+	doc.save()
+	if frappe.get_meta("Customer").has_field("crm_deal"):
+		frappe.db.set_value("Customer", customer, "crm_deal", deal, update_modified=False)
+	dropped = None
+	if old and old != customer and frappe.db.exists("Customer", old) and not _has_business(old):
+		frappe.db.set_value("Customer", old, "disabled", 1)
+		frappe.get_doc("Customer", old).add_comment("Comment", _("Duplicate of {0} ({1}): the deal {2} uses that customer (same GSTIN). Disabled by {3}.").format(
+			customer, cname, deal, user))
+		dropped = old
+	from sk_app import gates
+
+	return {"name": customer, "customer_name": cname, "disabled_duplicate": dropped, "missing": [t for _k, t in gates.customer_missing(customer)]}
+
+
 def after_insert(doc, method=None):
 	from sk_app import gates
 	from sk_app.core.switch import use_new

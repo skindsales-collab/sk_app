@@ -830,7 +830,10 @@
 		fl_add_item: "Add item", fl_rate_blank: "blank = price list", fl_valid: "Valid for days", fl_desc: "Description (Enter = new line)", fl_terms: "Terms / note", fl_quote_saved: "Quotation saved",
 		fl_order_why: "Order received = Deal Won. The Sales Order is made from the quotation and submitted.", fl_delivery: "Promised delivery date", fl_po_no: "Customer PO no",
 		g_fill: "Please fill first", g_missing: "Data missing: this cannot move on until it is filled", g_save: "Save details", g_locked: "Locked: fill first",
-		g_cust: "Customer details for GST bill", qb_title: "Quote NOT in ERPNext yet: do not send any quote PDF", qb_missing: "Missing", qb_who: "Who fills it", qb_you: "You (deal owner)",
+		g_cust: "Customer details for GST bill", sg_title: "This GSTIN is already in ERPNext", sg_why: "GSTIN {0} belongs to the customer below. Use it, so the quote, order and bills all go to the one customer.",
+		sg_use: "Use this customer", sg_after: "The deal's company and customer change to this one; the empty customer made for the deal is closed as a duplicate.", sg_done: "Deal now on customer",
+		wb_title: "Deal Won but NO Sales Order in ERPNext", wb_need: "Sales Order with the customer PO number + PO date (or PO copy), delivery date and value, submitted",
+		qb_title: "Quote NOT in ERPNext yet: do not send any quote PDF", qb_missing: "Missing", qb_who: "Who fills it", qb_you: "You (deal owner)",
 		qb_fill: "Fill customer details now", qb_ready: "Customer details are complete. Make the quotation now; its PDF is the one to send.",
 		qb_why: "Design's PDF is only a reference. Only the quotation made here is saved in ERPNext and may go to the customer.",
 		cust_first: "Fill the customer details above first (GSTIN or No GSTIN, billing address, mobile). Then the quote buttons appear.", g_gstin: "GSTIN (15 letters / digits)", g_unreg: "Customer has no GSTIN (unregistered)", g_unreg_why: "Why no GSTIN",
@@ -875,7 +878,10 @@
 		fl_add_item: "आयटम जोडा", fl_rate_blank: "रिकामे = किंमत यादी", fl_valid: "किती दिवस वैध", fl_desc: "वर्णन (Enter = नवी ओळ)", fl_terms: "अटी / नोंद", fl_quote_saved: "कोटेशन जतन झाले",
 		fl_order_why: "ऑर्डर मिळाली = डील जिंकली. कोटेशनवरून सेल्स ऑर्डर बनून सबमिट होते.", fl_delivery: "दिलेली डिलिव्हरी तारीख", fl_po_no: "ग्राहकाचा PO नंबर",
 		g_fill: "आधी हे भरा", g_missing: "माहिती अपूर्ण: भरल्याशिवाय पुढे जाता येणार नाही", g_save: "माहिती सेव्ह करा", g_locked: "बंद: आधी माहिती भरा",
-		g_cust: "GST बिलासाठी ग्राहकाची माहिती", qb_title: "कोटेशन अजून ERPNext मध्ये नाही: कोणतीही कोटेशन PDF पाठवू नका", qb_missing: "राहिलेली माहिती", qb_who: "कोण भरणार", qb_you: "तुम्ही (डील मालक)",
+		g_cust: "GST बिलासाठी ग्राहकाची माहिती", sg_title: "हा GSTIN आधीच ERPNext मध्ये आहे", sg_why: "GSTIN {0} खालील ग्राहकाचा आहे. तोच वापरा, म्हणजे कोटेशन, ऑर्डर व बिले एकाच ग्राहकावर जातील.",
+		sg_use: "हाच ग्राहक वापरा", sg_after: "डीलची कंपनी व ग्राहक हाच होईल; डीलसाठी बनलेला रिकामा ग्राहक डुप्लिकेट म्हणून बंद होईल.", sg_done: "डील आता या ग्राहकावर",
+		wb_title: "डील जिंकली पण ERPNext मध्ये सेल्स ऑर्डर नाही", wb_need: "ग्राहकाचा PO नंबर + PO तारीख (किंवा PO प्रत), डिलिव्हरी तारीख व रक्कम असलेली सेल्स ऑर्डर, सबमिट केलेली",
+		qb_title: "कोटेशन अजून ERPNext मध्ये नाही: कोणतीही कोटेशन PDF पाठवू नका", qb_missing: "राहिलेली माहिती", qb_who: "कोण भरणार", qb_you: "तुम्ही (डील मालक)",
 		qb_fill: "आता ग्राहकाची माहिती भरा", qb_ready: "ग्राहकाची माहिती पूर्ण आहे. आता कोटेशन बनवा; त्याचीच PDF पाठवायची.",
 		qb_why: "डिझाइनची PDF फक्त संदर्भासाठी आहे. इथे बनवलेले कोटेशनच ERPNext मध्ये जतन होते आणि तेच ग्राहकाला पाठवायचे.",
 		cust_first: "आधी वर ग्राहकाची माहिती भरा (GSTIN किंवा GSTIN नाही, बिलिंग पत्ता, मोबाईल). मग कोटेशन बटणे दिसतील.", g_gstin: "GSTIN (15 अक्षरे / अंक)", g_unreg: "ग्राहकाकडे GSTIN नाही (अनरजिस्टर्ड)", g_unreg_why: "GSTIN का नाही",
@@ -3081,6 +3087,10 @@
 	// what is missing, who must fill it, and give the button to the exact place. Shown first on the deal.
 	function quoteBlockCard(d, doctype, name) {
 		const q = d.quote_pending;
+		const so = (d.sales_orders || []).some((o) => o.docstatus === 1);
+		if (doctype === "CRM Deal" && d.doc && d.doc.status === "Won" && !so) // SK 27-Nov: Won = order in ERPNext; say what is missing
+			return `<div class="sk-card sk-gap sk-block"><div class="sk-item-title sk-due">⛔ ${t("wb_title")}</div>
+				<p class="sk-note"><b>${t("qb_missing")}:</b><br>• ${t("wb_need")}</p><p class="sk-note"><b>${t("qb_who")}:</b> ${t("qb_you")}</p></div>`;
 		if (doctype !== "CRM Deal" || !q) return "";
 		const miss = q.missing || [];
 		const who = q.owner && q.owner === (state.home && state.home.user) ? t("qb_you") : esc(q.owner_name || q.owner || "");
@@ -7452,7 +7462,23 @@
 				try {
 					const r = await call("flow_make_customer", { deal: el.dataset.deal, gstin: unreg ? null : val("gc-gstin").toUpperCase(), unregistered: unreg ? 1 : 0,
 						gst_note: val("gc-why") || null, address: val("gc-addr"), city: val("gc-city") || null, state: val("gc-state"), pincode: val("gc-pin"), mobile: val("gc-mobile") }, true);
+					if (r.same_gstin) { // SK 27-Nov (HD deal 00190): no dead end; offer the customer that already has this GSTIN
+						const o = r.same_gstin;
+						return sheet(`<h3 class="sk-h">🧾 ${t("sg_title")}</h3><p class="sk-note">${t("sg_why").replace("{0}", esc(r.gstin))}</p>
+							<div class="sk-card"><div class="sk-item-title">${esc(o.customer_name)}</div><div class="sk-item-meta">${esc(o.name)}</div></div>
+							<button class="sk-btn go wide" data-act="use-customer" data-deal="${esc(el.dataset.deal)}" data-customer="${esc(o.name)}">✅ ${t("sg_use")}</button>
+							<p class="sk-note">${t("sg_after")}</p><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
+					}
 					if (r.missing && r.missing.length) toast(`${t("g_fill")}: ${r.missing.join(", ")}`, true); else toast(t("g_cust_ok"));
+				} finally { el.disabled = false; }
+				return go("detail");
+			}
+			if (act === "use-customer") {
+				el.disabled = true;
+				try {
+					const r = await call("flow_use_customer", { deal: el.dataset.deal, customer: el.dataset.customer }, true);
+					closeSheet();
+					toast(`✓ ${t("sg_done")}: ${r.customer_name}` + (r.missing && r.missing.length ? ` · ${t("g_fill")}: ${r.missing.join(", ")}` : ""), !!(r.missing && r.missing.length));
 				} finally { el.disabled = false; }
 				return go("detail");
 			}

@@ -323,6 +323,9 @@ def send_to_design(user: str, lead: str) -> dict:
 	seg = frappe.db.get_value("CRM Lead", lead, "sk_segment") if frappe.get_meta("CRM Lead").has_field("sk_segment") else None
 	if seg and main_of(seg) != CABIN:
 		return {"sent": False, "reason": _("Only Cabin enquiries go to design")}
+	from sk_app.step_gates import check_send_to_design
+
+	check_send_to_design(lead)  # SK 27-Nov: design starts only on a full enquiry (requirement + size)
 	deal, reason = _to_deal(user, lead, seg)
 	if not deal:
 		return {"sent": False, "reason": reason}

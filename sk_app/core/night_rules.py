@@ -35,7 +35,7 @@ ORDER = list(KINDS)
 DRAFT_DOCTYPES = {
 	"Quotation": "Sales", "Sales Order": "Sales", "Sales Invoice": "Accounts", "Payment Entry": "Accounts", "Journal Entry": "Accounts",
 	"Purchase Invoice": "Accounts", "Purchase Order": "Purchase", "Material Request": "Stores", "Stock Entry": "Stores", "Purchase Receipt": "Stores",
-	"Expense Claim": "Accounts",
+	"Expense Claim": "Accounts", "Delivery Note": "Stores", "Work Order": "Production",  # SK 27-Nov gate: every step's draft
 }
 DRAFT_GRACE_DAYS = 1  # a draft made or edited today is still being worked on
 # SK 23-Nov (approved): quotes and expenses left as drafts: on the owner's list after 2 days, also on SK's list after 5
