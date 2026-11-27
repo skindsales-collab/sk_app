@@ -2347,7 +2347,12 @@ def cabin_quote_price(req, deal=None, lead=None):
 	if deal or lead:
 		crm._check("CRM Deal" if deal else "CRM Lead", deal or lead, "read")
 		value = cabin_quote.design_value(deal or frappe.db.get_value("CRM Deal", {"lead": lead}, "name"))
-	return cabin_quote.price(json.loads(req) if isinstance(req, str) else req, value=value)
+	from sk_app import quote_learning
+
+	rc = cabin_quote.rate_card()
+	p = cabin_quote.price(json.loads(req) if isinstance(req, str) else req, rc, value=value)
+	p["learned"] = quote_learning.learned_for(p, rc)  # SK 27-Nov: shown beside the rate card, never in its place
+	return p
 
 
 @frappe.whitelist()

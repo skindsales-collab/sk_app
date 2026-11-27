@@ -106,7 +106,10 @@ def _design_price(req: dict, rc: dict, value: float) -> dict:
 	dims = "L x W x H" if H else "L x W"
 	line = {"kind": "cabin", "desc": f"{title} {size} ({dims}), as per specification below", "qty": qty, "unit": "No.", "rate": round(flt(value) / qty, 2), "basis": "design price"}
 	line["amount"] = line["qty"] * line["rate"]
-	return {"lines": [line], "total": line["amount"], "rate_card": rc["version"], "area": L * W, "label": title, "size": size, "qty": qty}
+	from sk_app.quote_learning_rules import spec_key
+
+	return {"lines": [line], "total": line["amount"], "rate_card": rc["version"], "area": L * W, "label": title, "size": size, "qty": qty,
+		"spec_key": spec_key(DESIGN, "", title)}
 
 
 def price(req: dict, rc: dict | None = None, value: float = 0) -> dict:
@@ -157,7 +160,11 @@ def price(req: dict, rc: dict | None = None, value: float = 0) -> dict:
 	for ln in lines:
 		ln["amount"] = ln["qty"] * ln["rate"]
 	total = sum(ln["amount"] for ln in lines)
-	return {"lines": lines, "total": total, "rate_card": rc["version"], "area": area, "label": t["label"], "size": size, "qty": qty}
+	from sk_app.quote_learning_rules import band, spec_key
+
+	similar = band(area, t.get("slabs"), f"{int(L)}x{int(W)}" if "fixed" in t else None)  # SK 27-Nov: corrections learn per type + size slab
+	return {"lines": lines, "total": total, "rate_card": rc["version"], "area": area, "label": t["label"], "size": size, "qty": qty,
+		"spec_key": spec_key(req["type"], similar)}
 
 
 def options(user: str | None = None) -> dict:
@@ -238,7 +245,10 @@ def ensure_setup():
 		frappe.get_doc({"doctype": "Print Format", "name": PRINT_FORMAT, "module": "SK App", "standard": "No", **values}).insert(ignore_permissions=True)
 	from sk_app.tax_invoice import _set_default
 
-	_set_default("Quotation", PRINT_FORMAT)  # SK 21-Nov: doctype-level (ERPNext reads it), never over a chosen default
+	_set_default("Quotation", PRINT_FORMAT)
+	from sk_app import quote_learning
+
+	quote_learning.ensure_field()  # SK 21-Nov: doctype-level (ERPNext reads it), never over a chosen default
 	from sk_app import building_quote
 
 	building_quote.ensure_setup()
@@ -307,6 +317,19 @@ def make(user: str, req: dict, deal=None, lead=None, customer=None, discount_pct
 	customer, deal = _customer_for(user, deal, lead, customer)
 	disc = max(0.0, flt(discount_pct))
 	allowed = max_discount(user)
+	# SK 27-Nov: the salesperson may type a corrected amount (before GST) in place of the suggested one; lower = checked like a discount
+	from sk_app import quote_learning as QL
+	from sk_app.quote_learning_rules import below_pct
+
+	corrected = flt(req.get("corrected"))
+	calc, why = None, None
+	if corrected > 0:
+		if disc:
+			frappe.throw(_("Give either a corrected amount or a discount %, not both"))
+		calc = QL.apply(p, corrected)
+		below = below_pct(p["total"], corrected)
+		if below > allowed:  # waits for SK; the quote keeps the suggested amount until SK approves
+			why = f"Corrected amount {inr(corrected)} asked, {below:g}% below the suggested {inr(p['total'])} (your limit {allowed:g}%)"
 	old = frappe.get_doc("Quotation", revise) if revise else None
 	if old and old.party_name != customer:
 		frappe.throw(_("That quotation is for another customer"))
@@ -319,19 +342,20 @@ def make(user: str, req: dict, deal=None, lead=None, customer=None, discount_pct
 	for r in rows:
 		if not r["uom"]:
 			r.pop("uom")
-	need_ok = disc > allowed
+	if calc and not why:
+		QL.set_cabin_rate(rows, main, calc["corrected_rate"])
+	need_ok = disc > allowed or bool(why)
 	if use_new("Sales", user):  # rebuild: the one Quotation writer (linear flow map, Flow 1 step 6)
 		from sk_app.writers import quotation as qw
 
 		doc = qw.write(user, customer=customer, items=rows, deal=deal, kind="CAB", terms=_terms(rc),
 			valid_days=cint(rc["terms"].get("validity_days")) or 15, revise=revise, contact=contact, extra={
 				"sk_rate_card": rc["version"], "sk_cabin_request": json.dumps(req), "sk_discount_pct": disc,
-				"additional_discount_percentage": 0 if need_ok else disc, "apply_discount_on": "Net Total",
+				"additional_discount_percentage": 0 if need_ok else disc, "apply_discount_on": "Net Total", "sk_corrected_amount": corrected or 0,
 				"sk_discount_status": "Requested" if need_ok else ("Approved" if disc else "")})
-		if need_ok:
-			_ask_discount(user, doc, disc)
+		_after_make(user, doc, req, p, rc, calc, why, disc, need_ok)
 		return {"name": doc.name, "ref": doc.sk_quote_ref, "rev": doc.sk_rev, "net_total": doc.net_total, "grand_total": doc.grand_total,
-			"discount_waiting": need_ok, "pdf": _pdf(doc.name), "rate_card": rc["version"]}
+			"discount_waiting": need_ok, "pdf": _pdf(doc.name), "rate_card": rc["version"], "corrected": calc}
 	if old and old.docstatus == 0:
 		doc = old
 		doc.set("items", [])
@@ -354,18 +378,30 @@ def make(user: str, req: dict, deal=None, lead=None, customer=None, discount_pct
 		doc.crm_deal = deal
 	if contact and doc.meta.has_field("contact_person") and frappe.db.exists("Contact", contact):
 		doc.contact_person = contact
-	need_ok = disc > allowed
 	doc.additional_discount_percentage = 0 if need_ok else disc
 	doc.apply_discount_on = "Net Total"
 	doc.sk_discount_status = "Requested" if need_ok else ("Approved" if disc else "")
+	if doc.meta.has_field("sk_corrected_amount"):
+		doc.sk_corrected_amount = corrected or 0
 	doc.flags.ignore_permissions = True
 	doc.save()
-	if need_ok:
-		_ask_discount(user, doc, disc)
+	_after_make(user, doc, req, p, rc, calc, why, disc, need_ok)
 	if deal:
 		_deal_to_quotation(deal)
 	return {"name": doc.name, "ref": doc.sk_quote_ref, "rev": doc.sk_rev, "net_total": doc.net_total, "grand_total": doc.grand_total,
-		"discount_waiting": need_ok, "pdf": _pdf(doc.name), "rate_card": rc["version"]}
+		"discount_waiting": need_ok, "pdf": _pdf(doc.name), "rate_card": rc["version"], "corrected": calc}
+
+
+def _after_make(user, doc, req, p, rc, calc, why, disc, need_ok):
+	"""Approval ask, and the correction kept against the specification (SK 27-Nov)."""
+	from sk_app import quote_learning as QL
+
+	if need_ok:
+		_ask_discount(user, doc, None if why else disc, why)
+	if calc:
+		QL.record(user, doc, req, p, calc, teaches=_shared_is_ceo(user), rc=rc)  # SK's own correction teaches at once
+	elif doc.name:
+		QL.set_status(doc.name, "Not used")  # revised back to the rate card: the older correction no longer stands
 
 
 def _terms(rc: dict) -> str:
@@ -419,7 +455,12 @@ def decide_discount(user: str, quotation: str, ok: int) -> dict:
 	doc = frappe.get_doc("Quotation", quotation)
 	if doc.sk_discount_status != "Requested" or doc.docstatus != 0:
 		frappe.throw(_("No discount is waiting on this quotation"))
-	if cint(ok):
+	from sk_app import quote_learning as QL
+
+	if cint(ok) and flt(doc.get("sk_corrected_amount")):  # SK 27-Nov: a corrected amount SK approved goes into the cabin rate
+		_apply_correction(doc)
+		doc.sk_discount_status = "Approved"
+	elif cint(ok):
 		if flt(doc.sk_discount_pct):
 			doc.additional_discount_percentage = flt(doc.sk_discount_pct)
 			doc.apply_discount_on = "Net Total"
@@ -430,7 +471,22 @@ def decide_discount(user: str, quotation: str, ok: int) -> dict:
 	doc.save()
 	for td in frappe.get_all("ToDo", filters={"reference_type": "Quotation", "reference_name": quotation, "status": "Open"}, pluck="name"):
 		frappe.db.set_value("ToDo", td, "status", "Closed")
+	QL.set_status(doc.name, "Teaching" if cint(ok) else "Not used")  # SK 27-Nov: only what SK approved (or an order) teaches
 	return {"name": doc.name, "status": doc.sk_discount_status, "grand_total": doc.grand_total}
+
+
+def _apply_correction(doc):
+	"""Cabin rows take the rate that makes the quote total equal the corrected amount; options and transport stay."""
+	from sk_app.quote_learning_rules import correction_rate
+
+	cabin = [d for d in doc.items if d.item_code not in (OPTION_ITEM, TRANSPORT_ITEM)]
+	lines = [{"kind": "cabin" if d in cabin else "other", "amount": flt(d.qty) * flt(d.rate)} for d in doc.items]
+	try:
+		rate = correction_rate(lines, flt(doc.sk_corrected_amount), sum(cint(d.qty) for d in cabin))
+	except ValueError:
+		frappe.throw(_("The corrected amount must be more than the options and transport together"))
+	for d in cabin:
+		d.rate = rate
 
 
 def _boss_only(user: str):

@@ -82,7 +82,8 @@ doc_events = {
 	"Sales Order": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.sales_owner.fill_order_team", "sk_app.segment_accounts.set_segment", "sk_app.writers.taxes.on_validate"],
 		"on_update": "sk_app.writers.taxes.after_save",  # SK 6-Nov: GST filled by the app when the rows were left empty (New path)
 		"before_submit": "sk_app.gates.check_sales_order",
-		"on_submit": ["sk_app.won_deals.on_submit", "sk_app.lead_time.on_sales_order_submit", "sk_app.bom_optional.tell_design", "sk_app.lead_follow.on_order_submit"]},  # SK 28-Oct: its lead / deal shows Won in the CRM at once
+		"on_submit": ["sk_app.won_deals.on_submit", "sk_app.lead_time.on_sales_order_submit", "sk_app.bom_optional.tell_design", "sk_app.lead_follow.on_order_submit",
+			"sk_app.quote_learning.on_order_submit"]},  # SK 28-Oct: its lead / deal shows Won in the CRM at once
 	# SK 29-Oct (Shraddha): a tax invoice is submitted only with the buyer's Bill to address (Ship to defaults to it)
 	"Sales Invoice": {"before_validate": "sk_app.party_currency.warm", "validate": ["sk_app.segment_accounts.set_segment", "sk_app.cabin_projects.set_cost_centre", "sk_app.doubles.check",
 		"sk_app.writers.taxes.on_validate", "sk_app.writers.payment_allocate.pull_advances"], "on_update": "sk_app.writers.taxes.after_save",

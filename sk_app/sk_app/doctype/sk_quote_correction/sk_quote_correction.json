@@ -1,0 +1,195 @@
+{
+ "doctype": "DocType",
+ "name": "SK Quote Correction",
+ "module": "SK App",
+ "custom": 0,
+ "engine": "InnoDB",
+ "creation": "2026-11-27 10:00:00.000000",
+ "modified": "2026-11-27 10:00:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator",
+ "naming_rule": "Random",
+ "autoname": "hash",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "description": "SK 27-Nov: each corrected quote amount against its cabin specification, with the rate it implies; teaching ones shape the next quote's learned suggestion.",
+ "field_order": [
+  "spec_key",
+  "status",
+  "cabin_type",
+  "title_text",
+  "length",
+  "width",
+  "height",
+  "area",
+  "qty",
+  "options",
+  "col_amt",
+  "suggested_rate",
+  "corrected_rate",
+  "suggested_total",
+  "corrected_total",
+  "factor",
+  "pct",
+  "per_sqft",
+  "sec_ref",
+  "quotation",
+  "deal",
+  "corrected_by",
+  "rate_card"
+ ],
+ "fields": [
+  {
+   "fieldname": "spec_key",
+   "fieldtype": "Data",
+   "label": "Specification (similar cabins)",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Waiting\nTeaching\nNot used",
+   "default": "Waiting",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Waiting: kept for reference. Teaching: SK approved it or the quote became an order, so it shapes the next suggestion."
+  },
+  {
+   "fieldname": "cabin_type",
+   "fieldtype": "Data",
+   "label": "Cabin type"
+  },
+  {
+   "fieldname": "title_text",
+   "fieldtype": "Data",
+   "label": "Cabin title (design price)"
+  },
+  {
+   "fieldname": "length",
+   "fieldtype": "Float",
+   "label": "Length ft"
+  },
+  {
+   "fieldname": "width",
+   "fieldtype": "Float",
+   "label": "Width ft"
+  },
+  {
+   "fieldname": "height",
+   "fieldtype": "Float",
+   "label": "Height ft"
+  },
+  {
+   "fieldname": "area",
+   "fieldtype": "Float",
+   "label": "Area sq ft"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Int",
+   "label": "Cabins"
+  },
+  {
+   "fieldname": "options",
+   "fieldtype": "Small Text",
+   "label": "Options"
+  },
+  {
+   "fieldname": "col_amt",
+   "fieldtype": "Column Break",
+   "label": ""
+  },
+  {
+   "fieldname": "suggested_rate",
+   "fieldtype": "Currency",
+   "label": "Suggested rate per cabin (rate card)"
+  },
+  {
+   "fieldname": "corrected_rate",
+   "fieldtype": "Currency",
+   "label": "Corrected rate per cabin",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "suggested_total",
+   "fieldtype": "Currency",
+   "label": "Suggested amount (quote)"
+  },
+  {
+   "fieldname": "corrected_total",
+   "fieldtype": "Currency",
+   "label": "Corrected amount (quote)"
+  },
+  {
+   "fieldname": "factor",
+   "fieldtype": "Float",
+   "label": "Factor against rate card",
+   "precision": "4"
+  },
+  {
+   "fieldname": "pct",
+   "fieldtype": "Percent",
+   "label": "Change against rate card %",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "per_sqft",
+   "fieldtype": "Currency",
+   "label": "Implied rate per sq ft"
+  },
+  {
+   "fieldname": "sec_ref",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "quotation",
+   "fieldtype": "Link",
+   "label": "Quotation",
+   "options": "Quotation",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "deal",
+   "fieldtype": "Data",
+   "label": "CRM Deal"
+  },
+  {
+   "fieldname": "corrected_by",
+   "fieldtype": "Link",
+   "label": "Corrected by",
+   "options": "User"
+  },
+  {
+   "fieldname": "rate_card",
+   "fieldtype": "Data",
+   "label": "Rate card version"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "Sales Manager",
+   "read": 1,
+   "report": 1,
+   "export": 1
+  }
+ ],
+ "states": [],
+ "actions": [],
+ "links": [],
+ "index_web_pages_for_search": 0,
+ "title_field": "spec_key"
+}

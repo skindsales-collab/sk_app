@@ -806,7 +806,11 @@
 		cq_title: "Cabin quotation", cq_why: "Price from SK's rate card: the same cabin gets the same price from anyone. You cannot type the price.",
 		cq_type: "Cabin type", cq_design: "Other (LGSF, modular, container, bigger): design price", cq_l: "Length (ft)", cq_w: "Width (ft)", cq_h: "Height (ft)",
 		cq_opts: "Options", cq_km: "Distance from Talegaon plant (km)", cq_crane: "Crane for unloading", cq_transport: "Add transport to site", cq_disc: "Discount %", cq_disc_max: "you can give up to",
-		cq_disc_sk: "above this SK approves", cq_price: "Price (excl. GST)", cq_revise: "Revise", cq_new: "New quotation", cq_saved: "Quotation saved",
+		cq_disc_sk: "above this SK approves", cq_corr: "Corrected amount, all cabins (excl. GST) – leave empty to use the suggested one",
+		cq_corr_how: "Your corrected amount goes into the quote and is kept against this cabin's specification; the next similar quote learns from it once SK approves or it becomes an order.",
+		cq_suggested: "Suggested amount (rate card, excl. GST)", cq_learned: "Learned from past corrections:", cq_from: "from", cq_quotes: "quotes", cq_use: "Use this",
+		cq_no_learn: "No learned amount yet for this size", cq_corr_or: "Give either a corrected amount or a discount %, not both", cq_below: "below the suggested amount",
+		cq_price: "Price (excl. GST)", cq_revise: "Revise", cq_new: "New quotation", cq_saved: "Quotation saved",
 		cq_waiting: "Discount sent to SK for approval; the quote is saved without it", cq_design_go: "The price comes from design (Design quote value on the deal). Write what the cabin is and its specification.", cq_not_saved: "The quotation was not saved in ERPNext. Please try again or send a screenshot to SK.", cq_design_what: "What is the cabin (LGSF office, container ...)", cq_design_spec: "Specification, one line each (prints on the quote)",
 		bq_type: "Building: PUF / EPS labour camp or site office (G+0 to G+2)", bq_title: "Building quotation (PUF / EPS)",
 		bq_why: "Same method and rates as SK's Quotation Calculator: area x rate card. You cannot type the price.",
@@ -844,7 +848,11 @@
 		cq_title: "केबिन कोटेशन", cq_why: "SK च्या रेट कार्डनुसार किंमत: एकाच केबिनला कोणीही केले तरी एकच किंमत. किंमत टाइप करता येत नाही.",
 		cq_type: "केबिन प्रकार", cq_design: "इतर (LGSF, मॉड्युलर, कंटेनर, मोठे): डिझाइनची किंमत", cq_l: "लांबी (फूट)", cq_w: "रुंदी (फूट)", cq_h: "उंची (फूट)",
 		cq_opts: "पर्याय", cq_km: "तळेगाव प्लांटपासून अंतर (किमी)", cq_crane: "उतरवण्यासाठी क्रेन", cq_transport: "साइटपर्यंत वाहतूक जोडा", cq_disc: "सूट %", cq_disc_max: "तुम्ही देऊ शकता",
-		cq_disc_sk: "त्यापेक्षा जास्त SK मंजूर करतात", cq_price: "किंमत (GST वगळून)", cq_revise: "सुधारणा", cq_new: "नवीन कोटेशन", cq_saved: "कोटेशन जतन झाले",
+		cq_disc_sk: "त्यापेक्षा जास्त SK मंजूर करतात", cq_corr: "दुरुस्त रक्कम, सर्व केबिन (GST वगळून) – सुचवलेली रक्कम वापरायची असल्यास रिकामे ठेवा",
+		cq_corr_how: "तुमची दुरुस्त रक्कम कोटेशनमध्ये जाते आणि या केबिनच्या स्पेसिफिकेशनसोबत जतन होते; SK मंजूर केल्यावर किंवा ऑर्डर आल्यावर पुढील तसेच कोटेशन त्यातून शिकते.",
+		cq_suggested: "सुचवलेली रक्कम (रेट कार्ड, GST वगळून)", cq_learned: "मागील दुरुस्त्यांवरून शिकलेली रक्कम:", cq_from: "", cq_quotes: "कोटेशनवरून", cq_use: "हीच वापरा",
+		cq_no_learn: "या आकारासाठी अजून शिकलेली रक्कम नाही", cq_corr_or: "दुरुस्त रक्कम किंवा सूट %, यापैकी एकच द्या", cq_below: "सुचवलेल्या रकमेपेक्षा कमी",
+		cq_price: "किंमत (GST वगळून)", cq_revise: "सुधारणा", cq_new: "नवीन कोटेशन", cq_saved: "कोटेशन जतन झाले",
 		cq_waiting: "सूट SK कडे मंजुरीसाठी पाठवली; कोटेशन सूटशिवाय जतन झाले", cq_design_go: "किंमत डिझाइनकडून येते (डीलवरील Design quote value). केबिन काय आहे व स्पेसिफिकेशन लिहा.", cq_not_saved: "कोटेशन ERPNext मध्ये जतन झाले नाही. पुन्हा प्रयत्न करा किंवा SK ला स्क्रीनशॉट पाठवा.", cq_design_what: "केबिन काय आहे (LGSF ऑफिस, कंटेनर ...)", cq_design_spec: "स्पेसिफिकेशन, एका ओळीत एक (कोटेशनवर छापते)",
 		bq_type: "बिल्डिंग: PUF / EPS लेबर कॅम्प किंवा साइट ऑफिस (G+0 ते G+2)", bq_title: "बिल्डिंग कोटेशन (PUF / EPS)",
 		bq_why: "SK च्या Quotation Calculator सारखीच पद्धत व दर: क्षेत्रफळ x रेट कार्ड. किंमत टाइप करता येत नाही.",
@@ -3117,6 +3125,7 @@
 			<label class="sk-check"><input type="checkbox" id="cq-crane" data-cq="1"> ${t("cq_crane")}</label></div>
 			<label class="sk-field"><span>${t("cq_disc")} (${t("cq_disc_max")} ${o.max_discount}%, ${t("cq_disc_sk")})</span>${qtyBox("cq-disc", 0)}</label>
 			<div id="cq-price" class="sk-card"></div>
+			<label class="sk-field"><span>${t("cq_corr")}</span>${qtyBox("cq-corr", "")}</label><p class="sk-note">${t("cq_corr_how")}</p>
 			<button class="sk-btn ok wide" data-act="fl-cabinq-save">${t("save")} + PDF</button><button class="sk-btn wide" data-act="close-sheet">${t("back")}</button>`);
 		const box = document.querySelector(".sk-sheet") || document;
 		const rerun = debounceSearch(cabinPrice, "#cq-l-none");
@@ -3131,7 +3140,7 @@
 		}
 		return { type: val("cq-type"), length: Number(val("cq-l")), width: Number(val("cq-w")), height: Number(val("cq-h")) || S.cq.o.height,
 			qty: Number(val("cq-q")) || 1, options, km: Number(val("cq-km")) || 0, crane: document.getElementById("cq-crane").checked,
-			title: val("cq-title"), spec: val("cq-spec"),
+			title: val("cq-title"), spec: val("cq-spec"), corrected: Number(val("cq-corr")) || 0, // SK 27-Nov: corrected amount, before GST
 			transport: !!(document.getElementById("cq-tr") || {}).checked }; // SK 21-Nov: transport optional, off unless ticked
 	}
 	async function cabinPrice() {
@@ -3145,9 +3154,18 @@
 		try {
 			const p = await call("cabin_quote_price", { req: JSON.stringify(req), [S.cq.doctype === "CRM Lead" ? "lead" : "deal"]: S.cq.name });
 			const disc = Number(val("cq-disc")) || 0;
-			box.innerHTML = `<div class="sk-card-label">${t("cq_price")}</div><div class="sk-card-text">${money(p.total * (1 - Math.min(disc, S.cq.o.max_discount) / 100))}</div>
+			const corr = req.corrected; // SK 27-Nov: suggested amount, learned amount beside it, corrected amount goes into the quote
+			const below = corr && corr < p.total ? Math.round((p.total - corr) * 10000 / p.total) / 100 : 0;
+			const lr = p.learned;
+			box.innerHTML = `<div class="sk-card-label">${t("cq_suggested")}</div><div class="sk-card-text">${money(p.total)}</div>
+				${lr ? `<p class="sk-note">${t("cq_learned")} <b>${money(lr.total)}</b> (${lr.pct > 0 ? "+" : ""}${lr.pct}% · ${t("cq_from")} ${lr.n} ${t("cq_quotes")})
+					<button class="sk-btn" type="button" id="cq-use-learned">${t("cq_use")}</button></p>` : `<p class="sk-note">${t("cq_no_learn")}</p>`}
 				<ul class="sk-list">${p.lines.map((l) => `<li class="sk-item"><div><div class="sk-item-meta">${esc(l.desc)}</div></div><b>${l.qty} × ${money(l.rate)}</b></li>`).join("")}</ul>
-				${disc > S.cq.o.max_discount ? `<p class="sk-note sk-due">${t("cq_disc_sk")}</p>` : ""}`;
+				<div class="sk-card-label">${t("cq_price")}</div><div class="sk-card-text">${money(corr || p.total * (1 - Math.min(disc, S.cq.o.max_discount) / 100))}</div>
+				${corr && disc ? `<p class="sk-note sk-due">${t("cq_corr_or")}</p>` : ""}
+				${disc > S.cq.o.max_discount || below > S.cq.o.max_discount ? `<p class="sk-note sk-due">${below ? `${below}% ${t("cq_below")} · ` : ""}${t("cq_disc_sk")}</p>` : ""}`;
+			const use = document.getElementById("cq-use-learned");
+			if (use) use.onclick = () => { const c = document.getElementById("cq-corr"); c.value = Math.round(lr.total); cabinPrice(); };
 		} catch (e) { box.innerHTML = `<div class="sk-card-text sk-due">${esc(e.message || "")}</div>`; }
 	}
 	// SK 27-Oct: PUF / EPS buildings, same method as SK's Quotation Calculator Excel
