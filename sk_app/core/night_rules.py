@@ -25,6 +25,7 @@ KINDS = {
 	"import_gap": ("Import gap (source rows not in ERPNext)", "Load the missing rows or correct the SK Import count", "Management"),
 	"approval": ("Purchase request waiting for CEO", "Approve or reject it", "Management"),
 	"quote_not_in_erp": ("Quote not in ERPNext (design's PDF only)", "Fill the missing customer details on the deal, then Make quotation in the app", "Sales"),
+	"invoice_step": ("Invoice step for you (SK)", "Do the step written here, then it leaves your list by itself", "Accounts"),
 	"won_no_order": ("Deal Won without a Sales Order", "Make the Sales Order from the deal, or move the deal back to Negotiations", "Sales"),
 	"applicant_untouched": ("Candidate not touched for 24 hours", "Open the candidate: read the resume, book Round 1 or put on Hold", "HR"),
 	"shortlisted_waiting": ("Shortlisted candidate not seen by the CEO for 48 hours", "Open the Round 2 list and book the candidate or decide", "Management"),

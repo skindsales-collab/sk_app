@@ -206,6 +206,24 @@ def _quote_not_in_erp(logins: set) -> list[dict]:
 	return out
 
 
+def _rothe_850(logins: set) -> list[dict]:
+	"""SK 27-Nov "send this in tomorrow morning mail to her": the Rothe 850 steps in Accounts' one morning mail (EN + MR),
+	until they are done (857 cancelled, then the draft 850 submitted)."""
+	from sk_app.invoice_naming import ROTHE_850
+
+	keep, names, src, _counter = ROTHE_850
+	who = _function_owner("Accounts")
+	if frappe.db.get_value("Sales Invoice", src, "docstatus") == 1:
+		return [R.item("invoice_step", "Sales Invoice", src, "Rothe invoice must stay 850 (SK). Step 1: Cancel this invoice 857. Within an hour a draft "
+			f"{keep} appears; then check it and Submit. / रोथे इनव्हॉइस 850 च राहील (SK). पायरी 1: हे 857 इनव्हॉइस Cancel करा. तासाभरात {keep} चा ड्राफ्ट "
+			"येईल; तो तपासून Submit करा.", who, function="Accounts", action="Cancel 857 / 857 Cancel करा")]
+	if frappe.db.get_value("Sales Invoice", keep, "docstatus") == 0:
+		return [R.item("invoice_step", "Sales Invoice", keep, "Rothe draft 850 is ready (same details as 857, ₹1,12,100, our GSTIN prints). Check it and "
+			"Submit. / रोथे 850 चा ड्राफ्ट तयार आहे (857 प्रमाणेच, ₹1,12,100, आमचा GSTIN छापतो). तपासा आणि Submit करा.", who, function="Accounts",
+			action="Check and Submit 850 / 850 तपासून Submit करा")]
+	return []
+
+
 def _import_gaps() -> list[dict]:
 	from sk_app.core import imports
 
@@ -258,7 +276,7 @@ def collect() -> list[dict]:
 	users = _app_users()
 	logins = {u["user"] for u in users}
 	items = _safe(_doubles, logins) + _safe(_missing, logins) + _safe(_late, users) + _safe(_drafts, logins) + _safe(_unlinked_payments) + _safe(_import_gaps) + _safe(_hiring, logins) \
-		+ _safe(_service_sac) + _safe(_placeholder_po, logins) + _safe(_email_typos) + _safe(_quote_not_in_erp, logins)
+		+ _safe(_service_sac) + _safe(_placeholder_po, logins) + _safe(_email_typos) + _safe(_quote_not_in_erp, logins) + _safe(_rothe_850, logins)
 	return R.dedupe(items)
 
 
