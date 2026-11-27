@@ -95,12 +95,37 @@ def _ask_quote(deal: str, file_name: str | None, file_url: str | None = None):
 	if not owner or frappe.db.exists("ToDo", {"reference_type": "CRM Deal", "reference_name": deal, "status": "Open",
 			"description": ["like", TASK_MARK + "%"]}):
 		return
+	frappe.get_doc({"doctype": "ToDo", "allocated_to": owner, "reference_type": "CRM Deal", "reference_name": deal, "priority": "High",
+		"date": nowdate(), "description": _task_text(deal, file_name, file_url)}).insert(ignore_permissions=True)
+
+
+def missing_for_quote(deal: str) -> list[str]:
+	"""SK 27-Nov (Swati, deal 00190: design's quote PDF went out, no ERPNext quote, nobody said why): what the customer
+	still lacks before the quote can be made, in plain words (empty = the quote can be made now)."""
+	from sk_app import gates
+	from sk_app.erp_flow import customer_of
+
+	return [t for _k, t in gates.customer_missing(customer_of(deal), segment=True)]
+
+
+def _task_text(deal: str, file_name: str | None, file_url: str | None = None) -> str:
 	shown = (f'<a href="{file_url}" target="_blank">{file_name}</a>' if file_url else file_name) if file_name else _("the design team's quote value")
 	value = _value(deal)
 	hint = _("Reference value ₹{0:,.0f} (before GST).").format(value) if value > 0 else ""
-	frappe.get_doc({"doctype": "ToDo", "allocated_to": owner, "reference_type": "CRM Deal", "reference_name": deal, "priority": "High",
-		"date": nowdate(), "description": TASK_MARK + _("Make the quote in the app: open the deal, Make quotation, and write the scope and "
-			"specification lines. {0} is only a reference and is not sent to the customer. {1}").format(shown, hint)}).insert(ignore_permissions=True)
+	miss = missing_for_quote(deal)
+	first = (_("QUOTE NOT IN ERPNEXT YET. First fill on the deal's Customer card: {0}. ").format("; ".join(miss))) if miss else ""
+	return TASK_MARK + first + _("Make the quote in the app: open the deal, Make quotation, and write the scope and "
+		"specification lines. {0} is only a reference: do not send it to the customer. {1}").format(shown, hint)
+
+
+def refresh_task(deal: str):
+	"""Keep the open task's text true (what is still missing), so My Day says exactly what to do."""
+	for name, desc in frappe.get_all("ToDo", filters={"reference_type": "CRM Deal", "reference_name": deal, "status": "Open",
+			"description": ["like", TASK_MARK + "%"]}, fields=["name", "description"], as_list=True):
+		files = quote_files(deal)
+		new = _task_text(deal, files[-1].file_name if files else None, files[-1].file_url if files else None)
+		if new != desc:
+			frappe.db.set_value("ToDo", name, "description", new, update_modified=False)
 
 
 def _close_tasks(deal: str):
@@ -114,7 +139,46 @@ def pending(deal: str) -> dict | None:
 	if not _ready() or quotations_of(deal):
 		return None
 	files = quote_files(deal)
-	return {"file": files[-1].file_name, "value": _value(deal)} if files else None
+	if not files and _value(deal) <= 0:
+		return None
+	# SK 27-Nov: the deal screen says the quote is not in ERPNext, what is missing and who fills it
+	return {"file": files[-1].file_name if files else None, "value": _value(deal), "missing": missing_for_quote(deal),
+		"owner": (owner := frappe.db.get_value("CRM Deal", deal, "deal_owner")), "owner_name": frappe.db.get_value("User", owner, "full_name") if owner else None}
+
+
+def not_in_erp(days: int = 1) -> list[dict]:
+	"""Night check: deals with design's quote (PDF or value) and no ERPNext Quotation after `days`."""
+	if not _ready():
+		return []
+	cutoff = add_days(nowdate(), -days)
+	out = []
+	for t in frappe.get_all("ToDo", filters={"reference_type": "CRM Deal", "status": "Open", "description": ["like", TASK_MARK + "%"],
+			"creation": ["<", cutoff]}, fields=["reference_name", "allocated_to", "creation"], limit=0):
+		if quotations_of(t.reference_name):
+			continue
+		out.append({"deal": t.reference_name, "owner": t.allocated_to, "missing": missing_for_quote(t.reference_name),
+			"days": (frappe.utils.getdate() - frappe.utils.getdate(t.creation)).days})
+	return out
+
+
+def check_quote_upload(doc, method=None):
+	"""SK 27-Nov hard stop: a salesperson cannot attach a quote PDF to a deal while the customer details are missing;
+	the quote is made in the app (it becomes the ERPNext Quotation) once they are filled. Design's reference PDF is let in."""
+	if doc.attached_to_doctype != "CRM Deal" or not doc.attached_to_name or not is_quote_file(doc.file_name) or not _ready():
+		return
+	user = frappe.session.user
+	owner = frappe.db.get_value("CRM Deal", doc.attached_to_name, "deal_owner")
+	from sk_app.logins import profile_functions
+
+	fns = profile_functions(user) or [] if user != "Administrator" else []
+	if user != owner and ("Sales" not in fns or "Design" in fns):  # design / admin / Claude design: reference is let in
+		return
+	if quotations_of(doc.attached_to_name):
+		return
+	miss = missing_for_quote(doc.attached_to_name)
+	if miss:
+		frappe.throw(_("A quote cannot go to the customer yet: it is not in ERPNext. Fill on the deal's Customer card first:") + "\n• "
+			+ "\n• ".join(miss) + "\n" + _("Then tap Make quotation; its PDF is the one to send."), title=_("Quote not in ERPNext"))
 
 
 def enter_amount(user: str, deal: str, amount) -> dict:
@@ -280,6 +344,7 @@ def sync() -> int:
 		try:
 			if make_for_deal(deal):
 				made += 1
+			refresh_task(deal)
 		except Exception:
 			frappe.log_error(f"SK App quotation for deal {deal}")
 	return made

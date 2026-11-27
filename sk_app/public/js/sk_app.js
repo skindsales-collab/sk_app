@@ -830,7 +830,10 @@
 		fl_add_item: "Add item", fl_rate_blank: "blank = price list", fl_valid: "Valid for days", fl_desc: "Description (Enter = new line)", fl_terms: "Terms / note", fl_quote_saved: "Quotation saved",
 		fl_order_why: "Order received = Deal Won. The Sales Order is made from the quotation and submitted.", fl_delivery: "Promised delivery date", fl_po_no: "Customer PO no",
 		g_fill: "Please fill first", g_missing: "Data missing: this cannot move on until it is filled", g_save: "Save details", g_locked: "Locked: fill first",
-		g_cust: "Customer details for GST bill", cust_first: "Fill the customer details above first (GSTIN or No GSTIN, billing address, mobile). Then the quote buttons appear.", g_gstin: "GSTIN (15 letters / digits)", g_unreg: "Customer has no GSTIN (unregistered)", g_unreg_why: "Why no GSTIN",
+		g_cust: "Customer details for GST bill", qb_title: "Quote NOT in ERPNext yet: do not send any quote PDF", qb_missing: "Missing", qb_who: "Who fills it", qb_you: "You (deal owner)",
+		qb_fill: "Fill customer details now", qb_ready: "Customer details are complete. Make the quotation now; its PDF is the one to send.",
+		qb_why: "Design's PDF is only a reference. Only the quotation made here is saved in ERPNext and may go to the customer.",
+		cust_first: "Fill the customer details above first (GSTIN or No GSTIN, billing address, mobile). Then the quote buttons appear.", g_gstin: "GSTIN (15 letters / digits)", g_unreg: "Customer has no GSTIN (unregistered)", g_unreg_why: "Why no GSTIN",
 		g_addr: "Billing address", g_city: "City", g_state: "State", g_pin: "PIN code", g_cmobile: "Customer mobile", g_cust_ok: "Customer complete ✓",
 		g_qsubmit: "Submit quotation (send to customer)", g_qsubmitted: "Quotation submitted ✓", g_order_date: "Order date", g_po_date: "PO date",
 		g_po_photo: "PO copy (photo / PDF)", g_po_or_photo: "Customer PO number or PO copy", g_won: "Deal Won ✓ Sales Order submitted", g_wait_confirm: "Saved. Waiting for the manager's Confirm; the deal turns Won then",
@@ -872,7 +875,10 @@
 		fl_add_item: "आयटम जोडा", fl_rate_blank: "रिकामे = किंमत यादी", fl_valid: "किती दिवस वैध", fl_desc: "वर्णन (Enter = नवी ओळ)", fl_terms: "अटी / नोंद", fl_quote_saved: "कोटेशन जतन झाले",
 		fl_order_why: "ऑर्डर मिळाली = डील जिंकली. कोटेशनवरून सेल्स ऑर्डर बनून सबमिट होते.", fl_delivery: "दिलेली डिलिव्हरी तारीख", fl_po_no: "ग्राहकाचा PO नंबर",
 		g_fill: "आधी हे भरा", g_missing: "माहिती अपूर्ण: भरल्याशिवाय पुढे जाता येणार नाही", g_save: "माहिती सेव्ह करा", g_locked: "बंद: आधी माहिती भरा",
-		g_cust: "GST बिलासाठी ग्राहकाची माहिती", cust_first: "आधी वर ग्राहकाची माहिती भरा (GSTIN किंवा GSTIN नाही, बिलिंग पत्ता, मोबाईल). मग कोटेशन बटणे दिसतील.", g_gstin: "GSTIN (15 अक्षरे / अंक)", g_unreg: "ग्राहकाकडे GSTIN नाही (अनरजिस्टर्ड)", g_unreg_why: "GSTIN का नाही",
+		g_cust: "GST बिलासाठी ग्राहकाची माहिती", qb_title: "कोटेशन अजून ERPNext मध्ये नाही: कोणतीही कोटेशन PDF पाठवू नका", qb_missing: "राहिलेली माहिती", qb_who: "कोण भरणार", qb_you: "तुम्ही (डील मालक)",
+		qb_fill: "आता ग्राहकाची माहिती भरा", qb_ready: "ग्राहकाची माहिती पूर्ण आहे. आता कोटेशन बनवा; त्याचीच PDF पाठवायची.",
+		qb_why: "डिझाइनची PDF फक्त संदर्भासाठी आहे. इथे बनवलेले कोटेशनच ERPNext मध्ये जतन होते आणि तेच ग्राहकाला पाठवायचे.",
+		cust_first: "आधी वर ग्राहकाची माहिती भरा (GSTIN किंवा GSTIN नाही, बिलिंग पत्ता, मोबाईल). मग कोटेशन बटणे दिसतील.", g_gstin: "GSTIN (15 अक्षरे / अंक)", g_unreg: "ग्राहकाकडे GSTIN नाही (अनरजिस्टर्ड)", g_unreg_why: "GSTIN का नाही",
 		g_addr: "बिलिंग पत्ता", g_city: "शहर", g_state: "राज्य", g_pin: "पिन कोड", g_cmobile: "ग्राहकाचा मोबाईल", g_cust_ok: "ग्राहक माहिती पूर्ण ✓",
 		g_qsubmit: "कोटेशन सबमिट करा (ग्राहकाला पाठवा)", g_qsubmitted: "कोटेशन सबमिट झाले ✓", g_order_date: "ऑर्डर तारीख", g_po_date: "PO तारीख",
 		g_po_photo: "PO ची प्रत (फोटो / PDF)", g_po_or_photo: "ग्राहकाचा PO नंबर किंवा PO ची प्रत", g_won: "डील जिंकली ✓ सेल्स ऑर्डर सबमिट", g_wait_confirm: "सेव्ह झाले. मॅनेजरच्या Confirm ची वाट; मग डील जिंकली दिसेल",
@@ -3071,6 +3077,20 @@
 	// the deal's ERPNext customer: GSTIN (or unregistered + why), billing address with state / PIN, mobile
 	// SK 23-Nov (approved): the quote buttons show only when the deal's customer is complete (GSTIN / No GSTIN, address, mobile)
 	function custReady(d) { return !!(d.customer && !(d.customer.missing || []).length); }
+	// SK 27-Nov (Swati, deal 00190): design's quote PDF is not the quote; say plainly that the quote is not in ERPNext,
+	// what is missing, who must fill it, and give the button to the exact place. Shown first on the deal.
+	function quoteBlockCard(d, doctype, name) {
+		const q = d.quote_pending;
+		if (doctype !== "CRM Deal" || !q) return "";
+		const miss = q.missing || [];
+		const who = q.owner && q.owner === (state.home && state.home.user) ? t("qb_you") : esc(q.owner_name || q.owner || "");
+		return `<div class="sk-card sk-gap sk-block"><div class="sk-item-title sk-due">⛔ ${t("qb_title")}</div>
+			${miss.length ? `<p class="sk-note"><b>${t("qb_missing")}:</b><br>${miss.map((m) => "• " + esc(m)).join("<br>")}</p>
+				<p class="sk-note"><b>${t("qb_who")}:</b> ${who}</p>
+				<button class="sk-btn go wide" type="button" onclick="(document.getElementById('sk-custcard')||{}).scrollIntoView&&document.getElementById('sk-custcard').scrollIntoView({behavior:'smooth'})">🧾 ${t("qb_fill")}</button>`
+			: `<p class="sk-note">${t("qb_ready")}</p><button class="sk-btn go wide" data-act="fl-cabinq" data-dt="CRM Deal" data-name="${esc(name)}">📝 ${t("fl_new_quote")}</button>`}
+			<p class="sk-note">${t("qb_why")}</p></div>`;
+	}
 	function customerCard(d) {
 		if (!d.deal || (d.customer && !d.customer.missing.length)) return d.customer ? `<p class="sk-note">✅ ${t("g_cust_ok")}: ${esc(d.customer.name)}</p>` : "";
 		const miss = d.customer ? d.customer.missing : [];
@@ -3078,7 +3098,7 @@
 		const keys = d.customer && d.customer.keys ? d.customer.keys : ["gstin", "address", "mobile_no"];
 		const want = (k) => keys.includes(k);
 		const mob = (d.doc && (d.doc.mobile_no || d.doc.phone)) || "";
-		return `<div class="sk-card sk-gate sk-gap"><div class="sk-item-title">🧾 ${t("g_cust")}</div>
+		return `<div class="sk-card sk-gate sk-gap" id="sk-custcard"><div class="sk-item-title">🧾 ${t("g_cust")}</div>
 			${miss.length ? `<p class="sk-note">${miss.map(esc).join(" · ")}</p>` : ""}
 			<div ${want("gstin") ? "" : "hidden"}>${formField("gc-gstin", t("g_gstin"))}
 			<label class="sk-check"><input id="gc-unreg" type="checkbox"> ${t("g_unreg")}</label>${formField("gc-why", t("g_unreg_why") + ` (${t("optional")})`)}</div>
@@ -3328,7 +3348,7 @@
 			<div class="sk-card sk-gap sk-reqcard"><div class="sk-row"><b class="sk-grow">🧾 ${t("rq_customer")}</b>
 				<button class="sk-chip" data-act="req-edit">✏️ ${t("rq_update")}</button></div>
 				<div class="sk-card-text">${doc.sk_product ? esc(doc.sk_product) : `<span class="sk-due">${t("rq_none")}</span>`}</div></div>
-			${gateCard(d, o)}${customerCard(d)}
+			${quoteBlockCard(d, doctype, name)}${gateCard(d, o)}${customerCard(d)}
 			<h3 class="sk-h">${t("status")}</h3><div class="sk-chips">${chips}</div>
 			${doctype === "CRM Lead" && !doc.converted && doc.status && doc.status !== "New" ? `<button class="sk-btn go wide sk-gap" data-act="convert-deal">🤝 ${t("convert_deal")}</button>` : ""}
 			${doctype === "CRM Lead" && !doc.converted && doc.sk_cold !== undefined ? `<button class="sk-btn wide sk-gap" data-act="cold-set" data-lead="${esc(name)}" data-cold="${doc.sk_cold ? 0 : 1}">${doc.sk_cold ? "🔥 " + t("cold_interested") : "🧊 " + t("cold_move")}</button>` : ""}
@@ -3338,10 +3358,10 @@
 			${(d.products || []).length ? `<h3 class="sk-h">${t("products_for")}</h3>${productStrip(d.products)}` : ""}
 			${doctype === "CRM Lead" && doc.status && doc.status !== "New" ? `<button class="sk-btn go wide" data-act="lead-send" data-name="${esc(name)}">📐 ${t("lead_send")}</button>` : ""}
 			${doctype === "CRM Lead" && (!doc.status || doc.status === "New") ? `<p class="sk-note">${t("lead_next_call")}</p>` : ""}
-			${doctype === "CRM Deal" && !custReady(d) ? `<p class="sk-note">🧾 ${t("cust_first")}</p>` : ""}
+			${doctype === "CRM Deal" && !custReady(d) ? `<p class="sk-note sk-due">⛔ ${t("cust_first")}${d.customer && d.customer.missing.length ? `<br><b>${t("qb_missing")}:</b> ${d.customer.missing.map(esc).join(" · ")}` : ""}</p>` : ""}
 			${doctype === "CRM Deal" && custReady(d) ? `<button class="sk-btn go wide" data-act="fl-cabinq" data-dt="${esc(doctype)}" data-name="${esc(name)}">📝 ${t("fl_new_quote")}: ${t("cq_title")}</button>` : ""}
 			${doctype === "CRM Deal" && custReady(d) ? `<button class="sk-btn wide" data-act="fl-quote" data-dt="${esc(doctype)}" data-name="${esc(name)}">📝 ${t("cq_other")}</button>` : ""}
-			${d.quote_pending ? `<div class="sk-card sk-gap"><div class="sk-item-title">📄 ${t("dq_title")}</div><div class="sk-item-meta">${esc(d.quote_pending.file)}</div>
+			${d.quote_pending && d.quote_pending.file ? `<div class="sk-card sk-gap"><div class="sk-item-title">📄 ${t("dq_title")}</div><div class="sk-item-meta">${esc(d.quote_pending.file)}</div>
 				<p class="sk-note">${t("dq_how")}</p></div>` : ""}
 			${sec(t("quotations"), d.quotations.map((q) => erpDocRow("Quotation", q, mobile)).join(""))}
 			${sec(t("sales_orders"), d.sales_orders.map((q) => erpDocRow("Sales Order", q, mobile)).join(""))}

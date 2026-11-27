@@ -303,6 +303,13 @@ def complete_customer(customer: str, gstin=None, unregistered=0, gst_note=None, 
 		c.append("links", {"link_doctype": "Customer", "link_name": customer})
 		c.insert()
 		frappe.db.set_value("Customer", customer, "customer_primary_contact", c.name)
+	try:  # SK 27-Nov: the open "[Quote]" task on My Day says at once that the customer part is done
+		from sk_app.deal_quotes import refresh_task
+
+		for deal in frappe.get_all("CRM Deal", filters={"erpnext_customer": customer}, pluck="name", limit=20):
+			refresh_task(deal)
+	except Exception:
+		frappe.log_error(f"SK App quote task refresh for {customer}")
 	return {"name": customer, "missing": [t for _k, t in customer_missing(customer)]}
 
 

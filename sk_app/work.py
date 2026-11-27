@@ -47,6 +47,11 @@ def open_todos(user: str) -> list[WorkItem]:
 		title = frappe.utils.strip_html(r.description or "")[:80] or r.reference_name or r.name
 		items.append(WorkItem("task", title, r.reference_type or "ToDo", r.reference_name or r.name,
 			due=get_datetime(r.date) if r.date else None, priority=prio.get(r.priority, 3)))
+	# SK 27-Nov (Swati, deal 00190): the deal's "[Quote]" task (quote not in ERPNext, what to fill) is on My Day first, red
+	for r in frappe.get_all("ToDo", filters={"allocated_to": user, "status": "Open", "reference_type": "CRM Deal", "description": ["like", "[Quote]%"]},
+			fields=["name", "description", "date", "reference_name"], limit=20):
+		title = frappe.utils.strip_html(r.description or "")[:160]
+		items.append(WorkItem("task", f"⛔ {title}", "CRM Deal", r.reference_name, due=get_datetime(r.date) if r.date else None, priority=1))
 	return items
 
 

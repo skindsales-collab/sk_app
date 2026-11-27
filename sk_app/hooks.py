@@ -59,7 +59,8 @@ doc_events = {
 	"SK DSI Entry": {"before_insert": ["sk_app.permissions.stamp_user", "sk_app.dsi.stamp_function"]},  # SK 29-Oct: role for the monthly summary
 	"SK Work Log": {"before_insert": "sk_app.permissions.stamp_user"},
 	"SK Day Report": {"before_insert": "sk_app.permissions.stamp_user"},
-	"File": {"before_insert": "sk_app.files.check_file",  # PR H (SK 16-Nov KF-05549): only PDF / photos on customer-facing records, no cabin number
+	"File": {"before_insert": ["sk_app.files.check_file", "sk_app.deal_quotes.check_quote_upload"],  # SK 27-Nov: no quote PDF while customer data is missing
+		  # PR H (SK 16-Nov KF-05549): only PDF / photos on customer-facing records, no cabin number
 		"after_insert": ["sk_app.sales_screens.on_file_attached", "sk_app.deal_quotes.on_file"]},  # SK 28-Oct: a quote file → Quotation
 	"SK Library Item": {"validate": "sk_app.library.make_public"},
 	# SK 28-Oct mandatory gate: a lead / deal moves on only with its data and the step's ERPNext document (sk_app.gates)

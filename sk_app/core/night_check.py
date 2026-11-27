@@ -189,6 +189,18 @@ def _placeholder_po(logins: set) -> list[dict]:
 	return out
 
 
+def _quote_not_in_erp(logins: set) -> list[dict]:
+	"""SK 27-Nov: a deal whose quote is only design's PDF (no ERPNext Quotation) goes to its owner, with what is missing."""
+	from sk_app.deal_quotes import not_in_erp
+
+	out = []
+	for d in not_in_erp():
+		what = (f"{frappe.db.get_value('CRM Deal', d['deal'], 'organization') or d['deal']} · missing: {'; '.join(d['missing'])}" if d["missing"]
+			else f"{frappe.db.get_value('CRM Deal', d['deal'], 'organization') or d['deal']} · customer details complete: tap Make quotation")
+		out.append(R.item("quote_not_in_erp", "CRM Deal", d["deal"], what, _owner_or(d["owner"], "Sales", logins), days=d["days"]))
+	return out
+
+
 def _import_gaps() -> list[dict]:
 	from sk_app.core import imports
 
@@ -241,7 +253,7 @@ def collect() -> list[dict]:
 	users = _app_users()
 	logins = {u["user"] for u in users}
 	items = _safe(_doubles, logins) + _safe(_missing, logins) + _safe(_late, users) + _safe(_drafts, logins) + _safe(_unlinked_payments) + _safe(_import_gaps) + _safe(_hiring, logins) \
-		+ _safe(_service_sac) + _safe(_placeholder_po, logins) + _safe(_email_typos)
+		+ _safe(_service_sac) + _safe(_placeholder_po, logins) + _safe(_email_typos) + _safe(_quote_not_in_erp, logins)
 	return R.dedupe(items)
 
 

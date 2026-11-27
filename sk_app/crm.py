@@ -174,7 +174,11 @@ INTERNAL_FILE_WORDS = ("bom", "costing", "cost_sheet", "manufacturing", "interna
 
 def _for_customer(file_name: str) -> bool:
 	name = (file_name or "").lower()
-	return name.endswith(".pdf") and not any(w in name for w in INTERNAL_FILE_WORDS)
+	from sk_app.file_rules import is_quote_file
+
+	# SK 27-Nov (Swati, deal 00190): a quote PDF made outside the app is only a reference; My Day never says "send it" and it has
+	# no Send button. The customer gets the ERPNext Quotation's PDF, which exists only once the customer details are filled.
+	return name.endswith(".pdf") and not any(w in name for w in INTERNAL_FILE_WORDS) and not is_quote_file(name)
 
 def _sent_files(user: str) -> set:
 	return set(frappe.get_all("SK Work Log", filters={"user": user, "reference_doctype": "File"}, pluck="reference_name"))
