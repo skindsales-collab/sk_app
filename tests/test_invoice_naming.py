@@ -33,3 +33,10 @@ def test_amendment_keeps_the_number_with_a_letter():
 	assert len("SK/IND/1126/850A") == 16  # GST limit
 	assert amended_name("SINV-26-00151", lambda n: False) is None
 	assert number_of("SK/IND/1126/850A") == 850
+
+
+def test_cancelled_copy_name():
+	from sk_app.invoice_naming import cxl_name
+
+	assert cxl_name("SK/IND/1126/850", lambda n: False) == "SK/IND/1126/850-CXL"
+	assert cxl_name("SK/IND/1126/850", {"SK/IND/1126/850-CXL"}.__contains__) == "SK/IND/1126/850-CXL2"

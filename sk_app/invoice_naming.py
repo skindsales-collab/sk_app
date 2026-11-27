@@ -4,8 +4,11 @@
 The ERPNext naming series "SK/IND/.MM.YY./.###." counts per month (it restarted at 001 in November), so the app names
 these invoices itself: a single counter (tabSeries key COUNTER), started from the higher of SK App Settings
 "invoice_running_last" (the last number already used, e.g. 848) and the highest number found in existing invoices.
-SK 27-Nov: an amended invoice keeps its number with a letter (SK/IND/1126/850 -> 850A -> 850B): no running number is
-used up, and it stays within GST's 16 characters (850-1 would be 17). Other series (SINV-…) are not touched."""
+SK 27-Nov ("invoice number changes, this should not happen"): a corrected (cancelled + amended) invoice keeps EXACTLY its
+number. The cancelled copy is kept as "<number>-CXL" (its accounts already reversed; it never goes to GST) and the
+amendment takes the number itself. Only when the cancelled copy had an IRN or e-way bill (the GST portal already holds
+that number) does the amendment take the same number with a letter (850A), within GST's 16 characters.
+Other series (SINV-…) are not touched."""
 
 import re
 
@@ -34,6 +37,29 @@ def amended_name(amended_from: str | None, taken) -> str | None:
 	return None
 
 
+def cxl_name(name: str, taken) -> str:
+	"""Where the cancelled copy is kept: 850-CXL, then 850-CXL2 ..."""
+	n, i = f"{name}-CXL", 2
+	while taken(n):
+		n, i = f"{name}-CXL{i}", i + 1
+	return n
+
+
+def keep_on_amend(doc) -> bool:
+	"""The amendment takes its cancelled original's exact number (the original moves to -CXL)."""
+	src = doc.get("amended_from")
+	if not ROOT_RE.match(src or ""):
+		return False
+	row = frappe.db.get_value("Sales Invoice", src, ["docstatus", "irn", "ewaybill"], as_dict=True) if frappe.db.exists("Sales Invoice", src) else None
+	if not row or row.docstatus != 2 or row.get("irn") or row.get("ewaybill"):
+		return False
+	keep = cxl_name(src, lambda n: bool(frappe.db.exists("Sales Invoice", n)))
+	frappe.rename_doc("Sales Invoice", src, keep, force=True)
+	doc.amended_from = keep
+	doc.name = src
+	return True
+
+
 def number_of(name: str | None) -> int:
 	m = NAME_RE.match(name or "")
 	return int(m.group(1)) if m else 0
@@ -47,6 +73,8 @@ def autoname(doc, method=None):
 
 	if frappe.flags.sk_invoice_name:  # the one-time "keep this number" fix (keep_number below)
 		doc.name = frappe.flags.sk_invoice_name
+		return
+	if keep_on_amend(doc):
 		return
 	amend = amended_name(doc.get("amended_from"), lambda n: bool(frappe.db.exists("Sales Invoice", n)))
 	if amend:
@@ -116,3 +144,23 @@ def keep_number(keep: str, cancelled: list[str], copy_from: str, counter: int) -
 	if frappe.get_meta("SK App Settings").has_field("invoice_running_last"):
 		frappe.db.set_single_value("SK App Settings", "invoice_running_last", counter)
 	return new.name
+
+
+ROTHE_850 = ("SK/IND/1126/850", ["SK/IND/1126/850", "SK/IND/1126/856", "SK/IND/1126/857"], "SK/IND/1126/857", 855)
+
+
+def hourly():
+	"""SK 27-Nov "keep 850 / no 857": once Accounts has cancelled 857, the Rothe invoice gets back its number 850 as a draft.
+	Runs only while 850, 856 and 857 all exist and are all cancelled; afterwards it finds 850 as a draft and does nothing."""
+	keep, names, src, counter = ROTHE_850
+	if not all(frappe.db.get_value("Sales Invoice", n, "docstatus") == 2 for n in names):
+		return
+	try:
+		made = keep_number(keep, names, src, counter)
+		if made:
+			frappe.get_doc("Sales Invoice", made).add_comment("Comment", "SK 27-Nov: invoice number 850 kept for Rothe (already sent to the "
+				"customer). The cancelled 850 / 856 / 857 are kept as -CXL. Check and Submit this draft.")
+			frappe.db.commit()
+	except Exception:
+		frappe.db.rollback()
+		frappe.log_error("SK App keep invoice 850")

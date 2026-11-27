@@ -28,7 +28,7 @@ jinja = {"methods": ["sk_app.cabin_quote.sk_cabin_quote_html", "sk_app.tax_invoi
 scheduler_events = {
 	"hourly": ["sk_app.deal_quotes.sync", "sk_app.lead_follow.hourly", "sk_app.guide.hourly", "sk_app.day_report.auto_reports", "sk_app.activities.noon_nudge", "sk_app.mailbox.remind",
 		"sk_app.hiring.hourly",  # SK 17-Nov hiring: 48 h hand-over to HR, interview reminders, 6-month and 7-day clean-ups
-		"sk_app.old_crm_load.hourly"],  # SK 6-Nov: old CRM leads SK uploads as a File are loaded once
+		"sk_app.old_crm_load.hourly"],  # (invoice_naming.hourly, Rothe 850 back once 857 is cancelled: held for SK's answer 27-Nov)  # SK 6-Nov: old CRM leads SK uploads as a File are loaded once
 	# IndiaMART / JustDial / GeM mails to the team mailboxes become CRM leads (free route, point 14)
 	"cron": {"*/5 * * * *": ["sk_app.lead_sources.scan", "sk_app.mailbox.link_known", "sk_app.mailbox.route_suppliers", "sk_app.mailbox.auto_leads"],
 		# SK 27-Oct: the AI's actions to lift each graph, every morning before work
